@@ -6,12 +6,14 @@ import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import MatrixRankWarning, spsolve
 from tritflow import RAILS
+from .technology import DEFAULT_SHEET_OHM, DEFAULT_VIA_OHM, EM_LIMITS
 
-DEFAULT_SHEET_OHM = {'M1': 0.05, 'M2': 0.05}
 IR_ASSUMPTION = ('Constant nominal-bias cell currents; centerline sheet-R network. '
                  'Default metal sheet R=0.05 ohm/square and via R=0.05 ohm are '
                  'assumed, not PDK characterized; no package R, self-heating or '
-                 'voltage-dependent current iteration. Zero shift assumes equal divider conductances.')
+                 'voltage-dependent current iteration. OS00 p9 resistor sheet values do not apply to metal; '
+                 'no metal/TC/contact resistance found in the open PDFs/models. '
+                 'Zero shift assumes equal divider conductances.')
 
 
 def solve_resistive_network(edges, fixed_v: dict, injection_a: dict | None = None) -> dict:
@@ -116,12 +118,14 @@ def _rail_graph(pnr, rail, taps, sheet, via_ohm):
             for point in candidates:
                 if _project(point, a)[1] < 1e-6 and _project(point, b)[1] < 1e-6:
                     a['cuts'].add(point); b['cuts'].add(point)
-    via_edges = []
+    via_edges, details = [], []
     for via in power.get('vias', []):
         if via['net'] != rail: continue
         point = (via['x'], via['y'])
         a, b = attach(point, 'M1'), attach(point, 'M2')
         via_edges.append((a, b, via_ohm))
+        details.append({'kind':'TC','net':rail,'x_um':point[0],'y_um':point[1],
+                        'limit_a':EM_LIMITS['TC']['current_a']})
     tap_nodes = {inst: attach(point, 'M1') for inst, point in taps.items()}
     pins = power.get('pins', []) + pnr.get('pins', [])
     fixed = {}
@@ -136,11 +140,15 @@ def _rail_graph(pnr, rail, taps, sheet, via_ohm):
             length = abs(a[0]-b[0])+abs(a[1]-b[1])
             if length:
                 edges.append((key(segment, a), key(segment, b), sheet[segment['layer']]*length/segment['width']))
-    return edges, fixed, tap_nodes
+                kind = 'M1_step' if segment['layer']=='M1' else 'M2_field'
+                limit = EM_LIMITS[kind]
+                details.append({'kind':kind,'net':rail,'width_um':segment['width'],
+                    'limit_a':limit['current_a']*segment['width']/limit['width_um']})
+    return edges, fixed, tap_nodes, details
 
 
 def estimate_ir_drop(pnr: dict, template: dict, abstracts: dict, characterizations: dict, *,
-                     instance_vectors: dict | None = None, sheet_ohm=None, via_ohm=0.05) -> dict:
+                     instance_vectors: dict | None = None, sheet_ohm=None, via_ohm=DEFAULT_VIA_OHM) -> dict:
     """Use PNR power rails/straps/vias/pins plus char.json signed DC currents.
 
     abstracts/characterizations map CELL name to the corresponding JSON object.
@@ -165,14 +173,17 @@ def estimate_ir_drop(pnr: dict, template: dict, abstracts: dict, characterizatio
             raise ValueError(f"Missing characterized current for {p['inst']}")
         currents[p['inst']] = {rail: max((r['rail_current_a'][rail] for r in rows), key=abs) for rail in RAILS}
     result = {p['inst']: {'cell': p['cell'], 'rail_v': {}, 'rail_current_a': currents[p['inst']]} for p in placements}
-    pad_current = {}
+    pad_current, em_rows = {}, []
     for rail in RAILS:
         y0, y1 = template['rails'][rail]
         taps = {p['inst']: (p['x']+abstracts[p['cell']]['width']/2, p['y']+(y0+y1)/2) for p in placements}
-        edges, fixed, nodes = _rail_graph(pnr, rail, taps, sheet, via_ohm)
+        edges, fixed, nodes, details = _rail_graph(pnr, rail, taps, sheet, via_ohm)
         injection = defaultdict(float)
         for inst, node in nodes.items(): injection[node] += currents[inst][rail]
         solved = solve_resistive_network(edges, fixed, injection)
+        for (a,b,resistance), detail in zip(edges,details):
+            current = abs((solved['voltage_v'][a]-solved['voltage_v'][b])/resistance)
+            em_rows.append(dict(detail,current_a=current,utilization=current/detail['limit_a']))
         pad_current[rail] = float(sum(solved['pad_injection_a'].values()))
         for inst, node in nodes.items(): result[inst]['rail_v'][rail] = solved['voltage_v'][node]
     for values in result.values():
@@ -182,5 +193,13 @@ def estimate_ir_drop(pnr: dict, template: dict, abstracts: dict, characterizatio
         values['clamp_zero_shift_v'] = v['VMID'] if values['cell'] == 'NANY' else None
     return {'cells': result, 'pad_injection_a': pad_current,
             'sheet_ohm_per_square': sheet, 'via_ohm': via_ohm,
+            'parameter_origin':{'sheet':'assumption' if sheet_ohm is None else 'caller override',
+                                'via':'assumption' if via_ohm == DEFAULT_VIA_OHM else 'caller override'},
+            'em_check':{'passed':all(r['utilization'] <= 1+1e-9 for r in em_rows),
+                'max_utilization':max((r['utilization'] for r in em_rows),default=0),
+                'worst_by_kind':{kind:max((r for r in em_rows if r['kind']==kind),key=lambda r:r['utilization'],default=None)
+                                 for kind in ('M1_step','M2_field','TC')},
+                'limits':EM_LIMITS,
+                'scope':'DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off.'},
             'current_mode': 'specified vector' if instance_vectors is not None else 'independent per-rail worst-magnitude envelope',
             'assumptions': IR_ASSUMPTION}

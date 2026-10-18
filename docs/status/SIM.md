@@ -207,6 +207,21 @@ script also exited 0 for all four designs using the stored electrical caches.
 
 ## Interface requests
 
+**Phase 4 PNR handoff (2026-10-18): PDK current limits FOUND.**
+`OS00_リファレンスマニュアル_rev1.1.pdf`, printed/PDF page **17**, Tables I-3-1
+and I-3-3: field M1 **900 µA at 2 µm**; field M2 **3.7 mA at 3 µm**;
+M1 over a step **500 µA at 2 µm**; TC via **780 µA per 1.4 µm square**,
+instantaneous ceiling **7.8 mA per via**. These are width-specific design limits,
+not a supplied A/cm² lifetime/temperature model. If PNR linearly scales with
+width, normalized limits are M1 field **0.00045 A/µm**, M2 field
+**0.001233333 A/µm**, M1 step **0.00025 A/µm**; that scaling is an engineering
+interpretation. Existing universal **0.00025 A/µm** happens to match the
+most restrictive published step case, but must not be described as assumed
+foundry data. Apply the separate TC cut limit when choosing via-array count.
+Contact-current limits, temperature derating and lifetime targets were not
+found in the open documents. No PNR-owned files edited by SIM.
+
+
 No shared-contract changes requested. Phase 2 used the explicit waves/example
 and characterization grants. Phase 3 additionally uses `tritflow/viz/scaling.py`,
 `results/`, `cells/out/sizing/` and `examples/adder_scaling.py`, as authorized.
@@ -341,3 +356,11 @@ paths and the explicit sizing/results/example/viz grants.
 `python3 -m pytest tests/sim tests/extract -q`. `compileall` and
 `git diff --check` on owned paths pass. The full scaling/load producer and
 the four-design post-layout producer both exited 0.
+
+## Phase 4 — in progress
+
+All seven Tokai Rika PDFs were extracted with existing `pdftotext -layout`;
+key tables on OS00 pages 9/17 and OS04 page 7 were rendered and visually checked.
+No packages installed. Text and page images are under `build/pdk_data/`.
+The prior measured datasets/summaries are preserved in `results/phase3_assumed/`
+for direct numerical comparison after the rerun.

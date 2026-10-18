@@ -313,7 +313,11 @@ def _device_rows(cell):
         record = next((r for r in manifest if r['pcell'] == pcell
                        and abs(r['origin'][0]-match['x_um']) < 1e-6
                        and abs(r['origin'][1]-match['y_um']) < 1e-6), {})
-        alias = aliases.get(_location_key(match), record.get('role', source['name']))
+        role=record.get('role')
+        # Repeated INV PCell roles in BUF must not create duplicate table labels
+        # when the optional independent schematic evidence is absent.
+        fallback=role if role and sum(r.get('role')==role for r in manifest)==1 else source['name']
+        alias = aliases.get(_location_key(match), fallback)
         rows.append({**source, 'schematic_name': alias, 'pcell_role': record.get('role'),
                      'x_um': match['x_um'], 'y_um': match['y_um'],
                      'bbox_um': [box.left, box.bottom, box.right, box.top],
@@ -411,8 +415,10 @@ class DeviceMapping:
             trace.line.color=style['line.color'][i]; trace.line.width=style['line.width'][i]
             trace.opacity=style['opacity'][i]
         if self.rows:
-            fills = ['#f39b24' if r['name'] == device else _theme(self.theme)['paper_bgcolor'] for r in self.rows]
+            fills = ['#754b08' if r['name'] == device else _theme(self.theme)['paper_bgcolor'] for r in self.rows]
+            fonts = ['#ffffff' if r['name'] == device else _theme(self.theme)['font']['color'] for r in self.rows]
             self.table.data[0].cells.fill.color=[fills]*5
+            self.table.data[0].cells.font.color=[fonts]*5
             self.figure.layout.updatemenus[0].active=0 if device is None else next(
                 i+1 for i,row in enumerate(self.rows) if row['name']==device)
         return self
@@ -501,7 +507,9 @@ plot.on('plotly_buttonclicked',event=>{
 
     def _repr_html_(self):
         # Isolate Plotly/CSS across repeated notebook outputs; Colab supports iframes.
-        return '<iframe title="Cell device mapping" style="border:0;width:100%;height:760px" srcdoc="'+escape(self.to_html(),quote=True)+'"></iframe>'
+        # Character references also survive a host page with an unspecified charset.
+        document=escape(self.to_html(),quote=True).encode('ascii','xmlcharrefreplace').decode('ascii')
+        return '<iframe title="Cell device mapping" style="border:0;width:100%;height:760px" srcdoc="'+document+'"></iframe>'
 
 
 def device_mapping(cell, *, library=CELLS_DIR/'out', theme='light', selected=None):

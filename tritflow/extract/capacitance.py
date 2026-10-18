@@ -2,15 +2,12 @@
 from __future__ import annotations
 from pathlib import Path
 import re
+from .technology import DEFAULT_CAP_COEFFICIENTS
 
-# No interconnect R/C deck is published in the installed PDK. Assumed SiO2
-# effective heights 1/2 um: epsilon0*3.9/h = 0.03453/0.01727 fF/um².
-# Fringe per perimeter is an explicit engineering assumption, 0.02 fF/um.
-DEFAULT_CAP_COEFFICIENTS = {
-    'M1': {'area_f_per_um2': 0.03453e-15, 'fringe_f_per_um': 0.02e-15},
-    'M2': {'area_f_per_um2': 0.01727e-15, 'fringe_f_per_um': 0.02e-15}}
 CAP_ASSUMPTION = ('Estimated substrate C only: SiO2 epsilon_r=3.9, effective M1/M2 heights '
                   '1/2 um, fringe=0.02 fF/um perimeter. Assumed, not PDK calibrated. '
+                  'Reviewed OS00 rev1.1 p5 (no parasitic extraction), OS04 p7 and model libraries; '
+                  'the ESD M1-M2 overlap rule is not a metal-to-substrate coefficient. '
                   'No coupling, shielding, via C or signal wire R; not signoff PEX.')
 
 
@@ -28,7 +25,8 @@ def _summary(regions, dbu, coefficients):
             row['layers'][layer] = {'area_um2': area, 'perimeter_um': perimeter, 'capacitance_f': cap}
             row['capacitance_f'] += cap
         result[net] = row
-    return {'nets': result, 'coefficients': coefficients, 'assumptions': CAP_ASSUMPTION}
+    return {'nets': result, 'coefficients': coefficients, 'assumptions': CAP_ASSUMPTION,
+            'parameter_origin':'assumption' if coefficients == DEFAULT_CAP_COEFFICIENTS else 'caller override; calibration unspecified'}
 
 
 def wire_capacitance(pnr: dict, *, coefficients=None, dbu_um=0.001) -> dict:

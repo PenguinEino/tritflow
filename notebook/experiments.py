@@ -5,13 +5,15 @@ from hashlib import sha256
 from pathlib import Path
 import shutil
 
-from tritflow import flow
-from tritflow.extract import estimate_ir_drop
-from tritflow.synth import write_artifacts
+from tritflow import flow, TRIT_VOLTS
+from tritflow.extract import estimate_ir_drop, reference_net_map
+from tritflow.sim.spice import simulation_netlist
+from tritflow.synth import write_artifacts, evaluate_netlist
 
 
 def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
-                    hold_s=500e-9, step_s=2e-9, rows=None, anneal_steps=600, seed=0):
+                    hold_s=500e-9, step_s=2e-9, rows=None, anneal_steps=600, seed=0,
+                    initialize_internal=False):
     """Real GDS + DRC/LVS + matched pre/post vectors + separate rail-IR envelope.
 
     ``expected`` is an independent integer oracle. The analog sequence is
@@ -26,9 +28,25 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
     assert drc["clean"] and lvs["matched"], (drc, lvs)
     extracted = lay.extract()
     options = dict(load=load_f, hold_s=hold_s, step_s=step_s, expected=expected, timeout=300)
-    pre = net.simulate(vectors, workdir=directory/"pre", **options)
-    post = extracted.simulate(vectors, workdir=directory/"post", **options)
-    assert pre["measurements"]["passed"] and post["measurements"]["passed"]
+    guesses = {"pre": {}, "post": {}}
+    if initialize_internal:
+        # Soft Newton guesses address nonphysical BSIM operating-point roots.
+        # They are never .ic/uic constraints and never replace the independent
+        # arithmetic oracle or constrain any subsequent transient sample.
+        pins = [p.name for p in net.ports if p.dir == "input"]
+        ports = {p.name for p in net.ports}
+        values = evaluate_netlist(net,dict(zip(pins,vectors[0],strict=True)),return_all=True)
+        internal = {name:TRIT_VOLTS[int(value)] for name,value in values.items() if name not in ports}
+        mapping = {name.lower():node for name,node in reference_net_map(lvs["report"],net.top).items()}
+        for name, voltage in internal.items():
+            node = mapping[name.lower()]
+            node = simulation_netlist("\\"+node if node.startswith("$") else node)
+            guesses["pre"]["xdut."+name] = voltage
+            guesses["post"]["xdut."+node] = voltage
+    pre = net.simulate(vectors, workdir=directory/"pre", nodeset=guesses["pre"], **options)
+    post = extracted.simulate(vectors, workdir=directory/"post", nodeset=guesses["post"], **options)
+    assert pre["measurements"]["passed"] and post["measurements"]["passed"], {
+        mode:result["measurements"] for mode,result in (("pre",pre),("post",post))}
     assert pre["stimulus"]["vectors"] == post["stimulus"]["vectors"]
     assert pre["stimulus"]["hold_s"] == post["stimulus"]["hold_s"]
     cells = net.settings.cells
@@ -39,7 +57,7 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
                          {c: read(f"out/{c}/{c}.abstract.json") for c in used},
                          {c: read(f"out/{c}/{c}.char.json") for c in used})
     return {"pre": pre, "post": post, "drc": drc, "lvs": lvs, "stats": lay.stats,
-            "capacitance": extracted.capacitance, "ir": ir}
+            "capacitance": extracted.capacitance, "ir": ir, "initial_nodeset_v": guesses}
 
 
 def experiment_artifacts(result, directory, top):
