@@ -63,7 +63,8 @@ def build():
         return render(captions.split(f'## fig_{name}\n\n',1)[1].split('\n## ',1)[0].strip(),values)
     def image(name,alt,include_caption=True):
         data = base64.b64encode((ROOT/f'figures/out/fig_{name}.png').read_bytes()).decode()
-        return responsive_image(data,alt)+('\n\n'+caption(name) if include_caption else '')
+        width = 520 if name == 'sta' else None   # single-column figure
+        return responsive_image(data,alt,width)+('\n\n'+caption(name) if include_caption else '')
     def prose(name):
         text = (NARRATIVE/name).read_text()
         # Images are inserted once at the editorial anchors below.

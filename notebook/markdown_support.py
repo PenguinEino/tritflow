@@ -22,10 +22,16 @@ def colab_math(text):
     return ''.join(parts)
 
 
-def responsive_image(data, alt):
-    """Embed the committed PNG without its native pixel width widening Colab."""
-    return (f'<img alt="{escape(alt,quote=True)}" src="data:image/png;base64,{data}" width="100%" '
-            'style="display:block;max-width:100%;width:100%;height:auto;" />')
+def responsive_image(data, alt, width=None):
+    """Embed the committed PNG without its native pixel width widening Colab.
+
+    Single-column figures pass a pixel width; Colab keeps the width attribute
+    even where it drops inline styles, so they do not fill a whole viewport.
+    """
+    size = f'{width}' if width else '100%'
+    css = f'max-width:100%;width:{width}px;' if width else 'max-width:100%;width:100%;'
+    return (f'<img alt="{escape(alt,quote=True)}" src="data:image/png;base64,{data}" width="{size}" '
+            f'style="display:block;{css}height:auto;" />')
 
 
 def _inline(text):
