@@ -16,7 +16,8 @@ import fig_pnr  # noqa: E402
 import fig_postlayout  # noqa: E402
 import fig_scaling  # noqa: E402
 import fig_sizing  # noqa: E402
+import fig_sta  # noqa: E402
 import fig_synth  # noqa: E402
 
-for module in (fig_flow, fig_gates, fig_sizing, fig_cell, fig_synth, fig_pnr, fig_postlayout, fig_scaling):
+for module in (fig_flow, fig_gates, fig_sizing, fig_cell, fig_synth, fig_pnr, fig_postlayout, fig_scaling, fig_sta):
     print(module.make())

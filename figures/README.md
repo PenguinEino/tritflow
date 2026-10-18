@@ -20,3 +20,5 @@ encoding everywhere: −1 blue, 0 grey, +1 red. Shaded bands are the ±0.5 V acc
 | `fig_scaling` | **One HDL source, six adders.** N-trit ripple adders (N = 1…6) generated, routed, DRC/LVS-checked and simulated. (a) Worst carry/MSB settling grows linearly: ≈49 ns per trit for the extracted devices alone, ≈57 ns per trit with estimated wire capacitance (wiring adds ≈16 %). (b) Idle supply power grows with cell count, ≈4.2 mW per cell, the cost of resistive-divider levels. (c) Die area and cell count. |
 
 Numbers in the captions are from the current data; re-read them after the final regeneration.
+
+| `fig_sta` | **A static timing estimate for ternary logic.** Predicted settling (SPICE-characterized midpoint delays per transition class, propagated slew, one endpoint settling tail) vs. post-layout SPICE for the same input transitions: 38 of 39 outputs fall within ±20 %, mean absolute error 6.8 %. |

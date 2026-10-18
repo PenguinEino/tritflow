@@ -61,11 +61,12 @@ def test_package_hashes_size_identity_and_allowlist(tmp_path):
     target=tmp_path/"payload"
     builder.package(document,source,target,team,{"tools":{"python":"unit-test"}})
     info=builder.check(target,source)
-    assert info["file_count"]==7
+    assert info["file_count"]==8
     assert info["total_bytes"]==sum(p.stat().st_size for p in target.iterdir())
     assert "[AUTHOR_NAME]" in (target/"README.md").read_text()
     assert "[AFFILIATION]" in document.cells[0].source and "[EMAIL]" in document.cells[0].source
     assert (target/"LICENSE").read_bytes()==(ROOT/"LICENSE").read_bytes()
+    assert (target/"NOTICE").read_bytes()==(ROOT/"NOTICE").read_bytes()
     (target/"README.md").write_text("changed")
     with pytest.raises(ValueError,match="hash mismatch"):builder.check(target,source)
 
@@ -103,7 +104,7 @@ def test_capture_commit_uses_execution_output(tmp_path):
 
 def test_actual_payload_has_readable_embedded_evidence():
     info=builder.check(builder.DESTINATION,builder.SOURCE)
-    assert info["file_count"]==7 and info["total_bytes"] < 8*1024*1024
+    assert info["file_count"]==8 and info["total_bytes"] < 8*1024*1024
     document=nbformat.read(builder.DESTINATION/"tritflow_tr1um.ipynb",as_version=4)
     for cell in document.cells:
         for output in cell.get("outputs",[]):

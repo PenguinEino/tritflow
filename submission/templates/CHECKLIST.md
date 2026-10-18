@@ -12,7 +12,7 @@ Primary sources: [current root rules](https://github.com/sscs-ose/sscs-ose-code-
 | Explain ideas, decisions, method, evidence and reproduction | Chapters 0/1, 4–6, 7/8; first setup cell and README | Included |
 | Use open tools; open PDK where applicable | Lark/NumPy, KLayout, ngspice, Plotly; OpenSUSI TR-1um; versions in build information | Included |
 | Reproducible source release | README's generated release check; default tag must match this notebook before filing | Release check / pending if mismatched |
-| Suitable open-source license | Apache-2.0 `LICENSE` and author-authorized derived schematic assets; README license statement | Included |
+| Suitable open-source license | Apache-2.0 `LICENSE`, verbatim attribution `NOTICE` and author-authorized derived schematic assets; README license statement | Included |
 | One project folder under the current event's submitted notebooks | This directory maps to `ISSCC27/submitted_notebooks/TritFlow/` | Prepared |
 | Keep proposed changes within that project folder | Copy only these small payload files; builder/tests remain in TritFlow | Prepared |
 | Fork and submit a GitHub PR | Submitter/integrator action; no PR opened here | Pending |

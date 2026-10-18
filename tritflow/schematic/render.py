@@ -5,6 +5,7 @@ from dataclasses import asdict
 import math
 
 from .vector import INK, SECONDARY, TRIT_COLOR, Vector
+from .model import natural
 
 
 def _rect(v,x,y,w,h,**style):
@@ -127,7 +128,7 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
     """Paint an existing scene; geometry does not depend on any overlay."""
     caps = caps or {}
     title = scene.top if title is None else title
-    visible=sorted({s.net for s in scene.segments})
+    visible=sorted({s.net for s in scene.segments},key=natural)
     annotated=values is not None or caps or net_names
     columns=max(1,scene.width//240)
     rows=math.ceil(len(visible)/columns) if annotated else 0
@@ -187,6 +188,8 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
 def metadata(scene,values,caps):
     """Machine-readable connection ledger also documents closed-block contents."""
     return {'top':scene.top,'connections':[asdict(c) for c in scene.connections],
-            'symbols':[{'key':n.key,'kind':n.kind,'members':list(n.members)} for n in scene.symbols],
+            'symbols':[{'key':n.key,'kind':n.kind,'members':list(n.members),
+                        'module':n.module,'pin_labels':n.pin_labels} for n in scene.symbols],
+            'frames':[asdict(f) for f in scene.frames],
             'hidden_nets':list(scene.hidden_nets),'notes':list(scene.notes),
             'values':values,'capacitance_f':caps}

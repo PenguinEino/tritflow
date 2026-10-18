@@ -127,3 +127,21 @@ def test_force_reruns_valid_cache_and_records_actual_stage_times(tmp_path):
     assert len(calls) == 2
     assert cache.events == [("stage","run")]*2
     assert all(r["state"] == "run" and r["elapsed_s"] > 0 for r in cache.timings)
+
+
+def test_recorded_filename_set_checks_edits_and_deletions_not_unused_additions(tmp_path):
+    root, pdk = tmp_path/"source", tmp_path/"pdk"
+    root.mkdir(); pdk.mkdir()
+    abstract = root/"INV.abstract.json"
+    abstract.write_text('{"pins":{"A":{"access":[[3,6]]}}}')
+    names = ["source/INV.abstract.json"]
+    captured = module.source_manifest(root, pdk, names=names)
+    (root/"unused.py").write_text("# never imported by this experiment\n")
+    assert module.source_manifest(root, pdk, names=captured) == captured
+    abstract.write_text('{"pins":{"A":{"access":[[9,6]]}}}')
+    assert module.source_manifest(root, pdk, names=captured) != captured
+    abstract.unlink()
+    with pytest.raises(FileNotFoundError):
+        module.source_manifest(root, pdk, names=captured)
+    with pytest.raises(ValueError, match="invalid recorded source"):
+        module.source_manifest(root, pdk, names=["source/../outside"])
