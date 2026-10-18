@@ -27,7 +27,7 @@ from .logic import function
 from .metrics import edge_metrics
 
 LOADS = (10e-15,100e-15,500e-15,1e-12,2e-12)
-RAMPS = (.25e-9,1e-9,5e-9,15e-9,50e-9,150e-9)
+RAMPS = (.25e-9,1e-9,5e-9,15e-9,50e-9,150e-9,200e-9)
 FIELDS = ('propagation_s','tail_s','output_slew_10_90_s','settling_s','recovery_s')
 
 

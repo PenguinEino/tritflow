@@ -1,18 +1,18 @@
 {
   "top": "mul1",
   "arrival": {
-    "p": 9.256323797485109e-08
+    "p": 2.812697745196341e-08
   },
   "transition_arrival": {
     "p": {
-      "1->1": 9.159790896885126e-08,
-      "1->0": 3.112866387241346e-08,
-      "1->-1": 9.148310014808501e-08,
-      "0->1": 9.205401102418125e-08,
-      "0->0": 2.9134320667535847e-08,
-      "0->-1": 7.447557461626634e-08,
-      "-1->1": 9.256323797485109e-08,
-      "-1->0": 3.428842390585912e-08
+      "-1->0": 6.2181890942329015e-09,
+      "-1->1": 1.8787055055852667e-08,
+      "0->-1": 2.634224759647634e-08,
+      "0->0": 1.569675856780661e-08,
+      "0->1": 2.5627068220770747e-08,
+      "1->-1": 2.812697745196341e-08,
+      "1->0": 1.6383133260834497e-08,
+      "1->1": 2.040780813976718e-08
     }
   },
   "paths": {
@@ -24,29 +24,29 @@
         "input_net": "a",
         "output_net": "_n1",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          -1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 0,
+          "B": -1
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NOR:21",
-        "delay_s": 1.5921788498038555e-08,
-        "arrival_s": 1.6421788498038556e-08,
+        "arc_id": "NOR:29",
+        "delay_s": 1.0637312173273918e-08,
+        "arrival_s": 1.1137312173273918e-08,
         "load_f": 1.429571812330077e-13,
         "input_transition_s": 1e-09,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "settling_tail_s": 1.1854315116465028e-08,
+        "output_slew_10_90_s": 1.9391396091313992e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -57,26 +57,26 @@
         "output_net": "_n2",
         "input_transition": [
           0,
-          1
+          -1
         ],
         "output_transition": [
           0,
-          -1
+          1
         ],
         "from_inputs": {
           "A": 0
         },
         "to_inputs": {
-          "A": 1
+          "A": -1
         },
-        "arc_id": "INV:03",
-        "delay_s": 1.271253216949729e-08,
-        "arrival_s": 2.9134320667535847e-08,
+        "arc_id": "INV:02",
+        "delay_s": 4.559446394532693e-09,
+        "arrival_s": 1.569675856780661e-08,
         "load_f": 2.5063857503673564e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 5.006026157532105e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 2.4255145307101004e-08,
+        "settling_tail_s": 7.589673613670509e-09,
+        "output_slew_10_90_s": 1.2736400714742525e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -86,29 +86,29 @@
         "input_net": "_n2",
         "output_net": "p",
         "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
           1,
           -1
         ],
-        "output_transition": [
-          -1,
-          1
-        ],
         "from_inputs": {
-          "A": 1,
-          "B": 1
+          "A": -1,
+          "B": 0
         },
         "to_inputs": {
           "A": 1,
-          "B": -1
+          "B": 1
         },
-        "arc_id": "NAND:70",
-        "delay_s": 3.1712578648164764e-08,
-        "arrival_s": 9.256323797485109e-08,
+        "arc_id": "NAND:15",
+        "delay_s": 1.1707575907282087e-09,
+        "arrival_s": 2.812697745196341e-08,
         "load_f": 6.784583119999999e-14,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 3.171633865915047e-08,
-        "output_slew_10_90_s": 1.1176112946120295e-07,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 1.5876865882487798e-08,
+        "settling_tail_s": 1.1259461293428591e-08,
+        "output_slew_10_90_s": 1.566586527975357e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       }
     ]
@@ -117,33 +117,25 @@
     "p": {
       "before": null,
       "after": null,
-      "reason": "Independent transient local classes; no joint endpoint witness is asserted."
+      "reason": "No joint temporal waveform witness is asserted.",
+      "compatible_primary_endpoints": {
+        "before": {
+          "a": 0,
+          "b": -1
+        },
+        "after": {
+          "a": 1,
+          "b": 1
+        }
+      }
     }
   },
   "loads": {
-    "a": {
-      "fanout_f": 4.835121595128594e-13,
-      "wire_f": 4.7970608599999994e-14,
-      "external_f": 0.0,
-      "total_f": 5.314827681128594e-13
-    },
     "_n1": {
       "fanout_f": 1.144260802330077e-13,
       "wire_f": 2.8531101e-14,
       "external_f": 0.0,
       "total_f": 1.429571812330077e-13
-    },
-    "_n0": {
-      "fanout_f": 2.0613144150076912e-13,
-      "wire_f": 3.23767502e-14,
-      "external_f": 0.0,
-      "total_f": 2.385081917007691e-13
-    },
-    "p": {
-      "fanout_f": 0.0,
-      "wire_f": 5.78458312e-14,
-      "external_f": 1e-14,
-      "total_f": 6.784583119999999e-14
     },
     "_n2": {
       "fanout_f": 2.059554318367356e-13,
@@ -151,20 +143,36 @@
       "external_f": 0.0,
       "total_f": 2.5063857503673564e-13
     },
+    "a": {
+      "fanout_f": 4.835121595128594e-13,
+      "wire_f": 4.7970608599999994e-14,
+      "external_f": 0.0,
+      "total_f": 5.314827681128594e-13
+    },
+    "p": {
+      "fanout_f": 0.0,
+      "wire_f": 5.78458312e-14,
+      "external_f": 1e-14,
+      "total_f": 6.784583119999999e-14
+    },
     "b": {
       "fanout_f": 4.839436672518686e-13,
       "wire_f": 5.22174886e-14,
       "external_f": 0.0,
       "total_f": 5.361611558518686e-13
+    },
+    "_n0": {
+      "fanout_f": 2.0613144150076912e-13,
+      "wire_f": 3.23767502e-14,
+      "external_f": 0.0,
+      "total_f": 2.385081917007691e-13
     }
   },
   "assumptions": [
-    "Conservative envelope of measured local midpoint/recovery terms; endpoint tail added once, using the same local class and ramp.",
-    "All transient local classes are admitted independently, including pulses on endpoint-stable nets; maximizing path classes need not be jointly realizable.",
-    "Known primary ramp; every internal measured ramp knot is considered (piecewise-linear maxima).",
-    "Unchanged-output recovery can launch downstream activity; it is a conservative guard clock, not a measured full-level crossing.",
-    "Maximum biased AC device input C plus supplied metal/output C; no load correction or circuit-fitted delay margin.",
-    "Finite nominal table-domain envelope, not a certified bound for arbitrary slew, analog pulse shape, skew, PVT or signal/poly RC."
+    "Transition-specific narrow slew intervals follow measured output slew; d50 and endpoint settling extrema use the same segment.",
+    "Backward search intersects primary-input compatibility along the entire path; local time alignment and partial pulse amplitude remain relaxed.",
+    "Side-input state policy: reachable; local stable recovery is not propagated as a fabricated full-level edge.",
+    "Scalar-table upper estimate; nominal finite-case coverage is validated separately. Not an arbitrary analog-waveform or PVT bound."
   ],
   "warnings": [],
   "provenance": {
@@ -182,42 +190,28 @@
       "/home/ishi-kai/code-a-chip/cells/out/TIEN/TIEN.timing.json": "6146e0d3e89b1e3f25576fda4e3a4361e47c0a9f7efebe1deab12f061295f744",
       "/home/ishi-kai/code-a-chip/cells/out/TIEP/TIEP.timing.json": "f4b76fb5211680d0d612db599c4f6b95d570238323e697d29d55b3db5c488e2c",
       "/home/ishi-kai/code-a-chip/cells/out/TIEZ/TIEZ.timing.json": "7dff780b967943349e7aee29b4cb2c3f631215a15ae84fe0ec1520eed4aa3f7d",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/BUF.propagation.json": "421e29f00fb1ec8c45bee596bd5a9d2364e1a8a2072c2701920455db45f8fe3a",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/INV.propagation.json": "f16a43dd04aaaf87718697c203c0314c2bdba1d19a011efb8c2b569fc5f0b06b",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NAND.propagation.json": "80eba653c5b6a248df0ba33675bea92b4bc1c6bc787574fbccbce08a5cb1c387",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NANY.propagation.json": "8eb7c1f2f66b6cf4fb923a244b1aaadf08b91a400374bb62af32861ea3a42991",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NOR.propagation.json": "69028cae917f7c225dc75a607883d8a20d1849764b2285332ca77ac5c633f10c"
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/BUF.propagation.json": "128cd1b53ad803de668be59ed2a8bdfa89c81a80a479b49270892ef27474a771",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/INV.propagation.json": "fe82f240b1a8163f8990c3f40f4b981f5ad3627db06ffd4275120fb1fae23155",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NAND.propagation.json": "c495ac7dae516ccd85063895e589669a3c135168ef15df4bcfa84ced85242042",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NANY.propagation.json": "0b325c3991218f41b57db17db3996b44a4f03727b6feb55fa819cd08dc4c3c7f",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NOR.propagation.json": "6da051426251c72ca5c6bca3cdf5e987eff2664a16657d7bd5c05f296e9b082b"
     },
     "load_policy": "linear",
     "input_transition_s": 1e-09,
-    "metric": "local_class_ramp_envelope",
-    "bound_scope": "Upper envelope of characterized scalar terms; empirical simulation coverage is separate.",
-    "fixed_ramp": false,
-    "recovery_guard": true
+    "metric": "conditioned_slew_windows",
+    "side_states": "reachable",
+    "slew_bin_s": 5e-09
   },
   "statistics": {
-    "runtime_s": 0.0037481780018424615,
-    "all_endpoint_pairs": true,
-    "local_candidates": 900,
-    "joint_endpoint_witness": false,
+    "runtime_s": 0.005488658003741875,
+    "graph_nodes": 664,
+    "graph_choices": 345,
+    "search_expansions": 38,
     "slew_domain_closed": true,
     "slew_domain_violations": [],
     "load_in_measured_domain": true,
-    "net_activity_clock_s": {
-      "a": 5e-10,
-      "b": 5e-10,
-      "_n0": 1.0181553066209162e-08,
-      "_n1": 1.6421788498038556e-08,
-      "_n2": 2.9134320667535847e-08,
-      "p": 9.159790896885126e-08
-    },
-    "net_slew_upper_10_90_s": {
-      "a": 8.000000000000001e-10,
-      "b": 8.000000000000001e-10,
-      "_n0": 1.1835017800450925e-08,
-      "_n1": 2.0333104770059633e-08,
-      "_n2": 1.0621516360900118e-07,
-      "p": 1.1277930203387047e-07
-    }
+    "all_endpoint_pairs": true,
+    "joint_temporal_witness": false,
+    "unmodeled_analog_recovery_propagation": true
   }
 }

@@ -1,46 +1,46 @@
 {
   "top": "mac1",
   "arrival": {
-    "sum": 8.026469427552273e-07,
-    "cout": 7.736886088178125e-07,
-    "and_out": 7.201284464151143e-08,
-    "or_out": 1.034883135210583e-07
+    "sum": 2.6618680068324755e-07,
+    "cout": 2.4666627204001447e-07,
+    "and_out": 1.6211582996949718e-08,
+    "or_out": 2.7965796209404327e-08
   },
   "transition_arrival": {
     "sum": {
-      "1->1": 7.813534712741616e-07,
-      "1->0": 7.916182005677658e-07,
-      "1->-1": 7.974715528581413e-07,
-      "0->-1": 7.965192727432266e-07,
-      "0->1": 8.003641430087522e-07,
-      "-1->0": 7.952243969671548e-07,
-      "-1->-1": 7.77560331851398e-07,
-      "-1->1": 8.026469427552273e-07,
-      "0->0": 7.299074441388626e-07
+      "-1->-1": 2.4965346119093835e-07,
+      "-1->0": 2.549187830510596e-07,
+      "-1->1": 2.6618680068324755e-07,
+      "0->-1": 2.572609880258788e-07,
+      "0->0": 2.36482492685047e-07,
+      "0->1": 2.6324856181261784e-07,
+      "1->-1": 2.502004611134481e-07,
+      "1->0": 2.4879172931859505e-07,
+      "1->1": 2.527211984122759e-07
     },
     "cout": {
-      "1->0": 7.288298221487875e-07,
-      "1->-1": 7.704252792991131e-07,
-      "0->1": 7.576122325083505e-07,
-      "0->-1": 7.501131363910167e-07,
-      "-1->1": 7.736886088178125e-07,
-      "-1->0": 7.287955269097653e-07
+      "-1->0": 2.218303385593945e-07,
+      "-1->1": 2.315626561671344e-07,
+      "0->-1": 2.3766189996637725e-07,
+      "0->1": 2.3016355459235591e-07,
+      "1->-1": 2.4666627204001447e-07,
+      "1->0": 2.38550295071183e-07
     },
     "and_out": {
-      "1->0": 2.726660491673842e-08,
-      "1->-1": 6.897838532889542e-08,
-      "0->1": 5.5930048649075935e-08,
-      "0->-1": 4.861869553176981e-08,
-      "-1->1": 7.201284464151143e-08,
-      "-1->0": 2.7211330083532464e-08
+      "-1->0": 5.460330174866336e-09,
+      "-1->1": 1.4528418041241598e-08,
+      "0->-1": 1.524206191101257e-08,
+      "0->1": 1.3538352157602808e-08,
+      "1->-1": 1.6211582996949718e-08,
+      "1->0": 5.401196940697392e-09
     },
     "or_out": {
-      "1->0": 5.879350571230654e-08,
-      "1->-1": 1.0057778689699501e-07,
-      "0->1": 8.734869593164786e-08,
-      "0->-1": 8.015674675928978e-08,
-      "-1->1": 1.034883135210583e-07,
-      "-1->0": 5.8736733832014315e-08
+      "-1->0": 8.6635941968656e-09,
+      "-1->1": 2.3967658216199737e-08,
+      "0->-1": 1.88266107744867e-08,
+      "0->1": 2.7965796209404327e-08,
+      "1->-1": 2.0344745301087148e-08,
+      "1->0": 9.019179576504137e-09
     }
   },
   "paths": {
@@ -52,29 +52,29 @@
         "input_net": "a",
         "output_net": "_n1",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          -1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 0,
+          "B": -1
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NOR:21",
-        "delay_s": 1.6428353134118866e-08,
-        "arrival_s": 1.6928353134118867e-08,
+        "arc_id": "NOR:29",
+        "delay_s": 1.1096160539699674e-08,
+        "arrival_s": 1.1596160539699673e-08,
         "load_f": 1.924013516330077e-13,
         "input_transition_s": 1e-09,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "settling_tail_s": 1.2449944011410248e-08,
+        "output_slew_10_90_s": 2.0246503907164e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -85,26 +85,26 @@
         "output_net": "_n2",
         "input_transition": [
           0,
-          1
+          -1
         ],
         "output_transition": [
           0,
-          -1
+          1
         ],
         "from_inputs": {
           "A": 0
         },
         "to_inputs": {
-          "A": 1
+          "A": -1
         },
-        "arc_id": "INV:03",
-        "delay_s": 1.438601683593709e-08,
-        "arrival_s": 3.131436997005596e-08,
+        "arc_id": "INV:02",
+        "delay_s": 5.939861788186236e-09,
+        "arrival_s": 1.753602232788591e-08,
         "load_f": 3.998587260697433e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 5.1158281497041e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 2.5328901456074186e-08,
+        "settling_tail_s": 9.696769221146864e-09,
+        "output_slew_10_90_s": 1.573523212527341e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -114,29 +114,29 @@
         "input_net": "_n2",
         "output_net": "_n3",
         "input_transition": [
-          1,
-          -1
+          0,
+          1
         ],
         "output_transition": [
           1,
-          1
+          -1
         ],
         "from_inputs": {
           "A": -1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
           "A": 1,
-          "B": -1
+          "B": 1
         },
-        "arc_id": "NAND:21",
-        "delay_s": 8.20840854741126e-08,
-        "arrival_s": 1.1339845544416856e-07,
+        "arc_id": "NAND:15",
+        "delay_s": 8.162280050733433e-09,
+        "arrival_s": 2.5698302378619343e-08,
         "load_f": 9.14324155854466e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 1.966904015659176e-08,
+        "settling_tail_s": 2.7655743804773035e-08,
+        "output_slew_10_90_s": 3.225644924855311e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -146,29 +146,29 @@
         "input_net": "_n3",
         "output_net": "_n4",
         "input_transition": [
-          0,
+          1,
           -1
         ],
         "output_transition": [
-          1,
+          0,
           1
         ],
         "from_inputs": {
           "A": -1,
-          "B": 0
+          "B": 1
         },
         "to_inputs": {
           "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:10",
-        "delay_s": 6.520879052367373e-08,
-        "arrival_s": 1.7860724596784229e-07,
+        "arc_id": "NANY:18",
+        "delay_s": 2.5381986247135376e-08,
+        "arrival_s": 5.108028862575472e-08,
         "load_f": 8.860227452544659e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 4.202946325945757e-08,
+        "settling_tail_s": 2.493345454332811e-08,
+        "output_slew_10_90_s": 3.441790138543381e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -178,8 +178,8 @@
         "input_net": "_n4",
         "output_net": "_n6",
         "input_transition": [
-          1,
-          -1
+          0,
+          1
         ],
         "output_transition": [
           -1,
@@ -187,20 +187,20 @@
         ],
         "from_inputs": {
           "A": 1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
-          "A": 1,
-          "B": -1
+          "A": -1,
+          "B": 1
         },
-        "arc_id": "NANY:70",
-        "delay_s": 6.164847560367484e-08,
-        "arrival_s": 2.402557215715171e-07,
+        "arc_id": "NANY:58",
+        "delay_s": 1.606352844731894e-08,
+        "arrival_s": 6.714381707307366e-08,
         "load_f": 4.590747780624661e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.428424831096336e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 4.4769921227327915e-08,
+        "settling_tail_s": 7.278503169889946e-09,
+        "output_slew_10_90_s": 3.5904813449360103e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -210,29 +210,29 @@
         "input_net": "_n6",
         "output_net": "_n7",
         "input_transition": [
-          0,
-          -1
+          -1,
+          0
         ],
         "output_transition": [
           1,
-          1
+          -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
           "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:10",
-        "delay_s": 7.551698563415884e-08,
-        "arrival_s": 3.1577270720567596e-07,
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:30",
+        "delay_s": 1.5669413450363384e-08,
+        "arrival_s": 8.281323052343704e-08,
         "load_f": 1.385445255716932e-12,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 4.5e-08,
+        "settling_tail_s": 4.318374810976948e-08,
+        "output_slew_10_90_s": 4.881902704629435e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -247,24 +247,24 @@
         ],
         "output_transition": [
           -1,
-          0
+          1
         ],
         "from_inputs": {
           "A": 1,
           "B": 1
         },
         "to_inputs": {
-          "A": 1,
+          "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:70",
-        "delay_s": 5.904048172369622e-08,
-        "arrival_s": 3.7481318892937215e-07,
+        "arc_id": "NANY:67",
+        "delay_s": 1.9839042844967573e-08,
+        "arrival_s": 1.0265227336840462e-07,
         "load_f": 1.697558170330077e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.2009832371536622e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 6.5e-08,
+        "settling_tail_s": 2.201093620823308e-08,
+        "output_slew_10_90_s": 4.827781317141833e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -274,27 +274,27 @@
         "input_net": "_n8",
         "output_net": "_n9",
         "input_transition": [
-          0,
+          -1,
           1
         ],
         "output_transition": [
-          0,
+          1,
           -1
         ],
         "from_inputs": {
-          "A": 0
+          "A": -1
         },
         "to_inputs": {
           "A": 1
         },
-        "arc_id": "INV:03",
-        "delay_s": 1.468854285587417e-08,
-        "arrival_s": 3.895017317852463e-07,
+        "arc_id": "INV:01",
+        "delay_s": 2.513906691261086e-09,
+        "arrival_s": 1.051661800596657e-07,
         "load_f": 4.268341619919998e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 5.135677724868492e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 6.3288965964575e-08,
+        "settling_tail_s": 3.106751295149739e-08,
+        "output_slew_10_90_s": 4.8000000000000006e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -313,20 +313,20 @@
         ],
         "from_inputs": {
           "A": 1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
           "A": -1,
           "B": 1
         },
-        "arc_id": "NANY:66",
-        "delay_s": 6.200270358457325e-08,
-        "arrival_s": 4.5150443536981954e-07,
+        "arc_id": "NANY:58",
+        "delay_s": 1.9878468225673438e-08,
+        "arrival_s": 1.2504464828533913e-07,
         "load_f": 6.109625578250075e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.1393293412843636e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 6.5e-08,
+        "settling_tail_s": 1.2677142180413479e-08,
+        "output_slew_10_90_s": 5.197426955898263e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -340,25 +340,25 @@
           0
         ],
         "output_transition": [
-          1,
+          0,
           1
         ],
         "from_inputs": {
           "A": -1,
-          "B": 0
+          "B": 1
         },
         "to_inputs": {
           "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:10",
-        "delay_s": 6.59972626820423e-08,
-        "arrival_s": 5.175016980518619e-07,
+        "arc_id": "NANY:18",
+        "delay_s": 3.3669976457303535e-08,
+        "arrival_s": 1.5871462474264266e-07,
         "load_f": 9.22802279654466e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 6.5e-08,
+        "settling_tail_s": 2.5699224604447147e-08,
+        "output_slew_10_90_s": 3.601046966366528e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -368,8 +368,8 @@
         "input_net": "_n11",
         "output_net": "_n13",
         "input_transition": [
-          1,
-          -1
+          0,
+          1
         ],
         "output_transition": [
           -1,
@@ -377,20 +377,20 @@
         ],
         "from_inputs": {
           "A": 1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
-          "A": 1,
-          "B": -1
+          "A": -1,
+          "B": 1
         },
-        "arc_id": "NANY:70",
-        "delay_s": 6.163829885266118e-08,
-        "arrival_s": 5.79139996904523e-07,
+        "arc_id": "NANY:58",
+        "delay_s": 1.8825351264610794e-08,
+        "arrival_s": 1.7753997600725347e-07,
         "load_f": 4.579458156624661e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.4275373226978413e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 5e-08,
+        "settling_tail_s": 6.743379778185512e-09,
+        "output_slew_10_90_s": 3.986779575442982e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -400,29 +400,29 @@
         "input_net": "_n13",
         "output_net": "_n14",
         "input_transition": [
-          0,
-          -1
+          -1,
+          0
         ],
         "output_transition": [
-          1,
+          0,
           1
         ],
         "from_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "to_inputs": {
           "A": -1,
           "B": 0
         },
-        "to_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "arc_id": "NANY:10",
-        "delay_s": 7.578810994120384e-08,
-        "arrival_s": 6.549281068457268e-07,
+        "arc_id": "NANY:49",
+        "delay_s": 3.063885477238499e-08,
+        "arrival_s": 2.0817883077963845e-07,
         "load_f": 1.3987328057873985e-12,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 5e-08,
+        "settling_tail_s": 3.4433317927817814e-08,
+        "output_slew_10_90_s": 4.763907279865022e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -432,8 +432,8 @@
         "input_net": "_n14",
         "output_net": "_n15",
         "input_transition": [
-          1,
-          -1
+          0,
+          1
         ],
         "output_transition": [
           -1,
@@ -441,20 +441,20 @@
         ],
         "from_inputs": {
           "A": 1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
-          "A": 1,
-          "B": -1
+          "A": -1,
+          "B": 1
         },
-        "arc_id": "NANY:70",
-        "delay_s": 5.911266764783163e-08,
-        "arrival_s": 7.140407744935584e-07,
+        "arc_id": "NANY:58",
+        "delay_s": 2.359400608652499e-08,
+        "arrival_s": 2.3177283686616343e-07,
         "load_f": 1.777637946330077e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.207278528631001e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 6.000000000000001e-08,
+        "settling_tail_s": 4.241041630973892e-09,
+        "output_slew_10_90_s": 4.65143059334596e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -464,27 +464,27 @@
         "input_net": "_n15",
         "output_net": "_n16",
         "input_transition": [
-          0,
-          1
+          -1,
+          0
         ],
         "output_transition": [
-          0,
-          -1
+          1,
+          0
         ],
         "from_inputs": {
-          "A": 0
+          "A": -1
         },
         "to_inputs": {
-          "A": 1
+          "A": 0
         },
-        "arc_id": "INV:03",
-        "delay_s": 1.4861781517127642e-08,
-        "arrival_s": 7.28902556010686e-07,
+        "arc_id": "INV:00",
+        "delay_s": 2.081287059087065e-09,
+        "arrival_s": 2.338541239252505e-07,
         "load_f": 4.422813899919998e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 5.147044396167195e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 5.534023361767192e-08,
+        "settling_tail_s": 1.0060227422216501e-08,
+        "output_slew_10_90_s": 2.4000000000000003e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -510,13 +510,13 @@
           "B": -1
         },
         "arc_id": "NANY:67",
-        "delay_s": 4.017042314467749e-08,
-        "arrival_s": 8.026469427552273e-07,
+        "delay_s": 1.2508493164648533e-08,
+        "arrival_s": 2.6618680068324755e-07,
         "load_f": 2.068339942e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 3.357396359986372e-08,
-        "output_slew_10_90_s": 9.795764429456132e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 3.5e-08,
+        "settling_tail_s": 1.9824183593348507e-08,
+        "output_slew_10_90_s": 3.204622802155779e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       }
     ],
@@ -528,29 +528,29 @@
         "input_net": "a",
         "output_net": "_n1",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          -1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 0,
+          "B": -1
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NOR:21",
-        "delay_s": 1.6428353134118866e-08,
-        "arrival_s": 1.6928353134118867e-08,
+        "arc_id": "NOR:29",
+        "delay_s": 1.1096160539699674e-08,
+        "arrival_s": 1.1596160539699673e-08,
         "load_f": 1.924013516330077e-13,
         "input_transition_s": 1e-09,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "settling_tail_s": 1.2449944011410248e-08,
+        "output_slew_10_90_s": 2.0246503907164e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -561,26 +561,26 @@
         "output_net": "_n2",
         "input_transition": [
           0,
-          1
+          -1
         ],
         "output_transition": [
           0,
-          -1
+          1
         ],
         "from_inputs": {
           "A": 0
         },
         "to_inputs": {
-          "A": 1
+          "A": -1
         },
-        "arc_id": "INV:03",
-        "delay_s": 1.438601683593709e-08,
-        "arrival_s": 3.131436997005596e-08,
+        "arc_id": "INV:02",
+        "delay_s": 5.939861788186236e-09,
+        "arrival_s": 1.753602232788591e-08,
         "load_f": 3.998587260697433e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 5.1158281497041e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 2.5328901456074186e-08,
+        "settling_tail_s": 9.696769221146864e-09,
+        "output_slew_10_90_s": 1.573523212527341e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -590,29 +590,29 @@
         "input_net": "_n2",
         "output_net": "_n3",
         "input_transition": [
-          1,
-          -1
+          0,
+          1
         ],
         "output_transition": [
           1,
-          1
+          -1
         ],
         "from_inputs": {
           "A": -1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
           "A": 1,
-          "B": -1
+          "B": 1
         },
-        "arc_id": "NAND:21",
-        "delay_s": 8.20840854741126e-08,
-        "arrival_s": 1.1339845544416856e-07,
+        "arc_id": "NAND:15",
+        "delay_s": 8.162280050733433e-09,
+        "arrival_s": 2.5698302378619343e-08,
         "load_f": 9.14324155854466e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 1.966904015659176e-08,
+        "settling_tail_s": 2.7655743804773035e-08,
+        "output_slew_10_90_s": 3.225644924855311e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -622,29 +622,29 @@
         "input_net": "_n3",
         "output_net": "_n4",
         "input_transition": [
-          0,
+          1,
           -1
         ],
         "output_transition": [
-          1,
+          0,
           1
         ],
         "from_inputs": {
           "A": -1,
-          "B": 0
+          "B": 1
         },
         "to_inputs": {
           "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:10",
-        "delay_s": 6.520879052367373e-08,
-        "arrival_s": 1.7860724596784229e-07,
+        "arc_id": "NANY:18",
+        "delay_s": 2.5381986247135376e-08,
+        "arrival_s": 5.108028862575472e-08,
         "load_f": 8.860227452544659e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 4.202946325945757e-08,
+        "settling_tail_s": 2.493345454332811e-08,
+        "output_slew_10_90_s": 3.441790138543381e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -654,8 +654,8 @@
         "input_net": "_n4",
         "output_net": "_n6",
         "input_transition": [
-          1,
-          -1
+          0,
+          1
         ],
         "output_transition": [
           -1,
@@ -663,20 +663,20 @@
         ],
         "from_inputs": {
           "A": 1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
-          "A": 1,
-          "B": -1
+          "A": -1,
+          "B": 1
         },
-        "arc_id": "NANY:70",
-        "delay_s": 6.164847560367484e-08,
-        "arrival_s": 2.402557215715171e-07,
+        "arc_id": "NANY:58",
+        "delay_s": 1.606352844731894e-08,
+        "arrival_s": 6.714381707307366e-08,
         "load_f": 4.590747780624661e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.428424831096336e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 4.4769921227327915e-08,
+        "settling_tail_s": 7.278503169889946e-09,
+        "output_slew_10_90_s": 3.5904813449360103e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -686,29 +686,29 @@
         "input_net": "_n6",
         "output_net": "_n7",
         "input_transition": [
-          0,
-          -1
+          -1,
+          0
         ],
         "output_transition": [
           1,
-          1
+          -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
           "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:10",
-        "delay_s": 7.551698563415884e-08,
-        "arrival_s": 3.1577270720567596e-07,
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:30",
+        "delay_s": 1.5669413450363384e-08,
+        "arrival_s": 8.281323052343704e-08,
         "load_f": 1.385445255716932e-12,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 4.5e-08,
+        "settling_tail_s": 4.318374810976948e-08,
+        "output_slew_10_90_s": 4.881902704629435e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -723,24 +723,24 @@
         ],
         "output_transition": [
           -1,
-          0
+          1
         ],
         "from_inputs": {
           "A": 1,
           "B": 1
         },
         "to_inputs": {
-          "A": 1,
+          "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:70",
-        "delay_s": 5.904048172369622e-08,
-        "arrival_s": 3.7481318892937215e-07,
+        "arc_id": "NANY:67",
+        "delay_s": 1.9839042844967573e-08,
+        "arrival_s": 1.0265227336840462e-07,
         "load_f": 1.697558170330077e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.2009832371536622e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 6.5e-08,
+        "settling_tail_s": 2.201093620823308e-08,
+        "output_slew_10_90_s": 4.827781317141833e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -750,27 +750,27 @@
         "input_net": "_n8",
         "output_net": "_n9",
         "input_transition": [
-          0,
+          -1,
           1
         ],
         "output_transition": [
-          0,
+          1,
           -1
         ],
         "from_inputs": {
-          "A": 0
+          "A": -1
         },
         "to_inputs": {
           "A": 1
         },
-        "arc_id": "INV:03",
-        "delay_s": 1.468854285587417e-08,
-        "arrival_s": 3.895017317852463e-07,
+        "arc_id": "INV:01",
+        "delay_s": 2.513906691261086e-09,
+        "arrival_s": 1.051661800596657e-07,
         "load_f": 4.268341619919998e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 5.135677724868492e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 6.3288965964575e-08,
+        "settling_tail_s": 3.106751295149739e-08,
+        "output_slew_10_90_s": 4.8000000000000006e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -789,20 +789,20 @@
         ],
         "from_inputs": {
           "A": 1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
           "A": -1,
           "B": 1
         },
-        "arc_id": "NANY:66",
-        "delay_s": 6.200270358457325e-08,
-        "arrival_s": 4.5150443536981954e-07,
+        "arc_id": "NANY:58",
+        "delay_s": 1.9878468225673438e-08,
+        "arrival_s": 1.2504464828533913e-07,
         "load_f": 6.109625578250075e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.1393293412843636e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 6.5e-08,
+        "settling_tail_s": 1.2677142180413479e-08,
+        "output_slew_10_90_s": 5.197426955898263e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -816,25 +816,25 @@
           0
         ],
         "output_transition": [
-          1,
+          0,
           1
         ],
         "from_inputs": {
           "A": -1,
-          "B": 0
+          "B": 1
         },
         "to_inputs": {
           "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:10",
-        "delay_s": 6.59972626820423e-08,
-        "arrival_s": 5.175016980518619e-07,
+        "arc_id": "NANY:18",
+        "delay_s": 3.3669976457303535e-08,
+        "arrival_s": 1.5871462474264266e-07,
         "load_f": 9.22802279654466e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 6.5e-08,
+        "settling_tail_s": 2.5699224604447147e-08,
+        "output_slew_10_90_s": 3.601046966366528e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -844,8 +844,8 @@
         "input_net": "_n11",
         "output_net": "_n13",
         "input_transition": [
-          1,
-          -1
+          0,
+          1
         ],
         "output_transition": [
           -1,
@@ -853,20 +853,20 @@
         ],
         "from_inputs": {
           "A": 1,
-          "B": 1
+          "B": 0
         },
         "to_inputs": {
-          "A": 1,
-          "B": -1
+          "A": -1,
+          "B": 1
         },
-        "arc_id": "NANY:70",
-        "delay_s": 6.163829885266118e-08,
-        "arrival_s": 5.79139996904523e-07,
+        "arc_id": "NANY:58",
+        "delay_s": 1.8825351264610794e-08,
+        "arrival_s": 1.7753997600725347e-07,
         "load_f": 4.579458156624661e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.4275373226978413e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 5e-08,
+        "settling_tail_s": 6.743379778185512e-09,
+        "output_slew_10_90_s": 3.986779575442982e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -876,29 +876,29 @@
         "input_net": "_n13",
         "output_net": "_n14",
         "input_transition": [
-          0,
-          -1
+          -1,
+          0
         ],
         "output_transition": [
           1,
-          1
+          -1
         ],
         "from_inputs": {
           "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:10",
-        "delay_s": 7.578810994120384e-08,
-        "arrival_s": 6.549281068457268e-07,
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:06",
+        "delay_s": 2.2406953478856185e-08,
+        "arrival_s": 1.9994692948610966e-07,
         "load_f": 1.3987328057873985e-12,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "input_transition_s": 5e-08,
+        "settling_tail_s": 4.3434679239461586e-08,
+        "output_slew_10_90_s": 5.5918423991759376e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -913,24 +913,24 @@
         ],
         "output_transition": [
           -1,
-          0
+          1
         ],
         "from_inputs": {
           "A": 1,
           "B": 1
         },
         "to_inputs": {
-          "A": 1,
+          "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:70",
-        "delay_s": 5.8982840539552306e-08,
-        "arrival_s": 7.139109473852791e-07,
+        "arc_id": "NANY:67",
+        "delay_s": 2.101337649088657e-08,
+        "arrival_s": 2.2096030597699624e-07,
         "load_f": 1.633613666330077e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 2.1959563837936597e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 7e-08,
+        "settling_tail_s": 2.2495755083728373e-08,
+        "output_slew_10_90_s": 5.110092244782587e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -940,6 +940,38 @@
         "input_net": "_n18",
         "output_net": "cout",
         "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1
+        },
+        "to_inputs": {
+          "A": 1
+        },
+        "arc_id": "INV:01",
+        "delay_s": -1.459801914351328e-09,
+        "arrival_s": 2.4666627204001447e-07,
+        "load_f": 3.67700862e-14,
+        "input_transition_s": 6.164600870902687e-08,
+        "settling_tail_s": 2.7165767977369565e-08,
+        "output_slew_10_90_s": 4.4000000000000004e-08,
+        "metric": "slew_window",
+        "time_order_adjustment_s": 0.0
+      }
+    ],
+    "and_out": [
+      {
+        "instance": "mul_t1",
+        "cell": "NAND",
+        "input_pin": "B",
+        "input_net": "b",
+        "output_net": "_n0",
+        "input_transition": [
           1,
           -1
         ],
@@ -948,53 +980,21 @@
           1
         ],
         "from_inputs": {
-          "A": 1
-        },
-        "to_inputs": {
-          "A": -1
-        },
-        "arc_id": "INV:04",
-        "delay_s": 6.056480714432029e-09,
-        "arrival_s": 7.736886088178125e-07,
-        "load_f": 3.67700862e-14,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 5.372118071810143e-08,
-        "output_slew_10_90_s": 1.0369085008270079e-07,
-        "metric": "midpoint_envelope",
-        "time_order_adjustment_s": 0.0
-      }
-    ],
-    "and_out": [
-      {
-        "instance": "mul_t1",
-        "cell": "NAND",
-        "input_pin": "A",
-        "input_net": "a",
-        "output_net": "_n0",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
-          1
-        ],
-        "from_inputs": {
-          "A": -1,
+          "A": 1,
           "B": 1
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NAND:21",
-        "delay_s": 1.1113979077469552e-08,
-        "arrival_s": 1.1613979077469551e-08,
+        "arc_id": "NAND:70",
+        "delay_s": 4.642652394992423e-09,
+        "arrival_s": 5.142652394992423e-09,
         "load_f": 3.8475553273377685e-13,
         "input_transition_s": 1e-09,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "settling_tail_s": 1.5094030647275466e-08,
+        "output_slew_10_90_s": 1.5130217177906244e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -1004,27 +1004,27 @@
         "input_net": "_n0",
         "output_net": "and_out",
         "input_transition": [
-          1,
-          -1
-        ],
-        "output_transition": [
           -1,
           1
         ],
+        "output_transition": [
+          1,
+          -1
+        ],
         "from_inputs": {
-          "A": 1
-        },
-        "to_inputs": {
           "A": -1
         },
-        "arc_id": "INV:04",
-        "delay_s": 6.479286514542722e-09,
-        "arrival_s": 7.201284464151143e-08,
+        "to_inputs": {
+          "A": 1
+        },
+        "arc_id": "INV:01",
+        "delay_s": 8.933076385937128e-10,
+        "arrival_s": 1.6211582996949718e-08,
         "load_f": 1.0384858539999999e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 5.3919579049499153e-08,
-        "output_slew_10_90_s": 1.0361849028342499e-07,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 1.5824290097219073e-08,
+        "settling_tail_s": 1.0175622963363582e-08,
+        "output_slew_10_90_s": 1.3121484990636823e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       }
     ],
@@ -1036,29 +1036,29 @@
         "input_net": "a",
         "output_net": "_n1",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          -1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 0,
+          "B": -1
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NOR:21",
-        "delay_s": 1.6428353134118866e-08,
-        "arrival_s": 1.6928353134118867e-08,
+        "arc_id": "NOR:29",
+        "delay_s": 1.1096160539699674e-08,
+        "arrival_s": 1.1596160539699673e-08,
         "load_f": 1.924013516330077e-13,
         "input_transition_s": 1e-09,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": null,
-        "metric": "recovery_guard",
+        "settling_tail_s": 1.2449944011410248e-08,
+        "output_slew_10_90_s": 2.0246503907164e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -1069,26 +1069,26 @@
         "output_net": "_n2",
         "input_transition": [
           0,
-          1
+          -1
         ],
         "output_transition": [
           0,
-          -1
+          1
         ],
         "from_inputs": {
           "A": 0
         },
         "to_inputs": {
-          "A": 1
+          "A": -1
         },
-        "arc_id": "INV:03",
-        "delay_s": 1.438601683593709e-08,
-        "arrival_s": 3.131436997005596e-08,
+        "arc_id": "INV:02",
+        "delay_s": 5.939861788186236e-09,
+        "arrival_s": 1.753602232788591e-08,
         "load_f": 3.998587260697433e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 5.1158281497041e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 2.5328901456074186e-08,
+        "settling_tail_s": 9.696769221146864e-09,
+        "output_slew_10_90_s": 1.573523212527341e-08,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -1112,13 +1112,13 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 1.1453487948080674e-08,
-        "arrival_s": 4.276785791813663e-08,
+        "delay_s": 3.7825431410679414e-09,
+        "arrival_s": 2.1318565468953853e-08,
         "load_f": 1.383729698330077e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 0.0,
-        "output_slew_10_90_s": 4.9234167578067475e-08,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 1.966904015659176e-08,
+        "settling_tail_s": 5.030001703627123e-09,
+        "output_slew_10_90_s": 9.23322801088395e-09,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -1128,27 +1128,27 @@
         "input_net": "_n21",
         "output_net": "or_out",
         "input_transition": [
-          1,
+          0,
           -1
         ],
         "output_transition": [
-          -1,
+          0,
           1
         ],
         "from_inputs": {
-          "A": 1
+          "A": 0
         },
         "to_inputs": {
           "A": -1
         },
-        "arc_id": "INV:04",
-        "delay_s": 6.659941232941285e-09,
-        "arrival_s": 1.034883135210583e-07,
+        "arc_id": "INV:02",
+        "delay_s": 2.735881173969738e-09,
+        "arrival_s": 2.7965796209404327e-08,
         "load_f": 1.329529266e-13,
-        "input_transition_s": 1.5e-07,
-        "settling_tail_s": 5.4060514369980386e-08,
-        "output_slew_10_90_s": 1.0369227712131996e-07,
-        "metric": "midpoint_envelope",
+        "input_transition_s": 1.1541535013604938e-08,
+        "settling_tail_s": 3.911349566480734e-09,
+        "output_slew_10_90_s": 6.644458936200893e-09,
+        "metric": "slew_window",
         "time_order_adjustment_s": 0.0
       }
     ]
@@ -1157,36 +1157,92 @@
     "sum": {
       "before": null,
       "after": null,
-      "reason": "Independent transient local classes; no joint endpoint witness is asserted."
+      "reason": "No joint temporal waveform witness is asserted.",
+      "compatible_primary_endpoints": {
+        "before": {
+          "a": 0,
+          "b": -1,
+          "cin": -1,
+          "x": -1
+        },
+        "after": {
+          "a": 1,
+          "b": 1,
+          "cin": 1,
+          "x": 0
+        }
+      }
     },
     "cout": {
       "before": null,
       "after": null,
-      "reason": "Independent transient local classes; no joint endpoint witness is asserted."
+      "reason": "No joint temporal waveform witness is asserted.",
+      "compatible_primary_endpoints": {
+        "before": {
+          "a": 0,
+          "b": -1,
+          "cin": -1,
+          "x": -1
+        },
+        "after": {
+          "a": 1,
+          "b": 1,
+          "cin": 1,
+          "x": 0
+        }
+      }
     },
     "and_out": {
       "before": null,
       "after": null,
-      "reason": "Independent transient local classes; no joint endpoint witness is asserted."
+      "reason": "No joint temporal waveform witness is asserted.",
+      "compatible_primary_endpoints": {
+        "before": {
+          "a": -1,
+          "b": 1,
+          "cin": 0,
+          "x": 0
+        },
+        "after": {
+          "a": 1,
+          "b": -1,
+          "cin": 0,
+          "x": 0
+        }
+      }
     },
     "or_out": {
       "before": null,
       "after": null,
-      "reason": "Independent transient local classes; no joint endpoint witness is asserted."
+      "reason": "No joint temporal waveform witness is asserted.",
+      "compatible_primary_endpoints": {
+        "before": {
+          "a": 0,
+          "b": -1,
+          "cin": 0,
+          "x": 0
+        },
+        "after": {
+          "a": 1,
+          "b": 0,
+          "cin": 0,
+          "x": 0
+        }
+      }
     }
   },
   "loads": {
-    "a": {
-      "fanout_f": 4.835121595128594e-13,
-      "wire_f": 5.0422304599999997e-14,
+    "_n5": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 8.9634219e-14,
       "external_f": 0.0,
-      "total_f": 5.339344641128594e-13
+      "total_f": 4.603654563919998e-13
     },
-    "_n18": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 4.89352864e-14,
+    "_n2": {
+      "fanout_f": 3.203815120697433e-13,
+      "wire_f": 7.9477214e-14,
       "external_f": 0.0,
-      "total_f": 1.633613666330077e-13
+      "total_f": 3.998587260697433e-13
     },
     "x": {
       "fanout_f": 4.851573176250075e-13,
@@ -1194,119 +1250,11 @@
       "external_f": 0.0,
       "total_f": 6.414413528250075e-13
     },
-    "_n9": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 5.6102924600000006e-14,
-      "external_f": 0.0,
-      "total_f": 4.268341619919998e-13
-    },
-    "_n6": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 6.50142214e-14,
-      "external_f": 0.0,
-      "total_f": 4.590747780624661e-13
-    },
-    "_n14": {
-      "fanout_f": 1.1821816699873985e-12,
-      "wire_f": 2.1655113580000003e-13,
-      "external_f": 0.0,
-      "total_f": 1.3987328057873985e-12
-    },
-    "b": {
-      "fanout_f": 4.839436672518686e-13,
-      "wire_f": 5.53403514e-14,
-      "external_f": 0.0,
-      "total_f": 5.392840186518686e-13
-    },
-    "_n1": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 7.79752714e-14,
-      "external_f": 0.0,
-      "total_f": 1.924013516330077e-13
-    },
-    "_n13": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 6.3885259e-14,
-      "external_f": 0.0,
-      "total_f": 4.579458156624661e-13
-    },
     "_n3": {
       "fanout_f": 7.647917940544659e-13,
       "wire_f": 1.495323618e-13,
       "external_f": 0.0,
       "total_f": 9.14324155854466e-13
-    },
-    "_n7": {
-      "fanout_f": 1.158852350716932e-12,
-      "wire_f": 2.26592905e-13,
-      "external_f": 0.0,
-      "total_f": 1.385445255716932e-12
-    },
-    "_n8": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 5.53297368e-14,
-      "external_f": 0.0,
-      "total_f": 1.697558170330077e-13
-    },
-    "_n10": {
-      "fanout_f": 4.851573176250075e-13,
-      "wire_f": 1.258052402e-13,
-      "external_f": 0.0,
-      "total_f": 6.109625578250075e-13
-    },
-    "and_out": {
-      "fanout_f": 0.0,
-      "wire_f": 9.38485854e-14,
-      "external_f": 1e-14,
-      "total_f": 1.0384858539999999e-13
-    },
-    "_n5": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 8.9634219e-14,
-      "external_f": 0.0,
-      "total_f": 4.603654563919998e-13
-    },
-    "_n12": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 4.58396626e-14,
-      "external_f": 0.0,
-      "total_f": 4.165708999919998e-13
-    },
-    "or_out": {
-      "fanout_f": 0.0,
-      "wire_f": 1.229529266e-13,
-      "external_f": 1e-14,
-      "total_f": 1.329529266e-13
-    },
-    "_n16": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 7.15501526e-14,
-      "external_f": 0.0,
-      "total_f": 4.422813899919998e-13
-    },
-    "_n11": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.580104856e-13,
-      "external_f": 0.0,
-      "total_f": 9.22802279654466e-13
-    },
-    "cin": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.383598342e-13,
-      "external_f": 0.0,
-      "total_f": 9.03151628254466e-13
-    },
-    "_n0": {
-      "fanout_f": 3.205575217337768e-13,
-      "wire_f": 6.4198011e-14,
-      "external_f": 0.0,
-      "total_f": 3.8475553273377685e-13
-    },
-    "cout": {
-      "fanout_f": 0.0,
-      "wire_f": 2.67700862e-14,
-      "external_f": 1e-14,
-      "total_f": 3.67700862e-14
     },
     "_n15": {
       "fanout_f": 1.144260802330077e-13,
@@ -1314,17 +1262,35 @@
       "external_f": 0.0,
       "total_f": 1.777637946330077e-13
     },
-    "sum": {
-      "fanout_f": 0.0,
-      "wire_f": 1.968339942e-13,
-      "external_f": 1e-14,
-      "total_f": 2.068339942e-13
-    },
-    "_n4": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.2123095119999998e-13,
+    "_n10": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 1.258052402e-13,
       "external_f": 0.0,
-      "total_f": 8.860227452544659e-13
+      "total_f": 6.109625578250075e-13
+    },
+    "_n1": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 7.79752714e-14,
+      "external_f": 0.0,
+      "total_f": 1.924013516330077e-13
+    },
+    "_n12": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 4.58396626e-14,
+      "external_f": 0.0,
+      "total_f": 4.165708999919998e-13
+    },
+    "cin": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.383598342e-13,
+      "external_f": 0.0,
+      "total_f": 9.03151628254466e-13
+    },
+    "_n6": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 6.50142214e-14,
+      "external_f": 0.0,
+      "total_f": 4.590747780624661e-13
     },
     "_n21": {
       "fanout_f": 1.144260802330077e-13,
@@ -1332,24 +1298,110 @@
       "external_f": 0.0,
       "total_f": 1.383729698330077e-13
     },
-    "_n2": {
-      "fanout_f": 3.203815120697433e-13,
-      "wire_f": 7.9477214e-14,
+    "_n8": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 5.53297368e-14,
       "external_f": 0.0,
-      "total_f": 3.998587260697433e-13
+      "total_f": 1.697558170330077e-13
+    },
+    "_n0": {
+      "fanout_f": 3.205575217337768e-13,
+      "wire_f": 6.4198011e-14,
+      "external_f": 0.0,
+      "total_f": 3.8475553273377685e-13
+    },
+    "sum": {
+      "fanout_f": 0.0,
+      "wire_f": 1.968339942e-13,
+      "external_f": 1e-14,
+      "total_f": 2.068339942e-13
+    },
+    "_n18": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 4.89352864e-14,
+      "external_f": 0.0,
+      "total_f": 1.633613666330077e-13
+    },
+    "_n4": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.2123095119999998e-13,
+      "external_f": 0.0,
+      "total_f": 8.860227452544659e-13
+    },
+    "_n13": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 6.3885259e-14,
+      "external_f": 0.0,
+      "total_f": 4.579458156624661e-13
+    },
+    "b": {
+      "fanout_f": 4.839436672518686e-13,
+      "wire_f": 5.53403514e-14,
+      "external_f": 0.0,
+      "total_f": 5.392840186518686e-13
+    },
+    "_n7": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 2.26592905e-13,
+      "external_f": 0.0,
+      "total_f": 1.385445255716932e-12
+    },
+    "cout": {
+      "fanout_f": 0.0,
+      "wire_f": 2.67700862e-14,
+      "external_f": 1e-14,
+      "total_f": 3.67700862e-14
+    },
+    "or_out": {
+      "fanout_f": 0.0,
+      "wire_f": 1.229529266e-13,
+      "external_f": 1e-14,
+      "total_f": 1.329529266e-13
+    },
+    "a": {
+      "fanout_f": 4.835121595128594e-13,
+      "wire_f": 5.0422304599999997e-14,
+      "external_f": 0.0,
+      "total_f": 5.339344641128594e-13
+    },
+    "_n14": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 2.1655113580000003e-13,
+      "external_f": 0.0,
+      "total_f": 1.3987328057873985e-12
+    },
+    "_n9": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 5.6102924600000006e-14,
+      "external_f": 0.0,
+      "total_f": 4.268341619919998e-13
+    },
+    "_n16": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 7.15501526e-14,
+      "external_f": 0.0,
+      "total_f": 4.422813899919998e-13
+    },
+    "and_out": {
+      "fanout_f": 0.0,
+      "wire_f": 9.38485854e-14,
+      "external_f": 1e-14,
+      "total_f": 1.0384858539999999e-13
+    },
+    "_n11": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.580104856e-13,
+      "external_f": 0.0,
+      "total_f": 9.22802279654466e-13
     }
   },
   "assumptions": [
-    "Conservative envelope of measured local midpoint/recovery terms; endpoint tail added once, using the same local class and ramp.",
-    "All transient local classes are admitted independently, including pulses on endpoint-stable nets; maximizing path classes need not be jointly realizable.",
-    "Known primary ramp; every internal measured ramp knot is considered (piecewise-linear maxima).",
-    "Unchanged-output recovery can launch downstream activity; it is a conservative guard clock, not a measured full-level crossing.",
-    "Maximum biased AC device input C plus supplied metal/output C; no load correction or circuit-fitted delay margin.",
-    "Finite nominal table-domain envelope, not a certified bound for arbitrary slew, analog pulse shape, skew, PVT or signal/poly RC."
+    "Transition-specific narrow slew intervals follow measured output slew; d50 and endpoint settling extrema use the same segment.",
+    "Backward search intersects primary-input compatibility along the entire path; local time alignment and partial pulse amplitude remain relaxed.",
+    "Side-input state policy: reachable; local stable recovery is not propagated as a fabricated full-level edge.",
+    "Scalar-table upper estimate; nominal finite-case coverage is validated separately. Not an arbitrary analog-waveform or PVT bound."
   ],
-  "warnings": [
-    "17 internal pins have an all-class slew upper limit beyond the measured ramp domain; this domain is not closed. Empirical coverage is qualified separately."
-  ],
+  "warnings": [],
   "provenance": {
     "cell_generation": {
       "height_um": 132.0,
@@ -1365,204 +1417,28 @@
       "/home/ishi-kai/code-a-chip/cells/out/TIEN/TIEN.timing.json": "6146e0d3e89b1e3f25576fda4e3a4361e47c0a9f7efebe1deab12f061295f744",
       "/home/ishi-kai/code-a-chip/cells/out/TIEP/TIEP.timing.json": "f4b76fb5211680d0d612db599c4f6b95d570238323e697d29d55b3db5c488e2c",
       "/home/ishi-kai/code-a-chip/cells/out/TIEZ/TIEZ.timing.json": "7dff780b967943349e7aee29b4cb2c3f631215a15ae84fe0ec1520eed4aa3f7d",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/BUF.propagation.json": "421e29f00fb1ec8c45bee596bd5a9d2364e1a8a2072c2701920455db45f8fe3a",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/INV.propagation.json": "f16a43dd04aaaf87718697c203c0314c2bdba1d19a011efb8c2b569fc5f0b06b",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NAND.propagation.json": "80eba653c5b6a248df0ba33675bea92b4bc1c6bc787574fbccbce08a5cb1c387",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NANY.propagation.json": "8eb7c1f2f66b6cf4fb923a244b1aaadf08b91a400374bb62af32861ea3a42991",
-      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NOR.propagation.json": "69028cae917f7c225dc75a607883d8a20d1849764b2285332ca77ac5c633f10c"
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/BUF.propagation.json": "128cd1b53ad803de668be59ed2a8bdfa89c81a80a479b49270892ef27474a771",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/INV.propagation.json": "fe82f240b1a8163f8990c3f40f4b981f5ad3627db06ffd4275120fb1fae23155",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NAND.propagation.json": "c495ac7dae516ccd85063895e589669a3c135168ef15df4bcfa84ced85242042",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NANY.propagation.json": "0b325c3991218f41b57db17db3996b44a4f03727b6feb55fa819cd08dc4c3c7f",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NOR.propagation.json": "6da051426251c72ca5c6bca3cdf5e987eff2664a16657d7bd5c05f296e9b082b"
     },
     "load_policy": "linear",
     "input_transition_s": 1e-09,
-    "metric": "local_class_ramp_envelope",
-    "bound_scope": "Upper envelope of characterized scalar terms; empirical simulation coverage is separate.",
-    "fixed_ramp": false,
-    "recovery_guard": true
+    "metric": "conditioned_slew_windows",
+    "side_states": "reachable",
+    "slew_bin_s": 5e-09
   },
   "statistics": {
-    "runtime_s": 0.030501619999995455,
-    "all_endpoint_pairs": true,
-    "local_candidates": 7476,
-    "joint_endpoint_witness": false,
-    "slew_domain_closed": false,
-    "slew_domain_violations": [
-      {
-        "instance": "fa.ha1.g_u",
-        "pin": "B",
-        "input_net": "_n4",
-        "full_ramp_upper_s": 1.5691170278571655e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha1.g_c",
-        "pin": "B",
-        "input_net": "_n6",
-        "full_ramp_upper_s": 1.523305608214976e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha1.g_d",
-        "pin": "A",
-        "input_net": "_n4",
-        "full_ramp_upper_s": 1.5691170278571655e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha1.g_d",
-        "pin": "B",
-        "input_net": "_n7",
-        "full_ramp_upper_s": 1.657857475071841e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha1.g_nd",
-        "pin": "A",
-        "input_net": "_n8",
-        "full_ramp_upper_s": 1.5022994544034064e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha1.g_s",
-        "pin": "B",
-        "input_net": "_n7",
-        "full_ramp_upper_s": 1.657857475071841e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha2.g_t",
-        "pin": "A",
-        "input_net": "_n10",
-        "full_ramp_upper_s": 1.5309256931889309e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha2.g_na",
-        "pin": "A",
-        "input_net": "_n10",
-        "full_ramp_upper_s": 1.5309256931889309e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha2.g_u",
-        "pin": "B",
-        "input_net": "_n11",
-        "full_ramp_upper_s": 1.5448827836593684e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha2.g_c",
-        "pin": "B",
-        "input_net": "_n13",
-        "full_ramp_upper_s": 1.5232236393120825e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha2.g_d",
-        "pin": "A",
-        "input_net": "_n11",
-        "full_ramp_upper_s": 1.5448827836593684e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha2.g_d",
-        "pin": "B",
-        "input_net": "_n14",
-        "full_ramp_upper_s": 1.6602885529904804e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.g_nc",
-        "pin": "A",
-        "input_net": "_n7",
-        "full_ramp_upper_s": 1.657857475071841e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.g_nc",
-        "pin": "B",
-        "input_net": "_n14",
-        "full_ramp_upper_s": 1.6602885529904804e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha2.g_nd",
-        "pin": "A",
-        "input_net": "_n15",
-        "full_ramp_upper_s": 1.5028808777867432e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.g_cout",
-        "pin": "A",
-        "input_net": "_n18",
-        "full_ramp_upper_s": 1.5018351820025764e-07,
-        "table_max_ramp_s": 1.5e-07
-      },
-      {
-        "instance": "fa.ha2.g_s",
-        "pin": "B",
-        "input_net": "_n14",
-        "full_ramp_upper_s": 1.6602885529904804e-07,
-        "table_max_ramp_s": 1.5e-07
-      }
-    ],
+    "runtime_s": 0.8908969769981923,
+    "graph_nodes": 47595,
+    "graph_choices": 12204,
+    "search_expansions": 5174,
+    "slew_domain_closed": true,
+    "slew_domain_violations": [],
     "load_in_measured_domain": true,
-    "net_activity_clock_s": {
-      "x": 5e-10,
-      "a": 5e-10,
-      "cin": 5e-10,
-      "b": 5e-10,
-      "_n0": 1.1613979077469551e-08,
-      "_n1": 1.6928353134118867e-08,
-      "_n5": 5.6031505554701055e-09,
-      "and_out": 2.268028052582519e-08,
-      "_n2": 3.131436997005596e-08,
-      "_n3": 1.1339845544416856e-07,
-      "_n21": 4.276785791813663e-08,
-      "_n4": 1.7860724596784229e-07,
-      "or_out": 5.41605607833777e-08,
-      "_n6": 2.402557215715171e-07,
-      "_n7": 3.1577270720567596e-07,
-      "_n8": 3.7481318892937215e-07,
-      "_n9": 3.895017317852463e-07,
-      "_n10": 4.5150443536981954e-07,
-      "_n11": 5.175016980518619e-07,
-      "_n12": 4.6607787707168903e-07,
-      "_n13": 5.79139996904523e-07,
-      "_n14": 6.549281068457268e-07,
-      "_n15": 7.140407744935584e-07,
-      "_n18": 7.139109473852791e-07,
-      "_n16": 7.28902556010686e-07,
-      "cout": 7.242240479311447e-07,
-      "sum": 7.873391364331014e-07
-    },
-    "net_slew_upper_10_90_s": {
-      "x": 8.000000000000001e-10,
-      "a": 8.000000000000001e-10,
-      "cin": 8.000000000000001e-10,
-      "b": 8.000000000000001e-10,
-      "_n0": 1.5130217177906244e-08,
-      "_n1": 2.13071042686982e-08,
-      "_n5": 1.3518510358455196e-08,
-      "and_out": 1.0561536429529861e-07,
-      "_n2": 1.0682489281738715e-07,
-      "_n3": 1.195945981892112e-07,
-      "_n21": 1.0575643455588088e-07,
-      "_n4": 1.2552936222857325e-07,
-      "or_out": 1.0573428769001188e-07,
-      "_n6": 1.218644486571981e-07,
-      "_n7": 1.326285980057473e-07,
-      "_n8": 1.2018395635227252e-07,
-      "_n9": 1.0693511728155558e-07,
-      "_n10": 1.2247405545511448e-07,
-      "_n11": 1.2359062269274949e-07,
-      "_n12": 1.0689318051516445e-07,
-      "_n13": 1.218578911449666e-07,
-      "_n14": 1.3282308423923843e-07,
-      "_n15": 1.2023047022293946e-07,
-      "_n18": 1.201468145602061e-07,
-      "_n16": 1.0699823627744853e-07,
-      "cout": 1.0540421534498693e-07,
-      "sum": 1.2039932278103367e-07
-    }
+    "all_endpoint_pairs": true,
+    "joint_temporal_witness": false,
+    "unmodeled_analog_recovery_propagation": true
   }
 }

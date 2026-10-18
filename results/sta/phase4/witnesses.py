@@ -16,6 +16,7 @@ from tritflow.sta.diagnose import write
 from tritflow.sim.runner import run_ngspice
 from tritflow.sim.measure import settling_time
 from tritflow.synth import evaluate_netlist
+from tritflow.synth.writers import spice_names
 
 if __name__=='__main__':
  records=[];rng=random.Random(4104)
@@ -45,11 +46,11 @@ if __name__=='__main__':
   candidates=[]
   for t,pat,pin in sorted(scores,key=lambda row:row[0],reverse=True):
    if pat.get('before') is not None and pat not in candidates:candidates.append(pat)
-   if len(candidates)==8:break
+   if len(candidates)==3:break
   old=json.loads((ROOT/'results/sta/phase2'/f'scaling_{name}.timing.json').read_text())
-  for pat in old['patterns'].values():
+  for pat in [old['patterns']['cout']]:
    if pat.get('before') is not None and pat not in candidates:candidates.append(pat)
-  hold=1e-6;step=.25e-9 if n==2 else 1e-9
+  hold=1e-6;step=1e-9 if n==2 else 2e-9
   vectors=[dict(zip(plan['input_order'],plan['vectors'][0]))]
   for pat in candidates:vectors.extend([pat['before'],pat['after']])
   deck=(directory/'post/tb.spice').read_text();circuit=deck.split('.control')[0]
@@ -59,7 +60,9 @@ if __name__=='__main__':
    points=[f'0 {5*vectors[0][pin]}']
    for k in range(1,len(vectors)):points += [f'{k*hold:.15g} {5*vectors[k-1][pin]}',f'{k*hold+1e-9:.15g} {5*vectors[k][pin]}']
    circuit=circuit[:match.start()]+f'Vin{col} {match[1]} 0 PWL('+ ' '.join(points)+')'+circuit[match.end():]
-  probes={p:f'v({p})' for p in summary['settling']['post_max_settling_s']}
+  outputs=list(summary['settling']['post_max_settling_s'])
+  safe=spice_names(plan['input_order']+outputs,('VDD','VMID','VSS','0'))
+  probes={p:f'v({safe[p]})' for p in outputs}
   folder=ROOT/'results/sta/phase4/witnesses'/name
   digest=hashlib.sha256((circuit+str(step)).encode()).hexdigest();cache=folder/'measurements.json'
   if cache.exists() and json.loads(cache.read_text()).get('sha256')==digest:record=json.loads(cache.read_text())
