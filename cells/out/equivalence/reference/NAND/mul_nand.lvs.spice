@@ -1,10 +1,10 @@
 ** sch_path: /home/ishi-kai/balanced-ternary-logic/mul_nand.sch
-.subckt mul_nand a b vout V+ V-
+.subckt mul_nand A B Y VDD VSS
 *.PININFO V+:B a:I b:I vout:O V-:B
-MXM1 net1 a V+ V+ PMOS w=19u l=1u
-MXM3 net1 b V+ V+ PMOS w=19u l=1u
-XR1 net1 vout V+ F_RR w=2.8e-06 l=30e-06
-XR2 vout net2 V+ F_RR w=2.8e-06 l=30e-06
-MXM2 net2 a net3 V- NMOS w=13u l=1u
-MXM4 net3 b V- V- NMOS w=13u l=1u
+MXM1 net1 A VDD VDD PMOS w=19u l=1u
+MXM3 net1 B VDD VDD PMOS w=19u l=1u
+XR1 net1 Y VDD F_RR w=2.8e-06 l=30e-06
+XR2 Y net2 VDD F_RR w=2.8e-06 l=30e-06
+MXM2 net2 A net3 VSS NMOS w=13u l=1u
+MXM4 net3 B VSS VSS NMOS w=13u l=1u
 .ends

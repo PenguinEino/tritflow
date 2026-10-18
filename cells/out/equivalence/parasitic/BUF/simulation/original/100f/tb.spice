@@ -7,10 +7,10 @@ TritFlow ternary testbench
 .parameters magRR       = 1
 .parameters magRS       = 1 
 .parameters magCSIO     = 1 
-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib"
 .subckt BUF A Y VDD VMID VSS
 Xstage0_M_ex_1 stage0_n_ex_4 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
 Xstage0_M_ex_2 stage0_n_ex_5 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u

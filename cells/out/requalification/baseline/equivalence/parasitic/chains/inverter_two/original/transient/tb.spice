@@ -1,0 +1,165 @@
+TritFlow ternary testbench
+*
+.parameters vthMP	= 0
+.parameters vthMN 	= 0
+.parameters vthMPE      = 0
+.parameters vthMNE      = 0
+.parameters magRR       = 1
+.parameters magRS       = 1 
+.parameters magCSIO     = 1 
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
+* Public ports renamed from independent taped-out reference
+.subckt INV A Y VDD VMID VSS
+* device instance $1 r0 *1 13.2,44 PMOS
+XM_ex_1 n_ex_4 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+* device instance $2 r0 *1 13.2,14 NMOS
+XM_ex_2 n_ex_5 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+* device instance $3 r0 *1 64,32 F_RR
+XR_ex_3 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $4 r0 *1 64,45 F_RR
+XR_ex_4 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 2.57975434e-14
+Ctfwire1 A 0 1.985781e-15
+Ctfwire2 n_ex_4 0 6.368421e-15
+Ctfwire3 n_ex_5 0 7.536423e-15
+Ctfwire4 Y 0 4.5427916e-15
+Ctfwire5 VSS 0 1.84650864e-14
+.ends INV
+* Public ports renamed from independent taped-out reference
+.subckt NAND A B Y VDD VMID VSS
+* device instance $1 r0 *1 20,96 PMOS
+XM_ex_1 n_ex_3 A VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $2 r0 *1 35,96 PMOS
+XM_ex_2 n_ex_3 B VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $3 r0 *1 20,16 NMOS
+XM_ex_3 n_ex_16 A n_ex_5 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $4 r0 *1 35,16 NMOS
+XM_ex_4 VSS B n_ex_16 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $5 r0 *1 90,42 F_RR
+XR_ex_5 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 90,78 F_RR
+XR_ex_6 n_ex_3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 5.3510866e-14
+Ctfwire1 n_ex_3 0 2.3431911e-14
+Ctfwire2 n_ex_5 0 1.32774498e-14
+Ctfwire3 a 0 3.651473e-15
+Ctfwire4 b 0 5.132243e-15
+Ctfwire5 Y 0 8.5148656e-15
+Ctfwire6 n_ex_16 0 4.4645408e-15
+Ctfwire7 VSS 0 2.6662408e-14
+.ends NAND
+* Public ports renamed from independent taped-out reference
+.subckt NOR A B Y VDD VMID VSS
+* device instance $1 r0 *1 20,96 PMOS
+XM_ex_1 n_ex_16 A VDD VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $2 r0 *1 35,96 PMOS
+XM_ex_2 n_ex_3 B n_ex_16 VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $3 r0 *1 20,16 NMOS
+XM_ex_3 n_ex_4 A VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $4 r0 *1 35,16 NMOS
+XM_ex_4 n_ex_4 B VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $5 r0 *1 90,42 F_RR
+XR_ex_5 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 90,78 F_RR
+XR_ex_6 n_ex_3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 4.97702922e-14
+Ctfwire1 n_ex_3 0 1.71889998e-14
+Ctfwire2 n_ex_4 0 1.4677706e-14
+Ctfwire3 a 0 3.651473e-15
+Ctfwire4 b 0 5.132243e-15
+Ctfwire5 Y 0 8.5148656e-15
+Ctfwire6 n_ex_16 0 1.06938848e-14
+Ctfwire7 VSS 0 2.84176108e-14
+.ends NOR
+* Public ports renamed from independent taped-out reference
+.subckt NANY A B Y VDD VMID VSS
+* device instance $1 r0 *1 50,88 PMOS
+XM_ex_1 n_ex_7 A Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $2 r0 *1 65,88 PMOS
+XM_ex_2 n_ex_10 B Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $3 r0 *1 20,88 PMOS
+XM_ex_3 n_ex_32 A VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $4 r0 *1 35,88 PMOS
+XM_ex_4 n_ex_3 B n_ex_32 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $5 r0 *1 50,15 NMOS
+XM_ex_5 n_ex_7 B VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $6 r0 *1 65,15 NMOS
+XM_ex_6 n_ex_10 A VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $7 r0 *1 20,15 NMOS
+XM_ex_7 n_ex_33 A n_ex_4 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $8 r0 *1 35,15 NMOS
+XM_ex_8 VSS B n_ex_33 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $9 r0 *1 112.5,42 F_RR
+XR_ex_9 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $10 r0 *1 112.5,72 F_RR
+XR_ex_10 n_ex_3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 5.00961732e-14
+Ctfwire1 n_ex_3 0 1.73473818e-14
+Ctfwire2 n_ex_4 0 1.52914248e-14
+Ctfwire3 Y 0 2.8933305e-14
+Ctfwire4 VMID 0 1.8007801e-14
+Ctfwire5 n_ex_7 0 1.3524332e-14
+Ctfwire6 n_ex_10 0 1.3524332e-14
+Ctfwire7 a 0 1.91278484e-14
+Ctfwire8 b 0 1.58847588e-14
+Ctfwire9 n_ex_32 0 9.6556608e-15
+Ctfwire10 n_ex_33 0 3.9454288e-15
+Ctfwire11 VSS 0 3.02584622e-14
+.ends NANY
+.subckt BUF A Y VDD VMID VSS
+Xstage0_M_ex_1 stage0_n_ex_4 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+Xstage0_M_ex_2 stage0_n_ex_5 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+Xstage0_R_ex_3 stage0_n_ex_5 mid VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+Xstage0_R_ex_4 stage0_n_ex_4 mid VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+Xstage1_M_ex_1 stage1_n_ex_4 mid VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+Xstage1_M_ex_2 stage1_n_ex_5 mid VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+Xstage1_R_ex_3 stage1_n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+Xstage1_R_ex_4 stage1_n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 5.15950868e-14
+Ctfwire1 A 0 1.985781e-15
+Ctfwire2 stage0_n_ex_4 0 6.368421e-15
+Ctfwire3 stage0_n_ex_5 0 7.536423e-15
+Ctfwire4 mid 0 6.5285726e-15
+Ctfwire5 VSS 0 3.69301728e-14
+Ctfwire6 stage1_n_ex_4 0 6.368421e-15
+Ctfwire7 stage1_n_ex_5 0 7.536423e-15
+Ctfwire8 Y 0 4.5427916e-15
+.ends BUF
+
+.subckt CASCADE A i1 i2 VDD VMID VSS
+Xstage_i1 A i1 VDD VMID VSS INV
+Xstage_i2 i1 i2 VDD VMID VSS INV
+.ends CASCADE
+
+.temp 27
+.options rshunt=1e12
+VDD VDD 0 5
+VMID VMID 0 0
+VSS VSS 0 -5
+Xdut A i1 i2 VDD VMID VSS CASCADE
+Vin0 A 0 PWL(0 -5.0 2e-08 -5.0 2.1e-08 0.0 4e-08 0.0 4.1e-08 5.0 6e-08 5.0 6.1e-08 0.0 8e-08 0.0 8.1e-08 -5.0 1e-07 -5.0 1.01e-07 5.0 1.2e-07 5.0 1.21e-07 -5.0)
+Cload1 i2 0 1e-14
+.nodeset v(i1)=5
+.nodeset v(i2)=-5
+.nodeset v(xdut.xstage_i1.n_ex_4)=5
+.nodeset v(xdut.xstage_i1.n_ex_5)=-5
+.nodeset v(xdut.xstage_i2.n_ex_4)=5
+.nodeset v(xdut.xstage_i2.n_ex_5)=-5
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+set numdgt=15
+tran 5e-11 1.4e-07 0 5e-11
+wrdata waveform.txt v(A) v(i1) v(i2) i(vdd) i(vmid) i(vss)
+quit
+.endc
+.end

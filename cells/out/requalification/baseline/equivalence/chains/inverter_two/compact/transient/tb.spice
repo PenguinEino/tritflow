@@ -1,0 +1,111 @@
+TritFlow ternary testbench
+*
+.parameters vthMP	= 0
+.parameters vthMN 	= 0
+.parameters vthMPE      = 0
+.parameters vthMNE      = 0
+.parameters magRR       = 1
+.parameters magRS       = 1 
+.parameters magCSIO     = 1 
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt INV A Y VDD VMID VSS
+* device instance $1 r0 *1 19.2,56 PMOS
+XM_ex_1 n_ex_5 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+* device instance $2 r0 *1 19.2,26 NMOS
+XM_ex_2 n_ex_6 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+* device instance $3 r0 *1 70,44 F_RR
+XR_ex_3 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $4 r0 *1 70,57 F_RR
+XR_ex_4 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+.ends INV
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NAND A B Y VDD VMID VSS
+* device instance $1 r0 *1 26,100 PMOS
+XM_ex_1 n_ex_4 A VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $2 r0 *1 41,100 PMOS
+XM_ex_2 n_ex_4 B VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $3 r0 *1 26,28 NMOS
+XM_ex_3 n_ex_18 A n_ex_6 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $4 r0 *1 41,28 NMOS
+XM_ex_4 VSS B n_ex_18 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $5 r0 *1 96,54 F_RR
+XR_ex_5 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 96,84 F_RR
+XR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+.ends NAND
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NOR A B Y VDD VMID VSS
+* device instance $1 r0 *1 26,100 PMOS
+XM_ex_1 n_ex_18 A VDD VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $2 r0 *1 41,100 PMOS
+XM_ex_2 n_ex_4 B n_ex_18 VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $3 r0 *1 26,28 NMOS
+XM_ex_3 n_ex_5 A VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $4 r0 *1 41,28 NMOS
+XM_ex_4 n_ex_5 B VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $5 r0 *1 96,54 F_RR
+XR_ex_5 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 96,84 F_RR
+XR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+.ends NOR
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NANY A B Y VDD VMID VSS
+* device instance $1 r0 *1 56,100 PMOS
+XM_ex_1 n_ex_7 A Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $2 r0 *1 71,100 PMOS
+XM_ex_2 n_ex_9 B Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $3 r0 *1 41,100 PMOS
+XM_ex_3 n_ex_30 B n_ex_43 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $4 r0 *1 26,100 PMOS
+XM_ex_4 n_ex_43 A VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $5 r0 *1 56,27 NMOS
+XM_ex_5 n_ex_7 B VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $6 r0 *1 71,27 NMOS
+XM_ex_6 n_ex_9 A VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $7 r0 *1 26,27 NMOS
+XM_ex_7 n_ex_17 A n_ex_5 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $8 r0 *1 41,27 NMOS
+XM_ex_8 VSS B n_ex_17 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $9 r0 *1 118.5,54 F_RR
+XR_ex_9 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $10 r0 *1 118.5,84 F_RR
+XR_ex_10 n_ex_30 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+.ends NANY
+
+.subckt CASCADE A i1 i2 VDD VMID VSS
+Xstage_i1 A i1 VDD VMID VSS INV
+Xstage_i2 i1 i2 VDD VMID VSS INV
+.ends CASCADE
+
+.temp 27
+.options rshunt=1e12
+VDD VDD 0 5
+VMID VMID 0 0
+VSS VSS 0 -5
+Xdut A i1 i2 VDD VMID VSS CASCADE
+Vin0 A 0 PWL(0 -5.0 2e-08 -5.0 2.1e-08 0.0 4e-08 0.0 4.1e-08 5.0 6e-08 5.0 6.1e-08 0.0 8e-08 0.0 8.1e-08 -5.0 1e-07 -5.0 1.01e-07 5.0 1.2e-07 5.0 1.21e-07 -5.0)
+Cload1 i2 0 1e-14
+.nodeset v(i1)=5
+.nodeset v(i2)=-5
+.nodeset v(xdut.xstage_i1.n_ex_5)=5
+.nodeset v(xdut.xstage_i1.n_ex_6)=-5
+.nodeset v(xdut.xstage_i2.n_ex_5)=5
+.nodeset v(xdut.xstage_i2.n_ex_6)=-5
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+set numdgt=15
+tran 5e-11 1.4e-07 0 5e-11
+wrdata waveform.txt v(A) v(i1) v(i2) i(vdd) i(vmid) i(vss)
+quit
+.endc
+.end

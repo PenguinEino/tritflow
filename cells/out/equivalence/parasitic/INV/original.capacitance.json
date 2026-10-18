@@ -15,7 +15,7 @@
         }
       }
     },
-    "vin": {
+    "A": {
       "capacitance_f": 1.985781e-15,
       "layers": {
         "M1": {
@@ -60,7 +60,7 @@
         }
       }
     },
-    "vout": {
+    "Y": {
       "capacitance_f": 4.5427915999999995e-15,
       "layers": {
         "M1": {
@@ -101,7 +101,8 @@
       "fringe_f_per_um": 2e-17
     }
   },
-  "assumptions": "Estimated substrate C only: SiO2 epsilon_r=3.9, effective M1/M2 heights 1/2 um, fringe=0.02 fF/um perimeter. Assumed, not PDK calibrated. No coupling, shielding, via C or signal wire R; not signoff PEX.",
+  "assumptions": "Estimated substrate C only: SiO2 epsilon_r=3.9, effective M1/M2 heights 1/2 um, fringe=0.02 fF/um perimeter. Assumed, not PDK calibrated. Reviewed OS00 rev1.1 p5 (no parasitic extraction), OS04 p7 and model libraries; the ESD M1-M2 overlap rule is not a metal-to-substrate coefficient. No coupling, shielding, via C or signal wire R; not signoff PEX.",
+  "parameter_origin": "assumption",
   "scope": "Actual top-net metal including connected cell pin metal; excludes child-only local nets and unconnected purged metal",
   "excluded_unconnected_metal_um2": {
     "M1": 0.0,
@@ -208,12 +209,12 @@
   "reference_to_layout_net": {
     "NET1": "$4",
     "NET2": "$5",
+    "A": "A",
     "VDD": "VDD",
     "VSS": "VSS",
-    "VIN": "vin",
-    "VOUT": "vout"
+    "Y": "Y"
   },
   "gds_sha256": "66242f8be89020ec65350f12ffcc2a7301bc632955dfde345016224138e7e3a4",
-  "lvs_report_sha256": "ce876b9692bd50e579f055c0a881cbc6646087947a7c04c8624d45a05b21c597",
+  "lvs_report_sha256": "7c11d38779c4e776971cb6281ace70a258264acc5452b0208b5db64f4d68123a",
   "annotated_sha256": "c9843783c9ff76bbebbd63b325bebc3de03e2afc705b480a549ef06964cb6250"
 }

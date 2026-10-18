@@ -1,0 +1,32 @@
+* Created by KLayout
+*** My special header ***
+
+* cell nany
+* pin VDD
+* pin VMID
+* pin VSS
+* pin a
+* pin b
+* pin vout
+.SUBCKT nany VDD VMID VSS a b vout
+* device instance $1 r0 *1 50,88 PMOS
+XM$1 \$7 a vout VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $2 r0 *1 65,88 PMOS
+XM$2 \$10 b vout VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $3 r0 *1 20,88 PMOS
+XM$3 \$32 a VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $4 r0 *1 35,88 PMOS
+XM$4 \$3 b \$32 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $5 r0 *1 50,15 NMOS
+XM$5 \$7 b VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $6 r0 *1 65,15 NMOS
+XM$6 \$10 a VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $7 r0 *1 20,15 NMOS
+XM$7 \$33 a \$4 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $8 r0 *1 35,15 NMOS
+XM$8 VSS b \$33 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $9 r0 *1 112.5,42 F_RR
+XR$9 \$4 vout VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $10 r0 *1 112.5,72 F_RR
+XR$10 \$3 vout VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+.ENDS nany

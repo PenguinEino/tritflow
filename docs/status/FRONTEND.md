@@ -34,7 +34,9 @@ Updated: 2026-10-18. **Phase 8 review fixes implemented; pinned-publication inte
   and `row_abutment`, with labelled original/published devices and both devices
   of the Y→VMID clamp branch highlighted. Branch terminal topology and its
   measured DC state are asserted; highlights are not current-density data.
-  Raw reports/conditions/provenance use collapsed controls. Static submission
+  Raw reports/conditions/provenance use collapsed controls. Tables show four
+  significant digits, with full-precision acceptance/DC evidence available;
+  long publication-reader inputs request folding in supporting Jupyter hosts. Static submission
   captures retain the selected schematic; runtime can expand alternatives.
 - Runtime: prior capture metadata attributes 699 s of 789 s to the four-design
   loop; recorded PNR time was only a few seconds/design. New cache/stage and
@@ -86,7 +88,10 @@ Updated: 2026-10-18. **Phase 8 review fixes implemented; pinned-publication inte
 Full owned frontend/notebook/viz regression: 235 tests passed (74.40 s).
 After the schematic/text/API follow-up, 14 targeted tests passed (20.10 s),
 and 14 packaging/presentation tests passed (1.56 s; stale old payload excluded). No extra packages, git-writing commands or foreign
-path edits. Final notebook timings/publication coverage/package checks pending.
+path edits. The latest targeted cache/publication/presentation suite passed 15 tests
+(12.64 s; old payload excluded), and HTML readability/document checks passed
+3 tests (0.57 s). Final notebook timings/publication coverage/package checks
+are pending the parallel publications.
 
 ### Interface requests
 

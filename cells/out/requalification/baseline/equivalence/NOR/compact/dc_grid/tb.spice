@@ -1,0 +1,53 @@
+TritFlow ternary testbench
+*
+.parameters vthMP	= 0
+.parameters vthMN 	= 0
+.parameters vthMPE      = 0
+.parameters vthMNE      = 0
+.parameters magRR       = 1
+.parameters magRS       = 1 
+.parameters magCSIO     = 1 
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NOR A B Y VDD VMID VSS
+* device instance $1 r0 *1 26,100 PMOS
+XM_ex_1 n_ex_18 A VDD VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $2 r0 *1 41,100 PMOS
+XM_ex_2 n_ex_4 B n_ex_18 VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $3 r0 *1 26,28 NMOS
+XM_ex_3 n_ex_5 A VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $4 r0 *1 41,28 NMOS
+XM_ex_4 n_ex_5 B VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $5 r0 *1 96,54 F_RR
+XR_ex_5 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 96,84 F_RR
+XR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+.ends NOR
+
+.temp 27
+.options rshunt=1e12
+VDD VDD 0 5
+VMID VMID 0 0
+VSS VSS 0 -5
+Xdut A B Y VDD VMID VSS NOR
+Vin0 A 0 PWL(0 -5)
+Vin1 B 0 PWL(0 -5)
+Cload0 Y 0 1e-14
+.nodeset v(Y)=5
+.nodeset v(xdut.n_ex_18)=5
+.nodeset v(xdut.n_ex_4)=5
+.nodeset v(xdut.n_ex_5)=-5
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+set numdgt=15
+dc Vin0 -5 5 0.125 Vin1 -5 5 0.125
+wrdata waveform.txt v(A) v(B) v(Y) i(vdd) i(vmid) i(vss)
+quit
+.endc
+.end

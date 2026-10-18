@@ -18,9 +18,9 @@
       pin numpy/scipy/matplotlib/plotly (pin only klayout, lark) or force a runtime restart; print
       KLayout/ngspice versions; ch6/ch7 must not depend on ch0 globals. Setup took ~1 min on Colab.
   (b) copy root NOTICE into the submission folder and mention it in its licence section.
-  (c) with EDITOR's notebook/narrative/: rebuild the notebook to docs/editorial.md — interactive layer
-      (Plotly sliders/dropdowns over precomputed frames; ipywidgets only for live runs), predict-first
-      hand estimates, teaser figure, Appendix A/B; move process/provenance text out of chapters.
+  (c) DEFERRED by the user until the pipeline is complete: rebuild the notebook to docs/editorial.md
+      (interactive layer, predict-first estimates, Appendix A/B). Keep docs/editorial.md as the
+      reference; paper-style static figures are made by the integrator in figures/.
 - Integrator after cascade + FRONTEND phase 9: move tag colab-v0 to the new head, COLAB Run all on
   real Colab, then REVIEW round 2 focused on reader clarity and Code-a-Chip fit (not more caveats).
 - Feature freeze 10-25 JST (docs/editorial.md schedule). STA, shuttle-ready top and corners enter

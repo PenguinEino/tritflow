@@ -1,6 +1,6 @@
 """Three-domain MPW power header using the published DC width/cut limits.
 
-Compact M2 banks fan outward into M1. Long common rails stay in M2, and real
+Compact M2 banks contact wider M1 through tall TC arrays. Common rails stay in M2;
 supply-pad feeders divide current among multiple wide M1 fingers and TC cuts.
 """
 
@@ -63,18 +63,10 @@ def _power_header(data, macro_pins, core, margin):
     for pin in macro_pins:
         rail = pin["name"]
         a, b, c, d = pin["rect"]
-        source_x = (a + c) / 2
-        w = c - a
-        # VMID is a reference with negligible measured current. Its narrow
-        # finger leaves space to widen the two current-carrying M1 fingers.
-        shift = (
-            (-14.0 if rail == "VDD" else 14.0) if rail != "VMID" and w <= 20.0 else 0.0
-        )
-        x = source_x + shift
-        finger_w = (
-            3.4 if rail == "VMID" else min(44.0, 2 * (w + 2.4 + abs(shift) - 3.75))
-        )
-        # The flat lower end avoids M1 already routed in the last macro channel.
+        x, w = (a + c) / 2, c - a
+        # The reference finger is narrow; VDD/VSS occupy the remaining
+        # bank pitch with at least 2.05 um M1 spacing to that finger.
+        finger_w = 3.4 if rail == "VMID" else min(44.0, 2 * (w + 2.4 - 3.75))
         low, high = y1 - 4.7, bars[rail] + widths[rail] / 2
         power["rails"].append(
             {
@@ -85,43 +77,22 @@ def _power_header(data, macro_pins, core, margin):
                 "rect": [x - finger_w / 2, low, x + finger_w / 2, high],
             }
         )
+        # A tall array shares current between several rows of TC. Keep M1
+        # and M2 centerlines aligned; both model and geometry then describe
+        # parallel cuts, without off-axis projection into one favored cut.
+        contact_h = 9.4 if rail == "VMID" else 32.7
+        contact_y = y1 + 1 if rail == "VMID" else y1 + 12.65
+        extension = 7.0 if rail == "VMID" else 29.0
         power["straps"].append(
             {
                 "net": rail,
                 "layer": "M2",
                 "width": w,
-                "points": [
-                    [source_x, y1 - w / 2],
-                    [source_x, y1 + (12.65 if shift else 3)],
-                ],
-                "rect": [a, y1 - 6, c, y1 + (29.0 if shift else 7)],
+                "points": [[x, y1 - w / 2], [x, y1 + extension - 1.7]],
+                "rect": [a, y1 - 6, c, y1 + extension],
             }
         )
-        if shift:
-            # M2's larger field-current rating permits compact macro banks.
-            # Fan VDD/VSS outward above the macro before entering wider M1.
-            fan_left, fan_right = (x - 10.0, c) if shift < 0 else (a, x + 10.0)
-            power["straps"].append(
-                {
-                    "net": rail,
-                    "layer": "M2",
-                    "width": 32.7,
-                    "points": [[fan_left, y1 + 12.65], [fan_right, y1 + 12.65]],
-                    "rect": [fan_left, y1 - 3.7, fan_right, y1 + 29.0],
-                }
-            )
-            contact_left = max(fan_left, x - finger_w / 2)
-            contact_right = min(fan_right, x + finger_w / 2)
-            _via_array(
-                power["vias"],
-                rail,
-                (contact_left + contact_right) / 2,
-                y1 + 12.65,
-                contact_right - contact_left,
-                32.7,
-            )
-        else:
-            _via_array(power["vias"], rail, x, y1 + 1, min(w, finger_w), 9.4)
+        _via_array(power["vias"], rail, x, contact_y, min(w, finger_w), contact_h)
         _via_array(power["vias"], rail, x, bars[rail], finger_w, widths[rail])
         fingers.append((x - finger_w / 2, x + finger_w / 2))
     # Find three genuinely empty M1 corridors, also disjoint from each other.
@@ -241,12 +212,14 @@ def _power_header(data, macro_pins, core, margin):
                 "rect": [cx - 20, 1030.0, cx + 20, 1050.0],
             }
         )
+    # Keep the VMID crossover outside every supply feeder and pad keep-out.
+    main_bars["VMID"]["points"][0][0] = -948.0
     return pads, {
         "rail_current_envelope_a": totals,
         "M2_width_um": widths,
         "reserve": margin,
         "collector_y_um": collector_y,
-        "vmid_escape_um": [left, bars["VMID"]],
+        "vmid_escape_um": [-948.0, bars["VMID"]],
         "M1_step_limit_a_per_um": 0.00025,
         "M2_field_limit_a_per_um": 3.7e-3 / 3,
     }

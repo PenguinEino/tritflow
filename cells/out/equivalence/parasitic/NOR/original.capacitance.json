@@ -1,6 +1,6 @@
 {
   "nets": {
-    "V+": {
+    "VDD": {
       "capacitance_f": 4.9770292199999997e-14,
       "layers": {
         "M1": {
@@ -45,7 +45,7 @@
         }
       }
     },
-    "a": {
+    "A": {
       "capacitance_f": 3.6514730000000004e-15,
       "layers": {
         "M1": {
@@ -60,7 +60,7 @@
         }
       }
     },
-    "b": {
+    "B": {
       "capacitance_f": 5.1322429999999994e-15,
       "layers": {
         "M1": {
@@ -75,7 +75,7 @@
         }
       }
     },
-    "vout": {
+    "Y": {
       "capacitance_f": 8.514865600000001e-15,
       "layers": {
         "M1": {
@@ -105,7 +105,7 @@
         }
       }
     },
-    "V-": {
+    "VSS": {
       "capacitance_f": 2.8417610799999998e-14,
       "layers": {
         "M1": {
@@ -131,7 +131,8 @@
       "fringe_f_per_um": 2e-17
     }
   },
-  "assumptions": "Estimated substrate C only: SiO2 epsilon_r=3.9, effective M1/M2 heights 1/2 um, fringe=0.02 fF/um perimeter. Assumed, not PDK calibrated. No coupling, shielding, via C or signal wire R; not signoff PEX.",
+  "assumptions": "Estimated substrate C only: SiO2 epsilon_r=3.9, effective M1/M2 heights 1/2 um, fringe=0.02 fF/um perimeter. Assumed, not PDK calibrated. Reviewed OS00 rev1.1 p5 (no parasitic extraction), OS04 p7 and model libraries; the ESD M1-M2 overlap rule is not a metal-to-substrate coefficient. No coupling, shielding, via C or signal wire R; not signoff PEX.",
+  "parameter_origin": "assumption",
   "scope": "Actual top-net metal including connected cell pin metal; excludes child-only local nets and unconnected purged metal",
   "excluded_unconnected_metal_um2": {
     "M1": 0.0,
@@ -200,7 +201,7 @@
           "capacitance_f": 2.60395e-15
         }
       },
-      "extracted_net": "a"
+      "extracted_net": "A"
     },
     "B": {
       "capacitance_f": 5.1322429999999994e-15,
@@ -216,7 +217,7 @@
           "capacitance_f": 4.08472e-15
         }
       },
-      "extracted_net": "b"
+      "extracted_net": "B"
     },
     "Y": {
       "capacitance_f": 8.514865600000001e-15,
@@ -271,13 +272,13 @@
     "NET1": "$16",
     "NET2": "$3",
     "NET3": "$4",
-    "V+": "V+",
-    "V-": "V-",
-    "A": "a",
-    "B": "b",
-    "VOUT": "vout"
+    "A": "A",
+    "B": "B",
+    "VDD": "VDD",
+    "VSS": "VSS",
+    "Y": "Y"
   },
   "gds_sha256": "704347b70467b0547ded933987a8e6145860cabc08bb68903f4e80ea5d77f9f5",
-  "lvs_report_sha256": "8564ff76c7c1ed8f096bddce3eb193bfb749e04d60237f444f1a52df2a73750a",
-  "annotated_sha256": "b08193ef0278466e3fe6335255f2633712074fd1fdd7442ab14ea7c3929507ef"
+  "lvs_report_sha256": "0bd82deb26e1b8d4069c0c71b11feb8da17754ac5886f515d849aae80b5e701b",
+  "annotated_sha256": "6f78939a6bc52c5ee99a35098d3a9c02df5a2106716a2dee92c0ae420e5505ce"
 }

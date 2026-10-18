@@ -1,0 +1,37 @@
+--- before
++++ pinned
+@@ -2,22 +2,22 @@
+ *** My special header ***
+ 
+ * cell mul_nor
+-* pin V+
+-* pin V-
+-* pin a
+-* pin b
+-* pin vout
+-.SUBCKT mul_nor V+ V\x2d a b vout
++* pin A
++* pin B
++* pin VDD
++* pin VSS
++* pin Y
++.SUBCKT mul_nor A B VDD VSS Y
+ * device instance $1 r0 *1 20,96 PMOS
+-XM$1 \$16 a V+ V+ PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
++XM$1 \$16 A VDD VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+ * device instance $2 r0 *1 35,96 PMOS
+-XM$2 \$3 b \$16 V+ PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
++XM$2 \$3 B \$16 VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+ * device instance $3 r0 *1 20,16 NMOS
+-XM$3 \$4 a V\x2d V\x2d NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
++XM$3 \$4 A VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+ * device instance $4 r0 *1 35,16 NMOS
+-XM$4 \$4 b V\x2d V\x2d NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
++XM$4 \$4 B VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+ * device instance $5 r0 *1 90,42 F_RR
+-XR$5 \$4 vout V+ F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++XR$5 \$4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+ * device instance $6 r0 *1 90,78 F_RR
+-XR$6 \$3 vout V+ F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++XR$6 \$3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+ .ENDS mul_nor

@@ -1,0 +1,11 @@
+* RR30 schematic connectivity; lengths in micrometres
+.subckt BUF A Y VDD VMID VSS
+XMP0 p0 A VDD VDD PMOS W=13.5u L=1u
+XMN0 n0 A VSS VSS NMOS W=5u L=1u
+XMP1 p1 mid VDD VDD PMOS W=13.5u L=1u
+XMN1 n1 mid VSS VSS NMOS W=5u L=1u
+XRP0 p0 mid VDD F_RR W=2.8u L=30u
+XRN0 mid n0 VDD F_RR W=2.8u L=30u
+XRP1 p1 Y VDD F_RR W=2.8u L=30u
+XRN1 Y n1 VDD F_RR W=2.8u L=30u
+.ends BUF

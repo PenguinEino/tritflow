@@ -671,16 +671,16 @@ and test files, `examples/pnr_all.py`, and generated `build/` outputs.
 <!-- PNR_RESULTS_BEGIN -->
 ## Current verified build results
 
-Published template height: **132 µm**. Input content fingerprint: `4cd439c1bb70fc18b84b17341ce76688f285eda6bd640fc4bcf297e31a2ec5f3`.
+Published template height: **132 µm**. Input content fingerprint: `b02fc563be6ad53bcd9ec00f0f0368822353c7c8ca646d6d88455c803c72eb8d`.
 
 All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
 
 | Design | Seed | Die (µm) | Aspect | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS | PNR / +LVS (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|
-| adder4 | 7 | 1848 × 1590 | 1.162 | 42.91% | 43494 | 40263 | 524 / 1376 | 0 violations | Match | 18.55 / 22.60 |
-| full_add | 0 | 840 × 702 | 1.197 | 53.46% | 4608 | 6277.5 | 111 / 144 | 0 violations | Match | 6.03 / 9.39 |
-| mac1 | 0 | 888 × 1038 | 1.169 | 46.57% | 7458 | 9195.5 | 165 / 384 | 0 violations | Match | 7.21 / 11.68 |
-| mul1 | 0 | 372 × 366 | 1.016 | 52.35% | 750 | 1022.5 | 25 / 32 | 0 violations | Match | 3.96 / 8.47 |
+| adder4 | 7 | 1692 × 1590 | 1.064 | 46.87% | 47274 | 43333 | 551 / 800 | 0 violations | Match | 6.08 / 7.23 |
+| full_add | 19 | 876 × 702 | 1.248 | 51.26% | 6300 | 6200.5 | 125 / 240 | 0 violations | Match | 2.01 / 3.14 |
+| mac1 | 0 | 876 × 1038 | 1.185 | 47.21% | 7782 | 9195.5 | 167 / 360 | 0 violations | Match | 1.79 / 2.97 |
+| mul1 | 0 | 420 × 366 | 1.148 | 46.37% | 822 | 1022.5 | 25 / 80 | 0 violations | Match | 1.33 / 2.60 |
 
 ## Phase 2 → phase 3
 
@@ -688,10 +688,10 @@ Before artifacts are preserved in each design's `phase2/`; cell library and inpu
 
 | Design | Die before → after (µm) | Aspect before → after | Utilization before → after | Die area reduction | Signal length before → after (µm) |
 |---|---:|---:|---:|---:|---:|
-| adder4 | 1176 × 3534 → 1848 × 1590 | 3.005 → 1.162 | 30.34% → 42.91% | 29.30% | 91254 → 83757 |
-| full_add | 924 × 942 → 840 × 702 | 1.019 → 1.197 | 36.21% → 53.46% | 32.25% | 11817.5 → 10885.5 |
-| mac1 | 912 × 1374 → 888 × 1038 | 1.507 → 1.169 | 34.26% → 46.57% | 26.44% | 17899.5 → 16653.5 |
-| mul1 | 612 × 510 → 372 × 366 | 1.200 → 1.016 | 22.84% → 52.35% | 56.38% | 2106.5 → 1772.5 |
+| adder4 | 1176 × 3534 → 1692 × 1590 | 3.005 → 1.064 | 30.34% → 46.87% | 35.27% | 91254 → 90607 |
+| full_add | 924 × 942 → 876 × 702 | 1.019 → 1.248 | 36.21% → 51.26% | 29.35% | 11817.5 → 12500.5 |
+| mac1 | 912 × 1374 → 876 × 1038 | 1.507 → 1.185 | 34.26% → 47.21% | 27.44% | 17899.5 → 16977.5 |
+| mul1 | 612 × 510 → 420 × 366 | 1.200 → 1.148 | 22.84% → 46.37% | 50.75% | 2106.5 → 1844.5 |
 
 ## Placement seed comparison
 
@@ -699,18 +699,18 @@ Cell-terminal HPWL excludes external ports. Each before/after pair uses the same
 
 | Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | PNR / +LVS (s) | DRC / LVS |
 |---|---:|---:|---:|---:|---:|---|
-| adder4 | 0 | 80608.5 | 52066.5 | 35.41% | 43.72 / 48.50 | clean / Match |
-| adder4 | 7 | 75352.5 | 50692.5 | 32.73% | 21.18 / 24.99 | clean / Match |
-| adder4 | 19 | 77980.5 | 56133 | 28.02% | 27.68 / 32.43 | clean / Match |
-| full_add | 0 | 9135 | 5088 | 44.30% | 5.68 / 9.57 | clean / Match |
-| full_add | 7 | 9135 | 4896 | 46.40% | 6.11 / 10.25 | clean / Match |
-| full_add | 19 | 9135 | 4680 | 48.77% | 6.04 / 9.54 | clean / Match |
-| mac1 | 0 | 16947.5 | 7497 | 55.76% | 6.32 / 10.84 | clean / Match |
-| mac1 | 7 | 16947.5 | 6504.5 | 61.62% | 8.42 / 11.94 | clean / Match |
-| mac1 | 19 | 17703.5 | 9959 | 43.75% | 6.72 / 10.60 | clean / Match |
-| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 3.62 / 7.65 | clean / Match |
-| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 4.84 / 7.80 | clean / Match |
-| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 5.11 / 8.37 | clean / Match |
+| adder4 | 0 | 82552.5 | 53907 | 34.70% | 35.00 / 36.72 | clean / Match |
+| adder4 | 7 | 72040.5 | 48070.5 | 33.27% | 6.90 / 8.83 | clean / Match |
+| adder4 | 19 | 77296.5 | 53035.5 | 31.39% | 16.04 / 17.18 | clean / Match |
+| full_add | 0 | 9135 | 5088 | 44.30% | 1.72 / 2.92 | clean / Match |
+| full_add | 7 | 9831 | 5376 | 45.32% | 2.85 / 3.95 | clean / Match |
+| full_add | 19 | 9135 | 4680 | 48.77% | 2.16 / 3.20 | clean / Match |
+| mac1 | 0 | 16659.5 | 7353 | 55.86% | 1.89 / 3.40 | clean / Match |
+| mac1 | 7 | 16659.5 | 8070.5 | 51.56% | 2.36 / 3.42 | clean / Match |
+| mac1 | 19 | 18171.5 | 10235 | 43.68% | 3.29 / 4.43 | clean / Match |
+| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 1.36 / 2.59 | clean / Match |
+| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 1.24 / 2.26 | clean / Match |
+| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 1.21 / 2.29 | clean / Match |
 
 Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.
 <!-- PNR_RESULTS_END -->

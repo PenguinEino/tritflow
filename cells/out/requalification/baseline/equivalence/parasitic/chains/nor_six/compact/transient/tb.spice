@@ -1,0 +1,258 @@
+TritFlow ternary testbench
+*
+.parameters vthMP	= 0
+.parameters vthMN 	= 0
+.parameters vthMPE      = 0
+.parameters vthMNE      = 0
+.parameters magRR       = 1
+.parameters magRS       = 1 
+.parameters magCSIO     = 1 
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt INV A Y VDD VMID VSS
+* device instance $1 r0 *1 19.2,56 PMOS
+XM_ex_1 n_ex_5 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+* device instance $2 r0 *1 19.2,26 NMOS
+XM_ex_2 n_ex_6 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+* device instance $3 r0 *1 70,44 F_RR
+XR_ex_3 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $4 r0 *1 70,57 F_RR
+XR_ex_4 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 6.61372514e-14
+Ctfwire1 A 0 3.2210792e-15
+Ctfwire2 n_ex_5 0 6.368421e-15
+Ctfwire3 n_ex_6 0 7.536423e-15
+Ctfwire4 Y 0 6.030037e-15
+Ctfwire5 VSS 0 4.13775122e-14
+.ends INV
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NAND A B Y VDD VMID VSS
+* device instance $1 r0 *1 26,100 PMOS
+XM_ex_1 n_ex_4 A VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $2 r0 *1 41,100 PMOS
+XM_ex_2 n_ex_4 B VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $3 r0 *1 26,28 NMOS
+XM_ex_3 n_ex_18 A n_ex_6 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $4 r0 *1 41,28 NMOS
+XM_ex_4 VSS B n_ex_18 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $5 r0 *1 96,54 F_RR
+XR_ex_5 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 96,84 F_RR
+XR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 7.808932e-14
+Ctfwire1 n_ex_4 0 2.0966129e-14
+Ctfwire2 n_ex_6 0 1.32774498e-14
+Ctfwire3 A 0 5.1387184e-15
+Ctfwire4 B 0 6.6194884e-15
+Ctfwire5 Y 0 9.223443e-15
+Ctfwire6 n_ex_18 0 4.4645408e-15
+Ctfwire7 VSS 0 5.59871538e-14
+.ends NAND
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NOR A B Y VDD VMID VSS
+* device instance $1 r0 *1 26,100 PMOS
+XM_ex_1 n_ex_18 A VDD VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $2 r0 *1 41,100 PMOS
+XM_ex_2 n_ex_4 B n_ex_18 VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $3 r0 *1 26,28 NMOS
+XM_ex_3 n_ex_5 A VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $4 r0 *1 41,28 NMOS
+XM_ex_4 n_ex_5 B VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $5 r0 *1 96,54 F_RR
+XR_ex_5 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 96,84 F_RR
+XR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 7.47380802e-14
+Ctfwire1 n_ex_4 0 1.56316638e-14
+Ctfwire2 n_ex_5 0 1.4677706e-14
+Ctfwire3 A 0 5.1387184e-15
+Ctfwire4 B 0 6.6194884e-15
+Ctfwire5 Y 0 9.223443e-15
+Ctfwire6 n_ex_18 0 1.06938848e-14
+Ctfwire7 VSS 0 5.77423566e-14
+.ends NOR
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NANY A B Y VDD VMID VSS
+* device instance $1 r0 *1 56,100 PMOS
+XM_ex_1 n_ex_7 A Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $2 r0 *1 71,100 PMOS
+XM_ex_2 n_ex_9 B Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $3 r0 *1 41,100 PMOS
+XM_ex_3 n_ex_30 B n_ex_43 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $4 r0 *1 26,100 PMOS
+XM_ex_4 n_ex_43 A VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $5 r0 *1 56,27 NMOS
+XM_ex_5 n_ex_7 B VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $6 r0 *1 71,27 NMOS
+XM_ex_6 n_ex_9 A VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $7 r0 *1 26,27 NMOS
+XM_ex_7 n_ex_17 A n_ex_5 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $8 r0 *1 41,27 NMOS
+XM_ex_8 VSS B n_ex_17 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $9 r0 *1 118.5,54 F_RR
+XR_ex_9 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $10 r0 *1 118.5,84 F_RR
+XR_ex_10 n_ex_30 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VMID 0 5.09656736e-14
+Ctfwire1 n_ex_5 0 1.52914248e-14
+Ctfwire2 n_ex_7 0 1.3524332e-14
+Ctfwire3 n_ex_9 0 1.3524332e-14
+Ctfwire4 B 0 1.73720042e-14
+Ctfwire5 A 0 2.06150938e-14
+Ctfwire6 VDD 0 8.21731732e-14
+Ctfwire7 n_ex_17 0 3.9454288e-15
+Ctfwire8 Y 0 3.16797664e-14
+Ctfwire9 n_ex_30 0 1.73473818e-14
+Ctfwire10 n_ex_43 0 9.6556608e-15
+Ctfwire11 VSS 0 6.5117304e-14
+.ends NANY
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt BUF A Y VDD VMID VSS
+* device instance $1 r0 *1 19.2,56 PMOS
+XM_ex_1 n_ex_5 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+* device instance $2 r0 *1 127.2,56 PMOS
+XM_ex_2 n_ex_8 n_ex_7 VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+* device instance $3 r0 *1 19.2,26 NMOS
+XM_ex_3 n_ex_6 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+* device instance $4 r0 *1 127.2,26 NMOS
+XM_ex_4 n_ex_9 n_ex_7 VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+* device instance $5 r0 *1 70,44 F_RR
+XR_ex_5 n_ex_6 n_ex_7 VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 70,57 F_RR
+XR_ex_6 n_ex_5 n_ex_7 VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $7 r0 *1 178,44 F_RR
+XR_ex_7 n_ex_9 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $8 r0 *1 178,57 F_RR
+XR_ex_8 n_ex_8 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 1.319545028e-13
+Ctfwire1 A 0 3.2210792e-15
+Ctfwire2 n_ex_5 0 6.368421e-15
+Ctfwire3 n_ex_6 0 7.536423e-15
+Ctfwire4 n_ex_7 0 1.16477584e-14
+Ctfwire5 n_ex_8 0 6.368421e-15
+Ctfwire6 n_ex_9 0 7.536423e-15
+Ctfwire7 Y 0 6.030037e-15
+Ctfwire8 VSS 0 8.08323826e-14
+.ends BUF
+
+.subckt CASCADE A a1 a2 a3 a4 a5 a6 b1 b2 b3 b4 b5 b6 tied1 tied2 tied3 tied4 tied5 tied6 VDD VMID VSS
+Xstage_a1 A VSS a1 VDD VMID VSS NOR
+Xstage_a2 a1 VSS a2 VDD VMID VSS NOR
+Xstage_a3 a2 VSS a3 VDD VMID VSS NOR
+Xstage_a4 a3 VSS a4 VDD VMID VSS NOR
+Xstage_a5 a4 VSS a5 VDD VMID VSS NOR
+Xstage_a6 a5 VSS a6 VDD VMID VSS NOR
+Xstage_b1 VSS A b1 VDD VMID VSS NOR
+Xstage_b2 VSS b1 b2 VDD VMID VSS NOR
+Xstage_b3 VSS b2 b3 VDD VMID VSS NOR
+Xstage_b4 VSS b3 b4 VDD VMID VSS NOR
+Xstage_b5 VSS b4 b5 VDD VMID VSS NOR
+Xstage_b6 VSS b5 b6 VDD VMID VSS NOR
+Xstage_tied1 A A tied1 VDD VMID VSS NOR
+Xstage_tied2 tied1 tied1 tied2 VDD VMID VSS NOR
+Xstage_tied3 tied2 tied2 tied3 VDD VMID VSS NOR
+Xstage_tied4 tied3 tied3 tied4 VDD VMID VSS NOR
+Xstage_tied5 tied4 tied4 tied5 VDD VMID VSS NOR
+Xstage_tied6 tied5 tied5 tied6 VDD VMID VSS NOR
+.ends CASCADE
+
+.temp 27
+.options rshunt=1e12
+VDD VDD 0 5
+VMID VMID 0 0
+VSS VSS 0 -5
+Xdut A a1 a2 a3 a4 a5 a6 b1 b2 b3 b4 b5 b6 tied1 tied2 tied3 tied4 tied5 tied6 VDD VMID VSS CASCADE
+Vin0 A 0 PWL(0 -5.0 2e-07 -5.0 2.01e-07 0.0 4e-07 0.0 4.01e-07 5.0 6e-07 5.0 6.01e-07 0.0 8e-07 0.0 8.01e-07 -5.0 1e-06 -5.0 1.001e-06 5.0 1.2e-06 5.0 1.201e-06 -5.0 1.4e-06 -5.0 1.401e-06 -1.0 1.6e-06 -1.0 1.601e-06 -0.5 1.8e-06 -0.5 1.801e-06 -0.2 2e-06 -0.2 2.001e-06 0.0 2.2e-06 0.0 2.201e-06 0.2 2.4e-06 0.2 2.401e-06 0.5 2.6e-06 0.5 2.601e-06 1.0 2.8e-06 1.0 2.801e-06 0.0)
+Cload5 a6 0 1e-14
+Cload11 b6 0 1e-14
+Cload17 tied6 0 1e-14
+.nodeset v(a1)=5
+.nodeset v(a2)=-5
+.nodeset v(a3)=5
+.nodeset v(a4)=-5
+.nodeset v(a5)=5
+.nodeset v(a6)=-5
+.nodeset v(b1)=5
+.nodeset v(b2)=-5
+.nodeset v(b3)=5
+.nodeset v(b4)=-5
+.nodeset v(b5)=5
+.nodeset v(b6)=-5
+.nodeset v(tied1)=5
+.nodeset v(tied2)=-5
+.nodeset v(tied3)=5
+.nodeset v(tied4)=-5
+.nodeset v(tied5)=5
+.nodeset v(tied6)=-5
+.nodeset v(xdut.xstage_a1.n_ex_18)=5
+.nodeset v(xdut.xstage_a1.n_ex_4)=5
+.nodeset v(xdut.xstage_a1.n_ex_5)=-5
+.nodeset v(xdut.xstage_a2.n_ex_18)=5
+.nodeset v(xdut.xstage_a2.n_ex_4)=5
+.nodeset v(xdut.xstage_a2.n_ex_5)=-5
+.nodeset v(xdut.xstage_a3.n_ex_18)=5
+.nodeset v(xdut.xstage_a3.n_ex_4)=5
+.nodeset v(xdut.xstage_a3.n_ex_5)=-5
+.nodeset v(xdut.xstage_a4.n_ex_18)=5
+.nodeset v(xdut.xstage_a4.n_ex_4)=5
+.nodeset v(xdut.xstage_a4.n_ex_5)=-5
+.nodeset v(xdut.xstage_a5.n_ex_18)=5
+.nodeset v(xdut.xstage_a5.n_ex_4)=5
+.nodeset v(xdut.xstage_a5.n_ex_5)=-5
+.nodeset v(xdut.xstage_a6.n_ex_18)=5
+.nodeset v(xdut.xstage_a6.n_ex_4)=5
+.nodeset v(xdut.xstage_a6.n_ex_5)=-5
+.nodeset v(xdut.xstage_b1.n_ex_18)=5
+.nodeset v(xdut.xstage_b1.n_ex_4)=5
+.nodeset v(xdut.xstage_b1.n_ex_5)=-5
+.nodeset v(xdut.xstage_b2.n_ex_18)=5
+.nodeset v(xdut.xstage_b2.n_ex_4)=5
+.nodeset v(xdut.xstage_b2.n_ex_5)=-5
+.nodeset v(xdut.xstage_b3.n_ex_18)=5
+.nodeset v(xdut.xstage_b3.n_ex_4)=5
+.nodeset v(xdut.xstage_b3.n_ex_5)=-5
+.nodeset v(xdut.xstage_b4.n_ex_18)=5
+.nodeset v(xdut.xstage_b4.n_ex_4)=5
+.nodeset v(xdut.xstage_b4.n_ex_5)=-5
+.nodeset v(xdut.xstage_b5.n_ex_18)=5
+.nodeset v(xdut.xstage_b5.n_ex_4)=5
+.nodeset v(xdut.xstage_b5.n_ex_5)=-5
+.nodeset v(xdut.xstage_b6.n_ex_18)=5
+.nodeset v(xdut.xstage_b6.n_ex_4)=5
+.nodeset v(xdut.xstage_b6.n_ex_5)=-5
+.nodeset v(xdut.xstage_tied1.n_ex_18)=5
+.nodeset v(xdut.xstage_tied1.n_ex_4)=5
+.nodeset v(xdut.xstage_tied1.n_ex_5)=-5
+.nodeset v(xdut.xstage_tied2.n_ex_18)=5
+.nodeset v(xdut.xstage_tied2.n_ex_4)=5
+.nodeset v(xdut.xstage_tied2.n_ex_5)=-5
+.nodeset v(xdut.xstage_tied3.n_ex_18)=5
+.nodeset v(xdut.xstage_tied3.n_ex_4)=5
+.nodeset v(xdut.xstage_tied3.n_ex_5)=-5
+.nodeset v(xdut.xstage_tied4.n_ex_18)=5
+.nodeset v(xdut.xstage_tied4.n_ex_4)=5
+.nodeset v(xdut.xstage_tied4.n_ex_5)=-5
+.nodeset v(xdut.xstage_tied5.n_ex_18)=5
+.nodeset v(xdut.xstage_tied5.n_ex_4)=5
+.nodeset v(xdut.xstage_tied5.n_ex_5)=-5
+.nodeset v(xdut.xstage_tied6.n_ex_18)=5
+.nodeset v(xdut.xstage_tied6.n_ex_4)=5
+.nodeset v(xdut.xstage_tied6.n_ex_5)=-5
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+set numdgt=15
+tran 2e-10 3e-06 0 2e-10
+wrdata waveform.txt v(A) v(a1) v(a2) v(a3) v(a4) v(a5) v(a6) v(b1) v(b2) v(b3) v(b4) v(b5) v(b6) v(tied1) v(tied2) v(tied3) v(tied4) v(tied5) v(tied6) i(vdd) i(vmid) i(vss)
+quit
+.endc
+.end

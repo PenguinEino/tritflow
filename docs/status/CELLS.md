@@ -1,10 +1,10 @@
-# CELLS — Phase 7 pinned-PDK requalification in progress
+# CELLS — Phase 7 complete; public pinned-PDK qualification published
 
-Phase 7 target: public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c** at `~/pdk/TR-1um-pinned`. The live Phase 6 physical qualification below is historical dev-snapshot evidence until the Phase 7 atomic publish. PNR/SIM should wait for the Phase 7 publish journal before their final reruns. All new generation, extraction and verification use the pinned PDK only.
+Only public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c** is qualified. All active views and electrical data now have fresh pinned-PDK qualification. Earlier phase notes are retained as historical records; the final Phase 7 section and difference ledger supersede their provenance. PNR/SIM can now rerun against the new publication.
 
 ## Published generation
 
-The live library is generation `2026-10-18T09:49:34.717678+00:00` (Phase 6 timing/poly-R evidence; physical views unchanged from `2026-10-18T07:47:24.187502+00:00`). All nine cells now use
+The live library is generation `2026-10-18T10:26:47.211617+00:00` (Phase 7: regenerated and requalified against public PDK 5d963db; geometry matches the prior generation). All nine cells now use
 **132 um** common height and a **6 um** routing grid. The PNR library loader
 accepts every view. The tall generation remains in integrator tag `cells-v1-tall`.
 
@@ -652,16 +652,117 @@ Publish 2026-10-18T09:49:34.717678+00:00: Phase 6 PASS: nine STA timing tables, 
 
 Post-publish validation: all nine timing/poly tables have matching generation, source and annotated-model hashes; timing-summary hashes match the stamped files, all 4×8 matrices are complete, and all physical verification/characterization hashes still pass. Template resolves through the published generation. Phase 6 complete.
 
-## Phase 7 — pinned public PDK requalification (in progress)
+## Phase 7 — public pinned-PDK requalification complete
 
-Fresh complete-library stage: `cells/.cells-pinned-kdw8spcg`. The previous published generation and its physical/electrical tables are preserved privately under `requalification/baseline/` for an explicit machine-readable difference report. No live output has changed. Generation now records actual PCell-source, model, drawing/LVS-deck and setup-pin hashes.
+Only public commit **5d963db9d44e192d37a0489c208bfccf2e2f690c** is qualified.
+All nine cells were regenerated from its PCells in a fresh private stage;
+no old timing measurements or equivalence results were reused. The full prior
+public generation is represented by its preserved views/tables/reference
+extractions under `cells/out/requalification/baseline/`.
 
-Review finding 2: CELLS now calls SIM's fixed public `extract_layout` for strict LVS, including physical metal/label/edge-continuity proof before an unloaded power formal can be restored. Raw extraction and LVS databases remain available at the established cell paths. New cell-level regressions remove all INV VMID rail metal, sever it in the middle, or remove its physical label; each must fail cell LVS. FILL keeps its empty-device proof and strict three-rail probe fixture.
+- All nine drawing-DRC/strict-LVS/DC qualifications pass (FILL retains its empty
+  extraction and strict three-rail RR-probe method). All **324** ordered-pair /
+  R0-MY abutment cases pass with **zero** findings. Eight fresh SIM electrical
+  characterizations pass. DRC qualification is the drawing deck, not MDP/ESD
+  tape-out sign-off.
+- Untouched taped-out INV/NAND/NOR/NANY GDS was re-extracted with the pinned LVS
+  deck: all four native raw extracted SPICE files are **byte-identical** to the
+  dev-deck extractions. All nine public compact `.ext.spice` files are also
+  byte-identical. Model files are byte-identical. Thus changed decks do not
+  change these particular extracted device networks.
+- All nine regenerated GDS files are identical after only BGNLIB/BGNSTR date
+  payloads are zeroed. Every drawing layer and physical text label is identical;
+  PCell parameters, dimensions, abstracts, rails and free M2 tracks are unchanged.
+  Generation/provenance and GDS timestamps change, not physical geometry.
+- Independent source-schematic LVS, the DC neighborhoods, directed transitions,
+  NANY skew tests and all four cascade protocols pass. The estimated actual-GDS
+  wire-C comparison also passes for five logic cells and four cascades. Per-net
+  C and all comparable recorded numerical results are unchanged. Saved old/new
+  annotated decks contain respectively 6/8/8/12/9 wire capacitors per original
+  or compact INV/NAND/NOR/NANY/BUF; CELLS' earlier wire-C decks were not affected
+  by SIM's separately diagnosed no-op annotation bug.
+- All **160** primary profiles / **7,296** directed observations pass, with
+  **60** freshly measured biased input-C samples. Every settling, output-slew,
+  level-error and pin-C value matches the prior table exactly. Worst grid
+  settling remains INV 149.584 ns, NAND 160.019 ns, NOR 167.484 ns,
+  NANY 168.323 ns and BUF 150.425 ns. Axes and exact side-input sensitizations
+  are unchanged. These primary tables remain device-only.
+- All **30** poly-R profiles / **1,368** directed observations pass. Paired
+  baselines use identical timesteps. Every comparable numerical poly-R result
+  is unchanged; all nine `.poly.spice` files are byte-identical to their prior
+  versions. The largest single-pin output-changing increase remains **1.650 ns**,
+  and the largest simultaneous hazard-recovery increase **6.267 ns**. The
+  **120 Ω/square RS-poly value remains an uncalibrated GC sensitivity proxy**,
+  separate from the primary STA model. Historical mesh-refinement and rejected
+  coarsening evidence is preserved under `requalification/baseline/`; exact
+  geometry/model identity preserves its applicability. Fresh timing runs use
+  the documented fine/coarse timestep limits; that historical evidence is not
+  represented as a new experiment.
 
-Pinned physical result: all nine cells pass drawing DRC, strict LVS and DC (FILL uses its documented probe), and all 324 ordered-pair/orientation abutment cases pass with zero findings. Every regenerated GDS matches the prior GDS after only BGNLIB/BGNSTR timestamps are zeroed; every public `.ext.spice` is byte-identical. Untouched original INV/NAND/NOR/NANY GDS was separately re-extracted using the pinned deck and all four native raw SPICE files are byte-identical to their dev-deck counterparts. Thus the changed extraction decks do not change these specific device networks.
+### Every difference and its scope
 
-Strict public port checking initially exposed original NAND/NOR `V-` versus KLayout-escaped `V\x2d` spelling. Existing labels and source terminals are now renamed together to A/B/Y/VDD/VSS in private GDS/source copies; no conductor, device, dimension or port is added. Original native extraction remains separately retained under `requalification/native_reference/`; the aliased copies receive strict independent-source LVS. All four original/compact schematic comparisons pass.
+[Requalification report](../../cells/out/requalification/report.json) records
+all qualification flags, exact pre/post artifact hashes, per-cell geometry and
+paired timing/C differences, native original extraction comparisons, and **15**
+changed/added/removed DRC/LVS deck files with their hashes (including MDP-related
+files). [All JSON differences](../../cells/out/requalification/all_differences.json.gz)
+retains exact metadata/result leaf changes; the separate
+[numeric ledger](../../cells/out/requalification/numeric_differences.json.gz)
+has **zero changed comparable numerical values**. Added provenance/physical-proof
+records are retained explicitly, not counted as changes to an old measurement.
+The baseline is the exact pre-Phase-7 publication: its physical qualification
+used dev decks; its Phase 6 model bytes were already pinned-compatible.
 
-Deleted, severed and unlabelled INV VMID fixtures are each rejected with missing physical metal/label/continuity evidence, despite the schematic having no VMID device load. Their retained results are under `requalification/rail_negatives/`. Full electrical, timing and CELLS/viz regression runs continue in the private stage; no Phase 7 publish yet.
+All **100** saved electrical decks were audited with model include paths
+normalized by recorded content hash. Active networks and stimuli have **zero**
+mismatches. Sixteen device-only chain decks additionally include an uninstantiated
+BUF definition; four NANY chain decks also replace coarse Newton `.nodeset`
+hints with DC-solved internal guesses. These hints are not `.ic`/`uic` constraints.
+Full bench diffs remain under `requalification/bench_differences/`. No old PDK
+files are read or executed to establish this comparison.
 
-Phase 7 regression: `python3 -m pytest tests/cells tests/viz/test_cell*.py -q` completed with **66 passed, zero skips, in 1044.28 s**. All eight electrical-cell SIM characterizations pass with current pinned-PDK provenance. Local tools are Python 3.12, KLayout Python 0.30.6 / native executable 0.30.9, and ngspice 46+ on aarch64; exact versions and consumed hashes are in `requalification/environment.json`. This is the local pinned-PDK qualification, not a new amd64 Colab installation run.
+Strict public port checking exposed original NAND/NOR `V-` versus KLayout's
+escaped spelling. Existing labels and fresh source nodes are renamed together
+in private copies to A/B/Y/VDD/VSS; no conductor, device, dimension or physical
+port is added. Those copies receive strict independent-source LVS. Untouched
+native extraction is separately retained under `requalification/native_reference/`,
+so label-only raw-SPICE differences cannot be mistaken for deck/device changes.
+
+### Missing-rail rejection and publication contract
+
+CELLS uses SIM's **fixed public `extract_layout`**, read without edits, before
+restoring any unused power formal. An unused schematic pin alone cannot pass.
+New cell-level tests remove all **432 µm²** of INV VMID M1, sever its middle, or
+remove its physical label: all three are rejected for missing physical
+metal/label/continuity evidence. Intact cells pass. Runnable negative fixtures
+and errors remain under `requalification/rail_negatives/`.
+
+Generation records PCell/model/deck/setup-pin hashes in `pdk_provenance.json`.
+Known non-pinned checkouts, tracked PDK source edits and a cached PCell module
+from another PDK are rejected. Publication checks current pinned provenance
+against build, verification, characterization and timing evidence, validates
+source/view hashes and exchanges the whole directory atomically. SIM's live
+sizing directory is preserved; electrical `.char.json` files are freshly
+regenerated with the pinned harness. No SIM/extract/PNR/STA files were edited.
+No reference/PDK files, git state or dependencies were changed.
+
+Reproduce the complete producer (fresh build through atomic publication):
+
+```sh
+python3 -m tritflow.cells requalify --jobs 3
+python3 -m pytest tests/cells tests/viz/test_cell*.py -q
+```
+
+The regression completed with **66 passed, zero skips, in 1044.28 s**.
+`timing_validation.json` independently verifies every table sample against its
+retained point data, all initial states, source/measurement fingerprints,
+finite capacitances and the matched poly baseline settings. `compileall` and
+owned-path `git diff --check` pass. Exact local tools are recorded in
+`requalification/environment.json`: Python 3.12, KLayout Python 0.30.6/native
+executable 0.30.9, ngspice 46+, aarch64. This is local pinned-PDK qualification,
+not an additional amd64 Colab installation run. No blockers/interface requests.
+
+
+Publish 2026-10-18T10:26:47.211617+00:00: Phase 7 public PDK 5d963db requalification PASS: all nine regenerated cells, strict physical-rail LVS, 324 abutments, native taped-out extraction/equivalence, wire-C/cascades, 160 timing and 30 poly-R profiles; 66 tests passed; no numerical result changes. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.
+
+Post-publish integrity PASS: pinned provenance, all nine generation/source/view/timing/poly hashes, template linkage, 324-case evidence and the empty numerical-difference ledger match generation `2026-10-18T10:26:47.211617+00:00`. PNR and SIM may rerun now.

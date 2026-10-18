@@ -45,7 +45,7 @@
         }
       }
     },
-    "vout": {
+    "Y": {
       "capacitance_f": 2.8933305e-14,
       "layers": {
         "M1": {
@@ -105,7 +105,7 @@
         }
       }
     },
-    "a": {
+    "A": {
       "capacitance_f": 1.91278484e-14,
       "layers": {
         "M1": {
@@ -120,7 +120,7 @@
         }
       }
     },
-    "b": {
+    "B": {
       "capacitance_f": 1.5884758800000002e-14,
       "layers": {
         "M1": {
@@ -191,7 +191,8 @@
       "fringe_f_per_um": 2e-17
     }
   },
-  "assumptions": "Estimated substrate C only: SiO2 epsilon_r=3.9, effective M1/M2 heights 1/2 um, fringe=0.02 fF/um perimeter. Assumed, not PDK calibrated. No coupling, shielding, via C or signal wire R; not signoff PEX.",
+  "assumptions": "Estimated substrate C only: SiO2 epsilon_r=3.9, effective M1/M2 heights 1/2 um, fringe=0.02 fF/um perimeter. Assumed, not PDK calibrated. Reviewed OS00 rev1.1 p5 (no parasitic extraction), OS04 p7 and model libraries; the ESD M1-M2 overlap rule is not a metal-to-substrate coefficient. No coupling, shielding, via C or signal wire R; not signoff PEX.",
+  "parameter_origin": "assumption",
   "scope": "Actual top-net metal including connected cell pin metal; excludes child-only local nets and unconnected purged metal",
   "excluded_unconnected_metal_um2": {
     "M1": 0.0,
@@ -324,7 +325,7 @@
           "capacitance_f": 9.166491800000001e-15
         }
       },
-      "extracted_net": "a"
+      "extracted_net": "A"
     },
     "B": {
       "capacitance_f": 1.5884758800000002e-14,
@@ -340,7 +341,7 @@
           "capacitance_f": 6.720490600000001e-15
         }
       },
-      "extracted_net": "b"
+      "extracted_net": "B"
     },
     "NET1": {
       "capacitance_f": 9.655660799999999e-15,
@@ -398,14 +399,14 @@
     "NET4": "$33",
     "NET5": "$7",
     "NET6": "$10",
+    "A": "A",
+    "B": "B",
     "VDD": "VDD",
     "VMID": "VMID",
     "VSS": "VSS",
-    "A": "a",
-    "B": "b",
-    "VOUT": "vout"
+    "Y": "Y"
   },
   "gds_sha256": "3403d325575c08cee2765c459d40985ee041db48a1ed21f1e13f3d9306af6282",
-  "lvs_report_sha256": "b3574994752ed92060abbd166a96005ebc3d9393f3291d10fa4d23db6a46b4bc",
-  "annotated_sha256": "877ff14c45639bdc2cb2c244bf2dfd1af47bfe396b57f5052181a564eb5facd6"
+  "lvs_report_sha256": "8fa2c500611b6808f57371ba411fff91487d000e4091d8e9d5b4fbcb846dae07",
+  "annotated_sha256": "18cd055ce46bf2dd786c0b541cffcd989d96febd84b14e6ee5fbf54a63158c75"
 }

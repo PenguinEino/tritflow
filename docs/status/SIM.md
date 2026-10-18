@@ -55,6 +55,10 @@ Mul1's unseeded initial solve returned internal nodes at **+525.862 / −505.185
 
 CELLS Phase 7 is regenerating/qualifying the complete pinned-PDK library and timing tables in a private stage. Its new INV/NAND/NOR device views match the live device SPICE bytes (GDS files differ), with fresh pinned metadata. To avoid competing with that prerequisite and producing another stale publication, redundant interim layout/scaling producers have been stopped after retaining their completed electrical caches. Final four-design, scaling, corners and rail-audit publications will rerun after the Phase 7 atomic exchange and PNR rebuilds. The refined carry control is complete and the full suite passed **69 tests in 265.92 s**, with JUnit under `build/sim_verification/pytest.xml`. Final pinned publication freshness remains pending the CELLS/PNR exchange. No foreign process was stopped.
 
+## Source-cache scope
+
+Scaling hashes the code used by HDL/synthesis, macro PNR, extraction and simulation plus all consumed cell/model/deck/HDL files. Separately developed `pnr/chip*` and `pnr/signoff*` implementations are excluded because this study never calls chip packaging or MPW signoff; the macro PNR API/implementation and every physical output are still hashed. This prevents independent chip-wrapper edits from falsely invalidating a completed macro experiment while retaining the pinned-deck/input checks.
+
 ## In progress
 
 The pinned PDK model libraries are byte-identical to the dev snapshot; no metal/via R or substrate/fringe C coefficients were added by this migration. Full active model/deck hashes are recorded in `pdk_provenance`; the pinned `01_Extract.lvs` SHA-256 is `5557369f863655af37590b0cc12bfb75b8b378ce8ce954cc9840866bcf32c6b1`. The old results are preserved in `results/dev_before_pinned/`.

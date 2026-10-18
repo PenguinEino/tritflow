@@ -7,10 +7,10 @@ TritFlow ternary testbench
 .parameters magRR       = 1
 .parameters magRS       = 1 
 .parameters magCSIO     = 1 
-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib"
 * Public ports renamed from independent taped-out reference
 .subckt NOR A B Y VDD VMID VSS
 * device instance $1 r0 *1 20,96 PMOS
@@ -29,8 +29,8 @@ XR_ex_6 n_ex_3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
 Ctfwire0 VDD 0 4.97702922e-14
 Ctfwire1 n_ex_3 0 1.71889998e-14
 Ctfwire2 n_ex_4 0 1.4677706e-14
-Ctfwire3 a 0 3.651473e-15
-Ctfwire4 b 0 5.132243e-15
+Ctfwire3 A 0 3.651473e-15
+Ctfwire4 B 0 5.132243e-15
 Ctfwire5 Y 0 8.5148656e-15
 Ctfwire6 n_ex_16 0 1.06938848e-14
 Ctfwire7 VSS 0 2.84176108e-14

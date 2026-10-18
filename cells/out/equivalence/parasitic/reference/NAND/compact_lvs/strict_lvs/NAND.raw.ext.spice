@@ -1,0 +1,23 @@
+* Created by KLayout
+*** My special header ***
+
+* cell NAND
+* pin A
+* pin B
+* pin VDD
+* pin VSS
+* pin Y
+.SUBCKT NAND A B VDD VSS Y
+* device instance $1 r0 *1 26,100 PMOS
+XM$1 \$4 A VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $2 r0 *1 41,100 PMOS
+XM$2 \$4 B VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $3 r0 *1 26,28 NMOS
+XM$3 \$18 A \$6 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $4 r0 *1 41,28 NMOS
+XM$4 VSS B \$18 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $5 r0 *1 96,54 F_RR
+XR$5 \$6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 96,84 F_RR
+XR$6 \$4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+.ENDS NAND

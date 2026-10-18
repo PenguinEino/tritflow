@@ -1,0 +1,34 @@
+--- before
++++ pinned
+@@ -7,10 +7,10 @@
+ .parameters magRR       = 1
+ .parameters magRS       = 1 
+ .parameters magCSIO     = 1 
+-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
+-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
+-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
++.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
++.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib"
++.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib"
++.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib"
+ * Public ports renamed from independent taped-out reference
+ .subckt INV A Y VDD VMID VSS
+ * device instance $1 r0 *1 13.2,44 PMOS
+@@ -75,6 +75,16 @@
+ * device instance $10 r0 *1 112.5,72 F_RR
+ XR_ex_10 n_ex_3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+ .ends NANY
++.subckt BUF A Y VDD VMID VSS
++Xstage0_M_ex_1 stage0_n_ex_4 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
++Xstage0_M_ex_2 stage0_n_ex_5 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
++Xstage0_R_ex_3 stage0_n_ex_5 mid VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++Xstage0_R_ex_4 stage0_n_ex_4 mid VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++Xstage1_M_ex_1 stage1_n_ex_4 mid VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
++Xstage1_M_ex_2 stage1_n_ex_5 mid VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
++Xstage1_R_ex_3 stage1_n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++Xstage1_R_ex_4 stage1_n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++.ends BUF
+ 
+ .subckt CASCADE A m1 m2 m3 m4 m5 m6 VDD VMID VSS
+ Xstage_m1 A m1 VDD VMID VSS INV

@@ -130,7 +130,7 @@ def worker(job):
     out = Path(job["directory"])
     started = time.perf_counter()
     report = {"name": job["name"], "parameters": job["parameters"], "anneal_steps": job["anneal_steps"],
-              "fingerprint": job["fingerprint"], "source_sha256": job["source_sha256"]}
+              "seed":job['seed'], "fingerprint": job["fingerprint"], "source_sha256": job["source_sha256"]}
     stage = "synthesis"
     try:
         net = synthesize(load(out/f"{job['name']}.tv", top=job["name"]),
@@ -259,6 +259,10 @@ def main(argv=None):
                     for name, source in scale_sources(range(1, 9) if args.all_adders else (6, 8)).items()]
     for name, source, parameters, root, seed in sources:
         out = (root/name).resolve(); out.mkdir(parents=True, exist_ok=True)
+        if parameters.get('scale') and name=='adder4':
+            # Keep the seed-comparison canonical example independent of this
+            # fixed-seed scaling experiment and its immutable report hashes.
+            out=out/'scale';out.mkdir(parents=True,exist_ok=True)
         (out/f"{name}.tv").write_text(source)
         jobs.append(dict(name=name, directory=str(out), parameters=parameters, seed=seed,
             anneal_steps=max(args.anneal_steps,3000) if name=='adder7' else args.anneal_steps, fingerprint=stamp,
