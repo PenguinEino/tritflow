@@ -1,0 +1,9 @@
+// The four primitive cells, written as TritVerilog expressions.
+// Trits are -1, 0, +1; '~' negates, '&' is min, '|' is max.
+module gates(input  trit a, b,
+             output trit inva, nandab, norab, nanyab);
+  assign inva   = ~a;          // INV  : -a
+  assign nandab = ~(a & b);    // NAND : -min(a, b)
+  assign norab  = ~(a | b);    // NOR  : -max(a, b)
+  assign nanyab = nany(a, b);  // NANY : -sat(a + b)
+endmodule

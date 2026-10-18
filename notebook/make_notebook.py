@@ -65,6 +65,9 @@ def build():
         data = base64.b64encode((ROOT/f'figures/out/fig_{name}.png').read_bytes()).decode()
         width = 520 if name == 'sta' else None   # single-column figure
         return responsive_image(data,alt,width)+('\n\n'+caption(name) if include_caption else '')
+    def verilog(*names):
+        # Show the exact HDL files the method cells load, as highlighted definitions.
+        return '\n\n'.join(f"`examples/{n}`\n\n```verilog\n{(ROOT/'examples'/n).read_text().strip()}\n```" for n in names)
     def prose(name):
         text = (NARRATIVE/name).read_text()
         # Images are inserted once at the editorial anchors below.
@@ -123,17 +126,17 @@ $$''',text,count=1)
     imports = cell('code',f'NARRATIVE_CONTEXT_SHA256 = {context_sha!r}\n'+stages.IMPORTS,'imports',
                    title='Imports and run bookkeeping')
     chapter_title = 'Chapter 0: From HDL to a checked adder layout'
-    md(render('## 0.'+chapter0,values))
+    md(render('## 0.'+chapter0,values)+'\n\n'+verilog('adder.tv'))
     code('opening_inputs','Chapter 0 inputs: test conditions and an independent integer oracle')
     method('opening')
     code('opening','Chapter 0 checks')
-    chapter('01_gates.md','gates'); method('gates')
+    chapter('01_gates.md','gates'); md(verilog('gates.tv')); method('gates')
     code('gates','Chapter 1 checks and the taped-out INV schematic')
     chapter('02_sizing.md','sizing'); method('sizing')
     code('sizing','Chapter 2 details: resistor-length candidates at the taped-out MOS sizes')
     chapter('03_cells.md','cell'); method('cells')
     code('cells','Chapter 3 checks: template, clamp devices and cell qualification')
-    chapter('04_hdl.md','synth'); method('arithmetic')
+    chapter('04_hdl.md','synth'); md(verilog('half_add.tv','full_add.tv')); method('arithmetic')
     code('arithmetic','Chapter 4 checks: cell counts against the taped-out schematics')
     chapter('05_synthesis.md'); method('synthesis')
     code('synthesis','Chapter 5 checks: mapping rules and gate-level TritVerilog')
@@ -166,6 +169,7 @@ $$''',text,count=1)
     md(text+'\n\n**Successful first edit:** the visible sorter below implements its minimum as '
        '`~((~a) | (~b))`. Run it to obtain a new mapped schematic and GDS while keeping the independent sorting reference.')
     method('edit')
+    method('pick')
     method('custom')
     code('custom_check','Chapter 8 check: every input state against the independent arithmetic reference',requires=())
     method('custom_layout')

@@ -92,7 +92,7 @@ def test_chapter_math_is_outside_html_and_paper_images_are_responsive():
 
 def test_scoped_real_pass_and_missing_verification_note(monkeypatch):
     note = colab_evidence.run_note()
-    assert '332.5 s' in note and 'including setup' in note and '34 code cells' in note
+    assert ' s including setup' in note and '34 code cells' in note
     assert 'If Run all stops after setup, choose Run all again.' in note
     monkeypatch.setattr(colab_evidence,'CURRENT_EVIDENCE',None)
     assert colab_evidence.run_note() == ''

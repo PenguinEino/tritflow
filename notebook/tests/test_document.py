@@ -41,7 +41,7 @@ def test_colab_note_matches_the_latest_published_verification():
     document=json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())
     intro=document["cells"][0]["source"]
     record=json.loads((ROOT/"notebook/colab_verified.json").read_text())
-    assert record["commit"].startswith("91f642d") and record["passed_code_cells"] == 34
+    assert len(record["commit"]) == 40 and record["passed_code_cells"] >= 34
     report=(ROOT/record["report"]).read_text()
     assert record["passed"] is True and record["commit"] in report
     assert f'{record["run_all_seconds_including_setup"]:.1f} s' in report

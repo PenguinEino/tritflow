@@ -72,7 +72,7 @@ def test_static_context_and_embedded_figures_have_no_unresolved_results():
     assert '## Appendix A.' in markdown and not TOKEN.search(markdown)
     cells = {c['id']:c for c in document['cells']}
     edit = cells['method-edit']
-    assert 'source = """module minmax' in edit['source'] and not edit['metadata'].get('jupyter',{}).get('source_hidden')
+    assert 'source = """\nmodule minmax(input' in edit['source'] and not edit['metadata'].get('jupyter',{}).get('source_hidden')
     order = [c['id'] for c in document['cells']]
     # The reader's edit is synthesized and checked against the oracle before any physical work.
     assert order.index('method-custom') < order.index('custom_check') < order.index('method-custom_layout') < order.index('custom')
