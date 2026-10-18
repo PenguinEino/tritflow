@@ -6,12 +6,14 @@ import io
 import json
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 
 import pytest
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/"notebook"))
 spec = importlib.util.spec_from_file_location("tritflow_setup", ROOT/"notebook/setup_colab.py")
 setup = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(setup)
@@ -31,6 +33,10 @@ def test_official_deb_plan_is_release_specific(version, capsys, monkeypatch):
     assert setup.PINS["pdk_commit"] in result["pdk_archive"]
     assert any("ngspice" in c for c in result["commands"])
     assert any("-e" in c for c in result["commands"])
+    pip = next(c for c in result["commands"] if "pip" in c)
+    assert "--no-deps" in pip
+    assert result["scientific_packages_installed"] is False
+    assert set(result["host_scientific_minimums"]) == {"numpy","scipy","matplotlib","plotly"}
 
 
 @pytest.mark.parametrize("version,arch", [("26.04", "amd64"), ("24.04", "arm64")])

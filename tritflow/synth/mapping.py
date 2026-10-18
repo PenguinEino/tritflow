@@ -18,6 +18,16 @@ def fanouts(net: GateNetlist):
 class SynthesizedNetlist(GateNetlist):
     """Shared GateNetlist format plus notebook-oriented synthesis reporting."""
 
+    def schematic(self, **options):
+        """Draw mapped hierarchy; optional trit values/wire C use the public renderer.
+
+        ``expand='*'`` exposes every cell. ``inputs`` gives settled scalar
+        trits; ``parasitics`` accepts PNR's public net-parasitics report. This
+        display stage does not alter synthesis or invoke physical tools.
+        """
+        from tritflow.schematic import draw
+        return draw(self, **options)
+
     def report(self) -> dict:
         """Count mapped cells and longest gate chain, retaining source scopes.
 

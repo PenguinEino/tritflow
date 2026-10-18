@@ -5,6 +5,9 @@ from dataclasses import dataclass, field
 import re
 
 Point = tuple[int, int]
+# Gate input spacing is also the minimum useful leg between routing corners.
+# Pin escape uses the finer eight-pixel raster.
+JOG_PITCH = 32
 
 
 def natural(name):

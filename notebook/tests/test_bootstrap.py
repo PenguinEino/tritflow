@@ -11,13 +11,15 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/"notebook"))
+import runtime_support
 CELL = json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())["cells"][1]["source"]
 COMMIT = "a"*40
 URL = "https://github.com/PenguinEino/tritflow.git"
 
 
 def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False, dirty=False,
-              clone_failure=False):
+              clone_failure=False, configured=False):
     """Use real temporary files, intercept every command, and substitute only /content."""
     target = tmp_path/"tritflow"
     commands = []
@@ -25,9 +27,12 @@ def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False
     def seed():
         (target/".git").mkdir(parents=True)
         (target/"notebook").mkdir()
+        (target/"notebook/runtime_support.py").write_text("# source-asset presence fixture\n")
 
     if existing:
         seed()
+    if configured:
+        (target/"notebook/runtime.json").write_text(json.dumps({"TRITFLOW_SETUP_SCHEMA":runtime_support.SETUP_SCHEMA}))
     monkeypatch.delenv("TRITFLOW_REF", raising=False)
     if ref:
         monkeypatch.setenv("TRITFLOW_REF", ref)
@@ -40,7 +45,10 @@ def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False
                 raise subprocess.CalledProcessError(128, command)
             seed()
         elif command[0] == "bash":
-            (target/"notebook/runtime.json").write_text(json.dumps({"TRITFLOW_ROOT": str(target)}))
+            (target/"notebook/runtime.json").write_text(json.dumps({"TRITFLOW_ROOT": str(target),
+                "TRITFLOW_SETUP_SCHEMA":runtime_support.SETUP_SCHEMA}))
+        elif command[-1] == "-v":
+            return SimpleNamespace(returncode=0,stdout=f"{command[0]} version (unit fixture)",stderr="")
         else:
             raise AssertionError(f"unexpected subprocess: {command}")
         return SimpleNamespace(returncode=0)
@@ -60,6 +68,7 @@ def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False
     monkeypatch.setattr(subprocess, "run", run)
     monkeypatch.setattr(subprocess, "check_output", check_output)
     monkeypatch.setattr(importlib.util, "find_spec", lambda name: object())
+    monkeypatch.setattr(runtime_support,"check_runtime",lambda:{})
     # Patch this import only, preserving pathlib itself for pytest and real files.
     proxy = SimpleNamespace(Path=lambda p: target if str(p) == "/content/tritflow" else Path(p))
     namespace = {}
@@ -75,15 +84,23 @@ def test_shallow_pinned_clone_prints_hash_and_installs(monkeypatch, tmp_path, ca
     commands, ns = run_colab(monkeypatch, tmp_path, ref=ref)
     assert commands[0] == ["git", "clone", "--depth", "1", "--single-branch", "--branch",
                            ref or "colab-v0", URL, str(tmp_path/"tritflow")]
-    assert commands[-1] == ["bash", str(tmp_path/"tritflow/notebook/colab_setup.sh"),
-                            "--source", str(tmp_path/"tritflow")]
+    assert ["bash", str(tmp_path/"tritflow/notebook/colab_setup.sh"),
+            "--source", str(tmp_path/"tritflow")] in commands
     assert ns["SOURCE_COMMIT"] == COMMIT
-    assert COMMIT in capsys.readouterr().out
+    output = capsys.readouterr().out
+    assert COMMIT in output and "KLayout executable" in output and "ngspice executable" in output
+    assert ns["_TRITFLOW_SETUP_READY"] is True
 
 
 def test_existing_matching_checkout_can_be_rerun(monkeypatch, tmp_path):
     commands, _ = run_colab(monkeypatch, tmp_path, existing=True)
     assert not any(c[:2] == ["git", "clone"] for c in commands)
+
+
+def test_current_setup_is_reused_but_versions_are_still_printed(monkeypatch,tmp_path):
+    commands,_ = run_colab(monkeypatch,tmp_path,existing=True,configured=True)
+    assert not any(c[0] == "bash" for c in commands)
+    assert sum(c[-1] == "-v" for c in commands) == 2
 
 
 @pytest.mark.parametrize("condition", ["mismatch", "dirty"])

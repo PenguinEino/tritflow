@@ -130,3 +130,14 @@ def test_author_identity_matches_integrator_record_and_asset_authorization():
     assert "releases the derived assets" in readme and "Apache-2.0" in readme
     assert not {"phone", "telephone", "tel"} & team.keys()
     assert "confirm the rights field" not in readme
+
+
+def test_public_schematic_svg_gets_saved_png_fallback():
+    from tritflow import flow
+    net=flow.load("examples/half_add.tv","half_add").synthesize()
+    svg=net.schematic(expand="*",inputs={"a":1,"b":1}).svg
+    document=nbformat.v4.new_notebook(cells=[nbformat.v4.new_code_cell("# unit drawing",
+        outputs=[nbformat.v4.new_output("display_data",data={"image/svg+xml":svg})])])
+    builder.portable_outputs(document,{})
+    data=document.cells[0].outputs[0].data
+    assert data["image/svg+xml"] == svg and "image/png" in data

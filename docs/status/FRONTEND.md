@@ -1,5 +1,62 @@
 # FRONTEND status
 
+Updated: 2026-10-18. **Phase 9 implemented; native capture and package refresh in progress.**
+
+## Phase 9 — in progress
+
+- Colab now pins only KLayout and Lark. Pip uses `--no-deps`, preserving
+  preloaded NumPy/SciPy/Matplotlib/Plotly. Minimum-version/live-versus-disk
+  checks and NumPy-testing/SciPy BLAS smoke checks provide an explicit
+  restart-once recovery message for an already mixed kernel. Native KLayout
+  and ngspice executable versions print on every setup, including reuse.
+- Cell prerequisites track successful completion. Failed reruns invalidate
+  dependent completion markers. Independent chapters load their own small
+  arithmetic/characterization data; physical views fail with a clear named
+  prerequisite rather than `lay`/`demo` NameError. Setup/import failures
+  cannot leave a usable old completion marker.
+- Added `SynthesizedNetlist.schematic()` once, inherited by `flow.Netlist`,
+  forwarding to the public SCHEM renderer. Chapter 5 shows a hierarchical
+  two-trit adder and flat half-adder with settled trits. Chapter 7 calls
+  `lay.result.net_parasitics()` and annotates the exact same scene with
+  routed wire C. SCHEM implementation files remain untouched. Public SVG
+  gets an embedded PNG fallback in the static submission.
+- Root NOTICE remains in the eight-file allowlist and is copied verbatim.
+- Initial targeted checks: 33 passed (0.33 s; previous payload excluded),
+  public schematic/facade suites 86 passed (10.35 s). Local host-stack
+  smoke test passed without installs. Chapter 3/5 run independently after
+  setup/imports; an actual retained PNR layout yielded 37 overlay nets.
+  Pre-capture regression: 262 passed in 25.60 s, excluding the previous
+  payload and two explicitly stale SIM-publication checks. Full native
+  notebook execution has started in `/tmp/tritflow-submission-phase9/native`.
+
+### Phase 9 interface requests
+
+The shared display hook changed `mapping.py`'s full-file hash, initially
+rejecting otherwise unchanged SIM width/load results. This is resolved in the
+FRONTEND reader by a narrow, explicit compatibility proof: parse the class,
+accept only the exact undecorated `schematic(self, **options)` public delegate
+(with no defaults/annotations/class-time effects), delete only that method and
+at most its following blank line, and require the reconstructed whole-file SHA
+to equal the recorded SHA. Every other source byte and every HDL/library/PDK
+input must still match. The recorded/live hashes and proof appear in a collapsed
+notebook evidence block; no claim of new SIM qualification is made. No SIM
+result/hash was rewritten. Added unrelated-byte, decorator and report-code
+negative controls; all 11 experiment/publication/document tests pass (0.22 s).
+A later SIM republication can remove the need for this compatibility case;
+it is not required to display current, unchanged physics. The full fresh local
+four-design archive will still be regenerated against the complete new code.
+
+The initial private native attempt was stopped before completing the four-design
+loop when this compatibility check was added; it is not a published capture.
+Final native execution is `/tmp/tritflow-submission-phase9/native-final`.
+The exact reconstructed-hash proof replaces the earlier external publication
+request; it does not relax abstract/manifest/library/model/deck checks.
+
+The selected source ref must include `notebook/runtime_support.py`; an older
+release now fails explicitly with instructions to select a matching immutable
+ref. The default `colab-v0` tag remains an integrator release action. Local
+checks cannot establish Python-3.13/free-Colab installation success.
+
 Updated: 2026-10-18. **Phase 8 owned review fixes complete; pinned native run, recorded evidence and saved-output submission rebuilt.**
 
 ## Phase 8 handoff — complete
