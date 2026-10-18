@@ -214,6 +214,11 @@ def test_labels_never_overlap_with_all_overlays(name,n,expand):
             else:
                 assert not (x<wire.a[0]<x+w and max(y,wire.a[1])<min(y+h,wire.b[1])),(box,wire)
         for node in sch.scene.symbols:
+            if item.get('owner')==node.key:
+                # Gate names occupy the reserved strip above the outline.
+                # A large readable label may extend into the empty side halo.
+                assert y+h<=node.y+56
+                continue
             a,b,c,d=node.box
             contained=a<=x<=x+w<=c and b<=y<=y+h<=d
             assert contained or max(x,a)>=min(x+w,c) or max(y,b)>=min(y+h,d),(box,node)
@@ -270,12 +275,13 @@ def test_gallery_metric_budgets_against_reviewed_baseline(name,n,expand):
     assert 0.65 < after['aspect_ratio'] < 4.5
     assert after['wire_length_px']==sum(row['wire_length_px'] for row in after['nets'].values())
     previous={i['name']:i['metrics'] for i in json.loads(
-        (ROOT/'tritflow/schematic/assets/phase2_metrics.json').read_text())}[f'{stem}-{mode}']
-    # Spaced buses require longer wire; phase-2's 8 px channels are no longer
-    # valid. Keep a finite budget while measuring every clearance separately.
-    assert after['wire_length_px']<=2.5*previous['wire_length_px']
-    assert after['bends_total']<=max(previous['bends_total']*1.25,previous['bends_total']+2)
-    assert after['crossings']<=max(previous['crossings']*1.25,previous['crossings']+2)
+        (ROOT/'tritflow/schematic/assets/phase4_metrics.json').read_text())}[f'{stem}-{mode}']
+    # Standalone macro reuse and blocked frame interiors replace phase 4's
+    # global compaction. Bound that deliberate channel cost against the last
+    # reviewed gallery; exact geometry/type invariants are tested separately.
+    assert after['wire_length_px']<=1.5*previous['wire_length_px']
+    assert after['bends_total']<=max(previous['bends_total']*1.4,previous['bends_total']+4)
+    assert after['crossings']<=max(previous['crossings']*1.75,previous['crossings']+5)
 
 
 @pytest.mark.parametrize('name,n',CASES)
@@ -332,7 +338,9 @@ def test_half_adder_straight_t_trunk_and_two_bend_target():
 
 def test_full_adder_compact_frames_contain_the_correct_cells():
     sch=draw(circuit('full_add'),expand='*')
-    assert 1.8<=sch.metrics['aspect_ratio']<=2.4
+    # Identical standalone half-adder templates take precedence over the
+    # old folded 2:1 panel. Two uncompressed templates remain side by side.
+    assert 3.0<=sch.metrics['aspect_ratio']<=4.2
     frames=sorted(sch.scene.frames,key=lambda f:f.box[0])
     assert [f.label for f in frames]==['ha1','ha2']
     assert frames[0].box[2]<frames[1].box[0]

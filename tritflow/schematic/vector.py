@@ -23,18 +23,20 @@ class Vector:
     height: int
     items: list[dict] = field(default_factory=list)
     net_labels: dict[str,str] = field(default_factory=dict)
+    font_min: float = 0
+    stroke_min: float = 0
 
     def path(self, commands, *, stroke=INK, fill='none', width=0.8, net=None):
-        self.items.append(dict(kind='path',commands=commands,stroke=stroke,fill=fill,width=width,net=net))
+        self.items.append(dict(kind='path',commands=commands,stroke=stroke,fill=fill,width=max(width,self.stroke_min) if width else 0,net=net))
 
     def line(self,a,b,**style):
         self.path([('M',*a),('L',*b)],**style)
 
     def circle(self,x,y,r,*,stroke=INK,fill='white',width=0.8,net=None):
-        self.items.append(dict(kind='circle',x=x,y=y,r=r,stroke=stroke,fill=fill,width=width,net=net))
+        self.items.append(dict(kind='circle',x=x,y=y,r=r,stroke=stroke,fill=fill,width=max(width,self.stroke_min) if width else 0,net=net))
 
-    def text(self,x,y,text,*,size=11,color=INK,anchor='start',weight='normal'):
-        self.items.append(dict(kind='text',x=x,y=y,text=str(text),size=size,color=color,anchor=anchor,weight=weight))
+    def text(self,x,y,text,*,size=11,color=INK,anchor='start',weight='normal',owner=None):
+        self.items.append(dict(kind='text',x=x,y=y,text=str(text),size=max(size,self.font_min),color=color,anchor=anchor,weight=weight,owner=owner))
 
     def svg(self, title, metadata=None):
         parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.width}" height="{self.height}" '

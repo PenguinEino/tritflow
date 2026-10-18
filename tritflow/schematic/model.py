@@ -63,6 +63,10 @@ class Frame:
     label: str
     box: tuple[int, int, int, int]
     members: tuple[str, ...]
+    module: str = ''
+    pins: dict[str, Point] = field(default_factory=dict)
+    sides: dict[str, str] = field(default_factory=dict)
+    nets: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -80,3 +84,5 @@ class Scene:
     notes: tuple[str, ...] = ()
     frames: tuple[Frame, ...] = ()
     trunks: tuple[Segment, ...] = ()
+    # Outer routes are kept separately so frame-boundary access is auditable.
+    interconnect: tuple[Segment, ...] = ()

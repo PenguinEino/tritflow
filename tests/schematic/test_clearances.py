@@ -1,6 +1,7 @@
 """The round-4 drawing rules, checked independently of routing choices."""
 import xml.etree.ElementTree as ET
 import re
+import math
 from collections import Counter
 
 import pytest
@@ -23,8 +24,9 @@ def test_every_gallery_scene_satisfies_clearances(name,n,expand):
     bounds=[n.box for n in s.scene.symbols]+[f.box for f in s.scene.frames]
     bounds += [(w.a[0],w.a[1],w.b[0],w.b[1]) for w in s.scene.segments]
     assert min(b[0] for b in bounds)==24
-    assert min(b[1] for b in bounds)==48
-    assert s.scene.height-max(b[3] for b in bounds)==40
+    font=12*s.scene.width/1000
+    assert min(b[1] for b in bounds)==max(48,8*math.ceil(font*1.5/8))
+    assert s.scene.height-max(b[3] for b in bounds)==max(40,8*math.ceil(font*1.5/8))
     for node in s.scene.symbols:
         if node.kind not in {'input','output'}:continue
         related={m for n in s.scene.symbols for m in n.members

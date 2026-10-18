@@ -3,7 +3,7 @@
     python3 -m tritflow.schematic.gallery --output build/schematic-review
 
 The overlay routes the real half-adder cell library and calls the public PNR
-net_parasitics() method. The geometry comparison uses the frozen phase-3
+net_parasitics() method. The geometry comparison uses the frozen phase-4
 gallery; the original baseline remains in the JSON manifest.
 """
 from __future__ import annotations
@@ -24,7 +24,8 @@ def _summary(name,before,after):
             f'{before["bends_per_net_mean"]:.2f} → {after["bends_per_net_mean"]:.2f} | '
             f'{before["bends_per_net_max"]} → {after["bends_per_net_max"]} | '
             f'{before["crossings"]} → {after["crossings"]} | '
-            f'{before["aspect_ratio"]:.2f} → {after["aspect_ratio"]:.2f} |')
+            f'{before["aspect_ratio"]:.2f} → {after["aspect_ratio"]:.2f} | '
+            f'{before["min_font_pt_at_1000px"]:.1f} → {after["min_font_pt_at_1000px"]:.1f} |')
 
 
 def generate(root,output):
@@ -34,7 +35,7 @@ def generate(root,output):
     output.mkdir(parents=True,exist_ok=True)
     baseline=json.loads((Path(__file__).parent/'assets/baseline_metrics.json').read_text())['items']
     previous={item['name']:item['metrics'] for item in json.loads(
-        (Path(__file__).parent/'assets/phase3_metrics.json').read_text())}
+        (Path(__file__).parent/'assets/phase4_metrics.json').read_text())}
     cases=[('half_add','half_add',None),('full_add','full_add',None),('adder2','adder',2),
            ('adder4','adder',4),('mul1','mul1',None),('mac1','mac1',None)]
     cases += [(name,item.top,None) for name,item in DESIGNS.items()]
@@ -46,7 +47,7 @@ def generate(root,output):
             sch=draw(net,expand=expand,title=f'{stem} · {mode}')
             for ext in ('svg','png','pdf'):sch.save(output/f'{name}.{ext}')
             manifest.append({'name':name,'cells':len(net.instances),'symbols':len(sch.scene.symbols),
-                             'metrics':measure(sch.scene),'before':baseline[name],
+                             'metrics':sch.metrics,'before':baseline[name],
                              'notes':list(sch.scene.notes)})
     net=load(root/'examples/half_add.tv','half_add').synthesize()
     result=place_and_route(net,Library.load(root/'cells'),output_dir=output/'physical',
@@ -63,16 +64,18 @@ def generate(root,output):
                                     'library_mock':result.data['library']['mock'],
                                     'wire_capacitance_f':sum(overlay.capacitance_f.values())}})
     empty=measure(Scene('legend',(),(),{},(),{},1088,624))
+    v=legend()._vector()
+    empty['min_font_pt_at_1000px']=min(i['size'] for i in v.items if i['kind']=='text')*.75*1000/v.width
     manifest.append({'name':'legend','metrics':empty,'before':baseline['legend']})
     for item in manifest:item['previous']=previous[item['name']]
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-    rows=['# Schematic geometry: phase 3 → phase 4','',
+    rows=['# Schematic geometry: phase 4 → phase 5','',
           'Wire length is in drawing pixels, not chip micrometres. A bend is a unique same-net '
           'degree-two orthogonal corner; T joins are excluded. Crossings count distinct '
           'different-net perpendicular intersections. Aspect is full canvas width / height; '
           'the real-C overlay includes its annotation table.','',
-          '| Figure | Wire px | Bends total | Bends/net mean | Bends/net max | Crossings | Aspect |',
-          '|---|---:|---:|---:|---:|---:|---:|']
+          '| Figure | Wire px | Bends total | Bends/net mean | Bends/net max | Crossings | Aspect | Min font pt @1000px |',
+          '|---|---:|---:|---:|---:|---:|---:|---:|']
     rows += [_summary(item['name'],item['previous'],item['metrics']) for item in manifest]
     rows += ['', 'A short jog is a leg shorter than one gate input pitch (32 px) between two '
              'degree-two corners. Terminal stubs and T joins are excluded; pin access uses the '

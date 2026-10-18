@@ -1,6 +1,6 @@
 """Reproduce the gallery and notebook views through the browser SVG renderer.
 
-python3 -m tritflow.schematic.review --output build/schematic-review/round4/after
+python3 -m tritflow.schematic.review --output build/schematic-review/round5/after
 CairoSVG is only a review dependency; the public SVG/PDF API does not use it.
 """
 import argparse
@@ -33,12 +33,12 @@ def notebook_views(root,output):
 
 def rasterize(folder):
     for p in sorted(folder.glob('*.svg')):
-        cairosvg.svg2png(bytestring=p.read_bytes(),write_to=str(p.with_suffix('.png')),scale=1.25)
+        cairosvg.svg2png(bytestring=p.read_bytes(),write_to=str(p.with_suffix('.png')),output_width=1000)
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output',type=Path,default=Path('build/schematic-review/round4/after'))
+    parser.add_argument('--output',type=Path,default=Path('build/schematic-review/round5/after'))
     args=parser.parse_args()
     root=Path(__file__).resolve().parents[2]
     manifest=generate(root,args.output/'gallery')
