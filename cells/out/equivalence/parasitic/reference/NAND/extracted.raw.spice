@@ -1,0 +1,23 @@
+* Created by KLayout
+*** My special header ***
+
+* cell mul_nand
+* pin V+
+* pin V-
+* pin a
+* pin b
+* pin vout
+.SUBCKT mul_nand V+ V\x2d a b vout
+* device instance $1 r0 *1 20,96 PMOS
+XM$1 \$3 a V+ V+ PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $2 r0 *1 35,96 PMOS
+XM$2 \$3 b V+ V+ PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u
+* device instance $3 r0 *1 20,16 NMOS
+XM$3 \$16 a \$5 V\x2d NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $4 r0 *1 35,16 NMOS
+XM$4 V\x2d b \$16 V\x2d NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u
+* device instance $5 r0 *1 90,42 F_RR
+XR$5 \$5 vout V+ F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 90,78 F_RR
+XR$6 \$3 vout V+ F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+.ENDS mul_nand

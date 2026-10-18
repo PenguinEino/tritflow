@@ -26,13 +26,14 @@ def logic_value(cell: str, values) -> int:
 
 
 def dc_operating_points(subckts, top, inputs, outputs, vectors, expected, *, timeout=120,
-                        workdir=None, **kwargs):
+                        workdir=None, nodeset=None, **kwargs):
     """Solve a separate DC operating point for every bias (true static currents)."""
     rows = []
     for index, vector in enumerate(vectors):
         ideal = expected(vector)
         bench = build_testbench(subckts, top, inputs, outputs, [vector],
-                                initial_outputs=ideal, loads_f=0, **kwargs)
+                                initial_outputs=ideal, loads_f=0,
+                                nodeset=nodeset(vector) if callable(nodeset) else nodeset, **kwargs)
         folder = None if workdir is None else Path(workdir)/f'state_{index:03d}'
         data = run_ngspice(bench['netlist'], 'op', bench['probes'],
                            timeout=timeout, workdir=folder)['data']

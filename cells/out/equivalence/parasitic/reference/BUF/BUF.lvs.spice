@@ -1,0 +1,10 @@
+.subckt BUF A Y VDD VMID VSS
+Mstage0_MXM1 stage0_net1 A VDD VDD PMOS w=13.5u l=1u
+Xstage0_R1 stage0_net1 mid VDD F_RR w=2.8e-06 l=30e-06
+Xstage0_R2 mid stage0_net2 VDD F_RR w=2.8e-06 l=30e-06
+Mstage0_MXM2 stage0_net2 A VSS VSS NMOS w=5u l=1u
+Mstage1_MXM1 stage1_net1 mid VDD VDD PMOS w=13.5u l=1u
+Xstage1_R1 stage1_net1 Y VDD F_RR w=2.8e-06 l=30e-06
+Xstage1_R2 Y stage1_net2 VDD F_RR w=2.8e-06 l=30e-06
+Mstage1_MXM2 stage1_net2 mid VSS VSS NMOS w=5u l=1u
+.ends BUF

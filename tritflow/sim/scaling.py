@@ -13,11 +13,13 @@ import time
 
 from tritflow import ROOT, CELLS_DIR, PDK_ROOT
 from tritflow.hdl import load
-from tritflow.synth import synthesize, write_artifacts
+from tritflow.synth import synthesize, write_artifacts, evaluate_netlist
 from tritflow.pnr import Library, PnrResult, place_and_route
+from tritflow.extract import reference_net_map
 from .characterize import dc_operating_points
 from .postlayout import _save, file_hash, run_postlayout
 from .bench import input_vectors
+from .spice import simulation_netlist
 
 RESULT = ROOT/'results'/'adder_scaling.json'
 
@@ -91,6 +93,49 @@ def _valid_cache(record, digest):
     return (record.get('configuration_sha256') == digest and record.get('state') == 'complete'
             and bool(record.get('artifacts_sha256'))
             and all(Path(p).is_file() and file_hash(p)==h for p,h in record['artifacts_sha256'].items()))
+
+
+def static_points(net, circuit, lvs_report, vectors, expected, *, folder, timeout=900):
+    """Independent DC solves, seeded by matched ideal internal-net voltages.
+
+    The LVS cross-reference maps reference gate nets to actual extracted names.
+    .nodeset supplies Newton guesses only, never .ic/uic or voltage constraints.
+    Output checks still use the independent integer arithmetic oracle.
+    """
+    inputs = [p.name for p in net.ports if p.dir=='input']
+    outputs = [p.name for p in net.ports if p.dir=='output']
+    mapping = {key.lower():value for key,value in reference_net_map(lvs_report,net.top).items()}
+    ports = {p.name.lower() for p in net.ports}
+    def guesses(vector):
+        values = evaluate_netlist(net,dict(zip(inputs,vector)),return_all=True)
+        result = {}
+        for name,value in values.items():
+            if name.lower() in ports: continue
+            if name.lower() not in mapping:
+                raise RuntimeError(f'LVS does not map internal reference net {name}')
+            node = mapping[name.lower()]
+            node = simulation_netlist('\\'+node if node.startswith('$') else node)
+            result['xdut.'+node] = 5*int(value)
+        return result
+    models = {p.name:file_hash(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}
+    digest = _key(dict(circuit=circuit,vectors=vectors,models=models,
+        expected=[expected(v) for v in vectors],mapping=mapping,
+        code={name:file_hash(Path(__file__).with_name(name))
+              for name in ('scaling.py','characterize.py','bench.py','spice.py','runner.py')}))
+    folder = Path(folder);folder.mkdir(parents=True,exist_ok=True)
+    manifest = folder/'static_cache.json';data_path = folder/'static.json'
+    if manifest.is_file() and data_path.is_file():
+        cached = json.loads(manifest.read_text())
+        if cached.get('sha256')==digest and cached.get('data_sha256')==file_hash(data_path):
+            return json.loads(data_path.read_text())
+    dc = dc_operating_points(circuit,net.top,inputs,outputs,vectors,expected,
+                            timeout=timeout,workdir=folder/'static',nodeset=guesses)
+    for row in dc:
+        row['static_power_w'] = -sum(v*row['rail_current_a'][rail]
+                                    for rail,v in (('VDD',5.),('VMID',0.),('VSS',-5.)))
+    _save(data_path,dc)
+    _save(manifest,dict(sha256=digest,data_sha256=file_hash(data_path)))
+    return dc
 
 
 def run_size(n, *, build_root=None, seeds=(7,0,19), hold_s=1e-6, step_s=2e-9,
@@ -168,19 +213,15 @@ def run_size(n, *, build_root=None, seeds=(7,0,19), hold_s=1e-6, step_s=2e-9,
                                transitions=samples)
         print(f'N={n}: static operating points',flush=True)
         unique = list(dict.fromkeys(tuple(v) for v in vectors))
-        dc = dc_operating_points((out/'postlayout.spice').read_text(),net.top,inputs,outputs,unique,expected,
-                                  timeout=timeout,workdir=out/'static')
-        for row in dc:
-            row['static_power_w'] = -sum(v*row['rail_current_a'][rail]
-                                        for rail,v in (('VDD',5.),('VMID',0.),('VSS',-5.)))
-        _save(out/'static.json',dc)
+        lvs = json.loads((out/'lvs.json').read_text())
+        dc = static_points(net,(out/'postlayout.spice').read_text(),lvs['report'],unique,expected,
+                           timeout=timeout,folder=out)
         if experiment_sources() != sources:
             raise RuntimeError('Inputs/code changed during scaling run; rerun to qualify the new revision')
         artifacts = [directory/f'{net.top}{suffix}' for suffix in ('.json','.gds','.pnr.json')]
         artifacts += [out/name for name in ('summary.json','lvs.json','prelayout.spice','postlayout.spice',
-            'capacitance.json','ir_drop.json','vectors.json','static.json','pre/measurements.json','post/measurements.json',
+            'capacitance.json','ir_drop.json','vectors.json','static.json','static_cache.json','pre/measurements.json','post/measurements.json',
             'pre/waveforms.npz','post/waveforms.npz')]
-        lvs = json.loads((out/'lvs.json').read_text())
         artifacts += [Path(lvs['extracted']),Path(lvs['report'])]
         record.update(state='complete',passed=summary['passed'] and all(r['passed'] for r in dc),
             cell_count=len(net.instances),die_area_um2=pnr.stats['die_area_um2'],die_size_um=pnr.stats['die_size_um'],

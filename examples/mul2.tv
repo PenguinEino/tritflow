@@ -1,0 +1,14 @@
+`include "mul1.tv"
+`include "half_add.tv"
+
+// (a0+3*a1)*(b0+3*b1) = p0+3*p1+9*p2+27*p3.
+// Four one-trit products and two half adders preserve the exact integer.
+module mul2(input trit [1:0] a, b, output trit [3:0] p);
+  wire trit cross01, cross10, high, carry;
+  mul1 u00 (.a(a[0]), .b(b[0]), .p(p[0]));
+  mul1 u01 (.a(a[0]), .b(b[1]), .p(cross01));
+  mul1 u10 (.a(a[1]), .b(b[0]), .p(cross10));
+  mul1 u11 (.a(a[1]), .b(b[1]), .p(high));
+  half_add middle (.a(cross01), .b(cross10), .sum(p[1]), .carry(carry));
+  half_add upper (.a(high), .b(carry), .sum(p[2]), .carry(p[3]));
+endmodule

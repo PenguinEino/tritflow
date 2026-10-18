@@ -1,0 +1,9 @@
+// Compare a0+3*a1 and b0+3*b1. cmp is -1, 0, +1 for less/equal/greater.
+// A nonzero high-digit comparison dominates the low digit. Repeated
+// saturated addition implements sat(2*high+low) without signal arithmetic.
+module compare2(input trit [1:0] a, b, output trit cmp);
+  wire trit high, low;
+  assign high = ~nany(a[1], ~b[1]);
+  assign low = ~nany(a[0], ~b[0]);
+  assign cmp = ~nany(high, ~nany(high, low));
+endmodule

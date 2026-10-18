@@ -1,8 +1,8 @@
-# CELLS — Phase 4 in progress; compact library qualified
+# CELLS — Phase 4 complete; compact library qualified
 
 ## Published generation
 
-The live library is generation `2026-10-18T07:47:24.187502+00:00`. All nine cells now use
+The live library is generation `2026-10-18T08:40:04.261111+00:00` (Phase 4 evidence; physical views unchanged from `2026-10-18T07:47:24.187502+00:00`). All nine cells now use
 **132 um** common height and a **6 um** routing grid. The PNR library loader
 accepts every view. The tall generation remains in integrator tag `cells-v1-tall`.
 
@@ -157,17 +157,19 @@ runs phase 2 against `~/balanced-ternary-logic`. `--out` selects a private stage
 `python3 -m pytest tests/cells -q` includes the ported Phase 2 checks. Final
 run: **16 passed in 504.21 s (8:24)**, against an independently rebuilt private
 compact library. All published GDS/extraction/abstract verification hashes were
-rechecked after this run and still match. Phase 4 is in progress: compare actual-GDS
-estimated metal C on both layouts, document long-poly resistance, and publish
-the completed evidence atomically.
+rechecked after this run and still match. Phase 4 final run: **24 passed in
+492.89 s (8:12)**, including the new estimated-wire-C and poly checks. The full
+five-cell/four-cascade wire-C comparison also passed. No CELLS blockers remain.
 
 No extra packages installed. No reference or PDK files changed. Only owned paths
 were edited. No git-state-changing commands were run.
 
 ## Interface requests
 
-None. Consume final template/abstracts; retain the FILL method and device-only
-extraction scope when presenting results. Generation IDs support snapshot checks.
+None. Consume final template/abstracts; retain the FILL method. Distinguish the
+Phase 2 device-only identity proof from Phase 4 estimated-metal-C results; neither
+models poly R/C or full calibrated PEX. W/L DC sizing belongs to SIM. Generation
+IDs support snapshot checks.
 
 ## Publish journal
 
@@ -177,7 +179,7 @@ Evidence publish 2026-10-18T08:07:34.359407+00:00: five-cell original/compact eq
 
 Final verification 2026-10-18T08:22:49.239261+00:00: 16 CELLS tests passed; published phase-1 and phase-2 reports both passed; live input hashes unchanged.
 
-## Phase 4 — estimated wire C and poly resistance (in progress)
+## Phase 4 — estimated wire C and poly resistance
 
 The previous Phase 2 results establish **device-level identity only**, not
 layout performance equivalence: both networks omit all interconnect parasitics.
@@ -195,7 +197,7 @@ poly C and wire R are absent. Unconnected/purged metal is explicitly reported
 by the API. BUF's original reference is two original INV macros with an ideal
 connection, not a fabricated BUF layout; no original inter-macro route is invented.
 The same DC grids/current checks, 10/100 fF transitions, NANY skew cases and four
-cascade protocols are being repeated. Functional bands and hold times remain
+cascade protocols were repeated and all passed in both layouts. Functional bands and hold times remain
 unchanged; geometry-dependent timing differences are measured, not forced to zero.
 
 ### W/L sweep ownership decision
@@ -244,3 +246,111 @@ from signal gate buses in the inventory. The worst compact signal section is
 through these distributed resistances remains a timing concern. Metal-C checks
 cannot validate that effect; calibrated GC/contact R and poly C are needed for
 that claim. This limitation also applies to the original layout.
+
+### Parasitic-aware results
+
+All five cell comparisons and all four cascade protocols **pass** at the
+original functional limits. DC-grid differences are at most 7.62e-14 V; static
+current differences are zero. C is open at DC, so that agreement is expected.
+The following settling times include the estimated metal C plus the stated
+external load. Supplies are ideal; added rail C does not model IR drop or bounce.
+
+| Cell | DC error original / compact (mV) | Static current original / compact (uA) | Worst settling at 10 fF original / compact (ns) |
+|---|---:|---:|---:|
+| INV | 39.537 / 39.537 | 407.165 / 407.165 | 4.724 / 4.759 |
+| NAND | 102.597 / 102.597 | 435.377 / 435.377 | 10.039 / 10.053 |
+| NOR | 158.904 / 158.904 | 434.204 / 434.204 | 22.690 / 22.626 |
+| NANY | 44.640 / 44.640 | 421.373 / 421.373 | 19.465 / 19.556 |
+| BUF | 35.233 / 35.233 | 814.301 / 814.301 | 7.991 / 8.121 |
+
+NOR's slightly faster compact worst-case settling is consistent with its
+PMOS-side NET2 capacitance dropping by 1.557 fF; Y gains 0.709 fF. Rail
+extensions primarily load ideal supplies. NAND
+also loses 2.466 fF on NET1 while gaining 0.709 fF on Y. Most internal signal
+geometry is inherited unchanged. BUF gains 5.119 fF on its midpoint connection.
+The largest paired transition difference across all cell protocols is 0.557 ns
+(NANY, B delayed 2 ns); this differs from subtracting the two worst-case times
+because the worst transition can differ. All 10/100 fF and both skew suites pass.
+
+| Cascade | Worst sampled error original / compact (mV) | Worst settling across all stages original / compact (ns) | Maximum paired settling difference (ns) |
+|---|---:|---:|---:|
+| inverter_two | 39.537 / 39.537 | 8.049 / 8.135 | 0.092 |
+| nor_six | 215.532 / 215.532 | 74.078 / 74.085 | 0.226 |
+| nany_six | 122.452 / 122.452 | 113.857 / 114.318 | 0.461 |
+| mixed_six | 158.455 / 158.455 | 64.662 / 64.875 | 0.213 |
+
+Cascade DC curves agree within 2.02e-12 V. All stages meet the original
+20 ns (two INV) / 200 ns (six-stage) hold-time checks, including near-zero
+perturbations. These results support nominal functional agreement under the
+stated **estimated metal-C model only**, not full interconnect-RC equivalence.
+
+### Per-net estimated capacitance
+
+Values below are fF; full-precision C, per-layer merged area/perimeter,
+coefficient/API/source hashes and extracted-node correspondence are in
+`equivalence_report.json` → `parasitic_aware.per_net_capacitance` and
+`capacitance_details`. Net names come from the independently matched schematic,
+not the unrelated anonymous extraction numbers. Unloaded VMID metal purged
+from INV/NAND/NOR/BUF extraction is excluded; omitted area is reported explicitly
+by the API. The table lists every retained connected net.
+
+| Cell | Schematic net | Original C (fF) | Compact C (fF) |
+|---|---|---:|---:|
+| INV | A | 1.986 | 3.221 |
+| INV | NET1 | 6.368 | 6.368 |
+| INV | NET2 | 7.536 | 7.536 |
+| INV | VDD | 25.798 | 66.137 |
+| INV | VSS | 18.465 | 41.378 |
+| INV | Y | 4.543 | 6.030 |
+| NAND | A | 3.651 | 5.139 |
+| NAND | B | 5.132 | 6.619 |
+| NAND | NET1 | 23.432 | 20.966 |
+| NAND | NET2 | 13.277 | 13.277 |
+| NAND | NET3 | 4.465 | 4.465 |
+| NAND | VDD | 53.511 | 78.089 |
+| NAND | VSS | 26.662 | 55.987 |
+| NAND | Y | 8.515 | 9.223 |
+| NOR | A | 3.651 | 5.139 |
+| NOR | B | 5.132 | 6.619 |
+| NOR | NET1 | 10.694 | 10.694 |
+| NOR | NET2 | 17.189 | 15.632 |
+| NOR | NET3 | 14.678 | 14.678 |
+| NOR | VDD | 49.770 | 74.738 |
+| NOR | VSS | 28.418 | 57.742 |
+| NOR | Y | 8.515 | 9.223 |
+| NANY | A | 19.128 | 20.615 |
+| NANY | B | 15.885 | 17.372 |
+| NANY | NET1 | 9.656 | 9.656 |
+| NANY | NET2 | 17.347 | 17.347 |
+| NANY | NET3 | 15.291 | 15.291 |
+| NANY | NET4 | 3.945 | 3.945 |
+| NANY | NET5 | 13.524 | 13.524 |
+| NANY | NET6 | 13.524 | 13.524 |
+| NANY | VDD | 50.096 | 82.173 |
+| NANY | VMID | 18.008 | 50.966 |
+| NANY | VSS | 30.258 | 65.117 |
+| NANY | Y | 28.933 | 31.680 |
+| BUF | A | 1.986 | 3.221 |
+| BUF | MID | 6.529 | 11.648 |
+| BUF | STAGE0_NET1 | 6.368 | 6.368 |
+| BUF | STAGE0_NET2 | 7.536 | 7.536 |
+| BUF | STAGE1_NET1 | 6.368 | 6.368 |
+| BUF | STAGE1_NET2 | 7.536 | 7.536 |
+| BUF | VDD | 51.595 | 131.955 |
+| BUF | VSS | 36.930 | 80.832 |
+| BUF | Y | 4.543 | 6.030 |
+
+Annotated original/compact models and per-net geometry are retained under
+`cells/out/equivalence/parasitic/<CELL>/`; all DC/settling/cascade decks and
+logs are below that comparison tree. Public `.ext.spice` remains the clean
+device-only LVS view. `python3 -m tritflow.cells parasitic` reproduces Phase 4
+in a private full-library snapshot and atomically publishes the evidence.
+
+Publish 2026-10-18T08:40:04.261111+00:00: Phase 4 original/compact estimated wire-C comparison PASS for five cells and four cascades; 24 CELLS tests passed; physical cell views unchanged. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.
+
+Final Phase 4 validation 2026-10-18T08:40:04.374013+00:00: **24 tests passed**;
+all five estimated-wire-C cell comparisons and four cascades passed. Published
+via whole-directory atomic exchange. All nine cells' GDS/SPICE/extraction/abstract/
+truth/PNG hashes match the prior generation; latest live SIM characterizations
+and sizing artifacts were preserved. No SIM/extract code or PDK/reference files
+were edited. No extra dependencies or git-state changes.

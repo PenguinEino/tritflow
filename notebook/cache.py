@@ -25,7 +25,8 @@ def runtime_fingerprint(root, pdk):
     files = [*root.glob("tritflow/**/*.py"), *root.glob("cells/out/**/*.gds"),
              *root.glob("cells/out/**/*.spice"), *root.glob("cells/out/**/*.char.json"),
              root/"cells/template.json", root/"notebook/setup_pins.json",
-             root/"notebook/tritflow_tr1um.ipynb", root/"notebook/cache.py"]
+             root/"notebook/tritflow_tr1um.ipynb", *root.glob("notebook/*.py"),
+             *root.glob("examples/*.tv"), *root.glob("examples/*.py")]
     files += [p for folder in ["libs.tech/klayout/tech/drc", "libs.tech/klayout/tech/lvs",
                               "libs.tech/spice/models"] for p in (pdk/folder).rglob("*") if p.is_file()]
     digest = sha256(sys.version.encode())
@@ -53,6 +54,21 @@ def _json(value):
     raise TypeError(f"cannot cache {type(value).__name__}")
 
 
+def _restore(value):
+    """Restore native simulation arrays even inside a pre/post experiment pair."""
+    if isinstance(value, list):
+        return [_restore(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    result = {key: _restore(item) for key, item in value.items()}
+    for key in ("waveforms", "data"):
+        if key in result and isinstance(result[key], dict):
+            result[key] = {name: np.asarray(array) for name, array in result[key].items()}
+    if "stimulus" in result:
+        result["stimulus"]["vectors"] = [tuple(v) for v in result["stimulus"]["vectors"]]
+    return result
+
+
 class Cache:
     """Cache native dict results only when context/options/artifact hashes agree."""
 
@@ -73,13 +89,7 @@ class Cache:
                                            for p, h in saved["artifacts"].items()):
                 self.events.append((name, "hit"))
                 print(f"Cache hit: {name}")
-                result = saved["result"]
-                for array_key in ("waveforms", "data"):
-                    if array_key in result:
-                        result[array_key] = {k: np.asarray(v) for k, v in result[array_key].items()}
-                if "stimulus" in result:
-                    result["stimulus"]["vectors"] = [tuple(v) for v in result["stimulus"]["vectors"]]
-                return result
+                return _restore(saved["result"])
         print(f"Running: {name}")
         result = producer()
         paths = artifacts(result) if callable(artifacts) else artifacts
