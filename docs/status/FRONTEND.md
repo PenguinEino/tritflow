@@ -1,8 +1,51 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 9 implemented; native capture and package refresh in progress.**
+Updated: 2026-10-18. **Phase 9 complete locally: Colab-safe setup, schematic stage, saved-output package and fresh timings verified.**
 
-## Phase 9 — in progress
+## Phase 9 — complete
+
+Final local validation uses the pinned public PDK at
+`$TR1UM_PDK=/home/ishi-kai/pdk/TR-1um-pinned`, commit
+`5d963db9d44e192d37a0489c208bfccf2e2f690c`. Installed tools were unchanged:
+Python 3.12.3, native KLayout 0.30.9, Python klayout 0.30.6, ngspice 46+.
+No packages were installed, and no git-writing command, PR or push was run.
+
+| Check | Final observed result |
+|---|---|
+| Fresh full native capture (`TRITFLOW_FORCE_RUN=1`) | **402.72 s**, 17 source code cells, all successful |
+| Fresh default capture (empty output directory) | **86.07 s**, fresh opening adder/NANY/editable circuit, four designs labelled recorded |
+| Warm headless notebook | **1.8 s** inside notebook, no PNG export |
+| HDL/synth/viz/notebook/submission regression | **269 passed in 28.75 s**, zero failures/skips |
+| Separate public SCHEM/facade integration checks | **86 passed in 10.35 s** |
+| Final reviewer package audit | **8 files, 2,636,975 bytes; 17 code cells, 94 outputs, 28 PNGs, 33 HTML tables; no errors** |
+
+These are local execution/capture times with installed tools, not clean-Colab
+installation-inclusive measurements. The setup's non-mutating Ubuntu 24.04
+plan confirms `--no-deps` and only two pinned wheels. Tests reproduce both a
+preloaded/disk version mismatch and the original `_blas_supports_fpe` exception,
+requiring restart guidance before physical work. Old host versions fail before
+apt/download; an old release missing the new setup helper fails clearly.
+Actual Colab Python 3.13 still needs the separate exact-release rerun.
+
+All required sizing/cell/width/load results render without result TODO slots.
+The optional display-only source-compatibility proof is disclosed below and
+in the saved notebook; no old SIM result was rewritten as new qualification.
+The new native four-design record was produced against all **172** complete
+current input files, with **54 native evidence members**, in the updated
+**4,726,521-byte** `notebook/assets/four_designs.zip`. Its input hashes still
+match. Both schemas share exact logical signal names with the PNR C report.
+The four native designs spent **290.71 s** in ngspice, **25.74 s** in PNR/DRC
+plus strict LVS, and **0.37 s** in wire-C estimation. All controls retain the
+same intrinsic devices, terminal orientation, guesses, vectors and criteria.
+
+Final raw captures are under
+`/tmp/tritflow-submission-phase9/{native-final,default-final}/`; logs are
+`/tmp/tritflow-phase9-{native-final,default,archive,final-tests,warm}.log`.
+The submission folder was rebuilt from the successful fresh default capture;
+`python3 submission/build_submission.py --check` passes. Root NOTICE is copied
+verbatim (SHA-256 `7630ddc3e330372ca17a712384c28b95adda04fe7c6e19ebe8aa35e587090738`).
+Inspected the saved hierarchical, flat half-adder and routed-C SVG/PNG views;
+trit values and legend are legible, and the overlay preserves scene identity.
 
 - Colab now pins only KLayout and Lark. Pip uses `--no-deps`, preserving
   preloaded NumPy/SciPy/Matplotlib/Plotly. Minimum-version/live-versus-disk
@@ -27,7 +70,8 @@ Updated: 2026-10-18. **Phase 9 implemented; native capture and package refresh i
   setup/imports; an actual retained PNR layout yielded 37 overlay nets.
   Pre-capture regression: 262 passed in 25.60 s, excluding the previous
   payload and two explicitly stale SIM-publication checks. Full native
-  notebook execution has started in `/tmp/tritflow-submission-phase9/native`.
+  notebook execution was restarted under the final path below after the
+  compatibility proof was added.
 
 ### Phase 9 interface requests
 
@@ -41,14 +85,14 @@ to equal the recorded SHA. Every other source byte and every HDL/library/PDK
 input must still match. The recorded/live hashes and proof appear in a collapsed
 notebook evidence block; no claim of new SIM qualification is made. No SIM
 result/hash was rewritten. Added unrelated-byte, decorator and report-code
-negative controls; all 11 experiment/publication/document tests pass (0.22 s).
+negative controls; all 11 experiment/publication/document tests pass (0.29 s).
 A later SIM republication can remove the need for this compatibility case;
 it is not required to display current, unchanged physics. The full fresh local
-four-design archive will still be regenerated against the complete new code.
+four-design archive has been regenerated against the complete new code.
 
 The initial private native attempt was stopped before completing the four-design
 loop when this compatibility check was added; it is not a published capture.
-Final native execution is `/tmp/tritflow-submission-phase9/native-final`.
+Final native execution succeeded at `/tmp/tritflow-submission-phase9/native-final`.
 The exact reconstructed-hash proof replaces the earlier external publication
 request; it does not relax abstract/manifest/library/model/deck checks.
 

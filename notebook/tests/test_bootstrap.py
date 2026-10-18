@@ -19,7 +19,7 @@ URL = "https://github.com/PenguinEino/tritflow.git"
 
 
 def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False, dirty=False,
-              clone_failure=False, configured=False):
+              clone_failure=False, configured=False, missing_helper=False):
     """Use real temporary files, intercept every command, and substitute only /content."""
     target = tmp_path/"tritflow"
     commands = []
@@ -27,7 +27,8 @@ def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False
     def seed():
         (target/".git").mkdir(parents=True)
         (target/"notebook").mkdir()
-        (target/"notebook/runtime_support.py").write_text("# source-asset presence fixture\n")
+        if not missing_helper:
+            (target/"notebook/runtime_support.py").write_text("# source-asset presence fixture\n")
 
     if existing:
         seed()
@@ -113,3 +114,8 @@ def test_missing_tag_does_not_fall_back_to_main(monkeypatch, tmp_path):
     with pytest.raises(subprocess.CalledProcessError) as error:
         run_colab(monkeypatch, tmp_path, clone_failure=True)
     assert "colab-v0" in error.value.cmd
+
+
+def test_old_release_missing_setup_helper_explains_matching_ref(monkeypatch,tmp_path):
+    with pytest.raises(RuntimeError,match="TRITFLOW_REF predates.*matching immutable release"):
+        run_colab(monkeypatch,tmp_path,missing_helper=True)
