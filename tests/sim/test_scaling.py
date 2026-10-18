@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from tritflow.hdl import load
 from tritflow.synth import synthesize, evaluate_netlist
 from tritflow.sim.scaling import adder_oracle,adder_vectors,_valid_cache
@@ -45,6 +47,31 @@ def test_figures_preserve_failed_load_and_adopted_marker():
     figure=load_sweep_figure(result)
     assert figure.data[0].y[0] is None
     assert figure.data[1].y[0]==500
+
+
+@pytest.mark.parametrize('loads_pf',[
+    [.01,1,12.8125,12.96875,30],
+    [2,1,.1],
+])
+def test_load_sweep_log_range_stays_within_measured_loads(loads_pf):
+    rows=[{'load_f':load*1e-12,'max_error_v':.1,'max_settling_s':{'sum':100e-9},
+           'passed':True,'failures':[]} for load in loads_pf]
+    last_pass,first_fail=sorted(loads_pf)[-2:]
+    result={'rows':rows,'conditions':{'hold_s':500e-9},'outputs':['sum'],
+            'boundary_found':True,'boundary':{'last_pass_f':last_pass*1e-12,'first_fail_f':first_fail*1e-12}}
+    figure=load_sweep_figure(result)
+    assert figure.layout.xaxis.type=='log'
+    assert figure.layout.xaxis.autorange is False
+    # Plotly log ranges are exponents. The old boundary annotation stretched
+    # autorange to ~10**13 pF, despite the largest measured load being 30 pF.
+    lower,upper=(10**bound for bound in figure.layout.xaxis.range)
+    assert lower==pytest.approx(min(loads_pf))
+    assert upper==pytest.approx(max(loads_pf))
+    boundary=next(a for a in figure.layout.annotations if a.text.startswith('Measured PASS'))
+    window=next(a for a in figure.layout.annotations if a.text.endswith('ns window'))
+    assert boundary.xref==boundary.yref=='paper' and boundary.y>1
+    assert window.xref=='x domain' and window.yref=='y'
+    assert window.yanchor=='top'  # window text below the line; boundary above plot
 
 
 def test_imported_code_provenance_is_frozen_but_model_inputs_are_live(monkeypatch):
