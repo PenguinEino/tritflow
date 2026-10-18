@@ -19,9 +19,7 @@ print(f"DRC clean: {drc['clean']} · LVS match: {lvs['matched']} · analog PASS:
 '''
 
 GATES = r'''
-gates = flow.loads("""module gates(input trit a, b, output trit inva, nandab, norab, nanyab);
-  assign inva = ~a;  assign nandab = ~(a & b);  assign norab = ~(a | b);  assign nanyab = nany(a, b);
-endmodule""")
+gates = flow.load(ROOT/"examples/gates.tv", "gates")       # the definition shown above
 t = gates.truth_table()                                    # all nine input pairs, ideal trits
 curve = dc_transfer((CELLS_DIR/"out/INV/INV.ext.spice").read_text(), "INV", ["A"], ["Y"], "A",
                     fixed_trits={}, step_v=0.02)["data"]   # extracted INV layout, DC sweep in ngspice
@@ -127,31 +125,39 @@ table([["Check", "Result"]] + [[k, chip[k]] for k in
 '''
 
 EDIT = r'''
-from examples.curated import DESIGNS
-from tritflow.synth import evaluate_netlist
-CHOICE = os.environ.get("TRITFLOW_CIRCUIT", "minmax")  # sign | compare2 | mul2 | minmax
-example = DESIGNS[CHOICE]
-# Edit this HDL literal, then run the next cell. This successful first edit
-# replaces min(a,b) with its equivalent De Morgan expression on trits.
-source = """module minmax(input trit a, b, output trit lo, hi);
-  assign lo = ~((~a) | (~b));
-  assign hi = a | b;
+# Your circuit: edit this TritVerilog, then run the cells below.
+# This first edit writes min(a, b) through De Morgan, as -max(-a, -b).
+source = """
+module minmax(input  trit a, b,
+              output trit lo, hi);
+  assign lo = ~((~a) | (~b));   // min(a, b)
+  assign hi = a | b;            // max(a, b)
 endmodule
-""" if CHOICE == "minmax" else example.path.read_text()
-print(example.description)
-display(Code(source,language="verilog"))
+"""
 '''
 
 BROKEN = r'''
 from tritflow.hdl import HDLError
-broken = """module broken(input trit a,b,output trit y);
- assign y = a + b;
-endmodule"""
+broken = """
+module broken(input trit a, b, output trit y);
+  assign y = a + b;   // '+' on signals is not a gate
+endmodule
+"""
 try:
-    flow.loads(broken,"broken",filename="your_circuit.tv")
+    flow.loads(broken, "broken", filename="your_circuit.tv")
 except HDLError as error:
     print(error)
-    print("Repair: use gates for signal arithmetic; e.g. nany(a,b) gives the negative saturated sum.")
+    print("Repair: use gates for signal arithmetic; e.g. nany(a, b) gives the negative saturated sum.")
 else:
     raise AssertionError("unsupported signal arithmetic must be rejected")
+'''
+
+PICK = r'''
+from examples.curated import DESIGNS
+from tritflow.synth import evaluate_netlist
+CHOICE = os.environ.get("TRITFLOW_CIRCUIT", "minmax")   # or: sign | compare2 | mul2
+example = DESIGNS[CHOICE]                                # its independent arithmetic reference
+if CHOICE != "minmax":
+    source = example.path.read_text()
+print(example.description)
 '''
