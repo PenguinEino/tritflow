@@ -33,13 +33,13 @@ def make():
     fig, axes = plt.subplots(1, 3, figsize=(style.DOUBLE, 2.15), gridspec_kw={"wspace": 0.42})
 
     ax = axes[0]
-    for y, c, lab in ((pre, style.BLUE, "schematic"), (post, style.ORANGE, "extracted layout")):
+    for y, c, lab in ((pre, style.BLUE, "extracted devices"), (post, style.ORANGE, "+ wire C")):
         k, b = fit(n, y)
         xs = np.linspace(0.6, 6.4, 2)
         ax.plot(xs, k * xs + b, color=c, lw=0.8, alpha=0.6)
         ax.plot(n, y, "o", ms=4, color=c, mec="white", mew=0.6, label=f"{lab}: {k:.1f} ns/trit")
     ax.set_xlabel("Adder width $N$ (trits)")
-    ax.set_ylabel("Worst carry settling (ns)")
+    ax.set_ylabel("Worst settling, carry/MSB (ns)")
     ax.set_ylim(bottom=0)
     ax.legend(loc="upper left", handletextpad=0.2)
 
@@ -54,7 +54,7 @@ def make():
     ax.text(0.97, 0.06, f"{k:.2f} mW per cell", transform=ax.transAxes, ha="right",
             fontsize=7, color=style.INK)
     ax.set_xlabel("Cells")
-    ax.set_ylabel("Idle supply power, worst input (mW)")
+    ax.set_ylabel("Static power, max over states (mW)")
     ax.set_xlim(0, cells.max() * 1.08)
     ax.set_ylim(0, p_worst.max() * 1.15)
 

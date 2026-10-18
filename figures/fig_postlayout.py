@@ -1,4 +1,4 @@
-"""Fig. 8 — full adder, all 27 inputs: schematic vs extracted layout, and the load at which it fails."""
+"""Fig. 8 — full adder, all 27 inputs: extracted devices without vs with wire C, and the load at which it fails."""
 
 import json
 
@@ -51,9 +51,9 @@ def make():
 
     for ax, out in ((asum, "sum"), (acout, "cout")):
         style.bands(ax)
-        ax.plot(t, pre[f"v({out})"], color=style.BLUE, lw=0.9, label="schematic")
+        ax.plot(t, pre[f"v({out})"], color=style.BLUE, lw=0.9, label="extracted devices")
         ax.plot(post["time"] * 1e6, post[f"v({out})"], color=style.ORANGE, lw=0.9,
-                ls=(0, (3, 1.5)), label="extracted layout + wire C")
+                ls=(0, (3, 1.5)), label="+ wire C")
         ax.set_ylabel(f"$V_{{\\mathrm{{{out}}}}}$ (V)")
         ax.set_yticks([-5, 0, 5])
         ax.set_ylim(-6, 6)
@@ -65,8 +65,8 @@ def make():
     rows = meas_post["rows"]
     k = max(range(1, len(rows)), key=lambda i: rows[i]["outputs"]["sum"]["settling_s"] or 0)
     t0 = k * hold
-    for w, color, ls, meas, lab in ((pre, style.BLUE, "-", meas_pre, "schematic"),
-                                    (post, style.ORANGE, (0, (3, 1.5)), meas_post, "layout")):
+    for w, color, ls, meas, lab in ((pre, style.BLUE, "-", meas_pre, "devices only"),
+                                    (post, style.ORANGE, (0, (3, 1.5)), meas_post, "+ wire C")):
         tt = (w["time"] - t0) * 1e9
         sel = (tt > -20) & (tt < 200)
         azoom.plot(tt[sel], w["v(sum)"][sel], color=color, lw=1.1, ls=ls)
@@ -80,9 +80,9 @@ def make():
     azoom.set_title(f"slowest sum step, (a,b,cin) {tuple(prev)} → {tuple(cur)}".replace("-1", "−1"),
                     loc="left", fontsize=7)
     from matplotlib.lines import Line2D
-    azoom.legend(handles=[Line2D([], [], color=style.BLUE, lw=1.1, label="schematic"),
+    azoom.legend(handles=[Line2D([], [], color=style.BLUE, lw=1.1, label="extracted devices"),
                           Line2D([], [], color=style.ORANGE, lw=1.1, ls=(0, (3, 1.5)),
-                                 label="extracted layout\n+ wire C")],
+                                 label="devices + wire C")],
                  loc="center right", fontsize=6.5, handlelength=1.8)
     azoom.set_xlabel("Time from input step (ns)")
     azoom.set_ylabel("$V_{\\mathrm{sum}}$ (V)")
