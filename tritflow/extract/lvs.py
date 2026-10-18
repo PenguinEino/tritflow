@@ -133,11 +133,30 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
     ref = out / 'reference.spice'
     if text is not None:
         ref.write_text(lvs_netlist(text))
+    # The pinned deck compares pin names as well as topology. Normalize only
+    # labels that actually exist, in a scratch GDS, using synthesis' encoding.
+    # Missing labels remain missing; source geometry and source GDS are untouched.
+    from tritflow.synth.writers import spice_names
+    safe_top = spice_names([top])[top]
+    deck_top = safe_top if text and safe_top.lower() in subcircuits(text) else top
+    decoded = logical_spice_names(text or '')
+    normalized_gds = gds
+    if decoded or deck_top != top:
+        layout = db.Layout(); layout.read(str(gds))
+        encode = {logical: encoded for encoded, logical in decoded.items()}
+        changes = 0
+        for cell in layout.each_cell():
+            for layer in ((48,0),(48,1),(49,0),(49,1)):
+                for shape in cell.shapes(layout.layer(*layer)).each():
+                    if shape.is_text() and shape.text.string in encode:
+                        label=shape.text;label.string=encode[label.string];shape.text=label;changes+=1
+        if deck_top != top: layout.cell(top).name=deck_top
+        normalized_gds=out/'spice_named_input.gds';layout.write(str(normalized_gds))
     extracted, report = out / f'{top}.ext.spice', out / f'{top}.lvsdb'
     for path in (extracted, report):
         path.unlink(missing_ok=True)
     command = [str(executable), '-b', '-r', str(deck)]
-    options = dict(input=gds, top_cell=top, report=report, extracted=extracted)
+    options = dict(input=normalized_gds, top_cell=deck_top, report=report, extracted=extracted)
     options.update(circuit=ref) if text is not None else options.update(netlist_only='true')
     for name, value in options.items():
         command.extend(['-rd', f'{name}={value}'])
@@ -163,16 +182,15 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
     circuits = [{'layout': pair.first().name if pair.first() is not None else None,
                  'reference': pair.second().name if pair.second() is not None else None,
                  'status': str(pair.status())} for pair in pairs]
-    layout_top = subcircuits(extracted.read_text()).get(top.lower())
-    reference_top = subcircuits(text).get(top.lower())
+    layout_top = subcircuits(extracted.read_text()).get(deck_top.lower())
+    reference_top = subcircuits(text).get(deck_top.lower())
     layout_pins = {p.lower() for p in layout_top['pins']} if layout_top else set()
-    decoded = logical_spice_names(text)
-    reference_pins = {decoded.get(p,p).lower() for p in reference_top['pins']} if reference_top else set()
+    reference_pins = {p.lower() for p in reference_top['pins']} if reference_top else set()
     restored=[]; physical_evidence={}
     # The PDK purges physically present pass-through rails with no device loads.
     # Restore only reference power formals proven unused through the hierarchy.
     for pin in sorted(reference_pins-layout_pins):
-        if pin in {'vdd','vmid','vss'} and layout_top and _unused_pin(subcircuits(text),top,pin):
+        if pin in {'vdd','vmid','vss'} and layout_top and _unused_pin(subcircuits(text),deck_top,pin):
             evidence = _physical_rail(gds, top, pin)
             if evidence:
                 restored.append(pin.upper()); physical_evidence[pin.upper()] = evidence
@@ -181,7 +199,7 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
     if restored:
         raw=extracted.read_text()
         (out/f'{top}.raw.ext.spice').write_text(raw)
-        signature=re.compile(r'(?im)^(\s*\.subckt\s+'+re.escape(top)+r'\b[^\n]*)')
+        signature=re.compile(r'(?im)^(\s*\.subckt\s+'+re.escape(deck_top)+r'\b[^\n]*)')
         extracted.write_text(signature.sub(lambda m:m[1]+' '+' '.join(restored),raw,count=1))
         layout_pins.update(p.lower() for p in restored)
     if layout_top is None or reference_top is None or layout_pins != reference_pins:
@@ -190,8 +208,13 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
     matched = (bool(pairs) and not errors
                     and all(p.status() == db.NetlistCrossReference.Match for p in pairs)
                     and 'Congratulations! Netlists match.' in log)
+    if decoded:
+        annotations='\n'.join(f'* net {encoded} = {logical}' for encoded,logical in decoded.items())
+        extracted.write_text(annotations+'\n'+extracted.read_text())
     return dict(matched=matched, extracted=str(extracted), report=str(report),
                 circuits=circuits, errors=errors, log=log, strict_ports=True,
                 unused_power_formals_restored=restored,
                 unused_power_physical_evidence=physical_evidence,
+                spice_name_map={logical:encoded for encoded,logical in decoded.items()},
+                label_normalization_gds=str(normalized_gds) if normalized_gds!=gds else None,
                 scope='PDK device extraction; intrinsic device parasitics; no signal-wire resistance')

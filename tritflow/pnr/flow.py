@@ -31,6 +31,11 @@ class PnrResult:
         from .signoff import signoff
         return signoff(self, **options)
 
+    def to_chip(self, **options):
+        """Build and qualify a separate OpenSUSI full-chip TEG wrapper."""
+        from .chip import chip
+        return chip(self, **options)
+
 
 def _floorplan_choice(netlist, library, rows, channel_tracks, currents, capacity, power_options):
     """Choose a small, nearly square grid of independently powered row spans."""
