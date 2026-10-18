@@ -1,266 +1,293 @@
-# REVIEW — completed independent audit
+# REVIEW — round 2, reader and editorial review
 
-**The frozen implementation passes its tests and default local notebook;
-release reproducibility and verification gaps remain.** Ranked findings:
-one release blocker, four major, three minor. No code or notebook was edited.
+**Integrate the narrative drafts and paper figures. They materially improve the notebook.**
+The working flow is convincing; the current reading path still hides its two reasons to
+remember it. This round finds five major reader-facing issues and one minor figure-layout
+issue. It does not reopen the completed Colab or round-1 engineering qualification.
 
-The commit actually cloned/tested is
-**`37034be20dc02d8ee82d15170b955b6ef2777d70`**, 2026-10-18 09:03 UTC.
-Other streams continued working. Later read-only comparison observed HEAD
-`a7d6da281ae33f486c75907efaf3256090c18282`; the facade, extractor, cache, naming
-and notebook-generator paths implicated below remained unchanged when checked.
-Later timing/poly/diagnosis/signoff additions are outside the frozen suite.
-See [clone hashes](../../logs/review/clone_manifest.json),
-[concurrent delta](../../logs/review/concurrent_delta.txt) and
-[full claims ledger](../../logs/review/claims_audit.md).
+Read `docs/editorial.md` first and treated its purpose, two memorable points, chapter
+structure and reading budget as binding. Reviewed as a ten-minute ISSCC Code-a-Chip skim
+and a 25-minute IC-design read. These are editorial judgments, not a measured reader study.
 
-## Reproduction decisions
+Snapshot: **`9ca9ba471121a466a602e5a70806e9e6ac5c01b5`**, cloned read-only for targeted
+checks at `/tmp/tritflow-review2-0pq0qhoz/source`. Release **`colab-v0 = 842afe27bead953c9ffd48a7ddceadb57fe0d39d`**
+passed real free-Colab Run all in **384.1 s including setup**, all **17 code cells**.
+The retained COLAB report/screenshots and `notebook/colab_verified.json` support that result.
+I did not repeat Run all. All nine `figures/out/*.png`, the chapter drafts, captions,
+prediction instructions and relevant Colab screenshots were inspected.
 
-- Only this file and `logs/review/` are written in the shared checkout. The
-  explicitly requested local clone is `/tmp/tritflow-review-wox2aqgy/source`.
-  No checkout/reset/stash/commit is performed. Generated runs stay in scratch.
-- Fresh Python 3.12 venv, pinned `notebook/requirements-colab.txt`, editable
-  package, pytest, nbconvert and ipykernel. System ensurepip is unavailable, so
-  `venv --without-pip` plus system pip's `--python <venv>/bin/python` installs
-  into that isolated venv. No shared interpreter packages are changed.
-- Fresh PDK archive at pinned commit
-  `5d963db9d44e192d37a0489c208bfccf2e2f690c`; SHA-256 verified against
-  `notebook/setup_pins.json`. No HOME PDK/reference files are modified.
-- Host is Ubuntu 24.04/aarch64. The checksum-correct official Ubuntu 24.04
-  KLayout 0.30.6 binary is amd64 and fails with `Exec format error`. Therefore
-  the native runs use installed KLayout executable 0.30.9 and fresh Python
-  klayout 0.30.6, plus installed ngspice 46+. This is explicitly not a clean
-  amd64 Colab installation test.
-- Run the whole `tests` **and** `notebook/tests` suite, and execute every
-  notebook cell with nbconvert in its own venv kernel. `--allow-errors` preserves
-  error outputs and lets later independent cells run; errors, not nbconvert's
-  exit status alone, determine success.
+Other streams changed files during review. The final observed HEAD was
+`b0319024f2d16fc28f0633880b687b24e51e4430` (STA phase 4), after `638bb02`,
+with pending notebook/package edits.
+The live generator now shortens the introduction, prints the verified Colab time and adds
+Appendix B. SIM's `a6a81c1` repairs the load-plot axis. Those improvements are credited
+below; the original stale release warning and trillion-pF axis are **not** new open findings.
+Evidence: [snapshot/context](../../logs/review/round2/context.json),
+[live delta](../../logs/review/round2/live_delta.json),
+[figure inventory](../../logs/review/round2/figures_inspected.json).
 
-Fresh dependency install took **20.54 s**; PDK download/extraction **6.04 s**.
-PDK archive SHA-256 is
-`003010a0f64fafb96acf5a0d18614c096d8faf6ade29e13af4bde54d85262769`.
-Exact package versions are in [environment.json](../../logs/review/environment.json)
-and [frozen requirements](../../logs/review/requirements_frozen.txt). The pinned
-binary architecture failure is in [pinned_klayout.json](../../logs/review/pinned_klayout.json).
+## The two reader judgments
 
-## Reproduction results
+**Ten-minute skim:** the title says HDL to GDS, but the first screen does not tell me why
+this particular flow matters. Japan's open 1 µm PDK, the author's taped-out starting cells,
+the actual clean layout and the static-power cost are not presented together. At the
+reviewed commit the introduction is 439 words, largely author/setup/reuse instructions;
+the live shortened version is 164 words including metadata, but still has no teaser image,
+Japan/tapeout context or power takeaway. I would skim to the figures. Until the scaling
+plot, I could mistake this for another general HDL tutorial with unusually extensive checks.
 
-| Check | Result | Evidence |
-|---|---|---|
-| Whole suite, including notebook tests | **338 passed, zero failures/skips**, pytest **866.14 s**, process wall **866.45 s** | [log](../../logs/review/pytest.log), [JUnit](../../logs/review/pytest.xml) |
-| Cold nbconvert | **31 cells / 16 code cells**, zero errors, wall **412.41 s** | [executed notebook](../../logs/review/executed.ipynb), [result](../../logs/review/notebook_result.json) |
-| Warm nbconvert | Zero errors, wall **2.63 s**, all nine expensive stages hit | [warm notebook](../../logs/review/executed_warm.ipynb), [result](../../logs/review/notebook_warm_result.json) |
-| Scaling/load publication slots | Both skipped with explicit stale-PDK TODOs | [stdout](../../logs/review/notebook_stdout.txt), [publication audit](../../logs/review/publication_audit.json) |
-| Printed numerical table consistency | **188 scalar values agree** with full-precision JSON within rounding | [numeric audit](../../logs/review/numeric_claims.json) |
-| Extra unwaived MDP → IP62 checks | adder4 **46 WAR06**, full_add **16 WAR06**; all external-input gates; both clean/submission_ready false | [signoff](../../logs/review/signoff.json) |
+**25-minute IC-design read:** I can trace the implementation and trust the checks. I cannot
+easily tell what I am meant to predict, vary or conclude. Chapter 2 describes the
+characterization machinery before explaining the divider. Chapters 4/5 repeat the same
+arithmetic at several representations. Chapter 7 mixes the electrical result with long
+instructions about records and solver initialization. The engineering detail is useful,
+but its placement makes the central circuit insight an inference the reader must make.
 
-Cold execution recomputed all stages; its four-design block took **365.11 s**.
-The test suite and other project streams ran concurrently, so wall times are
-observations on this host, not a Colab/install-inclusive ten-minute guarantee.
-The warm run also passed without `--allow-errors`. Its cache hits are recorded
-evidence, not a new execution of DRC/LVS.
-
-Warnings: both nbconvert runs emitted the kernel TCP-without-encryption warning.
-Actual cold-notebook EDA logs contain no convergence/error warnings; their only
-error-word hits are six informational `flag_missing_ports enabled` messages.
-Pytest reported no warnings. The initial ensurepip failure and incompatible
-amd64 executable were handled explicitly, not hidden with test skips.
-
-Reproduce from the retained environment:
-
-```sh
-cd /tmp/tritflow-review-wox2aqgy/source
-TR1UM_PDK=/tmp/tritflow-review-wox2aqgy/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c \
-  /tmp/tritflow-review-wox2aqgy/venv/bin/python -m pytest tests notebook/tests -ra
-```
-
-Exact nbconvert commands/kernel/options are in the result JSONs. Scratch is
-retained. `logs/` is git-ignored: preserve/attach review evidence for release.
-The [final audit](../../logs/review/final_audit.json) confirms zero tracked-file
-changes in the clone after execution, unchanged finding-related source paths,
-and continued pinned-PDK rejection of both latest live publications.
+The main reading path should be **working layout → why the middle level draws current →
+sizing choice → arithmetic/mapping → wiring effect and width/power trend → my edited GDS**.
 
 ## Ranked findings
 
-### 1. BLOCKER for release — badge/bootstrap select an older notebook
+### 1. MAJOR — the first screen does not sell the specific contribution
 
-**Location:** notebook cells 0/1/29; `notebook/make_notebook.py:30`, `:42`, `:62`.
-**Owner: integrator with FRONTEND.**
+**Location:** notebook cell 0 and chapter-0 cells 3/4;
+`notebook/narrative/00_intro.md:3`, `:20`, `:29`;
+`notebook/narrative/teaser.md:1`. **Owner: EDITOR + FRONTEND; integrator for author placement.**
 
-Public `colab-v0` resolves to `89b484bb484ca26f8bb8e1d8cb7ec26cccbea269`, whose
-notebook has **24 cells**, versus **31** reviewed here. The badge therefore
-does not run the reviewed four-design/curated-circuit deliverable. Public main
-advanced to `a7d6da2` during review, but the tag stayed old. The instruction to
-“create colab-v0 after committing this notebook” is stale: that tag exists.
-No clean-Colab result validates the reviewed release.
+The shortened live introduction fixes the obsolete Colab warning, but still leads with the
+full author block and a generic build/inspect pitch. The reader has to discover the
+Japan/PDK/tapeout context elsewhere. There is no result image above setup and no second
+memorable point on the opening screen. The narrative draft supplies the missing context
+and actual flow image, so it is a substantial improvement, but its first paragraph still
+says “DRC/LVS results” rather than stating the successful outcome. Its power insight starts
+only in chapter 1.
 
-**Fix:** integrator publishes a new immutable final tag; FRONTEND updates the
-badge/bootstrap/default-ref tests together. Execute that exact tag in clean
-amd64 Colab and retain commit, versions, errors, figures and install-inclusive
-time. A public-main update or local pass does not validate the tag. Evidence:
-[public refs](../../logs/review/public_refs_final.txt),
-`git show colab-v0:notebook/tritflow_tr1um.ipynb`.
+**Concrete fix:** title, a short purpose/context paragraph, `fig_flow`, two generated
+result sentences, then the Colab action. Preserve the exact author information in an
+Author block in the title cell after the pitch; do not let it occupy the whole opening.
+The two sentences should say, in substance:
 
-### 2. MAJOR — missing unloaded power metal passes “strict ports” LVS
+- A short ternary HDL adder becomes a DRC-clean, LVS-matched GDS on Japan's NDA-free
+  OpenSUSI TR-1um, using a library adapted from the author's 2026 taped-out circuits.
+- The middle level has a measurable cost: about 4.17 mW per mapped cell for this adder
+  mix and about 0.40 W at six trits; sizing changes current and voltage accuracy.
 
-**Location:** `tritflow/extract/lvs.py:105`–`:124`; baseline
-`docs/status/SIM.md:140`. **Owner: SIM; FRONTEND for facade physical proof.**
+Use the actual displayed top-level HDL count, **17 lines plus shared modules**, rather
+than forcing the storyboard's illustrative “30 lines.” Keep the successful **384.1 s**
+Colab result beside the launch action. Display the four-trit paper example once and label
+it as such; the live example is two trits. This makes both the purpose and the educational
+question visible before any Python setup.
 
-Deleting **all 432 µm² of INV's VMID M1 rail** from a scratch GDS still returns
-`matched=true`, `strict_ports=true`, with `VMID` restored into extracted SPICE.
-The unchanged baseline also matches. `_unused_pin` proves only that the reference
-formal has no device load, not that a physical conductor/label exists. Thus the
-comment/status wording “physically present” overstates the check. PNR's separate
-generation-time connectivity check covers power geometry, but raw extraction
-and `Layout.lvs()` do not rerun that proof after a GDS change.
+### 2. MAJOR — the static-power insight is shown as data, not taught as a circuit
 
-**Fix:** require drawn rail/label/continuity evidence before formal restoration,
-analogous to PNR's isolated-input proof; otherwise label the result device-only
-and require physical port proof in the facade. Add deleted-VMID rejection.
-Evidence: [spice probes](../../logs/review/spice_probes.json),
-[reproducer](../../logs/review/probe_spice.py).
+**Location:** notebook cells 6–11 and 27;
+`notebook/narrative/01_gates.md:18`, `02_sizing.md:29`, `07_results.md:17`;
+`figures/out/fig_gates.png`, `fig_sizing.png`, `fig_scaling.png`.
+**Owner: EDITOR + FRONTEND, using existing SIM results.**
 
-### 3. MAJOR — headline scaling/load data do not reproduce with setup's PDK
+The notebook goes from gate equations to characterization/fanout tables and scatter plots.
+There is no “Predict first” divider calculation or generated “What this shows” takeaway.
+A knowledgeable reader can infer I ≈ 0.4 mA and P ≈ 4 mW, but is never led through the
+simultaneously conducting upper/lower branches. Chapter 2's first result is about how data
+was qualified. Even the draft sizing takeaway counts finite candidates and lists the
+adopted point; it does not compare two sizes to demonstrate the trade-off.
 
-**Location:** notebook cell 25; `notebook/experiments.py:104`;
-`results/{adder_scaling,full_add_load_sweep}.json:sources_sha256`;
-baseline `docs/status/SIM.md:265`–`:337`. **Owner: SIM, integrator.**
+**Concrete fix:** integrate the drafts' chapter-1 divider and chapter-7 cell-power sum.
+Show the conducting INV path beside I = ΔV/(Ru+Rd) and P = ΔV·I, then reveal the existing
+hand/SPICE comparison specified in `predict_first.md`. In chapter 2, retain the same MOS
+sizes and compare actual RR candidates rather than opening with candidate counts:
 
-All six widths and the load sweep hash the installed `lvs/01_Extract.lvs`, which
-differs from the pinned public PDK. Both slots print TODOs and omit the plots in
-the fresh run. The values are internally consistent recorded local results;
-they are not current results of the distributed pinned flow. FRONTEND's later
-handoff independently acknowledges the same mismatch; it is not resolved.
+| RR length | Worst level error | Maximum static rail current |
+|---|---:|---:|
+| 20 µm | 0.0674 mV | 649 µA |
+| 30 µm, adopted | 39.5 mV | 407 µA |
+| 45 µm | 52.4 mV | 261 µA |
 
-**Fix:** republish the measured matrix/load boundary/derived fits after
-requalification with the pinned PDK, or deliberately update and validate the
-distributed pin. Preserve actual consumed hashes. Add a clean-pinned-PDK check
-that required final-publication slots do not become TODOs. Evidence:
-[publication audit](../../logs/review/publication_audit.json), cold cell 25.
+These numbers were checked directly in the current INV grid. They give a concrete
+accuracy/current trade-off without a new experiment. Generate them at integration time.
+Put the **4.17 mW/cell / 400 mW at N=6** sentence immediately above the scaling power
+panel. Use current power-network utilization if mentioned; the present N=6 value is
+**74.1%**, so do not revive the old 99%-near-limit headline. This is a result update,
+not a request for another qualification paragraph. Evidence:
+[data checks](../../logs/review/round2/data_checks.json).
 
-### 4. MAJOR — facade rejects valid circuits with unused inputs
+### 3. MAJOR — repeated representations and process paragraphs break the 25-minute path
 
-**Location:** `tritflow/flow.py:150`–`:161`; notebook cells 23/28;
-baseline `docs/status/PNR.md:174`. **Owner: FRONTEND.**
+**Location:** notebook cells 8/10, 13, 15/17/19, 22/24/26;
+`notebook/narrative/03_cells.md`, `05_synthesis.md`, `07_results.md`, `A_limits.md`, `B_evidence.md`.
+**Owner: FRONTEND + EDITOR.**
 
-`module unused(input trit a,b,output trit y); assign y=~a; endmodule` synthesizes
-and routes cleanly. `lay.lvs()` returns a mismatch for b. The existing public
-`pnr.strict_lvs` matches and restores b after proving its isolated labeled M2
-pad. `lay.extract()` therefore refuses a legal circuit through the advertised
-method chain. PNR's handoff request remains unconsumed.
+The reviewed notebook has 2,204 prose words and 578 code lines. Word count alone fits the
+budget; the number of full output views and interruptions does not. In chapters 4/5 the
+reader gets historical HA/FA schematics, two truth tables, two gate graphs, a two-trit
+hierarchical schematic and another flat half-adder. Chapter 3 shows cell geometry, another
+device-map geometry, its full device table and an abutted row before returning to arithmetic.
+Chapter 7 has **600 words across cells 22/24/26**, largely measurement/record/source/solver
+explanation, before the width/load result. Examples of process text to relocate are
+“Every member hash, consumed abstract, manifest/publication identity...” and the full
+`run_scaling` / `sweep_output_load` signatures.
 
-**Fix:** delegate `Layout.lvs()` to `pnr.strict_lvs` with actual PNR data/library,
-retaining fingerprint checks. Test the full facade with an unused input and an
-injected missing pad label. Evidence:
-[interface probes](../../logs/review/interface_probes.json),
-[reproducer](../../logs/review/probe_interfaces.py).
+**Concrete fix:** integrate the chapter drafts and A/B; change the display order as well
+as the Markdown. Keep one main view for each question:
 
-### 5. MAJOR — physical abstract changes do not invalidate notebook caches
+- Chapter 2: divider prediction and sizing hero first; full AC-C/fanout tables in Details/B.
+- Chapter 3: `fig_cell` plus one selected device-map view; full mapping table/alternate
+  geometry/qualification tables collapsed.
+- Chapter 4: radix equality + `fig_synth`; full truth tables collapsed, with the generated
+  exhaustive count left visible.
+- Chapter 5: reuse that figure's graph, show one mapping transformation and a selectable
+  value-colored schematic. Remove the consecutive uncolored/colored full-graph duplicates
+  from the main path.
+- Chapter 7: one band-entry zoom → sizing/load consequence → width/static-power result.
+  Put archive policy, resistor-terminal orientation, Newton initialization and producer
+  APIs in A/B. Keep running checks exactly as they are.
 
-**Location:** `notebook/cache.py:25`–`:29`; notebook cell 2;
-baseline `docs/status/FRONTEND.md:372`. **Owner: FRONTEND.**
+The late Appendix B is a good start, but the main-chapter paragraphs above remain. Replace
+those paragraphs instead of appending the new drafts beneath them. The drafts' decision
+not to repeat `fig_synth` at full size is correct.
 
-`runtime_fingerprint` omits `*.abstract.json` and the library manifest. Changing
-an INV abstract from width 108 to 216 in an isolated probe leaves the fingerprint
-**identical**. Pin access, M2/V1 obstructions and free tracks are PNR inputs;
-correcting them can reuse an earlier physical PASS instead of rerouting.
-Output artifact hashes do not cover these omitted inputs.
+### 4. MAJOR — the required learning interaction is still a code edit
 
-**Fix:** hash every consumed abstract, manifest and publication identity, with
-relative filenames/content; add a real fingerprint test changing only
-pin/obstruction metadata. Evidence: `abstract_cache` in
-[interface probes](../../logs/review/interface_probes.json).
+**Location:** notebook cell 11 (`SIZING_INDEX`), cells 17/19 (fixed input dictionaries);
+`notebook/narrative/figures.md:3`–`:7`; `docs/editorial.md:46` and storyboard.
+**Owner: FRONTEND; EDITOR aligns the handoff with the binding plan.**
 
-### 6. MINOR — accepted HDL names do not survive analog-flow naming
+Layer/device selectors, physical-net dropdowns and placement playback exist and are useful.
+The two explanatory experiments do not: changing a sizing candidate or a gate's input
+requires editing a Python variable/dictionary and rerunning a cell. The phase-2 narrative
+handoff makes all scientific sliders optional. Integrating those static drafts alone would
+therefore leave the plan's “change it and watch what happens” teaching mechanism unfinished.
 
-**Location:** `tritflow/sim/spice.py:53`–`:64`,
-`tritflow/sim/bench.py:55`–`:58`, `tritflow/synth/writers.py:52`.
-**Owner: SIM with FRONTEND.**
+**Concrete fix:** keep the excellent static heroes and add one small lookup control in
+chapter 2: RR length or a few named W/L candidates at fixed other dimensions. Update the
+transfer curve, operating point, error/current readout and adopted marker from the existing
+grid; show the hand prediction before the SPICE value. A second compact input-vector
+selector can recolor the existing mapped half-adder. Both can use precomputed Plotly
+states with an initial static view. No new simulation campaign or large widget framework
+is needed. Prioritize the sizing control over additional routing/STA features.
 
-Inputs a and A are legal case-sensitive HDL and pass nine logical states, but
-`net.simulate()` raises `ValueError: Input/output pins do not match`. The
-synthesis writer encodes case collisions; SIM's separate `gate_spice` writes
-raw names, and SPICE is case-insensitive.
+### 5. MAJOR — “your circuit” does not make the edit or its new layout visible
 
-**Fix:** share reversible naming across writer/reference/bench/probes, mapping
-waveform/oracle keys back. Alternatively reject unsupported names with a located
-HDL diagnostic and documented restriction before physical work. Evidence:
-`case_names` in [spice probes](../../logs/review/spice_probes.json).
+**Location:** notebook cell 30; `notebook/narrative/08_your_circuit.md:11`–`:23`.
+**Owner: FRONTEND + EDITOR.**
 
-### 7. MINOR — opening demo never exercises its most-significant sum
+The code reads `source = example.path.read_text()  # edit this string`, then displays that
+source inside an evidence block. There is no visible HDL literal to edit. The chapter
+ends in a colored gate graph, a physical-statistics Details block and a waveform; it does
+not display the generated custom GDS. The notebook's opening promise is HDL to GDS, so
+this is exactly where a reviewer should see that the editable flow belongs to them.
 
-**Location:** notebook cell 4; `notebook/make_notebook.py:139`–`:140`.
-**Owner: FRONTEND.**
+**Concrete fix:** expose the chosen HDL in a separate, short editable code cell, with the
+run cell below it. Give one successful first action (select `sign`, or replace the sorter's
+minimum with the equivalent `~((~a)|(~b))`) before the optional deliberately failing edit.
+Show the **actual custom-result GDS** beside the custom waveform and a compact
+DRC/LVS/oracle outcome. The narrative draft gives this chapter the right purpose, but
+integration must implement the visible source and output; inserting its prose alone will
+not do so. Reuse the existing render/flow APIs.
 
-All six sequence entries keep `sum[1]` at ideal zero; `sum[0]` visits only zero/+1.
-The MSB waveform is flat and its maximum settling time is zero. Exhaustive logic
-is sound and analog coverage honestly says representative, but the chosen
-sequence demonstrates neither rail-level restoration nor transitions at every
-output.
+### 6. MINOR — routing and placement controls cover titles
 
-**Fix:** add positive/negative single-digit cases and carry assert/release; assert
-that every displayed output visits all three levels. Evidence:
-[output coverage](../../logs/review/demo_output_coverage.json).
+**Location:** `tritflow/viz/layout.py:159`, `:233`, `:244`, `:283`;
+Colab screenshots `round2-03-ch00-routing.png`, `round2-11-ch06-placement.png`,
+`round2-15b-ch07-load-boundary.png`. **Owner: PNR; SIM's separate axis correction is complete.**
 
-### 8. MINOR — presentation obscures schematic-to-layout understanding
+The physical-net selector and Play/Pause row overlap the routing/placement titles in the
+actual Colab captures. Give those views a clear title and a separate control row.
+The release also had a load plot spanning up to **1T pF**, compressing 0.01–30 pF data;
+that separate issue is now fixed and is not an open finding against the latest head.
 
-**Location:** notebook cells 7/13; `notebook/schematics.py:26`–`:29`;
-chapter-3 raster display in `notebook/make_notebook.py`.
-**Owner: FRONTEND, consuming CELLS APIs.**
+**Concrete fix:** PNR gives the title and controls distinct rows with reserved top margin
+at normal Colab width. SIM's `a6a81c1` already fixes the load issue after the reviewed
+release: I checked a log-axis range of **[-2, 1.4771]**, corresponding to **0.01–30 pF**,
+and the boundary caption uses paper coordinates. Carry that existing correction into
+the integrated artifact; no new load study is requested. The static `fig_postlayout`
+already presents the bracket clearly. Evidence:
+[axis check](../../logs/review/round2/load_axis_fix.json).
 
-There are 1,623 prose words but 443 code lines, six expanded schematics, repeated
-raw tables/dictionaries and long all-state plots. At the actual preview's
-1000 px content width, INV fills most of a screen; several NAND/NOR screens
-precede NANY. RR properties overlap symbols. The 700 px NANY raster lacks
-legend/device/pin overlays; fine hatching obscures contacts. CELLS' tested
-interactive mapping/abutment tools exist but are unused in the notebook.
+## What to integrate from narrative/ and figures/out/
 
-**Fix:** expand only the selected primitive, move HA/FA drawings beside chapter
-4, collapse raw stats/provenance, and use `cell_figure`/`device_mapping` with a
-highlighted NANY current path. Keep full evidence beneath the main 20–30 minute
-narrative. Actual gate/wave/schematic previews were inspected in a new Chrome
-tab; user Colab tabs were untouched. Preview:
-[figures.html](../../logs/review/figures.html).
+**Yes: integrate chapters 00–09, the eight captions and Appendices A/B as replacements.**
+Their titles, divider explanation, explicit arithmetic identity, two/three-line predictions
+and generated takeaway boxes fit Code-a-Chip much better than the current audit-log prose.
+`predict_first.md`, `placeholders.md` and the long control specifications are implementation
+notes, not additional reader chapters. Preserve the short numerical comparison in the
+chapter and keep parameter parsing/source details outside it.
 
-## Claims, engineering and reader audit coverage
+Three draft adjustments before insertion:
 
-[The full claims ledger](../../logs/review/claims_audit.md) covers every notebook
-cell and every section of CELLS/COLAB/FRONTEND/PNR/SIM status, including subsequent
-handoffs. It maps claims to tests/assertions/data or explicit historical,
-unverified or planned scope. Hand-entered historical timings/test counts and
-ignored-build campaign evidence are identified rather than newly certified.
-The 188 directly checked table values agree; pinned-PDK provenance is the main
-quantitative gap.
+1. Move both memorable points into the first screen and make chapter 2's takeaway a
+   comparison of sizes, as findings 1/2 specify.
+2. Keep the existing live views where they teach something; a static reading path and a
+   sizing/input selector complement each other. Making every interaction optional does not
+   satisfy the binding plan.
+3. Refresh stale handoff notes: `figures.md:42` still mentions “18 sizes, all pass” although
+   the inspected PNG says **17 solved sizes**; the “rename device-only” requests are already
+   reflected in the supplied PNGs. `placeholders.md:394` describes an old unsuccessful
+   payload. Substitute the verified 842afe2/384.1 s result instead of copying obsolete
+   unavailable/run-failure text into the rewrite.
 
-Independent integer oracles are not mapped-netlist self-comparisons. FILL's
-probe method, sampled versus exhaustive coverage, released Newton guesses,
-whole-hold settling, uncalibrated top-net C, omitted child-only/poly/signal R,
-ideal-rail transients, separate IR and absent PVT/silicon qualification are
-generally stated accurately. No blanket DRC warning exclusion or mismatched
-native device comparison was found in successful-check paths. Missing-rail
-formal restoration is the substantive verification exception above.
+| Inspected PNG | Reader judgment and placement |
+|---|---|
+| `fig_flow` | Strong opener. Five equal-width panels make the actual GDS only about 150–170 px wide at a 1000 px notebook width. Enlarge the GDS/check outcome, or use two rows; keep code/count detail subordinate. Put the clean/LVS result in a visible caption, not only small bottom text. |
+| `fig_gates` | Strong chapter-1 hero: voltage directly above current makes the physical cost visible. Start at INV's zero input and show the highlighted current path in the accompanying schematic; then compare the other gates. |
+| `fig_sizing` | Essential chapter-2 hero. Pair with the same-MOS 20/30/45 µm comparison. Keep its caption explaining hollow points and triangles; the script creates a marker key but does not draw that key in the image. |
+| `fig_cell` | Clear original/adapted comparison, device groups and three continuous rails. Integrate as the static overview; the live device map can supply detail without four expanded views. |
+| `fig_synth` | Useful combination of source, colored half-adder and full-adder hierarchy. Use once across chapters 4/5. The small source text belongs in a selectable code block as well as the image. |
+| `fig_pnr` | Clear before/after and **72 → 48 mm HPWL** message. Better main-path summary than requiring animation playback; leave animation available underneath. |
+| `fig_postlayout` | The best electrical teaching figure. Emphasize panel b: the sum remains logically +1 but glitches through the opposite rail, so final band-entry time matters. Then show **100 → 109 ns** with wire C and the load boundary. Put the all-27-state sequence below the zoom if reading space is tight. |
+| `fig_scaling` | Essential: **4.17 mW/cell, about 400 mW at N=6**, plus carry slope and area, are immediately readable. Give the power panel a one-sentence conclusion before the figure. This closes the chapter-1/2 circuit explanation. |
+| `fig_sta` | Readable parity figure, but a third timing-analysis thread is unnecessary for the two main messages. Put it in an optional appendix/detail after the required story, rather than adding another mandatory chapter-7 result. |
 
-Mask failure is a **material scope limit**, not a hidden drawing-DRC failure:
-independent signoff retains every WAR06 item and reports false clean. Actual
-I/O/frame/supply integration and exposed-gate resolution are necessary before
-manufacturing readiness. No mask LVS is invented where the inspected flow
-defines none. The notebook already disclaims padframe/ESD qualification.
+These are good opaque, high-resolution static figures. Use their supplied captions, embed
+images in the distributed notebook and retain full-size access. They should replace
+redundant main outputs, not add nine more full outputs to the existing stack. Keep the
+paper N=4/live N=2 distinction in a short label so the area/count tables do not look inconsistent.
+**Owners:** integrator coordinates changes to paper-figure producers in `figures/`;
+EDITOR owns caption/narrative changes; FRONTEND owns notebook embedding and display order.
 
-Primary PDK cross-checks confirmed seven PDFs/109 pages and cited current,
-resistor and capacitor tables (`logs/review/OS00_p*.txt`, `OS04_p7.txt`). Root
-Apache-2.0 LICENSE, README upstream credits, copied-builder attribution and
-source/SVG hashes exist. No specific stripped notice or licence violation was
-established; this is an attribution audit, not a legal opinion.
+## Suggested reading path and chapter budget
 
-## Done / remaining / interface requests
+| Group | Keep in the main path | Budget |
+|---|---|---:|
+| Intro / 0 | Purpose, Japan/tapeout context, two results, one flow hero, Run all action | 2 min |
+| 1 / 2 | Divider → hand power estimate → SPICE → one sizing change | 6 min |
+| 3 | Original/adapted cell and continuous three-rail row | 2 min |
+| 4 / 5 | One radix example, shared adder hierarchy, one mapping/input change | 4 min |
+| 6 | Before/after layout and HPWL; optional playback | 3 min |
+| 7 | Same-output glitch/band entry, load boundary, width/power consequence | 5 min |
+| 8 / 9 | Successful edit/new GDS and January 2027 measurement plan | 3 min |
 
-REVIEW is complete: scratch reproduction, whole suite, actual cold/warm
-nbconvert, fault probes, unwaived mask checks, claims/numerical/technical audit
-and browser reader review. No REVIEW process, HTTP server or preview tab remains
-running. Scratch/evidence are retained. No user input is required.
+This is a proposed **25-minute** budget, not a benchmark. A ten-minute skim should work by
+reading the opener, sizing comparison, scaling conclusion and edited-circuit result;
+no cache/source-policy paragraph should be required to understand those four stops.
 
-Implementation requests remain with owners named in findings 1–8. Resolve
-release/pinned-publication and physical-port/facade/cache issues, rerun the
-integrated suite/notebook, and qualify the exact release in Colab. Concurrent
-timing/diagnosis features need a subsequent review; the 338-test result applies
-only to the explicitly cloned commit.
+## Short round-1 closure
+
+Original review: `37034be20dc02d8ee82d15170b955b6ef2777d70`, 338 tests passed and local
+cold/warm execution. Full report preserved at
+[round1_report.md](../../logs/review/round2/round1_report.md).
+
+| Round-1 issue | Round-2 disposition |
+|---|---|
+| Old release / no successful Colab run | **Fixed:** matching 842afe2 tag, all 17 cells, 384.1 s. The live introduction now reports it. |
+| Missing VMID rail accepted | **Fixed:** real drawn-rail proof; metal deletion, label deletion and severed-rail regressions pass. |
+| Pinned-PDK width/load mismatch | **Fixed:** all six width records and load record validate against the pinned PDK; the exact display-only schematic-delegate compatibility is tested separately. |
+| Facade rejects unused input | **Fixed:** full facade includes physical isolated-pad proof; deleting its label invalidates extraction. |
+| Abstract/manifest cache gap | **Fixed:** pin, obstruction, manifest and generation changes invalidate; relocation remains supported. |
+| Case-distinct HDL/SPICE names | **Fixed:** independent a/A and y/Y waveforms/oracles survive simulation. |
+| Flat opening MSB | **Fixed:** new sequence exercises all three levels on every output and positive/negative carry assert/release. |
+| Expanded historical drawings / unlabeled cell raster | **Improved:** selected primitive, interactive cell/device mapping and real abutment are integrated. Remaining presentation work is findings 1–6 above. |
+
+**22 targeted tests passed, zero failures/skips, in 13.15 s** on the frozen current-head
+clone: `tests/extract/test_compact.py`, `tests/synth/test_flow_api.py`,
+`notebook/tests/test_cache.py`, `notebook/tests/test_experiments.py`, and
+`tests/sim/test_cells.py::test_case_sensitive_hdl_names_round_trip_through_ngspice`.
+[Exact command/result](../../logs/review/round2/round1_fixes_result.json),
+[test log](../../logs/review/round2/round1_fixes.log),
+[publication/grid checks](../../logs/review/round2/data_checks.json).
+
+No new full-suite or fresh-Colab execution was needed for this editorial round. No code,
+notebook, figure, PDK or reference was edited by REVIEW; no packages installed or git state
+changed by REVIEW beyond the explicitly requested scratch clone. Writes are confined to
+this status and `logs/review/`. Review is complete; interface requests are the concrete
+owner actions in findings 1–6, not additional scope/qualification prose.
