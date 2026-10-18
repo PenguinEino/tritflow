@@ -1,0 +1,24 @@
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NANY A B Y VDD VMID VSS
+* device instance $1 r0 *1 56,100 PMOS
+XM$1 \$7 A Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $2 r0 *1 71,100 PMOS
+XM$2 \$9 B Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $3 r0 *1 41,100 PMOS
+XM$3 \$30 B \$43 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $4 r0 *1 26,100 PMOS
+XM$4 \$43 A VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $5 r0 *1 56,27 NMOS
+XM$5 \$7 B VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $6 r0 *1 71,27 NMOS
+XM$6 \$9 A VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $7 r0 *1 26,27 NMOS
+XM$7 \$17 A \$5 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $8 r0 *1 41,27 NMOS
+XM$8 VSS B \$17 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $9 r0 *1 118.5,54 F_RR
+XR$9 \$5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $10 r0 *1 118.5,84 F_RR
+XR$10 \$30 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+.ends NANY

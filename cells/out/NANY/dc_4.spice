@@ -1,0 +1,18 @@
+* TritFlow extracted DC sanity
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/ip62_models"
+.include "/home/ishi-kai/code-a-chip/cells/.compact-work/NANY/NANY.ext.spice"
+VDD VDD 0 5
+VMID VMID 0 0
+VSS VSS 0 -5
+VA A 0 0
+VB B 0 0
+XU A B Y VDD VMID VSS NANY
+.temp 27
+.options rshunt=1e12
+.nodeset v(Y)=0
+.control
+op
+print v(Y)
+quit
+.endc
+.end

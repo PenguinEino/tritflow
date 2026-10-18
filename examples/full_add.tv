@@ -1,0 +1,10 @@
+`include "half_add.tv"
+// Reference: balanced-ternary-logic/FULL_ADDER.md.
+// a + b + cin = sum + 3*cout. Exactly eleven NANY and five INV.
+module full_add(input trit a, b, cin, output trit sum, cout);
+  wire trit s1, c1, c2, nc;
+  half_add ha1 (.a(a), .b(b), .sum(s1), .carry(c1));
+  half_add ha2 (.a(s1), .b(cin), .sum(sum), .carry(c2));
+  nany g_nc (nc, c1, c2);
+  inv g_cout (cout, nc);
+endmodule

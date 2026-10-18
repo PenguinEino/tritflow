@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "renderer": "batch xschem -r -x; text_svg=1",
+  "renderer_sha256": "d4e5af0f533a003dbb4fd61b33aecc2bd1a52df75b6bfbcc9a75501113e0988a",
+  "dependencies": {
+    "reference/inverter.sch": {
+      "source_sha256": "db254c47b4c8c1f0bc3329fc52e70e6d8809a85122c820d12f57564d70228def"
+    },
+    "pdk/TR-1umLIB/MP.sym": {
+      "source_sha256": "f14115d673498092814b1365ef9d4cf3d5dcddb589508554b79b1f2dc94c3635"
+    },
+    "system/devices/iopin.sym": {
+      "source_sha256": "bbc87ed498bb82e5159128150f7c55f7e76f4cd1ba93a5c11e5dfd1289e1938e"
+    },
+    "system/devices/ipin.sym": {
+      "source_sha256": "e97027204a68cb5c1026e11ad69c17f73682d9ec293f2bdea9039cc81a2d2b0f"
+    },
+    "pdk/TR-1umLIB/RR.sym": {
+      "source_sha256": "b86b78d44419c17183bcb70c3101c0192eef82b9b88c344e9f9dde1b50c2a3ff"
+    },
+    "system/devices/opin.sym": {
+      "source_sha256": "31ea7d379c44d2a90bcef540d28a38f4ea0bf7c608062f1ecdfd0b825f22f62e"
+    },
+    "system/devices/lab_pin.sym": {
+      "source_sha256": "9e4de539d269c949916819b23b26186b7f94956ed4e26c6c433dda4ea4e4680b"
+    },
+    "pdk/TR-1umLIB/MN.sym": {
+      "source_sha256": "a608c56c6659c3b48ab05f939953cd7bd0c5f0f4a1213d3ed5b12e3f6cec4fb6"
+    },
+    "reference/mul_nand.sch": {
+      "source_sha256": "02f4bcddd1e0736c6184d16da7cdb282f65a7d27bae59a568434573ab96afea0"
+    },
+    "reference/mul_nor.sch": {
+      "source_sha256": "b06d4f999ace81c91333e52b2207f2a9a1f949561e3a494486e8b0427159c45d"
+    },
+    "reference/nany.sch": {
+      "source_sha256": "ed54832af23ea507d6cc0302abf85cc9f281199c8d422346cd3499aabcdb4630"
+    },
+    "reference/half_adder.sch": {
+      "source_sha256": "2523ef16811218c7b62f45d1a17ee22349f92e07c0d40a8c2f43d3e6cd41333b"
+    },
+    "reference/nany.sym": {
+      "source_sha256": "ce61f330d4c40e89c054bafcc896579d5fac819d95e78a45a2b1172b7e2aee56"
+    },
+    "reference/inverter.sym": {
+      "source_sha256": "33a7d33a457877572e7bf504ae7c92db017da58adac8d5e72286d93ba17e410f"
+    },
+    "reference/full_adder.sch": {
+      "source_sha256": "dc0a3a0b776e23fad1a34190746a4eafe2dfdbeb6fa18cdcf8bc24e28805ee26"
+    },
+    "reference/half_adder.sym": {
+      "source_sha256": "60fc9f30723a987fe66a9de0996afd5409eef22c6c3df80f22d54df91d5ba437"
+    }
+  },
+  "schematics": {
+    "INV": {
+      "source": "inverter.sch",
+      "source_sha256": "db254c47b4c8c1f0bc3329fc52e70e6d8809a85122c820d12f57564d70228def",
+      "crop": [
+        0,
+        0,
+        930,
+        880
+      ],
+      "themes": {
+        "light": {
+          "file": "INV.svg",
+          "sha256": "0064cd57c1c2e65ac748cb60c23eb2fb0b9441f0e3a4aa36449115ec5c5d93a5"
+        },
+        "dark": {
+          "file": "INV.dark.svg",
+          "sha256": "397e8b8ec63f5f993e69771f32d0bf66e05f74b143d58b3f86a3c2bbcd5ad6dd"
+        }
+      }
+    },
+    "NAND": {
+      "source": "mul_nand.sch",
+      "source_sha256": "02f4bcddd1e0736c6184d16da7cdb282f65a7d27bae59a568434573ab96afea0",
+      "crop": [
+        100,
+        0,
+        930,
+        1040
+      ],
+      "themes": {
+        "light": {
+          "file": "NAND.svg",
+          "sha256": "0196460af66fb373e9eb312057cf00d11691e34e2a2db172f7e97587eb1ff606"
+        },
+        "dark": {
+          "file": "NAND.dark.svg",
+          "sha256": "c2f98f46fd183759243afa23675ed2fe641fa06f896e8715a0a7141fb11b11f7"
+        }
+      }
+    },
+    "NOR": {
+      "source": "mul_nor.sch",
+      "source_sha256": "b06d4f999ace81c91333e52b2207f2a9a1f949561e3a494486e8b0427159c45d",
+      "crop": [
+        100,
+        0,
+        930,
+        1140
+      ],
+      "themes": {
+        "light": {
+          "file": "NOR.svg",
+          "sha256": "02ad2f86e77b285bba124a3f8997e6a2973b51ed277efc747bae1ef446e49776"
+        },
+        "dark": {
+          "file": "NOR.dark.svg",
+          "sha256": "727e4923d810a433119df2d6dc16ca35c32c31cae07b32291a3294e20c5b3cf8"
+        }
+      }
+    },
+    "NANY": {
+      "source": "nany.sch",
+      "source_sha256": "ed54832af23ea507d6cc0302abf85cc9f281199c8d422346cd3499aabcdb4630",
+      "crop": [
+        -340,
+        -520,
+        980,
+        640
+      ],
+      "themes": {
+        "light": {
+          "file": "NANY.svg",
+          "sha256": "25a3b1672996a4f0eee76f0dd247f26fba5357d961c51ba9d9bd6bb5f817fc67"
+        },
+        "dark": {
+          "file": "NANY.dark.svg",
+          "sha256": "69aec84cdda91c78185f6fac4372e15c56a06840d1620c20612331ff13fe0893"
+        }
+      }
+    },
+    "half_adder": {
+      "source": "half_adder.sch",
+      "source_sha256": "2523ef16811218c7b62f45d1a17ee22349f92e07c0d40a8c2f43d3e6cd41333b",
+      "crop": [
+        -20,
+        -240,
+        1530,
+        1270
+      ],
+      "themes": {
+        "light": {
+          "file": "half_adder.svg",
+          "sha256": "d9f3203e10ef8bdcf5fd7699bd9d235b4c272fff5f81dfecde82073824034662"
+        },
+        "dark": {
+          "file": "half_adder.dark.svg",
+          "sha256": "851d6be8418d405cd8337d1236078d96916b902638ad850e7d401a336f43a825"
+        }
+      }
+    },
+    "full_adder": {
+      "source": "full_adder.sch",
+      "source_sha256": "dc0a3a0b776e23fad1a34190746a4eafe2dfdbeb6fa18cdcf8bc24e28805ee26",
+      "crop": [
+        -20,
+        -220,
+        1750,
+        1090
+      ],
+      "themes": {
+        "light": {
+          "file": "full_adder.svg",
+          "sha256": "761cf37717a35d027045c549488dc7930c956887cd5334d5550953667264d4f6"
+        },
+        "dark": {
+          "file": "full_adder.dark.svg",
+          "sha256": "3f940ab5ed9501c06b1f71047baafa25989637b36a4f8c1b0d67e7a32ba031c2"
+        }
+      }
+    }
+  },
+  "presentation": "Opaque light/dark themes; visual-only stroke/color normalization; no circuit edits"
+}

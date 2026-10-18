@@ -1,0 +1,63 @@
+TritFlow ternary testbench
+*
+.parameters vthMP	= 0
+.parameters vthMN 	= 0
+.parameters vthMPE      = 0
+.parameters vthMNE      = 0
+.parameters magRR       = 1
+.parameters magRS       = 1 
+.parameters magCSIO     = 1 
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
+* Public ports renamed from independent taped-out reference
+.subckt NANY A B Y VDD VMID VSS
+* device instance $1 r0 *1 50,88 PMOS
+XM_ex_1 n_ex_7 A Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $2 r0 *1 65,88 PMOS
+XM_ex_2 n_ex_10 B Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $3 r0 *1 20,88 PMOS
+XM_ex_3 n_ex_32 A VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $4 r0 *1 35,88 PMOS
+XM_ex_4 n_ex_3 B n_ex_32 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $5 r0 *1 50,15 NMOS
+XM_ex_5 n_ex_7 B VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $6 r0 *1 65,15 NMOS
+XM_ex_6 n_ex_10 A VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $7 r0 *1 20,15 NMOS
+XM_ex_7 n_ex_33 A n_ex_4 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $8 r0 *1 35,15 NMOS
+XM_ex_8 VSS B n_ex_33 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $9 r0 *1 112.5,42 F_RR
+XR_ex_9 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $10 r0 *1 112.5,72 F_RR
+XR_ex_10 n_ex_3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+.ends NANY
+
+.temp 27
+.options rshunt=1e12
+VDD VDD 0 5
+VMID VMID 0 0
+VSS VSS 0 -5
+Xdut A B Y VDD VMID VSS NANY
+Vin0 A 0 PWL(0 -5)
+Vin1 B 0 PWL(0 -5)
+Cload0 Y 0 1e-14
+.nodeset v(Y)=5
+.nodeset v(xdut.n_ex_7)=0
+.nodeset v(xdut.n_ex_10)=0
+.nodeset v(xdut.n_ex_32)=5
+.nodeset v(xdut.n_ex_3)=5
+.nodeset v(xdut.n_ex_33)=-5
+.nodeset v(xdut.n_ex_4)=-5
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+set numdgt=15
+dc Vin0 -5 5 0.125 Vin1 -5 5 0.125
+wrdata waveform.txt v(A) v(B) v(Y) i(vdd) i(vmid) i(vss)
+quit
+.endc
+.end

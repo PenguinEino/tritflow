@@ -1,0 +1,8 @@
+// Reference: balanced-ternary-logic/MUL.md. p = a*b for trit inputs.
+module mul1(input trit a, b, output trit p);
+  wire trit t1, t2, t3;
+  nand g_t1 (t1, a, b);
+  nor g_t2 (t2, a, b);
+  inv g_t3 (t3, t2);
+  nand g_p (p, t1, t3);
+endmodule

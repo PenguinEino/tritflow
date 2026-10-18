@@ -1,0 +1,649 @@
+{
+  "cells": {
+    "INV": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "strict_ports": true,
+        "circuits": [
+          "Match"
+        ],
+        "errors": []
+      },
+      "dc": {
+        "passed": true,
+        "cases": [
+          {
+            "inputs": {
+              "A": -1
+            },
+            "Y": 1,
+            "output_V": 4.999999,
+            "error_V": 1.000000000139778e-06,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0
+            },
+            "Y": 0,
+            "output_V": -0.0395421,
+            "error_V": 0.0395421,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          }
+        ],
+        "temperature_C": 27,
+        "scope": "DC sanity only; no wire/poly parasitics"
+      }
+    },
+    "NAND": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "strict_ports": true,
+        "circuits": [
+          "Match"
+        ],
+        "errors": []
+      },
+      "dc": {
+        "passed": true,
+        "cases": [
+          {
+            "inputs": {
+              "A": -1,
+              "B": -1
+            },
+            "Y": 1,
+            "output_V": 5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": -1,
+              "B": 0
+            },
+            "Y": 1,
+            "output_V": 4.999998,
+            "error_V": 2.000000000279556e-06,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": -1,
+              "B": 1
+            },
+            "Y": 1,
+            "output_V": 4.999998,
+            "error_V": 2.000000000279556e-06,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": -1
+            },
+            "Y": 1,
+            "output_V": 5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": 0
+            },
+            "Y": 0,
+            "output_V": 0.0359788,
+            "error_V": 0.0359788,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": 1
+            },
+            "Y": 0,
+            "output_V": -0.10011,
+            "error_V": 0.10011,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": -1
+            },
+            "Y": 1,
+            "output_V": 4.999999,
+            "error_V": 1.000000000139778e-06,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": 0
+            },
+            "Y": 0,
+            "output_V": -0.102661,
+            "error_V": 0.102661,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": 1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          }
+        ],
+        "temperature_C": 27,
+        "scope": "DC sanity only; no wire/poly parasitics"
+      }
+    },
+    "NOR": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "strict_ports": true,
+        "circuits": [
+          "Match"
+        ],
+        "errors": []
+      },
+      "dc": {
+        "passed": true,
+        "cases": [
+          {
+            "inputs": {
+              "A": -1,
+              "B": -1
+            },
+            "Y": 1,
+            "output_V": 4.999998,
+            "error_V": 2.000000000279556e-06,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": -1,
+              "B": 0
+            },
+            "Y": 0,
+            "output_V": -0.00943312,
+            "error_V": 0.00943312,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": -1,
+              "B": 1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": -1
+            },
+            "Y": 0,
+            "output_V": -0.00664881,
+            "error_V": 0.00664881,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": 0
+            },
+            "Y": 0,
+            "output_V": -0.158997,
+            "error_V": 0.158997,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": 1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": -1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": 0
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": 1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          }
+        ],
+        "temperature_C": 27,
+        "scope": "DC sanity only; no wire/poly parasitics"
+      }
+    },
+    "NANY": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "strict_ports": true,
+        "circuits": [
+          "Match"
+        ],
+        "errors": []
+      },
+      "dc": {
+        "passed": true,
+        "cases": [
+          {
+            "inputs": {
+              "A": -1,
+              "B": -1
+            },
+            "Y": 1,
+            "output_V": 4.999999,
+            "error_V": 1.000000000139778e-06,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": -1,
+              "B": 0
+            },
+            "Y": 1,
+            "output_V": 4.999998,
+            "error_V": 2.000000000279556e-06,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": -1,
+              "B": 1
+            },
+            "Y": 0,
+            "output_V": 5.044412e-08,
+            "error_V": 5.044412e-08,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": -1
+            },
+            "Y": 1,
+            "output_V": 4.999999,
+            "error_V": 1.000000000139778e-06,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": 0
+            },
+            "Y": 0,
+            "output_V": -0.0445998,
+            "error_V": 0.0445998,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0,
+              "B": 1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": -1
+            },
+            "Y": 0,
+            "output_V": 5.048412e-08,
+            "error_V": 5.048412e-08,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": 0
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1,
+              "B": 1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          }
+        ],
+        "temperature_C": 27,
+        "scope": "DC sanity only; no wire/poly parasitics"
+      }
+    },
+    "BUF": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "strict_ports": true,
+        "circuits": [
+          "Match"
+        ],
+        "errors": []
+      },
+      "dc": {
+        "passed": true,
+        "cases": [
+          {
+            "inputs": {
+              "A": -1
+            },
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 0
+            },
+            "Y": 0,
+            "output_V": -0.0352371,
+            "error_V": 0.0352371,
+            "passed": true
+          },
+          {
+            "inputs": {
+              "A": 1
+            },
+            "Y": 1,
+            "output_V": 4.999999,
+            "error_V": 1.000000000139778e-06,
+            "passed": true
+          }
+        ],
+        "temperature_C": 27,
+        "scope": "DC sanity only; no wire/poly parasitics"
+      }
+    },
+    "TIEP": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "strict_ports": true,
+        "circuits": [
+          "Match"
+        ],
+        "errors": []
+      },
+      "dc": {
+        "passed": true,
+        "cases": [
+          {
+            "inputs": {},
+            "Y": 1,
+            "output_V": 5.0,
+            "error_V": 0.0,
+            "passed": true
+          }
+        ],
+        "temperature_C": 27,
+        "scope": "DC sanity only; no wire/poly parasitics"
+      }
+    },
+    "TIEZ": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "strict_ports": true,
+        "circuits": [
+          "Match"
+        ],
+        "errors": []
+      },
+      "dc": {
+        "passed": true,
+        "cases": [
+          {
+            "inputs": {},
+            "Y": 0,
+            "output_V": 0.0,
+            "error_V": 0.0,
+            "passed": true
+          }
+        ],
+        "temperature_C": 27,
+        "scope": "DC sanity only; no wire/poly parasitics"
+      }
+    },
+    "TIEN": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "strict_ports": true,
+        "circuits": [
+          "Match"
+        ],
+        "errors": []
+      },
+      "dc": {
+        "passed": true,
+        "cases": [
+          {
+            "inputs": {},
+            "Y": -1,
+            "output_V": -5.0,
+            "error_V": 0.0,
+            "passed": true
+          }
+        ],
+        "temperature_C": 27,
+        "scope": "DC sanity only; no wire/poly parasitics"
+      }
+    },
+    "FILL": {
+      "drc": {
+        "passed": true,
+        "items": 0,
+        "categories": {}
+      },
+      "lvs": {
+        "passed": true,
+        "method": "empty-device extraction + strict three-rail RR probe fixture",
+        "empty_device_extraction": true,
+        "rail_and_well_geometry": true,
+        "standalone_deck": {
+          "passed": false,
+          "strict_ports": true,
+          "circuits": [],
+          "errors": [],
+          "normalization_error": "No extracted circuit FILL"
+        },
+        "probe": {
+          "passed": true,
+          "strict_ports": true,
+          "circuits": [
+            "Match",
+            "Match",
+            "Match",
+            "Match"
+          ],
+          "errors": []
+        },
+        "explanation": "PDK purges device-free FILL; standalone comparison has no circuits. No device mismatch is waived."
+      }
+    }
+  },
+  "pdk": "/home/ishi-kai/pdk/TR-1um",
+  "deck_sha256": {
+    "libs.tech/klayout/tech/drc/00_Layers.drc": "6e029f7adeb58062bd8f5a1983d8c71188d23b5d5c5a2c404501026df8174e86",
+    "libs.tech/klayout/tech/drc/01_Basics.drc": "b8cfb0df7b6e98db833a8019b50fad3be9672b91793d215690c4e0dfb480c2ff",
+    "libs.tech/klayout/tech/drc/02_Device.drc": "f2a79da0cfe7f1bca89b2b00bd7576393eb302a20b8568f16f6214f4bf2729bc",
+    "libs.tech/klayout/tech/drc/03_Electrical.drc": "497d9cd3ddbccbba68f73553618b455fecffe849b4be37f10d750030b7bde085",
+    "libs.tech/klayout/tech/drc/04_TapeOut.drc": "56b7d1905429bf49bcc1313413e33f1fe69d87af104e287ecfa1a9981447ae6f",
+    "libs.tech/klayout/tech/drc/IP62/00_Layers.drc": "32f0957029368e89a032626b3a2fb8b09930c36cc9581b62c0ad132c9d393b07",
+    "libs.tech/klayout/tech/drc/IP62/01_Basics.drc": "eac124d2e77929ca2b675cd6c8b6e36065a5cecf699f2ca59a532647fdea7314",
+    "libs.tech/klayout/tech/drc/IP62/02_Device.drc": "df84a871f7b9c6f1c9809deae2d8d716377596c8a400d1690949a731eeb82010",
+    "libs.tech/klayout/tech/drc/IP62/03_Check.drc": "6487168daa36b1d9765b42e461fd4d271495aeef919a41b2c937745071af7b46",
+    "libs.tech/klayout/tech/drc/IP62/04_Check.drc": "5a2107118f3a92377b57a220c865f75e59e589675956c70e7b35ec890e8c9d2a",
+    "libs.tech/klayout/tech/drc/IP62/05_Check.drc": "1a81ef8b0ce88d435963a2f05cc253dfa786df3841de4e505a7867517aeb3911",
+    "libs.tech/klayout/tech/drc/IP62/06_Check.drc": "26fd6afb7a2fc69ba584763fece00e7e77aaa7d55c4b43acea2bc1daa4c22b20",
+    "libs.tech/klayout/tech/drc/IP62/07_Check.drc": "4ad62763f3ae5c9233fc8a9fd55a5ec999450362070956fcf0348060ce03d758",
+    "libs.tech/klayout/tech/drc/IP62/08_Check.drc": "a4dbf53e06b7993d1e54138da767990f90197a8960fcb86c8c7b63bfa9cf602d",
+    "libs.tech/klayout/tech/drc/IP62/09_Check.drc": "e5602d8aa07ab997a023b5d4da91437ce066f56abf71a1eca4556e1a8110eb72",
+    "libs.tech/klayout/tech/drc/IP62/10_TapeOut.drc": "7620a3b4c153b9f13b5fa65953e65f034ac9fb1b6a9c1994a3f6aff32c19382c",
+    "libs.tech/klayout/tech/drc/drc.lydrc": "1e610ee59a2022e5e3da275fdf99b6717678403035ddc14f27f7ff94d02b31b8",
+    "libs.tech/klayout/tech/drc/drc_IP62.lydrc": "e5b40a257ce8e7e88e488d8b73086af15e984dc46399ec600818788317b1c1da",
+    "libs.tech/klayout/tech/drc/run.drc": "8ffc43f3ea42fedf8f6f39facfada8309cd16d089a3af1b26016526e215f56ca",
+    "libs.tech/klayout/tech/drc/run_IP62.drc": "07f9811a87a562ac4e0e4a13b70c5f60dd9d3ca962a8b034acb224877a3c5ebe",
+    "libs.tech/klayout/tech/drc/run_mdp.drc": "828f54f161f47efb4c1b9721577ec018649d367438bdc6c9ef50123c4a30bd4c",
+    "libs.tech/klayout/tech/drc/run_tile.drc": "5966f762d81e7408f245957ec1b0813caa346a5cb902fbd9e5fd9ba22dccd135",
+    "libs.tech/klayout/tech/lvs/01_Extract.lvs": "2206d70e86e72b0397a25811c5680715cd63d37ae42fd30e8185e7fdec0e21a6",
+    "libs.tech/klayout/tech/lvs/02_Extract.lvs": "91d26f9d2150cedea78ef2591971bf5159b8c6c7bae0f89d9117837dbb716762",
+    "libs.tech/klayout/tech/lvs/03_Combiner.lvs": "38f081645ca9396735b685ea0acbfb36796b14df252b7c292c371dd911be6388",
+    "libs.tech/klayout/tech/lvs/04_Custom.lvs": "bb9339879006ed5eaf3c635ad3d5d1bf3a2d732e4d2e0e74482685945b3d8cbe",
+    "libs.tech/klayout/tech/lvs/05_Compare.lvs": "ba20494aa1483f3f42f9d7668d704c1773ac0b7953482d47476875b25d40c18d",
+    "libs.tech/klayout/tech/lvs/IP62/01_Extract.lvs": "3584c4f1477f9b63b0f6b219a4e7a39db61070ef9e8614ac2a7033b38ea7a1f3",
+    "libs.tech/klayout/tech/lvs/IP62/02_Extract.lvs": "07ef72a2ee9be769a53a83bffc6a75dbf9e85b622d229c416fe12ff57bf0d8ac",
+    "libs.tech/klayout/tech/lvs/IP62/03_Extract.lvs": "05f0ef3f480f8523c2c1f8f109673ad576df5fdf2cdae207726d9182a2be937d",
+    "libs.tech/klayout/tech/lvs/IP62/04_Compare.lvs": "e95cc8df79f34e7faf2d0a0d2e943f966f72e4ccb065fff0278d25bf61893a39",
+    "libs.tech/klayout/tech/lvs/IP62/run.lvs": "df3087c9b616daad0ac0681423436d6e02df19270648220fbaee15db10a56ef0",
+    "libs.tech/klayout/tech/lvs/lvs.lylvs": "1fdbec8c7f76a2f2c93584cefb8b250535f40ab41ffe5f426d14be1248eae70a",
+    "libs.tech/klayout/tech/lvs/run.lvs": "bc765ce4cb5a23c15866ed1727b83484965394da2f557ac508431c7c58addec3"
+  },
+  "scope": "nominal device/connectivity extraction, no interconnect RC",
+  "artifact_sha256": {
+    "INV": {
+      "gds": "c295d2127767f1eeed86a106743a1716ff9f03ab6c57ab8ccde93427aefac0da",
+      "spice": "ee2544f7c0a7e943daffd3c5c125bc70f97e12cbb478166ac2a93b9ac9a4a96e",
+      "abstract.json": "ecb8d8197310295edc73bbaab07f22a354fb028f76ff653725bab52760f14f11"
+    },
+    "NAND": {
+      "gds": "493dbfb1a4b5acee12a0c39de9d7f1018b55d2045299ab1425227e17ffc89d6b",
+      "spice": "80481464e03dc284f5b8e6548b4c5bca70dd7452394afc093ebb04486f54212b",
+      "abstract.json": "31ad9a12a3ae2562d783cb0b2f5a5700cca74d6ef6e03f1c8ae261051d268703"
+    },
+    "NOR": {
+      "gds": "a49fdbddf2df1ba793713a3d9db49b49cbcef69351fe260c97313947478b42fa",
+      "spice": "c9023a50b4d7b95c8f41a7d6e591245cb27a9c1613d632923e188d347d1f48c3",
+      "abstract.json": "0c91172596e2ce5534c3c7788e5ae938fd727d3cd038dda4b65c4750b3e5cce5"
+    },
+    "NANY": {
+      "gds": "f97c672944631d63c915657c80951d3f3b120bb09246c57715d4e67179b4e155",
+      "spice": "7954cd9933e01335bf6fac5f29b2a5606a899fb80978954ab0c617d3d8a4de26",
+      "abstract.json": "5fcf2725ea58d2d77d775d0e5df7bf027ff2278ac652fb784f10e4316891c48f"
+    },
+    "BUF": {
+      "gds": "4a2ae02e29c54d525b13ee825c34d5fce32dca87a11f43e8522cc59821fd59d5",
+      "spice": "15820bc86ca9d3a8538caa8228fe1b5cb9b46c19f04314db8ee47396bbe3e0aa",
+      "abstract.json": "618c63ea05939b67271c45f8769dd2acb861a64c1113862402265b57920634a0"
+    },
+    "TIEP": {
+      "gds": "ba73629b0962c1444271e3a4bd86d7fe0f09b556bff2bc56d3031808fa0ef23b",
+      "spice": "8dcaef0a443d282ef310aaac5b3a8c381db141c32cb40cc0687a14919c398a25",
+      "abstract.json": "4f6eacff791aee8fd7002d6d6c13f7f40bd82f930e5657110e9f3c3bccd1712b"
+    },
+    "TIEZ": {
+      "gds": "d444fe559609271fc6f27a10bf5576ae23a29b41ffb7797845fafa1428e8ac83",
+      "spice": "872a87381fbfdda87eeb3164d9b5f2f9afa51369ab9d17c60d6d9c7aa85b2066",
+      "abstract.json": "927499c9bc197755d536a7fbef0357303e095a3b5a10e1ec8696d862425517bb"
+    },
+    "TIEN": {
+      "gds": "69e84301b0085a6512f31726e1946f9f930fa58b58d54ddaa2c62e2c5fb37376",
+      "spice": "f24184b67a0db7046e113afaa38febf884b127303bd26b18061ddbf5b886a4a6",
+      "abstract.json": "66655cdee8991aa8538fd6ae1847610efacec643a4d607d8ab034ad60507b682"
+    },
+    "FILL": {
+      "gds": "5ac2ce306279c67e2e6bac6daa9dd9de73d6c1f8716a8e95da6d088e7028c17f",
+      "spice": "f6822c66b465673dbf1b6a34e104d69ee8af1832f87db31f6ea2bbdc0670b4c0",
+      "abstract.json": "58466bd5be5e6d7351e9f671445d2b38e31c6069adf37086434aaecaa608d3d3"
+    }
+  },
+  "abutment": {
+    "passed": true,
+    "items": 0,
+    "categories": {},
+    "ordered_pair_orientation_cases": 324
+  },
+  "passed": true
+}

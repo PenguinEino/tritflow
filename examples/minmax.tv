@@ -1,0 +1,5 @@
+// & and | are min/max on -1 < 0 < +1, not bitwise Boolean operators.
+module minmax(input trit a, b, output trit lo, hi);
+  assign lo = a & b;
+  assign hi = a | b;
+endmodule

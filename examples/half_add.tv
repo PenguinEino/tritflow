@@ -1,0 +1,12 @@
+// Reference: balanced-ternary-logic/HALF_ADDER_SIMULATION.md.
+// a + b = sum + 3*carry. Exactly five NANY and two INV cells.
+module half_add(input trit a, b, output trit sum, carry);
+  wire trit t, u, na, d, nd;
+  nany g_t (t, a, b);
+  nany g_u (u, b, t);
+  inv g_na (na, a);
+  nany g_c (carry, na, u);
+  nany g_d (d, t, carry);
+  inv g_nd (nd, d);
+  nany g_s (sum, nd, carry);
+endmodule
