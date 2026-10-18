@@ -1,121 +1,154 @@
-# COLAB — round 3, 2026-10-18
+# COLAB — round 4 release candidate, 2026-10-18
 
-**FAIL: Run all stops in imports before chapter 0.** The fresh GitHub notebook loaded the editorial rewrite, paper figures and chapter-8 code. Setup completed, but `load_paper(ROOT)` rejected `figures/out/fig_cell.svg`. No chapter computation, sizing widget or chapter-8 generated schematic/GDS was produced. This round does not verify those features.
+**PASS after one Run-all retry: all 18 code cells completed, no uncaught traceback, printed runtime 405.0 s (6 min 45 s).** The initial attempt ceased after setup without chapter output or a traceback; the second Runtime → Run all completed on the same runtime. This is a successful complete execution with a recovery step, not evidence of an uninterrupted first-attempt clean-install pass.
 
-## Environment and procedure
+Printed commit: **`2c81d2c1aa81ecebefaa93851f004eb17c9040ba`** (`colab-v0`). Math renders in chapters 1/2/7. The sizing slider updates at two positions. Chapter 8 produces the edited HDL, mapped schematic, real GDS and passing extracted waveform. Runtime was disconnected and deleted afterward.
 
-- Target: https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb
-- Chrome extension surface through `cua_repl`; reloaded the GitHub notebook. Initial runtime was disconnected and deletion was disabled, so there was no old runtime to delete. Inspected runtime settings: Python 3, CPU selected, latest recommended runtime; connected a fresh standard free Google Compute Engine backend (12.67 GB RAM).
-- Used **Runtime → Run all**, accepted the authorized GitHub warning. No notebook edits, manual reruns, guard bypasses or source fixes.
-- Printed source commit: **`c84145b1ed66a37a87fe0c4ffb091a405e2d4034`**, ref `colab-v0`.
-- Printed KLayout: `/usr/bin/klayout`, **0.30.6**. Printed ngspice: `/usr/bin/ngspice`, **ngspice-42**, KLU Direct Linear Solver.
-- Host scientific packages preserved: NumPy **2.1.3**, SciPy **1.16.3**, Matplotlib **3.10.0**, Plotly **5.24.1**.
-- Setup wall time: **not shown in the captured Colab UI**; complete source/version output is preserved. Run all completion time: **unavailable, because the run failed**; the final timer cell never ran. Run all clicked 22:38:00 JST, warning accepted 22:38:04.743; failure was recorded by 22:40:03.205 (118.5 s after acceptance, an observation upper bound, not measured execution time). Colab did not retain execution counts or gutter durations in the captured final state.
-- Deleted the runtime using Runtime → Disconnect and delete runtime → Yes at **22:42:02 JST**. Confirmed **Reconnect** afterward. No credentials entered, sign-in, OAuth, saving, sharing, paid upgrade or account-setting changes.
+## Procedure, tools and timing
 
-## Traceback — cell 2 (`imports`)
-
-```text
-RuntimeError                              Traceback (most recent call last)
-/tmp/ipykernel_2146/2922323329.py in <cell line: 0>()
-     38 from predictions import divider, zero_dc, rail_power
-     39 from presentation import details_html, details_svg
----> 40 paper = load_paper(ROOT)
-     41 narrative_values = context(ROOT)
-
-/content/tritflow/notebook/paper_evidence.py in load_paper(root)
-     25 for name, expected in record['repository_sha256'].items():
-     26     if digest(root / name) != expected:
----> 27         raise RuntimeError(f'Static figure evidence changed: {name}. Rebuild the paper evidence and notebook together.')
-
-RuntimeError: Static figure evidence changed: figures/out/fig_cell.svg. Rebuild the paper evidence and notebook together.
-```
-
-This is the only emitted traceback. The UI evidence establishes that the repository-artifact digest check failed; it does not distinguish a missing file from different file bytes. The NumPy/SciPy import incompatibility from round 1 did not recur before this failure.
+- Used the Chrome extension surface through `cua_repl` at https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb ; reloaded to retrieve the new notebook.
+- Initially no runtime existed: Connect was offered and Disconnect/delete was disabled. Verified Python 3, **CPU selected**, latest recommended runtime, then connected a standard free Google Compute Engine backend (12.67 GB RAM). No accelerator or paid option selected.
+- First Runtime → Run all: **23:36:27 JST**, authorized GitHub warning accepted **23:36:31**. Setup printed the expected commit and versions. Subsequently the UI showed an idle check mark, blank execution counts and no imports/chapter output or traceback. The captured [initial state](../../logs/colab/round4-latest-ax.txt) and [setup screenshot](../../logs/colab/round4-02-setup-versions.png) preserve that observation. The cause was not established; no intentional interrupt, restart, source edit or runtime change was made.
+- Recovery: second **Runtime → Run all at 23:38:55 JST**, same runtime, no code edits or bypasses. It completed all cells. The initial attempt had already installed tools, so the successful run's setup is not a pristine first installation.
+- Setup cell: **1 min**, Colab's rounded gutter display. Imports: **3 s**. The successful final cell printed **405.0 s including setup**, and completion was observed by 23:46:06. The observation time includes polling/capture delay and is not the execution timer. The 405.0 s excludes the first interrupted attempt and gap before retry.
+- Printed scientific stack, preserved host versions: **NumPy 2.1.3, SciPy 1.16.3, Matplotlib 3.10.0, Plotly 5.24.1**.
+- Printed tools: **KLayout 0.30.6**, `/usr/bin/klayout`; **ngspice-42**, `/usr/bin/ngspice`, compiled with KLU Direct Linear Solver.
+- Cleanup: Runtime → Disconnect and delete runtime → Yes at **23:47:48 JST**. Verified **Reconnect** in the toolbar; [cleanup screenshot](../../logs/colab/round4-28-runtime-deleted.png) and [accessibility confirmation](../../logs/colab/round4-cleanup-ax.txt).
+- No credentials entered, sign-in, OAuth, notebook saving/sharing, paid upgrade or account-setting changes. No notebook source was edited. No local package installation, source change or git write command was used.
 
 ## Every cell
 
-Cell numbers are Colab's zero-based indices. There are 18 code cells and 15 text cells. Only setup and imports ran; the remaining 16 code cells have empty outputs. Text rendering and embedded paper figures are not fresh simulation results. “—” means no execution time applies or the cell did not execute.
+Colab indices are zero-based: **33 cells = 18 code + 15 text**. Execution counts 1–18 and timings below are from the completed second Run all. Text cells rendered; they do not execute. `0 s` is Colab's rounded display, not a claim of zero work.
 
-| Cell | Purpose | Result | Wall time |
-|---|---|---|---|
-| 0 | Opening narrative / paper overview | Rendered (text/static) | — |
-| 1 | Setup | Ran; setup output complete | Not shown |
-| 2 | Imports / paper-evidence verification | ERROR: paper-evidence check | Not shown |
-| 3 | Chapter 0 narrative | Rendered (text/static) | — |
-| 4 | Chapter 0 live adder | Not run; stopped at cell 2 | — |
-| 5 | Chapter 1 narrative / DC paper figure | Rendered (text/static) | — |
-| 6 | Chapter 1 gate checks / live DC | Not run; stopped at cell 2 | — |
-| 7 | Chapter 2 narrative / sizing paper figure | Rendered (text/static) | — |
-| 8 | Chapter 2 sizing / slider | Not run; stopped at cell 2 | — |
-| 9 | Chapter 3 narrative / cell-layout figure | Rendered (text/static) | — |
-| 10 | Chapter 3 cell evidence | Not run; stopped at cell 2 | — |
-| 11 | Chapter 4 narrative / arithmetic figure | Rendered (text/static) | — |
-| 12 | Chapter 4 arithmetic checks | Not run; stopped at cell 2 | — |
-| 13 | Chapter 5 narrative | Rendered (text/static) | — |
-| 14 | Chapter 5 synthesis | Not run; stopped at cell 2 | — |
-| 15 | Chapter 5 mapped schematic | Not run; stopped at cell 2 | — |
-| 16 | Chapter 6 narrative / placement figure | Rendered (text/static) | — |
-| 17 | Chapter 6 live P&R | Not run; stopped at cell 2 | — |
-| 18 | Chapter 7 narrative / post-layout figure | Rendered (text/static) | — |
-| 19 | Chapter 7 matched pre/post simulation | Not run; stopped at cell 2 | — |
-| 20 | Chapter 7 scaling narrative / paper figure | Rendered (text/static) | — |
-| 21 | Chapter 7 published scaling/load results | Not run; stopped at cell 2 | — |
-| 22 | Chapter 8 narrative | Rendered (text/static) | — |
-| 23 | Chapter 8 edited HDL | Not run; stopped at cell 2 | — |
-| 24 | Chapter 8 custom flow / schematic / GDS | Not run; stopped at cell 2 | — |
-| 25 | Chapter 8 diagnostic introduction | Rendered (text/static) | — |
-| 26 | Chapter 8 expected HDL diagnostic | Not run; stopped at cell 2 | — |
-| 27 | Chapter 9 outlook / measurement table | Rendered (text/static) | — |
-| 28 | Appendix A scope | Rendered (text/static) | — |
-| 29 | Appendix B evidence introduction | Rendered (text/static) | — |
-| 30 | Appendix B characterization | Not run; stopped at cell 2 | — |
-| 31 | Appendix B four-design campaign | Not run; stopped at cell 2 | — |
-| 32 | Appendix B final assertions / timings | Not run; stopped at cell 2 | — |
+| Cell | Execution | Purpose | Result | Colab wall time |
+|---|---|---|---|---|
+| 0 | — | Opening narrative / overview hero | Rendered | — |
+| 1 | 1 | Setup | PASS | 1 min (rounded) |
+| 2 | 2 | Imports / paper evidence | PASS | 3 s (rounded) |
+| 3 | — | Chapter 0 narrative | Rendered | — |
+| 4 | 3 | Live two-trit adder | PASS | 2 min (rounded) |
+| 5 | — | Chapter 1 narrative / DC hero / math | Rendered | — |
+| 6 | 4 | Gate checks / inverter DC | PASS | 0 s (rounded) |
+| 7 | — | Chapter 2 narrative / sizing hero / math | Rendered | — |
+| 8 | 5 | Sizing tables and interactive slider | PASS | 8 s (rounded) |
+| 9 | — | Chapter 3 narrative / cell-layout hero | Rendered | — |
+| 10 | 6 | Cell dimensions / mapping / qualification | PASS | 0 s (rounded) |
+| 11 | — | Chapter 4 narrative / arithmetic hero | Rendered | — |
+| 12 | 7 | Half/full-adder arithmetic checks | PASS | 0 s (rounded) |
+| 13 | — | Chapter 5 synthesis narrative | Rendered | — |
+| 14 | 8 | Mapped half-adder graph / reports | PASS | 0 s (rounded) |
+| 15 | 9 | Mapped adder and half-adder schematics | PASS | 0 s (rounded) |
+| 16 | — | Chapter 6 narrative / P&R hero | Rendered | — |
+| 17 | 10 | P&R measurements | PASS | 0 s (rounded) |
+| 18 | — | Chapter 7 narrative / post-layout hero / math | Rendered | — |
+| 19 | 11 | Identical extracted devices, without wire C | PASS | 2 min (rounded) |
+| 20 | — | Chapter 7 scaling/power hero and estimates | Rendered | — |
+| 21 | 12 | Published width/load evidence | PASS | 0 s (rounded) |
+| 22 | — | Chapter 8 narrative | Rendered | — |
+| 23 | 13 | Edited minmax HDL | PASS | 0 s (rounded) |
+| 24 | 14 | Custom flow / schematic / GDS / waveform | PASS | 28 s (rounded) |
+| 25 | — | Expected diagnostic introduction | Rendered | — |
+| 26 | 15 | Caught unsupported-HDL diagnostic | PASS; expected diagnostic caught | 0 s (rounded) |
+| 27 | — | Chapter 9 outlook / measurement table | Rendered | — |
+| 28 | — | Appendix A scope | Rendered | — |
+| 29 | — | Appendix B evidence introduction | Rendered | — |
+| 30 | 16 | Characterization evidence | PASS | 0 s (rounded) |
+| 31 | 17 | Four-design recorded campaign | PASS | 0 s (rounded) |
+| 32 | 18 | Final assertions / summary / timings | PASS | 0 s (rounded) |
 
-## Visual and interaction findings
+Fresh-stage times printed by the notebook:
 
-- **First screen:** title and body are readable in Colab's light theme; the overview image renders with all five panels. Its small serif annotations and miniature HDL are much smaller than the surrounding prose. The caption repeats the 17-line / 64-cell / DRC-zero / LVS-match result in consecutive paragraphs, making the opening dense. The first viewport ends before the Run-all guidance and setup, requiring scrolling. No blank hero panel was observed.
-- **Math rendering:** chapter 1 shows literal `\operatorname`, `\frac`, `\qquad`, subscripts and bracket delimiters; chapter 2 and chapter 7 also show raw formula commands. This makes the prediction sections hard to read. Screenshot 06 records chapter 1.
-- **Width/overflow:** the chapter-2 sizing figure's rightmost x-axis caption extends beyond the notebook's right edge at the captured 1348 × 913 viewport; a horizontal notebook scrollbar is present. Appendix A's long scope table also runs beyond the right edge. Other captured paper figures have readable plots, although the dense overview and cell-layout labels benefit from zooming. Vertical scrolling was used to frame figures; viewport clipping alone is not evidence of a malformed image.
-- **Sizing slider:** unavailable. Cell 8 never executed; only its source call `show(sizing_slider(gi,PDK_ROOT))` and the static sizing paper figure were visible. No slider could be moved to a second position. Screenshot 08 records the empty-output boundary.
-- **Chapter 8:** both the edited source and the new schematic/GDS display code are present. Cells 23/24 never ran, so no truth-table result, generated schematic, GDS or waveforms exist for this round. Screenshots 15/16 document this limitation; they are not successful output captures.
-- **Chapter 5** refers to the preceding chapter-4 mapped-adder paper figure; live graph/schematic output is unavailable. **Chapter 9** contains an outlook and measurement table, with no separate hero figure.
-- The opening's 384.1 s / commit `842afe2` verification statement still refers to round 2. It is labeled with that older commit and must not be read as a passing result for `c84145b`.
+| Stage | State | Seconds |
+|---|---|---:|
+| adder2-complete | run | 154.2 |
+| adder2-pre | run | 139.3 |
+| your-minmax | run | 27.75 |
+| your-minmax-raster | run | 0.336 |
+| inv-dc | run | 0.330 |
+| four-mac1 | recorded lookup | 0.265 |
+| four-adder4 | recorded lookup | 0.178 |
+| four-full_add | recorded lookup | 0.068 |
+| four-mul1 | recorded lookup | 0.017 |
 
-## Evidence
+The paper figures, cell qualification, characterization, sizing grids, width/load campaigns and four-design retained reports are published evidence. Their display and compatibility/assertion checks passed, but they were not all freshly simulated in this Colab. The final table explicitly labels the four-design records and their routing identities.
 
-19 numbered screenshots, re-encoded and verified as actual PNG files (1348 × 913). Paper figures are explicitly named `static`; they are embedded notebook assets, not outputs generated during this failed run. Setup and the only traceback are captured in full.
+## Computation and interaction results
 
-- [round3-00-first-screen.png](../../logs/colab/round3-00-first-screen.png)
-- [round3-01-setup-commit.png](../../logs/colab/round3-01-setup-commit.png)
-- [round3-02-setup-versions.png](../../logs/colab/round3-02-setup-versions.png)
-- [round3-03-imports-error.png](../../logs/colab/round3-03-imports-error.png)
-- [round3-04-ch0-static-hero.png](../../logs/colab/round3-04-ch0-static-hero.png)
-- [round3-05-ch1-static-hero.png](../../logs/colab/round3-05-ch1-static-hero.png)
-- [round3-06-unrendered-math.png](../../logs/colab/round3-06-unrendered-math.png)
-- [round3-07-ch2-static-hero.png](../../logs/colab/round3-07-ch2-static-hero.png)
-- [round3-08-sizing-slider-unavailable.png](../../logs/colab/round3-08-sizing-slider-unavailable.png)
-- [round3-09-ch3-static-hero.png](../../logs/colab/round3-09-ch3-static-hero.png)
-- [round3-10-ch4-static-hero.png](../../logs/colab/round3-10-ch4-static-hero.png)
-- [round3-11-ch5-unexecuted.png](../../logs/colab/round3-11-ch5-unexecuted.png)
-- [round3-12-ch6-static-hero.png](../../logs/colab/round3-12-ch6-static-hero.png)
-- [round3-13-ch7-static-hero.png](../../logs/colab/round3-13-ch7-static-hero.png)
-- [round3-14-ch7-scaling.png](../../logs/colab/round3-14-ch7-scaling.png)
-- [round3-15-ch8-unexecuted.png](../../logs/colab/round3-15-ch8-unexecuted.png)
-- [round3-16-ch8-custom-unexecuted.png](../../logs/colab/round3-16-ch8-custom-unexecuted.png)
-- [round3-17-ch9-outlook.png](../../logs/colab/round3-17-ch9-outlook.png)
-- [round3-18-runtime-deleted.png](../../logs/colab/round3-18-runtime-deleted.png)
+- **Live chapter-0 adder:** 32 cells, **1284 × 1038 µm**, **0 DRC markers**, strict LVS **True**, analog **True**. Independent integer oracle checked **243 exhaustive input states**; the extracted sequence covered **9 selected unique states**. The illustrated four-trit paper hero is a separate recorded design, not this fresh two-trit run.
+- **Math:** chapter 1 gate/divider/power equations, chapter 2 sizing/voltage-shift equations and chapter 7 timing/rail-power sums all render as formatted math. The raw-LaTeX problem from round 3 is fixed in these views.
+- **Sizing position 1:** candidate **0**, taped-out size, Wp=13.5, Wn=5, L=1, RR=30 µm. Prediction Y(0)=−0.02066 V, P=4.432 mW; schematic SPICE Y(0)=−0.03954 V; worst discrete error **39.54 mV**, max rail |I| **407.2 µA**, within band.
+- **Sizing position 2:** dragged slider to candidate **45**, Wp=13.5, Wn=5, L=2, RR=20 µm. Prediction Y(0)=−0.0671 V, P=7.197 mW; SPICE Y(0)=−0.01213 V; worst error **12.13 mV**, max rail |I| **545.7 µA**, within band. Transfer curve, selected operating point, error/current marker and explanatory annotation visibly changed. These select precomputed measured candidates; dragging is not a fresh physical-cell regeneration.
+- **Chapter 5:** mapped graph and expandable mapped-hierarchy schematic render successfully. The graph's input selector no longer covers its title in the captured view.
+- **Chapter 8:** executed the notebook's prewritten successful edit `lo = ~((~a) | (~b)); hi = a | b;`. No agent source edit was needed. The sorter passes the independent integer reference for **9 input states**. Its **4 cells** occupy **384 × 366 µm**, drawing DRC **0**, LVS **Match**, extracted sequence **9 input states**, both outputs **PASS**. Generated schematic and GDS appear, and the lo/hi waveform shows the three voltage levels, target bands and passing samples. Displayed settling annotations: **11.26 ns** and **10.95 ns**.
+- **Final summary:** prerequisite guard and source checks completed. Four recorded designs are explicitly identified as retained checks: adder4 (18/19683 selected states), full_add (27/27), mac1 (81/81), mul1 (9/9); all display DRC/LVS True. This does not turn those records into fresh Colab qualifications.
 
-Machine-readable records: [all 33 cells](../../logs/colab/round3-cells.json), [timing observations](../../logs/colab/round3-timing.json), [failed-run accessibility output](../../logs/colab/round3-results-ax.txt), [cleanup confirmation](../../logs/colab/round3-cleanup-ax.txt). Google-account identifiers are redacted from saved accessibility text.
+## Errors and traceback record
 
-## Earlier rounds
+**No uncaught exception or Python traceback** appeared in either captured attempt. The initial queue interruption remains unexplained; it should be investigated before claiming a reliable one-click first run.
 
-- **Round 1 — FAIL**, commit `89b484bb484ca26f8bb8e1d8cb7ec26cccbea269`: setup completed; first chapter failed in SciPy/NumPy with `AttributeError: module 'numpy._core._multiarray_umath' has no attribute '_blas_supports_fpe'`. Manual diagnostic attempts totaled 8 passing / 4 failing code cells; additional missing-state and raw-HTML presentation problems. Runtime deleted. [Archived report](../../logs/colab/round1-report.md).
-- **Round 2 — PASS**, commit `842afe27bead953c9ffd48a7ddceadb57fe0d39d`: uninterrupted Run all, all 17 code cells, **384.1 s including setup**; no uncaught traceback, manual reruns or restart. KLayout 0.30.6/ngspice 42; main adder DRC 0, LVS matched and analog passed. Recorded campaign evidence was distinguished from fresh runs. Runtime deleted. [Archived report](../../logs/colab/round2-report.md).
+Cell 26 intentionally catches `HDLError`, passes and prints the following expected teaching diagnostic (screenshot 23):
 
-## Status and interface requests
+```text
+your_circuit.tv:2:17: arithmetic/comparison on trits is unsupported; use ~, &, |, nany and sized trit literals
+Repair: use gates for signal arithmetic; e.g. nany(a,b) gives the negative saturated sum.
+```
 
-Verification and cleanup completed; **round-3 execution is blocked by the published paper-evidence artifact check**. Rebuild/package the paper evidence and notebook together so the expected `figures/out/fig_cell.svg` digest matches the artifact in a clean tag checkout, then rerun real Colab. Also repair Colab math delimiters and constrain the sizing figure/table widths. No implementation changes were made because COLAB owns only this report and `logs/colab/`.
+This is not a failing cell. The round-3 paper-figure digest RuntimeError did not recur. Recorded failed/unavailable sweep points and the published load-failure boundary are experiment evidence, not new execution failures.
 
-Validation: real Colab UI run, traceback/output inspection, all-cell inventory, screenshot PNG decoding and report-link checks. No local code tests or package installations were needed; no code was changed.
+## Readability and figure review
+
+- **First screen improved:** concise introduction, visible bold Run all instruction, full overview hero and a single compact adder caption. The previous duplicated caption is gone. Body text and panel headings are readable in the current light theme. The overview's miniature HDL, GDS detail and serif footnotes remain small at normal zoom; the main message is clear.
+- **Sizing paper figure:** rightmost x-axis caption is still cut off inside the embedded figure (“Max static current over input states (m…”). Plot data and title are visible. The pale 20 µm series label has low contrast. Screenshot 08 preserves this.
+- **Interactive sizing widget:** both plots and slider are usable; candidate annotation and log-axis minor labels are small. The legend and titles remain separate, and both selected positions are readable in screenshots 09/10.
+- **Chapter-8 outputs:** no blank schematic, layout or waveform. Colab wraps the long output in an inner scrollbar; one must scroll inside it to see schematic, then GDS, then waveform. Captures explicitly frame each output. The GDS says “Axes are in µm” but the raster primarily shows die dimensions and layer legend, with no visible axis ticks; wording could be clearer. The schematic's detailed net legend is small; its main connectivity is legible.
+- **Chapter 7:** the paper load-boundary panel uses a useful pF range and is readable; the round-2 giant log-range problem is absent from this static hero. This does not test the optional EXTENDED interactive sweep plot.
+- **Appendix A:** the long scope table still extends beyond the viewport's right edge and requires horizontal scrolling. Long final cache-event text also requires horizontal scrolling. The summary table and timed stages remain usable.
+- Chapter 9 has a readable outlook and measurement table, no separate hero image. Chapter 5 refers to the prior arithmetic paper figure and also provides live graph/schematic outputs.
+
+## Screenshots and records
+
+**29 numbered screenshots**, all validated as actual PNG, **1348 × 913**. Static paper heroes are embedded published figures; the live chapter-0 result, slider, chapter-5 output, chapter-8 output and final tables were captured after execution. No uncaught error screenshot was needed; screenshot 23 records the expected caught diagnostic.
+
+- [round4-00-first-screen.png](../../logs/colab/round4-00-first-screen.png)
+- [round4-01-setup-commit.png](../../logs/colab/round4-01-setup-commit.png)
+- [round4-02-setup-versions.png](../../logs/colab/round4-02-setup-versions.png)
+- [round4-03-ch0-hero.png](../../logs/colab/round4-03-ch0-hero.png)
+- [round4-04-ch0-live-result.png](../../logs/colab/round4-04-ch0-live-result.png)
+- [round4-05-ch1-math.png](../../logs/colab/round4-05-ch1-math.png)
+- [round4-06-ch1-hero.png](../../logs/colab/round4-06-ch1-hero.png)
+- [round4-07-ch2-math.png](../../logs/colab/round4-07-ch2-math.png)
+- [round4-08-ch2-hero.png](../../logs/colab/round4-08-ch2-hero.png)
+- [round4-09-sizing-position1.png](../../logs/colab/round4-09-sizing-position1.png)
+- [round4-10-sizing-position2.png](../../logs/colab/round4-10-sizing-position2.png)
+- [round4-11-ch3-hero.png](../../logs/colab/round4-11-ch3-hero.png)
+- [round4-12-ch4-hero.png](../../logs/colab/round4-12-ch4-hero.png)
+- [round4-13-ch5-live-graph.png](../../logs/colab/round4-13-ch5-live-graph.png)
+- [round4-14-ch5-schematic.png](../../logs/colab/round4-14-ch5-schematic.png)
+- [round4-15-ch6-hero.png](../../logs/colab/round4-15-ch6-hero.png)
+- [round4-16-ch7-math.png](../../logs/colab/round4-16-ch7-math.png)
+- [round4-17-ch7-hero.png](../../logs/colab/round4-17-ch7-hero.png)
+- [round4-18-ch7-scaling.png](../../logs/colab/round4-18-ch7-scaling.png)
+- [round4-19-ch8-edited-hdl.png](../../logs/colab/round4-19-ch8-edited-hdl.png)
+- [round4-20-ch8-schematic.png](../../logs/colab/round4-20-ch8-schematic.png)
+- [round4-21-ch8-gds.png](../../logs/colab/round4-21-ch8-gds.png)
+- [round4-22-ch8-waveform.png](../../logs/colab/round4-22-ch8-waveform.png)
+- [round4-23-expected-hdl-error.png](../../logs/colab/round4-23-expected-hdl-error.png)
+- [round4-24-ch9-outlook.png](../../logs/colab/round4-24-ch9-outlook.png)
+- [round4-25-final-summary.png](../../logs/colab/round4-25-final-summary.png)
+- [round4-26-final-runtime.png](../../logs/colab/round4-26-final-runtime.png)
+- [round4-27-stage-times.png](../../logs/colab/round4-27-stage-times.png)
+- [round4-28-runtime-deleted.png](../../logs/colab/round4-28-runtime-deleted.png)
+
+Records: [all-cell inventory](../../logs/colab/round4-cells.json), [timing observations](../../logs/colab/round4-timing.json), [slider values](../../logs/colab/round4-slider.txt), [completed-run accessibility output](../../logs/colab/round4-results-ax.txt), [expanded final evidence](../../logs/colab/round4-results-expanded-ax.txt). Saved accessibility text redacts the Google-account identifier.
+
+## Short history
+
+- **Round 1 — FAIL**, `89b484bb484ca26f8bb8e1d8cb7ec26cccbea269`: setup succeeded; SciPy/NumPy failed with `AttributeError: module 'numpy._core._multiarray_umath' has no attribute '_blas_supports_fpe'`. Diagnostic manual attempts totaled 8 pass / 4 fail; runtime deleted. [Report](../../logs/colab/round1-report.md).
+- **Round 2 — PASS**, `842afe27bead953c9ffd48a7ddceadb57fe0d39d`: uninterrupted Run all, **17 code cells, 384.1 s including setup**, no uncaught traceback or recovery. Runtime deleted. [Report](../../logs/colab/round2-report.md).
+- **Round 3 — FAIL**, `c84145b1ed66a37a87fe0c4ffb091a405e2d4034`: setup succeeded, imports rejected `figures/out/fig_cell.svg` in `load_paper`; remaining 16 code cells unexecuted. Raw math/overflow noted, slider and chapter-8 outputs unavailable; runtime deleted. [Report](../../logs/colab/round3-report.md).
+
+## Status, requests and validation
+
+Round-4 verification, required captures and runtime cleanup are complete. **Functional pass with one recovery**, with the initial interruption limiting the first-run reliability claim. Interface requests: investigate that initial queue loss, repair the sizing figure's clipped caption and improve wide-table handling. No source fixes made: COLAB ownership is this report and `logs/colab/` only.
+
+Validation: real Colab UI execution; all 18 execution counts, final prerequisite assertions, printed timings and visible outputs inspected; all 33 cells recorded; screenshot PNG decode and report-link checks. No code changes requiring local unit tests.
