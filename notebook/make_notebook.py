@@ -629,6 +629,11 @@ oracle. The generated table checks every input against both source and mapped
 logic. The selected circuit then runs real P&R, DRC/LVS and extracted simulation
 through the same chain. Editing HDL can intentionally fail the oracle; update
 the mathematical specification only when you intend to change the function.
+Initial internal-node Newton guesses use mapped trits and strict-LVS net
+correspondence. They avoid nonphysical model operating-point roots; `.nodeset`
+is unconstrained during the transient, with no `.ic`/`uic` or circuit changes.
+Output acceptance still uses the independent arithmetic oracle. The actual
+guesses are displayed with the result.
 
 `~`, `&`, `|` and `nany` retain their ternary meanings. Here is a deliberately
 broken expression, caught before any physical work. Located errors identify
@@ -672,13 +677,14 @@ show(color_nets(custom,dict(zip(pins,planned[-1]))))
 custom_out = BUILD/"your_circuit"/example.top
 custom_result = cache.run(f"your-{CHOICE}", {"source":source,"net":custom.to_json(),"vectors":planned,
                          "expected":[oracle(v) for v in planned],"load_f":10e-15,"hold_s":1e-6,
-                         "step_s":2e-9,"rows":None,"anneal_steps":600,"seed":0},
-    lambda: complete_design(custom,custom_out,planned,oracle,hold_s=1e-6),
+                         "step_s":2e-9,"rows":None,"anneal_steps":600,"seed":0,"initialize_internal":True},
+    lambda: complete_design(custom,custom_out,planned,oracle,hold_s=1e-6,initialize_internal=True),
     artifacts=lambda r: experiment_artifacts(r,custom_out,example.top))
 assert_experiment(custom_result)
 assert {tuple(row["input_trits"]) for row in custom_result["post"]["measurements"]["rows"]} == set(planned)
 table([["Independent arithmetic input states",len(planned)], ["Physical results",custom_result["stats"]],
-       ["DRC clean / LVS matched",[custom_result["drc"]["clean"],custom_result["lvs"]["matched"]]]])
+       ["DRC clean / LVS matched",[custom_result["drc"]["clean"],custom_result["lvs"]["matched"]]],
+       ["Initial Newton guesses (V)",custom_result["initial_nodeset_v"]]])
 show(waveform_figure(custom_result["post"],title=f"{CHOICE}: all input states, selected sequence"))
 ''')
 md('''

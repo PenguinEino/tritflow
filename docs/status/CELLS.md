@@ -1,4 +1,4 @@
-# CELLS — Phase 4 complete; compact library qualified
+# CELLS — Phase 5 complete; compact library and notebook cell visuals qualified
 
 ## Published generation
 
@@ -355,7 +355,7 @@ truth/PNG hashes match the prior generation; latest live SIM characterizations
 and sizing artifacts were preserved. No SIM/extract code or PDK/reference files
 were edited. No extra dependencies or git-state changes.
 
-## Phase 5 — chapter 3 cell visuals (in progress)
+## Phase 5 — chapter 3 cell visuals
 
 New ownership: `tritflow/viz/cell.py` and `tests/viz/test_cell*.py`. The views read
 only published `cells/out` data. Layer polygons are taken from GDS with hole-safe
@@ -365,4 +365,94 @@ optional original XM/R labels come from the independent LVS evidence already
 inside `cells/out`. Actual GDS active-region bounds outline each MOS/RR device.
 The linked device table uses standalone HTML/Plotly JavaScript, so ipywidgets and
 anywidget are not runtime requirements. Separate ordinary Figure/table objects
-remain available for static notebook use. No cell outputs are being modified.
+remain available for static notebook use. No cell outputs were modified.
+
+### Notebook API
+
+Import directly from `tritflow.viz.cell` (no changes to shared viz exports):
+
+```python
+from IPython.display import display
+from tritflow.viz.cell import (
+    cell_figure, device_mapping, device_locations, device_table, row_abutment,
+)
+
+display(cell_figure("NANY", theme="dark"))
+view = device_mapping("NANY", theme="light")
+display(view)                       # linked Plotly + clickable device table
+view.select("XM9")                 # original alias, or published ID "XCN2"
+display(view.figure, view.table)    # ordinary figures; no widget/HTML coupling
+view.write_html("nany-devices.html")  # standalone, Plotly bundled by default
+
+display(row_abutment(
+    ["INV", "NAND", "NANY", "BUF", "FILL"],
+    orientations=["R0", "MY", "R0", "MY", "R0"],
+    theme="light",
+))
+rows = device_locations("INV")     # JSON-ready name/alias/model/W/L/origin/bbox
+static_table = device_table("INV")
+```
+
+- `cell_figure(cell, *, library=CELLS_DIR/"out", theme="light") -> go.Figure`:
+  actual WN/AP/AN/AR/GC/CO/M1/V1/M2 polygons, independent layer legend groups,
+  dashed exact M2/V1 router obstructions, signal access pads/labels, cell boundary
+  and labelled VDD/VMID/VSS M1 rail overlays. Legend single-click toggles a group;
+  double-click isolates one. Both light/dark palettes use explicit backgrounds
+  and contrasting text. Axes retain physical 1:1 scale and µm units.
+- `device_locations(cell, *, library=...) -> list[dict]`: one row per actual
+  schematic device, with unique published SPICE `name`, original
+  `schematic_name` when available, `model`, `w_um`, `l_um`, `x_um`, `y_um`, and
+  `bbox_um`. Coordinates are the matched extraction/PCell origins; boxes enclose
+  actual active geometry, including RR end regions (not an inferred W×L box).
+  FILL returns an empty list; taps/vias are correctly excluded. BUF aliases are
+  stage-qualified, so its eight devices remain distinct. Missing independent
+  evidence falls back to published names/PCell roles without any reference-repo
+  access. The main persisted cell LVS pairs and source dimensions must agree.
+- `device_mapping(cell, *, library=..., theme="light", selected=None)` returns
+  `DeviceMapping`: `.figure`, `.table`, `.rows`, `.select(name_or_alias_or_None)`,
+  `.static_figures()`, `.to_html(full_html=True, include_plotlyjs=True)` and
+  `.write_html(path, include_plotlyjs=True)`. Device outlines/labels are all
+  visible; hovering an outline shows schematic and SPICE names, model, W/L and
+  origin. The linked table supports whole-row clicks and keyboard Tab/Enter/Space.
+  Selection updates both the outline and native figure dropdown; clicking an
+  outline also selects its table row. `.figure` and `.table` are ordinary Plotly
+  figures, and the figure dropdown works without a Python callback. For notebook
+  hosts that restrict HTML/iframes, display those two attributes or the tuple
+  from `.static_figures()` instead. No FigureWidget/ipywidgets/anywidget required.
+- `device_table(cell, *, library=..., theme="light") -> go.Figure`: separate
+  Plotly table of schematic label, published ID, model, W/L and GDS origin.
+- `row_abutment(cells=("INV","NAND","NOR","NANY","FILL"), *,
+  orientations=None, library=..., theme="light") -> go.Figure`: actual transformed
+  cell polygons side by side. Default orientations alternate R0/MY; only those
+  orientations are accepted. It checks aligned heights/rails and physical M1
+  coverage before claiming continuity. Per-cell labels and hover expose the
+  advertised free full-height M2 tracks/count, width and clearance; MY mirrors
+  geometry, pins and tracks. These centerlines are the abstract's routing-space
+  promise, not a fabricated routing result. Free-track and rail legend entries
+  appear first in the row view.
+
+All functions accept INV/NAND/NOR/NANY/BUF/TIEP/TIEZ/TIEN/FILL, validate names and
+light/dark themes, and check `generation.json` before/after multi-file reads.
+Figures never write to the library. The optional HTML export writes only to the
+caller-specified destination; its default includes Plotly locally, with no CDN.
+
+### Phase 5 validation / publication
+
+`python3 -m pytest tests/viz -q`: **56 passed**, including **33 cell-visualization
+cases**. Coverage includes all nine cells in both themes; rendered GDS polygon
+and obstruction equality (including holes); every source device's matched
+location/dimensions/outline/table entry; original XM/R aliases and BUF hierarchy;
+selection/export/static fallback; portable data without PDK/reference/equivalence
+trees; mirrored tracks/pins, continuous rails and publication-change rejection.
+
+Chrome review confirmed light/dark NANY geometry, row-abutment geometry, table
+click and keyboard selection with the corresponding highlighted device, and the
+notebook iframe representation (including Unicode labels and selection). An
+initial overlapping dropdown/title and an unspecified-host-charset issue were
+corrected before the final test run.
+
+Phase 5 is complete. **No `cells/out` publish was needed or performed**: this
+phase changes visualization code/tests/status only; all physical cell views,
+characterizations and existing equivalence evidence remain as published. No
+shared notebook/viz exports, PNR/SIM code, PDK/reference files or git state were
+modified. No extra dependencies were installed. No blockers/interface requests.

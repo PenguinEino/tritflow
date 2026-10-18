@@ -25,14 +25,151 @@ Phase-1 `/tmp` artifacts are superseded by these project-local results.
   Plotly net/instance selection, placement + HPWL animation, and routing replay.
   Figures are normal notebook-ready Plotly Figures; exported HTML embeds Plotly.
 
-## Phase 4 — robustness (verification finishing)
+## Phase 4 — robustness
 
-`examples/fuzz_pnr.py` now generates deterministic reader-style TritVerilog,
-runs the public HDL/synthesis APIs (including source-to-gate equivalence),
-then real-cell placement/routing, flattened-GDS connectivity, own metal DRC,
-unmodified PDK DRC and strict device LVS. Initial discovery and corrected
-100-design campaigns are complete; final implementation hashes and scale
-measurements are being refreshed. All output stays under `build/`.
+`examples/fuzz_pnr.py` generates deterministic reader-style TritVerilog, runs
+the public HDL/synthesis APIs (including source-to-gate equivalence), then
+real-cell placement/routing, flattened-GDS connectivity, own metal DRC,
+unmodified PDK DRC and strict device LVS. Corrected 100-design campaigns pass;
+the final frozen-input campaign and scale table are recorded below. All
+output stays under `build/`. No packages were installed.
+
+Reproduce from the checkout:
+
+```
+python3 examples/fuzz_pnr.py --count 100 --scale --jobs 2
+python3 examples/fuzz_pnr.py --count 100 --scale --jobs 2 --resume
+python3 examples/fuzz_pnr.py --seeds 74 79 --jobs 1
+python3 examples/fuzz_pnr.py --count 0 --scale --output-root build/pnr_scale
+```
+
+Seeds 0–99 vary 2–12 input trits, 1–19 authored logic levels, widths 1–6,
+outputs 1–6, reconvergent paths, shared inputs, all min/max/nany/neg operators,
+all three constants, output aliases, entirely constant outputs and fanout
+limits 2/3/4/8. Every fifth case retains six output branches for larger live
+DAGs. Synthesis equivalence is exhaustive for these input sizes. The actual
+mapped circuit sizes and coverage are in the final result table below.
+
+Each source has its own directory `build/pnr_fuzz/fuzz_<seed>/`, with `.tv`,
+synthesis JSON/gate source/SPICE/equivalence report, canonical GDS/PNR JSON,
+PDK DRC database/log, strict LVS database/extracted/reference SPICE, worker log
+and `fuzz.result.json`. `summary.json` tracks progress and sets
+`inputs_stable=true` only after the final library/tool hash agrees. A changed
+publication fails certification; rerun after it settles. Resume requires both
+matching source/tool/library hashes and unchanged GDS/JSON/DRC/LVS artifact
+hashes. Changing annealing effort invalidates reuse. Each worker is a separate
+process with a timeout; its entire process group is reaped on exit/timeout.
+There is no daemon or watcher.
+
+### Failure classes and fixes
+
+1. **Unloaded boundary inputs disappear from device extraction.** The original
+   discovery pass completed 100 designs with 55 strict-LVS rejections of this
+   class; it was a diagnostic run during implementation, not a fixed-version
+   success-rate benchmark. Pads existed and DRC/connectivity were clean, but
+   the PDK removes standalone metal nets and the strict top-port comparison
+   reported missing inputs. In one minimal alias/TIEZ case, those unused
+   formals also made the native comparator mispair supplies. Original failing
+   sources and metadata are preserved as `first_failure.tv/.json`; the initial
+   run is `build/pnr_fuzz/discovery.summary.json`.
+
+   **Fix:** new public `tritflow.pnr.strict_lvs` independently proves each
+   unloaded input from the drawn GDS: exactly its M2 pad island, no V1,
+   the correct actual top-level TXM2 label, and clean drawn connectivity.
+   Only those empty formals are removed from the device reference before
+   invoking the unmodified strict PDK comparator. Every device and loaded
+   port must match. Proven formals are restored in extracted SPICE and the
+   complete physical port set is checked again. The full-port reference and
+   pre-restoration extracted file remain beside the native report. A missing
+   or mislabeled loaded/unloaded pad cannot be excused by this procedure.
+   Regression tests cover the minimal TIEZ/NOR/aliased-BUF circuit and deletion
+   of an actual unused-pad label while leaving its JSON unchanged.
+
+2. **A failed verification could leave a newly written canonical GDS.** This
+   was identified while exercising failure UX, rather than as a random DRC
+   defect. **Fix:** export to `<top>.candidate.gds`; publish `<top>.gds` and
+   canonical PNR JSON only after all requested geometry/PDK checks pass.
+   Failures raise `PhysicalVerificationError`, move geometry to
+   `<top>.failed.gds`, and write `<top>.pnr.failure.json`. An earlier successful
+   canonical GDS/JSON remains intact; its failure marker makes the new failed
+   attempt explicit. Tests inject both an unenclosed V1 (own check) and a tiny
+   N-well (actual PDK device DRC), verify exceptions, and compare the old good
+   artifacts byte for byte. No failed GDS is returned as a `PnrResult`.
+
+3. **Routing exhaustion gave a generic maze error.** **Fix:** `RoutingFailure`
+   carries `failed_nets`, `region_um`, `blocking_nets` and a readable message.
+   A failed connection window is reported with x/y bounds in µm and nearby
+   occupied nets where applicable, plus `rows`/`channel_tracks` and pin-access
+   guidance. Outer retries retain diagnostic fields and write all attempts to
+   `<top>.pnr.failure.json`. A real, intentionally enclosed M2 pin pocket is
+   tested without a mocked router. Reproducer evidence lives under
+   `build/pnr_failure_demo/`; it emits no GDS:
+
+   > Routing failed for nets z: no legal maze path; exhausted 1 floorplan
+   > attempts. Congested connection region: x=63..156 µm, y=3..111 µm.
+   > Try more rows (rows=...) or channel tracks (channel_tracks=...);
+   > check cell pin-access obstructions.
+
+No random-case metal-connectivity or PDK DRC defect remains in the verified
+corpus. This is measured fuzz coverage, not an assertion that all possible
+reader circuits will route. Exhausted routing and invalid layouts fail loudly.
+The power section and its geometry/current schema are unchanged from phase 3.
+
+### Scale methodology
+
+Scale runs synthesize adders at N=6/8 using the actual HA/FA source. `mul2`
+is a functioning two-trit multiplier: four one-trit multipliers and two full
+adders combine the four partial products into four output trits. A regression
+checks its arithmetic against integer multiplication for all 81 input vectors;
+its synthesis equivalence checks all 81 vectors as well. Generated standalone
+HDL and all physical/verification outputs are under
+`build/adder6/`, `build/adder8/`, `build/mul2/`.
+
+Wall time is measured separately for synthesis, PNR (including GDS, connectivity,
+own DRC and official PDK DRC), and LVS. Peak memory is sampled every 100 ms as
+the sum of worker/descendant RSS from `/proc`, in MiB. It includes Python and
+the live KLayout subprocess; shared pages can be counted twice. It excludes
+the small parent monitor and other concurrent workers. It is sampled process-
+tree RSS, rather than a claim of exact physical RAM or PSS. Timings are on this
+machine under concurrent stream/test load. No figures are included in fuzz
+run time; all native physical verification is included.
+
+### Final phase-4 evidence
+
+**103/103 passed:** 100 random HDL designs plus adder6, adder8 and mul2. The final frozen-input campaign took **173.18 s** with two bounded workers. All sources and checked output hashes were independently revalidated after the run; native LVS circuit statuses are Match for every case.
+
+Tool/library content fingerprint: `518d49bef7f8b4b1127ff7b0e5b0bb0c4b0e5d2c8182e51a54629f7e24e50fd1`. `inputs_stable=true`. Authoritative campaign: `build/pnr_fuzz/certified_campaign.summary.json`; progress/latest results: `build/pnr_fuzz/summary.json`.
+
+The random corpus maps to **1–79 cells**, mapped depth **1–23**, and covers INV/NAND/NOR/NANY/BUF/TIEP/TIEZ/TIEN. All input counts 2–12 and fanout limits 2/3/4/8 occur. Source/gate equivalence checks a total of **7,174,422 exhaustive vectors**. Isolated-input proof is exercised in **81 designs**. There are zero outstanding synthesis, routing, connectivity, DRC or LVS failures in this corpus.
+
+Random-design source-to-LVS time ranges **1.76–4.75 s** per design; sampled peak process-tree RSS ranges **547.3–566.4 MiB**.
+
+| Scale design | Cells | Die (µm) | Utilization | PNR incl. DRC (s) | PNR + LVS (s) | Source → LVS (s) | Peak tree RSS (MiB) | PDK DRC / LVS |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| adder6 | 96 | 2460 × 1782 | 43.14% | 7.93 | 9.06 | 9.18 | 576.9 | 0 / Match |
+| adder8 | 128 | 2796 × 2454 | 36.75% | 40.01 | 41.07 | 41.17 | 601.4 | 0 / Match |
+| mul2 | 49 | 1680 × 1206 | 45.66% | 2.97 | 4.03 | 4.06 | 556.9 | 0 / Match |
+
+| Scale design | Rows / spans | Tracks/channel | M1 / M2 signal length (µm) | Signal / power vias | HPWL before → after (µm) |
+|---|---:|---:|---:|---:|---:|
+| adder6 | 9 / 3 | 8 | 80898 / 79964.5 | 887 / 1944 | 153658 → 98407.5 |
+| adder8 | 11 / 3 | 12 | 172416 / 133689 | 1279 / 3168 | 231814 → 172083 |
+| mul2 | 6 / 2 | 8 | 29754 / 25475 | 383 / 600 | 54009.5 → 32969.5 |
+
+N=6 is well within the requested ~60 s. N=8 takes longer because its maze
+router exhausts eight-/ten-track attempts before succeeding with twelve
+tracks and two side bypass columns; those failed attempts are retained in
+its PNR JSON. All scale runs use default 600-step placement effort and seed 7.
+
+The final combined PNR/owned-layout-view regression run is **32 passed in
+38.77 s**. It includes actual PDK device-DRC rejection, geometric fault
+injection, isolated-pad label deletion, genuine blocked routing, multiplier
+arithmetic, prior compact-cell constraints and the 200-instance mock DAG.
+The four original canonical designs and all twelve seed candidates were also
+rebuilt under phase 4 and remain clean; their refreshed tables appear below.
+PNR implementation/verification is complete, with no PNR blockers. The notebook
+wrapper hookup below is an interface handoff under the ownership rules.
+No PNR watcher or background worker remains running.
 
 **Interface request for FRONTEND/integrator (files only):** notebook
 `tritflow.flow.Layout.lvs()` still calls raw `tritflow.extract.extract_layout`.
@@ -230,9 +367,9 @@ geometry checks and the PDK DRC. `+LVS` adds extraction/comparison; view renderi
 is separate in each summary JSON. No phase-2 runtime was archived, so the
 comparison makes no phase-2 speedup claim.
 
-Canonical PNR + strict LVS + all four exported notebook views took adder4 12.50 s, full_add 4.51 s, mac1 5.87 s, mul1 2.68 s.
+Canonical PNR + strict LVS + all four exported notebook views took adder4 5.68 s, full_add 2.28 s, mac1 2.65 s, mul1 1.89 s.
 Timings are wall-clock measurements on this machine; concurrent stream/test
-activity affects them. The slowest adder4 seed in the final batch is 6.90 s including LVS.
+activity affects them. The slowest adder4 seed in the final batch is 4.87 s including LVS.
 
 SIM compatibility checks on the canonical JSONs completed with every cell
 connected to all three supply pads. Maximum rail deviations from SIM's
@@ -278,7 +415,8 @@ python3 -m pytest tests/pnr tests/viz/test_layout.py -q
 python3 -m compileall -q tritflow/pnr tritflow/viz/layout.py examples/pnr_all.py
 ```
 
-Final phase-3 combined run: **27 passed in 60.16 s** (concurrent with the final batch). This includes the original
+Phase-3 combined run: **27 passed in 60.16 s**. Final phase-4 combined run:
+**32 passed in 38.77 s**. This includes the original
 synthetic suite and real four-trit adder, actual obstructed/mirrored mock GDS
 through the full PDK deck, V1-implied metal, free-column metadata, alternative
 pin access, portable raster/HTML, net/hierarchy selection, linked animation
