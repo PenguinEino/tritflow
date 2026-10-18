@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 def timing_figure(report):
-    """Cell contributions along the critical, logically sensitized path."""
+    """Cell contributions along the maximizing path; see report for sensitization scope."""
     import plotly.graph_objects as go
     path = report.critical_path
     figure = go.Figure(go.Bar(x=[s.instance for s in path], y=[s.delay_s*1e9 for s in path],
@@ -34,7 +34,7 @@ def validation_figure(validation=None):
     rows = [row for design in validation["designs"] for row in design.get("outputs", [])
             if row.get("simulated_s") is not None]
     figure = go.Figure()
-    for field, label, symbol in (("predicted_s", "Global graph, fixed ramp", "circle"),
+    for field, label, symbol in (("predicted_s", "Conservative local-class/ramp envelope", "circle"),
                                   ("tested_predicted_s", "SIM endpoint pairs, propagated slew", "diamond")):
         figure.add_scatter(x=[r["simulated_s"]*1e9 for r in rows], y=[r[field]*1e9 for r in rows],
             mode="markers", name=label, marker_symbol=symbol,

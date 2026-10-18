@@ -25,8 +25,8 @@ attendance/poster arrangements before filing.
 
 Default payload: `submission/ISSCC27/submitted_notebooks/TritFlow/`.
 **Only that folder** belongs in the eventual official-repository PR. It contains
-the notebook, README, Apache license, abstract, pitch, checklist and build
-information; no EDA sources, PDK, large cell tree or raw simulation results.
+the notebook, README, Apache license and NOTICE, abstract, pitch, checklist
+and build information; no EDA sources, PDK, large cell tree or raw simulation results.
 Current rules and inspected accepted-folder examples are linked in the checklist.
 The payload budget is 8 MiB, a self-imposed guard rather than an official limit.
 

@@ -1,133 +1,159 @@
 # Synthesized ternary schematics
 
 `tritflow.schematic.draw()` turns a public `GateNetlist` into a deterministic
-SVG drawing. Symbols follow signal flow from left to right. The same routed
-scene can later show ideal trit values and estimated wire capacitance.
+SVG/PDF schematic. Placement follows the arithmetic structure; external ports
+stay near their consumers and producers. The same scene later shows settled
+trit values and real PNR wire capacitance.
 
 ```python
 from tritflow import flow
 from tritflow.schematic import draw, legend
 
 net = flow.load('examples/full_add.tv', 'full_add').synthesize()
-sch = draw(net)                       # ha1 / ha2 blocks, plus top-level gates
+sch = draw(net)                       # ha1 / ha2 blocks and carry-combining gates
 sch.show()                           # or display(sch) in Colab
 sch.save('build/full_add.svg')
 sch.save('build/full_add.pdf')
 svg_text, pdf_bytes = sch.svg, sch.pdf
 
-flat = draw(net, expand='*')          # every actual synthesized cell
-ha1 = draw(net, expand=['ha1'])       # ha1 cells; ha2 stays a block
-coloured = flat.annotate(inputs={'a': -1, 'b': 1, 'cin': 0}, net_names=True)
-coloured.show()
+flat = draw(net, expand='*')          # actual cells, with light hierarchy frames
+partial = draw(net, expand=['ha1'])   # ha1 cells; ha2 stays a block
+flat.annotate(inputs={'a': -1, 'b': 1, 'cin': 0}, net_names=True).show()
+print(flat.metrics)                  # wire length, bends, crossings and aspect
 legend().show()
 ```
 
-The requested `net.schematic(**options)` convenience method is a one-line
-FRONTEND delegate to `draw`; SCHEM does not alter the shared netlist classes.
-The callable hook works now with `flow.Netlist`, `SynthesizedNetlist`, and a
-netlist loaded from JSON.
+`net.schematic(**options)` is the requested one-line FRONTEND delegate to
+`draw`; SCHEM does not alter the shared netlist classes. The callable hook
+works with `flow.Netlist`, `SynthesizedNetlist` and netlists loaded from JSON.
 
-## Symbol legend
+## Symbols and paper style
 
 ![Ternary symbol legend](assets/legend.svg)
 
 The triangle and inversion bubble preserve the familiar INV/BUF convention.
 NAND uses the AND outline with `min` inside; NOR uses the OR outline with
-`max` inside. The bubble means **arithmetic sign reversal**, which also leaves
-zero unchanged. It does not mean a Boolean complement. NANY uses a clipped
-summing body with a Σ and an output bubble: sum the inputs, saturate to
-−1…+1, then reverse the sign. Clipped corners distinguish this operation from
-AND, OR, XOR and the ordinary amplifier triangle. TIE symbols resemble supply
-sources and explicitly print +1, 0 or −1. Input and output flags point along
-the signal flow; ascending numerical bit order keeps vectors together.
+`max` inside. The bubble means **arithmetic sign reversal**, leaving zero
+unchanged. NANY uses a clipped summing body with a Σ and an output bubble:
+sum, saturate to −1…+1, then reverse the sign. Clipped corners distinguish it
+from AND, OR, XOR and an amplifier triangle. TIE symbols resemble supply
+sources and print +1, 0 or −1. Directional flags identify external ports.
 
-The three signal colours exactly match `figures/style.py`: −1 blue
-`#2a78d6`, 0 grey `#6f6e69`, +1 red `#e34948`. The installed drawing package
-copies those constants so it does not depend on the repository's figure
-scripts; a regression check prevents palette drift.
+Colours, serif font preferences and nominal line weights follow
+`figures/style.py`: −1 blue `#2a78d6`, 0 grey `#6f6e69`, +1 red `#e34948`;
+Nimbus Roman / Liberation Serif / DejaVu Serif; 8 pt gate labels, 0.6 pt
+symbol outlines and 1.2 pt unannotated signals. The package copies these
+small constants instead of depending on repository figure scripts.
 
-## Hierarchy and wiring
+## Hierarchy and placement
 
-The default view closes module-instance scopes recorded in `Instance.hier`.
-Unary generate containers are compressed: the adder shows `digit[0].fa`,
-`digit[1].fa`, and so on. `expand` accepts a path, a sequence of paths, or
-`'*'` / `'all'`. Selecting a scope exposes all its descendant cells; selecting
-a deeper scope opens its ancestors while sibling scopes remain closed.
-Unknown paths raise `ValueError`.
+Default views close module-instance scopes recorded in `Instance.hier`.
+Unary generate containers compress to paths such as `digit[0].fa`.
+`expand` accepts a path, a sequence, or `'*'` / `'all'`. Selecting a scope
+exposes every descendant gate; selecting a deeper scope opens its ancestors
+while siblings stay closed. Unknown paths raise `ValueError`.
 
-Mapped netlists retain hierarchy paths but do not retain original module
-port aliases or module types. A block therefore prints its instance path,
-cell count and actual boundary **net names**. It never invents an `a`/`b`/`sum`
-alias. When shared optimized logic crosses a scope more than once, closing
-that scope could imply false feedback. The affected scope is opened and
-`sch.scene.notes` explains why.
+A ripple adder is one row of digit blocks, with `cout` and the next `cin` on
+the same horizontal track. `a[i]` and `b[i]` enter locally from above;
+`sum[i]` leaves below its producer. Full-adder flat views frame the two half
+adders side by side and fold their latter stages into a lower feedforward
+row. A downward gate marks that row transition. Larger flat adders use
+multiple rows of these panels. The standalone half adder instead keeps the
+`t` net as a straight trunk from `g_t` to `g_d`, with a branch to `g_u`.
 
-Longest-path columns, dummy lanes for long nets, and repeated barycenter
-sweeps reduce crossings. Each inter-column channel assigns one distinct
-vertical track to each net. Pin rows, wire bends and lanes follow an 8-pixel
-grid. Symbol keep-outs include their labels; routing cannot enter them.
-Collinear same-net segments merge so shared trunks are drawn once. Same-net
-T joins get dots. Different-net perpendicular crossings get a gap in the
-vertical wire and no dot. Dots are never used to imply a crossing connection.
+The public mapped netlist currently drops original module types and port
+aliases. `arithmetic.py` therefore verifies exact cell-and-ordered-pin
+connectivity against the published HALF, FULL and MUL circuit grammars.
+Only an exact structural match earns their standard port names; a truth-table
+match or anonymous net name is insufficient. Gate instance names can change
+without breaking recognition. This recovers `cin` / `cout` in the stock
+adders without guessing that `_n35` is a carry. Unknown or rewritten modules
+retain actual boundary net names.
 
-Flat views preserve every synthesized cell, including fanout buffers and
-TIE drivers. Large ripple adders make wide flat schematics; the default
-hierarchical view is intended for an overview, with flat SVGs available at
-native scale for following individual pins. No cells or long connections
-are omitted to fit a page.
+Callers with source metadata can provide authoritative aliases for any module:
 
-## Reuse after placement and routing
+```python
+sch = draw(net, hierarchy={
+    'u': {'module': 'my_module', 'ports': {'P': 'a', 'Q': '_n4', 'Y': 'y'}}
+})
+```
+
+This metadata overrides recognized labels and never changes electrical net
+names. An interface request asks FRONTEND to preserve it during elaboration
+and synthesis. Shared optimization that makes a closed scope non-convex opens
+that scope rather than drawing false feedback; `scene.notes` records it.
+
+Generic logic uses compact dependency columns, barycenter placement and
+feedforward row folding. Ports follow consumer/producer positions, with
+natural bit order breaking ties. A bend-aware rectilinear router shares
+channels and attaches fanout branches to existing same-net trees. It protects
+terminal access, forbids wire-through-symbol and shared edges between nets,
+and permits only straight unconnected crossings. Collinear same-net segments
+merge; T joins get dots and different-net crossings get gaps. Placement and
+wire coordinates use an eight-pixel grid.
+
+## Reuse after P&R
 
 ```python
 # lay is the public flow.Layout returned by net.place_and_route(...).
-post = sch.annotate(parasitics=lay.result)
-# Equivalently:
-post = sch.annotate(parasitics=lay.result.net_parasitics())
+post = sch.annotate(parasitics=lay.result, net_names=True)
 post.show()
-# Geometry stays identical, including when values and C appear together.
 assert post.scene is sch.scene
+# Equivalently: parasitics=lay.result.net_parasitics()
 ```
 
 The adapter calls `PnrResult.net_parasitics()` and reads each net's
-`wire_capacitance_f`. It also accepts `{net: farads}` and extraction-style
-`{'nets': {net: {'capacitance_f': farads}}}` reports. Matching uses exact,
-case-sensitive logical names. Unknown supply/report nets are ignored.
-Nonfinite or negative capacitance raises `ValueError`. Receiving-pin C and
+`wire_capacitance_f`. It also accepts `{net: farads}` or extraction-style
+`{'nets': {net: {'capacitance_f': farads}}}` reports. Exact, case-sensitive
+logical-name matching preserves vector indices. Unknown supply/report nets
+are ignored; invalid, negative or nonfinite C raises `ValueError`. Pin C and
 `total_load_f` are never relabelled as wire C.
 
-Wire width and darkness grow monotonically with the square root of C,
-normalised to the maximum C in that report. With values enabled, hue retains
-the trit encoding and larger C darkens it. A source-side label prints C in fF.
-Name, value and C labels occupy reserved space, so annotations neither move a
-gate nor reroute a net. `annotate(inputs=None, parasitics=None)` removes those
-overlays. These are settled ideal logic values and PNR's estimated lumped
-wire C, not transient voltages or signoff PEX.
+Width and darkness increase monotonically with sqrt(C / maximum C). With
+values enabled, the hue retains the trit encoding. A compact keyed table
+below the circuit prints net names, settled trits and C in fF; SVG wire
+hover titles identify each net. This keeps labels away from wires and symbol
+names without reserving large blank routing gutters. Annotations extend the
+canvas but keep the exact same symbol and wire coordinates. Omitted arguments
+to `annotate()` preserve existing overlays; explicit `None` removes values/C.
+The values are settled ideal logic, not transient voltages, and C remains an
+uncalibrated lumped wire estimate.
 
-## Files and verification
+## Metrics, exports and review
 
-`sch.svg` is UTF-8 text. `sch.pdf` contains vector paths and embedded fonts.
-`save()` accepts `.svg`, `.pdf`, or `.png`; `png(scale=2)` returns a larger
-raster preview. SVG creation uses only the Python standard library. PDF/PNG
-exports lazily use the project's existing Matplotlib dependency. No Graphviz,
-Cairo, Xschem, browser, TeX, extra pip package or system package is needed.
-PDF timestamps are disabled so repeated exports are byte-identical.
+`sch.metrics` reports total unique wire length in drawing pixels, total and
+mean/maximum bends per net, nets over two bends, crossings and canvas aspect,
+plus per-net details. A bend is a degree-two orthogonal corner; T junctions
+are excluded. Crossings are distinct different-net perpendicular
+intersections. Aspect includes the annotation table when present. These are
+drawing metrics, not chip wirelength or electrical performance estimates.
 
-SVG metadata includes one record per original cell terminal and external
-port, with exact net name and owning symbol. A closed block records every
-contained cell, including its internal terminals and nets. Visible boundary
-terminals resolve to exact pin anchors; hidden terminals have `pin: null`.
-This ledger documents electrical completeness without pretending a closed
-block exposes its internal wiring.
+`svg` is UTF-8 text and `pdf` is vector bytes with embedded fonts. `save()`
+accepts `.svg`, `.pdf` or `.png`; `png(scale=2)` returns a larger preview.
+SVG uses the standard library; PDF/PNG lazily use existing Matplotlib. No
+Graphviz, Cairo, Xschem, browser, TeX, extra pip or system package is required.
+PDF timestamps are disabled for byte-identical exports.
+
+SVG metadata accounts for every original terminal exactly once, including
+terminals inside closed blocks. It records block membership, formal labels
+and hierarchy frames. Hidden terminals have `pin: null`; visible boundary
+terminals resolve to exact pin anchors.
 
 ```bash
 python3 -m pytest tests/schematic -q
 python3 -m tritflow.schematic.gallery --output build/schematic-review
 ```
 
-The gallery produces native SVG, PDF and PNG for hierarchical and flat
-`half_add`, `full_add`, adder N=2 and N=4, `mul1`, `mac1`, and all four
-chapter-8 catalog choices (`sign`, `compare2`, `mul2`, `minmax`). It also
-includes the legend and an explicitly **synthetic** C/value overlay.
-`index.html` links all artifacts; `manifest.json` records the scene dimensions.
-The gallery is a development utility run from this repository, not a runtime
-dependency of the schematic stage.
+The gallery renders hierarchical/flat half_add, full_add, adder N=2 and N=4,
+mul1, mac1 and all chapter-8 choices (sign, compare2, mul2, minmax). It adds
+the legend and a **real PNR** half-adder overlay: actual cell-library routing,
+`PnrResult.net_parasitics()`, and a retained sidecar under `physical/`.
+The gallery does not rerun DRC/LVS or claim new signoff evidence.
+
+`index.html` displays the figures and before/after results. `metrics.md`
+compares **every item** with the frozen reviewed gallery in
+`assets/baseline_metrics.json`; `manifest.json` includes per-net details and
+real-C provenance. Tests enforce wire/bend budgets, a straight ripple chain,
+formal/local digit ports, ≤2 bends/net in the standalone half adder, a near
+2:1 full-adder flat view, exact connectivity, no symbol overlap, clear pin
+access, no wire-through-symbol, and no text overlap/clipping.

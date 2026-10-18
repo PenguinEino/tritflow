@@ -85,7 +85,7 @@ def route(nodes,driver,loads,width,height,frames=()):
                     best[new_state]=new_cost;previous[new_state]=state
                     heapq.heappush(q,(new_cost+heuristic(nxt),new_cost,next(serial),new_state))
         if finish is None:
-            raise ValueError(f'No schematic route for {signal!r} at {start}; tree={sorted(tree)[:5]}, start wires={at[start]}, source wires={at[next(iter(tree))]}, visited={len(best)}')
+            raise ValueError(f'No schematic route for {signal!r} at {start}; its drawing channel is congested')
         path=[];state=finish
         while True:
             path.append(state[0])

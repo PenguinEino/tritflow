@@ -145,6 +145,8 @@ def draw(netlist, *, expand=None, inputs=None, net_names=False, parasitics=None,
     ``expand='*'`` gives the full cell view. A path or sequence such as
     ``expand=['digit[0].fa']`` exposes those scopes and all their descendant
     gates, leaving other blocks closed. Unknown scopes are errors.
+    ``hierarchy={scope: {"module": name, "ports": {formal: net}}}`` supplies
+    authoritative port aliases for modules outside the verified arithmetic set.
     Supply bit-blasted scalar trits via ``inputs={'a[0]': -1, ...}``.
     ``parasitics`` accepts a PnrResult, its report, or ``{net: farads}``.
     """

@@ -1,10 +1,4 @@
-"""Layered logic placement and dedicated-track Manhattan channel routing.
-
-Long nets receive a pass-through lane at every crossed column. Each channel
-uses one vertical track per net. Drivers escape on their pin row when it
-is free, or on y = 8 mod 16 when a sink from another net occupies that row.
-Sink lanes stay on y = 0 mod 16, preventing shared wires at crossings.
-"""
+"""Hierarchy boundaries, exact terminal accounting and compact circuit scenes."""
 from __future__ import annotations
 
 from collections import defaultdict, deque

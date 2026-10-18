@@ -12,13 +12,13 @@ Primary sources: [current root rules](https://github.com/sscs-ose/sscs-ose-code-
 | Explain ideas, decisions, method, evidence and reproduction | Chapters 0/1, 4–6, 7/8; first setup cell and README | Included |
 | Use open tools; open PDK where applicable | Lark/NumPy, KLayout, ngspice, Plotly; OpenSUSI TR-1um; versions in build information | Included |
 | Reproducible source release | README's generated release check; default tag must match this notebook before filing | Release check / pending if mismatched |
-| Suitable open-source license | Apache-2.0 `LICENSE` and README statement; exported-asset rights need submitter confirmation | Included / confirm rights |
+| Suitable open-source license | Apache-2.0 `LICENSE`, verbatim attribution `NOTICE` and author-authorized derived schematic assets; README license statement | Included |
 | One project folder under the current event's submitted notebooks | This directory maps to `ISSCC27/submitted_notebooks/TritFlow/` | Prepared |
 | Keep proposed changes within that project folder | Copy only these small payload files; builder/tests remain in TritFlow | Prepared |
 | Fork and submit a GitHub PR | Submitter/integrator action; no PR opened here | Pending |
 | Deadline: 2026-10-31 at 11:59 AM Pacific | Submitter schedules and files PR before that time | Pending |
 | Monitor review questions | Submitter watches the eventual PR | Pending |
-| Teams name one award/travel representative | README and top notebook fields; replace placeholders | Pending identity |
+| Teams name one award/travel representative | README and top notebook fields use docs/author.md; sole author named representative | Included |
 | Attend ISSCC 2027 and present a poster if selected | Representative confirmation in README; conference dates February 14–18, 2027 | Pending selection/confirmation |
 | Follow travel policy; keep eligible-expense receipts | Representative's post-award responsibility; reimbursement is after attendance/document review | Pending selection |
 | Membership is encouraged, not an eligibility restriction | No membership assertion or invented applicant category | Informational |
@@ -29,7 +29,7 @@ Conservative presentation guidance retained from the older application guide:
 
 | Guidance | Location | State |
 |---|---|---|
-| Identify team members at notebook top | Submission front matter + README; no guessed names, affiliations or email | Placeholders to fill |
+| Identify team members at notebook top | Submission front matter + README use docs/author.md exactly | Included |
 | Cite reused work/notebooks | Notebook references + README provenance; no prior submission cells reused | Included |
 | State recommended/used tool versions | Bootstrap pins and generated notebook/build information | Included |
 
@@ -48,6 +48,6 @@ Accepted structure examples inspected (not templates copied):
 - [ISSCC26 CircuitsDNA](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/tree/a502a6ba01260d3492df9137dddae0bb5fabeb3c/ISSCC26/submitted_notebooks/CircuitsDNA): notebook with supporting code; listed in the accepted table.
 - [VLSI26 IMC side-channel](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/tree/a502a6ba01260d3492df9137dddae0bb5fabeb3c/VLSI26/accepted_notebooks/IMC_Side_Channel_Analysis): compact notebook/README folder; listed among VLSI26 winners.
 
-Before filing: complete identity/representative/rights fields, check the release
+Before filing: confirm attendance/poster arrangements, check the release
 tag and external links, inspect saved outputs, and re-check live official rules.
 Clean Colab verification remains postponed, not checked off as completed.

@@ -42,6 +42,9 @@ class TimingReport:
     paths instead list timed intermediate pin states in the event approximation;
     those states need not equal the whole-vector endpoints at each internal net.
     ``transition_arrival`` includes local unchanged-output hazard recovery.
+    Conservative envelope paths admit independent local classes; their patterns
+    explicitly have no joint endpoint witness. They are bounds on scalar table
+    terms and do not assert a realizable critical transition sequence.
     """
 
     top: str
@@ -82,7 +85,7 @@ class TimingReport:
         result = (f"<h3>{escape(self.top)}: ternary settling estimate</h3>"
                   "<table><tr><th>Output</th><th>Settling (ns)</th></tr>" + rows + "</table>"
                   + timing_figure(self).to_html(full_html=False, include_plotlyjs=include_plotlyjs)
-                  + "<p>Sensitizing primary-input endpoints (event paths may use intermediate states):</p><pre>"
+                  + "<p>Sensitizing primary-input endpoints (event paths may use intermediate states; envelope has no joint witness):</p><pre>"
                   + escape(json.dumps(self.sensitizing_pattern, indent=2)) + "</pre><ul>" + notes + "</ul>")
         if path is not None: Path(path).write_text(result)
         return result
