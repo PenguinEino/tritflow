@@ -57,3 +57,13 @@ def table(rows, *, details=None):
 def evidence(title, value):
     text=value if isinstance(value,str) else json.dumps(value,indent=2,default=str)
     display(HTML("<details><summary>"+escape(title)+"</summary><pre>"+escape(text)+"</pre></details>"))
+
+
+def details_html(title, content):
+    """Collapse an existing HTML report without discarding any of its rows."""
+    display(HTML('<details><summary>'+escape(title)+'</summary>'+content+'</details>'))
+
+
+def details_svg(title, svg):
+    """Keep an optional native schematic available outside the main figure path."""
+    details_html(title,svg)

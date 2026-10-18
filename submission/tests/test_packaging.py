@@ -64,7 +64,8 @@ def test_package_hashes_size_identity_and_allowlist(tmp_path):
     assert info["file_count"]==8
     assert info["total_bytes"]==sum(p.stat().st_size for p in target.iterdir())
     assert "[AUTHOR_NAME]" in (target/"README.md").read_text()
-    assert "[AFFILIATION]" in document.cells[0].source and "[EMAIL]" in document.cells[0].source
+    assert document.cells[0].source == '# Unit fixture'
+    assert "[AFFILIATION]" in document.cells[-1].source and "[EMAIL]" in document.cells[-1].source
     assert (target/"LICENSE").read_bytes()==(ROOT/"LICENSE").read_bytes()
     assert (target/"NOTICE").read_bytes()==(ROOT/"NOTICE").read_bytes()
     (target/"README.md").write_text("changed")

@@ -1,15 +1,19 @@
-# Submission notebook draft
+# TritFlow notebook
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
 
 `tritflow_tr1um.ipynb` follows chapters 0–9 of `docs/concept.md`. Chapter 0
 runs an actual two-trit adder from HDL through GDS, DRC, LVS and post-layout
 ngspice. Logical coverage is exhaustive; its labelled analog states exercise every output at all three levels and are
-explicitly representative. The default run also includes NANY DC, the compact published
+explicitly representative. The default run also includes INV DC, a precomputed sizing slider, the compact published
 library/characterization tables, all four shared designs through matched
 device-only/added-wire-C simulation, and one selected circuit from chapter 8.
-Gate, layout, animation, DC, sizing, scaling and transient figures use
-the streams' public `tritflow.viz.*` functions.
+The reading path follows EDITOR’s `narrative/` text and embeds eight static
+paper figures from `figures/out/`. Public `tritflow.viz.*` and schematic APIs
+provide the optional/live views; the sizing slider selects measured rows.
+`paper_evidence.json` couples generated captions to the exact committed images
+and measurements. Main chapters contain the story; Appendix A/B hold scope,
+reports, actual runtime and rerun instructions.
 
 The method chain is in `tritflow.flow`:
 
@@ -50,7 +54,7 @@ code with headless Plotly serialization. It does not install anything locally.
 `TRITFLOW_NOTEBOOK_BUILD` overrides `build/notebook`; `TRITFLOW_EXTENDED=1`
 enables routing replay and additional loads. `PNR_ROWS`/`PNR_ANNEAL_STEPS`
 control chapter 0. Chapter 6 has opt-in fixed-row/effort/seed controls, showing
-measured die dimensions, aspect, utilization and HPWL. Chapter 7 uses a compressed recorded adder4/full_add/mac1/mul1 campaign when
+measured die dimensions, aspect, utilization and HPWL. Appendix B uses a compressed recorded adder4/full_add/mac1/mul1 campaign when
 its consumed-source/PDK/options and every native-artifact hash match. It labels
 that producer's tools and recorded checks; it never claims new local verification.
 Missing/stale records trigger local regeneration. `TRITFLOW_FORCE_RUN=1` bypasses
@@ -67,7 +71,8 @@ The checked-in notebook is output-free; `make_notebook.py` regenerates it.
 
 Runtime inputs are committed under `cells/out/` (including the template,
 characterization and verification reports), `examples/`, and
-`notebook/assets/` (schematics and the recorded shared-design archive). The
+`notebook/assets/` (schematics, portable paper evidence and recorded shared-design archive),
+plus the embedded paper images from `figures/out/`. The
 notebook generates its own GDS, reports,
 SPICE, rasters and caches under `build/notebook/`; no existing `build/` is
 needed. The taped-out reference repository and Xschem are needed only to
@@ -168,7 +173,7 @@ locally and are not silently relabelled as the same Colab capture.
 The six taped-out source schematics are bundled under `assets/schematics/`,
 each with an opaque light and dark SVG. Chapter 1 expands one selected primitive in a theme-aware gallery
 using embedded data URLs, so no Xschem installation is needed in Colab. The
-HA/FA drawings sit beside chapter 4. The manifest records source/dependency/exporter/output hashes and actual symbol
+HA/FA paper view is shared between chapters 4/5; extra native schematics are collapsed. The manifest records source/dependency/exporter/output hashes and actual symbol
 counts. The gallery checks output hashes; the arithmetic chapter checks mapped
 HA/FA counts against the source hierarchy counts.
 
@@ -184,9 +189,10 @@ crops omit stale free-text sizing sidebars while retaining actual instance
 properties; color/stroke normalization changes presentation only. Source inputs
 are hash-checked after export. The standalone light/dark variants and native
 SVG text remain readable without host-page CSS. RR property text is shifted into empty space
-without changing paths, terminal labels or values. Chapter 3 uses labelled
-CELLS device mapping, layer controls and row-abutment figures rather than an
-unlabelled cell raster.
+without changing paths, terminal labels or values. Chapter 3 pairs the static cell/abutment hero with one labelled CELLS device-map view.
+Chapter 8 exposes an HDL literal and regenerates its mapped schematic, actual GDS
+and extracted waveform. Its independent oracle reports a counterexample before
+routing when an edit changes the intended function.
 
 The review pass removes hand-entered result counts from prose, derives coverage
 and conditions in tables, and asserts cached/fresh pass flags equally. Published
@@ -260,3 +266,16 @@ SCHEM forwarder; every other byte must match. This does not relabel the old
 measurement as a new run. Any other mapping/report edit, or changed
 HDL/library/PDK input, still fails. The fresh four-design archive uses the full
 current source instead.
+
+To refresh figure captions after the integrator publishes matching paper figures
+and native results (this does **not** redraw the figures):
+
+```sh
+PYTHONPATH=.:notebook python3 notebook/paper_evidence.py
+python3 notebook/make_notebook.py
+```
+
+The static source notebook is output-free. Build the compact saved-output copy
+with `python3 submission/build_submission.py --workdir /tmp/tritflow-submission`.
+The real-Colab note remains explicitly scoped to the verified earlier revision;
+later editorial changes have their own local execution and regression evidence.

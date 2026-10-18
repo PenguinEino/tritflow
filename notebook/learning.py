@@ -1,6 +1,5 @@
 """Small precomputed teaching controls; changing size never reruns SPICE."""
 
-import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -39,6 +38,9 @@ def sizing_slider(grid, pdk):
     fig.add_trace(go.Scatter(mode='markers',name='Selected error/current',
                             marker={'symbol':'circle-open','size':17,'color':'#d34a2f','line':{'width':3}}),1,2)
     fig.add_hline(y=grid['conditions']['band_v']*1e3,line_dash='dot',line_color='#a33',row=1,col=2)
+    for target in grid['conditions']['supplies_v'].values():
+        fig.add_hrect(y0=target-grid['conditions']['band_v'],y1=target+grid['conditions']['band_v'],
+                      fillcolor='#e6ebf2',opacity=.35,line_width=0,row=1,col=1)
     base_annotations = list(fig.layout.annotations)
     steps = []
     for index,row in enumerate(rows):
@@ -50,7 +52,7 @@ def sizing_slider(grid, pdk):
         prediction = divider(d,pdk)
         measured = zero_dc(row)['output_v']['Y'] if row['dc'] else None
         status = 'within band' if row['passed'] else (row['error'] or 'outside band')
-        readout = (f"Predict first: Y(0)={prediction['output_v']:.4g} V, P={prediction['power_w']*1e3:.4g} mW"
+        readout = (f'Candidate {index}: '+label+'<br>'+f"Predict first: Y(0)={prediction['output_v']:.4g} V, P={prediction['power_w']*1e3:.4g} mW"
                    + (f" → SPICE Y(0)={measured:.4g} V" if measured is not None else ' → SPICE unavailable')
                    + (f"<br>Worst error {row['max_error_v']*1e3:.4g} mV; max |rail I| "
                       f"{row['max_static_current_a']*1e6:.4g} µA; {status}"
@@ -60,9 +62,9 @@ def sizing_slider(grid, pdk):
         y = [curve['v(y)'], [measured] if measured is not None else [],
              [max(row['max_error_v']*1e3,1e-3)] if row['max_error_v'] is not None else []]
         annotations = [a.to_plotly_json() for a in base_annotations]+[
-            {'text':readout,'xref':'paper','yref':'paper','x':0,'y':-.35,
+            {'text':readout,'xref':'paper','yref':'paper','x':0,'y':-.42,
              'showarrow':False,'xanchor':'left','yanchor':'top'}]
-        steps.append({'label':label,'method':'update',
+        steps.append({'label':'','value':str(index),'method':'update',
                       'args':[{'x':x,'y':y},{'annotations':annotations},[1,2,5]]})
     initial = steps[adopted_index]['args']
     for trace,x,y in zip((1,2,5),initial[0]['x'],initial[0]['y'],strict=True):
@@ -71,11 +73,12 @@ def sizing_slider(grid, pdk):
     fig.update_yaxes(title_text='Output Y (V)',row=1,col=1)
     fig.update_xaxes(title_text='Maximum |rail current| (µA)',row=1,col=2)
     fig.update_yaxes(title_text='Worst level error (mV)',type='log',row=1,col=2)
-    fig.update_layout(template='plotly_white',height=620,title='Move the size; compare prediction with SPICE',
-                      margin={'t':85,'b':190},annotations=initial[1]['annotations'],
+    fig.update_layout(template='plotly_white',height=740,
+                      title={'text':'Move the size; compare prediction with SPICE','y':.99,'yanchor':'top'},
+                      margin={'t':150,'b':230},annotations=initial[1]['annotations'],
                       legend={'orientation':'h','y':1.2},
-                      sliders=[{'active':adopted_index,'steps':steps,'y':-.13,
-                                'currentvalue':{'prefix':'Dimensions: '},'ticklen':0}],
+                      sliders=[{'active':adopted_index,'steps':steps,'y':-.18,
+                                'currentvalue':{'prefix':'Drag to choose a measured size'},'ticklen':0}],
                       meta={'adopted_index':adopted_index,'candidate_count':len(rows),
                             'scope':grid.get('scope'),'dimensions':[r['dimensions'] for r in rows]})
     return fig
