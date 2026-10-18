@@ -26,3 +26,4 @@
 - Feature freeze 10-25 JST (docs/editorial.md schedule). STA, shuttle-ready top and corners enter
   the notebook only if clean by then.
 - FRONTEND (next): add the `schematic()` delegate and a notebook cell after synthesis per SCHEM status (schematic stage built by SCHEM).
+- After FRONTEND phase 10: tritflow/synth/mapping.py changed after SIM's electrical campaign (results/pinned_requalification.json flags it stale). Ask SIM to re-run the publication campaign (or prove outputs unchanged) once FRONTEND stops editing synth; then regenerate figures and move colab-v0 again before the final Colab run.
