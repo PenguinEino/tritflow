@@ -11,7 +11,7 @@ def pdk_provenance(pdk=PDK_ROOT):
     """Record models and decks; reject a known checkout differing from setup pins."""
     root = Path(pdk).expanduser().resolve()
     pins = ROOT/'notebook/setup_pins.json'
-    expected = '5d963db9d44e192d37a0489c208bfccf2e2f690c'
+    expected = json.loads(pins.read_text())['pdk_commit']
     actual = None
     if (root/'.git').exists():
         actual = subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip()

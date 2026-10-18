@@ -49,18 +49,63 @@ def test_route_and_drc_call_public_entrypoints(monkeypatch, tmp_path):
 
 
 def test_lvs_mismatch_blocks_post_layout_simulation(monkeypatch, tmp_path):
-    import tritflow.extract
+    import tritflow.pnr
     from tritflow.pnr import PnrResult
 
     gds = tmp_path/"m.gds"
     gds.write_bytes(b"fixture")
     n = flow.loads("module m(input trit a,output trit y); assign y=~a; endmodule").synthesize()
     layout = flow.Layout(PnrResult(gds, tmp_path/"m.pnr.json", {}, {}), n, n.settings)
-    monkeypatch.setattr(tritflow.extract, "extract_layout", lambda *a, **k: {
+    monkeypatch.setattr(tritflow.pnr, "strict_lvs", lambda *a, **k: {
         "matched": False, "extracted": str(tmp_path/"absent"), "report": None, "errors": ["mismatch"]})
     assert layout.lvs()["matched"] is False
     with pytest.raises(RuntimeError, match="unmatched layout"):
         layout.extract()
+
+
+def test_signoff_uses_public_pnr_result_with_carried_settings(monkeypatch, tmp_path):
+    from tritflow.pnr import PnrResult
+
+    n = flow.loads("module m(input trit a,output trit y); assign y=~a; endmodule").synthesize()
+    result = PnrResult(tmp_path/"m.gds", tmp_path/"m.pnr.json", {}, {})
+    layout = flow.Layout(result, n, n.settings)
+    def check(self, **kwargs):
+        assert self is result and kwargs["netlist"] is n
+        assert not kwargs["library"].mock
+        assert kwargs["pdk_root"] == n.settings.pdk
+        assert kwargs["klayout_binary"] == n.settings.klayout
+        assert kwargs["force"] is True and kwargs["output_dir"] == tmp_path/"mask"
+        return {"clean":False, "submission_ready":False}
+    monkeypatch.setattr(PnrResult, "signoff", check)
+    assert layout.signoff(output_dir=tmp_path/"mask", force=True) == {"clean":False, "submission_ready":False}
+
+
+@pytest.mark.skipif(not shutil.which("ngspice") or not (Path.home()/"bin/klayout/klayout").is_file(),
+                    reason="local physical tools required")
+def test_unused_input_full_chain_and_missing_pad_label_invalidates_lvs(tmp_path):
+    import klayout.db as db
+
+    circuit = flow.loads("module unused(input trit a,b,output trit y); assign y=~a; endmodule")
+    net = circuit.synthesize()
+    layout = net.place_and_route(output_dir=tmp_path, anneal_steps=0)
+    assert layout.drc()["clean"]
+    report = layout.lvs()
+    assert report["matched"] and report["unused_input_formals_restored"] == ["b"]
+    before = layout._lvs_fingerprint
+    extracted = layout.extract()
+    assert extracted.simulate([(-1,-1), (0,1), (1,0)], load=100e-15)["measurements"]["passed"]
+    drawing = db.Layout()
+    drawing.read(str(layout.gds_path))
+    labels = drawing.cell(net.top).shapes(drawing.layer(49,0))
+    missing = [shape for shape in labels.each() if shape.is_text() and shape.text.string == "b"]
+    assert len(missing) == 1
+    missing[0].delete()
+    drawing.write(str(layout.gds_path))
+    assert layout._fingerprint() != before
+    # extract() must rerun the physical proof, rather than reuse the prior PASS.
+    with pytest.raises(RuntimeError, match="unmatched layout"):
+        layout.extract()
+    assert layout._lvs_report["matched"] is False
 
 
 @pytest.mark.skipif(not shutil.which("ngspice") or not (Path.home()/"bin/klayout/klayout").is_file(),

@@ -55,6 +55,25 @@ def test_spice_cell_pin_order_and_case_sensitive_hdl_names():
     assert "* net tf_567373 = Vss" in spice(n)
 
 
+def test_sim_uses_writer_and_inverse_map_for_case_and_encoded_name_collisions():
+    from tritflow import CELLS_DIR
+    from tritflow.sim.spice import gate_spice, logical_spice_names, subcircuits
+    from tritflow.synth.writers import spice_names
+
+    design = loads("""module names(input trit a,A,tf_61,Vdd,output trit y,Y);
+        assign y=nany(a,A); assign Y=nany(tf_61,Vdd); endmodule""")
+    net = synthesize(design)
+    cells = (CELLS_DIR/"out/all.spice").read_text()
+    text = gate_spice(net, cells)
+    assert text == spice(net)+"\n"+cells
+    names = spice_names(net.nets(), ("VDD","VMID","VSS","0"))
+    inverse = logical_spice_names(text)
+    assert all(inverse.get(safe, safe) == original for original, safe in names.items())
+    formals = subcircuits(text)["names"]["pins"]
+    assert len(formals) == len({p.lower() for p in formals})
+    assert formals[:-3] == [names[p.name] for p in net.ports]
+
+
 def test_arbitrary_gate_json_order_is_handled():
     d = loads("module m(input trit a,output trit y); wire trit w; inv g(w,a); inv h(y,w); endmodule")
     net = synthesize(d)

@@ -75,61 +75,87 @@ def _power_header(data, macro_pins, core, margin):
     """
     x0,y0,x1,y1 = core
     totals = {r:sum(v[r] for v in data['power']['rail_currents_a'].values()) for r in RAILS}
-    widths = {r:max(6.4,math.ceil(totals[r]/((3.7e-3/3)*(1-margin))*10)/10) for r in RAILS}
+    widths = {r:max(6.4 if r=='VMID' else 30.,
+                    math.ceil(totals[r]/((3.7e-3/3)*(1-margin))*10)/10) for r in RAILS}
     if any(w > 44. for w in widths.values()):
         raise ValueError('Chip supply needs parallel M2 bars; reduce the macro size or split the allocation')
-    bars, cursor = {}, y1+8.
+    bars, cursor = {}, y1+10.1
     for rail in RAILS:
         w = widths[rail]; bars[rail] = cursor+w/2; cursor += w+8.
-    collector_y = max(cursor+8., 1032.)
+    collector_y = max(cursor+8., 1018.)
     if collector_y+16 > 1050.:
         raise ValueError('Macro leaves insufficient top power-channel space; use fewer rows or more placement effort')
     power = data['power']; fingers = []
     for pin in macro_pins:
         rail = pin['name']; a,b,c,d = pin['rect']; x = (a+c)/2; w = c-a
+        # VMID is a reference with negligible measured current. Its narrow
+        # finger leaves space to widen the two current-carrying M1 fingers.
+        finger_w = 3.4 if rail=='VMID' else min(44.,2*(w+2.4-3.75))
         # The flat lower end avoids M1 already routed in the last macro channel.
         low, high = y1-4.7, bars[rail]+widths[rail]/2
-        power['rails'].append({'net':rail,'layer':'M1','width':w,
-                              'points':[[x,y1-3],[x,bars[rail]]],
-                              'rect':[a,low,c,high]})
+        power['rails'].append({'net':rail,'layer':'M1','width':finger_w,
+                              'points':[[x,y1-3],[x,high-1.7]],
+                              'rect':[x-finger_w/2,low,x+finger_w/2,high]})
         power['straps'].append({'net':rail,'layer':'M2','width':w,
-                               'points':[[x,y1-3],[x,y1+3]],
+                               'points':[[x,y1-w/2],[x,y1+3]],
                                'rect':[a,y1-6,c,y1+7]})
-        _via_array(power['vias'],rail,x,y1+1,w,9.4)
-        _via_array(power['vias'],rail,x,bars[rail],w,widths[rail])
-        fingers.append((a,c))
+        _via_array(power['vias'],rail,x,y1+1,min(w,finger_w),9.4)
+        _via_array(power['vias'],rail,x,bars[rail],finger_w,widths[rail])
+        fingers.append((x-finger_w/2,x+finger_w/2))
     # Find three genuinely empty M1 corridors, also disjoint from each other.
     used, pads = list(fingers), []
-    for rail, preferred in zip(RAILS,(-650.,0.,650.)):
-        required = totals[rail]/(.00025*(1-margin))
-        count = max(1,math.ceil(required/44.))
+    left=min(p['rect'][0] for p in macro_pins)-24
+    right=max(p['rect'][2] for p in macro_pins)+24
+    for rail in RAILS:
+        power['straps'].append({'net':rail,'layer':'M2','width':widths[rail],
+                               'points':[[left,bars[rail]],[right,bars[rail]]]})
+    requests=[]
+    for rail,preferred in zip(RAILS,(-150.,650.,150.)):
+        if rail=='VMID':
+            continue
+        pad_count=max(1,math.ceil(totals[rail]/.008))
+        preferreds=([preferred] if pad_count==1 else
+                    np.linspace(-840 if rail=='VDD' else -700,840 if rail=='VDD' else 980,pad_count))
+        requests += [(rail,float(p),pad_count) for p in preferreds]
+    for rail, preferred, pad_count in requests:
+        required = (totals[rail]/pad_count)*1.25/(.00025*(1-margin))
+        count = max(1,math.ceil(required/44.8))
         leg_width = max(6.4,math.ceil(required/count*10)/10)
         pitch = leg_width+4.
         span = count*leg_width+(count-1)*4.
-        candidates = sorted(np.arange(-900.,901.,2.),key=lambda x:(abs(x-preferred),x))
+        candidates = sorted(np.arange(-920.,921.,2.),key=lambda x:(abs(x-preferred),x))
         cx = next((float(x) for x in candidates
-                   if all(x+span/2+3 <= a or x-span/2-3 >= b for a,b in used)),None)
+                   if all(x+span/2+3 <= a or x-span/2-3 >= b for a,b in used)
+                   and all(abs(x-px)>=150 for _,px,_ in pads)),None)
         if cx is None:
             raise ValueError(f'No M1 supply corridor for {rail}; use a narrower macro or more rows')
         used.append((cx-span/2,cx+span/2))
         pads.append((rail,cx,1100.))
         for i in range(count):
             x = cx+(i-(count-1)/2)*pitch
+            collector_width=max(16.,widths[rail])
             power['rails'].append({'net':rail,'layer':'M1','width':leg_width,
-                'points':[[x,bars[rail]],[x,collector_y]]})
+                'points':[[x,bars[rail]-widths[rail]/2+1.7],[x,collector_y+collector_width/2-1.7]],
+                'rect':[x-leg_width/2,bars[rail]-widths[rail]/2,
+                        x+leg_width/2,collector_y+collector_width/2]})
             _via_array(power['vias'],rail,x,bars[rail],leg_width,widths[rail])
             # A shallow cut array stays well away from the PRO opening.
-            _via_array(power['vias'],rail,x,collector_y,leg_width,6.4)
+            _via_array(power['vias'],rail,x,collector_y,leg_width,max(16.,widths[rail]))
         power['straps'] += [
-            {'net':rail,'layer':'M2','width':widths[rail],
-             'points':[[min(min(p['rect'][0] for p in macro_pins),cx-span/2),bars[rail]],
-                       [max(max(p['rect'][2] for p in macro_pins),cx+span/2),bars[rail]]]},
-            {'net':rail,'layer':'M2','width':widths[rail],
-             'points':[[cx-(count-1)/2*pitch,collector_y],[cx+(count-1)/2*pitch,collector_y]]},
-            {'net':rail,'layer':'M2','width':widths[rail],
-             'points':[[cx,collector_y],[cx,1100.]]}]
+            {'net':rail,'layer':'M2','width':max(16.,widths[rail]),
+             'points':[[cx-span/2,collector_y],[cx+span/2,collector_y]]},
+            ]
+        # Five touching 8 um strips are physically one 40 um pad neck. Keep
+        # separate centerlines and ideal taps across the actual pad metal in
+        # the resistor model, rather than forcing all current into its center.
+        for offset in (-16.,-8.,0.,8.,16.):
+            power['straps'].append({'net':rail,'layer':'M2','width':8.,
+                'points':[[cx+offset,collector_y],[cx+offset,1100.]]})
+        power['straps'].append({'net':rail,'layer':'M2','width':40.,
+             'points':[[cx,1030.],[cx,1050.]],'rect':[cx-20,1030.,cx+20,1050.]})
     return pads, {'rail_current_envelope_a':totals,'M2_width_um':widths,
                   'reserve':margin,'collector_y_um':collector_y,
+                  'vmid_escape_um':[left,bars['VMID']],
                   'M1_step_limit_a_per_um':.00025,'M2_field_limit_a_per_um':3.7e-3/3}
 
 
@@ -176,6 +202,13 @@ def chip(result, *, output_dir=None, top=None, library=None, pdk_root=PDK_ROOT,
     data['power']['vias'] = [{**v,'x':v['x']+dx,'y':v['y']+dy} for v in data['power']['vias']]
     data['power']['assumptions']['reserved_current_margin'] = current_margin
     pads, power_header = _power_header(data,macro_pins,core,current_margin)
+    # The circuit model and integer GDS must use the same 1 nm coordinates.
+    for wire in data['power']['rails']+data['power']['straps']:
+        wire['points']=[[round(x,3),round(y,3)] for x,y in wire['points']]
+        if 'rect' in wire:
+            wire['rect']=[round(v,3) for v in wire['rect']]
+    for via in data['power']['vias']:
+        via['x'],via['y']=round(via['x'],3),round(via['y'],3)
     layout = db.Layout();layout.dbu=DBU
     parent = layout.create_cell(top)
     source = db.Layout();source.read(str(result.gds_path))
@@ -194,7 +227,14 @@ def chip(result, *, output_dir=None, top=None, library=None, pdk_root=PDK_ROOT,
     shapes, terminals = [], {}
     macro_signal = {p['name']:_shift_pin(p,dx,dy) for p in result.data['pins']}
     wrapper_wires, wrapper_vias = [], []
-    for direction,px in (('input',-1100.),('output',1100.)):
+    pads.append(('VMID',0.,-1100.))
+    data['power']['straps'].append({'net':'VMID','layer':'M2','width':40.,
+        'points':[[0.,-1050.],[0.,-1030.]],'rect':[-20.,-1050.,20.,-1030.]})
+    for offset in (-16.,-8.,0.,8.,16.):
+        data['power']['straps'].append({'net':'VMID','layer':'M2','width':8.,
+            'points':[[offset,-1100.],[offset,-1032.]]})
+    terminals['VMID']=[(1,*power_header['vmid_escape_um']),(1,0.,-1032.)]
+    for direction,px in (('input',-1020.),('output',1020.)):
         ports = [p for p in netlist.ports if p.dir == direction]
         if len(ports)>13:
             raise ValueError('TEG side supports at most 13 ports; use a multi-side pad assignment')
@@ -208,20 +248,32 @@ def chip(result, *, output_dir=None, top=None, library=None, pdk_root=PDK_ROOT,
             ex=dx-12 if direction=='input' else dx+w+12
             wrapper_wires.append({'net':port.name,'layer':'M1','width':3.4,'points':[[x,y],[ex,y]]})
             wrapper_vias.append({'net':port.name,'x':x,'y':y})
-            terminals[port.name]=[(0,ex,y),(0,px+(45 if px<0 else -45),py)]
+            sign=1 if px<0 else -1
+            neck=[px+sign*50,py-20,px+sign*70,py+20]
+            neck=[min(neck[0],neck[2]),neck[1],max(neck[0],neck[2]),neck[3]]
+            wrapper_wires.append({'net':port.name,'layer':'M1','width':40.,
+                'points':[[px+sign*50,py],[px+sign*70,py]],'rect':neck})
+            terminals[port.name]=[(0,ex,y),(0,px+sign*68,py)]
     for name,x,y in pads:
         frame.insert(db.CellInstArray(pad.cell_index(),db.Trans(round(x/DBU),round(y/DBU))))
         for layer in (0,1):
             shapes.append((layer,name,[x-50,y-50,x+50,y+50]))
     data['pins']=[{'name':n,'layer':'M2','rect':[x-50,y-50,x+50,y+50]} for n,x,y in pads if n not in RAILS]
-    data['power']['pins']=[{'name':n,'layer':'M2','rect':[x-50,y-50,x+50,y+50]} for n,x,y in pads if n in RAILS]
+    data['power']['pins']=[{'name':n,'layer':'M2','rect':[x+offset-2,y-2,x+offset+2,y+2]}
+                          for n,x,y in pads if n in RAILS for offset in (-16.,-8.,0.,8.,16.)]
     for wire in wrapper_wires+data['power']['rails']+data['power']['straps']:
         rect=wire.get('rect',wire_box(wire))
         if rect[0]<core[0] or rect[2]>core[2] or rect[1]<core[1] or rect[3]>core[3]:
             shapes.append((0 if wire['layer']=='M1' else 1,wire['net'],rect))
     router = ChipRouter(shapes,terminals,core,pads,{n:3.4 for n in terminals})
     for name in sorted(terminals,key=lambda n:abs(terminals[n][0][2]-terminals[n][1][2]),reverse=True):
-        wires,vias=router.route(name);wrapper_wires+=wires;wrapper_vias+=vias
+        wires,vias=router.route(name)
+        if name=='VMID':
+            data['power']['rails'] += [w for w in wires if w['layer']=='M1']
+            data['power']['straps'] += [w for w in wires if w['layer']=='M2']
+            data['power']['vias'] += vias
+        else:
+            wrapper_wires+=wires;wrapper_vias+=vias
     data['wires']+=wrapper_wires;data['vias']+=wrapper_vias
     for wire in wrapper_wires+data['power']['rails'][len(result.data['power']['rails']):]+data['power']['straps'][len(result.data['power']['straps']):]:
         route_cell.shapes(layout.layer(13 if wire['layer']=='M1' else 20,0)).insert(box(wire.get('rect',wire_box(wire))))

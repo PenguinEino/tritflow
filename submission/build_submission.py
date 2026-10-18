@@ -59,18 +59,21 @@ def has_placeholders(value):
     return isinstance(value,str) and bool(re.search(r"\[[A-Z][A-Z_ ]*\]",value))
 
 
+def author_details(team):
+    return "\n\n".join("\n".join(str(author[k]) if k == "status" else
+        f'GitHub: [{author[k]}](https://github.com/{author[k]}).'
+        for k in ("status", "github") if author.get(k)) for author in team["authors"])
+
+
 def render_readme(team, release_text="Release compatibility must be checked before filing.", source_commit=None):
     text = read_template("README.md")
     for key, value in {"TEAM_NAME":team["team_name"], "AUTHORS_TABLE":authors_table(team),
                        "REPRESENTATIVE":team["representative"], "ATTENDANCE":team["attendance_and_poster"],
                        "ASSET_RIGHTS":team["asset_rights_confirmation"],"RELEASE_STATUS":release_text,
+                       "AUTHOR_DETAILS":author_details(team),
                        "SOURCE_LINK":f'[{source_commit}](https://github.com/PenguinEino/tritflow/tree/{source_commit})'
                            if source_commit else "see build-info.json (commit print unavailable)"}.items():
         text = text.replace("{{"+key+"}}",str(value))
-    if not has_placeholders(team):
-        text=text.replace("**Identity fields are intentionally incomplete;\n"
-                          "the submitter must fill them before filing.** No author identity is inferred.",
-                          "Identity fields were supplied by the submitter; the generator does not verify them.")
     return text
 
 
@@ -179,10 +182,13 @@ def gallery_outputs(html):
     import cairosvg
     import nbformat
     images = []
+    selected = re.search(r'data-schematic-selected="([^"]+)"',html)
     pattern = r'<img src="data:image/svg\+xml;base64,([^"]+)" alt="([^"]+)"'
     for data, title in re.findall(pattern,html):
         if "taped-out schematic" not in title:
             continue
+        if selected and title != selected[1]+" taped-out schematic":
+            continue  # static reading keeps the selected drawing; rerun to expand others
         svg = b64decode(data).decode()
         png = cairosvg.svg2png(bytestring=svg.encode(),output_width=1100)
         images.append(nbformat.v4.new_output("display_data",data={
@@ -262,10 +268,12 @@ def package(document, source, destination, team, info):
         raise ValueError(f"unexpected files in payload; remove explicitly: {sorted(extra)}")
     abstract = read_template("ABSTRACT.md").split("\n\n",1)[1].strip()
     front = "# TritFlow — Code-a-Chip ISSCC 2027\n\n"+authors_table(team)
+    front += "\n\n"+author_details(team)
     front += f"\n\nTeam: {team['team_name']}. Representative: {team['representative']}.\n\n"
-    front += "**Apache-2.0. Identity/asset-rights confirmations remain in README.**\n\n"+abstract
+    front += "**Apache-2.0.** "+team["asset_rights_confirmation"]+"\n\n"+abstract
     front += "\n\nSaved outputs were executed locally, with static PNG figures for reading without running. "
     front += "Animation stills show their initial frame. Machine paths are normalized; numerical results are unchanged. "
+    front += "Schematic captures show the selected drawing; rerun to expand alternatives. "
     front += "The original source cells and bootstrap are preserved; rerun them for interactive figures. "
     front += "Clean Colab installation remains unverified/postponed.\n\n"
     front += release_notice(info.get("release",{}))+"\n\n"

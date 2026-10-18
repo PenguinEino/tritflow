@@ -65,13 +65,23 @@ def test_gallery_verifies_assets_and_bundles_both_themes(tmp_path):
         gallery.schematic_gallery(tmp_path/"assets")
 
 
+def test_only_selected_primitive_expands_and_arithmetic_drawings_are_separate():
+    html = gallery.schematic_gallery(ASSETS,names=["INV","NAND","NOR","NANY"],selected="NANY")
+    assert html.count("<details open>") == 1
+    assert "<details open><summary><strong>NANY" in html
+    assert "half_adder" not in html and "full_adder" not in html
+    assert "max-width:620px" in html
+    arithmetic = gallery.schematic_gallery(ASSETS,names=["half_adder","full_adder"],selected="half_adder")
+    assert arithmetic.count("<picture>") == 2 and arithmetic.count("<details open>") == 1
+
+
 @pytest.mark.skipif(not shutil.which("xschem") or not (Path.home()/"balanced-ternary-logic/inverter.sch").is_file(),
                     reason="read-only reference and Xschem required")
 def test_batch_reexport_is_deterministic_and_source_unchanged(tmp_path):
     source = Path.home()/"balanced-ternary-logic"
     files = [source/filename for filename,_ in exporter.EXPORTS.values()]
     before = {p: sha256(p.read_bytes()).hexdigest() for p in files}
-    args = (source, Path.home()/"pdk/TR-1um", "/usr/local/share/xschem/xschem_library")
+    args = (source, Path.home()/"pdk/TR-1um-pinned", "/usr/local/share/xschem/xschem_library")
     first = exporter.export(*args, tmp_path/"one")
     second = exporter.export(*args, tmp_path/"two")
     assert first == second

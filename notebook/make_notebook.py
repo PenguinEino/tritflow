@@ -5,6 +5,8 @@ from pathlib import Path
 import textwrap
 
 
+author_text = (Path(__file__).resolve().parents[1]/"docs/author.md").read_text()
+author_block = author_text[author_text.index("- Name:"):].split("\n\n",1)[0]
 cells = []
 
 
@@ -29,6 +31,10 @@ md("""
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
 
+AUTHOR_BLOCK
+
+Apache-2.0, including the derived historical schematic assets released by their author.
+
 Draft for IEEE SSCS Code-a-Chip, ISSCC 2027. Audience: designers familiar with
 CMOS, synthesis, P&R and SPICE. We follow a real three-rail circuit through the
 flow, separating logical equivalence, physical connectivity and nominal analog
@@ -39,8 +45,8 @@ Colab shallow-clones [TritFlow](https://github.com/PenguinEino/tritflow) at
 the package editably beside its committed cell/example/figure assets. Set
 `TRITFLOW_REF` before the first cell to select another tag or branch. An existing
 Colab checkout must match the requested ref and have no tracked edits.
-**Release TODO — integrator:** create the `colab-v0` tag after committing this
-notebook. Fresh Colab execution and the install-inclusive ten-minute budget
+**Release TODO — integrator:** the existing `colab-v0` tag predates this
+notebook; publish a matching immutable release and update the selected ref/badge. Fresh Colab execution and the install-inclusive ten-minute budget
 remain unverified.
 
 The default run starts with a small adder, then closes the loop on every shared
@@ -48,8 +54,16 @@ example and one selected circuit. Coverage is reported beside each experiment.
 Heavy stages use content-keyed JSON caches; `TRITFLOW_EXTENDED=1` enables extra
 load/routing views. Cached reports are identified as cache hits and their
 artifact hashes are checked. A cache is evidence of the recorded run, not a new
-DRC/LVS execution. Clear `build/notebook/cache` to force recomputation.
-""")
+DRC/LVS execution. Set `TRITFLOW_FORCE_RUN=1` before Run all (or delete the
+cache at `$TRITFLOW_NOTEBOOK_BUILD/cache`, default `build/notebook/cache`) to
+force every expensive stage. A cold run recomputes routed examples, checks,
+DC and matched pre/post transients; only committed cell qualification, sizing
+and scaling/load campaigns are read as precomputed evidence. Those campaigns
+check consumed source/PDK hashes and never count as a fresh local PASS.
+The last cell measures each cached/fresh stage; detailed PNR/LVS/SPICE times
+identify the runtime cost. Extended load, floorplan and signoff experiments
+are opt-in. Colab cold runtime remains to be measured.
+""".replace("AUTHOR_BLOCK", author_block))
 code(r'''
 import os, sys, json, time, hashlib, subprocess, importlib.util
 from pathlib import Path
@@ -102,22 +116,34 @@ from tritflow.sim import dc_transfer, input_vectors, subcircuits
 from tritflow.viz.graph import color_nets, gate_graph, truth_table_html
 from tritflow.viz.waves import waveform_figure, transfer_figure
 from tritflow.viz.layout import render_gds, layout_figure, placement_animation, routing_progress
+from tritflow.viz.cell import cell_figure, device_mapping, row_abutment
+from tritflow.sim.provenance import pdk_provenance
 from cache import Cache, runtime_fingerprint
 from schematics import schematic_gallery
 from experiments import (complete_design, experiment_artifacts, assert_experiment,
-                         load_edited, verify_publication_sources)
+                         load_edited, verify_publication_sources, adder_demo_vectors)
 EXTENDED = os.environ.get("TRITFLOW_EXTENDED", "0") == "1"
 BUILD = Path(os.environ.get("TRITFLOW_NOTEBOOK_BUILD", ROOT/"build/notebook")).resolve()
-cache = Cache(BUILD/"cache", runtime_fingerprint(ROOT, PDK_ROOT))
+qualified_pdk = pdk_provenance(PDK_ROOT)
+assert qualified_pdk["qualified_commit"] == json.loads((ROOT/"notebook/setup_pins.json").read_text())["pdk_commit"]
+cache = Cache(BUILD/"cache", runtime_fingerprint(ROOT, PDK_ROOT),
+              force=os.environ.get("TRITFLOW_FORCE_RUN", "0") == "1")
 def show(figure):
     if os.environ.get("TRITFLOW_NOTEBOOK_HEADLESS") == "1":
         figure.to_json()  # still validate every figure during local execution
     else:
         display(figure)
-def table(rows):
+def table(rows, *, details=None):
     from html import escape
-    display(HTML("<div style='overflow-x:auto'><table>"+"".join("<tr>"+"".join("<td style='padding:.3em .8em'>"+
-        escape(str(v))+"</td>" for v in row)+"</tr>" for row in rows)+"</table></div>"))
+    content = "<div style='overflow-x:auto'><table>"+"".join("<tr>"+"".join("<td style='padding:.3em .8em'>"+
+        escape(str(v))+"</td>" for v in row)+"</tr>" for row in rows)+"</table></div>"
+    if details:
+        content = "<details><summary>"+escape(details)+"</summary>"+content+"</details>"
+    display(HTML(content))
+def evidence(title, value):
+    from html import escape
+    display(HTML("<details><summary>"+escape(title)+"</summary><pre>"+
+                 escape(value if isinstance(value,str) else json.dumps(value,indent=2,default=str))+"</pre></details>"))
 ''')
 md('''
 ## 0. Start with the complete adder flow
@@ -136,8 +162,7 @@ net = d.synthesize(name="adder2_demo")
 logical = d.truth_table()
 inputs = [p.name for p in net.ports if p.dir == "input"]
 outputs = [p.name for p in net.ports if p.dir == "output"]
-vectors = [(-1,)*len(inputs), (0,)*len(inputs), (1,)*len(inputs),
-           (1,-1,-1,1,0), (-1,1,1,-1,1), (-1,)*len(inputs)]
+vectors, vector_labels = adder_demo_vectors(inputs)
 LOAD_F, HOLD_S, STEP_S, EDGE_S, TEMP_C = 100e-15, 1e-6, 2e-9, 1e-9, 27
 PNR_ROWS, PNR_ANNEAL_STEPS = None, 600  # automatic near-square floorplan; placement effort
 assert all(len(v) == len(inputs) for v in vectors)
@@ -150,12 +175,15 @@ def adder_reference(vector):
         result[f"sum[{i}]"] = (remainder+1)%3-1
         remainder = (remainder-result[f"sum[{i}]"])//3
     return {**result, "cout": remainder}
+expected_sequence = [adder_reference(v) for v in vectors]
+assert all({r[p] for r in expected_sequence} == {-1,0,1} for p in outputs)
+assert all(a != b for a,b in zip(vectors,vectors[1:]))
 for row in zip(*(logical[name] for name in inputs)):
     assert adder_reference(row) == {k: int(v) for k,v in d.design.evaluate(dict(zip(inputs,row))).items()}
 out = BUILD/"adder2_demo"
 def complete_adder():
     lay = net.place_and_route(output_dir=out, seed=0, rows=PNR_ROWS, anneal_steps=PNR_ANNEAL_STEPS)
-    drc = lay.drc()
+    drc = lay.data["checks"]["pdk_drc"]  # actual official deck report just produced by PNR
     lvs = lay.lvs()
     assert drc["clean"] and lvs["matched"], (drc, lvs)
     extracted = lay.extract()
@@ -173,6 +201,12 @@ demo = cache.run("adder2-complete", {"net": net.to_json(), "vectors": vectors, "
 lay = flow.load_layout(net, out)
 assert demo["drc"]["clean"] and demo["lvs"]["matched"] and demo["measurements"]["passed"]
 assert not lay.stats["library_mock"]
+assert all({row["outputs"][p]["ideal_trit"] for row in demo["measurements"]["rows"]} == {-1,0,1}
+           and demo["measurements"]["max_settling_s"][p] > 0 for p in outputs)
+table([["Output", "Exercised trits", "Actual ideal-level transitions"]]+[
+    [p, sorted({r[p] for r in expected_sequence}),
+     sum(a[p] != b[p] for a,b in zip(expected_sequence,expected_sequence[1:]))] for p in outputs])
+evidence("Demo sequence labels and inputs", list(zip(vector_labels,vectors)))
 table([["Logical input states (exhaustive)", len(logical[inputs[0]])],
        ["Analog states / unique states", f"{len(vectors)} / {len(set(vectors))}"],
        ["Analog transitions (selected / possible)", f"{len(vectors)-1} / {3**len(inputs)*(3**len(inputs)-1)}"],
@@ -222,7 +256,9 @@ display(truth_table_html(gates.design))
 for name in ["INV","NAND","NOR","NANY"]:
     body = subcircuits((CELLS_DIR/f"out/{name}/{name}.spice").read_text())[name.lower()]["body"]
     assert ("VMID" in body.upper()) == (name == "NANY"), name
-display(HTML(schematic_gallery(ROOT/"notebook/assets/schematics")))
+SCHEMATIC = "NANY"  # INV | NAND | NOR | NANY; only this primitive expands
+display(HTML(schematic_gallery(ROOT/"notebook/assets/schematics",
+                               names=["INV","NAND","NOR","NANY"], selected=SCHEMATIC)))
 cell_spice = (CELLS_DIR/"out/NANY/NANY.ext.spice").read_text()
 DC_FIXED_B, DC_STEP_V = 0, .1
 curve = cache.run("nany-dc", {"fixed_B": DC_FIXED_B, "step_v": DC_STEP_V}, lambda:
@@ -232,6 +268,7 @@ show(transfer_figure(curve, "A", ["Y"],
                      title=f"NANY DC: B={DC_FIXED_B} trit ({TRIT_VOLTS[DC_FIXED_B]:g} V)"))
 ''')
 md('''
+Only the selected primitive is expanded; choose another above or open its control.
 The primitive crops retain instance W/L properties and omit obsolete free-text
 sizing sidebars in the source drawings. Light/dark variants have opaque backing;
 expand the provenance control to compare them. NANY's clamp uses VMID; the
@@ -262,7 +299,7 @@ for cell, char in characters.items():
 table(rows)
 table([["Cell", "Recorded conditions", "Tested loads (fF)", "Fanout evidence"]]+
       [[cell, char["conditions"], [r["load_f"]*1e15 for r in char["transient"]], char["fanout"]]
-       for cell,char in characters.items()])
+       for cell,char in characters.items()], details="Characterization conditions and complete fanout evidence")
 fanout_rows = [["Cell", "Measured receiver counts", "Chain depth", "Worst chain (ns)",
                 "Driver at largest tested fanout (ns)", "Max level error (mV)"]]
 for cell, char in characters.items():
@@ -285,10 +322,10 @@ nominal bound, not an extrapolation to larger fanout or PVT. The chain checks
 every intermediate output. Isolated-cell load sweeps and self-loading chains
 answer different questions; their conditions are displayed separately above.
 
-**SIM publication slot — W/L sweep:** `cells/out/sizing/` supplies cached
-transfer/error/current data. When available, the code below reads SIM's public
-`load_grid(cell)` and uses `sizing_figure(result)` to mark the adopted dimensions.
-Missing or stale grids leave an explicit TODO. Full characterization is not
+The committed W/L campaign in `cells/out/sizing/` supplies measured
+transfer/error/current data. `load_grid(cell)` validates its provenance and
+`sizing_figure(result)` marks the adopted dimensions. Missing or stale data
+stops execution. Full characterization is not
 rerun by default. To compute new sparse device overrides, use
 `sweep_dimensions(cell, candidates, *, sweep_pin="A", fixed_trits=None,
 start_v=-5., stop_v=5., step_v=.1, temperature_c=27., pdk=None,
@@ -299,14 +336,7 @@ from tritflow.sim.sizing import load_grid, sweep_dimensions
 from tritflow.viz.scaling import sizing_figure
 SIZING_INDEX = {"INV": None, "NANY": None}  # None selects adopted; set a candidate index to inspect it
 for cell in ["INV", "NANY"]:
-    if not (CELLS_DIR/f"out/sizing/{cell}.grid.json").is_file():
-        print(f"TODO SIM: publish cells/out/sizing/{cell}.grid.json (W/L sweep)")
-        continue
-    try:
-        grid = load_grid(cell)
-    except RuntimeError as error:
-        print(f"TODO SIM: refresh {cell} sizing grid: {error}")
-        continue
+    grid = load_grid(cell)
     adopted = grid["rows"][grid["adopted_index"]]
     table([["Cell", "Candidates", "PASS", "Adopted dimensions (µm)", "Conditions"],
            [cell, len(grid["rows"]), sum(r["passed"] for r in grid["rows"]),
@@ -348,13 +378,32 @@ abstract = json.loads((CELLS_DIR/"out/NANY/NANY.abstract.json").read_text())
 table([["Height (µm)", template["height"]], ["Grid (µm)", template["grid"]],
        ["NANY width (µm)", abstract["width"]], ["Rails", template["rails"]],
        ["Pin names", list(abstract["pins"])], ["Obstruction layers", list(abstract["obstructions"])]])
-image = CELLS_DIR/"out/NANY/NANY.png"
-if image.is_file():
-    display(Image(filename=str(image), width=700))
+show(cell_figure("NANY"))  # actual GDS, labelled rails/pins, layer/obstruction legend
+mapping = device_mapping("NANY", selected="XCN1")
+# Highlight both conducting devices of the zero-level clamp. These are device
+# outlines, not an invented extracted current-density or wire-current map.
+clamp_devices = {"XCP1","XCN1"}
+clamp_body = subcircuits((CELLS_DIR/"out/NANY/NANY.spice").read_text())["nany"]["body"]
+clamp_terminals = {fields[0]:fields[1:5] for fields in map(str.split,clamp_body.splitlines()) if fields}
+assert clamp_terminals["XCP1"] == ["c1","A","Y","VDD"]
+assert clamp_terminals["XCN1"] == ["c1","B","VMID","VSS"]
+clamp_dc = next(r for r in characters["NANY"]["dc"] if r["input_trits"] == [-1,1])
+assert clamp_dc["passed"] and abs(clamp_dc["output_v"]["Y"]) <= PASS_BAND
+for trace in mapping.figure.data:
+    meta = trace.meta or {}
+    if meta.get("kind") == "device" and meta.get("device") in clamp_devices:
+        trace.update(line={"color":"#d13c28","width":4},opacity=1)
+mapping.figure.update_layout(title="NANY: Y → XCP1/XM6 → c1 → XCN1/XM7 → VMID, A=−1 B=+1")
+assert clamp_devices <= {r["name"] for r in mapping.rows}
+show(mapping.figure)
+show(mapping.table)
+show(row_abutment())
 qualification = CELLS_DIR/"out/verify_report.json"
 if qualification.is_file():
     report = json.loads(qualification.read_text())
     assert report["passed"]
+    assert all(hashlib.sha256((PDK_ROOT/name).read_bytes()).hexdigest() == value
+               for name,value in report["deck_sha256"].items()), "cell qualification uses a different PDK"
     for cell, artifacts in report["artifact_sha256"].items():
         for suffix, expected_hash in artifacts.items():
             assert hashlib.sha256((CELLS_DIR/f"out/{cell}/{cell}.{suffix}").read_bytes()).hexdigest() == expected_hash
@@ -363,12 +412,19 @@ if qualification.is_file():
          result["lvs"].get("method","strict device/port comparison")]
         for name,result in report["cells"].items()])
     if "FILL" in report["cells"]:
-        print("FILL qualification:", report["cells"]["FILL"]["lvs"]["explanation"])
-    print("Recorded qualification scope:", report["scope"])
+        evidence("FILL qualification", report["cells"]["FILL"]["lvs"]["explanation"])
+    evidence("Recorded qualification scope", report["scope"])
 else:
-    print("TODO CELLS: publish the cell qualification report; no cell-clean claim is made here")
+    raise FileNotFoundError("Required pinned-PDK cell qualification: "+str(qualification))
 ''')
 md('''
+At A=−1, B=+1, the schematic clamp branch Y–XCP1/XM6–c1–XCN1/XM7–VMID
+conducts toward the middle rail. Red outlines locate those devices; the table
+preserves original Xschem labels, published IDs and actual W/L. The dropdown
+selects individual devices. These highlights explain topology, not simulated
+current density. Layer legends and rail/pin access overlays remain available.
+The row view shows real R0/MY abutment and the abstract's free-M2 promise.
+
 ## 4. Describe arithmetic in TritVerilog
 
 The reference half adder shares intermediates. Two such blocks and carry
@@ -380,6 +436,8 @@ integer arithmetic in HDL; signal arithmetic is implemented with gates.
 code('''
 ha = flow.load(ROOT/"examples/half_add.tv", "half_add")
 fa = flow.load(ROOT/"examples/full_add.tv", "full_add")
+display(HTML(schematic_gallery(ROOT/"notebook/assets/schematics",
+                               names=["half_adder","full_adder"], selected="half_adder",max_width=650)))
 display(truth_table_html(ha.design))
 display(truth_table_html(fa.design))
 fa_table = fa.truth_table()
@@ -397,7 +455,7 @@ assert fa_counts == {cell:fa_symbols["half_adder"]*ha_counts[cell]+fa_symbols[sy
                      for cell,symbol in symbol_names.items()}
 table([["Circuit", "Cells", "Exhaustive input states"],
        ["half_add",ha_counts,len(ha_table["sum"])], ["full_add",fa_counts,len(fa_table["sum"])]])
-print((ROOT/"examples/adder.tv").read_text())
+evidence("Ripple-adder HDL", (ROOT/"examples/adder.tv").read_text())
 ''')
 md('''
 ## 5. Follow synthesis into cells
@@ -415,9 +473,9 @@ assert fa_net.report()["equivalence"]["passed"]
 assert fa_net.report()["equivalence"]["vectors"] == len(fa_table["sum"])
 show(gate_graph(fa_net))
 show(color_nets(fa_net, {"a": 1, "b": 1, "cin": -1}))
-table([["Report field", "Value"]]+[[k,v] for k,v in fa_net.report().items()])
+table([["Report field", "Value"]]+[[k,v] for k,v in fa_net.report().items()],details="Full synthesis report")
 from tritflow.synth import tritverilog
-print(tritverilog(fa_net))
+evidence("Gate-level TritVerilog", tritverilog(fa_net))
 mapping_cases = [("~a",["INV"]), ("~(a&b)",["NAND"]), ("a&b",["NAND","INV"]),
                  ("~(a|b)",["NOR"]), ("a|b",["NOR","INV"]), ("nany(a,b)",["NANY"]),
                  ("1'tT",["TIEN"]), ("1't0",["TIEZ"]), ("1't1",["TIEP"])]
@@ -439,11 +497,11 @@ islands, widths/spaces and via enclosures before the official PDK deck runs.
 Top-level device LVS compares the exported GDS to mapped-cell connectivity.
 ''')
 code('''
-table([["Metric", "Two-trit adder"]]+[[k,v] for k,v in lay.stats.items()])
+table([["Metric", "Two-trit adder"]]+[[k,v] for k,v in lay.stats.items()],details="Full physical statistics")
 table([["Requested rows (None = automatic)",PNR_ROWS], ["Annealing steps",PNR_ANNEAL_STEPS],
        ["Actual physical rows",len(lay.data["rows"])], ["Utilization",lay.stats["utilization"]]])
 print("Placement snapshots:", len(lay.data["history"]))
-print("Routing attempts:", lay.data["routing_attempts"])
+evidence("Routing attempts", lay.data["routing_attempts"])
 assert all(check["clean"] for check in lay.data["checks"].values())
 assert lay.stats["routed_nets"] == len(net.nets())
 assert {p["orient"] for p in lay.data["placements"]} <= {"R0","MY"}
@@ -476,6 +534,9 @@ With extended experiments enabled, routing progress replays the successful
 recorded pass. Neither animation substitutes for the geometry checks.
 `rows=None` searches row counts and independently fed power spans for a compact,
 near-square floorplan; the dimensions/aspect/utilization shown are measured.
+`lay.signoff()` additionally runs PNR's unwaived mask checks (optional,
+`force=True` reruns); inspect `clean` and `submission_ready` separately. The
+core-only demonstrations do not establish manufacturing readiness.
 A positive `rows` fixes the physical row count. `anneal_steps=0` retains initial
 placement; more steps spend effort on swaps/moves/reflections. Change the
 opt-in controls above to compare geometry and HPWL. Row/feed current constraints
@@ -491,7 +552,8 @@ segment end under sampled-waveform linear interpolation. The SIM API measures
 from ramp **start**, including the configured input ramp. Finite timestep limits
 resolution; initialization is excluded from maximum transition delay.
 
-The extracted devices retain intrinsic/junction effects. Added top-net wire C
+The extracted devices retain intrinsic/junction effects. Device-only and
+wire-augmented runs use identical device terminals; only the added C differs. Added top-net wire C
 uses actual connected GDS area/perimeter with explicitly assumed coefficients;
 it is not calibrated signoff PEX. Signal-wire resistance, coupling, local poly
 RC and PVT/mismatch are outside this experiment. The four-design loop below
@@ -500,18 +562,20 @@ characterized currents; it does not perturb the ideal supplies in SPICE.
 ''')
 code('''
 pre = cache.run("adder2-pre", {"net":net.to_json(),"vectors":vectors,"load":LOAD_F,
+                             "gds_sha256":hashlib.sha256(lay.gds_path.read_bytes()).hexdigest(),
                              "hold":HOLD_S,"step":STEP_S,"edge":EDGE_S,"temperature_c":TEMP_C}, lambda:
-    net.simulate(vectors, load=LOAD_F, expected=adder_reference, hold_s=HOLD_S,
+    lay.extract(wire_c=False).simulate(vectors, load=LOAD_F, expected=adder_reference, hold_s=HOLD_S,
                  step_s=STEP_S, edge_s=EDGE_S, temperature_c=TEMP_C, timeout=180))
 assert pre["measurements"]["passed"]
 assert pre["stimulus"]["vectors"] == demo["stimulus"]["vectors"]
 assert pre["stimulus"]["hold_s"] == demo["stimulus"]["hold_s"]
 assert pre["stimulus"]["step_s"] == demo["stimulus"]["step_s"]
-show(waveform_figure(demo, outputs, pre=pre, title=f"Matched pre/post stimuli: {LOAD_F*1e15:g} fF per output"))
+show(waveform_figure(demo, outputs, pre=pre, title=f"Same extracted devices ± wire C: {LOAD_F*1e15:g} fF/output",
+                     pre_label="device-only",post_label="device + wire C"))
 table([["Output", "Pre max settling (ns)", "Post max settling (ns)"]]+[
     [p, pre["measurements"]["max_settling_s"][p]*1e9,
      demo["measurements"]["max_settling_s"][p]*1e9] for p in outputs])
-print("Wire-C assumptions:", demo["capacitance"]["assumptions"])
+evidence("Wire-C assumptions", demo["capacitance"]["assumptions"])
 if EXTENDED:
     for load in [10e-15,1e-12]:
         loaded = cache.run(f"adder2-load-{load:g}", {"vectors":vectors,"load":load}, lambda:
@@ -526,7 +590,11 @@ it consumes no pre-existing `build/` results. SIM supplies the vector plans and
 independent radix-arithmetic oracles. Small circuits visit every input state;
 the larger adder uses labeled carry assertion/release, overflow and cancellation
 cases. Neither sequence exhausts directed transitions. Each physical result is
-checked before matched pre/post simulation. Maxima can occur on different
+checked before two matched runs of identical extracted intrinsic devices and
+terminal orientation: device-only versus device plus wire C. This matters
+because the PDK resistor's intrinsic capacitance is asymmetric at PLUS/MINUS;
+comparing schematic versus extracted terminal orientation would confound the
+wire effect. The authored schematic remains the independent LVS reference. Maxima can occur on different
 transitions; the last timing column compares each transition with itself.
 Sub-timestep differences do not establish a speedup.
 ''')
@@ -536,7 +604,7 @@ FOUR_DESIGN_LOAD_F, FOUR_DESIGN_HOLD_S, FOUR_DESIGN_STEP_S = 10e-15, 500e-9, 2e-
 four_results = {}
 physical_rows = [["Design", "Die (µm)", "Aspect", "Utilization", "DRC / LVS", "Input states visited / possible",
                   "Post max error (mV)", "Rail deviation / zero shift (mV)"]]
-timing_rows = [["Design", "Output", "Pre max (ns)", "Post max (ns)", "Largest same-transition change (ns)"]]
+timing_rows = [["Design", "Output", "Device-only max (ns)", "+ wire-C max (ns)", "Largest same-transition change (ns)"]]
 for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_add",{}),
                                   ("mac1","mac1",{}), ("mul1","mul1",{})]:
     mapped = flow.load(ROOT/f"examples/{source_name}.tv", source_name, params).synthesize(name=name)
@@ -572,18 +640,19 @@ table(timing_rows)
 table([["Shared load (fF)",FOUR_DESIGN_LOAD_F*1e15], ["Hold / max step (ns)",
        [FOUR_DESIGN_HOLD_S*1e9,FOUR_DESIGN_STEP_S*1e9]],
        ["Input plan labels", {name:representative_vectors(name,
-          r["post"]["stimulus"]["inputs"])[1] for name,r in four_results.items()}]])
+          r["post"]["stimulus"]["inputs"])[1] for name,r in four_results.items()}]],details="Four-design stimulus conditions and labels")
 FOUR_DESIGN_VIEW = "full_add"  # switch to adder4, mac1 or mul1
 viewed = four_results[FOUR_DESIGN_VIEW]
-show(waveform_figure(viewed["post"],pre=viewed["pre"],title=f"{FOUR_DESIGN_VIEW}: matched pre/post vectors"))
-print("Wire-C assumptions:", viewed["capacitance"]["assumptions"])
-print("IR assumptions (separate from ideal-rail SPICE):", viewed["ir"]["assumptions"])
+show(waveform_figure(viewed["post"],pre=viewed["pre"],title=f"{FOUR_DESIGN_VIEW}: same extracted devices ± wire C",
+                     pre_label="device-only",post_label="device + wire C"))
+evidence("Wire-C assumptions", viewed["capacitance"]["assumptions"])
+evidence("IR assumptions (separate from ideal-rail SPICE)", viewed["ir"]["assumptions"])
 ''')
 md('''
-**SIM publication slots — width scaling and load boundary:** the following cell
-reads `results/adder_scaling.json` and `results/full_add_load_sweep.json` when
-SIM publishes them. Missing data stays a TODO; no interpolated or invented
-measurements fill the gap. The precomputed readers/figures are fast. Producing
+The committed width-scaling and load-boundary campaigns below read
+`results/adder_scaling.json` and `results/full_add_load_sweep.json`.
+Required records must match the source, library and pinned PDK; missing/stale
+records stop execution rather than substituting another process revision. The precomputed readers/figures are fast. Producing
 the full matrix or refining a failing load is an opt-in experiment, outside
 default Run all: `run_scaling(sizes=range(1,7), *, jobs=1, destination=..., **kwargs)`
 and `sweep_output_load(directory, *, loads_f=..., hold_s=500e-9, step_s=2e-9,
@@ -599,17 +668,10 @@ from tritflow.viz.scaling import scaling_figure, load_sweep_figure
 for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figure),
                                   ("full_add_load_sweep.json",load_sweep_results,load_sweep_figure)]:
     published = ROOT/"results"/filename
-    if not published.is_file():
-        print(f"TODO SIM: publish results/{filename}; no scaling/boundary result claimed")
-        continue
     result = loader(published)
-    try:
-        records = result["rows"] if filename == "adder_scaling.json" else [result]
-        for record in records:
-            verify_publication_sources(record,ROOT,PDK_ROOT)
-    except RuntimeError as error:
-        print(f"TODO SIM: refresh results/{filename}: {error}; no current result claimed")
-        continue
+    records = result["rows"] if filename == "adder_scaling.json" else [result]
+    for record in records:
+        verify_publication_sources(record,ROOT,PDK_ROOT)
     print("Published experiment:", filename, result.get("coverage",result.get("scope")))
     print("Limits / conditions:",result.get("limits",result.get("conditions")))
     if filename == "adder_scaling.json":
@@ -659,7 +721,7 @@ CHOICE = os.environ.get("TRITFLOW_CIRCUIT", "minmax")  # sign | compare2 | mul2 
 table([["Choice", "Specification"]]+[[key,item.description] for key,item in DESIGNS.items()])
 example = DESIGNS[CHOICE]
 source = example.path.read_text()  # edit this string, or choose another catalog entry
-print(source)
+evidence("Editable HDL source", source)
 # Stage includes beside the edited text, preserving the committed source files.
 custom_circuit = load_edited(example,source,BUILD/"your_circuit"/"source"/example.top)
 custom = custom_circuit.synthesize()
@@ -684,7 +746,7 @@ assert_experiment(custom_result)
 assert {tuple(row["input_trits"]) for row in custom_result["post"]["measurements"]["rows"]} == set(planned)
 table([["Independent arithmetic input states",len(planned)], ["Physical results",custom_result["stats"]],
        ["DRC clean / LVS matched",[custom_result["drc"]["clean"],custom_result["lvs"]["matched"]]],
-       ["Initial Newton guesses (V)",custom_result["initial_nodeset_v"]]])
+       ["Initial Newton guesses (V)",custom_result["initial_nodeset_v"]]],details="Selected circuit physical evidence and Newton guesses")
 show(waveform_figure(custom_result["post"],title=f"{CHOICE}: all input states, selected sequence"))
 ''')
 md('''
@@ -699,7 +761,7 @@ measured discrepancies. The generated core is not a padframe or ESD-qualified
 top, and nominal device simulation is not a lifetime qualification.
 
 **TODO — integrator:** confirm the measurement schedule and hardware details;
-replace draft placeholders, publish the `colab-v0` tag, and run this exact
+publish a matching immutable release tag and run this exact
 notebook in a clean Colab runtime before submission. Record cold/warm runtimes
 and keep total default Run all near ten minutes.
 
@@ -709,6 +771,12 @@ Sources: [OpenSUSI TR-1um](https://github.com/OpenSUSI/TR-1um),
 The setup pins the PDK commit and verifies SHA-256 archive/package downloads.
 ''')
 code('''
+assert runtime_fingerprint(ROOT,PDK_ROOT) == cache.fingerprint, "consumed sources changed during Run all; rerun after publication settles"
+table([["Stage", "Fresh / cache hit", "Wall time this run (s)"]]+[
+    [r["stage"],r["state"],round(r["elapsed_s"],3)] for r in sorted(cache.timings,key=lambda r:r["elapsed_s"],reverse=True)])
+table([["Design", "Measured producer phase", "Wall time in recorded producer (s)"]]+[
+    [name,stage,round(seconds,3)] for name,result in four_results.items()
+    for stage,seconds in result["timings_s"].items()],details="Physical and pre/post-SPICE runtime breakdown (producer evidence)")
 print("Cache stages:", cache.events)
 print(f"Run time including setup: {time.monotonic()-started:.1f} s")
 print("Artifacts:", BUILD)

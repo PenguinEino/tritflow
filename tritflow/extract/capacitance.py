@@ -112,13 +112,27 @@ def gds_wire_capacitance(gds, lvs_report, *, top=None, coefficients=None) -> dic
 
 
 def reference_net_map(lvs_report, top: str) -> dict:
-    """Map matched reference top-net names to layout SPICE names via LVS xref."""
+    """Map exact logical names to physical nodes, reversing SPICE-safe naming."""
     import klayout.db as db
+    from .lvs import subcircuits, logical_spice_names
     result = db.LayoutVsSchematic(); result.read(str(lvs_report))
     circuit = result.netlist().circuit_by_name(top)
     if circuit is None:
         raise ValueError(f'LVS circuit missing: {top}')
-    return {p.second().expanded_name(): p.first().expanded_name()
+    reference = Path(lvs_report).parent/'reference.spice'
+    logical = {}
+    if reference.is_file():
+        text=reference.read_text();decoded=logical_spice_names(text)
+        definition=subcircuits(text).get(top.lower())
+        if definition:
+            names=list(definition['pins'])
+            for line in definition['body'].splitlines():
+                fields=line.split()
+                if fields and fields[0][0].upper()=='X':
+                    end=next((i for i,t in enumerate(fields) if '=' in t),len(fields))
+                    names.extend(fields[1:end-1])
+            logical={name.upper():decoded.get(name,name) for name in names}
+    return {logical.get(p.second().expanded_name().upper(),p.second().expanded_name()): p.first().expanded_name()
             for p in result.xref().each_net_pair(circuit) if p.first() and p.second()
             and p.status() == db.NetlistCrossReference.Match}
 
@@ -167,4 +181,7 @@ def append_wire_capacitance(spice: str, top: str, capacitances: dict, *, net_map
             raise ValueError('Wire capacitance has already been appended')
         lines.append(f'{device} {node} 0 {cap:.15g}')
     modified = re.sub(r'(?im)^\s*\.ends\b', '\n'.join(lines)+'\n.ends', definition['text'], count=1)
-    return spice.replace(definition['text'], modified, 1)
+    result = spice.replace(definition['text'], modified, 1)
+    if result == spice or any(line not in result for line in lines):
+        raise ValueError('Wire capacitance annotation did not reach the original SPICE text')
+    return result

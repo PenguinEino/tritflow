@@ -1,0 +1,226 @@
+{
+  "cell": "BUF",
+  "sheet_ohm_per_square": 120.0,
+  "pitch_um": 0.25,
+  "parameter_origin": "PDK RS resistor-poly specification used as a GC sensitivity proxy; GC applicability is uncalibrated.",
+  "pdk_source": {
+    "RR": 1000.0,
+    "RS_poly": 120.0,
+    "width_um": 6.0,
+    "tolerance_percent": 15.0,
+    "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+    "page": 9,
+    "table": "I-2-4",
+    "use": "Device-resistor specifications, not metal. Existing nonlinear PDK device models remain authoritative in SPICE."
+  },
+  "parameter_audit_sha256": "4358e3ccced80203e2223ac2f7ad08d04e244d3cc650875e23cf6fcaffdff263",
+  "source_sha256": "f822b915d4482fef9835d7e398393533e3f8b02b3bad7493c176df4c1f64a4b3",
+  "gds_sha256": "4a2ae02e29c54d525b13ee825c34d5fce32dca87a11f43e8522cc59821fd59d5",
+  "scope": "GC gate-interconnect sheet R only. No poly C/contact R; MOS gate-channel regions are equipotential. RR device models and all W/L/junction parameters are unchanged. Structural LVS extraction is preserved.",
+  "components": [
+    {
+      "terminals": [
+        "metal",
+        "gate_1",
+        "gate_3"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_1",
+          "squares": 11.761887997249207
+        },
+        {
+          "a": "metal",
+          "b": "gate_3",
+          "squares": 8.000739845008567
+        },
+        {
+          "a": "gate_1",
+          "b": "gate_3",
+          "squares": 6647.725363617534
+        }
+      ],
+      "mesh_vertices": 728,
+      "gate_to_contact_squares": {
+        "gate_1": 11.741139252079458,
+        "gate_3": 7.991139252079328
+      },
+      "reduced_vertices": 3,
+      "unit_sheet_conductance": [
+        [
+          0.21000880508820785,
+          -0.08502036409748787,
+          -0.12498844099072554
+        ],
+        [
+          -0.08502036409748787,
+          0.0851707914911124,
+          -0.00015042739362743828
+        ],
+        [
+          -0.12498844099072554,
+          -0.00015042739362743828,
+          0.12513886838435084
+        ]
+      ],
+      "net": "A",
+      "bbox_um": [
+        17.900000000000002,
+        22.3,
+        20.5,
+        63.95
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_2",
+        "gate_4"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_2",
+          "squares": 11.761887997249207
+        },
+        {
+          "a": "metal",
+          "b": "gate_4",
+          "squares": 8.000739845008567
+        },
+        {
+          "a": "gate_2",
+          "b": "gate_4",
+          "squares": 6647.725363617534
+        }
+      ],
+      "mesh_vertices": 728,
+      "gate_to_contact_squares": {
+        "gate_2": 11.741139252079458,
+        "gate_4": 7.991139252079328
+      },
+      "reduced_vertices": 3,
+      "unit_sheet_conductance": [
+        [
+          0.21000880508820785,
+          -0.08502036409748787,
+          -0.12498844099072554
+        ],
+        [
+          -0.08502036409748787,
+          0.0851707914911124,
+          -0.00015042739362743828
+        ],
+        [
+          -0.12498844099072554,
+          -0.00015042739362743828,
+          0.12513886838435084
+        ]
+      ],
+      "net": "$7",
+      "bbox_um": [
+        125.9,
+        22.3,
+        128.5,
+        63.95
+      ]
+    }
+  ],
+  "gates": {
+    "1": {
+      "node": "tfpg_1",
+      "base_net": "A",
+      "origin_um": [
+        19.2,
+        56.0
+      ],
+      "w_um": 13.5,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 1408.936710249535
+    },
+    "3": {
+      "node": "tfpg_3",
+      "base_net": "A",
+      "origin_um": [
+        19.2,
+        26.0
+      ],
+      "w_um": 5.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 958.9367102495194
+    },
+    "2": {
+      "node": "tfpg_2",
+      "base_net": "$7",
+      "origin_um": [
+        127.2,
+        56.0
+      ],
+      "w_um": 13.5,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 1408.936710249535
+    },
+    "4": {
+      "node": "tfpg_4",
+      "base_net": "$7",
+      "origin_um": [
+        127.2,
+        26.0
+      ],
+      "w_um": 5.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 958.9367102495194
+    }
+  },
+  "resistors": [
+    {
+      "name": "Rtfpg_0",
+      "a": "A",
+      "b": "tfpg_1",
+      "squares": 11.761887997249207,
+      "resistance_ohm": 1411.426559669905
+    },
+    {
+      "name": "Rtfpg_1",
+      "a": "A",
+      "b": "tfpg_3",
+      "squares": 8.000739845008567,
+      "resistance_ohm": 960.0887814010281
+    },
+    {
+      "name": "Rtfpg_2",
+      "a": "tfpg_1",
+      "b": "tfpg_3",
+      "squares": 6647.725363617534,
+      "resistance_ohm": 797727.0436341041
+    },
+    {
+      "name": "Rtfpg_3",
+      "a": "n_ex_7",
+      "b": "tfpg_2",
+      "squares": 11.761887997249207,
+      "resistance_ohm": 1411.426559669905
+    },
+    {
+      "name": "Rtfpg_4",
+      "a": "n_ex_7",
+      "b": "tfpg_4",
+      "squares": 8.000739845008567,
+      "resistance_ohm": 960.0887814010281
+    },
+    {
+      "name": "Rtfpg_5",
+      "a": "tfpg_2",
+      "b": "tfpg_4",
+      "squares": 6647.725363617534,
+      "resistance_ohm": 797727.0436341041
+    }
+  ],
+  "annotated_sha256": "00100fad16738798051fad2838bb7b789baa85f9d4f62760d2429a7356d35e8c",
+  "generation": {
+    "id": "2026-10-18T09:49:34.717678+00:00",
+    "reason": "Phase 6 PASS: nine STA timing tables, 160 load/ramp profiles and 7296 directed observations; 30 poly-R proxy profiles with matched baselines; physical cell views unchanged; latest SIM characterization/sizing preserved",
+    "height_um": 132.0
+  }
+}

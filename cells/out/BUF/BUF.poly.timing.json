@@ -1,0 +1,662 @@
+{
+  "cell": "BUF",
+  "source_sha256": "f822b915d4482fef9835d7e398393533e3f8b02b3bad7493c176df4c1f64a4b3",
+  "annotated_sha256": "00100fad16738798051fad2838bb7b789baa85f9d4f62760d2429a7356d35e8c",
+  "sheet_ohm_per_square": 120.0,
+  "parameter_origin": "PDK RS resistor-poly specification used as a GC sensitivity proxy; GC applicability is uncalibrated.",
+  "scope": "GC gate-interconnect sheet R only. No poly C/contact R; MOS gate-channel regions are equipotential. RR device models and all W/L/junction parameters are unchanged. Structural LVS extraction is preserved.",
+  "network_file": "BUF/BUF.poly.json",
+  "spice_file": "BUF/BUF.poly.spice",
+  "comparisons": [
+    {
+      "load_f": 1e-14,
+      "input_transition_s": 1e-09,
+      "baseline_run": "BUF/timing/ramp_00_load_01/measurements.json",
+      "poly_run": "BUF/timing_poly/ramp_00_load_00/measurements.json",
+      "max_step_s": 5e-11,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 2.854253819586934e-10,
+      "max_abs_difference_s": 2.854253819586934e-10,
+      "baseline_worst_settling_s": 7.282864824431365e-09,
+      "poly_worst_settling_s": 7.568290206390058e-09,
+      "rows": [
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 6.908025993101115e-09,
+          "poly_settling_s": 7.059596359221884e-09,
+          "difference_s": 1.5157036612076893e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 2.48979509623524e-09,
+          "poly_settling_s": 2.6576435842593703e-09,
+          "difference_s": 1.678484880241303e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 5.81853264219942e-09,
+          "poly_settling_s": 5.977481318743023e-09,
+          "difference_s": 1.5894867654360313e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 7.282864824431365e-09,
+          "poly_settling_s": 7.568290206390058e-09,
+          "difference_s": 2.854253819586934e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 2.623633620986591e-09,
+          "poly_settling_s": 2.790917080695325e-09,
+          "difference_s": 1.6728345970873396e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 6.220523153238057e-09,
+          "poly_settling_s": 6.403092427856297e-09,
+          "difference_s": 1.825692746182399e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-13,
+      "input_transition_s": 1e-09,
+      "baseline_run": "BUF/timing/ramp_00_load_04/measurements.json",
+      "poly_run": "BUF/timing_poly/ramp_00_load_01/measurements.json",
+      "max_step_s": 5e-11,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 2.641028745490584e-10,
+      "max_abs_difference_s": 2.641028745490584e-10,
+      "baseline_worst_settling_s": 9.296867628868416e-09,
+      "poly_worst_settling_s": 9.560970503417474e-09,
+      "rows": [
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 8.942037417638598e-09,
+          "poly_settling_s": 9.085684844191891e-09,
+          "difference_s": 1.43647426553293e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 3.628677239639496e-09,
+          "poly_settling_s": 3.788732636897059e-09,
+          "difference_s": 1.6005539725756265e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 7.796377395574382e-09,
+          "poly_settling_s": 7.945138936984994e-09,
+          "difference_s": 1.4876154141061224e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 9.296867628868416e-09,
+          "poly_settling_s": 9.560970503417474e-09,
+          "difference_s": 2.641028745490584e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 3.746689231933844e-09,
+          "poly_settling_s": 3.907309621449881e-09,
+          "difference_s": 1.6062038951603698e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 8.154293901252465e-09,
+          "poly_settling_s": 8.326079531404159e-09,
+          "difference_s": 1.7178563015169382e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-12,
+      "input_transition_s": 1e-09,
+      "baseline_run": "BUF/timing/ramp_00_load_07/measurements.json",
+      "poly_run": "BUF/timing_poly/ramp_00_load_02/measurements.json",
+      "max_step_s": 5e-11,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 1.5578216871342024e-10,
+      "max_abs_difference_s": 1.5578216871342024e-10,
+      "baseline_worst_settling_s": 3.918992961263604e-08,
+      "poly_worst_settling_s": 3.931379246937626e-08,
+      "rows": [
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 3.918992961263604e-08,
+          "poly_settling_s": 3.931379246937626e-08,
+          "difference_s": 1.2386285674022012e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 1.6391552539420566e-08,
+          "poly_settling_s": 1.6537695781250904e-08,
+          "difference_s": 1.4614324183033773e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 3.2124781825698495e-08,
+          "poly_settling_s": 3.226431809325869e-08,
+          "difference_s": 1.3953626756019588e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 3.8655808407515535e-08,
+          "poly_settling_s": 3.8782572060530926e-08,
+          "difference_s": 1.2676365301539098e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 1.6972535863132512e-08,
+          "poly_settling_s": 1.7113764270729274e-08,
+          "difference_s": 1.4122840759676165e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 3.1325080540178265e-08,
+          "poly_settling_s": 3.1480862708891685e-08,
+          "difference_s": 1.5578216871342024e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-14,
+      "input_transition_s": 1.5e-07,
+      "baseline_run": "BUF/timing/ramp_03_load_01/measurements.json",
+      "poly_run": "BUF/timing_poly/ramp_01_load_00/measurements.json",
+      "max_step_s": 2e-09,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 3.072786183185468e-10,
+      "max_abs_difference_s": 3.072786183185468e-10,
+      "baseline_worst_settling_s": 1.285590742907942e-07,
+      "poly_worst_settling_s": 1.287301844530633e-07,
+      "rows": [
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 1.285590742907942e-07,
+          "poly_settling_s": 1.287301844530633e-07,
+          "difference_s": 1.7111016226910338e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 7.516616062206364e-08,
+          "poly_settling_s": 7.547343924038219e-08,
+          "difference_s": 3.072786183185468e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 1.0367866059947258e-07,
+          "poly_settling_s": 1.0383799008504795e-07,
+          "difference_s": 1.5932948557537214e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 1.28278194027976e-07,
+          "poly_settling_s": 1.2846795212769627e-07,
+          "difference_s": 1.8975809972026177e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 7.68242330075013e-08,
+          "poly_settling_s": 7.703264460065023e-08,
+          "difference_s": 2.0841159314893593e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 1.0238908988989174e-07,
+          "poly_settling_s": 1.0254542423827111e-07,
+          "difference_s": 1.563343483793693e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-13,
+      "input_transition_s": 1.5e-07,
+      "baseline_run": "BUF/timing/ramp_03_load_04/measurements.json",
+      "poly_run": "BUF/timing_poly/ramp_01_load_01/measurements.json",
+      "max_step_s": 2e-09,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 2.3421429324771255e-10,
+      "max_abs_difference_s": 2.3421429324771255e-10,
+      "baseline_worst_settling_s": 1.2961561776478054e-07,
+      "poly_worst_settling_s": 1.2981821640314345e-07,
+      "rows": [
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 1.2953685031533977e-07,
+          "poly_settling_s": 1.297275881518319e-07,
+          "difference_s": 1.9073783649212885e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 7.632162466127629e-08,
+          "poly_settling_s": 7.651729499107215e-08,
+          "difference_s": 1.95670329795856e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 1.045252177559173e-07,
+          "poly_settling_s": 1.0468765365904397e-07,
+          "difference_s": 1.6243590312666004e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 1.2961561776478054e-07,
+          "poly_settling_s": 1.2981821640314345e-07,
+          "difference_s": 2.025986383629027e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 7.788871719045385e-08,
+          "poly_settling_s": 7.812293148370156e-08,
+          "difference_s": 2.3421429324771255e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 1.035995050351497e-07,
+          "poly_settling_s": 1.0377639378731118e-07,
+          "difference_s": 1.7688875216147817e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-12,
+      "input_transition_s": 1.5e-07,
+      "baseline_run": "BUF/timing/ramp_03_load_07/measurements.json",
+      "poly_run": "BUF/timing_poly/ramp_01_load_02/measurements.json",
+      "max_step_s": 2e-09,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 2.1276479063679965e-10,
+      "max_abs_difference_s": 2.1276479063679965e-10,
+      "baseline_worst_settling_s": 1.5042515944251036e-07,
+      "poly_worst_settling_s": 1.5062311652790093e-07,
+      "rows": [
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 1.5042515944251036e-07,
+          "poly_settling_s": 1.5062311652790093e-07,
+          "difference_s": 1.9795708539057168e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 8.817349029381808e-08,
+          "poly_settling_s": 8.838446404279014e-08,
+          "difference_s": 2.109737489720578e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            1
+          ],
+          "baseline_settling_s": 1.2068820702629027e-07,
+          "poly_settling_s": 1.2086114019592956e-07,
+          "difference_s": 1.7293316963929135e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 1.500386230398589e-07,
+          "poly_settling_s": 1.5022942007387022e-07,
+          "difference_s": 1.9079703401132057e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1
+          ],
+          "to": [
+            0
+          ],
+          "baseline_settling_s": 8.950822491928605e-08,
+          "poly_settling_s": 8.972098970992285e-08,
+          "difference_s": 2.1276479063679965e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0
+          ],
+          "to": [
+            -1
+          ],
+          "baseline_settling_s": 1.2092548751094234e-07,
+          "poly_settling_s": 1.21114894170548e-07,
+          "difference_s": 1.8940665960564545e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "passed": true,
+  "max_single_pin_output_change_increase_s": 3.072786183185468e-10,
+  "generation": {
+    "id": "2026-10-18T09:49:34.717678+00:00",
+    "reason": "Phase 6 PASS: nine STA timing tables, 160 load/ramp profiles and 7296 directed observations; 30 poly-R proxy profiles with matched baselines; physical cell views unchanged; latest SIM characterization/sizing preserved",
+    "height_um": 132.0
+  }
+}

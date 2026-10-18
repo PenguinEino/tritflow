@@ -265,8 +265,12 @@ def characterize_all(out,*,jobs=3,include_poly=True):
         from .poly import characterize_sensitivity,finalize_sensitivity
         characterize_sensitivity(out,jobs=max(1,min(jobs,2)))
         values=finalize_sensitivity(out)
+        summary['primary_complete']=summary['complete']
+        summary['primary_passed']=summary['passed']
         summary['poly_sensitivity_complete']=all(r['complete'] for r in values.values())
         summary['poly_sensitivity_passed']=all(r['passed'] for r in values.values())
+        summary['complete'] &= summary['poly_sensitivity_complete']
+        summary['passed'] &= summary['poly_sensitivity_passed']
         for cell in summary['cells']:
             summary['cells'][cell]['timing_sha256']=sha(Path(out)/cell/f'{cell}.timing.json')
         write_json(Path(out)/'timing_report.json',summary)
@@ -276,14 +280,18 @@ def characterize_all(out,*,jobs=3,include_poly=True):
 def finalize_retained(out,*,allow_legacy_fingerprint=False):
     """Reassemble exact retained measurements, repairing interrupted run artifacts.
 
-    The explicit legacy option is for this producer's audited fingerprint-format
-    migration only. Original producer fingerprints remain recorded; compatibility
+    The explicit legacy option is for this producer's audited nominal-compatible
+    SIM/PDK migration only. Original producer fingerprints remain recorded; compatibility
     metadata never changes a measured voltage/delay. Public SIM/model/source and
     numerical settings are checked before accepting any retained sample.
     """
     import re
     out=Path(out).resolve()
     if out==(CELLS_DIR/'out').resolve():raise ValueError('Finalize only in a private stage')
+    audit_path=out/'timing_compatibility/compatibility_audit.json'
+    audit=json.loads(audit_path.read_text()) if audit_path.exists() else {}
+    audited=(audit.get('settling_time_AST_identical') and audit.get('nominal_measurement_common_fields_identical')
+             and not audit.get('mismatches'))
     reports={}
     for cell,circuit in circuits().items():
         path=out/cell/f'{cell}.timing.json';previous=json.loads(path.read_text())
@@ -299,17 +307,27 @@ def finalize_retained(out,*,allow_legacy_fingerprint=False):
                              and p['load_f']==load and p['input_transition_s']==ramp
                              and p['hold_s']==ramp+300e-9 and p['max_step_s']<=_grid_step(ramp,cell))
                     code=p.get('compatible_measurement_code',p.get('measurement_code'))==_measurement_code()
-                    legacy=(allow_legacy_fingerprint and p['measurement_code']['sim_source']==_measurement_code()['sim_source'])
+                    record=audit.get('records',{}).get(str((folder/'measurements.json').relative_to(out)),{})
+                    compatibility=(audited and record.get('measurement_sha256')==sha(folder/'measurements.json')
+                                   and record.get('deck_sha256')==sha(folder/'tb.spice'))
+                    legacy=(allow_legacy_fingerprint and (p['measurement_code']['sim_source']==_measurement_code()['sim_source'] or compatibility))
                     deck=(command is not None and abs(float(command[1])-p['max_step_s'])<1e-20)
                     if not (physics and (code or legacy) and deck and p['complete']):
                         shutil.copyfile(folder/'measurements.json',folder/'measurements.pre-repair.json')
                         p=point(cell,text,load,ramp,folder,max_step_s=_grid_step(ramp,cell))
                     elif not code:
                         p['compatible_measurement_code']=_measurement_code()
-                        p['compatibility_reason']='Audited same measurement recipe; stable semantic fingerprint replaces CPython marshal/interning serialization. Original at-run fingerprint retained.'
+                        p['compatibility_reason']='Audited nominal circuit/model equivalence and unchanged settling calculation across SIM/name/supply/PDK-path updates; original at-run fingerprint retained. See timing_compatibility/compatibility_audit.json.'
                     p['deck_sha256']=sha(folder/'tb.spice')
                     write_json(folder/'measurements.json',p);points.append(p)
-        report=assemble(cell,text,points,loads,ramps,previous['input_capacitance'],
+        inputs=list(circuit.inputs)
+        cap=input_capacitance(text,cell,inputs,['Y'],input_vectors(len(inputs)),
+                lambda v,c=cell:{'Y':ideal(c,v)},nodeset=guesses(text)) if inputs else []
+        capacitance={'method':'Biased unloaded-output AC driving-point C from current SIM public input_capacitance; no added cell wire C.',
+                     'frequency_hz':1e6,'rows':cap,
+                     'per_pin':{pin:{'min_f':min(r['capacitance_f'] for r in cap if r['pin']==pin),
+                                     'max_f':max(r['capacitance_f'] for r in cap if r['pin']==pin)} for pin in inputs}}
+        report=assemble(cell,text,points,loads,ramps,capacitance,
                         source_generation=previous.get('source_generation'),model_sha256=MODEL_SHA256)
         write_json(path,report);reports[cell]=report
     summary={'created_utc':datetime.now(timezone.utc).isoformat(),

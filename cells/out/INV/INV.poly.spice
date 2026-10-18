@@ -1,0 +1,16 @@
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt INV A Y VDD VMID VSS
+* device instance $1 r0 *1 19.2,56 PMOS
+XM_ex_1 n_ex_5 tfpg_1 VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+* device instance $2 r0 *1 19.2,26 NMOS
+XM_ex_2 n_ex_6 tfpg_2 VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+* device instance $3 r0 *1 70,44 F_RR
+XR_ex_3 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $4 r0 *1 70,57 F_RR
+XR_ex_4 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+* Gate-field-poly sheet-R sensitivity; uncalibrated GC proxy
+Rtfpg_0 A tfpg_1 1411.4265596699
+Rtfpg_1 A tfpg_2 960.088781401028
+Rtfpg_2 tfpg_1 tfpg_2 797727.043634104
+.ends INV

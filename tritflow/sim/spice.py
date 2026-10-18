@@ -12,11 +12,11 @@ CELL_PINS = {'INV': ('A', 'Y'), 'BUF': ('A', 'Y'), 'NAND': ('A', 'B', 'Y'),
 
 def subcircuits(text: str) -> dict[str, dict]:
     """Read subcircuit declarations, preserving formal pin spelling and order."""
-    text = re.sub(r'\n\s*\+\s*', ' ', text)
     result = {}
-    for match in re.finditer(r'^\s*\.subckt\s+(\S+)\s*([^\n]*)\n(.*?)^\s*\.ends\b[^\n]*', text, re.M | re.S | re.I):
+    pattern = r'^[ \t]*\.subckt[ \t]+(\S+)[ \t]*([^\n]*(?:\n[ \t]*\+[^\n]*)*)\n(.*?)^[ \t]*\.ends\b[^\n]*'
+    for match in re.finditer(pattern, text, re.M | re.S | re.I):
         pins = []
-        for token in match[2].split():
+        for token in re.sub(r'\n[ \t]*\+[ \t]*', ' ', match[2]).split():
             if '=' in token or token.lower() == 'params:':
                 break
             pins.append(token)

@@ -108,6 +108,7 @@ def fingerprint():
     paths += [p for group in ("drc", "lvs")
               for p in (PDK_ROOT/"libs.tech/klayout/tech"/group).rglob("*") if p.is_file()]
     paths += [ROOT/"notebook/setup_pins.json"]
+    paths += [ROOT/"tritflow/sim/spice.py"]
     paths += [p for p in (ROOT/"cells/out").glob("*/*")
               if p.is_file() and p.name.endswith((".gds", ".abstract.json", ".char.json"))]
     hashes = {str(p.resolve()): hashlib.sha256(p.read_bytes()).hexdigest()

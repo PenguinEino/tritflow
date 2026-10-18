@@ -7,9 +7,23 @@
 - Finding 2: restoring a schematic-unused power formal now also requires actual TXM1/TXM2 labels on one connected drawn M1/M2/V1 component. Standard-cell pass-through rails must reach both abutment edges. Missing conductor, missing label and severed-VMID regressions all reject; an intact INV still passes the pinned LVS deck.
 - Finding 6: `gate_spice` uses synthesis's writer directly, including its shared `spice_names` encoding and reversible net annotations. Testbenches use safe external node names; waveform and oracle keys restore exact logical spelling. Independent `a`/`A`, `y`/`Y` truth tables pass ngspice transient and DC tests. Synthesis files were not edited.
 
+## PNR handoff: encoded ports on the pinned deck — ready to rerun
+
+The pinned deck's strict name comparison needs the physical labels and reference to use the same reversible encoding. `extract_layout` now renames **existing labels only**, in `lvs/spice_named_input.gds`, using the exact synthesis annotations. It preserves geometry and the source GDS, never adds a missing label, and runs the unmodified pinned deck. Extracted SPICE carries the inverse annotations for logical bench keys. A real adder4 probe now returns native strict **Match** (`build/pinned_naming_probe/`). PNR can rerun its campaign. The result records `spice_name_map` and `label_normalization_gds`; the unused-input wrapper must compare mapped formals when such inputs are present.
+
+## Delay anomaly — root cause found, corrected reruns active
+
+The old `subcircuits()` parser unfolded SPICE continuation lines before returning a subcircuit's text. The capacitance annotator then tried to replace that altered text in the original source, silently doing nothing when the source contained continuations. Saved evidence `results/delay_annotation_bug.json` records nonzero computed C but **zero Ctfwire devices** (and identical pre/post text hashes) for affected adders. This explains why an extracted device-only network could be labelled post-layout and appear faster than the schematic. A second difference is RN terminal orientation: the PDK F_RR model attaches 25.95 fF only to PLUS for W=2.8/L=30; extraction swaps RN PLUS/MINUS relative to the schematic. MOS AD/AS/PD/PS equal the active wrapper defaults, so those are not the cause.
+
+The parser now preserves exact original source slices, the annotator rejects a no-op, and a regression covers both continued top declarations and continued MOS junction parameters. A real adder2 now receives all 40 calculated net capacitors. Affected SIM producer processes were stopped and are being rerun. Final wire comparisons use identical extracted intrinsic devices, with the original schematic retained as the independent LVS reference. Earlier numeric fits are invalid until the corrected runs finish.
+
 ## In progress
 
-Phase 5 delay attribution, available process/T/V coverage and rail-current audit; all published datasets will be recomputed with pinned-deck/model/source hashes after CELLS and PNR publish their final revisions.
+The pinned PDK model libraries are byte-identical to the dev snapshot; no metal/via R or substrate/fringe C coefficients were added by this migration. Full active model/deck hashes are recorded in `pdk_provenance`; the pinned `01_Extract.lvs` SHA-256 is `5557369f863655af37590b0cc12bfb75b8b378ce8ce954cc9840866bcf32c6b1`. The old results are preserved in `results/dev_before_pinned/`.
+
+The first complete robustness matrix has 54 successful simulations: TYP × temperatures −40/27/85 C × symmetric rail scales 0.9/1.0/1.1, for INV/NAND/NOR/NANY/BUF and the post-layout full adder (all 27 states). Every actual-rail ±0.5 V check passes. Against the fixed project levels, all six DUTs fail at 0.9 supply, at all temperatures. The largest full-adder fixed-band error at 0.9 is 0.500249 V; this is loss beyond an already exhausted 0.5 V rail-shift budget, not catastrophic logic collapse. All nominal and +10% cases pass the fixed bands. TYP is the only distributed process; FF/SS/FS/SF and private L16 sets are unavailable. −40 C is extrapolation outside the published 27..150 C fit range. `results/corners/summary.json` and per-case compressed DC/transient records retain both criteria without recentering the project criterion.
+
+Reruns are in progress after PNR's 20% current-reserve geometry changes; the producer rejects changed input hashes and retries. CELLS' subsequent pinned-deck publication is still pending in the integrator queue, so final publication freshness will be checked again.
 
 ## Interface requests
 

@@ -20,7 +20,8 @@ def _bands(fig, row=None):
 
 
 def waveform_figure(result: dict, outputs=None, *, pre: dict | None = None,
-                    title='Ternary transient', annotate_settling='worst') -> go.Figure:
+                    title='Ternary transient', annotate_settling='worst',
+                    pre_label='pre-layout',post_label='post-layout') -> go.Figure:
     """Plot simulate() data, checkpoints and ideal bands; optionally overlay pre.
 
     result is the post-layout (or sole) simulate() result. The optional pre result
@@ -43,10 +44,10 @@ def waveform_figure(result: dict, outputs=None, *, pre: dict | None = None,
         _bands(fig, index)
         if pre is not None:
             fig.add_trace(go.Scatter(x=pre['waveforms']['time']*1e9,
-                y=signal_waveform(pre['waveforms'], pin), name=f'{pin}: pre-layout',
+                y=signal_waveform(pre['waveforms'], pin), name=f'{pin}: {pre_label}',
                 mode='lines', line={'color':'#3478ad', 'dash':'dash', 'width':1.5}), row=index, col=1)
         fig.add_trace(go.Scatter(x=result['waveforms']['time']*1e9,
-            y=signal_waveform(result['waveforms'], pin), name=f'{pin}: post-layout' if pre else pin,
+            y=signal_waveform(result['waveforms'], pin), name=f'{pin}: {post_label}' if pre else pin,
             mode='lines', line={'color':'#bc5a22', 'width':1.7}), row=index, col=1)
         if rows:
             hold = result['stimulus']['hold_s']

@@ -193,10 +193,10 @@ def characterize_sensitivity(out,*,jobs=2,loads_f=(10e-15,100e-15,1e-12),ramps_s
             print(f'{p["cell"]} poly-R load={p["load_f"]*1e15:g} fF ramp={p["input_transition_s"]*1e9:g} ns: {"PASS" if p["passed"] else "FAIL"}',flush=True)
 
 
-def finalize_sensitivity(out):
+def finalize_sensitivity(out, *, loads_f=(10e-15,100e-15,1e-12), ramps_s=(1e-9,150e-9)):
     """Join complete primary/proxy measurements and retain every paired delta."""
-    from .circuits import circuits
-    from .timing import point
+    from .circuits import circuits,ideal
+    from .timing import point,_measurement_code
     from tritflow import CELLS_DIR
     out=Path(out).resolve()
     if out==(CELLS_DIR/'out').resolve():raise ValueError('Poly results require a private stage')
@@ -208,7 +208,13 @@ def finalize_sensitivity(out):
         for path in (out/cell/'timing').glob('*/measurements.json'):
             p=json.loads(path.read_text());baselines[p['load_f'],p['input_transition_s']]=p
         comparisons=[]
-        for path in sorted((out/cell/'timing_poly').glob('*/measurements.json')):
+        paths=sorted((out/cell/'timing_poly').glob('*/measurements.json'))
+        profiles=[(p['load_f'],p['input_transition_s']) for p in
+                  (json.loads(path.read_text()) for path in paths)]
+        required={(load,ramp) for load in loads_f for ramp in ramps_s} if circuit.inputs else set()
+        if len(profiles)!=len(required) or set(profiles)!=required:
+            raise ValueError(f'{cell}: incomplete/duplicate poly sensitivity profiles')
+        for path in paths:
             proxy=json.loads(path.read_text());baseline=baselines[proxy['load_f'],proxy['input_transition_s']]
             if proxy['source_sha256']!=network['annotated_sha256']:
                 raise ValueError(f'{cell}: stale poly timing model')
@@ -218,8 +224,15 @@ def finalize_sensitivity(out):
             if baseline['max_step_s']!=proxy['max_step_s']:
                 # Attribute small poly-R effects using identical solver sampling.
                 baseline_path=out/cell/'timing_poly/baseline_checks'/path.parent.name/'measurements.json'
-                baseline=point(cell,(out/cell/f'{cell}.ext.spice').read_text(),proxy['load_f'],proxy['input_transition_s'],
-                               baseline_path.parent,max_step_s=proxy['max_step_s'])
+                cached=json.loads(baseline_path.read_text()) if baseline_path.exists() else {}
+                if (cached.get('complete') and cached.get('source_sha256')==primary['source_sha256']
+                    and cached.get('model_sha256')==proxy['model_sha256']
+                    and cached.get('compatible_measurement_code',cached.get('measurement_code'))==_measurement_code()
+                    and all(cached.get(k)==proxy[k] for k in ('load_f','input_transition_s','hold_s','max_step_s'))):
+                    baseline=cached
+                else:
+                    baseline=point(cell,(out/cell/f'{cell}.ext.spice').read_text(),proxy['load_f'],proxy['input_transition_s'],
+                                   baseline_path.parent,max_step_s=proxy['max_step_s'])
             expected={ (tuple(r['from']),tuple(r['to'])):r for r in baseline['rows']}
             rows=[]
             for r in proxy['rows']:
@@ -227,6 +240,8 @@ def finalize_sensitivity(out):
                 before,after=b['settling_s'],r['settling_s']
                 rows.append({'from':r['from'],'to':r['to'],'baseline_settling_s':before,
                              'poly_settling_s':after,'difference_s':after-before if before is not None and after is not None else None,
+                             'single_pin':sum(a!=b for a,b in zip(r['from'],r['to']))==1,
+                             'output_changes':ideal(cell,r['from'])!=ideal(cell,r['to']),
                              'baseline_passed':b['passed'],'poly_passed':r['passed']})
             deltas=[r['difference_s'] for r in rows if r['difference_s'] is not None]
             comparisons.append({'load_f':proxy['load_f'],'input_transition_s':proxy['input_transition_s'],
@@ -243,10 +258,13 @@ def finalize_sensitivity(out):
                 'network_file':f'{cell}/{cell}.poly.json','spice_file':f'{cell}/{cell}.poly.spice',
                 'comparisons':comparisons,'complete':all(p['baseline_complete'] and p['poly_complete'] for p in comparisons),
                 'passed':all(p['baseline_passed'] and p['poly_passed'] for p in comparisons)}
+        result['max_single_pin_output_change_increase_s']=max((r['difference_s'] for p in comparisons for r in p['rows']
+            if r['single_pin'] and r['output_changes'] and r['difference_s'] is not None),default=None)
         write_json(out/cell/f'{cell}.poly.timing.json',result)
         primary['poly_resistance']={'adopted_in_primary':False,'sensitivity_file':f'{cell}/{cell}.poly.timing.json',
             'sheet_ohm_per_square':network['sheet_ohm_per_square'],'parameter_origin':network['parameter_origin'],
             'max_increase_s':max((p['max_increase_s'] for p in comparisons if p['max_increase_s'] is not None),default=None),
+            'max_single_pin_output_change_increase_s':result['max_single_pin_output_change_increase_s'],
             'complete':result['complete'],'passed':result['passed']}
         write_json(out/cell/f'{cell}.timing.json',primary)
         summary[cell]=primary['poly_resistance']

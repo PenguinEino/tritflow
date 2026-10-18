@@ -85,6 +85,26 @@ def _theme_svg(source, label, theme):
     styles.append(f"text{{font-family:DejaVu Sans,sans-serif;fill:{foreground};fill-opacity:1}}")
     source = re.sub(r"<style\b[^>]*>.*?</style>", "<style>"+"\n".join(styles)+"</style>", source, flags=re.S)
     source = re.sub(r'(<text\b[^>]*\bfill=")#[0-9A-Fa-f]+(")', rf'\g<1>{foreground}\2', source)
+    # Xschem's RR symbol puts its property block over its zigzag/terminal
+    # annotations. Move text only into the empty space on the left. Original
+    # values, device labels and every path/connection remain unchanged.
+    blocks = list(re.finditer(r'<text\b[^>]*>[^<]*</text>', source))
+    labels = []
+    for match in blocks:
+        element = ET.fromstring(match[0])
+        position = re.fullmatch(r'translate\(([\d.eE+\-]+),\s*([\d.eE+\-]+)\)',element.get('transform',''))
+        if position:
+            labels.append((match[0],element.text or '',float(position[1]),float(position[2])))
+    for _, text, x, y in labels:
+        if text != 'RR':
+            continue
+        for raw, content, tx, ty in labels:
+            model = content == 'RR' and tx == x and ty == y
+            prop = abs(tx-(x-13.637)) < 2 and -2 <= ty-y <= 38 and re.match(r'^[wlmR]=',content)
+            if model or prop:
+                changed = re.sub(r'transform="[^"]+"',
+                    f'transform="translate({tx-80:g}, {ty-15 if model else ty:g})"',raw)
+                source = source.replace(raw,changed,1)
     root = ET.fromstring(source)
     width, height = root.attrib["width"], root.attrib["height"]
     source = source.replace('<svg ', f'<svg role="img" aria-labelledby="schematic-title schematic-description" '
@@ -155,7 +175,7 @@ def export(reference, pdk, system_library, output, *, executable="xschem"):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference", type=Path, default=Path.home()/"balanced-ternary-logic")
-    parser.add_argument("--pdk", type=Path, default=Path.home()/"pdk/TR-1um")
+    parser.add_argument("--pdk", type=Path, default=Path.home()/"pdk/TR-1um-pinned")
     parser.add_argument("--system-library", type=Path, default=Path("/usr/local/share/xschem/xschem_library"))
     parser.add_argument("--output", type=Path, default=Path(__file__).parent/"assets/schematics")
     args = parser.parse_args()

@@ -3,6 +3,18 @@ from tritflow.extract import wire_capacitance, append_wire_capacitance
 from tritflow.sim.spice import simulation_netlist
 
 
+def test_pdk_continuations_receive_real_wire_capacitors():
+    from tritflow.sim.spice import subcircuits
+    source='.SUBCKT chip a\n+ y VDD VMID VSS\nM1 n a VSS VSS NMOS W=5u L=1u\n+ AS=14p AD=14p\nR1 n y 1k\n.ENDS chip\n'
+    definition=subcircuits(source)['chip']
+    assert definition['text'] in source
+    assert definition['pins']==['a','y','VDD','VMID','VSS']
+    result=append_wire_capacitance(source,'chip',{'y':1e-13})
+    assert 'Ctfwire0 y 0 1e-13' in result
+    assert result.count('Ctfwire')==1
+    assert 'AS=14p AD=14p' in result
+
+
 def test_union_geometry_no_overlap_double_count():
     wire = {'net':'n','layer':'M1','width':2,'points':[[0,0],[10,0]]}
     pnr={'wires':[wire,wire], 'pins':[]}

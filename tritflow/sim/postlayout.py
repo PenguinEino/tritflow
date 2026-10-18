@@ -192,7 +192,10 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
         raise RuntimeError('PNR GDS embeds a different cell revision; rerun PNR with current cells/out')
     for cell in used:
         source=root/'out'/cell/f'{cell}.ext.spice';char=root/'out'/cell/f'{cell}.char.json'
-        if not char.is_file() or json.loads(char.read_text()).get('source_sha256')!=file_hash(source):
+        current=json.loads(char.read_text()) if char.is_file() else {}
+        active_models={p.name:file_hash(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}
+        if (current.get('source_sha256')!=file_hash(source) or current.get('model_sha256')!=active_models
+                or current.get('pdk_provenance',{}).get('qualified_commit')!=pdk_provenance()['qualified_commit']):
             if not refresh_characterization: raise RuntimeError(f'{cell} characterization is stale')
             characterize_cell(cell,source.read_text(),destination=char)
     paths=[netfile,gds,pnrfile,root/'template.json']
@@ -250,7 +253,8 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
     audit=parameter_audit();_save(out/'pdk_parameters.json',audit)
     if plots:
         from tritflow.viz.waves import waveform_figure
-        waveform_figure(results['post'],pre=results['pre'],title=f'{design}: pre/post-layout').write_html(out/'waveforms.html')
+        waveform_figure(results['post'],pre=results['pre'],title=f'{design}: identical devices, added wire C',
+                        pre_label='device-only',post_label='device + wire C').write_html(out/'waveforms.html')
     changed=[name for name,digest in hashes.items() if not Path(name).is_file() or file_hash(name)!=digest]
     unchanged=not changed
     summary={'schema_version':1,'design':design,'top':net.top,'input_sha256':hashes,
