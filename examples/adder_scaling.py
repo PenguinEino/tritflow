@@ -21,12 +21,12 @@ def main():
     from tritflow.sim.scaling import run_scaling, compare_phase3
     from tritflow.viz.scaling import scaling_figure, load_sweep_figure, scaling_fit_figure
     passed = True
+    study = None
     if not args.load_only:
         result = run_scaling(args.sizes,jobs=args.jobs)
+        study = result
         scaling_figure(result).write_html(ROOT/'results/adder_scaling.html',include_plotlyjs='cdn')
         scaling_fit_figure(result).write_html(ROOT/'results/adder_scaling_fit.html',include_plotlyjs='cdn')
-        if (ROOT/'results/phase3_assumed/adder_scaling.json').is_file():
-            compare_phase3(result)
         passed = result['passed']
     if not args.skip_load:
         from tritflow.sim.load_sweep import sweep_output_load
@@ -41,6 +41,8 @@ def main():
                 print(f'Retrying load sweep after concurrent publication: {error}',flush=True)
         load_sweep_figure(result).write_html(ROOT/'results/full_add_load_sweep.html',include_plotlyjs='cdn')
         passed = passed and result['boundary_found']
+    if study is not None and (ROOT/'results/phase3_assumed/adder_scaling.json').is_file():
+        compare_phase3(study)
     return 0 if passed else 1
 
 

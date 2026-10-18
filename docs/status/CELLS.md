@@ -456,3 +456,46 @@ phase changes visualization code/tests/status only; all physical cell views,
 characterizations and existing equivalence evidence remain as published. No
 shared notebook/viz exports, PNR/SIM code, PDK/reference files or git state were
 modified. No extra dependencies were installed. No blockers/interface requests.
+
+## Phase 6 — STA timing tables (in progress; schema contract)
+
+Producing `cells/out/<CELL>/<CELL>.timing.json` for all nine cells. Proposed schema
+is fixed here early for STA to implement against; publication will be atomic.
+
+- `schema_version: 1`, `cell`, `inputs: [pin,...]`, `output: "Y"` (null for FILL),
+  `source_sha256` (the clean `.ext.spice`), model/code provenance, `generation`,
+  `complete`, `passed`, `kind: "logic" | "constant" | "physical"`.
+- `axes: {load_f: [5e-15,1e-14,2e-14,5e-14,1e-13,2e-13,5e-13,1e-12],
+  input_transition_s: [1e-9,1e-8,5e-8,1.5e-7]}`. Input transition is the full
+  0–100% linear voltage ramp, not 10–90% slew or a binary threshold delay.
+- `arcs: [...]`: **one arc per directed single-input transition with every other
+  input fixed at a specified trit**. Fields: `id`, `input_pin`, `output_pin`,
+  `input_from`, `input_to`, `output_from`, `output_to`, `from_inputs`, `to_inputs`,
+  `side_inputs`, `changed_inputs`, and matrices `settling_s`, `output_slew_10_90_s`,
+  `passed`, `status`, `error_v`. Matrix order is **[input-transition index][load
+  index]**. `side_inputs` is the sensitizing constant-input assignment, preserving
+  the ternary function/correlation rather than merging incompatible arcs.
+- `simultaneous: [...]` holds the remaining multi-input vector changes, with the
+  same matrices and `input_pin: null`; these are synchronous-ramp observations,
+  not single-pin propagation arcs. Complete directed coverage: 6 vector changes
+  for INV/BUF; 72 for NAND/NOR/NANY (36 single-pin, 36 multi-pin). Unchanged-output
+  arcs are retained (including any measured hazard recovery), not discarded.
+- `settling_s` is measured from **input edge START** to final entry in the new
+  ideal output's ±0.5 V band, remaining there through the recorded observation
+  window. Null means unsettled or solver failure; consult `status` and `passed`.
+  Never interpolate through null/failed entries or silently extrapolate beyond
+  either tested axis. Outputs with no level change have null 10–90% slew.
+- `input_capacitance: {method, frequency_hz, rows, per_pin}`: fresh SIM biased
+  small-signal AC driving-point C at 1 MHz, unloaded output, every discrete input
+  bias. `rows` use SIM's `{input_trits, pin, capacitance_f}` schema; `per_pin` maps
+  each input to `{min_f,max_f}`. Use `max_f` for a bias-independent fanout bound.
+- TIEP/TIEZ/TIEN have `kind:"constant"`, no input arcs, empty capacitance rows,
+  and `constant_trit`; FILL has `kind:"physical"`, no output/arcs/capacitance.
+
+The primary table uses the **device-only extracted model**, matching existing
+`.char.json` and SIM's post-layout device network. It does not add the cell's
+metal C to input capacitance and then count that same metal again in PNR GDS
+wire C. STA may add its separately estimated net wire C. Poly-R augmentation and
+its measured sensitivity will be reported separately rather than silently
+changing the structural LVS extraction or claiming unverified calibrated GC R.
+SIM's IP62 parameter audit is being monitored for the published poly values.

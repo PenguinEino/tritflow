@@ -1,4 +1,4 @@
-# SIM status — Phases 2 and 3 complete
+# SIM status — Phases 2–4 complete
 
 2026-10-18. No blockers. No additional packages installed. PDK and reference checkout remained read only.
 
@@ -357,7 +357,7 @@ paths and the explicit sizing/results/example/viz grants.
 `git diff --check` on owned paths pass. The full scaling/load producer and
 the four-design post-layout producer both exited 0.
 
-## Phase 4 — in progress
+## Phase 4 — complete (2026-10-18)
 
 All seven Tokai Rika PDFs were extracted with existing `pdftotext -layout`;
 key tables on OS00 pages 9/17 and OS04 page 7 were rendered and visually checked.
@@ -479,4 +479,23 @@ The reported maximum covers all 27 states for N=1 and nine documented states
 for larger N, not an exhaustive N=6 maximum. Dynamic power, regulator losses,
 and energy/operation are not measured by this DC fit.
 
-Phase 4 final regression is running; the completed result will be recorded here.
+**Phase 4 final regression: 58 passed, no skips, in 123.78 s**, with
+`python3 -m pytest tests/sim tests/extract -q`. Tests cover independent via-cut
+current/parallel-cut behavior, separation of device/ESD and interconnect data,
+exact slope/intercept recovery, failed-point exclusion and concurrent-summary
+comparison. `compileall` and `git diff --check` on owned paths pass. Both the
+four-design post-layout rerun and the complete scaling/load/fit producer exit 0.
+Every scaling evidence hash and every original post-layout input hash was
+verified against its live artifact after the final producer completed.
+
+Reproduce in order:
+
+```sh
+python3 examples/postlayout_all.py
+python3 examples/adder_scaling.py --jobs 2
+python3 -m pytest tests/sim tests/extract -q
+```
+
+Fast notebook calls remain `load_scaling()`, `load_sweep_results()` and Plotly
+figure construction from the published JSON; they do not launch PNR/ngspice.
+No blockers. No extra packages installed.
