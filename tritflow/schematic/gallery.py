@@ -15,6 +15,7 @@ from pathlib import Path
 
 from . import draw, legend
 from .metrics import measure
+from .model import Scene
 
 
 def _summary(name,before,after):
@@ -51,9 +52,7 @@ def generate(root,output):
     report=result.net_parasitics()
     overlay=draw(net,inputs={'a':-1,'b':1},parasitics=result,net_names=True,
                  title='half_add · settled trits and routed wire capacitance')
-    metrics=measure(overlay.scene)
-    vector=overlay._vector()
-    metrics.update(width_px=vector.width,height_px=vector.height,aspect_ratio=vector.width/vector.height)
+    metrics=overlay.metrics
     for ext in ('svg','png','pdf'):
         overlay.save(output/f'half_add-overlay.{ext}')
         legend().save(output/f'legend.{ext}')
@@ -61,7 +60,7 @@ def generate(root,output):
                      'parasitics':{'schema':report['schema'],'source':'physical/half_add.net_parasitics.json',
                                     'library_mock':result.data['library']['mock'],
                                     'wire_capacitance_f':sum(overlay.capacitance_f.values())}})
-    empty=measure(type('LegendScene',(),{'segments':(),'width':1088,'height':624})())
+    empty=measure(Scene('legend',(),(),{},(),{},1088,624))
     manifest.append({'name':'legend','metrics':empty,'before':baseline['legend']})
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     rows=['# Schematic geometry: original → revised','',

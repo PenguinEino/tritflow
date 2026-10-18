@@ -3,6 +3,7 @@
 from pathlib import Path
 import gzip
 import json
+import shutil
 import sys
 import zipfile
 
@@ -35,6 +36,17 @@ def test_publish_actual_inv_retain_native_evidence_and_reject_corruption(tmp_pat
     restored=recorded.get(net.top,options)
     assert restored["lvs"]["matched"] and restored["drc"]["clean"]
     np.testing.assert_array_equal(restored["post"]["waveforms"]["time"],result["post"]["waveforms"]["time"])
+    # Replay requires committed inputs, not the producer's ignored build tree.
+    relocated = tmp_path/"relocated-source"
+    for name in manifest["source_files"]:
+        if name.startswith("source/"):
+            relative = name.removeprefix("source/")
+            target = relocated/relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(ROOT/relative, target)
+    assert not (relocated/"build").exists()
+    moved = RecordedCampaign(archive,relocated,PDK_ROOT).get(net.top,options)
+    assert moved["lvs"]["matched"] and moved["post"]["measurements"]["passed"]
     assert recorded.get(net.top,{**options,"load":1e-12}) is None
     assert RecordedCampaign(archive,tmp_path/"missing-root",PDK_ROOT).get(net.top,options) is None
     assert RecordedCampaign(tmp_path/"missing.zip",ROOT,PDK_ROOT).manifest is None

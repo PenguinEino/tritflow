@@ -1,13 +1,51 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 8 review fixes implemented; pinned-publication integration and saved-output rebuild in progress.**
+Updated: 2026-10-18. **Phase 8 owned review fixes complete; pinned native run, recorded evidence and saved-output submission rebuilt.**
 
-## Phase 8 handoff (in progress)
+## Phase 8 handoff — complete
+
+Final verification uses `$TR1UM_PDK=/home/ishi-kai/pdk/TR-1um-pinned`, public
+commit `5d963db9d44e192d37a0489c208bfccf2e2f690c`. All required cell,
+sizing, width-scaling and load-boundary publications pass source/deck checks;
+their notebook cells execute and render figures, without result TODO slots.
+
+| Final check | Observed result |
+|---|---|
+| Full native notebook, all stage caches bypassed | **405.68 s**, all 16 code cells pass |
+| Fresh default notebook and static PNG capture | **83.39 s**, fresh opening adder/NANY/selected circuit; four designs explicitly recorded |
+| Warm headless notebook | **1.5 s** inside notebook (no PNG export); local hits plus labelled recorded designs |
+| Owned HDL/synth/viz/notebook/submission tests | **254 passed in 27.19 s**, no failures/skips |
+| Submission payload audit | **8 files, 2,263,677 bytes**, 88 outputs, 25 PNGs, 33 HTML tables, no errors |
+
+The native four-design loop measured **290.92 s** in ngspice versus **25.71 s**
+for PNR/DRC and strict LVS, plus **0.36 s** for wire-C estimation. The notebook
+prints the actual per-design wall/CPU breakdown and reuse state; these status
+numbers are observations, not typed-in notebook results. Recorded evidence
+retains its original tools and native files; reading it never establishes new
+local DRC/LVS. All four control pairs retain identical intrinsic devices and
+soft Newton guesses, with actual added-wire capacitors asserted. No physics,
+input coverage, tolerance, timestep or settling interval was weakened.
+
+Final captures and diagnostic evidence remain outside the payload under
+`/tmp/tritflow-submission-phase8/{full-4,cold-4}/`; full regression log is
+`/tmp/tritflow-phase8-final-tests.log`, warm log
+`/tmp/tritflow-phase8-warm.log`. The eight-file review folder is
+`submission/ISSCC27/submitted_notebooks/TritFlow/`; source notebook remains
+output-free. `python3 submission/build_submission.py --check` passes. PNG
+inspection confirmed all displayed outputs change, the labelled two-device
+NANY clamp branch, and actual scaling/load plots. See the SIM display-only
+handoff below for the load plot's excessive log-axis range.
+
+Clean Colab installation/runtime is still unverified, and old `colab-v0` is
+still incompatible with this release. Bootstrap code remains unchanged as
+instructed; no tag, commit, PR or push was performed. No dependencies installed.
 
 - Author fields now follow `docs/author.md` exactly, including student status and
   GitHub; no telephone field is included. The user has explicitly authorized
   Apache-2.0 for their derived historical schematic assets; submission licensing
-  text reflects that authorization rather than requesting it again.
+  text reflects that authorization rather than requesting it again. The package
+  also copies the repository NOTICE verbatim; the current allowlist is eight
+  small files, preserving Apache attribution alongside LICENSE.
 - REVIEW 4: `Layout.lvs()` delegates to `pnr.strict_lvs` with actual PNR data and
   a freshly loaded physical library. Reuse fingerprints include GDS, gate
   reference, PNR data, template, library/publication JSON, every abstract,
@@ -72,13 +110,13 @@ Updated: 2026-10-18. **Phase 8 review fixes implemented; pinned-publication inte
   option is verified before reading recorded flags; recorded producer tools
   remain visible, not adopted as the current runtime. Stale/absent publications
   fall back to execution. `TRITFLOW_FORCE_RUN=1` bypasses both kinds of reuse,
-  including a corrupt archive. `notebook/campaign.py <successful-cache-dir>`
+  including a corrupt archive. `PYTHONPATH=. python3 notebook/campaign.py <successful-cache-dir>`
   refuses changed contexts/native artifacts before publishing. This avoids
   counting old reports as new local checks and preserves full recomputation.
   The default fresh session still runs the opening adder and edited circuit.
   Real INV campaign export/reload, waveform equality, native-file retention,
   option/source rejection, corruption rejection and cache tests passed (8 tests,
-  12.32 s). Final four-design archive will be generated only from the final run.
+  12.32 s). The final four-design archive was generated from the successful full fresh run described below.
 - Required sizing/width/load publication slots now fail on missing/stale data
   instead of printing TODOs. Pinned cell-qualification deck hashes are also
   checked. Final Run all verifies that consumed inputs did not change during
@@ -90,8 +128,7 @@ After the schematic/text/API follow-up, 14 targeted tests passed (20.10 s),
 and 14 packaging/presentation tests passed (1.56 s; stale old payload excluded). No extra packages, git-writing commands or foreign
 path edits. The latest targeted cache/publication/presentation suite passed 15 tests
 (12.64 s; old payload excluded), and HTML readability/document checks passed
-3 tests (0.57 s). Final notebook timings/publication coverage/package checks
-are pending the parallel publications.
+3 tests (0.57 s). Those were intermediate checks; the final results below supersede the earlier pending state.
 
 The first native capture reached ADDER4/FULL_ADD and MAC1, but its consumed
 PNR `flow.py` changed at 10:46 UTC while it was running. It was intentionally
@@ -112,10 +149,10 @@ module additions as consumed inputs. All actual abstracts, manifest and
 publication identity remain included. Fresh plots are not physics-cache inputs;
 GDS rasters carry a separate renderer hash. Tests for the revised manifest,
 real native campaign export/reload and notebook document pass (8 tests, 4.76 s).
-A new full native capture is running against the updated PNR core, before the
-recorded archive and default-run submission are rebuilt.
+The subsequent full native capture and default-run submission both completed
+against the updated PNR core, as recorded below.
 
-### Interface requests / current publication gate
+### Interface requests / publication and release handoff
 
 CELLS Phase 7 was published at generation `2026-10-18T10:26:47.211617+00:00`;
 the required pinned-deck and artifact checks pass. Both W/L grids now pass.
@@ -131,6 +168,25 @@ the editable circuit. The notebook no longer duplicates the net-name mapping.
 Shared-initialization/document/campaign tests passed (6 tests, 3.35 s). SPICE
 wall timeout is 600 s for shared-host load, with unchanged electrical vectors,
 window, step and acceptance. This addresses SIM's unseeded off-rail root control.
+
+Visual handoff to SIM (outside FRONTEND ownership): the saved native
+`load_sweep_figure` log-x view extends to 10^12 pF although measured points end
+in the tens of pF. Its boundary `add_vrect` annotation uses raw pF as a log-axis
+annotation coordinate; set the explicit range from measured positive loads
+and use log10 for the annotation, so the measured boundary fills the plot.
+Data/assertions pass and the boundary table remains correct; no SIM visualization
+file was edited here. PNR's optional routing dropdown also overlaps its title
+in a static capture; this is a display-only follow-up for its owner.
+
+The new recorded archive is `notebook/assets/four_designs.zip` (4,726,490 bytes,
+54 native evidence members). It is not ignored but is newly untracked at this
+handoff; integrator must include it and the new submission NOTICE in the next
+source commit/release. Native
+export command for an uninstalled checkout is
+`PYTHONPATH=. python3 notebook/campaign.py /tmp/tritflow-submission-phase8/full-4/flow/cache`.
+The first command lacked that source import path, so it exited before publication;
+the successful 405.68 s native capture was reused without changing evidence.
+An automatically launched redundant capture was stopped, not published.
 
 The release-ref mismatch from phase 7 remains an integrator action; no tag or
 bootstrap write was performed here. The older colab-v0 failed the separate

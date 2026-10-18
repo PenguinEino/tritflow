@@ -82,6 +82,43 @@ def statistics(rows, field):
             'interpretation': 'Observed extrema on this nominal finite vector set; not guaranteed error bounds.'}
 
 
+def case_coverage(measured, predicted):
+    """Check every saved output observation, including unchanged-output hazards.
+
+    This is validation only. Measured values never alter the static envelope.
+    Zero-settling observations are counted without inventing a relative error.
+    """
+    cases=[];missing=[]
+    for index,row in enumerate(measured['rows']):
+        for pin,value in predicted.items():
+            observed=row['outputs'][pin]['settling_s']
+            if observed is None:
+                missing.append({'row':index,'output':pin});continue
+            cases.append({'row':index,'output':pin,'simulated_s':observed,
+                'predicted_s':value,'margin_s':value-observed,
+                'initial_state':row.get('previous_trits') is None})
+    violations=[r for r in cases if r['margin_s']<0]
+    return {'case_count':len(cases),'initial_state_case_count':sum(r['initial_state'] for r in cases),
+        'transition_case_count':sum(not r['initial_state'] for r in cases),
+        'missing_cases':missing,'underprediction_count':len(violations),
+        'passed':bool(cases) and not missing and not violations,
+        'minimum_margin_s':min((r['margin_s'] for r in cases),default=None),
+        'violations':violations,
+        'limiting_case':min(cases,key=lambda r:r['margin_s']) if cases else None}
+
+
+def pessimism(rows):
+    """Overestimate relative to each output's measured sequence maximum."""
+    usable=[r for r in rows if r.get('simulated_s',0) and r['simulated_s']>0]
+    if not usable:return {'count':0}
+    factors=[r['predicted_s']/r['simulated_s'] for r in usable]
+    return {'count':len(usable),'minimum_factor':min(factors),'maximum_factor':max(factors),
+        'mean_factor':float(np.mean(factors)),'median_factor':float(np.median(factors)),
+        'minimum_margin_s':min(r['predicted_s']-r['simulated_s'] for r in usable),
+        'maximum_margin_s':max(r['predicted_s']-r['simulated_s'] for r in usable),
+        'interpretation':'Static envelope / measured maximum, not matched-transition accuracy.'}
+
+
 def _read(path):
     return json.loads(Path(path).read_text())
 
@@ -107,6 +144,10 @@ def _validate_design(group, name, directory, models, scaling):
     kwargs = dict(library=models, wire_caps=logical_caps,
                   output_load_f=summary['output_load_f'], input_transition_s=1e-9)
     predicted = analyze(net, **kwargs)
+    endpoint = analyze(net,global_mode='endpoint',**kwargs)
+    from .envelope import analyze_envelope
+    relaxed_fixed=analyze_envelope(net,fixed_ramp=True,include_recovery=False,**kwargs)
+    without_recovery=analyze_envelope(net,include_recovery=False,**kwargs)
     tested = analyze(net, vector_pairs=pairs, **kwargs)
     fixed = analyze(net, vector_pairs=pairs, propagate_slew=False, **kwargs)
     block = analyze(net,vector_pairs=pairs,ordered_events=False,**kwargs)
@@ -131,6 +172,9 @@ def _validate_design(group, name, directory, models, scaling):
             stale.append('results/adder_scaling.json does not match physical measurement snapshot')
         outputs.append({'design': f'{group}/{name}', 'output': pin,
             'predicted_s': value, 'tested_predicted_s': tested.arrival[pin], 'simulated_s': observed,
+            'fixed_ramp_endpoint_s':endpoint.arrival[pin],
+            'fixed_ramp_class_envelope_s':relaxed_fixed.arrival[pin],
+            'ramp_envelope_without_recovery_s':without_recovery.arrival[pin],
             'fixed_ramp_midpoint_s':fixed.arrival[pin],
             'synchronous_block_midpoint_s':block.arrival[pin],
             'legacy_tested_s':legacy.get(pin,{}).get('tested_predicted_s'),
@@ -148,10 +192,13 @@ def _validate_design(group, name, directory, models, scaling):
         'all_pairs_report': f'{report_name}.timing.json', 'tested_pairs_report': f'{report_name}.tested.timing.json',
         'all_pairs_runtime_s': predicted.statistics['runtime_s'],
         'tested_pairs_runtime_s': tested.statistics['runtime_s'],
-        'load_extension_count': len(predicted.warnings),
+        'load_extension_count': sum('outside' in w for w in predicted.warnings),
+        'worst_case_coverage':case_coverage(measured,predicted.arrival),
+        'envelope_domain':{k:predicted.statistics[k] for k in
+            ('slew_domain_closed','slew_domain_violations','load_in_measured_domain')},
         'event_diagnostics':tested.statistics,
         'wire_scope': caps.get('scope'),
-        'electrical_scope': 'Measured midpoint propagation and endpoint-only settling tail; output slew propagated on tested patterns. Maximum biased device C and matching top-net metal C.'}
+        'electrical_scope': 'Independent local-class/ramp envelope with propagated recovery guard; matched-pattern midpoint events retain propagated slew. Same maximum biased device C and top-net metal C.'}
     return record, {f'{report_name}.timing.json': predicted.to_dict(),
                     f'{report_name}.tested.timing.json': tested.to_dict()}
 
@@ -194,21 +241,37 @@ def validate(*, output_dir=None, retries=3):
         rows = [r for d in records for r in d['outputs']]
         current = [r for d in records if d['qualified_current'] for r in d['outputs']]
         accurate=[r for r in rows if r.get('tested_error_percent') is not None and abs(r['tested_error_percent'])<=20]
-        result = {'schema_version': 2, 'created_utc': datetime.now(timezone.utc).isoformat(),
+        result = {'schema_version': 3, 'created_utc': datetime.now(timezone.utc).isoformat(),
             'complete': len(records) == 10 and all(d['outputs'] for d in records),
             'qualified_current': len(records) == 10 and all(d['qualified_current'] for d in records),
             'accuracy_passed':len(rows)==39 and len(accurate)==39,
             'accuracy_target_percent':20.,'outputs_within_target':len(accurate),
-            'scope': 'Midpoint propagation plus endpoint-only tail; nominal finite-vector validation with a ±20% empirical target, not a certified bound.',
+            'accuracy_claim_field':'tested_predicted_s',
+            'worst_case_conservative':len(records)==10 and all(d.get('worst_case_coverage',{}).get('passed',False) for d in records),
+            'worst_case_validation':{
+                'scope':'Every saved nominal output observation, including initial states and stable-endpoint glitches.',
+                'case_count':sum(d.get('worst_case_coverage',{}).get('case_count',0) for d in records),
+                'transition_case_count':sum(d.get('worst_case_coverage',{}).get('transition_case_count',0) for d in records),
+                'underprediction_count':sum(d.get('worst_case_coverage',{}).get('underprediction_count',0) for d in records),
+                'pessimism_vs_output_maxima':pessimism(rows),
+                'certified_analog_bound':False,
+                'all_slew_domains_closed':all(d.get('envelope_domain',{}).get('slew_domain_closed',False) for d in records)},
+            'scope': 'Conservative measured-domain envelope validated against every nominal SPICE case; matched-event timing is the separate ±20% accuracy claim.',
             'outside_accuracy_target':[{'design':r['design'],'output':r['output'],'error_percent':r['tested_error_percent']}
                 for r in rows if r.get('tested_error_percent') is not None and abs(r['tested_error_percent'])>20],
-            'limitations': ['Full fixed-ramp graph and tested-pattern event analysis have different waveform assumptions; neither is a global analog bound.',
+            'limitations': ['Conservatism is established against this complete saved nominal dataset; the characterized scalar envelope is not a certified arbitrary-waveform or PVT bound.',
+                'Independent local-class/ramp maxima and recovery clocks admit unrealizable combinations; their pessimism is reported separately from matched accuracy.',
+                'All-class output slew may exceed the measured input-ramp axis; non-closed domains are reported without silently clipping or claiming analog coverage.',
                 'Tested-pair comparison removes endpoint coverage differences, but does not reproduce analog slew/skew/history or propagated glitches.',
                 'Slew becomes an equivalent linear ramp. Ordered ideal trit events propagate logical pulses, but partial-voltage pulses and analog hazards on unchanged outputs lack a waveform model.',
                 'Wire coefficients are assumed, not calibrated PEX; signal/poly RC, PVT and package are outside the model.',
                 'Explicit bounded load extensions are uncharacterized estimates, not measured table points.'],
             'designs': records, 'cell_generation': models.generation,
-            'statistics': {'all_endpoint_pairs': statistics(rows, 'predicted_s'),
+            'statistics': {'conservative_envelope':statistics(rows,'predicted_s'),
+                           'fixed_ramp_endpoint':statistics(rows,'fixed_ramp_endpoint_s'),
+                           'fixed_ramp_class_envelope':statistics(rows,'fixed_ramp_class_envelope_s'),
+                           'ramp_envelope_without_recovery':statistics(rows,'ramp_envelope_without_recovery_s'),
+                           'all_endpoint_pairs': statistics(rows, 'predicted_s'),
                            'sim_endpoint_pairs': statistics(rows, 'tested_predicted_s'),
                            'fixed_ramp_midpoint':statistics(rows,'fixed_ramp_midpoint_s'),
                            'synchronous_block_midpoint':statistics(rows,'synchronous_block_midpoint_s'),

@@ -67,7 +67,8 @@ The checked-in notebook is output-free; `make_notebook.py` regenerates it.
 
 Runtime inputs are committed under `cells/out/` (including the template,
 characterization and verification reports), `examples/`, and
-`notebook/assets/schematics/`. The notebook generates its own GDS, reports,
+`notebook/assets/` (schematics and the recorded shared-design archive). The
+notebook generates its own GDS, reports,
 SPICE, rasters and caches under `build/notebook/`; no existing `build/` is
 needed. The taped-out reference repository and Xschem are needed only to
 **re-export** the bundled SVGs, never to run the notebook.
@@ -213,3 +214,15 @@ and publication identity, source and PDK. Cross-platform reading remains
 The opening adder and selected chapter-8 circuit still execute physical and
 analog work in a fresh session. Full characterization/sizing/scaling/load and
 the repeated four-design matrix are the explicitly precomputed work.
+
+To regenerate the recorded shared-design archive from a completed fresh capture
+(with the same consumed inputs and native evidence still present):
+
+```sh
+TRITFLOW_FORCE_RUN=1 python3 submission/build_submission.py --workdir /tmp/tritflow-native
+PYTHONPATH=. python3 notebook/campaign.py /tmp/tritflow-native/flow/cache
+```
+
+The explicit Python path also supports a source checkout that has not been
+installed editably. Publishing rejects changed inputs, options or native bytes;
+it does not repair a stale/failed run or claim new verification on replay.

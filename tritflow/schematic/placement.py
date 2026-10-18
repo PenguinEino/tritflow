@@ -55,7 +55,7 @@ def place(nodes,driver,loads,arithmetic):
     half folds its latter stages into a lower feedforward row; a downward NANY
     marks the row transition. Standalone halves retain a straight t-net lane.
     """
-    frames=[];placed=set();panels=[]
+    frames=[];placed=set()
     for node in nodes.values():anchors(node)
 
     def put(node,x,y,orient='right'):
@@ -78,21 +78,20 @@ def place(nodes,driver,loads,arithmetic):
             scope=(pattern.scope+'.' if pattern.scope else '')+child
             block=nodes.get('block:'+scope)
             if block:
-                put(block,cursor,y+64);w,h=160,224
+                put(block,cursor,y+64);w=160
             else:
                 sub=arithmetic.get(scope)
                 if sub is None:return None
                 w0,h0=half(sub,cursor+24,y+40,True)
                 w,h=w0+48,h0+64
                 frames.append(Frame(scope,(cursor,y,cursor+w,y+h),tuple(sub.cells.values())))
-            children.append((cursor,w,h));cursor+=w+64
-        x2,w2,h2=children[1]
+            children.append((cursor,w));cursor+=w+64
+        x2,w2=children[1]
         # Carry combining gates sit alongside the upper half-adder row, so the
         # sum output can leave the lower row next to its actual producer.
         final_x=x2+w2+40
         put(nodes['cell:'+pattern.cells['g_nc']],final_x,y+64)
         put(nodes['cell:'+pattern.cells['g_cout']],final_x+112,y+64)
-        return final_x+192-x,max(h for _,_,h in children)
 
     # Prefer deepest aliases when generate-only and module scopes contain the
     # same instances; never draw a generate wrapper as another arithmetic unit.
@@ -120,24 +119,20 @@ def place(nodes,driver,loads,arithmetic):
             for k,m in enumerate(candidates):
                 node=nodes['block:'+m.scope]
                 put(node,base_x+224*k,200)
-                panels.append((node.x,node.y,node.x+160,node.y+160))
         else:
             # Two full cells per row for N>=3; two-trit flat views stack panels
             # to avoid recreating the original very wide ripple diagram.
             columns=2 if len(candidates)>=3 else 1
-            if len(candidates)==1:columns=1
             for k,m in enumerate(candidates):
                 x=base_x+(k%columns)*1392
                 y=(320 if external_core else 176)+(k//columns)*640
                 if 'block:'+m.scope in nodes:
                     node=nodes['block:'+m.scope];put(node,x,y)
-                    size=(160,160)
-                else:size=full(m,x,y)
-                if size:panels.append((x,y,x+size[0],y+size[1]))
+                else:full(m,x,y)
     if not placed:
         root=arithmetic.get('')
         if root and root.module=='half_add' and all('cell:'+n in nodes for n in root.cells.values()):
-            w,h=half(root,160,160,False);panels.append((160,160,160+w,160+h))
+            half(root,160,160,False)
 
     # Other recognized module instances also remain visually grouped when
     # flattened (e.g. four one-trit multipliers and two half adders in mul2).
@@ -166,34 +161,51 @@ def place(nodes,driver,loads,arithmetic):
         for n in core:levels[n.level].append(n)
         bottom=max((n.y+n.height for n in nodes.values() if n.key in placed),default=48)
         offset_y=160 if external_core or not placed else bottom+112
-        fold_span=max(min(3,len(v)) for v in levels.values())*208+112
+        row_pitch=208 if any(n.kind=='block' for n in core) else 128
+        fold_span=max(min(3,len(v)) for v in levels.values())*row_pitch+112
         unique=sorted(levels)
         column=0;fold=0
         for level in unique:
-            group=sorted(levels[level],key=lambda n:natural(n.key))
+            def barycenter(node):
+                parents=[nodes[driver[s][0]].pins[driver[s][1]][1]
+                         for s in node.inputs.values() if driver[s][0] in placed]
+                return sum(parents)/len(parents) if parents else offset_y+fold*fold_span+56
+            group=sorted(levels[level],key=lambda n:(barycenter(n),natural(n.key)))
             percol=2 if len(group)>=4 and all(n.kind=='block' for n in group) else 3
             across=math.ceil(len(group)/percol)
             if column+across>4:column=0;fold+=1
+            bottom_by_column={}
             for row,node in enumerate(group):
-                put(node,160+(column+row//percol)*208,offset_y+fold*fold_span+(row%percol)*208)
+                col=column+row//percol
+                base=offset_y+fold*fold_span
+                minimum=bottom_by_column.get(col,base)
+                desired=8*round((barycenter(node)-56)/8)
+                y=max(minimum,desired)
+                put(node,160+col*208,y)
+                bottom_by_column[col]=y+max(row_pitch,node.height+32)
             column+=across
 
     # External terminals follow their consumers/producers, not a bus-name sort
     # at opposite edges of the entire sheet. Preserve bit order within ties.
     occupied=[n.box for n in nodes.values() if n.key in placed]
-    def free(box):return not any(_overlap(box,b,0) for b in occupied)
+    core_boxes=tuple(occupied)
+    def free(box):
+        # Labels may sit close to other port labels, while gate terminals need
+        # their outward access segment clear even beyond the symbol keep-out.
+        return (not any(_overlap(box,b,16) for b in core_boxes)
+                and not any(_overlap(box,b) for b in occupied))
     def port(node,preferred,orient):
         px,py=preferred
         # Search nearby whole-grid offsets, keeping horizontal anchors aligned
         # whenever possible. Resolve unused inputs after all connected ports.
-        options=[(0,0)]+[(0,d*48) for d in (-1,1,-2,2,-3,3)]
+        options=[(0,0)]+[(0,sign*d) for d in range(16,257,16) for sign in (-1,1)]
         options += [(dx,dy) for dy in (-96,96,-192,192) for dx in (-96,96,0)]
         for dx,dy in options:
             box=(px+dx,py+dy,px+dx+node.width,py+dy+32)
             if box[0]>=32 and box[1]>=88 and free(box):
                 put(node,box[0],box[1],orient);occupied.append(node.box);return
         # Rare dense edge: place in a free lower margin, retaining the true net.
-        py=max(b[3] for b in occupied)+64
+        py=max((b[3] for b in occupied),default=128)+64
         put(node,max(32,px),py,orient);occupied.append(node.box)
     ports=sorted((n for n in nodes.values() if n.kind=='input'),key=lambda n:(
         min((nodes[k].x for k,_ in loads[n.label]),default=1e9),natural(n.label)))
@@ -201,7 +213,7 @@ def place(nodes,driver,loads,arithmetic):
     for node in ports:
         sinks=loads[node.label]
         if not sinks:
-            bottom=max(b[3] for b in occupied)+48
+            bottom=max((b[3] for b in occupied),default=128)+48
             port(node,(48,bottom),'right');continue
         key,pin=min(sinks,key=lambda p:(nodes[p[0]].x,nodes[p[0]].pins[p[1]][1]))
         target=nodes[key];tx,ty=target.pins[pin]
@@ -221,6 +233,6 @@ def place(nodes,driver,loads,arithmetic):
         side=producer.sides[pin]
         if side=='bottom':port(node,(x-node.width//2,y+48),'down')
         else:port(node,(x+48,y-16),'right')
-    width=max(640,max((n.x+n.width for n in nodes.values()),default=0)+48)
+    width=max(400,max((n.x+n.width for n in nodes.values()),default=0)+48)
     height=max((n.y+n.height for n in nodes.values()),default=112)+96
     return tuple(frames),width,height

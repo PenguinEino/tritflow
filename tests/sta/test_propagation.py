@@ -31,7 +31,7 @@ def test_endpoint_tail_once_and_slew_transport(library):
     assert r.critical_path[0].arrival_s==pytest.approx(2.5e-9)
     assert r.critical_path[-1].arrival_s==pytest.approx(r.arrival['y'])
     assert r.critical_path[1].input_transition_s==pytest.approx(10e-9)
-    graph=analyze(n,library=models)
+    graph=analyze(n,library=models,global_mode="endpoint")
     assert graph.arrival['y']==pytest.approx(r.arrival['y'])
     fixed=analyze(n,library=models,vector_pairs=[({'a':0},{'a':1})],propagate_slew=False)
     assert fixed.critical_path[1].input_transition_s==1e-9
@@ -57,7 +57,7 @@ def test_midpoint_pattern_is_jointly_sensitizable(library):
     models=midpoint_library(library)
     n=GateNetlist('constant',[Port('a','input'),Port('y','output')],
         [Instance('i','INV',{'A':'a','Y':'na'}),Instance('n','NANY',{'A':'a','B':'na','Y':'y'})])
-    r=analyze(n,library=models)
+    r=analyze(n,library=models,global_mode="endpoint")
     assert set(r.transition_arrival['y'])=={'0->0'}
     assert r.critical_path[-1].metric=='local_recovery'
 
@@ -99,7 +99,7 @@ def test_real_default_midpoint_report_and_source_pattern():
     path=ROOT/'build/adder_scaling/adder6/adder6.json'
     if not path.exists() or not (ROOT/'results/sta/propagation/tables/NANY.propagation.json').exists():
         pytest.skip('Real layout/timing publication is not present')
-    report=analyze(path)
+    report=analyze(path,global_mode="endpoint")
     assert report.provenance['metric']=='midpoint_with_endpoint_tail'
     n=GateNetlist.load(path);pattern=report.sensitizing_pattern
     old=evaluate_netlist(n,pattern['before'],return_all=True)

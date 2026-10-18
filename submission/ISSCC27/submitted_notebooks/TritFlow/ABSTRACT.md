@@ -8,7 +8,7 @@ two-layer routing, official design-rule and connectivity checks, and ngspice
 verification against independent arithmetic references. The notebook begins
 with a complete adder, then connects gate truth tables and historical
 schematics to cell characterization, measured self-loading, mapping decisions,
-physical geometry, and pre/post-layout settling. Published experiments expose
+physical geometry, and device-only versus wire-loaded settling. Published experiments expose
 adder scaling and an output-load failure boundary, while editable examples
 let readers test their own circuits through the same interfaces. Saved figures
 and generated tables support review without execution; pinned source/runtime

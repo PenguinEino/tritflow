@@ -1,18 +1,18 @@
 {
   "top": "mul1",
   "arrival": {
-    "p": 2.170339844620906e-08
+    "p": 9.256323797485109e-08
   },
   "transition_arrival": {
     "p": {
-      "-1->0": 5.2802232015174165e-09,
-      "-1->1": 1.5330899158506418e-08,
-      "0->-1": 2.170339844620906e-08,
-      "0->0": 1.255000357853754e-08,
-      "0->1": 1.5674803103658658e-08,
-      "1->-1": 1.4738189928166786e-08,
-      "1->0": 7.165942745972936e-09,
-      "1->1": 1.3238322377721504e-08
+      "1->1": 9.159790896885126e-08,
+      "1->0": 3.112866387241346e-08,
+      "1->-1": 9.148310014808501e-08,
+      "0->1": 9.205401102418125e-08,
+      "0->0": 2.9134320667535847e-08,
+      "0->-1": 7.447557461626634e-08,
+      "-1->1": 9.256323797485109e-08,
+      "-1->0": 3.428842390585912e-08
     }
   },
   "paths": {
@@ -24,29 +24,29 @@
         "input_net": "a",
         "output_net": "_n1",
         "input_transition": [
-          0,
+          -1,
           1
         ],
         "output_transition": [
-          0,
+          -1,
           -1
         ],
         "from_inputs": {
-          "A": 0,
-          "B": -1
+          "A": -1,
+          "B": 1
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NOR:29",
-        "delay_s": 1.0637312173273918e-08,
-        "arrival_s": 1.1137312173273918e-08,
+        "arc_id": "NOR:21",
+        "delay_s": 1.5921788498038555e-08,
+        "arrival_s": 1.6421788498038556e-08,
         "load_f": 1.429571812330077e-13,
         "input_transition_s": 1e-09,
-        "settling_tail_s": 1.1854315116465028e-08,
-        "output_slew_10_90_s": 1.9391396091313992e-08,
-        "metric": "midpoint",
+        "settling_tail_s": 0.0,
+        "output_slew_10_90_s": null,
+        "metric": "recovery_guard",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -57,26 +57,26 @@
         "output_net": "_n2",
         "input_transition": [
           0,
-          -1
+          1
         ],
         "output_transition": [
           0,
-          1
+          -1
         ],
         "from_inputs": {
           "A": 0
         },
         "to_inputs": {
-          "A": -1
+          "A": 1
         },
-        "arc_id": "INV:02",
-        "delay_s": 2.9530636195001415e-09,
-        "arrival_s": 1.409037579277406e-08,
+        "arc_id": "INV:03",
+        "delay_s": 1.271253216949729e-08,
+        "arrival_s": 2.9134320667535847e-08,
         "load_f": 2.5063857503673564e-13,
-        "input_transition_s": 1e-09,
-        "settling_tail_s": 5.624191434267224e-09,
-        "output_slew_10_90_s": 7.755009790264229e-09,
-        "metric": "midpoint",
+        "input_transition_s": 1.5e-07,
+        "settling_tail_s": 0.0,
+        "output_slew_10_90_s": 5.006026157532105e-08,
+        "metric": "midpoint_envelope",
         "time_order_adjustment_s": 0.0
       },
       {
@@ -86,46 +86,65 @@
         "input_net": "_n2",
         "output_net": "p",
         "input_transition": [
-          0,
-          1
+          1,
+          -1
         ],
         "output_transition": [
-          0,
-          -1
+          -1,
+          1
         ],
         "from_inputs": {
           "A": 1,
-          "B": 0
+          "B": 1
         },
         "to_inputs": {
           "A": 1,
-          "B": 1
+          "B": -1
         },
-        "arc_id": "NAND:63",
-        "delay_s": 3.1326414591520137e-09,
-        "arrival_s": 2.170339844620906e-08,
+        "arc_id": "NAND:70",
+        "delay_s": 3.1712578648164764e-08,
+        "arrival_s": 9.256323797485109e-08,
         "load_f": 6.784583119999999e-14,
-        "input_transition_s": 1e-09,
-        "settling_tail_s": 4.480381194282988e-09,
-        "output_slew_10_90_s": 6.547889769070591e-09,
-        "metric": "midpoint",
+        "input_transition_s": 1.5e-07,
+        "settling_tail_s": 3.171633865915047e-08,
+        "output_slew_10_90_s": 1.1176112946120295e-07,
+        "metric": "midpoint_envelope",
         "time_order_adjustment_s": 0.0
       }
     ]
   },
   "patterns": {
     "p": {
-      "before": {
-        "a": 0,
-        "b": -1
-      },
-      "after": {
-        "a": 1,
-        "b": -1
-      }
+      "before": null,
+      "after": null,
+      "reason": "Independent transient local classes; no joint endpoint witness is asserted."
     }
   },
   "loads": {
+    "_n1": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 2.8531101e-14,
+      "external_f": 0.0,
+      "total_f": 1.429571812330077e-13
+    },
+    "_n0": {
+      "fanout_f": 2.0613144150076912e-13,
+      "wire_f": 3.23767502e-14,
+      "external_f": 0.0,
+      "total_f": 2.385081917007691e-13
+    },
+    "_n2": {
+      "fanout_f": 2.059554318367356e-13,
+      "wire_f": 4.468314320000001e-14,
+      "external_f": 0.0,
+      "total_f": 2.5063857503673564e-13
+    },
+    "b": {
+      "fanout_f": 4.839436672518686e-13,
+      "wire_f": 5.22174886e-14,
+      "external_f": 0.0,
+      "total_f": 5.361611558518686e-13
+    },
     "a": {
       "fanout_f": 4.835121595128594e-13,
       "wire_f": 4.7970608599999994e-14,
@@ -137,41 +156,15 @@
       "wire_f": 5.78458312e-14,
       "external_f": 1e-14,
       "total_f": 6.784583119999999e-14
-    },
-    "_n2": {
-      "fanout_f": 2.059554318367356e-13,
-      "wire_f": 4.468314320000001e-14,
-      "external_f": 0.0,
-      "total_f": 2.5063857503673564e-13
-    },
-    "_n1": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 2.8531101e-14,
-      "external_f": 0.0,
-      "total_f": 1.429571812330077e-13
-    },
-    "b": {
-      "fanout_f": 4.839436672518686e-13,
-      "wire_f": 5.22174886e-14,
-      "external_f": 0.0,
-      "total_f": 5.361611558518686e-13
-    },
-    "_n0": {
-      "fanout_f": 2.0613144150076912e-13,
-      "wire_f": 3.23767502e-14,
-      "external_f": 0.0,
-      "total_f": 2.385081917007691e-13
     }
   },
   "assumptions": [
-    "Nominal \u00b15/0 V models; settling means final entry into ideal \u00b10.5 V through the measured observation window.",
-    "Measured midpoint delays compose; only the endpoint settling tail is added. Global graph uses a fixed input ramp.",
-    "No propagated slew, analog waveform/skew or intermediate endpoint-stable glitch propagation; no guaranteed upper bound.",
-    "Simultaneous-input table delays use synchronous equal ramps; path endpoint patterns do not prove hazard-free operation.",
-    "Fanout C uses maximum measured biased input C; default external output load is 10 fF.",
-    "Caller-supplied logical-net wire C (validation uses LVS-mapped full top-net metal).",
-    "Estimated metal C only; no signal wire R, calibrated poly RC, PVT or package effects.",
-    "Linear load extension, when enabled, is limited to zero through twice maximum measured load; input ramps never extrapolate."
+    "Conservative envelope of measured local midpoint/recovery terms; endpoint tail added once, using the same local class and ramp.",
+    "All transient local classes are admitted independently, including pulses on endpoint-stable nets; maximizing path classes need not be jointly realizable.",
+    "Known primary ramp; every internal measured ramp knot is considered (piecewise-linear maxima).",
+    "Unchanged-output recovery can launch downstream activity; it is a conservative guard clock, not a measured full-level crossing.",
+    "Maximum biased AC device input C plus supplied metal/output C; no load correction or circuit-fitted delay margin.",
+    "Finite nominal table-domain envelope, not a certified bound for arbitrary slew, analog pulse shape, skew, PVT or signal/poly RC."
   ],
   "warnings": [],
   "provenance": {
@@ -197,14 +190,34 @@
     },
     "load_policy": "linear",
     "input_transition_s": 1e-09,
-    "metric": "midpoint_with_endpoint_tail"
+    "metric": "local_class_ramp_envelope",
+    "bound_scope": "Upper envelope of characterized scalar terms; empirical simulation coverage is separate.",
+    "fixed_ramp": false,
+    "recovery_guard": true
   },
   "statistics": {
-    "decision_nodes": 290,
-    "graph_nodes": 290,
-    "graph_choices": 266,
-    "search_expansions": 40,
-    "runtime_s": 0.0018991139950230718,
-    "all_endpoint_pairs": true
+    "runtime_s": 0.0037880409945501015,
+    "all_endpoint_pairs": true,
+    "local_candidates": 900,
+    "joint_endpoint_witness": false,
+    "slew_domain_closed": true,
+    "slew_domain_violations": [],
+    "load_in_measured_domain": true,
+    "net_activity_clock_s": {
+      "b": 5e-10,
+      "a": 5e-10,
+      "_n0": 1.0181553066209162e-08,
+      "_n1": 1.6421788498038556e-08,
+      "_n2": 2.9134320667535847e-08,
+      "p": 9.159790896885126e-08
+    },
+    "net_slew_upper_10_90_s": {
+      "b": 8.000000000000001e-10,
+      "a": 8.000000000000001e-10,
+      "_n0": 1.1835017800450925e-08,
+      "_n1": 2.0333104770059633e-08,
+      "_n2": 1.0621516360900118e-07,
+      "p": 1.1277930203387047e-07
+    }
   }
 }

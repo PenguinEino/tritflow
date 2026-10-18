@@ -169,9 +169,10 @@ def test_pdf_png_svg_and_connection_metadata(tmp_path):
 
 
 def test_public_pnr_result_integration(tmp_path):
-    from tritflow.pnr import mock_library, place_and_route
+    from tritflow.pnr import Library, place_and_route
     net=circuit('half_add')
-    result=place_and_route(net,mock_library(),output_dir=tmp_path,run_pdk_drc=False,anneal_steps=0)
+    result=place_and_route(net,Library.load(ROOT/'cells'),output_dir=tmp_path,run_pdk_drc=False,anneal_steps=0)
+    assert result.data['library']['mock'] is False
     report=result.net_parasitics()
     sch=draw(net,parasitics=result)
     assert sch.capacitance_f=={s:r['wire_capacitance_f'] for s,r in report['nets'].items()}
@@ -240,3 +241,105 @@ def test_paper_palette_matches_source():
     import runpy
     palette=runpy.run_path(str(ROOT/'figures/style.py'))
     assert TRIT_COLOR==palette['TRIT_COLOR']
+
+
+@pytest.mark.parametrize('name,n',CASES)
+@pytest.mark.parametrize('expand',[None,'*'])
+def test_gallery_metric_budgets_against_reviewed_baseline(name,n,expand):
+    baseline=json.loads((ROOT/'tritflow/schematic/assets/baseline_metrics.json').read_text())['items']
+    stem=f'adder{n}' if name=='adder' else name
+    mode='flat' if expand else 'hierarchical'
+    before=baseline[f'{stem}-{mode}']
+    after=draw(circuit(name,n),expand=expand).metrics
+    assert after['wire_length_px'] < before['wire_length_px']
+    assert after['bends_total'] <= before['bends_total']
+    assert after['bends_per_net_mean'] <= before['bends_per_net_mean']
+    assert 0.65 < after['aspect_ratio'] < 3.0
+    assert after['wire_length_px']==sum(row['wire_length_px'] for row in after['nets'].values())
+
+
+def test_ripple_is_straight_with_formal_ports_and_local_external_pins():
+    sch=draw(circuit('adder',4))
+    symbols={s.key:s for s in sch.scene.symbols}
+    blocks=sorted((s for s in sch.scene.symbols if s.kind=='block'),key=lambda s:s.x)
+    assert len({s.y for s in blocks})==1
+    for i,block in enumerate(blocks):
+        assert block.module=='full_add'
+        aliases={alias:block.pins[pin] for pin,alias in block.pin_labels.items()}
+        assert set(aliases)=={'a','b','cin','sum','cout'}
+        assert aliases['cin'][1]==aliases['cout'][1]
+        for name in ('a','b'):
+            flag=symbols[f'input:{name}[{i}]']
+            assert flag.pins['port'][0]==aliases[name][0]
+            assert 0<block.y-flag.pins['port'][1]<=64
+        flag=symbols[f'output:sum[{i}]']
+        assert flag.pins['port'][0]==aliases['sum'][0]
+        assert 0<flag.pins['port'][1]-aliases['sum'][1]<=64
+    assert sch.metrics['crossings']==sch.metrics['bends_total']==0
+
+
+def test_half_adder_straight_t_trunk_and_two_bend_target():
+    net=circuit('half_add')
+    sch=draw(net)
+    gt=next(s for s in sch.scene.symbols if s.label=='g_t')
+    gd=next(s for s in sch.scene.symbols if s.label=='g_d')
+    source,target=gt.pins['Y'],gd.pins['A']
+    assert source[1]==target[1]
+    signal=gt.outputs['Y']
+    assert any(s.net==signal and s.a[1]==s.b[1]==source[1]
+               and s.a[0]<=source[0]<target[0]<=s.b[0] for s in sch.scene.segments)
+    assert sch.metrics['bends_per_net_max']<=2
+
+
+def test_full_adder_compact_frames_contain_the_correct_cells():
+    sch=draw(circuit('full_add'),expand='*')
+    assert 1.8<=sch.metrics['aspect_ratio']<=2.4
+    frames=sorted(sch.scene.frames,key=lambda f:f.box[0])
+    assert [f.label for f in frames]==['ha1','ha2']
+    assert frames[0].box[2]<frames[1].box[0]
+    for frame in frames:
+        assert len(frame.members)==7
+        for node in sch.scene.symbols:
+            if not set(node.members)&set(frame.members):continue
+            x0,y0,x1,y1=frame.box;a,b,c,d=node.box
+            assert x0<=a<c<=x1 and y0<=b<d<=y1
+
+
+def test_arithmetic_aliases_are_verified_without_instance_name_heuristics():
+    from tritflow.schematic.arithmetic import recognize
+    net=circuit('full_add')
+    original=recognize(net)[''].ports
+    for k,inst in enumerate(net.instances):inst.name=f'renamed_{k}'
+    assert recognize(net)[''].ports==original
+    # A different gate function must not retain a claimed full-adder grammar.
+    next(i for i in net.instances if i.cell=='NANY').cell='NAND'
+    assert '' not in recognize(net)
+
+
+def test_explicit_port_metadata_for_an_unknown_module():
+    net=GateNetlist('custom',[Port('a','input'),Port('y','output')],[
+        Instance('inner.first','INV',{'A':'a','Y':'mid'},'inner'),
+        Instance('inner.second','INV',{'A':'mid','Y':'y'},'inner')])
+    sch=draw(net,hierarchy={'inner':{'module':'custom_buffer','ports':{'P':'a','Q':'y'}}})
+    block=next(s for s in sch.scene.symbols if s.kind=='block')
+    assert block.module=='custom_buffer'
+    assert set(block.pin_labels.values())=={'P','Q'}
+    assert_connections(net,sch.scene)
+
+
+def test_metric_definition_counts_bends_and_unconnected_crossings():
+    from tritflow.schematic.metrics import measure
+    from tritflow.schematic.model import Scene,Segment
+    scene=Scene('known',(),(Segment('n',(0,0),(16,0)),Segment('n',(16,0),(16,16)),
+                            Segment('other',(8,-8),(8,8))),{},(),{},40,20)
+    metrics=measure(scene)
+    assert metrics['wire_length_px']==48
+    assert metrics['bends_total']==1 and metrics['crossings']==1
+    assert metrics['aspect_ratio']==2
+
+
+def test_legend_uses_the_same_orthogonal_pin_stubs():
+    for item in legend()._vector().items:
+        if item['kind']=='path' and len(item['commands'])==2:
+            (_,x0,y0),(_,x1,y1)=item['commands']
+            assert x0==x1 or y0==y1
