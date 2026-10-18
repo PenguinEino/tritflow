@@ -36,16 +36,19 @@ def test_truth_tables_are_rendered_as_html_and_required_results_have_no_todo_fal
     assert block in document["cells"][0]["source"]
 
 
-def test_historical_colab_note_is_not_published_for_the_current_revision():
+def test_colab_note_preserves_round_four_retry_and_timing_scope():
     import json
     document=json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())
     intro=document["cells"][0]["source"]
     record=json.loads((ROOT/"notebook/colab_verified.json").read_text())
-    assert record["commit"].startswith("842afe2") and record["passed_code_cells"] == 17
+    assert record["commit"].startswith("2c81d2c") and record["passed_code_cells"] == 18
     report=(ROOT/record["report"]).read_text()
     assert record["passed"] is True and record["commit"] in report
-    assert f'{record["run_all_seconds_including_setup"]} s' in report
-    assert record["publish"] is False
+    assert f'{record["run_all_seconds_including_setup"]:.1f} s' in report
+    assert record["publish"] is True and record['first_attempt_completed'] is False
+    assert record['run_all_attempts'] == 2
+    assert 'successful second Run all' in intro and 'initial setup attempt excluded' in intro
+    assert 'If Run all stops after setup, choose Run all again.' in intro
     assert all(text not in intro for text in ("Run all ≈", "384.1 s", "842afe2"))
     assert intro.count('top-level HDL lines') == 1
     assert all(text not in intro for text in ("Release TODO","predates","unverified","content-keyed","TRITFLOW_FORCE_RUN"))

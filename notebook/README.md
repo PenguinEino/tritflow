@@ -130,9 +130,11 @@ The official packages and their release mapping were checked against
 is the [OpenSUSI commit](https://github.com/OpenSUSI/TR-1um/commit/5d963db9d44e192d37a0489c208bfccf2e2f690c).
 The downloaded `.deb` hashes/package metadata and pinned archive contents were
 checked locally; pinned-deck LVS and post-layout simulation passed locally.
-A current Colab runtime note is withheld until the next successful real-Colab
-Run all. Historical evidence remains in `docs/status/COLAB.md` and
-`notebook/colab_verified.json`; `publish` is false for the historical record.
+Real-Colab round 4 completed all 18 cells at commit `2c81d2c` in 405 s on
+the second Run all. The initial setup-only attempt and retry gap are excluded;
+uninterrupted first-attempt installation is not established. Evidence is in
+`docs/status/COLAB.md` and `notebook/colab_verified.json`.
+If Run all stops after setup, choose Run all again.
 
 Required SIM publications use `load_grid()` / `sizing_figure()` for
 `cells/out/sizing/`, `load_scaling()` / `scaling_figure()` for
@@ -271,8 +273,8 @@ python3 notebook/make_notebook.py
 
 The static source notebook is output-free. Build the compact saved-output copy
 with `python3 submission/build_submission.py --workdir /tmp/tritflow-submission`.
-Local execution and regression evidence accompany the capture. A real-Colab
-runtime note will be published after the next successful verification.
+Local execution and regression evidence accompany the capture. The real-Colab
+note identifies the tested revision and qualifies its retry/timing scope.
 
 Figure regeneration does not gate the flow. `load_paper` strictly checks the
 recorded measurement inputs, while changed or missing presentation assets only
@@ -299,3 +301,13 @@ rerunning measurements, use `python3 notebook/paper_evidence.py --refresh-routin
 on the publisher's matching native artifacts. Archive identities are read
 from manifest-checked PNR/GDS members. A fresh experiment records its actual
 PNR seed and geometry rather than borrowing a prior archive label.
+
+The setup audit found no kernel restart, IPython magic, input/display call or
+queue-control request. All child processes finish synchronously, and the shell
+`exec` replaces only the child shell. Runtime environment changes select EDA
+paths and Qt mode. The cause of round 4's initial silent queue stop is unknown;
+the GitHub warning was accepted during the first queue, but that observation
+does not establish causation. Setup is unchanged; its existing safe rerun
+checks remain active. Tables now constrain intrinsic width as well as their
+visible width, have HTML width-attribute fallbacks and keep any overflow inside
+their scroll container. Cache-event output uses one short line per stage.

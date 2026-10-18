@@ -597,7 +597,9 @@ table([["Stage", "Fresh / local cache / recorded", "Wall time this run (s)"]]+[
 table([["Design", "Routing realization", "Measured producer phase", "Wall time (s)", "Process + child CPU time (s)"]]+[
     [name,four_run_labels[name],stage,round(seconds,3),round(result["cpu_times_s"][stage],3)] for name,result in four_results.items()
     for stage,seconds in result["timings_s"].items()],details="Physical and pre/post-SPICE runtime breakdown (producer evidence)")
-print("Cache stages:", cache.events)
+print("Cache stages:")
+for name,state in cache.events:
+    print(f"  {name}: {state}")
 print(f"Run time including setup: {time.monotonic()-started:.1f} s")
 print("Artifacts:", BUILD)
 '''

@@ -22,17 +22,19 @@ frames; rerun for interactive figures. [Abstract](ABSTRACT.md),
 [three-sentence pitch](PITCH.md), and [requirements checklist](CHECKLIST.md)
 are included. [build-info.json](build-info.json) records source hashes, tools,
 capture conditions and the automatically measured package size.
-Captured bootstrap source commit: [dd682d727c7e81c2e261e22cfff8d7478218e6e4](https://github.com/PenguinEino/tritflow/tree/dd682d727c7e81c2e261e22cfff8d7478218e6e4). Any tracked working-tree
+Captured bootstrap source commit: [06af81134cd256b36a3c7709a8cebecf34230412](https://github.com/PenguinEino/tritflow/tree/06af81134cd256b36a3c7709a8cebecf34230412). Any tracked working-tree
 changes observed at packaging are recorded separately; a commit ID alone is
 not an assertion that the whole working tree was clean.
 
 ## Reproduce
 
+Free Colab verification at [2c81d2c](https://github.com/PenguinEino/tritflow/commit/2c81d2c1aa81ecebefaa93851f004eb17c9040ba): all 18 code cells completed in 405 s on the successful second Run all (initial setup attempt excluded).
 
+If Run all stops after setup, choose Run all again.
 
 <details><summary>Source reference for this saved notebook</summary>
 
-The local source-ref check found `colab-v0` at `c84145b1ed66a37a87fe0c4ffb091a405e2d4034`. This capture includes later presentation edits. Build-info.json records the checked source-ref details. Source-selection and rerun instructions are in Appendix B.
+The local source-ref check found `colab-v0` at `2c81d2c1aa81ecebefaa93851f004eb17c9040ba`. This capture includes later presentation edits. Build-info.json records the checked source-ref details. Source-selection and rerun instructions are in Appendix B.
 
 </details>
 
@@ -45,8 +47,9 @@ into `/content/tritflow`, prints the resolved commit and installs it editably.
 using that badge. The bootstrap installs ngspice, the pinned official KLayout
 binary/Python dependencies and a checksum-verified PDK archive at commit
 `5d963db9d44e192d37a0489c208bfccf2e2f690c`.
-The saved outputs in this package were executed locally. A verified Colab
-runtime note will be added after the next successful real-Colab Run all.
+The saved outputs in this package were executed locally. The Colab note names
+the tested revision and successful retry; its timer excludes the initial setup
+attempt. It does not establish uninterrupted first-attempt installation.
 This setup preserves Colab's scientific packages, checks minimum versions and
 live/disk consistency, and prints actual KLayout/ngspice versions. Only KLayout
 and Lark wheels are pinned; pip uses `--no-deps`. If an earlier installation

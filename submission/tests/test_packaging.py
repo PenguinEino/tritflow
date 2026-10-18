@@ -147,11 +147,14 @@ def test_public_schematic_svg_gets_saved_png_fallback():
     assert data["image/svg+xml"] == svg and "image/png" in data
 
 
-def test_historical_colab_pass_does_not_become_a_current_run_note():
+def test_colab_verification_note_discloses_the_completed_retry():
     note=builder.run_note()
-    assert note == "" and builder.COLAB_EVIDENCE is None
+    assert '405 s' in note and 'successful second Run all' in note
+    assert 'initial setup attempt excluded' in note
+    assert builder.COLAB_EVIDENCE['first_attempt_completed'] is False
     text=builder.release_notice({"default_ref":"colab-v0","commit":"a"*40})
     assert "TODO" not in text and "predates" not in text
     assert "Appendix B" in text
     readme=builder.render_readme(json.loads((ROOT/"submission/team.json").read_text()))
     assert "842afe2" not in readme and "384.1 s" not in readme
+    assert 'If Run all stops after setup, choose Run all again.' in readme

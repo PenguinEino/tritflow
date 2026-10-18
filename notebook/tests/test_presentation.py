@@ -18,7 +18,9 @@ def test_table_is_compact_and_native_evidence_keeps_precision(monkeypatch):
     value={"settling_ns":1/3,"passed":False}
     presentation.table([["Measured",value]],details="Full conditions")
     assert "0.3333" in outputs[0].data and "False" in outputs[0].data
-    assert "<details>" in outputs[0].data
+    assert "<details " in outputs[0].data
+    assert 'max-width:100%' in outputs[0].data and 'overflow-x:auto' in outputs[0].data
+    assert 'contain:inline-size' in outputs[0].data and "width='100%'" in outputs[0].data
     presentation.evidence("Raw <measurement>",value)
     assert str(1/3) in outputs[1].data and "&lt;measurement&gt;" in outputs[1].data
     assert value["settling_ns"] == 1/3

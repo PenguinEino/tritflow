@@ -391,7 +391,7 @@ def main(argv=None):
               "colab_verified":COLAB_EVIDENCE is not None,
               "captured_revision_colab_verified":bool(COLAB_EVIDENCE and captured_commit(document)==COLAB_EVIDENCE["commit"] and digest(args.source)==COLAB_EVIDENCE["notebook_sha256"]),
               "colab_verification":COLAB_EVIDENCE,
-              "colab_verification_scope":"A current real-Colab pass is published only after successful verification and explicit promotion. Local execution is recorded separately; no historical pass is inherited.",
+              "colab_verification_scope":"colab_verified describes the exact named run and its retry/timing qualifications in colab_verification. captured_revision_colab_verified separately checks commit and notebook bytes; later presentation edits have local execution evidence.",
               "team_fields_completed":not has_placeholders(json.loads(args.team.read_text())),
               "identity_fields_completed":not has_placeholders(json.loads(args.team.read_text())["authors"]),
               "raw_execution_not_in_payload":str(raw.relative_to(ROOT)) if raw.is_relative_to(ROOT) else str(raw),

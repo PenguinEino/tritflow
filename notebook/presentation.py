@@ -46,11 +46,11 @@ def display_value(value):
 
 
 def table(rows, *, details=None):
-    content = "<div style='max-width:100%;overflow-x:auto'><table style='width:100%;table-layout:fixed'>"+"".join("<tr>"+"".join(
+    content = "<div style='display:block;width:100%;min-width:0;max-width:100%;overflow-x:auto;contain:inline-size;box-sizing:border-box'><table width='100%' style='width:100%;min-width:0;max-width:100%;table-layout:fixed'>"+"".join("<tr>"+"".join(
         "<td style='padding:.3em .8em;white-space:normal;overflow-wrap:anywhere;vertical-align:top'>"+escape(display_value(v))+"</td>" for v in row)+"</tr>"
         for row in rows)+"</table></div>"
     if details:
-        content = "<details><summary>"+escape(details)+"</summary>"+content+"</details>"
+        content = "<details style='min-width:0;max-width:100%;overflow-x:auto'><summary>"+escape(details)+"</summary>"+content+"</details>"
     display(HTML(content))
 
 

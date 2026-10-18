@@ -85,11 +85,18 @@ def test_chapter_math_is_outside_html_and_paper_images_are_responsive():
             assert text.count('$$') >= 4
         if text.startswith('## Appendix A.'):
             assert 'table-layout:fixed' in text and 'overflow-wrap:anywhere' in text
+            assert 'contain:inline-size' in text and 'overflow-x:auto' in text
+            assert '<table width="100%"' in text
 
 
-def test_no_current_note_is_inherited_from_round_two(monkeypatch):
-    assert colab_evidence.CURRENT_EVIDENCE is None and colab_evidence.run_note() == ''
-    # An explicit unit fixture exercises the future publication branch.
+def test_scoped_real_pass_and_missing_verification_note(monkeypatch):
+    note = colab_evidence.run_note()
+    assert '405 s' in note and 'successful second Run all' in note
+    assert 'initial setup attempt excluded' in note
+    assert 'If Run all stops after setup, choose Run all again.' in note
+    monkeypatch.setattr(colab_evidence,'CURRENT_EVIDENCE',None)
+    assert colab_evidence.run_note() == ''
+    # Explicit unit fixture for a completed first-attempt run.
     monkeypatch.setattr(colab_evidence,'CURRENT_EVIDENCE',{
         'commit':'a'*40,'passed_code_cells':18,'run_all_seconds_including_setup':120})
     assert 'aaaaaaaa' in colab_evidence.run_note()
