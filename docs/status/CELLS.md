@@ -499,3 +499,31 @@ wire C. STA may add its separately estimated net wire C. Poly-R augmentation and
 its measured sensitivity will be reported separately rather than silently
 changing the structural LVS extraction or claiming unverified calibrated GC R.
 SIM's IP62 parameter audit is being monitored for the published poly values.
+
+### Phase 6 poly-R parameter and model decision
+
+SIM has completed its IP62 PDF audit in `docs/status/SIM.md` (Phase 4 PDK-document
+findings): OS00 rev1.1 **p9 Table I-2-4** gives RS poly **120 ohm/square** at
+W=6 um, tolerance ±15%; this is a resistor-device specification. No calibrated
+1 um GC routing value was published. The new augmentation therefore uses SIM's
+public `tritflow.extract.technology.parameter_audit()` value **as an explicit
+GC sensitivity proxy**, not as a calibrated primary timing parameter.
+
+`<CELL>.poly.spice` / `.poly.json` add a gate-field-poly resistor network without
+changing `.ext.spice`. Actual GC polygons and MOS gate nets come from persisted
+LVS connectivity and GDS. A 0.25 um square sheet mesh is reduced to contact and
+MOS-gate terminals (Kron reduction); contacts and MOS channel-gate regions are
+equipotential electrodes. Adjacent mesh squares have R=Rsheet; gate-to-gate
+coupling through shared poly is preserved. Mesh-edge staircasing is documented
+and checked by refinement. Intrinsic MOS capacitance remains in the PDK model;
+no arbitrary poly C, contact R, or changes to RR devices/W/L/junctions are added.
+The model covers gate-field interconnect, not distributed resistance along the
+MOS channel gate or supply guard poly. Structural LVS remains device-only.
+
+Representative poly-R comparisons use loads 10/100/1000 fF and full input ramps
+1/150 ns, every directed transition, with the identical SIM bench/measurement
+as the primary table. Results will be in `<CELL>.poly.timing.json` and referenced
+from `.timing.json.poly_resistance` with `adopted_in_primary:false`. A large
+resistor in a reduced equivalent network is not necessarily a long physical
+segment; `.poly.json.gates[*].effective_contact_resistance_ohm` gives each gate's
+resistance to the contacted metal with other gates open.

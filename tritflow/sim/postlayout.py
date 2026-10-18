@@ -2,6 +2,7 @@
 from __future__ import annotations
 import hashlib
 import json
+import re
 from pathlib import Path
 import shutil
 import numpy as np
@@ -22,6 +23,16 @@ def _save(path, data):
 
 def file_hash(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _device_fingerprint(text):
+    """Hash all SPICE content except comments and the added Ctfwire elements."""
+    rows=[]
+    for line in text.splitlines():
+        line=line.strip()
+        if not line or line.startswith('*') or re.match(r'(?i)^Ctfwire\d+\b',line):continue
+        rows.append(' '.join(line.split()).upper())
+    return hashlib.sha256('\n'.join(rows).encode()).hexdigest()
 
 
 def representative_vectors(design, inputs):
@@ -198,7 +209,7 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
             if file_hash(target/p.name)!=hashes[str(p)]: raise RuntimeError(f'Cell changed during snapshot: {p}')
     shutil.copyfile(root/'template.json',snapshot/'template.json')
     cell_text='\n'.join((snapshot/c/f'{c}.spice').read_text() for c in used)
-    pre_text=gate_spice(net,cell_text);(out/'prelayout.spice').write_text(pre_text)
+    schematic_text=gate_spice(net,cell_text);(out/'schematic.spice').write_text(schematic_text)
     inputs=[p.name for p in net.ports if p.dir=='input'];outputs=[p.name for p in net.ports if p.dir=='output']
     custom_plan = vectors is not None
     if custom_plan:
@@ -214,8 +225,14 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
     lvs=extract_layout(run_gds,net.top,out/'lvs',gate_netlist=net,cell_subckts=cell_text,timeout=timeout)
     _save(out/'lvs.json',lvs)
     if not lvs['matched']: raise RuntimeError(f'LVS mismatch: {lvs["errors"]}; see {out}/lvs.json')
+    # Keep every intrinsic device, terminal assignment and junction parameter
+    # identical. The source F_RR PLUS orientation differs from extraction and
+    # changes where its one-ended intrinsic capacitance is connected.
+    pre_text=Path(lvs['extracted']).read_text();(out/'prelayout.spice').write_text(pre_text)
     caps=gds_wire_capacitance(run_gds,lvs['report'],top=net.top);_save(out/'capacitance.json',caps)
-    post_text=append_wire_capacitance(Path(lvs['extracted']).read_text(),net.top,caps)
+    post_text=append_wire_capacitance(pre_text,net.top,caps)
+    if _device_fingerprint(pre_text)!=_device_fingerprint(post_text):
+        raise RuntimeError('Wire-C annotation changed intrinsic device content')
     (out/'postlayout.spice').write_text(post_text)
     results={}
     for mode,text in [('pre',pre_text),('post',post_text)]:
@@ -234,6 +251,9 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
     summary={'schema_version':1,'design':design,'top':net.top,'input_sha256':hashes,
              'inputs_unchanged':unchanged,'changed_inputs':changed,'lvs_matched':lvs['matched'],'vector_count':len(vectors),
              'hold_s':hold_s,'step_s':step_s,'output_load_f':load_f,
+             'comparison_scope':'Exact same GDS-extracted devices and terminal orientation: device-only (pre-wire) versus device+estimated wire C. Original GateNetlist schematic remains the independent LVS reference in schematic.spice.',
+             'device_only_sha256':file_hash(out/'prelayout.spice'),
+             'matched_device_fingerprint':_device_fingerprint(pre_text),
              'pre_passed':results['pre']['measurements']['passed'],
              'post_passed':results['post']['measurements']['passed'],
              'pre_max_error_v':results['pre']['measurements']['max_error_v'],

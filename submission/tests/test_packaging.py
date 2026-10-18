@@ -88,3 +88,11 @@ def test_pitch_has_three_sentences_and_deadline_is_current():
     assert "2026-10-31 at 11:59 AM Pacific" in checklist
     assert "ISSCC27/submitted_notebooks/TritFlow/" in checklist
     assert "superseded" in checklist and "2025" in checklist
+
+
+def test_capture_commit_uses_execution_output(tmp_path):
+    document,_=fixture_notebook(tmp_path)
+    assert builder.captured_commit(document) is None
+    document.cells[1].outputs.append(nbformat.v4.new_output("stream",name="stdout",
+        text="Source: /unit/test commit="+"a"*40+"\n"))
+    assert builder.captured_commit(document)=="a"*40

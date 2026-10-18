@@ -5,7 +5,7 @@ Owner: integrator (Claude). Streams must not change this file; propose changes i
 
 All lengths are µm, origin at the lower-left corner of the cell/die prBoundary.
 Electrical: VDD=+5 V, VMID=0 V, VSS=−5 V. Trit −1/0/+1 ↔ −5/0/+5 V. A node passes a
-check when |V − ideal| ≤ 0.5 V. PDK: `$TR1UM_PDK` (default `~/pdk/TR-1um`).
+check when |V − ideal| ≤ 0.5 V. PDK: `$TR1UM_PDK` (default `~/pdk/TR-1um-pinned` = public commit 5d963db pinned in notebook/setup_pins.json; `~/pdk/TR-1um` is an older local dev snapshot — do not qualify against it).
 Constants live in `tritflow/__init__.py`.
 
 ## Repository layout and ownership

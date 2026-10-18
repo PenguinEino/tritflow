@@ -6,7 +6,7 @@ import re
 import numpy as np
 from tritflow import ROOT,CELLS_DIR,PDK_ROOT
 from tritflow.netlist import GateNetlist
-from .postlayout import _save,_simulate_cached,file_hash
+from .postlayout import _save,_simulate_cached,file_hash,_device_fingerprint
 from .scaling import adder_vectors,adder_oracle
 
 
@@ -73,3 +73,38 @@ def diagnose_delay(destination=ROOT/'results/delay_diagnosis.json'):
 
 
 if __name__=='__main__':diagnose_delay()
+
+
+def device_fingerprint(text):
+    """Ignore only comments and added Ctfwire elements, not device parameters."""
+    return _device_fingerprint(text)
+
+
+def refine_longest_carry(n=6):
+    """Paired negative-carry assertion at two finer timesteps, identical devices."""
+    from .corners import _adder_guesses
+    directory=ROOT/f'build/adder_scaling/adder{n}'
+    net=GateNetlist.load(directory/f'adder{n}.json')
+    inputs=[p.name for p in net.ports if p.dir=='input'];outputs=[p.name for p in net.ports if p.dir=='output']
+    source=directory/'postlayout';lvs=json.loads((source/'lvs.json').read_text())
+    device=Path(lvs['extracted']).read_text();wire=(source/'postlayout.spice').read_text()
+    if device_fingerprint(device)!=device_fingerprint(wire):raise ValueError('Device mismatch in wire-C control')
+    vectors,labels=adder_vectors(n,inputs);pair=vectors[4:6]
+    expected=adder_oracle(n,inputs,outputs)
+    guesses=_adder_guesses(net,lvs['report'],inputs,{'VDD':5.,'VMID':0.,'VSS':-5.})(pair[0])
+    rows=[]
+    for step in (.25e-9,.1e-9):
+        results={}
+        for mode,text in [('device_only',device),('device_plus_wire',wire)]:
+            print(f'refined N={n} {mode} step={step*1e9:g}ns',flush=True)
+            run=_simulate_cached(ROOT/f'build/delay_diagnosis/refined/N{n}',f'{mode}_{step.hex()}',
+                text,net.top,inputs,outputs,pair,expected,hold_s=500e-9,step_s=step,
+                load_f=10e-15,timeout=900,nodeset=guesses)
+            results[mode]=run['measurements']
+        pin=f'sum[{n-1}]';before=results['device_only']['rows'][1]['outputs'][pin]['settling_s']
+        after=results['device_plus_wire']['rows'][1]['outputs'][pin]['settling_s']
+        rows.append(dict(step_s=step,device_only_s=before,device_plus_wire_s=after,delta_s=after-before,
+                         measurements=results))
+    result=dict(n=n,labels=labels[4:6],vectors=pair,device_fingerprint=device_fingerprint(device),
+        rows=rows,scope='One isolated full-length negative-carry assertion, two timesteps; identical extracted devices and ideal input/rail sources. All other comparisons remain scoped to their documented sequence.')
+    _save(ROOT/'results/delay_refined.json',result);return result

@@ -227,7 +227,7 @@ def run_size(n, *, build_root=None, seeds=(7,0,19), hold_s=1e-6, step_s=2e-9,
         if experiment_sources() != sources:
             raise RuntimeError('Inputs/code changed during scaling run; rerun to qualify the new revision')
         artifacts = [directory/f'{net.top}{suffix}' for suffix in ('.json','.gds','.pnr.json')]
-        artifacts += [out/name for name in ('summary.json','lvs.json','prelayout.spice','postlayout.spice',
+        artifacts += [out/name for name in ('summary.json','lvs.json','schematic.spice','prelayout.spice','postlayout.spice',
             'capacitance.json','ir_drop.json','pdk_parameters.json','vectors.json','static.json','static_cache.json','pre/measurements.json','post/measurements.json',
             'pre/waveforms.npz','post/waveforms.npz')]
         artifacts += [Path(lvs['extracted']),Path(lvs['report'])]
@@ -240,6 +240,7 @@ def run_size(n, *, build_root=None, seeds=(7,0,19), hold_s=1e-6, step_s=2e-9,
             carry=carry,settling=summary['settling'],
             max_rail_deviation_v=summary['max_rail_deviation_v'],max_zero_shift_v=summary['max_zero_shift_v'],
             interconnect_parameters=summary['interconnect_parameters'],em_check=summary['em_check'],
+            comparison_scope=summary['comparison_scope'],
             static_power_worst_w=max(r['static_power_w'] for r in dc),
             static_power_mean_w=sum(r['static_power_w'] for r in dc)/len(dc),
             static_vector_count=len(dc),static_scope='maximum/mean over documented unique representative states; N=1 includes all 27',
@@ -268,6 +269,7 @@ def run_scaling(sizes=range(1,7), *, jobs=1, destination=RESULT, **kwargs):
             rows = list(pool.map(partial(run_size,**kwargs),sizes))
     result = dict(schema_version=1,experiment='real-layout balanced-ternary ripple-adder scaling',
         rows=rows,passed=all(r['passed'] for r in rows),
+        comparison_scope='Identical GDS-extracted intrinsic devices: device-only (pre-wire) versus devices plus estimated wire C. Legacy source-schematic delays archived in results/phase4_before_matched/.',
         measurement='1 ns ramps; settling from ramp start to final entry into ±0.5 V, through entire segment; 2 ns default max timestep',
         coverage='four directed full-length carry assertion/release transitions, both polarities; overflow/zero/opposite/alternating; N=1 additionally all 27 states',
         limits='Nominal models only. Static power covers documented states. Resistive-divider cells draw DC current even without switching. IR envelope is separate from ideal-rail SPICE. Wire C and metal R remain assumptions where the open PDK supplies no value. PDK current limits are width/cut-specific; linear width scaling is not EM sign-off. Routing heuristics/seed can change die area.')

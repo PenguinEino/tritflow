@@ -20,6 +20,8 @@ capture conditions and the automatically measured package size.
 
 ## Reproduce
 
+{{RELEASE_STATUS}}
+
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
 
 The notebook's first cell shallow-clones
