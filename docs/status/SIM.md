@@ -52,7 +52,8 @@ The two maxima can occur on different transitions. The last column compares
 the same transition; it is not the difference of independently selected maxima.
 Every per-transition value, including negative changes, is in summary.json.
 Wire C can filter hazards as well as slow edges. Crossing interpolation is
-limited by the maximum timestep; these are nominal simulation estimates.
+limited by the maximum timestep; sub-2 ns differences are unresolved and do
+not establish a speedup. These are nominal simulation estimates.
 
 Each `build/<design>/postlayout/` contains:
 
@@ -200,7 +201,9 @@ mixed revisions. Requirements are the existing numpy/scipy/Plotly/klayout,
 ngspice, KLayout binary and TR-1um PDK. Optional reference regressions require
 `~/balanced-ternary-logic` and copy its GDS/netlists into temporary directories.
 
-Final test run is finishing; its exact result is appended on completion.
+**Final tests: 33 passed, no skips, in 132.33 s** with
+`python3 -m pytest tests/sim tests/extract -q`. The final default post-layout
+script also exited 0 for all four designs using the stored electrical caches.
 `compileall` and `git diff --check` on owned paths pass.
 
 ## Interface requests
