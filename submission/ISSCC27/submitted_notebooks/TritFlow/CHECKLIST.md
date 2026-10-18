@@ -11,7 +11,7 @@ Primary sources: [current root rules](https://github.com/sscs-ose/sscs-ose-code-
 | Open Jupyter project about circuit design or education | Executed `tritflow_tr1um.ipynb`, chapters 0–9; linked public source | Included |
 | Explain ideas, decisions, method, evidence and reproduction | Chapters 0/1, 4–6, 7/8; first setup cell and README | Included |
 | Use open tools; open PDK where applicable | Lark/NumPy, KLayout, ngspice, Plotly; OpenSUSI TR-1um; versions in build information | Included |
-| Reproducible source release | Current local execution and source hashes in build-info.json; public source and pinned setup | Next real-Colab verification pending |
+| Reproducible source release | Local capture/source hashes in build-info.json; named real-Colab run and recovery scope in README | Real-Colab completion after one Run-all retry; first-attempt reliability unestablished |
 | Suitable open-source license | Apache-2.0 `LICENSE`, verbatim attribution `NOTICE` and author-authorized derived schematic assets; README license statement | Included |
 | One project folder under the current event's submitted notebooks | This directory maps to `ISSCC27/submitted_notebooks/TritFlow/` | Prepared |
 | Keep proposed changes within that project folder | Copy only these small payload files; builder/tests remain in TritFlow | Prepared |
@@ -50,5 +50,6 @@ Accepted structure examples inspected (not templates copied):
 
 Before filing: check travel/poster logistics, the release
 tag and external links, inspect saved outputs, and re-check live official rules.
-The current saved outputs have local execution evidence. A new successful
-real-Colab pass is required before publishing an installation-inclusive runtime.
+The current saved outputs have local execution evidence. The README names the
+completed Colab run and its retry; its timing excludes the initial setup attempt
+and is not an installation-inclusive first-attempt benchmark.

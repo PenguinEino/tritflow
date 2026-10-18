@@ -1,36 +1,36 @@
 {
   "schema_version": 1,
-  "created_utc": "2026-10-18T14:21:55.441414+00:00",
-  "source_notebook_sha256": "65012492c7255f4fc7fa3e1ef61c4bb177d6fb9876b319e9377ebe3677ba2cd6",
-  "source_commit_at_bootstrap": "dd682d727c7e81c2e261e22cfff8d7478218e6e4",
-  "packaging_commit": "dd682d727c7e81c2e261e22cfff8d7478218e6e4",
+  "created_utc": "2026-10-18T15:04:14.816103+00:00",
+  "source_notebook_sha256": "83b757b608c8576b429af0e66b960949adb5098caf450f0db8d11dbfa0f385f9",
+  "source_commit_at_bootstrap": "06af81134cd256b36a3c7709a8cebecf34230412",
+  "packaging_commit": "06af81134cd256b36a3c7709a8cebecf34230412",
   "tracked_working_changes_at_packaging": [
     "docs/status/FRONTEND.md",
-    "docs/status/STA.md",
     "notebook/README.md",
     "notebook/assets/four_designs.zip",
     "notebook/assets/paper_evidence.json",
-    "notebook/editorial.py",
-    "notebook/experiments.py",
-    "notebook/make_notebook.py",
-    "notebook/paper_evidence.py",
+    "notebook/colab_evidence.py",
+    "notebook/colab_verified.json",
+    "notebook/markdown_support.py",
+    "notebook/presentation.py",
     "notebook/stages.py",
-    "notebook/tests/test_editorial.py",
+    "notebook/tests/test_colab_presentation.py",
+    "notebook/tests/test_document.py",
+    "notebook/tests/test_presentation.py",
     "notebook/tritflow_tr1um.ipynb",
-    "results/sta/review3_full_tests.log",
     "submission/ISSCC27/submitted_notebooks/TritFlow/CHECKLIST.md",
     "submission/ISSCC27/submitted_notebooks/TritFlow/README.md",
     "submission/ISSCC27/submitted_notebooks/TritFlow/build-info.json",
     "submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_tr1um.ipynb",
     "submission/README.md",
-    "submission/team.json",
+    "submission/build_submission.py",
     "submission/templates/CHECKLIST.md",
     "submission/templates/README.md",
     "submission/tests/test_packaging.py"
   ],
   "capture": {
-    "source_sha256": "65012492c7255f4fc7fa3e1ef61c4bb177d6fb9876b319e9377ebe3677ba2cd6",
-    "elapsed_s": 71.40233663201798,
+    "source_sha256": "83b757b608c8576b429af0e66b960949adb5098caf450f0db8d11dbfa0f385f9",
+    "elapsed_s": 67.35048900300171,
     "renderer": "png",
     "completed": true
   },
@@ -56,18 +56,38 @@
   "official_rules_commit": "a502a6ba01260d3492df9137dddae0bb5fabeb3c",
   "release": {
     "default_ref": "colab-v0",
-    "commit": "c84145b1ed66a37a87fe0c4ffb091a405e2d4034",
+    "commit": "2c81d2c1aa81ecebefaa93851f004eb17c9040ba",
     "matches_source_notebook": false,
     "missing_required_helpers": [],
     "compatible": false
   },
-  "colab_verified": false,
+  "colab_verified": true,
   "captured_revision_colab_verified": false,
-  "colab_verification": null,
-  "colab_verification_scope": "A current real-Colab pass is published only after successful verification and explicit promotion. Local execution is recorded separately; no historical pass is inherited.",
+  "colab_verification": {
+    "publish": true,
+    "publication_reason": "Round-4 complete run, explicitly qualified by one Run-all retry.",
+    "commit": "2c81d2c1aa81ecebefaa93851f004eb17c9040ba",
+    "date_utc": "2026-10-18",
+    "platform": "free Google Colab CPU",
+    "run_all_seconds_including_setup": 405,
+    "passed_code_cells": 18,
+    "run_all_attempts": 2,
+    "first_attempt_completed": false,
+    "initial_setup_attempt_seconds": null,
+    "timing_scope": "Successful second Run all only; excludes the initial setup attempt and gap before retry.",
+    "notebook_sha256": "65012492c7255f4fc7fa3e1ef61c4bb177d6fb9876b319e9377ebe3677ba2cd6",
+    "scope": "Default run with labelled recorded campaigns. Full completion after one recovery; uninterrupted first-attempt installation is not established.",
+    "report": "docs/status/COLAB.md",
+    "evidence_sha256": {
+      "logs/colab/round4-timing.json": "538260d3b957105de1cdd8b4b88758dd781fd9292a7e72406609567f6f0c9de8",
+      "logs/colab/round4-cells.json": "0063df9a75ec2e7895917f4e86300bf2dc8bacf75af510f9e0f5955b873d3015"
+    },
+    "passed": true
+  },
+  "colab_verification_scope": "colab_verified describes the exact named run and its retry/timing qualifications in colab_verification. captured_revision_colab_verified separately checks commit and notebook bytes; later presentation edits have local execution evidence.",
   "team_fields_completed": true,
   "identity_fields_completed": true,
-  "raw_execution_not_in_payload": "/tmp/tritflow-submission-phase13/default/executed.raw.ipynb",
+  "raw_execution_not_in_payload": "/tmp/tritflow-submission-phase14/default/executed.raw.ipynb",
   "manifest_scope": "files excludes build-info.json itself; total_bytes includes it",
   "code_cells": 18,
   "saved_outputs": 69,
@@ -76,12 +96,12 @@
   "html_tables": 26,
   "files": {
     "tritflow_tr1um.ipynb": {
-      "bytes": 5227837,
-      "sha256": "b1d674203111610800d0d20f8a2328040a0281ab0e17e2f61c3e66f4a4c85ef6"
+      "bytes": 5221126,
+      "sha256": "6f0cc4bd351b62f92f6fa7c22f53b62aed4b94cc79d9b05f0f8806f7b260998c"
     },
     "CHECKLIST.md": {
-      "bytes": 5045,
-      "sha256": "5a480a9c3547e816b2c9816979d5ce0194208a533f674fca56d4d5f249bfed48"
+      "bytes": 5166,
+      "sha256": "f793a189ede5716ced42037ea2d1b91edc08ad6cc5d8bf65fe041d3340dbd060"
     },
     "NOTICE": {
       "bytes": 842,
@@ -96,8 +116,8 @@
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     "README.md": {
-      "bytes": 7631,
-      "sha256": "87426f67c09d6a7fe2ffcd44be40ba92b25974b7655792ff632f649ed6ae7b7d"
+      "bytes": 7997,
+      "sha256": "56cee8b7a59bcdd22d43dd820a2307b569d826acf1d57f41266aa4768d135c3f"
     },
     "PITCH.md": {
       "bytes": 497,
@@ -105,5 +125,5 @@
     }
   },
   "file_count": 8,
-  "total_bytes": 5257945
+  "total_bytes": 5252920
 }

@@ -51,16 +51,18 @@ def wrap_tables(text):
                 rows.append([part.strip() for part in re.split(r'(?<!\\)\|',line.strip().strip('|'))])
             index += 1
         columns = len(rows[0])
-        output.append('<div style="max-width:100%;overflow-x:auto;">\n'
-                      '<table style="width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;">')
+        # A percentage-width table can otherwise contribute its intrinsic width
+        # to Colab's surrounding flex item before the column width is resolved.
+        output.append('<div style="display:block;width:100%;min-width:0;max-width:100%;overflow-x:auto;contain:inline-size;box-sizing:border-box;">\n'
+                      '<table width="100%" style="width:100%;min-width:0;max-width:100%;table-layout:fixed;border-collapse:collapse;">')
         for row_index,row in enumerate(rows):
             tag = 'th' if row_index == 0 else 'td'
             cells = []
             for col,value in enumerate(row):
                 width = ('20%' if col == 0 else '80%') if columns == 2 else f'{100/columns:g}%'
                 style = ('white-space:normal;overflow-wrap:anywhere;word-break:normal;'
-                         f'vertical-align:top;text-align:left;padding:.45em .7em;width:{width};')
-                cells.append(f'<{tag} style="{style}">{_inline(value)}</{tag}>')
+                         f'min-width:0;vertical-align:top;text-align:left;padding:.45em .7em;width:{width};')
+                cells.append(f'<{tag} width="{width}" style="{style}">{_inline(value)}</{tag}>')
             output.append('<tr>'+''.join(cells)+'</tr>')
         output.append('</table>\n</div>')
     return '\n'.join(output)

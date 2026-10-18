@@ -42,8 +42,9 @@ into `/content/tritflow`, prints the resolved commit and installs it editably.
 using that badge. The bootstrap installs ngspice, the pinned official KLayout
 binary/Python dependencies and a checksum-verified PDK archive at commit
 `5d963db9d44e192d37a0489c208bfccf2e2f690c`.
-The saved outputs in this package were executed locally. A verified Colab
-runtime note will be added after the next successful real-Colab Run all.
+The saved outputs in this package were executed locally. The Colab note names
+the tested revision and successful retry; its timer excludes the initial setup
+attempt. It does not establish uninterrupted first-attempt installation.
 This setup preserves Colab's scientific packages, checks minimum versions and
 live/disk consistency, and prints actual KLayout/ngspice versions. Only KLayout
 and Lark wheels are pinned; pip uses `--no-deps`. If an earlier installation

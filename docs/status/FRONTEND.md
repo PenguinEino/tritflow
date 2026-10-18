@@ -1,6 +1,112 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 13 release candidate complete: EDITOR integration, labelled native identities, confirmed attendance, full tests and submission rebuilt.**
+Updated: 2026-10-19. **Phase 14 complete: setup audit and retry note, refreshed figures, contained tables and submission rebuilt.**
+
+## Phase 14 — round-4 follow-up complete
+
+### Setup investigation
+
+Read the round-4 report, initial/completed accessibility records and timing/
+cell JSON, then traced `stages.SETUP` → child `colab_setup.sh` →
+`setup_colab.py` and `runtime_support.py`.
+
+- No `input()`, IPython magic (`%pip`/reset etc.), notebook display call,
+  kernel shutdown/restart/kill request, asynchronous worker or queue-control
+  call is present. All git/install/tool invocations are synchronous subprocesses.
+- The shell `exec python3` replaces only the child shell launched with
+  `subprocess.run`; the child's `SystemExit(main())` is not a kernel exit.
+  Nonzero child results raise through `check=True`; no silent exception handler
+  is present. Compatibility failures also raise a visible RuntimeError.
+- pip has `--no-deps` and installs only the pinned KLayout/Lark plus editable
+  TritFlow. Scientific packages remain host-owned. `check_runtime()` checks
+  imported/disk versions and BLAS; it offers a restart instruction only on a
+  detected error and never restarts the runtime itself.
+- Environment updates are the PDK/source/KLayout paths, Qt mode and setup-schema
+  marker. They do not change Jupyter connection/kernel variables. apt is
+  noninteractive (`-y`, `DEBIAN_FRONTEND=noninteractive`). Tool-version output
+  and install progress are ordinary stdout; there is no output-clearing call.
+- Round 4 accepted the GitHub warning while the first Run-all queue was active,
+  but no frontend queue events, PID/connection history or kernel logs establish
+  why it stopped. This is an observation, **not evidence that the warning or a
+  subprocess caused it**. Local mocked first-setup/reuse tests cannot reproduce
+  Colab frontend scheduling. No confirmed source-level cause was found.
+
+Setup is unchanged: its cell literal, shell wrapper, installer, runtime checker
+and dependency list are byte-identical to tested `2c81d2c`. Used the requested
+fallback, exactly: **If Run all stops after setup, choose Run all again.**
+The run note now names the actual successful **second** Run all at `2c81d2c`,
+**18 cells / 405 s**, explicitly excluding the initial setup attempt. The
+record retains `first_attempt_completed=false`, two attempts and unknown
+initial-attempt duration. It does not claim an uninterrupted installation.
+Build-info distinguishes this named pass from later local presentation edits.
+
+### Presentation / validation
+
+- Refreshed all **29 presentation hashes** against committed files; scientific
+  inputs and native measurement records are unchanged. Re-embedded the shorter
+  `fig_sizing` PNG; the rightmost label now displays fully. Figure checks remain
+  warning-only; no figure scripts were edited or regenerated here.
+- Prose/runtime table wrappers now set width/max-width, zero minimum width,
+  inline-size containment and `overflow-x:auto`; table/column width attributes
+  provide HTML fallbacks. Cells wrap and Details also contain overflow. This
+  prevents table intrinsic width from determining the surrounding flex size;
+  any remaining overflow stays inside the table container.
+- Replaced the long printed cache-event tuple with one short line per stage.
+  Numerical/native evidence is unchanged.
+- **74 preflight tests passed**, one final payload check deferred until rebuild.
+  Local Chrome preview at **1350 px and 760 px** shows scope/runtime tables
+  contained within **1100 px and 697 px** text columns, including a 256-character
+  native-identity stress case. Sizing equations have zero MathJax errors and
+  the shorter x label is fully visible. This is local preview evidence, not a
+  new real-Colab execution. Evidence: `/tmp/tritflow-phase14-preview/`.
+- **All 18 code cells pass** in both fresh local captures, with empty build/
+  cache directories: default **67.35 s**, forced native notebook stages
+  **385.82 s**. These include local setup checks/kernel/plotting, exclude
+  tool installation/final packaging, and are separate from the qualified
+  round-4 Colab timer. No errors or stderr. Default calculated the opening,
+  INV DC, paired adder simulation and edited sorter; four shared designs were
+  explicitly recorded. Forced capture ran all nine cached stages. Published
+  characterization/sizing/width/load experiments remain precomputed in both.
+- Refreshed the four-design archive from the completed native capture:
+  **4,727,543 bytes / 4 records / 54 native files**, with source/PDK/options and
+  native hashes verified by the publisher. No manual rekey after presentation
+  changes invalidated its conservative source fingerprint.
+- **214 area tests passed in 22.07 s** (HDL/synthesis/viz); final notebook/
+  submission tests **75 passed in 10.73 s**, including actual payload validation.
+  Builder `--check`, source/narrative identity checks and `git diff --check` pass.
+- Final payload: **8 files / 5,252,920 bytes**, **18 executed code cells,
+  69 saved outputs, 8 embedded paper PNGs, 7 live PNG outputs and 26 HTML
+  tables**. Current shortened sizing PNG is embedded. LICENSE/NOTICE exactly
+  match root files. All nine cache-event lines are at most 25 characters,
+  replacing the previous unwrapped tuple.
+- Metadata now records the **named** round-4 pass (`colab_verified=true`) with
+  two attempts and `first_attempt_completed=false`; this later presentation
+  notebook has `captured_revision_colab_verified=false`. Both local captures
+  use source SHA-256 `83b757b608c8576b429af0e66b960949adb5098caf450f0db8d11dbfa0f385f9`.
+- No package installations, git writes, PR/push, frozen HDL/synthesis edits or
+  foreign-owned edits. No new real-Colab run was performed or claimed here.
+
+Evidence: `/tmp/tritflow-submission-phase14/{native,default}/executed.raw.ipynb`,
+`/tmp/tritflow-phase14-{native,default,archive,preflight,area-tests,final-tests}.log`,
+`/tmp/tritflow-phase14-preview/{results.json,tables-760.png,tables-1350.png,sizing.png}`.
+
+```sh
+python3 notebook/paper_evidence.py --refresh-presentation
+python3 notebook/make_notebook.py
+python3 -m pytest tests/hdl tests/synth tests/viz notebook/tests submission/tests -q
+TRITFLOW_FORCE_RUN=1 python3 submission/build_submission.py --workdir /tmp/tritflow-submission-phase14/native --timeout 1800
+PYTHONPATH=. python3 notebook/campaign.py /tmp/tritflow-submission-phase14/native/flow/cache
+python3 submission/build_submission.py --workdir /tmp/tritflow-submission-phase14/default --timeout 1800
+python3 submission/build_submission.py --check
+```
+
+### Phase 14 handoff
+
+Release matching notebook/helpers/archive/evidence at the selected source ref.
+The silent first queue stop remains unexplained; the requested retry instruction
+is present in the notebook/README run note. A future first-attempt Colab pass,
+with queue/connection observations, is needed to establish that reliability.
+The narrower sizing label fixes the earlier figure-owner clipping request.
 
 ## Phase 13 — release candidate complete
 
