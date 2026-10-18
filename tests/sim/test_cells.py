@@ -56,7 +56,8 @@ def test_gate_reference_contract():
                           [Instance('g1','INV',{'A':'a[0]','Y':'y'})])
     good = '.subckt INV A Y VDD VMID VSS\nR1 A Y 1k\n.ends INV\n'
     text = gate_spice(netlist,good)
-    assert 'Xg1 a[0] y VDD VMID VSS INV' in text
+    from tritflow.synth.writers import spice
+    assert text.startswith(spice(netlist))
     with pytest.raises(ValueError):
         gate_spice(netlist, good.replace('A Y VDD VMID VSS','VDD VSS A Y'))
 
@@ -70,3 +71,25 @@ def test_bit_blasted_ports_survive_nutmeg_expressions():
     assert result['measurements']['passed']
     assert 'v(a[0])' in result['waveforms']
     assert 'v(y[0])' in result['waveforms']
+
+
+def test_case_sensitive_hdl_names_round_trip_through_ngspice():
+    """Nine independent states expose a/A shorts and mixed-case output aliases."""
+    import numpy as np
+    from tritflow.synth.writers import spice, spice_names
+    from tritflow.sim.characterize import dc_operating_points
+    net = GateNetlist('case_test', [Port('a','input'),Port('A','input'),
+        Port('y','output'),Port('Y','output')], [
+        Instance('g','INV',{'A':'a','Y':'y'}), Instance('G','INV',{'A':'A','Y':'Y'})])
+    cells = '.subckt INV A Y VDD VMID VSS\nE1 Y 0 A 0 -1\n.ends INV\n'
+    text = gate_spice(net, cells)
+    assert text.startswith(spice(net))
+    names = spice_names(net.nets(), ('VDD','VMID','VSS','0'))
+    assert len({n.lower() for n in names.values()}) == len(names)
+    expected = lambda v: {'y':-v[0], 'Y':-v[1]}
+    run = simulate(text,net.top,['a','A'],['y','Y'],input_vectors(2),expected)
+    assert run['measurements']['passed']
+    assert not np.array_equal(run['waveforms']['v(a)'],run['waveforms']['v(A)'])
+    assert not np.array_equal(run['waveforms']['v(y)'],run['waveforms']['v(Y)'])
+    assert all(r['passed'] for r in dc_operating_points(text,net.top,['a','A'],['y','Y'],input_vectors(2),expected))
+    assert all(set(r['outputs']) == {'y','Y'} for r in run['measurements']['rows'])

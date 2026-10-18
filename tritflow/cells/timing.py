@@ -11,7 +11,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime, timezone
 import hashlib
 import json
-import marshal
+from types import CodeType
 from pathlib import Path
 import shutil
 import tempfile
@@ -35,8 +35,17 @@ MODEL_SHA256 = {p.name:sha(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models'
 
 
 def _measurement_code():
-    """Cache only the actual measurement code, not unrelated table formatting."""
-    return {'cells_bytecode':hashlib.sha256(marshal.dumps(point.__code__)+marshal.dumps(_slew.__code__)+marshal.dumps(guesses.__code__)).hexdigest(),
+    """Stable semantic bytecode, excluding filenames/line numbers/interning flags."""
+    def stable(value):
+        if isinstance(value,CodeType):
+            return [value.co_code.hex(),value.co_names,value.co_varnames,
+                    value.co_argcount,value.co_kwonlyargcount,[stable(c) for c in value.co_consts]]
+        if isinstance(value,(tuple,list)):return [stable(v) for v in value]
+        if isinstance(value,frozenset):return sorted(stable(v) for v in value)
+        if isinstance(value,bytes):return {'bytes':value.hex()}
+        return value
+    signature=[stable(f.__code__) for f in (point,_slew,guesses,ideal)]
+    return {'cells_bytecode':hashlib.sha256(json.dumps(signature,sort_keys=True).encode()).hexdigest(),
             'sim_source':{k:v for k,v in CODE_SHA256.items() if k.startswith('sim/')}}
 
 
@@ -117,9 +126,13 @@ def _axis(values,name):
     return values
 
 
-def _grid_step(ramp_s):
-    """250 ps–2 ns ceiling; each run retains its actual (possibly finer) step."""
-    return min(max(ramp_s/20,.25e-9),2e-9)
+def _grid_step(ramp_s,cell):
+    """Coarsening is adopted only for the INV/NAND spot-checked fast ramps.
+
+    NANY's simultaneous-input hazard timing is sensitive to the timestep; keep
+    its original 50 ps ceiling for 1 ns edges, as for unvalidated NOR/BUF.
+    """
+    return min(max(ramp_s/20,.25e-9),2e-9) if cell in ('INV','NAND') else min(ramp_s/20,2e-9)
 
 
 def assemble(cell,text,points,loads_f,ramps_s,capacitance,*,source_generation=None,model_sha256=None):
@@ -134,7 +147,7 @@ def assemble(cell,text,points,loads_f,ramps_s,capacitance,*,source_generation=No
                 'input_ramp_definition':'Full 0–100% linear voltage ramp; synchronized when multiple inputs change.',
                 'delay_reference':'Input edge START; final entry into ideal +/-0.5 V band, staying through observation end.',
                 'hold_s_by_ramp':[r+300e-9 for r in ramps_s],
-                'max_step_s_by_ramp':[_grid_step(r) for r in ramps_s],
+                'max_step_s_by_ramp':[_grid_step(r,cell) for r in ramps_s],
                 'output_slew_definition':'Last directional 10% to 90% crossings of the ideal output step; null for unchanged output or missing crossings.'},
             'scope':'Nominal device-only PDK extraction; no cell wire C or poly R in the primary timing model. Add PNR net wire C separately; do not double count cell-pin metal.',
             'model_sha256':model_sha256 or {},'code_sha256':CODE_SHA256,
@@ -197,13 +210,13 @@ def characterize_library(out,*,loads_f=LOADS_F,ramps_s=RAMPS_S,jobs=3):
                 if cached.exists():
                     p=json.loads(cached.read_text())
                     if (p['source_sha256']==hashlib.sha256(texts[cell].encode()).hexdigest()
-                        and p.get('measurement_code')==_measurement_code() and p.get('model_sha256')==models
+                        and p.get('compatible_measurement_code',p.get('measurement_code'))==_measurement_code() and p.get('model_sha256')==models
                         and p['load_f']==load and p['input_transition_s']==ramp
-                        and p['max_step_s']<=_grid_step(ramp) and p['hold_s']==ramp+300e-9 and p['complete']):
+                        and p['max_step_s']<=_grid_step(ramp,cell) and p['hold_s']==ramp+300e-9 and p['complete']):
                         points[cell].append(p);continue
                 tasks.append((cell,texts[cell],load,ramp,folder))
     with ProcessPoolExecutor(max_workers=jobs) as pool:
-        pending={pool.submit(point,*task,max_step_s=_grid_step(task[3])):task for task in tasks}
+        pending={pool.submit(point,*task,max_step_s=_grid_step(task[3],task[0])):task for task in tasks}
         for future in as_completed(pending):
             p=future.result();points[p['cell']].append(p)
             print(f'{p["cell"]} load={p["load_f"]*1e15:g} fF ramp={p["input_transition_s"]*1e9:g} ns: {"PASS" if p["passed"] else "FAIL"}',flush=True)
@@ -257,4 +270,51 @@ def characterize_all(out,*,jobs=3,include_poly=True):
         for cell in summary['cells']:
             summary['cells'][cell]['timing_sha256']=sha(Path(out)/cell/f'{cell}.timing.json')
         write_json(Path(out)/'timing_report.json',summary)
+    return summary
+
+
+def finalize_retained(out,*,allow_legacy_fingerprint=False):
+    """Reassemble exact retained measurements, repairing interrupted run artifacts.
+
+    The explicit legacy option is for this producer's audited fingerprint-format
+    migration only. Original producer fingerprints remain recorded; compatibility
+    metadata never changes a measured voltage/delay. Public SIM/model/source and
+    numerical settings are checked before accepting any retained sample.
+    """
+    import re
+    out=Path(out).resolve()
+    if out==(CELLS_DIR/'out').resolve():raise ValueError('Finalize only in a private stage')
+    reports={}
+    for cell,circuit in circuits().items():
+        path=out/cell/f'{cell}.timing.json';previous=json.loads(path.read_text())
+        text=(out/cell/f'{cell}.ext.spice').read_text();digest=hashlib.sha256(text.encode()).hexdigest()
+        loads=previous['axes']['load_f'];ramps=previous['axes']['input_transition_s'];points=[]
+        if circuit.inputs:
+            for ri,ramp in enumerate(ramps):
+                for li,load in enumerate(loads):
+                    folder=out/cell/'timing'/f'ramp_{ri:02d}_load_{li:02d}'
+                    p=json.loads((folder/'measurements.json').read_text())
+                    command=re.search(r'(?m)^tran\s+(\S+)\s+(\S+)',(folder/'tb.spice').read_text())
+                    physics=(p['source_sha256']==digest and p.get('model_sha256')==MODEL_SHA256
+                             and p['load_f']==load and p['input_transition_s']==ramp
+                             and p['hold_s']==ramp+300e-9 and p['max_step_s']<=_grid_step(ramp,cell))
+                    code=p.get('compatible_measurement_code',p.get('measurement_code'))==_measurement_code()
+                    legacy=(allow_legacy_fingerprint and p['measurement_code']['sim_source']==_measurement_code()['sim_source'])
+                    deck=(command is not None and abs(float(command[1])-p['max_step_s'])<1e-20)
+                    if not (physics and (code or legacy) and deck and p['complete']):
+                        shutil.copyfile(folder/'measurements.json',folder/'measurements.pre-repair.json')
+                        p=point(cell,text,load,ramp,folder,max_step_s=_grid_step(ramp,cell))
+                    elif not code:
+                        p['compatible_measurement_code']=_measurement_code()
+                        p['compatibility_reason']='Audited same measurement recipe; stable semantic fingerprint replaces CPython marshal/interning serialization. Original at-run fingerprint retained.'
+                    p['deck_sha256']=sha(folder/'tb.spice')
+                    write_json(folder/'measurements.json',p);points.append(p)
+        report=assemble(cell,text,points,loads,ramps,previous['input_capacitance'],
+                        source_generation=previous.get('source_generation'),model_sha256=MODEL_SHA256)
+        write_json(path,report);reports[cell]=report
+    summary={'created_utc':datetime.now(timezone.utc).isoformat(),
+             'complete':all(r['complete'] for r in reports.values()),'passed':all(r['passed'] for r in reports.values()),
+             'cells':{c:{'complete':r['complete'],'passed':r['passed'],'coverage':r['coverage'],
+                         'timing_sha256':sha(out/c/f'{c}.timing.json'),'source_sha256':r['source_sha256']} for c,r in reports.items()}}
+    write_json(out/'timing_report.json',summary)
     return summary

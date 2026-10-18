@@ -3,7 +3,6 @@
 from base64 import b64encode
 import importlib.util
 import io
-import json
 from pathlib import Path
 
 import nbformat
@@ -96,3 +95,21 @@ def test_capture_commit_uses_execution_output(tmp_path):
     document.cells[1].outputs.append(nbformat.v4.new_output("stream",name="stdout",
         text="Source: /unit/test commit="+"a"*40+"\n"))
     assert builder.captured_commit(document)=="a"*40
+    assert builder.has_placeholders({"authors":[{"name":"[AUTHOR_NAME]"}]})
+    assert not builder.has_placeholders({"authors":[{"name":"Unit test author"}]})
+
+
+def test_actual_payload_has_readable_embedded_evidence():
+    info=builder.check(builder.DESTINATION,builder.SOURCE)
+    assert info["file_count"]==7 and info["total_bytes"] < 8*1024*1024
+    document=nbformat.read(builder.DESTINATION/"tritflow_tr1um.ipynb",as_version=4)
+    for cell in document.cells:
+        for output in cell.get("outputs",[]):
+            data=output.get("data",{})
+            assert not any(key.startswith("application/vnd.plotly") for key in data)
+            assert "<script" not in data.get("text/html","").lower()
+            if "image/png" in data:
+                from base64 import b64decode
+                with Image.open(io.BytesIO(b64decode(data["image/png"]))) as image:
+                    assert image.width >= 500 and image.height >= 100
+                    image.verify()

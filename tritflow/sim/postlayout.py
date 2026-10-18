@@ -14,6 +14,7 @@ from .bench import simulate, input_vectors, build_testbench
 from .spice import gate_spice
 from .characterize import characterize_cell
 from tritflow.extract.technology import parameter_audit
+from .provenance import pdk_provenance
 
 
 def _save(path, data):
@@ -144,6 +145,9 @@ def _simulate_cached_unlocked(out, mode, circuit, top, inputs, outputs, vectors,
     configuration={'circuit':circuit,'top':top,'inputs':inputs,'outputs':outputs,
                    'vectors':vectors,'expected':[expected(v) for v in vectors],
                    'hold_s':hold_s,'step_s':step_s,'load_f':load_f,
+                   'analysis_sha256':{name:file_hash(Path(__file__).with_name(name))
+                       for name in ('bench.py','runner.py','measure.py','spice.py')},
+                   'pdk_root':str(PDK_ROOT.resolve()),
                    'models':{p.name:file_hash(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}}
     options={}
     if temperature_c!=27:options['temperature_c']=temperature_c
@@ -194,6 +198,7 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
     paths=[netfile,gds,pnrfile,root/'template.json']
     paths += [p for p in sorted((PDK_ROOT/'openIP62/IP62/Technology/doc').glob('*.pdf')) if p.is_file()]
     paths += [p for p in sorted((PDK_ROOT/'libs.tech/spice/models').glob('*')) if p.is_file()]
+    paths += [p for p in sorted((PDK_ROOT/'libs.tech/klayout/tech/lvs').rglob('*')) if p.is_file()]
     for cell in used:
         paths += [root/'out'/cell/f'{cell}{ext}' for ext in ('.gds','.spice','.ext.spice','.abstract.json','.char.json')]
     hashes={str(p):file_hash(p) for p in paths}
@@ -249,6 +254,7 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
     changed=[name for name,digest in hashes.items() if not Path(name).is_file() or file_hash(name)!=digest]
     unchanged=not changed
     summary={'schema_version':1,'design':design,'top':net.top,'input_sha256':hashes,
+             'pdk_provenance':pdk_provenance(),
              'inputs_unchanged':unchanged,'changed_inputs':changed,'lvs_matched':lvs['matched'],'vector_count':len(vectors),
              'hold_s':hold_s,'step_s':step_s,'output_load_f':load_f,
              'comparison_scope':'Exact same GDS-extracted devices and terminal orientation: device-only (pre-wire) versus device+estimated wire C. Original GateNetlist schematic remains the independent LVS reference in schematic.spice.',

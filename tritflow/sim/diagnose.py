@@ -8,6 +8,8 @@ from tritflow import ROOT,CELLS_DIR,PDK_ROOT
 from tritflow.netlist import GateNetlist
 from .postlayout import _save,_simulate_cached,file_hash,_device_fingerprint
 from .scaling import adder_vectors,adder_oracle
+from .provenance import pdk_provenance
+from .spice import signal_waveform
 
 
 def reverse_negative_resistors(text):
@@ -40,7 +42,7 @@ def _junction_audit(cell):
 def diagnose_delay(destination=ROOT/'results/delay_diagnosis.json'):
     """Change RN orientation only, then compare device-only and wire-C controls."""
     directory=ROOT/'build/adder_scaling/adder1';net=GateNetlist.load(directory/'adder1.json')
-    source=ROOT/'build/delay_diagnosis/phase4/adder1/prelayout.spice'
+    source=directory/'postlayout/schematic.spice'
     schematic=source.read_text()
     device_only=(directory/'postlayout/lvs/adder1.ext.spice').read_text()
     wire=(directory/'postlayout/postlayout.spice').read_text()
@@ -56,8 +58,10 @@ def diagnose_delay(destination=ROOT/'results/delay_diagnosis.json'):
                              hold_s=1e-6,step_s=.5e-9,load_f=10e-15,timeout=600)
         measurements[mode]=run['measurements'];waves[mode]=run['waveforms']
     reference=waves['extracted_device_only'];corrected=waves['schematic_RN_reversed']
-    differences={p:float(max(abs(np.interp(reference['time'],corrected['time'],corrected[f'v({p})'])-reference[f'v({p})']))) for p in outputs}
-    result=dict(schema_version=1,vector_plan={'inputs':inputs,'vectors':vectors,'labels':labels},
+    differences={p:float(max(abs(np.interp(reference['time'],corrected['time'],signal_waveform(corrected,p))-signal_waveform(reference,p)))) for p in outputs}
+    carry={mode:max(row['outputs'][pin]['settling_s'] for i,row in enumerate(value['rows'])
+                   if i in (2,3,5,6) for pin in outputs) for mode,value in measurements.items()}
+    result=dict(pdk_provenance=pdk_provenance(),schema_version=1,carry_max_settling_s=carry,vector_plan={'inputs':inputs,'vectors':vectors,'labels':labels},
         conditions={'hold_s':1e-6,'step_s':.5e-9,'load_f':10e-15,'temperature_c':27},
         measurements=measurements,corrected_schematic_vs_extracted_max_waveform_difference_v=differences,
         junctions=[_junction_audit(cell) for cell in ['INV','NANY']],
@@ -70,9 +74,6 @@ def diagnose_delay(destination=ROOT/'results/delay_diagnosis.json'):
             str(PDK_ROOT/'libs.tech/spice/models/models_IP62_res_v5.lib'):file_hash(PDK_ROOT/'libs.tech/spice/models/models_IP62_res_v5.lib')},
         interpretation='PDK F_RR lumped C is attached to PLUS only. Swapping RN terminals preserves symmetric DC resistor topology but moves its intrinsic 25.95 fF from Y to the internal NMOS drain. MOS junction parameters equal the active schematic wrapper defaults. Use the exact same extracted devices with/without added wire C for an isolated wire-effect comparison.')
     _save(destination,result);return result
-
-
-if __name__=='__main__':diagnose_delay()
 
 
 def device_fingerprint(text):
@@ -105,6 +106,63 @@ def refine_longest_carry(n=6):
         after=results['device_plus_wire']['rows'][1]['outputs'][pin]['settling_s']
         rows.append(dict(step_s=step,device_only_s=before,device_plus_wire_s=after,delta_s=after-before,
                          measurements=results))
-    result=dict(n=n,labels=labels[4:6],vectors=pair,device_fingerprint=device_fingerprint(device),
+    result=dict(pdk_provenance=pdk_provenance(),n=n,labels=labels[4:6],vectors=pair,device_fingerprint=device_fingerprint(device),
         rows=rows,scope='One isolated full-length negative-carry assertion, two timesteps; identical extracted devices and ideal input/rail sources. All other comparisons remain scoped to their documented sequence.')
     _save(ROOT/'results/delay_refined.json',result);return result
+
+
+def audit_rail_currents(destination=ROOT/'results/rail_current_audit.json'):
+    """Check saved sizing decisions and solved branch currents, including T/V.
+
+    PVT uses independently worst measured cell currents at each condition on
+    the fixed geometry and resistance model. This is an envelope sensitivity,
+    not a claim that all cells attain their individual maxima in one vector.
+    """
+    from tritflow.extract import estimate_ir_drop
+    template=json.loads((CELLS_DIR/'template.json').read_text())
+    paths=sorted((ROOT/'build').glob('*/*.pnr.json'))+sorted((ROOT/'build/adder_scaling').glob('*/*.pnr.json'))
+    corners_path=ROOT/'results/corners/summary.json'
+    corners=json.loads(corners_path.read_text()) if corners_path.is_file() else None
+    rows=[]
+    for path in paths:
+        data=json.loads(path.read_text());power=data['power'];assumptions=power.get('assumptions',{})
+        used={p['cell'] for p in data['placements']}
+        chars={name:json.loads((CELLS_DIR/f'out/{name}/{name}.char.json').read_text()) for name in used}
+        abstracts={name:json.loads((CELLS_DIR/f'out/{name}/{name}.abstract.json').read_text()) for name in used}
+        groups={}
+        for pl in data['placements']:
+            key=(pl['row'],pl.get('span',0));groups[key]=groups.get(key,0.)+power['currents_a'][pl['inst']]
+        rate=assumptions.get('allowed_current_a_per_um')
+        group_worst=max((load/(2*.00025*(band[1]-band[0])) for load in groups.values() for band in template['rails'].values()),default=0.)
+        nominal=estimate_ir_drop(data,template,abstracts,chars)['em_check']
+        row=dict(design=path.stem.removesuffix('.pnr'),pnr=str(path.relative_to(ROOT)),pnr_sha256=file_hash(path),
+            sizing_assumptions=assumptions,uses_published_M1_step_limit=rate is not None and rate<=.00025,
+            current_sources=sorted(set(power.get('current_sources',{}).values())),
+            worst_row_span_centered_feed_utilization=group_worst,
+            feed_banks=[dict(**bank,published_limit_a=bank['width']*bank['count']*.00025,
+                 utilization=bank['current_a']/(bank['width']*bank['count']*.00025)) for bank in power.get('feed_banks',[])],
+            nominal_solved_em_check=nominal,pvt=[])
+        if corners and all(name in {'INV','NANY','NAND','NOR','BUF'} for name in used):
+            for t in corners['temperatures_c']:
+                for scale in corners['supply_scales']:
+                    selected={r['dut']:r for r in corners['rows'] if r['dut'] in used and r['conditions']['temperature_c']==t and r['conditions']['supply_scale']==scale and r['state']=='complete'}
+                    if set(selected)!=used: continue
+                    pvchars={name:{'dc':case['dc']['rows']} for name,case in selected.items()}
+                    em=estimate_ir_drop(data,template,abstracts,pvchars)['em_check']
+                    row['pvt'].append(dict(temperature_c=t,supply_scale=scale,em_check=em))
+        rows.append(row)
+    result=dict(pdk_provenance=pdk_provenance(),rows=rows,
+        source_sha256={str(CELLS_DIR/f'out/{c}/{c}.char.json'):file_hash(CELLS_DIR/f'out/{c}/{c}.char.json') for c in sorted({p['cell'] for path in paths for p in json.loads(path.read_text())['placements']})},
+        corner_summary_sha256=file_hash(corners_path) if corners else None,
+        scope='Drawn PNR rail network, published width-scaled DC limits. Nominal sizing and fixed-geometry T/V current sensitivity; unchanged assumed metal/via R, no temperature/lifetime derating or signal/internal-cell EM sign-off.')
+    _save(destination,result);return result
+
+
+if __name__=='__main__':
+    import argparse
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--refine',action='store_true');parser.add_argument('--rail-audit',action='store_true')
+    args=parser.parse_args()
+    if args.rail_audit:audit_rail_currents()
+    elif args.refine:refine_longest_carry()
+    else:diagnose_delay()

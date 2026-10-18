@@ -20,6 +20,7 @@ from tritflow import ROOT,CELLS_DIR,PDK_ROOT,TRIT_VOLTS
 from tritflow.netlist import GateNetlist
 from tritflow.synth import evaluate_netlist
 from tritflow.extract import reference_net_map
+from .provenance import pdk_provenance
 from .bench import input_vectors
 from .characterize import dc_operating_points,logic_value
 from .measure import measure_sequence
@@ -38,7 +39,7 @@ def available_corners(pdk=PDK_ROOT):
     sections={name:rows for name,rows in sections.items() if rows}
     if sections:raise ValueError('New model sections require review before mapping process-corner names')
     defaults={k:float(v) for k,v in re.findall(r'(?im)^\s*\.parameters?\s+(\w+)\s*=\s*([\d.eE+-]+)',texts['ip62_models'])}
-    return dict(available=['TYP'],lib_sections=sections,nominal_parameters=defaults,
+    return dict(pdk_provenance=pdk_provenance(pdk),available=['TYP'],lib_sections=sections,nominal_parameters=defaults,
         unavailable=['private Taguchi L16 sets 01..16','FF','SS','FS','SF'],
         evidence=[{'document':'OS00_リファレンスマニュアル_rev1.1.pdf','pages':[37,38]},
                   {'document':'OS02_回路simガイドライン_rev1.pdf','page':16,'statement':'コーナーモデルは非公開です。'}],
@@ -104,7 +105,7 @@ def _run_case(task,*,timeout=600):
         coverage='all 27 states in lexicographic order; 26 transitions' if dut=='full_add' else 'all discrete states and every directed input-vector transition')
     sources={str(source):file_hash(source)}|extra
     code={name:file_hash(Path(__file__).with_name(name)) for name in ['corners.py','bench.py','measure.py','runner.py','spice.py','characterize.py']}
-    digest=_key(dict(sources=sources,conditions=conditions,models=inventory['model_sha256'],code=code))
+    digest=_key(dict(sources=sources,conditions=conditions,models=inventory['model_sha256'],pdk=inventory['pdk_provenance'],code=code))
     cache=ROOT/f'results/corners/cases/{digest}.json.gz';cache.parent.mkdir(parents=True,exist_ok=True)
     if cache.is_file():
         result=json.loads(gzip.decompress(cache.read_bytes()))

@@ -1,3 +1,24 @@
+# PNR stream — pinned-PDK migration / phase 6 in progress
+
+2026-10-18: all new qualification uses `~/pdk/TR-1um-pinned`, public commit
+`5d963db9d44e192d37a0489c208bfccf2e2f690c`. Earlier phase-5 local-dev PDK
+results below are historical and are **not current qualification**.
+
+**Interface request for SIM (pinned LVS):** first new campaign currently fails
+at LVS for all designs. `build/adder1/lvs/klayout.log` reports `ERROR : Netlists
+don't match`, although every native circuit pair is `Match`, no errors, and
+layout ports use `a[0]` while the reference uses encoded `tf_615b305d`.
+`build/adder1/adder1.lvs.summary.json` retains the evidence. Please ensure
+strict native/reference port names are normalized consistently for this pinned
+deck; PNR will rerun the complete campaign after the extractor settles. No PDK
+checks or strict ports will be weakened. Source paths outside PNR remain read-only.
+
+Current sizing changes reserve 20% of OS00 p17 Tables I-3-1/I-3-3 DC limits and
+independently assess every real result with SIM's branch-current solver; failed
+reserve triggers tighter row capacity and a complete reroute. The PNR JSON
+`power` section retains its existing schema and adds `assumptions` fields and
+`dc_current_check`; the chip wrapper will have separate artifacts.
+
 # PNR stream — phase 5
 
 ## Done

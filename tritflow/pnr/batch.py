@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 
-from tritflow import CELLS_DIR, ROOT
+from tritflow import CELLS_DIR, ROOT, PDK_ROOT
 from tritflow.netlist import GateNetlist
 from . import Library, place_and_route
 
@@ -46,6 +46,9 @@ def input_state(build_root, cells_root, designs, seeds, anneal_steps, views):
     files += [Path(build_root)/name/f"{name}.json" for name in designs]
     files += list((ROOT/"tritflow/pnr").glob("*.py"))
     files += [ROOT/"tritflow/viz/layout.py", ROOT/"tritflow/extract/lvs.py", ROOT/"examples/pnr_all.py"]
+    files += [p for group in ("drc", "lvs")
+              for p in (PDK_ROOT/"libs.tech/klayout/tech"/group).rglob("*") if p.is_file()]
+    files += [ROOT/"notebook/setup_pins.json", ROOT/"tritflow/extract/technology.py"]
     state = {"files": digest_files(files), "designs": list(designs), "seeds": list(seeds),
              "anneal_steps": anneal_steps, "views": views}
     state["fingerprint"] = hashlib.sha256(json.dumps(state, sort_keys=True).encode()).hexdigest()

@@ -25,6 +25,9 @@ def inverter_surface(tmp_path_factory):
 
 
 def test_load_ramp_axes_reference_and_observed_slow_output(inverter_surface):
+    import subprocess,sys
+    command='import json; from tritflow.cells.timing import _measurement_code; print(json.dumps(_measurement_code(),sort_keys=True))'
+    assert subprocess.check_output([sys.executable,'-c',command])==subprocess.check_output([sys.executable,'-c',command])
     report,points=inverter_surface
     assert report['passed'] and report['complete']
     assert report['coverage']['single_pin_arcs']==6 and report['coverage']['simultaneous_transitions']==0

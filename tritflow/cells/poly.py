@@ -196,6 +196,7 @@ def characterize_sensitivity(out,*,jobs=2,loads_f=(10e-15,100e-15,1e-12),ramps_s
 def finalize_sensitivity(out):
     """Join complete primary/proxy measurements and retain every paired delta."""
     from .circuits import circuits
+    from .timing import point
     from tritflow import CELLS_DIR
     out=Path(out).resolve()
     if out==(CELLS_DIR/'out').resolve():raise ValueError('Poly results require a private stage')
@@ -209,6 +210,16 @@ def finalize_sensitivity(out):
         comparisons=[]
         for path in sorted((out/cell/'timing_poly').glob('*/measurements.json')):
             proxy=json.loads(path.read_text());baseline=baselines[proxy['load_f'],proxy['input_transition_s']]
+            if proxy['source_sha256']!=network['annotated_sha256']:
+                raise ValueError(f'{cell}: stale poly timing model')
+            baseline_path=next(p for p in (out/cell/'timing').glob('*/measurements.json')
+                if json.loads(p.read_text())['load_f']==proxy['load_f']
+                and json.loads(p.read_text())['input_transition_s']==proxy['input_transition_s'])
+            if baseline['max_step_s']!=proxy['max_step_s']:
+                # Attribute small poly-R effects using identical solver sampling.
+                baseline_path=out/cell/'timing_poly/baseline_checks'/path.parent.name/'measurements.json'
+                baseline=point(cell,(out/cell/f'{cell}.ext.spice').read_text(),proxy['load_f'],proxy['input_transition_s'],
+                               baseline_path.parent,max_step_s=proxy['max_step_s'])
             expected={ (tuple(r['from']),tuple(r['to'])):r for r in baseline['rows']}
             rows=[]
             for r in proxy['rows']:
@@ -219,6 +230,8 @@ def finalize_sensitivity(out):
                              'baseline_passed':b['passed'],'poly_passed':r['passed']})
             deltas=[r['difference_s'] for r in rows if r['difference_s'] is not None]
             comparisons.append({'load_f':proxy['load_f'],'input_transition_s':proxy['input_transition_s'],
+                'baseline_run':str(baseline_path.relative_to(out)), 'poly_run':str(path.relative_to(out)),
+                'max_step_s':proxy['max_step_s'],
                 'baseline_complete':baseline['complete'],'poly_complete':proxy['complete'],
                 'baseline_passed':baseline['passed'],'poly_passed':proxy['passed'],
                 'max_increase_s':max(deltas,default=None),'max_abs_difference_s':max(map(abs,deltas),default=None),

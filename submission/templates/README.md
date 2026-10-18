@@ -17,6 +17,9 @@ frames; rerun for interactive figures. [Abstract](ABSTRACT.md),
 [three-sentence pitch](PITCH.md), and [requirements checklist](CHECKLIST.md)
 are included. [build-info.json](build-info.json) records source hashes, tools,
 capture conditions and the automatically measured package size.
+Captured bootstrap source commit: {{SOURCE_LINK}}. Any tracked working-tree
+changes observed at packaging are recorded separately; a commit ID alone is
+not an assertion that the whole working tree was clean.
 
 ## Reproduce
 
@@ -69,8 +72,9 @@ Technical sources and reused material:
   [Plotly](https://plotly.com/python/), [Lark](https://github.com/lark-parser/lark).
 
 Past Code-a-Chip submissions were reviewed for packaging structure; no code or
-notebook cells were copied from them. Tool versions actually used for the
-saved outputs are generated into `build-info.json` and the notebook front matter.
+notebook cells were copied from them. Tool versions observed in the packaging
+environment are generated into `build-info.json` and the notebook front matter;
+the bootstrap separately records the recommended runtime pins.
 
 ## Filing scope
 

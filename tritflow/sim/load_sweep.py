@@ -1,5 +1,6 @@
 """Equal external loads on both full-adder outputs: first observed 500 ns FAIL."""
 from __future__ import annotations
+from .provenance import pdk_provenance
 
 import json
 import math
@@ -85,7 +86,7 @@ def sweep_output_load(directory=ROOT/'build/full_add', *, loads_f=DEFAULT_LOADS,
     current = experiment_sources()|{str(p):file_hash(p) for p in paths}
     if current != sources:
         raise RuntimeError('Inputs/code changed during load sweep; rerun for the current revision')
-    result = dict(schema_version=1,state='complete',configuration_sha256=digest,sources_sha256=sources,
+    result = dict(pdk_provenance=pdk_provenance(),schema_version=1,state='complete',configuration_sha256=digest,sources_sha256=sources,
         conditions=options|{'edge_s':1e-9,'band_v':.5,'load_application':'equal capacitor from each output to ground, plus actual-GDS wire C'},
         input_order=inputs,outputs=outputs,vectors=vectors,labels=labels,rows=sorted(rows,key=lambda r:r['load_f']),
         boundary_found=lower is not None and upper is not None,

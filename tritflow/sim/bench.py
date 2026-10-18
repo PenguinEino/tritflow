@@ -3,10 +3,24 @@ from __future__ import annotations
 
 from itertools import product
 import math
+import re
 
 from tritflow import TRIT_VOLTS, VDD, VMID, VSS
 from .runner import run_ngspice, SimulationError
-from .spice import subcircuits, simulation_netlist, model_includes
+from .spice import subcircuits, simulation_netlist, model_includes, logical_spice_names
+
+
+def restore_signals(data, bench):
+    """Restore logical spelling without aliasing distinct HDL names a and A."""
+    result = dict(data)
+    mapping = bench.get('signal_names', {})
+    for logical, encoded in mapping.items():
+        result[f'v({logical})'] = data[f'v({encoded})'.lower()]
+    counts = {name.lower(): sum(other.lower() == name.lower() for other in mapping) for name in mapping}
+    for logical in mapping:
+        if counts[logical.lower()] == 1:
+            result[f'v({logical})'.lower()] = result[f'v({logical})']
+    return result
 
 
 def input_vectors(ninputs: int, *, transitions: bool = False, max_transitions: int = 10000) -> list[tuple]:
@@ -57,42 +71,58 @@ def build_testbench(subckts: str, top: str, inputs: list[str], outputs: list[str
         raise ValueError('Input vectors must contain one valid trit per input')
     if not (0 < step_s <= hold_s and 0 < edge_s < hold_s - 1e-9):
         raise ValueError('Require positive step, edge and >1 ns checking margin after each edge')
+    from tritflow.synth.writers import spice_names
+    logical = inputs + outputs
+    names = spice_names(logical, ('VDD', 'VMID', 'VSS', '0'))
     definitions = subcircuits(subckts)
+    safe_top = spice_names([top])[top]
     try:
-        pins = definitions[top.lower()]['pins']
-    except KeyError as exc:
+        definition = definitions.get(top.lower(), definitions.get(safe_top.lower()))
+        pins = definition['pins']
+    except (KeyError, TypeError) as exc:
         raise ValueError(f'Missing .subckt {top}') from exc
-    declared = {p.lower() for p in pins}
-    signal = {p.lower() for p in inputs + outputs}
-    if len(signal) != len(inputs + outputs) or declared - {'vdd', 'vmid', 'vss'} != signal:
+    if definition is None: raise ValueError(f'Missing .subckt {top}')
+    annotated = logical_spice_names(subckts)
+    encoded_for = {name: encoded for encoded, name in annotated.items()}
+    decoded = {encoded_for.get(name, name): name for name in logical
+               if encoded_for.get(name, name) in pins}
+    if len(set(logical)) != len(logical) or set(decoded.values()) != set(logical) or len(decoded) != len(logical):
         raise ValueError(f'Input/output pins do not match {top}: {pins}')
+    declared = {p.lower() for p in pins if p not in decoded}
     if not {'vdd', 'vss'} <= declared:
         raise ValueError('VDD and VSS supply pins are required')
+    # Formal order stays positional. Rewrite exact tokens in this top only;
+    # SPICE must never see two formals differing only in case.
+    rename = {p: names[name] for p, name in decoded.items()}
+    rewritten = re.sub(r'\S+', lambda m: rename.get(m[0], m[0]), definition['text'])
+    subckts = subckts.replace(definition['text'], rewritten, 1)
+    pins = [rename.get(p, p) for p in pins]
     models = model_includes() if pdk is None else model_includes(pdk)
     lines = ['TritFlow ternary testbench', models, simulation_netlist(subckts),
              f'.temp {temperature_c:g}', '.options rshunt=1e12',
              *(f'{rail} {rail} 0 {value:g}' for rail,value in supplies.items()),
-             'Xdut ' + ' '.join(pins) + f' {top}']
+             'Xdut ' + ' '.join(pins) + f' {definition["name"]}']
     for col, pin in enumerate(inputs):
         points = [f'0 {trit_volts[vectors[0][col]]:g}']
         for k in range(1, len(vectors)):
             points.extend([f'{k * hold_s:.15g} {trit_volts[vectors[k-1][col]]:g}',
                            f'{k * hold_s + edge_s:.15g} {trit_volts[vectors[k][col]]:g}'])
-        lines.append(f'Vin{col} {pin} 0 PWL(' + ' '.join(points) + ')')
+        lines.append(f'Vin{col} {names[pin]} 0 PWL(' + ' '.join(points) + ')')
     for i, pin in enumerate(outputs):
         load = loads_f.get(pin, 0) if isinstance(loads_f, dict) else loads_f
         if load < 0:
             raise ValueError('Load capacitance cannot be negative')
         if load:
-            lines.append(f'Cload{i} {pin} 0 {load:.15g}')
+            lines.append(f'Cload{i} {names[pin]} 0 {load:.15g}')
     guesses = {pin: trit_volts[(initial_outputs or {}).get(pin, 0)] for pin in outputs}
     guesses.update(nodeset or {})
     for pin, voltage in guesses.items():
-        lines.append(f'.nodeset v({pin})={voltage:.15g}')
-    probes = [f'v({p})' for p in inputs + outputs] + ['i(vdd)', 'i(vmid)', 'i(vss)']
+        lines.append(f'.nodeset v({names.get(pin,pin)})={voltage:.15g}')
+    probes = [f'v({names[p]})' for p in logical] + ['i(vdd)', 'i(vmid)', 'i(vss)']
     return dict(netlist='\n'.join(lines), commands=f'tran {step_s:.15g} {len(vectors)*hold_s:.15g} 0 {step_s:.15g}',
                 probes=probes, vectors=vectors, inputs=inputs, outputs=outputs,
-                hold_s=hold_s, edge_s=edge_s, step_s=step_s,supplies_v=supplies,temperature_c=temperature_c)
+                hold_s=hold_s, edge_s=edge_s, step_s=step_s,supplies_v=supplies,temperature_c=temperature_c,
+                signal_names=names)
 
 
 def simulate(subckts: str, top: str, inputs: list[str], outputs: list[str], vectors,
@@ -107,7 +137,7 @@ def simulate(subckts: str, top: str, inputs: list[str], outputs: list[str], vect
         kwargs['initial_outputs'] = expected(vectors[0])
     bench = build_testbench(subckts, top, inputs, outputs, vectors, **kwargs)
     run = run_ngspice(bench['netlist'], bench['commands'], bench['probes'], timeout=timeout, workdir=workdir)
-    data = run['data']
+    data = restore_signals(run['data'], bench)
     if 'time' not in data or data['time'][-1] < len(vectors)*bench['hold_s'] - bench['step_s'] * 1e-3:
         raise SimulationError('Transient ended before the requested final segment')
     result = {'waveforms': data, 'log': run['log'], 'stimulus': bench}
@@ -126,5 +156,7 @@ def dc_transfer(subckts: str, top: str, inputs: list[str], outputs: list[str],
     vector = tuple((fixed_trits or {}).get(pin, 0) for pin in inputs)
     bench = build_testbench(subckts, top, inputs, outputs, [vector], **kwargs)
     source = f'Vin{inputs.index(sweep_pin)}'
-    return run_ngspice(bench['netlist'], f'dc {source} {start_v:g} {stop_v:g} {step_v:g}',
+    result = run_ngspice(bench['netlist'], f'dc {source} {start_v:g} {stop_v:g} {step_v:g}',
                        bench['probes'], timeout=timeout, workdir=workdir)
+    result['data'] = restore_signals(result['data'], bench)
+    return result
