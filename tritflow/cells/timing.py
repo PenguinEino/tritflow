@@ -117,6 +117,11 @@ def _axis(values,name):
     return values
 
 
+def _grid_step(ramp_s):
+    """250 ps–2 ns ceiling; each run retains its actual (possibly finer) step."""
+    return min(max(ramp_s/20,.25e-9),2e-9)
+
+
 def assemble(cell,text,points,loads_f,ramps_s,capacitance,*,source_generation=None,model_sha256=None):
     """Build per-sensitization matrices in [ramp][load] order, with no interpolation."""
     circuit=circuits()[cell];inputs=list(circuit.inputs)
@@ -129,7 +134,7 @@ def assemble(cell,text,points,loads_f,ramps_s,capacitance,*,source_generation=No
                 'input_ramp_definition':'Full 0–100% linear voltage ramp; synchronized when multiple inputs change.',
                 'delay_reference':'Input edge START; final entry into ideal +/-0.5 V band, staying through observation end.',
                 'hold_s_by_ramp':[r+300e-9 for r in ramps_s],
-                'max_step_s_by_ramp':[min(r/20,2e-9) for r in ramps_s],
+                'max_step_s_by_ramp':[_grid_step(r) for r in ramps_s],
                 'output_slew_definition':'Last directional 10% to 90% crossings of the ideal output step; null for unchanged output or missing crossings.'},
             'scope':'Nominal device-only PDK extraction; no cell wire C or poly R in the primary timing model. Add PNR net wire C separately; do not double count cell-pin metal.',
             'model_sha256':model_sha256 or {},'code_sha256':CODE_SHA256,
@@ -143,6 +148,8 @@ def assemble(cell,text,points,loads_f,ramps_s,capacitance,*,source_generation=No
     expected=len(loads_f)*len(ramps_s)
     if len(points)!=expected:raise ValueError(f'{cell}: incomplete load/ramp surface')
     indexed={(float(p['input_transition_s']),float(p['load_f'])):p for p in points}
+    report['runs']=[{k:p[k] for k in ('load_f','input_transition_s','hold_s','max_step_s',
+                                     'complete','passed','measurement_code')} for p in sorted(points,key=lambda p:(p['input_transition_s'],p['load_f']))]
     if len(indexed)!=expected:raise ValueError('Duplicate load/ramp condition')
     vectors=input_vectors(len(inputs),transitions=True)
     transitions=sorted(set((tuple(a),tuple(b)) for a,b in zip(vectors,vectors[1:])))
@@ -191,11 +198,12 @@ def characterize_library(out,*,loads_f=LOADS_F,ramps_s=RAMPS_S,jobs=3):
                     p=json.loads(cached.read_text())
                     if (p['source_sha256']==hashlib.sha256(texts[cell].encode()).hexdigest()
                         and p.get('measurement_code')==_measurement_code() and p.get('model_sha256')==models
-                        and p['load_f']==load and p['input_transition_s']==ramp and p['complete']):
+                        and p['load_f']==load and p['input_transition_s']==ramp
+                        and p['max_step_s']<=_grid_step(ramp) and p['hold_s']==ramp+300e-9 and p['complete']):
                         points[cell].append(p);continue
                 tasks.append((cell,texts[cell],load,ramp,folder))
     with ProcessPoolExecutor(max_workers=jobs) as pool:
-        pending={pool.submit(point,*task):task for task in tasks}
+        pending={pool.submit(point,*task,max_step_s=_grid_step(task[3])):task for task in tasks}
         for future in as_completed(pending):
             p=future.result();points[p['cell']].append(p)
             print(f'{p["cell"]} load={p["load_f"]*1e15:g} fF ramp={p["input_transition_s"]*1e9:g} ns: {"PASS" if p["passed"] else "FAIL"}',flush=True)

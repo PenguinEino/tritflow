@@ -1,6 +1,78 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 6 complete.**
+Updated: 2026-10-18. **Phase 7 packaging validation in progress.**
+
+## Phase 7 handoff
+
+Submission packaging is implemented under the newly owned `submission/`;
+the real saved-output capture is running. No PR, push or git-writing command.
+
+Official sources checked on 2026-10-18:
+
+- Current official root README at commit
+  `a502a6ba01260d3492df9137dddae0bb5fabeb3c`, ISSCC27's README and
+  submitted-notebooks README, and the IEEE SSCS award page. Source URLs/hashes
+  are recorded in `submission/official_sources.json`; the payload checklist
+  links the exact revision plus the live IEEE page.
+- The current target is `ISSCC27/submitted_notebooks/<project_name>/`; the
+  deadline is **October 31, 2026, 11:59 AM Pacific**, not midnight.
+  The older `howtoapply.md` names ISSCC26 and November 27, 2025, so its event/
+  deadline are superseded. Its author-at-top, references and version guidance
+  are retained conservatively and labeled as older presentation guidance.
+- Read accepted ISSCC26 current-mode logic/CircuitsDNA and VLSI26 IMC
+  side-channel folders, checking their event acceptance/winner lists. They
+  illustrate notebook/README/license/support-file structure; no notebook/code
+  was reused. No numerical file/byte limit or abstract/pitch requirement was
+  invented as an official rule. Our seven-file / 8-MiB cap is a packaging guard.
+
+Implementation:
+
+- `submission/build_submission.py` executes the current notebook in a Jupyter
+  kernel with real Plotly PNG export, saves all tables/results, normalizes
+  machine paths, embeds the schematic gallery as native SVG/PNG bundles and
+  validates source-cell identity, successful execution, evidence counts,
+  file hashes and size. PNG optimization is lossless. Figures/measurements
+  are never replaced with hand-entered values. Animation captures are labeled
+  as stills; normal re-execution restores interactive figures.
+- Payload target: `submission/ISSCC27/submitted_notebooks/TritFlow/`.
+  Only seven files belong in the eventual official-repository PR: notebook,
+  README, LICENSE, ABSTRACT, PITCH, CHECKLIST and build-info JSON. Full source,
+  PDKs, library trees, caches, raw SPICE/waveforms and build tools stay out.
+  A successful capture publishes from validated staging; failures retain raw
+  diagnostics outside the payload. `--from-executed` supports packaging edits
+  without pretending to run EDA again; `--check` audits the saved package.
+- `submission/team.json` contains explicit name/affiliation/email/team/
+  representative placeholders. No suggested personal identity was inferred.
+  Generated README and notebook front matter draw from that file. The
+  historical schematic repo had no separate license file when inspected, so
+  included-export rights are a submitter confirmation field rather than an
+  invented license claim. Root TritFlow Apache-2.0 LICENSE is copied verbatim;
+  external tool/PDK licenses and reference provenance remain separate.
+- One-paragraph abstract, exactly three-sentence pitch, and official-rule
+  mapping are in reviewable templates and copied into the payload. The
+  checklist distinguishes included technical evidence from pending identity,
+  filing, attendance/poster/travel documentation and deferred Colab actions.
+- **Release prerequisite:** a read-only remote query found `colab-v0` at
+  `89b484bb484ca26f8bb8e1d8cb7ec26cccbea269`. That release lacks
+  `notebook/experiments.py` (and predates the present notebook). The builder
+  records local release/source compatibility and adds a concrete README/front-
+  matter TODO when mismatched. Integrator must publish a corresponding
+  immutable source ref and configure `TRITFLOW_REF` before filing. Bootstrap
+  code remains unchanged; no tag was created/moved here. Saved reading does
+  not require that runtime release to be ready.
+
+Validation so far: **6 packaging tests pass**. The combined command
+`python3 -m pytest notebook/tests tests/hdl tests/synth tests/viz submission/tests -q`
+passed **234 tests in 45.68 s**. Saved-output notebook/size/readability checks
+will be recorded after the real capture completes.
+
+Build-only packages installed using the required user pip command:
+nbformat 5.10.4, nbclient 0.10.4, Kaleido 1.5.0, Choreographer 1.4.0,
+CairoSVG 2.8.2 and their Python dependencies. Existing Chrome/Cairo were used;
+no system packages or browser were installed. Kaleido 1.1.0 was initially
+tested, found incompatible with the current Choreographer, and replaced by
+the recorded 1.5.0 pin before capture. These dependencies are outside the
+reviewer payload and do not alter the Colab bootstrap.
 
 ## Phase 6 handoff
 
