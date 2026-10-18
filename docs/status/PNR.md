@@ -1,3 +1,72 @@
+# PNR — phase 7 complete: logical-net parasitics
+
+Qualified with public pinned PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c**, CELLS generation `2026-10-18T10:26:47.211617+00:00`. Phase 7 adds derived reports and figures; the four macro GDS files and their complete `power` sections are identical to SIM's retained input snapshots. No external tree or SIM artifact was edited.
+
+## Done and public API
+
+- `PnrResult.net_parasitics()` returns a dictionary and writes **`build/<design>/<top>.net_parasitics.json`**. Every successful PNR run writes this automatically, including mock runs. `<top>.pnr.json` embeds the same report under the additive `net_parasitics` key, so a saved notebook result can be viewed without accessing a mutable cell library.
+- Every GateNetlist signal net retains its exact name, including unused inputs, unrouted singleton outputs, hierarchy and case-distinct/vector names. Fields include `wirelength_um` per M1/M2, `via_count`, `pin_count`, `fanout`, per-layer merged area/perimeter/C, `wire_capacitance_f`, `cell_input_capacitance_f`, and `total_load_f`. Source characterization file hashes are retained.
+- **`tritflow.viz.layout.capacitance_figure(result_or_pnr_json)`** returns an ordinary Plotly figure, with a continuous fF colour scale and logical-net/load/fan-out hover. All metal layers and vias belonging to a net share its colour. Cell boundaries retain hierarchy hover; boundary pads include otherwise unused input nets. Empty/all-zero reports are supported. `save_layout_views()` adds the portable, self-contained **`<top>.capacitance.html`** beside the existing raster, vector and animation views.
+- `examples/pnr_all.py` regenerates reports and figures when consumed cells, characterization, extraction model or PNR code changes, and checks the new artifacts before accepting a cache hit. The rebuild and a subsequent unchanged-cache replay both passed.
+
+```python
+from tritflow.viz.layout import capacitance_figure
+
+# lay is the public Layout; its PnrResult is lay.result.
+loads = lay.result.net_parasitics()
+loads["nets"]["_n0"]["total_load_f"]
+capacitance_figure(lay).show()
+
+# Optional matched-LVS and retained-SIM comparison, with exact logical names.
+loads = lay.result.net_parasitics(
+    lvs_report="build/full_add/postlayout/lvs/full_add.lvsdb",
+    capacitance_path="build/full_add/postlayout/capacitance.json",
+)
+loads["extracted_comparison"]["nets"]["_n0"]
+```
+
+`lvs_report` alone provides connected-metal values without running ngspice. `capacitance_path` requires its matching LVS database. This optional call enriches the sidecar; the frozen PNR snapshot and power record remain unchanged. Older PnrResult objects can be upgraded using their GateNetlist (or its sibling `<top>.json`) and library; new reports replay their embedded snapshot. Passing `library=` explicitly refreshes the characterization used by that calculation.
+
+## Model and counting decisions
+
+The implementation **imports SIM's `tritflow.extract.wire_capacitance`, `gds_wire_capacitance` and `reference_net_map`**. No area/fringe numerical coefficient is copied into PNR. Routed metal uses the exporter's square-ended rectangles, boundary pads and actual template-sized M1/M2 landings at every V1. Same-net/layer overlaps are merged before measuring area and perimeter. Via cuts add no C in SIM's present model; their count remains reported. Length sums the recorded Manhattan branches and excludes power, independently of polygon union for C.
+
+`pin_count` counts receiving and driving cell signal terminals plus top ports. `fanout` counts receiving input pins: tying A and B of one cell to a net contributes two loads. For each receiver, C is the **maximum of that pin's own `input_capacitance.rows` AC measurements over all characterized biases**, read from `cells/out/<CELL>/<CELL>.char.json`; another pin's/global cell maximum is never substituted. The report retains each instance, pin, hierarchy and input C. Summing these separate maxima is a conservative envelope and need not be one simultaneously achievable input vector. These measurements are nominal 1 MHz unloaded-output driving-point C, including Miller response, not a fixed PVT timing model.
+
+`total_load_f = wire_capacitance_f + cell_input_capacitance_f` is the modeled **on-chip routed load**. External output loads and driver intrinsic C are excluded explicitly. Missing receiving-pin characterization gives `null` C/load with named missing pins, never an invented zero; known partial C remains available. Mock cells consequently have null loads on nets feeding uncharacterized inputs. All four real designs have complete receiving-pin characterization.
+
+The optional `extracted_comparison.nets[logical_name]` supplies `extracted_net`, `connected_metal_capacitance_f`, per-layer actual-GDS geometry, `connected_minus_routed_f`, and **`connected_metal_total_load_f`** (connected-metal C plus receiving-pin C). This is an alternative load using SIM's full connected-metal scope. **Do not add routed C to connected-metal C**. The substrate area/fringe coefficients remain assumptions, not calibrated PDK PEX; coupling, shielding, signal R, via C and child-only local nets remain outside the model.
+
+## Four examples and SIM agreement
+
+All seeds 0/7/19 rebuilt for the four examples; selected outputs have independent connectivity clean, PDK drawing DRC **0**, and strict LVS **Match**. The physical layouts, utilization and currents are unchanged. Final canonical adder4 PNR took **7.11 s**, **8.75 s** including LVS; reporting did not compromise the 30 s target.
+
+| Design | Signal nets | Routed wire C (pF) | Receiving pin C (pF) | Routed on-chip load (pF) | DRC / LVS |
+|---|---:|---:|---:|---:|---|
+| full_add | 19 | 1.311297252 | 8.984864061 | 10.296161313 | 0 / Match |
+| adder4 | 73 | 9.235546625 | 35.939456243 | 45.175002868 | 0 / Match |
+| mac1 | 27 | 1.771491265 | 10.822114357 | 12.593605622 | 0 / Match |
+| mul1 | 6 | 0.198811692 | 1.493972188 | 1.692783880 | 0 / Match |
+
+The like-for-like comparison maps **19/19 full_add** and **73/73 adder4** signals through **Match** net pairs in SIM's retained LVS database, reversing its reversible SPICE naming. It recomputes actual connected metal from the byte-identical current GDS with the shared model and compares every node against `build/<design>/postlayout/capacitance.json`. **Maximum per-signal discrepancy: 0 F** for both designs. Every extracted supply node also agrees; there are no unmatched signal nets. The retained GDS hash is checked before comparing, and the API rejects a different physical revision or different capacitance coefficients.
+
+| Design | Connected signal C, both reports (pF) | Connected minus routed (pF) | Non-signal/supply C (pF) | SIM all-net total, both reports (pF) | Maximum signal error (F) |
+|---|---:|---:|---:|---:|---:|
+| full_add | 2.095028169 | 0.783730917 | 5.412696341 | 7.507724510 | 0 |
+| adder4 | 12.370470293 | 3.134923668 | 21.162660435 | 33.533130728 | 0 |
+
+The raw route estimate is lower because it excludes connected cell-pin metal; SIM's all-net total additionally includes supply metal. These are scope differences, not numerical agreement claims. For example full_add `_n0` corresponds to **`$I62`**: routed C **75.4566592 fF**, connected-metal C **143.1100232 fF**, exactly SIM's saved value. Adding its characterized receivers gives **907.9040123 fF** with the connected-metal scope. No anonymous internal name is inferred from string similarity or guessed casing.
+
+Evidence: **`build/pnr_net_parasitics_comparison.json`**, `build/{full_add,adder4}/<top>.net_parasitics.sim.json`, all four `<top>.net_parasitics.json` / `<top>.capacitance.html`, and reproducible generated collector `python3 build/report_net_parasitics.py`. The normal sidecars retain the batch's own matched-LVS connected-metal values; the separate `.sim.json` reports retain SIM's exact correspondence, source hashes, and per-net comparison without modifying SIM files or the canonical batch cache.
+
+## Validation and Interface requests
+
+- **48 passed in 98.37 s**: `python3 -m pytest tests/pnr tests/viz/test_layout.py -q` (`build/pnr_phase7_final_tests.log`). The six new tests cover specific-pin bias envelopes, same-cell multiple receivers, unused/singleton nets, missing characterization, exact exported routing areas/perimeters including landings, shared coefficient updates, frozen characterization/coefficient snapshots, strict LVS mapping of vector/case-distinct names, deliberate mismatched C/stale GDS rejection, and the figure's per-net colours/fF scale. Existing real full-chip drawing/LVS/MDP/IP62 checks also passed.
+- `python3 examples/pnr_all.py` and its unchanged-cache replay passed (`build/pnr_phase7_final_examples.log`, `build/pnr_phase7_final_cache.log`). `compileall` and owned-path `git diff --check` passed. No new package was installed for phase 7.
+- No geometry/router/power algorithm changed in phase 7; the earlier 109-design pinned qualification below remains the physical campaign evidence, rather than claiming a new 109-design fuzz run for this reporting change. No PNR watcher or background producer remains running.
+- **FRONTEND:** notebook use is `lay.result.net_parasitics()` and `capacitance_figure(lay)` (or the `.pnr.json` path). A `Layout.net_parasitics()` convenience delegate is optional and remains FRONTEND-owned. The new report is available immediately after place/route; LVS enrichment is optional.
+- **SIM:** the `power` section is stable and was checked for equality against all four retained input snapshots. The PNR JSON file hash changes because of additive metadata/runtime records, so a whole-input provenance cache may refresh; all four macro GDS hashes remain identical. Connected-metal and routed-metal totals have separate, documented fields and must not be summed. No SIM interface change is required.
+
 # PNR — phase 6 complete, public pinned PDK
 
 Qualified only against public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c** at `~/pdk/TR-1um-pinned`.
@@ -135,16 +204,16 @@ Machine-readable complete evidence: `build/pnr_pinned_qualification.json`; the u
 <!-- PNR_RESULTS_BEGIN -->
 ## Current verified build results
 
-Published template height: **132 µm**. Input content fingerprint: `6df7cbddebf8448e32a22c28c37c2ef26f33348991f9df976472b235a8369289`.
+Published template height: **132 µm**. Input content fingerprint: `c6ea2c59dd3684bf5a4c56e4c322ea7aae4dec5aa827ca925f1bf14c8eb6f725`.
 
 All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
 
 | Design | Seed | Die (µm) | Aspect | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS | PNR / +LVS (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|
-| adder4 | 7 | 1692 × 1590 | 1.064 | 46.87% | 47274 | 43333 | 551 / 800 | 0 violations | Match | 6.59 / 8.01 |
-| full_add | 19 | 876 × 702 | 1.248 | 51.26% | 6300 | 6200.5 | 125 / 240 | 0 violations | Match | 2.12 / 3.72 |
-| mac1 | 0 | 876 × 1038 | 1.185 | 47.21% | 7782 | 9195.5 | 167 / 360 | 0 violations | Match | 2.17 / 3.51 |
-| mul1 | 0 | 420 × 366 | 1.148 | 46.37% | 822 | 1022.5 | 25 / 80 | 0 violations | Match | 2.04 / 3.60 |
+| adder4 | 7 | 1692 × 1590 | 1.064 | 46.87% | 47274 | 43333 | 551 / 800 | 0 violations | Match | 7.11 / 8.75 |
+| full_add | 19 | 876 × 702 | 1.248 | 51.26% | 6300 | 6200.5 | 125 / 240 | 0 violations | Match | 1.68 / 2.74 |
+| mac1 | 0 | 876 × 1038 | 1.185 | 47.21% | 7782 | 9195.5 | 167 / 360 | 0 violations | Match | 1.86 / 2.92 |
+| mul1 | 0 | 420 × 366 | 1.148 | 46.37% | 822 | 1022.5 | 25 / 80 | 0 violations | Match | 1.06 / 1.88 |
 
 ## Phase 2 → phase 3
 
@@ -163,18 +232,18 @@ Cell-terminal HPWL excludes external ports. Each before/after pair uses the same
 
 | Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | PNR / +LVS (s) | DRC / LVS |
 |---|---:|---:|---:|---:|---:|---|
-| adder4 | 0 | 82552.5 | 53907 | 34.70% | 27.00 / 28.25 | clean / Match |
-| adder4 | 7 | 72040.5 | 48070.5 | 33.27% | 6.14 / 7.45 | clean / Match |
-| adder4 | 19 | 77296.5 | 53035.5 | 31.39% | 17.07 / 18.72 | clean / Match |
-| full_add | 0 | 9135 | 5088 | 44.30% | 2.32 / 4.02 | clean / Match |
-| full_add | 7 | 9831 | 5376 | 45.32% | 3.59 / 5.47 | clean / Match |
-| full_add | 19 | 9135 | 4680 | 48.77% | 2.38 / 3.82 | clean / Match |
-| mac1 | 0 | 16659.5 | 7353 | 55.86% | 2.20 / 3.80 | clean / Match |
-| mac1 | 7 | 16659.5 | 8070.5 | 51.56% | 2.41 / 3.73 | clean / Match |
-| mac1 | 19 | 18171.5 | 10235 | 43.68% | 4.19 / 5.64 | clean / Match |
-| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 1.46 / 3.04 | clean / Match |
-| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 1.48 / 3.00 | clean / Match |
-| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 1.49 / 2.93 | clean / Match |
+| adder4 | 0 | 82552.5 | 53907 | 34.70% | 26.83 / 28.05 | clean / Match |
+| adder4 | 7 | 72040.5 | 48070.5 | 33.27% | 6.36 / 7.50 | clean / Match |
+| adder4 | 19 | 77296.5 | 53035.5 | 31.39% | 16.95 / 18.47 | clean / Match |
+| full_add | 0 | 9135 | 5088 | 44.30% | 1.69 / 2.73 | clean / Match |
+| full_add | 7 | 9831 | 5376 | 45.32% | 4.07 / 5.14 | clean / Match |
+| full_add | 19 | 9135 | 4680 | 48.77% | 1.62 / 2.62 | clean / Match |
+| mac1 | 0 | 16659.5 | 7353 | 55.86% | 1.77 / 2.79 | clean / Match |
+| mac1 | 7 | 16659.5 | 8070.5 | 51.56% | 2.04 / 3.15 | clean / Match |
+| mac1 | 19 | 18171.5 | 10235 | 43.68% | 3.09 / 4.27 | clean / Match |
+| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 1.14 / 2.22 | clean / Match |
+| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 1.22 / 2.11 | clean / Match |
+| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 1.08 / 1.91 | clean / Match |
 
 Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.
 <!-- PNR_RESULTS_END -->

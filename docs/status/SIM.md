@@ -1,36 +1,142 @@
-# SIM status — pinned-PDK requalification in progress
+# SIM — complete, public pinned PDK
 
-2026-10-18. The only qualification target is public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c** at `$TR1UM_PDK` (`~/pdk/TR-1um-pinned`). All numerical tables below the historical separator are **superseded dev-PDK results**, pending the republishing described here. No old SIM simulations remain running.
+2026-10-18. Qualification target: **5d963db9d44e192d37a0489c208bfccf2e2f690c**, installed at `$TR1UM_PDK` / `~/pdk/TR-1um-pinned`. CELLS generation **2026-10-18T10:26:47.211617+00:00** and the final PNR Phase 6 outputs are consumed. No blockers or extra installed packages. No PDK/reference files or foreign source paths were edited; no git-writing commands ran.
 
-## Review fixes completed first
+All four canonical post-layout loops, N=1…6 scaling, load sweep, sizing grids, eight electrical `.char.json` files, robustness matrix and derived figures are current. `results/pinned_requalification.json` checks their consumed hashes, native PDK identity, actual C-element counts and retained artifacts, and records every reported numeric change against the preserved dev baseline. `results/environment.json` records local Python 3.12 / native KLayout 0.30.9 / Python KLayout 0.30.6 / ngspice 46+ and executable hashes on aarch64. This is local qualification, not a new clean amd64 Colab run.
 
-- Finding 2: restoring a schematic-unused power formal now also requires actual TXM1/TXM2 labels on one connected drawn M1/M2/V1 component. Standard-cell pass-through rails must reach both abutment edges. Missing conductor, missing label and severed-VMID regressions all reject; an intact INV still passes the pinned LVS deck.
-- Finding 6: `gate_spice` uses synthesis's writer directly, including its shared `spice_names` encoding and reversible net annotations. Testbenches use safe external node names; waveform and oracle keys restore exact logical spelling. Independent `a`/`A`, `y`/`Y` truth tables pass ngspice transient and DC tests. Synthesis files were not edited.
+## REVIEW 2 and 6 — physical ports and naming
 
-## PNR handoff: encoded ports on the pinned deck — ready to rerun
+- An unloaded power formal is restored only after the schematic proves it unused **and** real TXM1/TXM2 labels lie on one continuous drawn M1/M2/V1 component. Standard-cell pass-through rails must reach both abutment edges. Deleted VMID metal, a severed rail and a missing label all reject. Native circuit/device mismatches are never waived.
+- `gate_spice` uses synthesis’s `spice` writer and shared `spice_names` encoding. Bench stimuli/probes, DC results and waveform/oracle keys preserve exact logical spelling; independent `a`/`A` and `y`/`Y` pass nine-state transient/DC regressions. `reference_net_map` reverses encoding and preserves legacy uppercase lookups only when unambiguous. The synthesis writer was read, not edited.
+- The pinned deck’s strict name check needs physical labels to match the encoded reference. Extraction renames **existing labels only** in a scratch `spice_named_input.gds`, preserving geometry and the original GDS. It records the reversible map and modified-label count; missing loaded labels still fail. PNR adopted the map for its separately proven unloaded-input pads.
+- All nine current cells were independently checked in `results/cell_pinned_lvs.json`. Device-free FILL’s standalone native mismatch is retained explicitly; its qualification uses empty extraction, physical rail continuity and a strict three-rail RR probe. CELLS’ 324 abutments and 66 pinned regression tests are recorded in CELLS status.
 
-The pinned deck's strict name comparison needs the physical labels and reference to use the same reversible encoding. `extract_layout` now renames **existing labels only**, in `lvs/spice_named_input.gds`, using the exact synthesis annotations. It preserves geometry and the source GDS, never adds a missing label, and runs the unmodified pinned deck. Extracted SPICE carries the inverse annotations for logical bench keys. A real adder4 probe now returns native strict **Match** (`build/pinned_naming_probe/`). PNR can rerun its campaign. The result records `spice_name_map` and `label_normalization_gds`; the unused-input wrapper must compare mapped formals when such inputs are present.
+## Phase 5 anomaly — cause and controlled correction
 
-## Delay anomaly — root cause found, corrected reruns active
+**The lower post-layout slope was an invalid comparison.** Two effects were found:
 
-The old `subcircuits()` parser unfolded SPICE continuation lines before returning a subcircuit's text. The capacitance annotator then tried to replace that altered text in the original source, silently doing nothing when the source contained continuations. Saved evidence `results/delay_annotation_bug.json` records nonzero computed C but **zero Ctfwire devices** (and identical pre/post text hashes) for affected adders. This explains why an extracted device-only network could be labelled post-layout and appear faster than the schematic. A second difference is RN terminal orientation: the PDK F_RR model attaches 25.95 fF only to PLUS for W=2.8/L=30; extraction swaps RN PLUS/MINUS relative to the schematic. MOS AD/AS/PD/PS equal the active wrapper defaults, so those are not the cause.
+1. `subcircuits()` unfolded continuation lines before returning source text. The wire annotator then searched for that changed text in the original source and silently inserted nothing. Larger continued netlists could have nonzero computed capacitance and **zero Ctfwire devices**. `results/delay_annotation_bug.json` preserves the failed evidence. The parser now retains exact original slices; annotation rejects a no-op; regression covers continued top declarations and MOS junction parameters.
+2. The PDK F_RR model for W=2.8/L=30 has **25.95 fF from PLUS to SUB and zero from MINUS**. Extraction reverses RN PLUS/MINUS relative to the schematic, moving this approximate intrinsic C from Y to the NMOS-side node. Symmetric resistor topology still passes LVS. MOS AD/AS/PD/PS equal the active 2.8 um diffusion-default wrapper values, so junction parameters are not the cause.
 
-The parser now preserves exact original source slices, the annotator rejects a no-op, and a regression covers both continued top declarations and continued MOS junction parameters. A real adder2 now receives all 40 calculated net capacitors. Affected SIM producer processes were stopped and are being rerun. Final wire comparisons use identical extracted intrinsic devices, with the original schematic retained as the independent LVS reference. Earlier numeric fits are invalid. The corrected, already measured device-only/+C endpoint pairs (ns) are N=1 **54.951/60.425**, N=2 **103.941/117.268**, N=3 **152.835/170.962**, N=4 **201.908/232.934**, N=5 **250.764/279.594**, N=6 **299.670/351.696**. Every top now contains its calculated 22/40/58/76/94/112 Ctfwire elements. Their provisional free-intercept slopes are **48.947 / 57.295 ns/trit**, so the wire effect has the expected sign. Publication waits for final cell/source freshness and the shared Newton-initialization policy; the final table/fit below will supersede these provisional numbers.
+Every published pre/post pair now uses the **same extracted intrinsic devices, orientation, parameters, input edges, loads and initial guesses**, differing only by the added estimated wire C. The original GateNetlist schematic remains the independent LVS reference in `schematic.spice`. “Pre” in legacy JSON keys therefore means **device-only / pre-wire**, as stated by `comparison_scope` and the plot legends. All six adders contain their calculated 22/40/58/76/94/112 wire capacitors.
 
-## Rail-current audit
+N=1 controlled carry (0.5 ns maximum step; same seven vectors), from `results/delay_diagnosis.json`:
 
-The saved old scaling N=6 rail network used 250 uA/um without a reserve: solved M1 utilization 98.9993% nominal and **118.155%** under the measured cold/+10% current envelope. It is not robust at that corner. PNR's new public API uses 200 uA/um (20% reserve against the OS00 p17 stepped-M1 limit), records the source and reserve in `power.assumptions`, and checks actual solved branch currents after routing. Its rebuilt `build/adder6` is 49.8640% nominal / 59.3657% worst sampled T/V. Scaling is now rebuilding the same margin-aware geometry. These values are current-envelope sensitivity, without foundry lifetime/temperature derating; no EM sign-off claim. Evidence: `results/rail_margin_change.json`, `results/rail_current_audit.json`.
+| Circuit | Carry settling (ns) |
+|---|---:|
+| schematic | 55.127349 |
+| schematic_RN_reversed | 54.949683 |
+| extracted_device_only | 54.947465 |
+| extracted_plus_wire | 60.659223 |
 
-## Validation progress
+A separate N=6 negative-carry setup/assert control uses the same devices and actual final wire C:
 
-Current focused regressions pass (continuation annotation, missing/severed rails, encoded physical labels, case-sensitive transient/DC, band criteria and corner figure null handling). The first full suite completed **67 passed / 1 timeout**, with no assertion failures: the now-real wire-C simulation of the large taped-out reference exceeded its old 120 s wall timeout while streams shared the host. That integration case retains the same 27 vectors, 500 ns window and 0.5 ns timestep, with a 600 s execution timeout; its complete three-test integration rerun passed in 379.70 s under concurrent host load. The final combined suite subsequently passed **69 tests in 265.92 s**; JUnit evidence is under `build/sim_verification/pytest.xml`. This changes no electrical acceptance criterion.
+| Max step (ns) | Device-only (ns) | + wire C (ns) | Wire penalty (ns) |
+|---:|---:|---:|---:|
+| 2 | 303.846500 | 348.696832 | 44.850332 |
+| 0.25 | 303.914161 | 348.763476 | 44.849316 |
+| 0.1 | 303.920343 | 348.778526 | 44.858183 |
 
-## Reproduction / cache entry points
+The two fine-step penalties differ by only 0.008867 ns. This isolated pair starts from its own DC setup and is a different history from the scaling sequence; its absolute delay is several ns larger. “Worst measured” means the maximum over the documented cases, not all analog histories. A sample step is not an integration-error bound.
 
-Use the pinned environment (`TR1UM_PDK=~/pdk/TR-1um-pinned`):
+Mul1 also exposed a nonphysical initial Newton root at +525.862 / −505.185 V. Both modes now receive identical LVS-mapped internal ideal-logic **`.nodeset` guesses**, never `.ic`, `uic` or transient constraints; independent arithmetic still decides PASS. Unseeded evidence is archived. All **20** final nominal initial solutions (four designs + six widths, both modes) pass the printed-node ±6 V sanity audit in `results/operating_point_audit.json`.
+
+## Final canonical post-layout loop
+
+All native LVS, device-only and +wire-C runs pass. Nominal conditions: +5/0/−5 V, 27 C, 10 fF per output, 1 ns input ramps, 500 ns holds, 2 ns maximum step; checkpoints are 1 ns before hold end. Settling is final entry into the ideal ±0.5 V band, staying there through segment end.
+
+| Design | Vectors | Max post error (mV) | Max device-only → post settling (ns) | Max rail estimate (mV) | Additional divider-zero shift (mV) |
+|---|---:|---:|---:|---:|---:|
+| adder4 | 20 | 43.340 | 201.845 → 231.797 | 15.594 | 1.446 |
+| full_add | 27 | 43.340 | 100.335 → 108.634 | 3.766 | 0.692 |
+| mac1 | 81 | 43.446 | 131.881 → 147.563 | 6.470 | 0.888 |
+| mul1 | 9 | 100.891 | 15.258 → 17.138 | 1.206 | 0.330 |
+
+Full_add/mac1/mul1 exhaust all 27/81/9 states. Adder4’s 20 documented cases include positive and negative four-digit carry setup/assert/release, overflow, cancellation, alternation and individual-digit probes. The maxima above can occur on different transitions; per-transition deltas remain in each summary. Each `build/<design>/postlayout/` retains exact input/library snapshots, native LVS database/log, independent reference, device/augmented SPICE, geometry/C, initialization, vectors/oracle results, NPZ waveforms, measurements, IR and HTML.
+
+## Final chapter-7 scaling and DC power
+
+Public HDL/synthesis/PNR APIs, real drawing DRC/LVS and ngspice were used for every width. Four directed full-length carry assertions/releases cover both polarities; overflow/zero/opposite/alternating cases are also included. N=1 additionally visits all 27 states. Holds are 1 us; maximum step 2 ns; other nominal conditions match above. DC power is separately solved with `.op` for 27 unique states at N=1 and nine documented unique states otherwise.
+
+| N | Cells | Die (mm²) | Device-only carry (ns) | +C carry (ns) | Worst representative DC (mW) | Rail estimate (mV) | Zero shift (mV) | Nominal DC-limit use (%) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 16 | 0.739800 | 54.951 | 60.669 | 66.705 | 4.246 | 0.708 | 54.81 |
+| 2 | 32 | 1.454112 | 103.939 | 115.389 | 133.411 | 7.802 | 0.943 | 58.89 |
+| 3 | 48 | 2.040552 | 152.835 | 169.459 | 200.116 | 9.569 | 1.142 | 65.07 |
+| 4 | 64 | 2.690280 | 201.893 | 231.807 | 266.822 | 15.594 | 1.446 | 67.58 |
+| 5 | 80 | 3.835944 | 250.762 | 286.547 | 333.527 | 18.239 | 1.469 | 69.29 |
+| 6 | 96 | 4.329108 | 299.713 | 343.675 | 400.232 | 31.418 | 1.851 | 74.09 |
+
+Free-intercept OLS over all six measured widths:
+
+- Device-only: **48.9525 ns/trit + 6.0150 ns**, R² 0.99999983.
+- + wire C: **56.8814 ns/trit + 2.1729 ns**, R² 0.99967025.
+- Static power: **4.169084 mW per mapped cell**, for this fixed adder cell mix and documented-state maximum. Residuals and predictions are in JSON; these are not PVT confidence limits.
+
+**N=6 draws 0.400232 W at its worst sampled nominal static state.** Resistive-divider ternary cells draw DC without switching; reducing clock frequency alone does not remove that power. This is fixed-temperature electrical simulation, not a thermal/package model.
+
+`results/adder_scaling.json`, `adder_scaling.html`, and `adder_scaling_fit.html` are the current publications. Plotly functions: `scaling_figure` and `scaling_fit_figure` in `tritflow.viz.scaling`.
+
+## Full-adder load boundary
+
+Equal external loads on sum and cout, in addition to actual-GDS estimated wire C: **12.81250 pF PASS / 12.96875 pF FAIL** in the 500 ns window. This is the first observed local bracket on all 27 lexicographic states / 26 transitions, not every directed transition or analog history. Unsettled delays remain null. JSON/HTML: `results/full_add_load_sweep.*`; `load_sweep_figure` is figure-ready.
+
+## Available-process / temperature / supply robustness
+
+The public `models_IP62_*.lib` files provide **nominal/TYP only**, with no `.lib` corner sections. FF/SS/FS/SF and the private Taguchi L16 sets are not invented. Evidence: OS00 reference manual pp37–38; OS02 simulation guideline p16 states “コーナーモデルは非公開です。” The published temperature-fit range is 27…150 C; **−40 C is extrapolation**.
+
+All **54 cases complete**: INV/NAND/NOR/NANY/BUF plus post-layout full_add × −40/27/85 C × common supply scale 0.9/1.0/1.1. VDD/VSS move symmetrically, VMID stays zero, and input trits track their corresponding actual rails. Cell runs cover every discrete DC state and directed input-vector transition at 10 fF; full_add covers all 27 states with its actual final estimated wire C.
+
+- Every case passes the ±0.5 V band relative to its **actual rails**.
+- Against the project’s **fixed −5/0/+5 V levels**, every DUT fails at −10% supply, at all three temperatures: the rail shift already exhausts the 0.5 V budget and finite output loss takes levels just outside. Nominal and +10% cases pass. The largest hot/low full-adder fixed error is **0.500267 V**.
+- Both criteria, true per-state DC currents/power, settling and failed points are retained; no recentering is used to claim compliance with the fixed project criterion.
+
+| DUT | Largest actual-rail error over grid (mV) | Actual-rail PASS | Fixed-level PASS |
+|---|---:|---:|---:|
+| INV | 64.626 | 9/9 | 6/9 |
+| NAND | 118.298 | 9/9 | 6/9 |
+| NOR | 175.925 | 9/9 | 6/9 |
+| NANY | 66.286 | 9/9 | 6/9 |
+| BUF | 60.579 | 9/9 | 6/9 |
+| full_add | 65.052 | 9/9 | 6/9 |
+
+Current compact caches are the **54** files referenced by `results/corners/summary.json`; earlier cases are archived separately. `load_corners()` only reads JSON. `corners_figure(result, dut=...)` produces fixed/tracking-error, static-current and settling heatmaps; failed/unsettled values are never fabricated. HTML exists for all six DUTs.
+
+## PDK facts, retained assumptions and current-limit check
+
+The seven pinned Japanese PDFs (109 pages) and model libraries are byte-identical to those audited previously. Document abbreviations: `OS00_リファレンスマニュアル_rev1.1.pdf`, `OS02_回路simガイドライン_rev1.pdf`, `OS04_ESD保護素子ガイドライン_rev1.pdf`; pages below are one-based PDF pages. `results/pdk_parameters.json` records document/model hashes, facts and missing-data decisions:
+
+| Quantity | Pinned source | Decision |
+|---|---|---|
+| RR / RS-poly sheet specification | OS00 reference manual p9, I-2-4: RR 1000 Ω/square, RS 120 Ω/square, W=6 um, ±15% | Device specifications; keep empirical PDK resistor models. RS is not a calibrated GC-routing value. |
+| Metal/poly routing sheet R; generic contact/TC R | No metal/contact values or calibrated GC-routing value found | Retain **M1/M2 0.05 Ω/square** and **TC 0.05 Ω** assumptions. CELLS’ 120 Ω/square GC proxy remains a separately labelled sensitivity. |
+| Substrate area/fringe C | Not supplied | Retain M1 **0.03453 fF/um²**, M2 **0.01727 fF/um²**, fringe **0.02 fF/um**. No coupling, via C or signal-wire R; not signoff PEX. |
+| Other capacitor data | OS00 p10 CSIO 0.6 fF/um²; OS04 ESD guideline p7, 64000 um² M1/M2 overlap ≥2 pF | Device/intermetal data, not substrate/fringe calibration; not substituted. |
+| DC current ratings | OS00 p17, I-3-1/I-3-3: M1 900 uA/2 um flat, **500 uA/2 um stepped**; M2 **3.7 mA/3 um**; TC **780 uA/cut**, 1.4 um square (7.8 mA instantaneous) | PNR uses separate M1/M2 ratings with a **20% reserve**, actual TC arrays and solved branch-current checks. Linear metal-width scaling is an engineering interpretation. |
+
+All **18** current `build/*/<top>.pnr.json` and scaling layouts use the published M1-step bound and pass the independent nominal DC branch check. The old scaling N=6 envelope was **98.9993% nominal / 118.1551% cold +10%**, so it was not robust. The final scaling N=6 is **74.0874% nominal / 88.3557% worst sampled T/V** (-40 C, common scale 1.1). The nine-condition current-envelope recheck covers 17 layouts; mul2’s constant-cell mix has nominal checking but no whole-design T/V envelope in this experiment.
+
+The MOS library’s `rsh=44.9607` is diffusion sheet R, not metal; F_RS’s empirical 95 and RR branch coefficients are device fits, not generic contact/interconnect R.
+
+`results/rail_current_audit.json` retains every source JSON hash, sizing assumption, row/feed calculation and solved M1/M2/TC maximum. T/V currents use measured per-cell envelopes on the fixed geometry/R model, not a realizable simultaneous logic vector. No lifetime/temperature derating was provided; this is **not EM signoff**. IR and additional divider-zero shift remain estimates separate from ideal-rail SPICE.
+
+## What changed / chapter-2 and characterization publication
+
+The dev baseline is retained under `results/dev_before_pinned/`. The machine-readable comparison in `results/pinned_requalification.json` covers all reported scalar changes. Important changes:
+
+- Invalid old fitted delay slopes **49.1622 / 47.2584 ns/trit** are superseded by **48.9525 / 56.8814 ns/trit**, with matched intrinsic devices and real wire C. Corrected C insertion, initialization and PNR power geometry explain these changes; they are not new metal R/C coefficients.
+- Adder4’s largest post settling is now **231.797 ns** (old 201.813 ns). Full per-output before/after values are in the manifest.
+- N=6 area/IR estimates changed with the real layer-specific power layout. Device SPICE, all eight electrical-cell characterizations’ reported metrics, all **90 INV / 18 NANY sizing rows**, and the load bracket are unchanged (static-power differences are floating-point roundoff). Sizing passes remain **76/90 INV** and **17/18 NANY**; one unphysical NANY solver root remains explicitly rejected.
+- Characterization includes nominal DC, signed rail currents, biased 1 MHz input C, 10/100/1000 fF directed transitions, depth-5 restoration and measured F=1/2/4/8 self-loading. The original RR20 two-inverter saved chain is separately replayed; the delivered RR30 circuits remain the adopted dimensions.
+
+`sweep_dimensions` resolves canonical device IDs from the current schematic, includes the adopted baseline once and caches complete DC curves/discrete-state metrics. `load_grid` rejects source/model/analysis changes. `sizing_figure` marks the actual adopted size; `waveform_figure` shows the three corresponding ideal levels, ±0.5 V bands, checkpoints/PASS/FAIL, settling and pre-wire/+C overlays, including correctly centred supply-tracking bands for PVT. `transfer_figure` puts signed static current on its second axis.
+
+## Reproduce / cache / validation
+
+Run sequentially after the CELLS/PNR publish, with `TR1UM_PDK=~/pdk/TR-1um-pinned`:
 
 ```sh
-python3 examples/postlayout_all.py --watch --watch-seconds 600
+python3 examples/postlayout_all.py --timeout 1200
 python3 examples/adder_scaling.py --jobs 2
 python3 -m tritflow.sim.sizing
 python3 -m tritflow.sim.corners --jobs 2
@@ -41,37 +147,19 @@ python3 -m tritflow.sim.publication
 python3 -m pytest tests/sim tests/extract -q
 ```
 
-Post-layout/scaling/load producers retain real decks, logs and waveforms under `build/`; portable numerical publications live in `results/` and sizing grids in `cells/out/sizing/`. New `pdk_provenance` records the exact setup pin, actual checkout and consumed model/deck SHA-256 values. `results/pinned_requalification.json` checks current inputs/outputs, positive-C element counts and pinned provenance and reports numeric changes against the preserved dev baseline. A stale or missing artifact is an error. `load_corners`, `load_scaling`, and `load_grid` only read cached data; measured warm reads are about 6–13 ms for the result JSONs, 12 ms for the NANY grid, and 69 ms for an INV cached slider call on this host (first INV grid read 125 ms including initialization). No ngspice runs in those cached reads.
+The load producer refreshes the full-adder model; run it before the corner producer, not concurrently. Post-layout writes are locked per design. Producers compare before/after consumed hashes and reject mid-run publications. Source code used by an already imported process is recorded as frozen; a fresh producer refreshes code provenance. Uncalled chip/signoff, sizing/corner/diagnostic/publication producers are excluded from macro timing-cache dependencies and hash their own experiments.
 
-## Refined carry control
+Notebook reads are cached: `load_scaling`, `load_corners`, `load_grid`, `load_sweep_results`. Measured warm JSON reads were about 6–13 ms; cached INV slider calls about 69 ms (first grid read 125 ms including initialization). No SPICE is launched by those readers. Real decks, logs, source snapshots and NPZ arrays are retained under `build/`.
 
-For one isolated N=6 negative-carry setup/assert pair, identical extracted devices give (device-only / +wire C / delta, ns): maximum step 2 ns **303.8465 / 356.8051 / 52.9586**; 0.25 ns **303.9142 / 356.8203 / 52.9062**; 0.1 ns **303.9203 / 356.8328 / 52.9125**. The fine-step penalty differs by only 0.00634 ns; every run has the same device fingerprint and documented source hashes in `results/delay_refined.json`. This corroborates the wire effect independently of the larger scaling sequence. The isolated pair starts from its own DC setup and is not the same history as the 11-vector scaling sequence; its absolute delay is several ns larger. “Worst” in the scaling figures means the maximum over the documented measured cases, not a bound over all analog histories. A 2 ns sample step is not a general integration-error bound.
-
-## Operating-point control
-
-Mul1's unseeded initial solve returned internal nodes at **+525.862 / −505.185 V**, outside the resistor model's meaningful range. Its device-only first vector failed; wire-C happened to aid recovery. This is a solver root, not an acceptable physical speed/logic comparison. Both runs now use the **same LVS-mapped internal ideal-logic `.nodeset` guesses**. These are Newton initial guesses only (no `.ic`, `uic`, or transient voltage constraints), and every output is still checked against the independent arithmetic oracle. The same initialization policy applies to all four designs and the scaling series; `postlayout/initialization.json` records every guess. Unseeded failure evidence is preserved under `results/dev_before_pinned/mul1_unseeded/`.
-
-## Dependency handoff now pending
-
-CELLS Phase 7 is regenerating/qualifying the complete pinned-PDK library and timing tables in a private stage. Its new INV/NAND/NOR device views match the live device SPICE bytes (GDS files differ), with fresh pinned metadata. To avoid competing with that prerequisite and producing another stale publication, redundant interim layout/scaling producers have been stopped after retaining their completed electrical caches. CELLS has now published Phase 7 generation `2026-10-18T10:26:47.211617+00:00`. The final scaling producer is running against it immediately; the four-design loop waits for the canonical PNR manifest to match the new cell hashes, then corners/load/rail audits follow. The refined carry control is complete and the full suite passed **69 tests in 265.92 s**, with JUnit under `build/sim_verification/pytest.xml`. Final pinned publication freshness remains pending the CELLS/PNR exchange. No foreign process was stopped.
-
-## Source-cache scope
-
-Scaling hashes the code used by HDL/synthesis, macro PNR, extraction and simulation plus all consumed cell/model/deck/HDL files. Separately developed `pnr/chip*` and `pnr/signoff*` implementations are excluded because this study never calls chip packaging or MPW signoff; the macro PNR API/implementation and every physical output are still hashed. This prevents independent chip-wrapper edits from falsely invalidating a completed macro experiment while retaining the pinned-deck/input checks.
-
-## In progress
-
-The pinned PDK model libraries are byte-identical to the dev snapshot; no metal/via R or substrate/fringe C coefficients were added by this migration. Full active model/deck hashes are recorded in `pdk_provenance`; the pinned `01_Extract.lvs` SHA-256 is `5557369f863655af37590b0cc12bfb75b8b378ce8ce954cc9840866bcf32c6b1`. The old results are preserved in `results/dev_before_pinned/`.
-
-The first complete robustness matrix has 54 successful simulations: TYP × temperatures −40/27/85 C × symmetric rail scales 0.9/1.0/1.1, for INV/NAND/NOR/NANY/BUF and the post-layout full adder (all 27 states). Every actual-rail ±0.5 V check passes. Against the fixed project levels, all six DUTs fail at 0.9 supply, at all temperatures. The largest full-adder fixed-band error at 0.9 is 0.500249 V; this is loss beyond an already exhausted 0.5 V rail-shift budget, not catastrophic logic collapse. All nominal and +10% cases pass the fixed bands. TYP is the only distributed process; FF/SS/FS/SF and private L16 sets are unavailable. −40 C is extrapolation outside the published 27..150 C fit range. `results/corners/summary.json` and per-case compressed DC/transient records retain both criteria without recentering the project criterion.
-
-Reruns are in progress after PNR's 20% current-reserve geometry changes; the producer rejects changed input hashes and retries. CELLS' subsequent pinned-deck publication is still pending in the integrator queue, so final publication freshness will be checked again.
+**Final validation: 69 SIM/extraction tests pass in 168.03 s** against the pinned PDK and published library; JUnit: `build/sim_verification/pytest.xml`. This includes actual taped-out 27-state extraction/wire-C simulation, three deleted/severed/unlabelled VMID negatives, loaded-label deletion, encoded vector ports, independent case-sensitive DC/transient, continued SPICE annotation, waveform bands and pinned-provenance rejection. Targeted plotting/cache checks also pass. The actual notebook publication verifier accepts all six current scaling rows and the load record against the pinned PDK, with no stale-source TODO. `compileall` and owned-path `git diff --check` pass.
 
 ## Interface requests
 
-FRONTEND/PNR: SIM imports `tritflow.synth.writers.spice_names` and `spice`, without editing the synthesis writer. Treat these as the common SPICE boundary. Encoded net comments provide the inverse mapping; logical oracle/waveform keys retain case. PNR's unloaded-input wrapper should decode this map when comparing encoded formals with physical label names (including bracketed names). Rail sizing currently uses the nominal-cell DC maximum and 250 uA/um stepped-M1 limit; a PVT margin assessment follows below.
+No outstanding request blocks SIM. PNR adopted physical-rail/encoded-port evidence and the published EM ratings. FRONTEND can consume the current scaling/load records with its source-hash verifier; the source writer was not edited. Fixed-band low-supply failures, unavailable process corners, cold extrapolation, assumed interconnect R/C and 0.4 W static power must remain explicit in notebook claims.
 
 ---
+
+**Historical dev-PDK notes below are superseded. Their numbers and old PDK paths are retained only as history.**
 
 # Historical dev-PDK results — superseded
 

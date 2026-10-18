@@ -45,7 +45,8 @@ def input_state(build_root, cells_root, designs, seeds, anneal_steps, views):
               for p in directory.rglob("*") if p.is_file()]
     files += [Path(build_root)/name/f"{name}.json" for name in designs]
     files += [p for p in (ROOT/"tritflow/pnr").glob("*.py") if not p.name.startswith(("chip","signoff"))]
-    files += [ROOT/"tritflow/viz/layout.py", ROOT/"tritflow/extract/lvs.py", ROOT/"examples/pnr_all.py"]
+    files += [ROOT/"tritflow/viz/layout.py", ROOT/"tritflow/extract/lvs.py",
+              ROOT/"tritflow/extract/capacitance.py", ROOT/"examples/pnr_all.py"]
     files += [p for group in ("drc", "lvs")
               for p in (PDK_ROOT/"libs.tech/klayout/tech"/group).rglob("*") if p.is_file()]
     files += [ROOT/"notebook/setup_pins.json", ROOT/"tritflow/extract/technology.py"]
@@ -61,12 +62,12 @@ def checked_artifacts(build_root, designs, views):
     for name in designs:
         out = Path(build_root)/name
         paths += [out/f"{name}{suffix}" for suffix in
-                  (".gds", ".pnr.json", ".drc.lyrdb", ".lvs.summary.json", ".pnr.summary.json", ".seed_comparison.json")]
+                  (".gds", ".pnr.json", ".net_parasitics.json", ".drc.lyrdb", ".lvs.summary.json", ".pnr.summary.json", ".seed_comparison.json")]
         paths += [p for p in (out/"pnr_seeds").rglob("*") if p.is_file()]
         paths += [out/"lvs"/f"{name}.ext.spice", out/"lvs"/f"{name}.lvsdb"]
         if views:
             paths += [out/f"{name}{suffix}" for suffix in
-                      (".layout.png", ".layout.html", ".placement.html", ".routing.html")]
+                      (".layout.png", ".layout.html", ".placement.html", ".routing.html", ".capacitance.html")]
     return digest_files(paths)
 
 
@@ -83,9 +84,11 @@ def _lvs(result, netlist, cell_subckts, directory):
     timing = result.stats["runtime_s"]
     timing["lvs"] = time.perf_counter()-started
     timing["with_lvs"] = timing["total"]+timing["lvs"]
-    write_json(result.json_path, result.data)
     if not report["matched"]:
+        write_json(result.json_path, result.data)
         raise RuntimeError(f"{netlist.top}: strict LVS mismatch; inspect {path}")
+    result.data["net_parasitics"] = result.net_parasitics(lvs_report=report["report"])
+    write_json(result.json_path, result.data)
     return summary
 
 

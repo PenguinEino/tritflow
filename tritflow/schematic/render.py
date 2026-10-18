@@ -1,0 +1,168 @@
+"""Textbook logic symbols and overlays in the shared TritFlow paper palette."""
+from __future__ import annotations
+
+from dataclasses import asdict
+import math
+
+from .vector import INK, SECONDARY, TRIT_COLOR, Vector
+
+
+def _rect(v,x,y,w,h,**style):
+    v.path([('M',x,y),('L',x+w,y),('L',x+w,y+h),('L',x,y+h),('Z',)],**style)
+
+
+def gate(v,kind,cx,cy):
+    """Draw a 64x48 body; bubbles mean arithmetic sign reversal in ternary."""
+    left,right = cx-32,cx+24
+    if kind in {'INV','BUF'}:
+        v.path([('M',left,cy-24),('L',right,cy),('L',left,cy+24),('Z',)],fill='white')
+        end = right
+        if kind == 'INV':
+            v.circle(right+5,cy,5)
+            end += 10
+        return left,end
+    if kind == 'NAND':
+        v.path([('M',left,cy-24),('L',cx,cy-24),
+                ('C',cx+32,cy-24,cx+32,cy+24,cx,cy+24),('L',left,cy+24),('Z',)],fill='white')
+        v.text(cx-3,cy+4,'min',size=10,anchor='middle')
+    elif kind == 'NOR':
+        v.path([('M',left-3,cy-24),('C',cx-2,cy-24,cx+14,cy-20,right,cy),
+                ('C',cx+14,cy+20,cx-2,cy+24,left-3,cy+24),
+                ('Q',left+15,cy,left-3,cy-24),('Z',)],fill='white')
+        v.text(cx-1,cy+4,'max',size=10,anchor='middle')
+    else:  # NANY: summing body with clipped corners, then sign reversal.
+        v.path([('M',left+8,cy-24),('L',cx+12,cy-24),('L',right,cy-12),
+                ('L',right,cy+12),('L',cx+12,cy+24),('L',left+8,cy+24),
+                ('L',left,cy+16),('L',left,cy-16),('Z',)],fill='white')
+        v.text(cx-3,cy+5,'Σ',size=21,anchor='middle')
+    v.circle(right+5,cy,5)
+    return left,right+10
+
+
+def _symbol(v,node):
+    x,y,x1,y1 = node.box
+    cx = (x+x1)/2
+    if node.kind == 'block':
+        _rect(v,x,y+8,node.width,node.height-16,fill='#f8f8f5',width=1.5)
+        v.text(cx,y+29,node.label,size=12,weight='bold',anchor='middle')
+        v.text(cx,y+44,f'{len(node.members)} cells',size=9,color=SECONDARY,anchor='middle')
+        for pin,signal in node.inputs.items():
+            px,py = node.pins[pin]
+            v.line((px,py),(px+8,py))
+            v.text(px+12,py+3,signal,size=9)
+        for pin,signal in node.outputs.items():
+            px,py = node.pins[pin]
+            v.line((px-8,py),(px,py))
+            v.text(px-12,py+3,signal,size=9,anchor='end')
+        return
+    pin = next(iter((node.pins[p] for p in node.outputs)), next(iter(node.pins.values())))
+    cy = pin[1]
+    if node.kind in {'input','output'}:
+        # Both external port flags point in the direction of signal flow.
+        v.path([('M',x,cy-12),('L',x1-12,cy-12),('L',x1,cy),
+                ('L',x1-12,cy+12),('L',x,cy+12),('Z',)],fill='#f4f4f1',width=1.3)
+        v.text(cx-3,cy+4,node.label,size=11,anchor='middle')
+        return
+    scope,_,local = node.label.rpartition('.')
+    v.text(cx,y+20,local or node.label,size=11,anchor='middle')
+    if scope:
+        v.text(cx,y+34,scope,size=8,color=SECONDARY,anchor='middle')
+    if node.kind.startswith('TIE'):
+        value = {'TIEP':'+1','TIEZ':'0','TIEN':'−1'}[node.kind]
+        # Rail-style source, with its level explicitly printed; never imply
+        # that TIEZ is a digital ground or that negative logic is a boolean 0.
+        v.line((cx-20,cy-12),(cx+20,cy-12),width=2)
+        v.line((cx,cy-12),(cx,cy))
+        v.line((cx,cy),(x1,cy))
+        v.text(cx,cy-18,value,size=12,anchor='middle')
+        return
+    left,right = gate(v,node.kind,cx,cy)
+    for name,(px,py) in node.pins.items():
+        if name in node.outputs:
+            v.line((right,cy),(px,py))
+        else:
+            end = left
+            if node.kind == 'NOR':
+                # Exact quadratic back-outline intersection at y = +/-16.
+                end = cx-35+9*(1-(16/24)**2)
+            v.line((px,py),(end,py))
+
+
+def _wire_styles(scene,values,caps):
+    maximum = max(caps.values(),default=0)
+    styles = {}
+    for signal in {s.net for s in scene.segments}:
+        fraction = math.sqrt(caps.get(signal,0)/maximum) if maximum else 0
+        width = 1.5+2.5*fraction
+        if values is not None and signal in values:
+            color = TRIT_COLOR[values[signal]]
+            # Increased C also darkens the settled-value hue.
+            factor = 1-.22*fraction
+            color = '#'+''.join(f'{round(int(color[i:i+2],16)*factor):02x}' for i in (1,3,5))
+        else:
+            grey = round(135-105*fraction) if caps else 80
+            color = '#'+f'{grey:02x}'*3
+        styles[signal] = color,width
+    return styles
+
+
+def render(scene,values=None,caps=None,net_names=False,title=None):
+    """Paint an existing scene; geometry does not depend on any overlay."""
+    caps = caps or {}
+    title = scene.top if title is None else title
+    v = Vector(scene.width,scene.height)
+    v.text(48,32,title,size=20,weight='bold')
+    gates = sum(len(n.members) for n in scene.symbols)
+    blocks = sum(n.kind == 'block' for n in scene.symbols)
+    v.text(48,54,f'Synthesized logic  ·  {gates} cells  ·  {blocks} closed scopes',size=11,color=SECONDARY)
+    styles = _wire_styles(scene,values,caps)
+    # Vertical trunks first. White under-strokes on all horizontals open the
+    # perpendicular crossing; same-net T junctions are restored by dots.
+    vertical = [s for s in scene.segments if s.a[0] == s.b[0]]
+    horizontal = [s for s in scene.segments if s.a[1] == s.b[1]]
+    for segment in vertical:
+        color,width = styles[segment.net]
+        v.line(segment.a,segment.b,stroke=color,width=width,net=segment.net)
+    for segment in horizontal:
+        color,width = styles[segment.net]
+        # Only real crossings get gaps: leaving a tiny white halo around every
+        # horizontal would break its own bends and make short wires look open.
+        for other in vertical:
+            if (other.net != segment.net and segment.a[0] < other.a[0] < segment.b[0]
+                    and other.a[1] < segment.a[1] < other.b[1]):
+                _,other_width = styles[other.net]
+                px,py = other.a[0],segment.a[1]
+                v.line((px-other_width/2-1.5,py),(px+other_width/2+1.5,py),stroke='white',width=width+3)
+        v.line(segment.a,segment.b,stroke=color,width=width,net=segment.net)
+    for signal,points in scene.junctions.items():
+        color,width = styles[signal]
+        for x,y in points:
+            v.circle(x,y,2.4+width*.2,fill=color,stroke=color,width=0,net=signal)
+    for node in scene.symbols:
+        _symbol(v,node)
+    for signal,(x,y) in scene.labels.items():
+        parts = []
+        if net_names: parts.append(signal)
+        if values is not None and signal in values: parts.append({-1:'−1',0:'0',1:'+1'}[values[signal]])
+        if signal in caps: parts.append(f'{caps[signal]*1e15:.1f} fF')
+        if parts:
+            v.text(x,y,'  '.join(parts),size=9,color=styles[signal][0])
+    footer = scene.height-42
+    if values is not None:
+        for k,(value,label) in enumerate([(-1,'−1  (−5 V)'),(0,'0  (0 V)'),(1,'+1  (+5 V)')]):
+            x = 48+k*140
+            v.line((x,footer-4),(x+24,footer-4),stroke=TRIT_COLOR[value],width=2.5)
+            v.text(x+32,footer,label,size=10)
+    else:
+        v.text(48,footer,'Signal flow →    • connected branch    Crossings with gaps are unconnected',size=10,color=SECONDARY)
+    if caps:
+        v.text(48,scene.height-20,'Wire C: thicker / darker means larger estimated lumped capacitance; not signoff PEX.',size=10,color=SECONDARY)
+    return v
+
+
+def metadata(scene,values,caps):
+    """Machine-readable connection ledger also documents closed-block contents."""
+    return {'top':scene.top,'connections':[asdict(c) for c in scene.connections],
+            'symbols':[{'key':n.key,'kind':n.kind,'members':list(n.members)} for n in scene.symbols],
+            'hidden_nets':list(scene.hidden_nets),'notes':list(scene.notes),
+            'values':values,'capacitance_f':caps}

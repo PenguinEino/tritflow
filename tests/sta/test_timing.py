@@ -135,14 +135,14 @@ def test_content_fingerprint_and_statistics(tmp_path):
     assert statistics(rows,'predicted_s')['max_signed_percent_error']==pytest.approx(20)
     assert statistics(rows,'tested_predicted_s')['underprediction_count']==1
     figure=validation_figure({'designs':[{'outputs':[dict(rows[0],design='a',output='y')]}]})
-    assert len(figure.data)==3
+    assert len(figure.data)==5
 
 
 def test_real_published_cells_and_six_trit_adder():
     from tritflow import ROOT
     path=ROOT/'build/adder_scaling/adder6/adder6.json'
     if not path.exists(): pytest.skip('Integration build is not present')
-    report=analyze(path)
+    report=analyze(path,library=TimingLibrary(['INV','NANY']))
     n=GateNetlist.load(path)
     before=evaluate(n,report.sensitizing_pattern['before']);after=evaluate(n,report.sensitizing_pattern['after'])
     assert report.arrival['cout']>0 and len(report.critical_path)>10

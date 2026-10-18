@@ -1,0 +1,3231 @@
+{
+  "top": "adder5",
+  "arrival": {
+    "sum[4]": 5.168728541493101e-07,
+    "sum[3]": 4.179741717865319e-07,
+    "sum[2]": 3.1170367934380276e-07,
+    "sum[1]": 2.413434350606283e-07,
+    "sum[0]": 2.2444626354019005e-07,
+    "cout": 5.052433858502238e-07
+  },
+  "transition_arrival": {
+    "sum[4]": {
+      "-1->0": 1.7816379197903069e-07,
+      "-1->1": 5.16724688030807e-07,
+      "0->1": 1.9676976374652425e-07,
+      "1->-1": 5.168728541493101e-07
+    },
+    "sum[3]": {
+      "-1->0": 1.813854788813431e-07,
+      "-1->1": 4.179741717865319e-07,
+      "0->1": 1.998094479235989e-07,
+      "1->-1": 4.164009800656764e-07
+    },
+    "sum[2]": {
+      "-1->0": 1.8094863117250167e-07,
+      "-1->1": 3.1170367934380276e-07,
+      "0->1": 1.9431851580338433e-07,
+      "1->-1": 3.0871704660175847e-07
+    },
+    "sum[1]": {
+      "-1->0": 1.7908233362731578e-07,
+      "-1->1": 2.09626623893307e-07,
+      "0->1": 2.0157856349174176e-07,
+      "1->-1": 2.413434350606283e-07
+    },
+    "sum[0]": {
+      "-1->0": 2.7929650008745543e-08,
+      "-1->1": 9.57479577148836e-08,
+      "0->1": 1.8711405904922632e-07,
+      "1->-1": 2.2444626354019005e-07
+    },
+    "cout": {
+      "-1->0": 3.278029698579204e-07,
+      "0->-1": 5.012204429435441e-07,
+      "0->1": 5.052433858502238e-07,
+      "1->-1": 1.0456763503803976e-07,
+      "1->0": 2.974046474170439e-07
+    }
+  },
+  "paths": {
+    "sum[4]": [
+      {
+        "instance": "digit[0].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "cin",
+        "output_net": "_n40",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.2755187595745295e-08,
+        "arrival_s": 1.2755187595745295e-08,
+        "load_f": 5.596414188624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n40",
+        "output_net": "_n41",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 5.2948307746353196e-08,
+        "arrival_s": 6.570349534209849e-08,
+        "load_f": 1.5341666081873983e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n41",
+        "output_net": "_n42",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.4188915806335911e-08,
+        "arrival_s": 7.989241114843439e-08,
+        "load_f": 2.554645330330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n42",
+        "output_net": "_n43",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 2.6625016431204013e-08,
+        "arrival_s": 1.065174275796384e-07,
+        "load_f": 8.93640466054466e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n43",
+        "output_net": "_n45",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.219105663448438e-08,
+        "arrival_s": 1.1870848421412277e-07,
+        "load_f": 4.662385300624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n45",
+        "output_net": "_n46",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 5.4758426915822005e-08,
+        "arrival_s": 1.7346691112994478e-07,
+        "load_f": 1.6010993777873985e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n46",
+        "output_net": "_n47",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.3092485989171463e-08,
+        "arrival_s": 1.8655939711911624e-07,
+        "load_f": 2.122039506330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n47",
+        "output_net": "_n48",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 2.981117765266091e-08,
+        "arrival_s": 2.1637057477177716e-07,
+        "load_f": 1.0098696336544658e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n48",
+        "output_net": "_n50",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.3175307875952944e-08,
+        "arrival_s": 2.295458826477301e-07,
+        "load_f": 6.276800772624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n50",
+        "output_net": "_n51",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 4.920432703584119e-08,
+        "arrival_s": 2.787502096835713e-07,
+        "load_f": 1.3957254477873984e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n51",
+        "output_net": "_n52",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.2885792904670183e-08,
+        "arrival_s": 2.916360025882415e-07,
+        "load_f": 2.0404869703300768e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n52",
+        "output_net": "_n53",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 2.9023117111722715e-08,
+        "arrival_s": 3.206591196999642e-07,
+        "load_f": 9.81121678254466e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n53",
+        "output_net": "_n55",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.2272839416840034e-08,
+        "arrival_s": 3.329319591168042e-07,
+        "load_f": 4.803357820624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n55",
+        "output_net": "_n56",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 5.241316188680185e-08,
+        "arrival_s": 3.8534512100360606e-07,
+        "load_f": 1.5143785217873983e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n56",
+        "output_net": "_n57",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.3336448122296912e-08,
+        "arrival_s": 3.9868156912590297e-07,
+        "load_f": 2.218296866330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n57",
+        "output_net": "_n58",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 2.676072333140618e-08,
+        "arrival_s": 4.2544229245730915e-07,
+        "load_f": 8.985909688544659e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n58",
+        "output_net": "_n61",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.2612942447323364e-08,
+        "arrival_s": 4.3805523490463253e-07,
+        "load_f": 5.366047564624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n61",
+        "output_net": "_n62",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 4.9868382003581046e-08,
+        "arrival_s": 4.879236169082135e-07,
+        "load_f": 1.4202802057873984e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.ha2.g_d",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n62",
+        "output_net": "_n63",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "arc_id": "NANY:09",
+        "delay_s": 5.4785789795100244e-09,
+        "arrival_s": 4.934021958877236e-07,
+        "load_f": 1.9608068503300769e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.ha2.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n63",
+        "output_net": "_n64",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 1
+        },
+        "to_inputs": {
+          "A": 0
+        },
+        "arc_id": "INV:05",
+        "delay_s": 9.865892854047653e-09,
+        "arrival_s": 5.032680887417713e-07,
+        "load_f": 5.907155947919998e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.ha2.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n64",
+        "output_net": "sum[4]",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:12",
+        "delay_s": 1.3604765407538696e-08,
+        "arrival_s": 5.1687285414931e-07,
+        "load_f": 1.6322403340000002e-13,
+        "input_transition_s": 1e-09
+      }
+    ],
+    "sum[3]": [
+      {
+        "instance": "digit[0].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "cin",
+        "output_net": "_n40",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "arc_id": "NANY:42",
+        "delay_s": 1.1133543330194965e-08,
+        "arrival_s": 1.1133543330194965e-08,
+        "load_f": 5.596414188624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n40",
+        "output_net": "_n41",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:54",
+        "delay_s": 4.722837536022694e-08,
+        "arrival_s": 5.8361918690421906e-08,
+        "load_f": 1.5341666081873983e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n41",
+        "output_net": "_n42",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 2.0866294254986323e-08,
+        "arrival_s": 7.922821294540823e-08,
+        "load_f": 2.554645330330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n42",
+        "output_net": "_n43",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": 1
+        },
+        "arc_id": "INV:03",
+        "delay_s": 2.6480774412417448e-08,
+        "arrival_s": 1.0570898735782567e-07,
+        "load_f": 8.93640466054466e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n43",
+        "output_net": "_n45",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "arc_id": "NANY:42",
+        "delay_s": 9.966889695634412e-09,
+        "arrival_s": 1.1567587705346009e-07,
+        "load_f": 4.662385300624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n45",
+        "output_net": "_n46",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:54",
+        "delay_s": 4.896098529302873e-08,
+        "arrival_s": 1.646368623464888e-07,
+        "load_f": 1.6010993777873985e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n46",
+        "output_net": "_n47",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 1.9696659052591797e-08,
+        "arrival_s": 1.843335213990806e-07,
+        "load_f": 2.122039506330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n47",
+        "output_net": "_n48",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": 1
+        },
+        "arc_id": "INV:03",
+        "delay_s": 2.952181938396322e-08,
+        "arrival_s": 2.138553407830438e-07,
+        "load_f": 1.0098696336544658e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n48",
+        "output_net": "_n50",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "arc_id": "NANY:42",
+        "delay_s": 1.1982299931046672e-08,
+        "arrival_s": 2.2583764071409047e-07,
+        "load_f": 6.276800772624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n50",
+        "output_net": "_n51",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:54",
+        "delay_s": 4.3644711766876316e-08,
+        "arrival_s": 2.6948235248096676e-07,
+        "load_f": 1.3957254477873984e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n51",
+        "output_net": "_n52",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 1.947616568043103e-08,
+        "arrival_s": 2.8895851816139777e-07,
+        "load_f": 2.0404869703300768e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n52",
+        "output_net": "_n53",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": 1
+        },
+        "arc_id": "INV:03",
+        "delay_s": 2.8769651687879748e-08,
+        "arrival_s": 3.1772816984927753e-07,
+        "load_f": 9.81121678254466e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n53",
+        "output_net": "_n55",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "arc_id": "NANY:42",
+        "delay_s": 1.014336884565223e-08,
+        "arrival_s": 3.2787153869492976e-07,
+        "load_f": 4.803357820624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n55",
+        "output_net": "_n56",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:54",
+        "delay_s": 4.6716144426819094e-08,
+        "arrival_s": 3.7458768312174884e-07,
+        "load_f": 1.5143785217873983e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_d",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n56",
+        "output_net": "_n66",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:62",
+        "delay_s": 9.938191292392841e-09,
+        "arrival_s": 3.845258744141417e-07,
+        "load_f": 2.586199818330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n66",
+        "output_net": "_n67",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": -1
+        },
+        "to_inputs": {
+          "A": 0
+        },
+        "arc_id": "INV:00",
+        "delay_s": 7.200311202621363e-09,
+        "arrival_s": 3.917261856167631e-07,
+        "load_f": 4.422813899919998e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n67",
+        "output_net": "sum[3]",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:59",
+        "delay_s": 2.624798616976885e-08,
+        "arrival_s": 4.1797417178653194e-07,
+        "load_f": 2.87874099e-13,
+        "input_transition_s": 1e-09
+      }
+    ],
+    "sum[2]": [
+      {
+        "instance": "digit[0].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "cin",
+        "output_net": "_n40",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "arc_id": "NANY:42",
+        "delay_s": 1.1133543330194965e-08,
+        "arrival_s": 1.1133543330194965e-08,
+        "load_f": 5.596414188624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n40",
+        "output_net": "_n41",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:54",
+        "delay_s": 4.722837536022694e-08,
+        "arrival_s": 5.8361918690421906e-08,
+        "load_f": 1.5341666081873983e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n41",
+        "output_net": "_n42",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 2.0866294254986323e-08,
+        "arrival_s": 7.922821294540823e-08,
+        "load_f": 2.554645330330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n42",
+        "output_net": "_n43",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": 1
+        },
+        "arc_id": "INV:03",
+        "delay_s": 2.6480774412417448e-08,
+        "arrival_s": 1.0570898735782567e-07,
+        "load_f": 8.93640466054466e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n43",
+        "output_net": "_n45",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "arc_id": "NANY:42",
+        "delay_s": 9.966889695634412e-09,
+        "arrival_s": 1.1567587705346009e-07,
+        "load_f": 4.662385300624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n45",
+        "output_net": "_n46",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:54",
+        "delay_s": 4.896098529302873e-08,
+        "arrival_s": 1.646368623464888e-07,
+        "load_f": 1.6010993777873985e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n46",
+        "output_net": "_n47",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 1.9696659052591797e-08,
+        "arrival_s": 1.843335213990806e-07,
+        "load_f": 2.122039506330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n47",
+        "output_net": "_n48",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": 1
+        },
+        "arc_id": "INV:03",
+        "delay_s": 2.952181938396322e-08,
+        "arrival_s": 2.138553407830438e-07,
+        "load_f": 1.0098696336544658e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n48",
+        "output_net": "_n50",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "arc_id": "NANY:42",
+        "delay_s": 1.1982299931046672e-08,
+        "arrival_s": 2.2583764071409047e-07,
+        "load_f": 6.276800772624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n50",
+        "output_net": "_n51",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:54",
+        "delay_s": 4.3644711766876316e-08,
+        "arrival_s": 2.6948235248096676e-07,
+        "load_f": 1.3957254477873984e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_d",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n51",
+        "output_net": "_n69",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:62",
+        "delay_s": 9.875309712663664e-09,
+        "arrival_s": 2.7935766219363043e-07,
+        "load_f": 2.536955410330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n69",
+        "output_net": "_n70",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": -1
+        },
+        "to_inputs": {
+          "A": 0
+        },
+        "arc_id": "INV:00",
+        "delay_s": 6.906180791128969e-09,
+        "arrival_s": 2.862638429847594e-07,
+        "load_f": 4.215907039919998e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n70",
+        "output_net": "sum[2]",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:59",
+        "delay_s": 2.543983635904336e-08,
+        "arrival_s": 3.1170367934380276e-07,
+        "load_f": 2.6432634300000003e-13,
+        "input_transition_s": 1e-09
+      }
+    ],
+    "sum[1]": [
+      {
+        "instance": "digit[1].fa.ha1.g_t",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "a[1]",
+        "output_net": "_n24",
+        "input_transition": [
+          1,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:57",
+        "delay_s": 4.972757294952107e-08,
+        "arrival_s": 4.972757294952107e-08,
+        "load_f": 1.002484971654466e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha1.g_d",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n24",
+        "output_net": "_n27",
+        "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:14",
+        "delay_s": 2.2167359540111563e-08,
+        "arrival_s": 7.189493248963264e-08,
+        "load_f": 2.902837394330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha1.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n27",
+        "output_net": "_n28",
+        "input_transition": [
+          1,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:04",
+        "delay_s": 2.0285917189992568e-08,
+        "arrival_s": 9.21808496796252e-08,
+        "load_f": 5.101918259919998e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha1.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n28",
+        "output_net": "_n29",
+        "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:14",
+        "delay_s": 3.366137328326914e-08,
+        "arrival_s": 1.2584222296289433e-07,
+        "load_f": 6.646281238250075e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_t",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n29",
+        "output_net": "_n44",
+        "input_transition": [
+          1,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:57",
+        "delay_s": 5.056310341954032e-08,
+        "arrival_s": 1.7640532638243465e-07,
+        "load_f": 1.026401154054466e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_d",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n44",
+        "output_net": "_n72",
+        "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:14",
+        "delay_s": 2.4564263887169533e-08,
+        "arrival_s": 2.0096959026960418e-07,
+        "load_f": 3.700150586330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n72",
+        "output_net": "_n73",
+        "input_transition": [
+          1,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:04",
+        "delay_s": 1.8249788038105587e-08,
+        "arrival_s": 2.1921937830770978e-07,
+        "load_f": 4.526625863919998e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n73",
+        "output_net": "sum[1]",
+        "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:14",
+        "delay_s": 2.212405675291854e-08,
+        "arrival_s": 2.413434350606283e-07,
+        "load_f": 2.88843303e-13,
+        "input_transition_s": 1e-09
+      }
+    ],
+    "sum[0]": [
+      {
+        "instance": "digit[0].fa.ha1.g_t",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "a[0]",
+        "output_net": "_n32",
+        "input_transition": [
+          1,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:57",
+        "delay_s": 4.783033597160967e-08,
+        "arrival_s": 4.783033597160967e-08,
+        "load_f": 9.481785552544658e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha1.g_d",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n32",
+        "output_net": "_n35",
+        "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:14",
+        "delay_s": 1.9156469014267218e-08,
+        "arrival_s": 6.698680498587689e-08,
+        "load_f": 1.8952576263300768e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha1.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n35",
+        "output_net": "_n36",
+        "input_transition": [
+          1,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:04",
+        "delay_s": 1.7519682818236876e-08,
+        "arrival_s": 8.450648780411376e-08,
+        "load_f": 4.320104119919998e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha1.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n36",
+        "output_net": "_n37",
+        "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:14",
+        "delay_s": 3.591008874258249e-08,
+        "arrival_s": 1.2041657654669625e-07,
+        "load_f": 7.359652758250075e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_t",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n37",
+        "output_net": "_n39",
+        "input_transition": [
+          1,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:57",
+        "delay_s": 4.889498254891888e-08,
+        "arrival_s": 1.6931155909561513e-07,
+        "load_f": 9.78652945654466e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_d",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n39",
+        "output_net": "_n75",
+        "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:14",
+        "delay_s": 1.9032934304539332e-08,
+        "arrival_s": 1.8834449340015446e-07,
+        "load_f": 1.8516551463300768e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n75",
+        "output_net": "_n76",
+        "input_transition": [
+          1,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:04",
+        "delay_s": 1.861668608900249e-08,
+        "arrival_s": 2.0696117948915696e-07,
+        "load_f": 4.630408747919998e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n76",
+        "output_net": "sum[0]",
+        "input_transition": [
+          -1,
+          1
+        ],
+        "output_transition": [
+          1,
+          -1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:14",
+        "delay_s": 1.748508405103309e-08,
+        "arrival_s": 2.2444626354019005e-07,
+        "load_f": 1.3053300700000002e-13,
+        "input_transition_s": 1e-09
+      }
+    ],
+    "cout": [
+      {
+        "instance": "digit[0].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "cin",
+        "output_net": "_n40",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.2755187595745295e-08,
+        "arrival_s": 1.2755187595745295e-08,
+        "load_f": 5.596414188624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n40",
+        "output_net": "_n41",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 5.2948307746353196e-08,
+        "arrival_s": 6.570349534209849e-08,
+        "load_f": 1.5341666081873983e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n41",
+        "output_net": "_n42",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.4188915806335911e-08,
+        "arrival_s": 7.989241114843439e-08,
+        "load_f": 2.554645330330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[0].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n42",
+        "output_net": "_n43",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 2.6625016431204013e-08,
+        "arrival_s": 1.065174275796384e-07,
+        "load_f": 8.93640466054466e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n43",
+        "output_net": "_n45",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.219105663448438e-08,
+        "arrival_s": 1.1870848421412277e-07,
+        "load_f": 4.662385300624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n45",
+        "output_net": "_n46",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 5.4758426915822005e-08,
+        "arrival_s": 1.7346691112994478e-07,
+        "load_f": 1.6010993777873985e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n46",
+        "output_net": "_n47",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.3092485989171463e-08,
+        "arrival_s": 1.8655939711911624e-07,
+        "load_f": 2.122039506330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[1].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n47",
+        "output_net": "_n48",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 2.981117765266091e-08,
+        "arrival_s": 2.1637057477177716e-07,
+        "load_f": 1.0098696336544658e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n48",
+        "output_net": "_n50",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.3175307875952944e-08,
+        "arrival_s": 2.295458826477301e-07,
+        "load_f": 6.276800772624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n50",
+        "output_net": "_n51",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 4.920432703584119e-08,
+        "arrival_s": 2.787502096835713e-07,
+        "load_f": 1.3957254477873984e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n51",
+        "output_net": "_n52",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.2885792904670183e-08,
+        "arrival_s": 2.916360025882415e-07,
+        "load_f": 2.0404869703300768e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[2].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n52",
+        "output_net": "_n53",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 2.9023117111722715e-08,
+        "arrival_s": 3.206591196999642e-07,
+        "load_f": 9.81121678254466e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n53",
+        "output_net": "_n55",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.2272839416840034e-08,
+        "arrival_s": 3.329319591168042e-07,
+        "load_f": 4.803357820624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n55",
+        "output_net": "_n56",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 5.241316188680185e-08,
+        "arrival_s": 3.8534512100360606e-07,
+        "load_f": 1.5143785217873983e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n56",
+        "output_net": "_n57",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.3336448122296912e-08,
+        "arrival_s": 3.9868156912590297e-07,
+        "load_f": 2.218296866330077e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[3].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n57",
+        "output_net": "_n58",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 2.676072333140618e-08,
+        "arrival_s": 4.2544229245730915e-07,
+        "load_f": 8.985909688544659e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.ha2.g_u",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n58",
+        "output_net": "_n61",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:29",
+        "delay_s": 1.2612942447323364e-08,
+        "arrival_s": 4.3805523490463253e-07,
+        "load_f": 5.366047564624661e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n61",
+        "output_net": "_n62",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": -1,
+          "B": 1
+        },
+        "to_inputs": {
+          "A": -1,
+          "B": 0
+        },
+        "arc_id": "NANY:17",
+        "delay_s": 4.9868382003581046e-08,
+        "arrival_s": 4.879236169082135e-07,
+        "load_f": 1.4202802057873984e-12,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.g_nc",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n62",
+        "output_net": "_n78",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": 1
+        },
+        "arc_id": "NANY:36",
+        "delay_s": 1.3132901034284692e-08,
+        "arrival_s": 5.010565179424982e-07,
+        "load_f": 2.1379856103300772e-13,
+        "input_transition_s": 1e-09
+      },
+      {
+        "instance": "digit[4].fa.g_cout",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n78",
+        "output_net": "cout",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 4.186867907725387e-09,
+        "arrival_s": 5.052433858502236e-07,
+        "load_f": 6.82466022e-14,
+        "input_transition_s": 1e-09
+      }
+    ]
+  },
+  "patterns": {
+    "sum[4]": {
+      "before": {
+        "cin": 0,
+        "a[0]": 1,
+        "b[0]": 0,
+        "a[1]": 1,
+        "b[1]": 0,
+        "a[2]": 1,
+        "b[2]": 0,
+        "a[3]": 1,
+        "b[3]": 0,
+        "a[4]": 1,
+        "b[4]": 0
+      },
+      "after": {
+        "cin": 1,
+        "a[0]": 1,
+        "b[0]": 0,
+        "a[1]": 1,
+        "b[1]": 0,
+        "a[2]": 1,
+        "b[2]": 0,
+        "a[3]": 1,
+        "b[3]": 0,
+        "a[4]": 1,
+        "b[4]": 0
+      }
+    },
+    "sum[3]": {
+      "before": {
+        "cin": 0,
+        "a[0]": -1,
+        "b[0]": 0,
+        "a[1]": -1,
+        "b[1]": 0,
+        "a[2]": -1,
+        "b[2]": 0,
+        "a[3]": -1,
+        "b[3]": 0,
+        "a[4]": -1,
+        "b[4]": 0
+      },
+      "after": {
+        "cin": -1,
+        "a[0]": -1,
+        "b[0]": 0,
+        "a[1]": -1,
+        "b[1]": 0,
+        "a[2]": -1,
+        "b[2]": 0,
+        "a[3]": -1,
+        "b[3]": 0,
+        "a[4]": -1,
+        "b[4]": 0
+      }
+    },
+    "sum[2]": {
+      "before": {
+        "cin": 0,
+        "a[0]": -1,
+        "b[0]": 0,
+        "a[1]": -1,
+        "b[1]": 0,
+        "a[2]": -1,
+        "b[2]": 0,
+        "a[3]": -1,
+        "b[3]": 0,
+        "a[4]": -1,
+        "b[4]": 0
+      },
+      "after": {
+        "cin": -1,
+        "a[0]": -1,
+        "b[0]": 0,
+        "a[1]": -1,
+        "b[1]": 0,
+        "a[2]": -1,
+        "b[2]": 0,
+        "a[3]": -1,
+        "b[3]": 0,
+        "a[4]": -1,
+        "b[4]": 0
+      }
+    },
+    "sum[1]": {
+      "before": {
+        "cin": 0,
+        "a[0]": 1,
+        "b[0]": 0,
+        "a[1]": 1,
+        "b[1]": 0,
+        "a[2]": 1,
+        "b[2]": 0,
+        "a[3]": 1,
+        "b[3]": 0,
+        "a[4]": 1,
+        "b[4]": 0
+      },
+      "after": {
+        "cin": 0,
+        "a[0]": -1,
+        "b[0]": 0,
+        "a[1]": -1,
+        "b[1]": 0,
+        "a[2]": -1,
+        "b[2]": 0,
+        "a[3]": -1,
+        "b[3]": 0,
+        "a[4]": -1,
+        "b[4]": 0
+      }
+    },
+    "sum[0]": {
+      "before": {
+        "cin": 0,
+        "a[0]": 1,
+        "b[0]": 0,
+        "a[1]": 1,
+        "b[1]": 0,
+        "a[2]": 1,
+        "b[2]": 0,
+        "a[3]": 1,
+        "b[3]": 0,
+        "a[4]": 1,
+        "b[4]": 0
+      },
+      "after": {
+        "cin": 0,
+        "a[0]": -1,
+        "b[0]": 0,
+        "a[1]": -1,
+        "b[1]": 0,
+        "a[2]": -1,
+        "b[2]": 0,
+        "a[3]": -1,
+        "b[3]": 0,
+        "a[4]": -1,
+        "b[4]": 0
+      }
+    },
+    "cout": {
+      "before": {
+        "cin": 0,
+        "a[0]": 1,
+        "b[0]": 0,
+        "a[1]": 1,
+        "b[1]": 0,
+        "a[2]": 1,
+        "b[2]": 0,
+        "a[3]": 1,
+        "b[3]": 0,
+        "a[4]": 1,
+        "b[4]": 0
+      },
+      "after": {
+        "cin": 1,
+        "a[0]": 1,
+        "b[0]": 0,
+        "a[1]": 1,
+        "b[1]": 0,
+        "a[2]": 1,
+        "b[2]": 0,
+        "a[3]": 1,
+        "b[3]": 0,
+        "a[4]": 1,
+        "b[4]": 0
+      }
+    }
+  },
+  "loads": {
+    "_n16": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.6452185039999998e-13,
+      "external_f": 0.0,
+      "total_f": 9.29313644454466e-13
+    },
+    "_n27": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.758576592e-13,
+      "external_f": 0.0,
+      "total_f": 2.902837394330077e-13
+    },
+    "_n5": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 6.127917460000001e-14,
+      "external_f": 0.0,
+      "total_f": 4.320104119919998e-13
+    },
+    "_n64": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 2.199843574e-13,
+      "external_f": 0.0,
+      "total_f": 5.907155947919998e-13
+    },
+    "_n46": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 4.189177078e-13,
+      "external_f": 0.0,
+      "total_f": 1.6010993777873985e-12
+    },
+    "cout": {
+      "fanout_f": 0.0,
+      "wire_f": 5.82466022e-14,
+      "external_f": 1e-14,
+      "total_f": 6.82466022e-14
+    },
+    "_n24": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.376931776e-13,
+      "external_f": 0.0,
+      "total_f": 1.002484971654466e-12
+    },
+    "b[1]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.381448546e-13,
+      "external_f": 0.0,
+      "total_f": 1.002936648654466e-12
+    },
+    "_n55": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 8.62752254e-14,
+      "external_f": 0.0,
+      "total_f": 4.803357820624661e-13
+    },
+    "_n11": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.438143784e-13,
+      "external_f": 0.0,
+      "total_f": 2.5824045863300766e-13
+    },
+    "_n12": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 2.063850714e-13,
+      "external_f": 0.0,
+      "total_f": 5.771163087919998e-13
+    },
+    "sum[2]": {
+      "fanout_f": 0.0,
+      "wire_f": 2.54326343e-13,
+      "external_f": 1e-14,
+      "total_f": 2.6432634300000003e-13
+    },
+    "sum[3]": {
+      "fanout_f": 0.0,
+      "wire_f": 2.77874099e-13,
+      "external_f": 1e-14,
+      "total_f": 2.87874099e-13
+    },
+    "b[0]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.5370056659999998e-13,
+      "external_f": 0.0,
+      "total_f": 9.18492360654466e-13
+    },
+    "_n18": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 2.870552954e-13,
+      "external_f": 0.0,
+      "total_f": 1.445907646116932e-12
+    },
+    "_n66": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.441939016e-13,
+      "external_f": 0.0,
+      "total_f": 2.586199818330077e-13
+    },
+    "_n19": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 6.77445944e-14,
+      "external_f": 0.0,
+      "total_f": 1.821706746330077e-13
+    },
+    "_n20": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 1.48195803e-13,
+      "external_f": 0.0,
+      "total_f": 5.189270403919998e-13
+    },
+    "_n6": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 3.038722442e-13,
+      "external_f": 0.0,
+      "total_f": 7.890295618250076e-13
+    },
+    "a[3]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 1.8784538560000003e-13,
+      "external_f": 0.0,
+      "total_f": 6.730027032250076e-13
+    },
+    "_n14": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 2.3236632020000005e-13,
+      "external_f": 0.0,
+      "total_f": 6.030975575919999e-13
+    },
+    "_n21": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 2.4471844900000004e-13,
+      "external_f": 0.0,
+      "total_f": 7.298757666250075e-13
+    },
+    "_n52": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 8.96226168e-14,
+      "external_f": 0.0,
+      "total_f": 2.0404869703300768e-13
+    },
+    "_n32": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.8338676119999998e-13,
+      "external_f": 0.0,
+      "total_f": 9.481785552544658e-13
+    },
+    "_n40": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.655808622e-13,
+      "external_f": 0.0,
+      "total_f": 5.596414188624661e-13
+    },
+    "sum[1]": {
+      "fanout_f": 0.0,
+      "wire_f": 2.78843303e-13,
+      "external_f": 1e-14,
+      "total_f": 2.88843303e-13
+    },
+    "_n47": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 9.77778704e-14,
+      "external_f": 0.0,
+      "total_f": 2.122039506330077e-13
+    },
+    "_n76": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 9.23096374e-14,
+      "external_f": 0.0,
+      "total_f": 4.630408747919998e-13
+    },
+    "_n67": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 7.15501526e-14,
+      "external_f": 0.0,
+      "total_f": 4.422813899919998e-13
+    },
+    "_n1": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 6.11304446e-14,
+      "external_f": 0.0,
+      "total_f": 4.318616819919998e-13
+    },
+    "_n30": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 1.647062394e-13,
+      "external_f": 0.0,
+      "total_f": 5.354374767919998e-13
+    },
+    "_n2": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.228696174e-13,
+      "external_f": 0.0,
+      "total_f": 5.169301740624661e-13
+    },
+    "b[3]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.5752352220000002e-13,
+      "external_f": 0.0,
+      "total_f": 9.22315316254466e-13
+    },
+    "_n25": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.373562078e-13,
+      "external_f": 0.0,
+      "total_f": 5.314167644624661e-13
+    },
+    "a[2]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 1.941920236e-13,
+      "external_f": 0.0,
+      "total_f": 6.793493412250075e-13
+    },
+    "_n3": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 3.086446234e-13,
+      "external_f": 0.0,
+      "total_f": 1.467496974116932e-12
+    },
+    "_n0": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.194560132e-13,
+      "external_f": 0.0,
+      "total_f": 9.84247807254466e-13
+    },
+    "_n70": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 5.0859466600000005e-14,
+      "external_f": 0.0,
+      "total_f": 4.215907039919998e-13
+    },
+    "_n28": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 1.394605886e-13,
+      "external_f": 0.0,
+      "total_f": 5.101918259919998e-13
+    },
+    "_n7": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 1.07525427e-13,
+      "external_f": 0.0,
+      "total_f": 4.782566643919998e-13
+    },
+    "_n73": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 8.1931349e-14,
+      "external_f": 0.0,
+      "total_f": 4.526625863919998e-13
+    },
+    "_n57": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.0740360640000001e-13,
+      "external_f": 0.0,
+      "total_f": 2.218296866330077e-13
+    },
+    "_n10": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 3.14326921e-13,
+      "external_f": 0.0,
+      "total_f": 1.4731792717169318e-12
+    },
+    "cin": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 3.3310144260000003e-13,
+      "external_f": 0.0,
+      "total_f": 1.097893236654466e-12
+    },
+    "_n23": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 1.64892027e-13,
+      "external_f": 0.0,
+      "total_f": 5.356232643919998e-13
+    },
+    "a[1]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 9.2281166e-14,
+      "external_f": 0.0,
+      "total_f": 5.774384836250075e-13
+    },
+    "_n9": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.253151198e-13,
+      "external_f": 0.0,
+      "total_f": 5.193756764624661e-13
+    },
+    "_n51": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 2.1354377779999999e-13,
+      "external_f": 0.0,
+      "total_f": 1.3957254477873984e-12
+    },
+    "_n62": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 2.380985358e-13,
+      "external_f": 0.0,
+      "total_f": 1.4202802057873984e-12
+    },
+    "_n61": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.4254419980000002e-13,
+      "external_f": 0.0,
+      "total_f": 5.366047564624661e-13
+    },
+    "_n8": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.033029332e-13,
+      "external_f": 0.0,
+      "total_f": 9.680947272544659e-13
+    },
+    "_n43": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.2884867200000001e-13,
+      "external_f": 0.0,
+      "total_f": 8.93640466054466e-13
+    },
+    "_n56": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 3.321968518e-13,
+      "external_f": 0.0,
+      "total_f": 1.5143785217873983e-12
+    },
+    "_n59": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.975407736e-13,
+      "external_f": 0.0,
+      "total_f": 1.062332567654466e-12
+    },
+    "_n58": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.337991748e-13,
+      "external_f": 0.0,
+      "total_f": 8.985909688544659e-13
+    },
+    "_n36": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 6.127917460000001e-14,
+      "external_f": 0.0,
+      "total_f": 4.320104119919998e-13
+    },
+    "_n37": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 2.508079582e-13,
+      "external_f": 0.0,
+      "total_f": 7.359652758250075e-13
+    },
+    "_n44": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.6160936e-13,
+      "external_f": 0.0,
+      "total_f": 1.026401154054466e-12
+    },
+    "_n49": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.6800590960000004e-13,
+      "external_f": 0.0,
+      "total_f": 1.0327977036544659e-12
+    },
+    "_n31": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 2.39420499e-13,
+      "external_f": 0.0,
+      "total_f": 6.101517363919998e-13
+    },
+    "_n22": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 2.338179214e-13,
+      "external_f": 0.0,
+      "total_f": 6.045491587919997e-13
+    },
+    "b[2]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.2998320100000002e-13,
+      "external_f": 0.0,
+      "total_f": 8.947749950544659e-13
+    },
+    "_n17": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 3.734285926e-13,
+      "external_f": 0.0,
+      "total_f": 7.674891492624661e-13
+    },
+    "_n39": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.138611516e-13,
+      "external_f": 0.0,
+      "total_f": 9.78652945654466e-13
+    },
+    "_n53": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.163298842e-13,
+      "external_f": 0.0,
+      "total_f": 9.81121678254466e-13
+    },
+    "_n26": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 2.7715087940000005e-13,
+      "external_f": 0.0,
+      "total_f": 1.436003230116932e-12
+    },
+    "sum[0]": {
+      "fanout_f": 0.0,
+      "wire_f": 1.20533007e-13,
+      "external_f": 1e-14,
+      "total_f": 1.3053300700000002e-13
+    },
+    "_n41": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 3.519849382e-13,
+      "external_f": 0.0,
+      "total_f": 1.5341666081873983e-12
+    },
+    "_n38": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 9.28706486e-14,
+      "external_f": 0.0,
+      "total_f": 4.636018859919998e-13
+    },
+    "_n45": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 7.21779734e-14,
+      "external_f": 0.0,
+      "total_f": 4.662385300624661e-13
+    },
+    "_n15": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 3.195586194e-13,
+      "external_f": 0.0,
+      "total_f": 6.902898567919998e-13
+    },
+    "_n75": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 7.07394344e-14,
+      "external_f": 0.0,
+      "total_f": 1.8516551463300768e-13
+    },
+    "_n29": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 1.794708062e-13,
+      "external_f": 0.0,
+      "total_f": 6.646281238250075e-13
+    },
+    "sum[4]": {
+      "fanout_f": 0.0,
+      "wire_f": 1.5322403340000001e-13,
+      "external_f": 1e-14,
+      "total_f": 1.6322403340000002e-13
+    },
+    "_n4": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 9.900371840000001e-14,
+      "external_f": 0.0,
+      "total_f": 2.1342979863300772e-13
+    },
+    "_n50": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 2.336195206e-13,
+      "external_f": 0.0,
+      "total_f": 6.276800772624661e-13
+    },
+    "_n54": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.3930835799999997e-13,
+      "external_f": 0.0,
+      "total_f": 1.0041001520544658e-12
+    },
+    "_n72": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 2.555889784e-13,
+      "external_f": 0.0,
+      "total_f": 3.700150586330077e-13
+    },
+    "_n60": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 1.1794513500000002e-13,
+      "external_f": 0.0,
+      "total_f": 4.886763723919998e-13
+    },
+    "_n13": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 2.572549994e-13,
+      "external_f": 0.0,
+      "total_f": 7.424123170250075e-13
+    },
+    "_n35": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 7.50996824e-14,
+      "external_f": 0.0,
+      "total_f": 1.8952576263300768e-13
+    },
+    "b[4]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.060091186e-13,
+      "external_f": 0.0,
+      "total_f": 9.708009126544659e-13
+    },
+    "_n34": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 2.93775459e-13,
+      "external_f": 0.0,
+      "total_f": 1.4526278097169318e-12
+    },
+    "_n42": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.410384528e-13,
+      "external_f": 0.0,
+      "total_f": 2.554645330330077e-13
+    },
+    "_n33": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 7.76942894e-14,
+      "external_f": 0.0,
+      "total_f": 4.717548460624662e-13
+    },
+    "_n48": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.450778396e-13,
+      "external_f": 0.0,
+      "total_f": 1.0098696336544658e-12
+    },
+    "_n78": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 9.937248080000002e-14,
+      "external_f": 0.0,
+      "total_f": 2.1379856103300772e-13
+    },
+    "_n69": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.392694608e-13,
+      "external_f": 0.0,
+      "total_f": 2.536955410330077e-13
+    },
+    "_n63": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 8.16546048e-14,
+      "external_f": 0.0,
+      "total_f": 1.9608068503300769e-13
+    },
+    "a[0]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 1.9162171520000001e-13,
+      "external_f": 0.0,
+      "total_f": 6.767790328250075e-13
+    },
+    "a[4]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 1.1326551519999999e-13,
+      "external_f": 0.0,
+      "total_f": 5.984228328250075e-13
+    }
+  },
+  "assumptions": [
+    "Nominal \u00b15/0 V models; settling means final entry into ideal \u00b10.5 V through the measured observation window.",
+    "Exact endpoint sensitization; maximum additive cell settling with a fixed full input ramp at every stage.",
+    "No propagated slew, analog waveform/skew or intermediate endpoint-stable glitch propagation; no guaranteed upper bound.",
+    "Simultaneous-input table delays use synchronous equal ramps; path endpoint patterns do not prove hazard-free operation.",
+    "Fanout C uses maximum measured biased input C; default external output load is 10 fF.",
+    "Caller-supplied logical-net wire C (validation uses LVS-mapped full top-net metal).",
+    "Estimated metal C only; no signal wire R, calibrated poly RC, PVT or package effects.",
+    "Linear load extension, when enabled, is limited to zero through twice maximum measured load; input ramps never extrapolate."
+  ],
+  "warnings": [
+    "digit[1].fa.ha1.g_t/NANY: load 1.00248e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[4].fa.ha1.g_c/NANY: load 1.4675e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[3].fa.ha1.g_c/NANY: load 1.47318e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[2].fa.ha1.g_c/NANY: load 1.44591e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[1].fa.ha1.g_c/NANY: load 1.436e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[0].fa.ha1.g_c/NANY: load 1.45263e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[0].fa.ha2.g_c/NANY: load 1.53417e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[1].fa.ha2.g_t/NANY: load 1.0264e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[1].fa.ha2.g_c/NANY: load 1.6011e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[1].fa.g_cout/INV: load 1.00987e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[2].fa.ha2.g_t/NANY: load 1.0328e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[2].fa.ha2.g_c/NANY: load 1.39573e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[3].fa.ha2.g_t/NANY: load 1.0041e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[3].fa.ha2.g_c/NANY: load 1.51438e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[4].fa.ha2.g_t/NANY: load 1.06233e-12 F outside [5e-15, 1e-12] F; policy=linear.",
+    "digit[4].fa.ha2.g_c/NANY: load 1.42028e-12 F outside [5e-15, 1e-12] F; policy=linear."
+  ],
+  "provenance": {
+    "cell_generation": {
+      "height_um": 132.0,
+      "id": "2026-10-18T10:26:47.211617+00:00",
+      "reason": "Phase 7 public PDK 5d963db requalification PASS: all nine regenerated cells, strict physical-rail LVS, 324 abutments, native taped-out extraction/equivalence, wire-C/cascades, 160 timing and 30 poly-R profiles; 66 tests passed; no numerical result changes"
+    },
+    "timing_sha256": {
+      "/home/ishi-kai/code-a-chip/cells/out/BUF/BUF.timing.json": "b7aff81431cad4cbc04012cea3137bee7fdd13620d8c1c5b4828c588268a92af",
+      "/home/ishi-kai/code-a-chip/cells/out/INV/INV.timing.json": "2f6dd53603d2c837ce502a6e63d42b680c03b045cbc8af75fa81e6075447d09f",
+      "/home/ishi-kai/code-a-chip/cells/out/NAND/NAND.timing.json": "deb8867fb530c49523b1e99122918c15b47b22de9cf22df5384ece56d386ddf9",
+      "/home/ishi-kai/code-a-chip/cells/out/NANY/NANY.timing.json": "0bec5f15739d0fcde9f7cd7d54b94cc82d5a134411a1bc34d6ec07c0579e07f4",
+      "/home/ishi-kai/code-a-chip/cells/out/NOR/NOR.timing.json": "4342814c1bd3a2dccac039d4cceff5c97ce94faf323e88320db7f300fe8c03bf",
+      "/home/ishi-kai/code-a-chip/cells/out/TIEN/TIEN.timing.json": "6146e0d3e89b1e3f25576fda4e3a4361e47c0a9f7efebe1deab12f061295f744",
+      "/home/ishi-kai/code-a-chip/cells/out/TIEP/TIEP.timing.json": "f4b76fb5211680d0d612db599c4f6b95d570238323e697d29d55b3db5c488e2c",
+      "/home/ishi-kai/code-a-chip/cells/out/TIEZ/TIEZ.timing.json": "7dff780b967943349e7aee29b4cb2c3f631215a15ae84fe0ec1520eed4aa3f7d"
+    },
+    "load_policy": "linear",
+    "input_transition_s": 1e-09
+  },
+  "statistics": {
+    "decision_nodes": 6716,
+    "graph_nodes": 6716,
+    "graph_choices": 584,
+    "search_expansions": 373,
+    "runtime_s": 0.0430768249934772,
+    "all_endpoint_pairs": false
+  }
+}

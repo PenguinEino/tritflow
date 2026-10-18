@@ -5,7 +5,7 @@ from PIL import Image
 import pytest
 
 from tritflow.pnr import mock_library, place_and_route
-from tritflow.viz.layout import (layout_figure, placement_animation, render_gds,
+from tritflow.viz.layout import (capacitance_figure, layout_figure, placement_animation, render_gds,
                                 routing_progress, save_layout_views)
 from tests.pnr.circuits import chain
 
@@ -84,9 +84,53 @@ def test_gds_raster_and_portable_html_outputs(result, tmp_path):
         assert max(count for count, color in colors if color != (255, 255, 255)) < image.width*image.height*.6
     assert original == result.gds_path.read_bytes()
     paths = save_layout_views(result)
-    assert set(paths) == {"png", "layout", "placement", "routing"}
+    assert set(paths) == {"png", "layout", "placement", "routing", "capacitance"}
     assert all(p.is_file() for p in paths.values())
-    for key in ("layout", "placement", "routing"):
+    for key in ("layout", "placement", "routing", "capacitance"):
         html = paths[key].read_text()
         assert "plotly.js" in html.lower()
         assert "cdn.plot.ly/" not in html[:300]
+
+
+def test_capacitance_colours_match_logical_net_values_and_portable_snapshot(result):
+    from plotly.colors import sample_colorscale
+    report = result.net_parasitics()
+    fig = capacitance_figure(result.json_path)
+    maximum = max(n["wire_capacitance_f"] for n in report["nets"].values())
+    seen = set()
+    for trace in fig.data:
+        if (trace.meta or {}).get("kind") != "route":
+            continue
+        name = trace.meta["net"]
+        cap = report["nets"][name]["wire_capacitance_f"]
+        assert trace.line.color == sample_colorscale("Viridis", [cap/maximum])[0]
+        assert trace.marker.color == trace.line.color
+        assert trace.meta["wire_capacitance_f"] == cap
+        assert name in trace.hovertemplate and "fF" in trace.hovertemplate
+        assert "Fan-out" in trace.hovertemplate
+        seen.add(name)
+    assert seen == {w["net"] for w in result.data["wires"]}
+    assert fig.data[-1].marker.cmax == maximum*1e15
+    assert "fF" in fig.data[-1].marker.colorbar.title.text
+    assert fig.layout.yaxis.scaleanchor == "x"
+    assert fig.layout.meta["parameter_origin"] == "assumption"
+    assert json.loads(fig.to_json())["data"]
+    # A separate JSON sidecar is also accepted, with the same colour scale.
+    other = capacitance_figure(result.data, parasitics=result.json_path.with_name(f"{result.data['top']}.net_parasitics.json"))
+    assert other.data[-1].marker.cmax == fig.data[-1].marker.cmax
+
+
+def test_capacitance_figure_empty_equal_and_missing_data():
+    data = {"top": "empty", "die": [10, 10], "placements": [], "wires": [], "vias": [], "pins": []}
+    report = {"top": "empty", "nets": {}, "wire_scope": "test", "parameter_origin": "assumption"}
+    assert capacitance_figure(data, parasitics=report).data[-1].marker.cmax == 1
+    with pytest.raises(ValueError, match="No net parasitic report"):
+        capacitance_figure(data)
+    data["pins"] = [{"name": "unused", "layer": "M2", "rect": [1, 1, 2, 2]}]
+    with pytest.raises(ValueError, match="missing routed nets"):
+        capacitance_figure(data, parasitics=report)
+    report["nets"]["unused"] = {"wire_capacitance_f": 0, "cell_input_capacitance_f": 0,
+        "total_load_f": 0, "fanout": 0, "pin_count": 1, "via_count": 0}
+    fig = capacitance_figure(data, parasitics=report)
+    assert fig.data[0].meta["net"] == "unused"
+    assert "0 fF" in fig.data[0].hovertemplate
