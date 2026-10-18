@@ -122,6 +122,7 @@ from tritflow.viz.waves import waveform_figure, transfer_figure
 from tritflow.viz.layout import render_gds, layout_figure, placement_animation, routing_progress
 from tritflow.viz.cell import cell_figure, device_mapping, row_abutment
 from tritflow.sim.provenance import pdk_provenance
+from tritflow.sim.postlayout import logical_nodeset
 from cache import Cache, runtime_fingerprint, source_fingerprint
 from campaign import RecordedCampaign
 from schematics import schematic_gallery
@@ -190,11 +191,14 @@ def complete_adder():
     lvs = lay.lvs()
     assert drc["clean"] and lvs["matched"], (drc, lvs)
     extracted = lay.extract()
+    guesses = logical_nodeset(net,lvs["report"],inputs,vectors[0])
     post = extracted.simulate(vectors, load=LOAD_F, hold_s=HOLD_S, step_s=STEP_S, edge_s=EDGE_S,
-                              temperature_c=TEMP_C, expected=adder_reference, timeout=180, workdir=out/"post")
+                              temperature_c=TEMP_C, expected=adder_reference, nodeset=guesses,
+                              timeout=600, workdir=out/"post")
     assert post["measurements"]["passed"], post["measurements"]
     return {**post, "stats": lay.stats, "drc": drc, "lvs": lvs,
-            "extracted_spice": extracted.spice, "capacitance": extracted.capacitance}
+            "extracted_spice": extracted.spice, "capacitance": extracted.capacitance,
+            "initial_nodeset_v":guesses}
 demo = cache.run("adder2-complete", {"net": net.to_json(), "vectors": vectors, "load": LOAD_F,
                                    "hold": HOLD_S, "step": STEP_S, "edge": EDGE_S,
                                    "temperature_c":TEMP_C, "seed": 0,
@@ -211,6 +215,7 @@ table([["Output", "Exercised trits", "Actual ideal-level transitions"]]+[
      sum(a[p] != b[p] for a,b in zip(expected_sequence,expected_sequence[1:]))] for p in outputs])
 evidence("Demo sequence labels and inputs", list(zip(vector_labels,vectors)))
 evidence("Full-precision demo acceptance and settling", demo["measurements"])
+evidence("Released Newton guesses, identical in both runs", demo["initial_nodeset_v"])
 table([["Logical input states (exhaustive)", len(logical[inputs[0]])],
        ["Analog states / unique states", f"{len(vectors)} / {len(set(vectors))}"],
        ["Analog transitions (selected / possible)", f"{len(vectors)-1} / {3**len(inputs)*(3**len(inputs)-1)}"],
@@ -570,7 +575,8 @@ pre = cache.run("adder2-pre", {"net":net.to_json(),"vectors":vectors,"load":LOAD
                              "gds_sha256":hashlib.sha256(lay.gds_path.read_bytes()).hexdigest(),
                              "hold":HOLD_S,"step":STEP_S,"edge":EDGE_S,"temperature_c":TEMP_C}, lambda:
     lay.extract(wire_c=False).simulate(vectors, load=LOAD_F, expected=adder_reference, hold_s=HOLD_S,
-                 step_s=STEP_S, edge_s=EDGE_S, temperature_c=TEMP_C, timeout=180))
+                 step_s=STEP_S, edge_s=EDGE_S, temperature_c=TEMP_C,
+                 nodeset=demo["initial_nodeset_v"], timeout=600))
 assert pre["measurements"]["passed"]
 assert pre["stimulus"]["vectors"] == demo["stimulus"]["vectors"]
 assert pre["stimulus"]["hold_s"] == demo["stimulus"]["hold_s"]
@@ -604,7 +610,11 @@ checked before two matched runs of identical extracted intrinsic devices and
 terminal orientation: device-only versus device plus wire C. This matters
 because the PDK resistor's intrinsic capacitance is asymmetric at PLUS/MINUS;
 comparing schematic versus extracted terminal orientation would confound the
-wire effect. The authored schematic remains the independent LVS reference. Maxima can occur on different
+wire effect. The authored schematic remains the independent LVS reference. SIM's public
+`logical_nodeset` initializes both solves identically from LVS-mapped ideal
+internal logic to avoid nonphysical off-rail roots; no `.ic`/`uic` forces the
+transient. Independent arithmetic and voltage/settling criteria remain active.
+Maxima can occur on different
 transitions; the last timing column compares each transition with itself.
 Sub-timestep differences do not establish a speedup.
 ''')
@@ -625,7 +635,7 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
     options = {"net":mapped.to_json(),"vectors":planned,"labels":labels,
                "expected":[oracle(v) for v in planned],"load_f":FOUR_DESIGN_LOAD_F,
                "hold_s":FOUR_DESIGN_HOLD_S,"step_s":FOUR_DESIGN_STEP_S,
-               "rows":None,"anneal_steps":600,"seed":0}
+               "rows":None,"anneal_steps":600,"seed":0,"initialize_internal":True}
     lookup_started = time.monotonic()
     result = None if cache.force else recorded_campaign.get(name,options)
     if result is not None:
@@ -636,7 +646,7 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
     else:
         result = cache.run(f"four-{name}",options,
             lambda: complete_design(mapped,directory,planned,oracle,load_f=FOUR_DESIGN_LOAD_F,
-                       hold_s=FOUR_DESIGN_HOLD_S,step_s=FOUR_DESIGN_STEP_S),
+                       hold_s=FOUR_DESIGN_HOLD_S,step_s=FOUR_DESIGN_STEP_S,initialize_internal=True),
             artifacts=lambda r: experiment_artifacts(r,directory,name))
     assert_experiment(result)
     assert result["post"]["stimulus"]["vectors"] == list(map(tuple,planned))

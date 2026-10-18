@@ -7,10 +7,9 @@ import shutil
 import time
 import resource
 
-from tritflow import flow, TRIT_VOLTS
-from tritflow.extract import estimate_ir_drop, reference_net_map
-from tritflow.sim.spice import simulation_netlist
-from tritflow.synth import write_artifacts, evaluate_netlist
+from tritflow import flow
+from tritflow.extract import estimate_ir_drop
+from tritflow.synth import write_artifacts
 
 
 def adder_demo_vectors(inputs, width=2):
@@ -78,21 +77,15 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
         return [" ".join(line.split()).upper() for line in text.splitlines()
                 if line.strip() and not line.lstrip().startswith("*") and not line.startswith("Ctfwire")]
     assert intrinsic(device_only.spice) == intrinsic(extracted.spice)
-    options = dict(load=load_f, hold_s=hold_s, step_s=step_s, expected=expected, timeout=300)
+    options = dict(load=load_f, hold_s=hold_s, step_s=step_s, expected=expected, timeout=600)
     guesses = {"pre": {}, "post": {}}
     if initialize_internal:
         # Soft Newton guesses address nonphysical BSIM operating-point roots.
         # They are never .ic/uic constraints and never replace the independent
         # arithmetic oracle or constrain any subsequent transient sample.
+        from tritflow.sim.postlayout import logical_nodeset
         pins = [p.name for p in net.ports if p.dir == "input"]
-        ports = {p.name for p in net.ports}
-        values = evaluate_netlist(net,dict(zip(pins,vectors[0],strict=True)),return_all=True)
-        internal = {name:TRIT_VOLTS[int(value)] for name,value in values.items() if name not in ports}
-        mapping = reference_net_map(lvs["report"],net.top)
-        for name, voltage in internal.items():
-            node = mapping[name]
-            node = simulation_netlist("\\"+node if node.startswith("$") else node)
-            guesses["post"]["xdut."+node] = voltage
+        guesses["post"] = logical_nodeset(net,lvs["report"],pins,vectors[0])
     # Both runs use the same extracted terminal orientation (including the
     # asymmetric F_RR intrinsic C); this isolates the added wire-C effect.
     guesses["pre"] = guesses["post"].copy()

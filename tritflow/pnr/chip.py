@@ -98,7 +98,7 @@ def chip(
     if not top or any(c in top for c in "/\\") or top == netlist.top:
         raise ValueError("Chip top must be a safe name distinct from the macro")
     w, h = result.data["die"]
-    if w > 1850 or h > 1764:
+    if w > 1850 or h > 1650:
         raise ValueError(
             f"Macro {w:g} x {h:g} um does not fit the TEG power/pad channels; try fewer rows, another seed or more annealing"
         )
@@ -179,12 +179,23 @@ def chip(
             }
         )
     vx, vy = power_header["vmid_escape_um"]
-    exit_y = round(core[3] + 4, 3)
+    exit_y = round(core[3] + 30, 3)
     data["power"]["rails"].append(
         {"net": "VMID", "layer": "M1", "width": 3.4, "points": [[vx, vy], [vx, exit_y]]}
     )
-    data["power"]["vias"] += [{"net": "VMID", "x": vx, "y": y} for y in (vy, exit_y)]
-    terminals["VMID"] = [(1, vx, exit_y), (1, 0.0, -1032.0)]
+    data["power"]["rails"].append(
+        {
+            "net": "VMID",
+            "layer": "M1",
+            "width": 3.4,
+            "points": [[vx, exit_y], [-936.0, exit_y]],
+        }
+    )
+    data["power"]["vias"] += [
+        {"net": "VMID", "x": vx, "y": vy},
+        {"net": "VMID", "x": -936.0, "y": exit_y},
+    ]
+    terminals["VMID"] = [(1, -936.0, exit_y), (1, 0.0, -1032.0)]
     for direction, px in (("input", -1020.0), ("output", 1020.0)):
         ports = [p for p in netlist.ports if p.dir == direction]
         if len(ports) > 13:
