@@ -12,6 +12,7 @@ from tritflow.extract import extract_layout, gds_wire_capacitance, append_wire_c
 from .bench import simulate, input_vectors, build_testbench
 from .spice import gate_spice
 from .characterize import characterize_cell
+from tritflow.extract.technology import parameter_audit
 
 
 def _save(path, data):
@@ -174,6 +175,8 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
             if not refresh_characterization: raise RuntimeError(f'{cell} characterization is stale')
             characterize_cell(cell,source.read_text(),destination=char)
     paths=[netfile,gds,pnrfile,root/'template.json']
+    paths += [p for p in sorted((PDK_ROOT/'openIP62/IP62/Technology/doc').glob('*.pdf')) if p.is_file()]
+    paths += [p for p in sorted((PDK_ROOT/'libs.tech/spice/models').glob('*')) if p.is_file()]
     for cell in used:
         paths += [root/'out'/cell/f'{cell}{ext}' for ext in ('.gds','.spice','.ext.spice','.abstract.json','.char.json')]
     hashes={str(p):file_hash(p) for p in paths}
@@ -216,6 +219,7 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
     abstracts={c:json.loads((snapshot/c/f'{c}.abstract.json').read_text()) for c in used}
     pnr=json.loads((inputs_snapshot/pnrfile.name).read_text());template=json.loads((snapshot/'template.json').read_text())
     ir=estimate_ir_drop(pnr,template,abstracts,chars);_save(out/'ir_drop.json',ir)
+    audit=parameter_audit();_save(out/'pdk_parameters.json',audit)
     if plots:
         from tritflow.viz.waves import waveform_figure
         waveform_figure(results['post'],pre=results['pre'],title=f'{design}: pre/post-layout').write_html(out/'waveforms.html')
@@ -231,6 +235,10 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
              'settling':_delay_comparison(results['pre']['measurements'],results['post']['measurements'],outputs),
              'max_rail_deviation_v':max(abs(v) for c in ir['cells'].values() for v in c['rail_deviation_v'].values()),
              'max_zero_shift_v':max((abs(c['zero_level_shift_v']) for c in ir['cells'].values() if c['zero_level_shift_v'] is not None),default=0),
+             'interconnect_parameters':{'sheet_ohm_per_square':ir['sheet_ohm_per_square'],
+                 'via_ohm':ir['via_ohm'],'wire_capacitance':caps['coefficients'],
+                 'resistance_origin':ir['parameter_origin'],'capacitance_origin':caps['parameter_origin']},
+             'em_check':ir['em_check'],'pdk_parameter_sources':audit['source_sha256'],
              'scope':caps['assumptions']+' '+ir['assumptions']}
     summary['passed']=unchanged and lvs['matched'] and summary['pre_passed'] and summary['post_passed']
     summary['state']='complete' if unchanged else 'stale'
