@@ -27,6 +27,7 @@ class PropagationCell(CellTiming):
 
     def sample(self, arc, load_f, ramp_s=1e-9, *, load_policy='error', field='propagation_s'):
         import math
+        if load_policy not in {'error','linear'}:raise ValueError('Unknown load policy')
         i,x=_bracket(self.data['axes']['load_f'],load_f,extend=load_policy=='linear')
         j,y=_bracket(self.data['axes']['input_transition_s'],ramp_s)
         value=0.
@@ -86,7 +87,7 @@ def analyze_patterns(netlist, pairs, *, library, wire_caps=None, output_load_f=1
     ordered=ordered_instances(netlist)
     inputs=[p.name for p in netlist.ports if p.dir=='input']
     outputs=list(report.arrival)
-    record={p:None for p in outputs};warnings=set(report.warnings);pattern_results=[]
+    record={p:None for p in outputs};warnings=set(report.warnings);pattern_count=0
     for before,after in pairs:
         if set(before)!=set(inputs) or set(after)!=set(inputs):raise ValueError('Incomplete timing pattern')
         old={n:int(v) for n,v in evaluate_netlist(netlist,before,return_all=True).items()}
@@ -126,8 +127,7 @@ def analyze_patterns(netlist, pairs, *, library, wire_caps=None, output_load_f=1
                     pair=f'{old[name]}->{new[name]}'
                     report.transition_arrival[name][pair]=max(report.transition_arrival[name].get(pair,0.),value)
                     if record[name] is None or value>record[name][0]:record[name]=value,winner,before,after
-        result={p:(states[p]['midpoint']+states[p]['tail'] if p in states else 0.) for p in outputs}
-        pattern_results.append(result)
+        pattern_count+=1
     for pin,row in record.items():
         if row is None:continue
         value,winner,before,after=row
@@ -143,7 +143,7 @@ def analyze_patterns(netlist, pairs, *, library, wire_caps=None, output_load_f=1
         'Synchronous multi-input table observations are approximations when input midpoints differ; no guaranteed bound.']
     report.warnings=sorted(warnings)
     report.provenance['metric']='midpoint_with_endpoint_tail'
-    report.statistics['pattern_count']=len(pattern_results)
+    report.statistics['pattern_count']=pattern_count
     report.statistics['propagate_slew']=propagate_slew
     report.statistics['runtime_s']=time.perf_counter()-started
     return report
