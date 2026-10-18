@@ -210,7 +210,7 @@ and test files, `examples/pnr_all.py`, and generated `build/` outputs.
 <!-- PNR_RESULTS_BEGIN -->
 ## Current verified build results
 
-Published template height: **132 µm**. Input content fingerprint: `227905d83a00465d8ffce3eba1581ace3b338aba0ab100647626a88539d9d2fd`.
+Published template height: **132 µm**. Input content fingerprint: `37e45ccdab2ee60426955fa9461d62a972a60e5365ae7b45b3ef46871590869e`.
 
 All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
 

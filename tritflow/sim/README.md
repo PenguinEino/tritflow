@@ -101,6 +101,6 @@ The post-layout plan exhausts all 27 full_add, 81 mac1 and 9 mul1 inputs. Adder4
 uses 20 documented cases: setup/trigger/release of both polarities of four-digit
 carry propagation, overflow, opposite and alternating operands, and positive/
 negative single-digit probes. Input order, labels and independent expected
-arithmetic are saved in `vectors.json`. Default hold is 2 us, maximum timestep
+arithmetic are saved in `vectors.json`. Default hold is 500 ns (after longer-window qualification), maximum timestep
 2 ns and output load 10 fF; CLI options change timing resolution explicitly.
 See `tritflow.viz.waves.waveform_figure` and `transfer_figure` for reusable plots.

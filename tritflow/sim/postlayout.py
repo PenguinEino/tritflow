@@ -112,7 +112,7 @@ def _simulate_cached(out, mode, *args, **kwargs):
         return _simulate_cached_unlocked(Path(out),mode,*args,**kwargs)
 
 
-def prepare_prelayout(directory, *, cells_root=CELLS_DIR, hold_s=2e-6, step_s=2e-9,
+def prepare_prelayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e-9,
                       load_f=10e-15, timeout=600):
     """Run independent arithmetic checks while waiting for physical artifacts."""
     directory=Path(directory).resolve();design=directory.name
@@ -150,7 +150,7 @@ def _simulate_cached_unlocked(out, mode, circuit, top, inputs, outputs, vectors,
     return result
 
 
-def run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=2e-6, step_s=2e-9,
+def run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e-9,
                    load_f=10e-15, timeout=600, refresh_characterization=True, plots=True):
     """Validate current PNR files, snapshot sources, LVS, wire C, pre/post and IR.
 
