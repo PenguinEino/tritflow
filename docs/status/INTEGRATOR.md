@@ -34,3 +34,4 @@
 - Plan review (docs/editorial.md, last section): code-as-method refactor (FRONTEND phase 15) and reuse story (EDITOR phase 4: ch7 STA, ch9 shuttle-ready top, Appendix C, README final).
 - Integrator to do: write README.md from notebook/narrative/readme_final.md; regenerate figures only in the release step (python3 figures/make_all.py) BEFORE FRONTEND captures hashes; then retag colab-v0, COLAB round 6, REVIEW round 4 (reader + Code-a-Chip fit), user read-through, freeze 10-25, user opens PR 10-30.
 - Other streams idle: CELLS, PNR, SIM, STA, SCHEM (done). Live log viewers: tail -F logs/<S>.log.
+- FRONTEND (after phase 15): Appendix A scope cells are ellipsis-truncated in Colab (COLAB round 5, screenshot round5-03); wrap text instead.
