@@ -124,3 +124,8 @@ def test_real_full_chain_and_reopen(tmp_path):
     reopened = flow.load_layout(net, tmp_path)
     assert reopened.gds_path == layout.gds_path
     assert reopened.stats == layout.stats
+    drawing = net.schematic(inputs={"a":1})
+    report = reopened.result.net_parasitics()
+    overlay = drawing.annotate(parasitics=report)
+    assert overlay.scene is drawing.scene
+    assert overlay.capacitance_f == {name:row["wire_capacitance_f"] for name,row in report["nets"].items()}

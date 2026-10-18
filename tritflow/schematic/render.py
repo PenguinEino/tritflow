@@ -77,32 +77,14 @@ def _symbol(v,node):
         v.line((cx-20,cy-12),(cx+20,cy-12),width=1.2)
         v.line((cx,cy-12),(cx,cy));v.line((cx,cy),(x1,cy))
         v.text(cx,cy-18,value,size=11,anchor='middle');return
-    body=Vector(0,0)
-    left,right=gate(body,node.kind,0,0)
-    for item in body.items:
-        item=dict(item)
-        if item['kind']=='text':
-            item['x']+=cx;item['y']+=cy
-        elif item['kind']=='circle':
-            a,b=item['x'],item['y']
-            item['x'],item['y']=(cx-b,cy+a) if node.orient=='down' else (cx+a,cy+b)
-        else:
-            commands=[]
-            for cmd in item['commands']:
-                op,*coords=cmd;points=[]
-                for k in range(0,len(coords),2):
-                    a,b=coords[k:k+2]
-                    points.extend((cx-b,cy+a) if node.orient=='down' else (cx+a,cy+b))
-                commands.append((op,*points))
-            item['commands']=commands
-        v.items.append(item)
+    left,right=gate(v,node.kind,cx,cy)
     for pin,(px,py) in node.pins.items():
         if pin in node.outputs:
-            end=(cx,cy+right) if node.orient=='down' else (cx+right,cy)
+            end=(right,cy)
         else:
             offset=left
-            if node.kind=='NOR':offset=-35+9*(1-(16/24)**2)
-            end=(px,cy+offset) if node.orient=='down' else (cx+offset,py)
+            if node.kind=='NOR':offset=cx-35+9*(1-(16/24)**2)
+            end=(offset,py)
         v.line((px,py),end)
 
 

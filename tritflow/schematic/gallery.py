@@ -3,8 +3,8 @@
     python3 -m tritflow.schematic.gallery --output build/schematic-review
 
 The overlay routes the real half-adder cell library and calls the public PNR
-net_parasitics() method. The geometry comparison uses the frozen gallery that
-received the integrator's review, with identical metric definitions.
+net_parasitics() method. The geometry comparison uses the frozen phase-2
+gallery; the original baseline remains in the JSON manifest.
 """
 from __future__ import annotations
 
@@ -33,6 +33,8 @@ def generate(root,output):
     from examples.curated import DESIGNS
     output.mkdir(parents=True,exist_ok=True)
     baseline=json.loads((Path(__file__).parent/'assets/baseline_metrics.json').read_text())['items']
+    previous={item['name']:item['metrics'] for item in json.loads(
+        (Path(__file__).parent/'assets/phase2_metrics.json').read_text())}
     cases=[('half_add','half_add',None),('full_add','full_add',None),('adder2','adder',2),
            ('adder4','adder',4),('mul1','mul1',None),('mac1','mac1',None)]
     cases += [(name,item.top,None) for name,item in DESIGNS.items()]
@@ -62,23 +64,38 @@ def generate(root,output):
                                     'wire_capacitance_f':sum(overlay.capacitance_f.values())}})
     empty=measure(Scene('legend',(),(),{},(),{},1088,624))
     manifest.append({'name':'legend','metrics':empty,'before':baseline['legend']})
+    for item in manifest:item['previous']=previous[item['name']]
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-    rows=['# Schematic geometry: original → revised','',
+    rows=['# Schematic geometry: phase 2 → phase 3','',
           'Wire length is in drawing pixels, not chip micrometres. A bend is a unique same-net '
           'degree-two orthogonal corner; T joins are excluded. Crossings count distinct '
           'different-net perpendicular intersections. Aspect is full canvas width / height; '
           'the real-C overlay includes its annotation table.','',
           '| Figure | Wire px | Bends total | Bends/net mean | Bends/net max | Crossings | Aspect |',
           '|---|---:|---:|---:|---:|---:|---:|']
-    rows += [_summary(item['name'],item['before'],item['metrics']) for item in manifest]
+    rows += [_summary(item['name'],item['previous'],item['metrics']) for item in manifest]
+    rows += ['', 'A short jog is a leg shorter than one gate input pitch (32 px) between two '
+             'degree-two corners. Terminal stubs and T joins are excluded; pin access uses the '
+             'finer 8 px raster. Edge runs count positive overlap along any symbol/label '
+             'keep-out boundary; perpendicular pin contact is allowed.', '',
+             '| Figure | Short jogs | Rotated gates | Symbol-edge runs |',
+             '|---|---:|---:|---:|']
+    for item in manifest:
+        old,new=item['previous'],item['metrics']
+        rows.append(f'| {item["name"]} | {old["short_jogs"]} → {new["short_jogs"]} | '
+                    f'{old["rotated_gates"]} → {new["rotated_gates"]} | '
+                    f'{old["symbol_edge_runs"]} → {new["symbol_edge_runs"]} |')
     (output/'metrics.md').write_text('\n'.join(rows)+'\n')
     cards=[]
     for entry in manifest:
-        name=entry['name'];m=entry['metrics'];old=entry['before']
+        name=entry['name'];m=entry['metrics'];old=entry['previous']
         detail=(f'Wire {old["wire_length_px"]:,} → {m["wire_length_px"]:,} px; '
                 f'bends {old["bends_total"]} → {m["bends_total"]}; '
                 f'crossings {old["crossings"]} → {m["crossings"]}; '
-                f'aspect {old["aspect_ratio"]:.2f} → {m["aspect_ratio"]:.2f}.')
+                f'aspect {old["aspect_ratio"]:.2f} → {m["aspect_ratio"]:.2f}. '
+                f'Short jogs {old["short_jogs"]} → {m["short_jogs"]}; '
+                f'rotated gates {old["rotated_gates"]} → {m["rotated_gates"]}; '
+                f'symbol-edge runs {m["symbol_edge_runs"]}.')
         cards.append(f'<section><h2>{escape(name)}</h2><p>{detail}</p><p><a href="{name}.svg">SVG</a> · '
                      f'<a href="{name}.pdf">PDF</a> · <a href="{name}.png">PNG</a></p>'
                      f'<img src="{name}.svg" alt="{escape(name)}"/></section>')

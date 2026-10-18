@@ -104,7 +104,7 @@ def release_notice(info):
         return f'Default source tag `{info["default_ref"]}` matches the packaged notebook at `{info["commit"]}` (local git-object check).'
     return ("**Release TODO before filing:** the default `colab-v0` release does not match this submitted notebook "
             "or could not be verified. The integrator must publish a corresponding immutable source tag and "
-            "configure `TRITFLOW_REF` before the bootstrap; the bootstrap itself is unchanged. "
+            "configure `TRITFLOW_REF` before the bootstrap. "
             "See `build-info.json` for the checked commit/missing helpers. Saved outputs remain readable offline; "
             "the existing badge is not a verified reproducer of this captured version.")
 
@@ -221,6 +221,12 @@ def portable_outputs(document, replacements):
             if output.output_type == "stream":
                 for old,new in replacements.items():
                     output.text = output.text.replace(old,new)
+            if "image/svg+xml" in data and "image/png" not in data:
+                # Public SCHEM figures expose native SVG. Preserve that vector
+                # and add a static fallback, without changing any circuit data.
+                import cairosvg
+                png = cairosvg.svg2png(bytestring=data["image/svg+xml"].encode(),output_width=1100)
+                data["image/png"] = b64encode(png).decode()
             if "image/png" in data:
                 # Lossless optimization, not a redraw or resampling of results.
                 with Image.open(io.BytesIO(b64decode(data["image/png"]))) as image:

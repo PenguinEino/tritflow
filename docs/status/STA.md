@@ -1,17 +1,133 @@
-# STA stream — phase 3 conservative envelope implemented; final validation in progress
+# STA stream — phase 3 complete: conservative nominal envelope, accuracy kept separate
 
-2026-10-18. Phase-2 results are preserved in `results/sta/phase2/`. The default
-global estimate is now a local-class/ramp envelope; matched event timing is
-unchanged. Initial phase-3 validation covers all **838 saved observations / 799
-transition observations**, with **zero underpredictions** across the 39 outputs.
-Envelope / measured maximum is **4.52–8.50×**, mean **6.02×**. This is deliberately
-pessimistic and is not the accuracy claim. Matched timing remains **38/39 within
-±20%, MAPE 6.78%**. The first full phase-3 test run passed **30 tests in 19.97 s**.
+2026-10-18. Only STA-owned paths changed; no packages installed, foreign
+producer/process changes, PDK/reference edits or git-state mutations.
+Qualification remains public PDK `5d963db9d44e192d37a0489c208bfccf2e2f690c`,
+CELLS generation `2026-10-18T10:26:47.211617+00:00`.
 
-Final checks now refresh validation after reporting changes, produce the
-reproducible `diagnosis/phase3_audit.json`, and verify source freshness. Detailed
-phase-3 conclusions will replace this in-progress note. The historical phase-2
-notes below describe the former default and are superseded by phase 3.
+## Result and what can be claimed
+
+The new default **`predicted_s` exceeds all 838/838 saved output observations**,
+including **799 transition observations**, across the same ten designs and
+**39 outputs**. No startup, unchanged-output glitch or individual transition
+is omitted. There are **zero underpredictions**. The schema-3
+`results/sta/validation.json` is `complete:true`, `qualified_current:true`,
+`stable_snapshot:true`, `worst_case_conservative:true`.
+
+The envelope is very pessimistic: **4.5189–8.5008×** the measured per-output
+maximum (**+351.89% to +750.08%**), mean **6.0161×**, median **6.2744×**.
+Absolute overestimates range from **56.21 ns to 1743.72 ns**. It is an
+independent measured-domain envelope, not a useful accuracy estimate. No
+circuit-derived floor, fitted multiplier or correction to pin C is used.
+
+**Matched-event accuracy is unchanged bit for bit on all 39 outputs:**
+**38/39 within ±20%, MAPE 6.782%, MAE 10.479 ns**, signed errors
+**−7.903% to +36.479%**. `accuracy_passed:false` remains correct for scaling
+adder2 `cout`; its phase-2 partial-pulse explanation still applies. This is the
+only accuracy claim. The old global graph is no longer described as an analog
+worst case.
+
+**30 STA tests pass**, final run **19.94 s**. Validation and the diagnostic audit
+both checked the current source fingerprint; STA code hashes match the executed
+source. Re-run-on-publication-change behavior remains intact. No watcher or
+simulation process is left running.
+
+## Diagnosis
+
+The reproducible `results/sta/diagnosis/phase3_audit.json` checks every local
+class, compares loading and matched results with the preserved phase-2 reports,
+and identifies the actual maximum observation's vector and endpoint class.
+
+| Analysis, same loads and SIM maxima | Underpredicted outputs | Signed error range |
+|---|---:|---:|
+| Previous fixed-1-ns, jointly sensitized endpoint graph | 35/39 | −38.47% … +26.64% |
+| All independent transient local classes, still 1 ns | 8/39 | −11.87% … +64.70% |
+| Independent classes and all internal ramp knots | 0/39 | +329.72% … +726.75% |
+| Plus propagated unchanged-output recovery guard (default) | 0/39 | +351.89% … +750.08% |
+
+1. **The tables have no missing directed local endpoint class:** six each for
+   INV/BUF and 72 each for NAND/NOR/NANY, every measured knot passing. What was
+   missing was *transient reachability*: exact jointly settled PI endpoint
+   constraints reject local classes that can occur at different times in a
+   reconvergent pulse. Three measured output maxima have unchanged endpoints:
+   scaling adder1 `cout`, full_add `sum`, mac1 `sum`. Stable recovery formerly
+   terminated at its own gate instead of being allowed to drive downstream
+   activity. Relaxing classes removes most, but not all, underpredictions.
+2. **Global slew was discarded.** The previous graph sampled every gate at a
+   full 1 ns ramp even though phase-2 SPICE probes measured equivalent internal
+   ramps up to 88.35 ns. Its `output_slew_10_90_s` fields were sampled but did
+   not affect its global recurrence. Large-load and slow transition classes
+   need different d50 values. Sampling the same actual load across the measured
+   internal ramp axis removes the remaining underpredictions.
+3. **Tail placement was correct, tail conditions were too narrow.** There is
+   no missing tail term to add to each stage. The endpoint tail was added once,
+   but at 1 ns. For example, the new adder6 `sum[0]` envelope endpoint class
+   NANY:67 at 97.03 fF has a 31.24 ns tail at 150 ns versus 15.33 ns at 1 ns.
+   The new envelope keeps d50 and tail on the same local class/ramp, adding the
+   tail once. Intermediate tails are not stacked.
+4. **Loading has not changed.** Every per-net fanout/wire/external load equals
+   phase 2. All present loads fit the measured 10 fF–2 pF axis. This rules out
+   an unrecorded C-model correction as the explanation for the new coverage.
+
+## Implementation and decisions
+
+`tritflow/sta/envelope.py` computes a monotone activity-clock recurrence over
+the DAG. For every active input pin, local class and measured internal ramp,
+it considers parent clock + d50 for changing outputs or parent clock + recovery
+for unchanged outputs. Both can propagate as activity clocks. At an endpoint,
+changing candidates add their own tail; recovery candidates need no tail.
+Known primary ramps remain 1 ns. Piecewise-linear ramp interpolation has its
+maxima at the knots, so all internal knots are considered without clipping.
+The same scalar recurrence covers pulses that return to an unchanged endpoint.
+
+Maximizing local classes and ramps independently admits false paths and
+incompatible slow conditions. That deliberate relaxation explains the large
+pessimism. Paths show the actual maximizing table terms, but **no jointly
+sensitizing PI vector is invented** (`patterns.before/after:null` with reason).
+`analyze(..., global_mode="endpoint")` retains the exact endpoint-witness
+graph as an explicitly limited diagnostic. `vector_pairs=...` retains the
+unchanged matched event model. Legacy explicit `TimingLibrary` behavior is
+also unchanged. No foreign table needed modification; the phase-2 isolated
+SPICE surfaces already characterize these local classes and ramps.
+
+The finite-dataset conservatism flag is deliberately separate from a universal
+analog guarantee: **`certified_analog_bound:false`**. All-class output-slew
+upper limits exceed the 150 ns input axis at some pins in nine designs (407
+pin occurrences total); these non-closed domains are explicit in every report
+and validation. They are neither silently clipped nor claimed qualified.
+Arbitrary pulse amplitudes, unequal ramps/skew/history, PVT and signal/poly RC
+remain outside the scalar characterization. Tighter globally useful bounds
+require class-correlated slew and skew/pulse characterization. No blocker
+remains for the requested conservative comparison against every saved case.
+
+## Artifacts, notebook handoff and checks
+
+- `results/sta/validation.json`: schema 3, coverage for every saved case,
+  pessimism, matched accuracy, four global diagnostic ablations and provenance.
+- `results/sta/validation.html` / `validation_figure()`: matched accuracy shown
+  by default, conservative envelope available as a separate optional trace.
+- `results/sta/pessimism.html` / `pessimism_figure()`: 39 envelope / SPICE factors,
+  separate from the accuracy chart.
+- `results/sta/diagnosis/phase3_audit.json`: complete class coverage, same-load
+  checks, unchanged matched estimates, actual maximum vectors and tail samples.
+- Twenty refreshed root timing reports; full phase-2 publication preserved at
+  `results/sta/phase2/`, and phase 1 remains at `results/sta/phase1/`.
+
+```sh
+python3 -m tritflow.sta.validate
+python3 -m tritflow.sta.worst_audit
+python3 -m pytest tests/sta -q
+```
+
+New tests cover slow internal classes, exactly one tail, downstream recovery
+activity, rejected failed samples, out-of-domain primary ramps, explicit
+non-closed slew domains, constant cones, and per-case validation of stable
+hazards and missing observations. Earlier phase-2 tests continue to pass.
+
+**Interface request / integrator handoff:** chapter 7 should use
+`tested_predicted_s` for the 38/39 accuracy claim and label `predicted_s` as the
+conservative nominal envelope, reporting its 4.52–8.50× pessimism and the
+non-certified scope. No shared interface file was edited.
 
 ---
 

@@ -111,7 +111,8 @@ bash notebook/colab_setup.sh --plan --ubuntu 24.04 --arch amd64
 
 Setup installs ngspice through apt; selects KLayout 0.30.6's official `.deb`
 for the **detected** Ubuntu 22.04/24.04 amd64 release; installs its dependencies
-through apt; pins the Python runtime dependencies; installs this package
+through apt; pins only klayout and lark; preserves Colab’s NumPy/SciPy/
+Matplotlib/Plotly and checks their minimum versions; installs this package
 editably beside its assets; and unpacks the PDK at commit
 `5d963db9d44e192d37a0489c208bfccf2e2f690c`. The script verifies SHA-256 for
 both binary and PDK downloads, checks required PDK/source files, and tests the
@@ -160,7 +161,8 @@ TRITFLOW_CIRCUIT=mul2 python3 notebook/validate_notebook.py --execute
 Latest-release Colab verification remains pending. The separate COLAB stream
 tested the older colab-v0 and recorded a NumPy/SciPy import failure; that is
 not a successful verification of this source notebook. Bootstrap behavior is
-unchanged in phases 6–8. Release-tag publication and final measurement
+unchanged in phases 6–8 and is corrected in phase 9 to preserve the preloaded
+scientific stack. Release-tag publication and final measurement
 hardware/schedule remain integrator tasks; no draft TODO is presented as a result.
 
 The six taped-out source schematics are bundled under `assets/schematics/`,
@@ -226,3 +228,35 @@ PYTHONPATH=. python3 notebook/campaign.py /tmp/tritflow-native/flow/cache
 The explicit Python path also supports a source checkout that has not been
 installed editably. Publishing rejects changed inputs, options or native bytes;
 it does not repair a stale/failed run or claim new verification on replay.
+
+Phase 9 setup uses pip `--no-deps`, so an already imported NumPy is not replaced.
+Minimum host versions are NumPy 1.26, SciPy 1.11, Matplotlib 3.8 and Plotly 5.18.
+Metadata checks, live/disk version comparison, the formerly failing NumPy-testing
+import and a SciPy BLAS solve run before chapters. A mixed old kernel gets an
+explicit restart-once instruction. Actual KLayout/ngspice executable versions
+print even when setup is reused. The setup schema refreshes older runtime
+configuration; it never silently reinstalls the scientific stack.
+
+Each chapter cell checks setup and completed prerequisites. A failing rerun
+invalidates downstream completion markers, so stale `lay`/`demo` globals cannot
+masquerade as a successful prior result. Gates, characterization, sizing, cell
+views, arithmetic, synthesis and the editable circuit can run after setup/imports
+without the opening physical experiment. PNR/paired-waveform views request a
+successful opening run; the wire-C overlay also requests the schematic cell.
+The closing summary requests every prior cell.
+
+Both direct `synth.synthesize(...)` and `flow.load(...).synthesize()` expose
+`.schematic(**options)` through the shared synthesized-netlist class. Chapter 5
+uses its hierarchical view and `expand="*"` half-adder view, with settled trits.
+Chapter 7 calls `lay.result.net_parasitics()` and `.annotate(...)` on the same
+schematic scene; annotations describe estimated routed wire C, not pin C or
+calibrated PEX. Public SVG outputs remain vector images and receive PNG reading
+fallbacks in the submission package.
+
+For older width/load records, the reader discloses one exact source-compatibility
+case: deleting only the new optional `.schematic()` delegate must recover the
+complete recorded mapping-file SHA. Its AST must be the undecorated public
+SCHEM forwarder; every other byte must match. This does not relabel the old
+measurement as a new run. Any other mapping/report edit, or changed
+HDL/library/PDK input, still fails. The fresh four-design archive uses the full
+current source instead.

@@ -256,6 +256,26 @@ def test_gallery_metric_budgets_against_reviewed_baseline(name,n,expand):
     assert after['bends_per_net_mean'] <= before['bends_per_net_mean']
     assert 0.65 < after['aspect_ratio'] < 3.0
     assert after['wire_length_px']==sum(row['wire_length_px'] for row in after['nets'].values())
+    previous={i['name']:i['metrics'] for i in json.loads(
+        (ROOT/'tritflow/schematic/assets/phase2_metrics.json').read_text())}[f'{stem}-{mode}']
+    # Pin alignment should remove stairs without replacing them with long
+    # detours. The collapsed full-adder sum flag gets its own wider channel.
+    assert after['wire_length_px']<=1.2*previous['wire_length_px']
+    assert after['bends_total']<=previous['bends_total']
+    assert after['crossings']<=previous['crossings']
+
+
+@pytest.mark.parametrize('name,n',CASES)
+@pytest.mark.parametrize('expand',[None,'*'])
+def test_gallery_gates_face_right_without_short_jogs_or_symbol_edge_runs(name,n,expand):
+    sch=draw(circuit(name,n),expand=expand)
+    assert sch.metrics['short_jogs']==0
+    assert sch.metrics['symbol_edge_runs']==0
+    assert sch.metrics['rotated_gates']==0
+    for node in sch.scene.symbols:
+        if node.kind in {'input','output','block'}:continue
+        assert all(node.sides[p]=='left' and node.pins[p][0]==node.x for p in node.inputs)
+        assert all(node.sides[p]=='right' and node.pins[p][0]==node.x+node.width for p in node.outputs)
 
 
 def test_ripple_is_straight_with_formal_ports_and_local_external_pins():
@@ -289,6 +309,12 @@ def test_half_adder_straight_t_trunk_and_two_bend_target():
     assert any(s.net==signal and s.a[1]==s.b[1]==source[1]
                and s.a[0]<=source[0]<target[0]<=s.b[0] for s in sch.scene.segments)
     assert sch.metrics['bends_per_net_max']<=2
+    gu=next(s for s in sch.scene.symbols if s.label=='g_u')
+    gc=next(s for s in sch.scene.symbols if s.label=='g_c')
+    source,target=gu.pins['Y'],gc.pins['B']
+    assert source[1]==target[1]
+    assert any(s.net==gu.outputs['Y'] and s.a[1]==s.b[1]==source[1]
+               and s.a[0]<=source[0]<target[0]<=s.b[0] for s in sch.scene.segments)
 
 
 def test_full_adder_compact_frames_contain_the_correct_cells():
@@ -336,6 +362,26 @@ def test_metric_definition_counts_bends_and_unconnected_crossings():
     assert metrics['wire_length_px']==48
     assert metrics['bends_total']==1 and metrics['crossings']==1
     assert metrics['aspect_ratio']==2
+
+
+def test_review_audit_distinguishes_jogs_stubs_junctions_and_pin_contact():
+    from tritflow.schematic.metrics import measure
+    from tritflow.schematic.model import Scene,Segment,Symbol
+    jog=(Segment('jog',(0,0),(16,0)),Segment('jog',(16,0),(16,16)),
+         Segment('jog',(16,16),(48,16)))
+    pitch=(Segment('pitch',(0,32),(16,32)),Segment('pitch',(16,32),(16,64)),
+           Segment('pitch',(16,64),(48,64)))
+    stub=(Segment('stub',(0,80),(8,80)),Segment('stub',(8,80),(8,112)))
+    edge=(Segment('edge',(64,64),(144,64)),Segment('pin',(144,96),(160,96)))
+    node=Symbol('gate','INV','gate',x=64,y=64,width=80,height=96,orient='down')
+    scene=Scene('audit',(node,),jog+pitch+stub+edge,{},(),{},192,192)
+    m=measure(scene)
+    assert m['short_jogs']==1 and m['nets']['jog']['short_jogs']==1
+    assert m['nets']['pitch']['short_jogs']==m['nets']['stub']['short_jogs']==0
+    assert m['rotated_gates']==m['symbol_edge_runs']==1
+    # A T splits the short leg into two branches, neither between two corners.
+    scene.segments+=(Segment('jog',(16,8),(32,8)),)
+    assert measure(scene)['short_jogs']==0
 
 
 def test_legend_uses_the_same_orthogonal_pin_stubs():

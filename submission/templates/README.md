@@ -38,8 +38,13 @@ binary/Python dependencies and a checksum-verified PDK archive at commit
 `5d963db9d44e192d37a0489c208bfccf2e2f690c`.
 Clean Colab installation and its total runtime remain **unverified/postponed**;
 saved outputs were executed locally, as recorded in the build information.
-The older `colab-v0` was separately tested and failed in NumPy/SciPy import;
-that is not a successful validation of this latest notebook.
+The older `colab-v0` was separately tested and failed in NumPy/SciPy import.
+This setup preserves Colab's scientific packages, checks minimum versions and
+live/disk consistency, and prints actual KLayout/ngspice versions. Only KLayout
+and Lark wheels are pinned; pip uses `--no-deps`. If an earlier installation
+left mixed versions loaded, follow the explicit restart-once message, then
+rerun setup/imports. Local tests do not establish a successful latest-release
+Colab run. Chapter cells report missing/failed prerequisites before using results.
 
 For a local run, use the complete TritFlow checkout and its documented PDK and
 EDA tools. Open `notebook/tritflow_tr1um.ipynb`, or set `TRITFLOW_ROOT` to that
@@ -58,11 +63,17 @@ the independent LVS reference. It does not exhaust every directed transition or
 PVT condition. Wire C and rail-IR scope come from the SIM records; this is not
 calibrated signoff PEX. Required published data is checked against the current source and pinned PDK;
 a mismatch stops execution rather than displaying an old result.
+One disclosed compatibility proof accepts the added optional schematic delegate
+only if deleting that exact method recovers the complete recorded mapping-file
+SHA; all other bytes and physical inputs must match. Those remain recorded runs.
 Physical output is a core layout, without padframe/ESD or silicon qualification.
 Static PNG outputs need no JavaScript or local files to read. Per-stage wall
 and CPU times are generated at the end. Set `TRITFLOW_FORCE_RUN=1` before Run
 all to bypass stage caches; expensive committed characterization/sizing/scaling
 campaigns remain recorded evidence, validated by consumed-source/PDK hashes.
+The synthesis chapter shows SCHEM's public hierarchical and flat half-adder
+drawings with settled trits. The post-layout chapter annotates the same scene
+with the public PNR net-parasitics wire-C report; it excludes receiving-pin C.
 
 ## License and provenance
 

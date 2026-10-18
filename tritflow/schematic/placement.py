@@ -6,7 +6,7 @@ from .model import Frame, natural
 
 
 def anchors(node):
-    """Gate terminal coordinates; down-facing gates fold feedforward rows."""
+    """Keep every logic gate facing right, including gates in folded rows."""
     x,y=node.x,node.y
     if node.kind in {'input','output'}:
         node.width,node.height=max(48,16*math.ceil((len(node.label)*6+16)/16)),32
@@ -30,18 +30,13 @@ def anchors(node):
                 node.pins[p]={'left':(x,y+offset),'right':(x+node.width,y+offset),
                               'top':(x+offset,y),'bottom':(x+offset,y+node.height)}[side]
         return
+    node.orient='right'
     node.width,node.height=80,96
     cy=y+56
-    if node.orient=='down':
-        offsets=[0] if len(node.inputs)==1 else [-16,16]
-        node.pins={p:(x+40-off,y) for p,off in zip(node.inputs,offsets)}
-        node.pins.update({p:(x+40,y+96) for p in node.outputs})
-        node.sides={p:'top' for p in node.inputs}|{p:'bottom' for p in node.outputs}
-    else:
-        offsets=[0] if len(node.inputs)==1 else [-16,16]
-        node.pins={p:(x,cy+off) for p,off in zip(node.inputs,offsets)}
-        node.pins.update({p:(x+80,cy) for p in node.outputs})
-        node.sides={p:'left' for p in node.inputs}|{p:'right' for p in node.outputs}
+    offsets=[0] if len(node.inputs)==1 else [-16,16]
+    node.pins={p:(x,cy+off) for p,off in zip(node.inputs,offsets)}
+    node.pins.update({p:(x+80,cy) for p in node.outputs})
+    node.sides={p:'left' for p in node.inputs}|{p:'right' for p in node.outputs}
 
 
 def _overlap(a,b,pad=0):
@@ -52,8 +47,8 @@ def place(nodes,driver,loads,arithmetic):
     """Place verified arithmetic as small panels, then compact remaining logic.
 
     A full-adder flat panel contains two side-by-side framed half adders. Each
-    half folds its latter stages into a lower feedforward row; a downward NANY
-    marks the row transition. Standalone halves retain a straight t-net lane.
+    half folds its latter stages into a lower left-to-right feedforward row.
+    Standalone halves retain a straight t-net lane and align u with c's input.
     """
     frames=[];placed=set()
     for node in nodes.values():anchors(node)
@@ -63,13 +58,13 @@ def place(nodes,driver,loads,arithmetic):
         anchors(node);placed.add(node.key)
 
     def half(pattern,x,y,fold):
-        positions=({'g_na':(0,0),'g_t':(0,112),'g_u':(112,112),'g_c':(224,0),
-                    'g_d':(112,240),'g_nd':(224,288),'g_s':(336,304)} if fold else
-                   {'g_t':(0,128),'g_u':(128,0),'g_na':(128,256),'g_c':(256,0),
+        positions=({'g_na':(0,0),'g_t':(0,112),'g_u':(112,96),'g_c':(224,16),
+                    'g_d':(112,288),'g_nd':(224,288),'g_s':(336,304)} if fold else
+                   {'g_t':(0,128),'g_u':(128,16),'g_na':(128,256),'g_c':(256,0),
                     'g_d':(384,144),'g_nd':(512,144),'g_s':(640,192)})
         for role,(dx,dy) in positions.items():
             node=nodes['cell:'+pattern.cells[role]]
-            put(node,x+dx,y+dy,'down' if fold and role=='g_d' else 'right')
+            put(node,x+dx,y+dy)
         return (416,400) if fold else (720,352)
 
     def full(pattern,x,y):
@@ -85,13 +80,18 @@ def place(nodes,driver,loads,arithmetic):
                 w0,h0=half(sub,cursor+24,y+40,True)
                 w,h=w0+48,h0+64
                 frames.append(Frame(scope,(cursor,y,cursor+w,y+h),tuple(sub.cells.values())))
-            children.append((cursor,w));cursor+=w+64
-        x2,w2=children[1]
+            children.append((cursor,w,block));cursor+=w+64
+        x2,w2,second_block=children[1]
         # Carry combining gates sit alongside the upper half-adder row, so the
         # sum output can leave the lower row next to its actual producer.
-        final_x=x2+w2+40
-        put(nodes['cell:'+pattern.cells['g_nc']],final_x,y+64)
-        put(nodes['cell:'+pattern.cells['g_cout']],final_x+112,y+64)
+        final_x=x2+w2+(128 if second_block else 40)
+        # Align the second carry with B; the first carry needs one full-pitch
+        # vertical leg. Leave the collapsed half's sum flag its own channel.
+        carry=nodes['cell:'+pattern.cells['g_nc']].inputs['B']
+        key,pin=driver[carry]
+        final_y=nodes[key].pins[pin][1]-72
+        put(nodes['cell:'+pattern.cells['g_nc']],final_x,final_y)
+        put(nodes['cell:'+pattern.cells['g_cout']],final_x+112,final_y)
 
     # Prefer deepest aliases when generate-only and module scopes contain the
     # same instances; never draw a generate wrapper as another arithmetic unit.
@@ -166,11 +166,17 @@ def place(nodes,driver,loads,arithmetic):
         unique=sorted(levels)
         column=0;fold=0
         for level in unique:
-            def barycenter(node):
-                parents=[nodes[driver[s][0]].pins[driver[s][1]][1]
-                         for s in node.inputs.values() if driver[s][0] in placed]
-                return sum(parents)/len(parents) if parents else offset_y+fold*fold_span+56
-            group=sorted(levels[level],key=lambda n:(barycenter(n),natural(n.key)))
+            def aligned_y(node):
+                parents=[(nodes[driver[s][0]],driver[s][1],p)
+                         for p,s in node.inputs.items() if driver[s][0] in placed]
+                # A fanout from an earlier row should not pull the next gate
+                # away from its adjacent producer in this feedforward row.
+                row_top=offset_y+fold*fold_span
+                local=[p for p in parents if p[0].y>=row_top-32]
+                aligned=[parent.pins[out][1]-(node.pins[pin][1]-node.y)
+                         for parent,out,pin in (local or parents)]
+                return sum(aligned)/len(aligned) if aligned else row_top
+            group=sorted(levels[level],key=lambda n:(aligned_y(n),natural(n.key)))
             percol=2 if len(group)>=4 and all(n.kind=='block' for n in group) else 3
             across=math.ceil(len(group)/percol)
             if column+across>4:column=0;fold+=1
@@ -178,8 +184,8 @@ def place(nodes,driver,loads,arithmetic):
             for row,node in enumerate(group):
                 col=column+row//percol
                 base=offset_y+fold*fold_span
-                minimum=bottom_by_column.get(col,base)
-                desired=8*round((barycenter(node)-56)/8)
+                minimum=bottom_by_column.get(col,base if col==0 else base-32)
+                desired=8*round(aligned_y(node)/8)
                 y=max(minimum,desired)
                 put(node,160+col*208,y)
                 bottom_by_column[col]=y+max(row_pitch,node.height+32)

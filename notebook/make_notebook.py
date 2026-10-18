@@ -1,6 +1,7 @@
 """Regenerate the concise, output-free submission notebook from reviewable cells."""
 
 import json
+import re
 from pathlib import Path
 import textwrap
 
@@ -48,8 +49,12 @@ the package editably beside its committed cell/example/figure assets. Set
 Colab checkout must match the requested ref and have no tracked edits.
 **Release TODO — integrator:** the existing `colab-v0` tag predates this
 notebook; publish a matching immutable release and update the selected ref/badge. This latest notebook and its install-inclusive ten-minute budget remain
-unverified in Colab. A separate test of the older tag failed in NumPy/SciPy
-import; publishing main alone does not validate the badge.
+unverified in Colab. Setup preserves Colab's NumPy/SciPy/Matplotlib/Plotly,
+checks minimum versions and imports, and prints native tool versions. If a
+previous install left mixed versions in memory, follow the explicit one-time
+restart instruction, then rerun setup/imports. Publishing main alone does not
+validate the badge. Each chapter checks successful prerequisites before using
+their results; after a failure, repair and rerun the named prerequisite first.
 
 The default run starts with a small adder, then closes the loop on every shared
 example and one selected circuit. Coverage is reported beside each experiment.
@@ -69,6 +74,8 @@ identify the runtime cost. Extended load, floorplan and signoff experiments
 are opt-in. Colab cold runtime remains to be measured.
 """.replace("AUTHOR_BLOCK", author_block))
 code(r'''
+_TRITFLOW_SETUP_READY = False
+globals().pop("_tf_cells", None)
 import os, sys, json, time, hashlib, subprocess, importlib.util
 from pathlib import Path
 started = time.monotonic()
@@ -96,8 +103,12 @@ if IN_COLAB:
     if SOURCE_COMMIT != requested_commit or source_git("status", "--porcelain", "--untracked-files=no"):
         raise RuntimeError("existing checkout differs from TRITFLOW_REF; use a fresh Colab runtime")
     print(f"Source: {SOURCE_URL} ref={SOURCE_REF} commit={SOURCE_COMMIT}", flush=True)
+    if not (ROOT/"notebook/runtime_support.py").is_file():
+        raise RuntimeError("TRITFLOW_REF predates this notebook's setup. Select its matching immutable release with TRITFLOW_REF in a fresh runtime.")
+    sys.path.insert(0, str(ROOT/"notebook"))
+    from runtime_support import SETUP_SCHEMA
     runtime = ROOT/"notebook/runtime.json"
-    if not runtime.is_file():
+    if not runtime.is_file() or json.loads(runtime.read_text()).get("TRITFLOW_SETUP_SCHEMA") != SETUP_SCHEMA:
         subprocess.run(["bash", str(ROOT/"notebook/colab_setup.sh"), "--source", str(ROOT)], check=True)
     os.environ.update(json.loads(runtime.read_text()))
 else:
@@ -111,8 +122,16 @@ else:
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT/"notebook"))
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+from runtime_support import check_runtime, print_tool_versions
+check_runtime()
+print_tool_versions()
+_TRITFLOW_SETUP_READY = True
 ''')
 code('''
+globals().pop("_tf_cells", None)
+if not globals().get("_TRITFLOW_SETUP_READY", False):
+    raise RuntimeError("Run the first setup cell successfully, then rerun the imports cell. If setup requested a restart, restart once first.")
+from runtime_support import CellState
 import numpy as np
 from IPython.display import display, HTML, Image
 from tritflow import flow, CELLS_DIR, PDK_ROOT, PASS_BAND, TRIT_VOLTS
@@ -398,7 +417,9 @@ clamp_body = subcircuits((CELLS_DIR/"out/NANY/NANY.spice").read_text())["nany"][
 clamp_terminals = {fields[0]:fields[1:5] for fields in map(str.split,clamp_body.splitlines()) if fields}
 assert clamp_terminals["XCP1"] == ["c1","A","Y","VDD"]
 assert clamp_terminals["XCN1"] == ["c1","B","VMID","VSS"]
-clamp_dc = next(r for r in characters["NANY"]["dc"] if r["input_trits"] == [-1,1])
+clamp_character = json.loads((CELLS_DIR/"out/NANY/NANY.char.json").read_text())
+assert hashlib.sha256((CELLS_DIR/"out/NANY/NANY.ext.spice").read_bytes()).hexdigest() == clamp_character["source_sha256"]
+clamp_dc = next(r for r in clamp_character["dc"] if r["input_trits"] == [-1,1])
 assert clamp_dc["passed"] and abs(clamp_dc["output_v"]["Y"]) <= PASS_BAND
 for trace in mapping.figure.data:
     meta = trace.meta or {}
@@ -479,6 +500,8 @@ separate output aliases also need physical drivers. The synthesis report shows
 the equivalence mode and vector count actually used for this design.
 ''')
 code('''
+fa = flow.load(ROOT/"examples/full_add.tv", "full_add")
+fa_table = fa.truth_table()
 fa_net = fa.synthesize()
 assert fa_net.report()["equivalence"]["passed"]
 assert fa_net.report()["equivalence"]["vectors"] == len(fa_table["sum"])
@@ -496,6 +519,25 @@ for expr, expected_cells in mapping_cases:
     assert sorted(inst.cell for inst in mapped.instances) == sorted(expected_cells)
     mapping_rows.append([expr, mapped.report()["cells"]])
 table(mapping_rows)
+''')
+md('''
+### The mapped schematic, before physical design
+
+Module blocks preserve the arithmetic hierarchy. The flat half-adder exposes
+its actual mapped cells; bubbles denote ternary sign reversal. Wire colours
+show settled ideal trits, not transient voltages. The post-layout view adds
+estimated routed wire C to this same scene without moving its symbols.
+''')
+code('''
+schematic_net = flow.load(ROOT/"examples/adder.tv", "adder", {"N":2}).synthesize(name="adder2_demo")
+schematic_inputs = {"a[0]":1,"a[1]":0,"b[0]":1,"b[1]":0,"cin":0}
+sch = schematic_net.schematic(inputs=schematic_inputs,net_names=True,
+                             title="Two-trit adder: mapped hierarchy and settled trits")
+half_net = flow.load(ROOT/"examples/half_add.tv", "half_add").synthesize()
+half_sch = half_net.schematic(expand="*",inputs={"a":1,"b":1},net_names=True,
+                              title="Half adder: flat mapped cells, a=b=+1")
+display(sch)
+display(half_sch)
 ''')
 md('''
 ## 6. Place, route and inspect GDS
@@ -588,6 +630,13 @@ table([["Output", "Device-only max settling (ns)", "+ wire-C max settling (ns)"]
     [p, pre["measurements"]["max_settling_s"][p]*1e9,
      demo["measurements"]["max_settling_s"][p]*1e9] for p in outputs])
 evidence("Wire-C assumptions", demo["capacitance"]["assumptions"])
+assert schematic_net.to_json() == net.to_json(), "schematic and routed references must be identical"
+wire_report = lay.result.net_parasitics()
+routed_sch = sch.annotate(parasitics=wire_report,
+                         title="Same adder schematic: settled trits and routed wire C (fF)")
+assert routed_sch.scene is sch.scene
+display(routed_sch)
+evidence("Schematic wire-C scope (excludes receiving-pin C)",wire_report["assumptions"])
 if EXTENDED:
     for load in [10e-15,1e-12]:
         loaded = cache.run(f"adder2-load-{load:g}", {"vectors":vectors,"load":load}, lambda:
@@ -705,8 +754,11 @@ for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figu
     published = ROOT/"results"/filename
     result = loader(published)
     records = result["rows"] if filename == "adder_scaling.json" else [result]
+    compatible_sources = []
     for record in records:
-        verify_publication_sources(record,ROOT,PDK_ROOT)
+        compatible_sources.extend(verify_publication_sources(record,ROOT,PDK_ROOT))
+    if compatible_sources:
+        evidence("Recorded-source compatibility: exact optional schematic delegate only",compatible_sources)
     evidence("Published experiment scope: "+filename,result.get("coverage",result.get("scope")))
     evidence("Published limits / conditions",result.get("limits",result.get("conditions")))
     if filename == "adder_scaling.json":
@@ -822,6 +874,34 @@ print("Artifacts:", BUILD)
 
 
 if __name__ == "__main__":
+    # Each independently runnable chapter starts with an explicit setup guard.
+    # Native-result views require successful upstream cells, never partial globals.
+    code_items = [item for item in cells if item["cell_type"] == "code"]
+    opening = next(c["id"] for c in code_items if 'd = flow.load(ROOT/"examples/adder.tv"' in c["source"])
+    schematic = next(c["id"] for c in code_items if "schematic_net =" in c["source"])
+    titles, chapter = {}, "setup"
+    for item in cells:
+        if item["cell_type"] == "markdown":
+            match = re.search(r"(?m)^## (\d+)\. (.+)",item["source"])
+            if match:
+                chapter = f"Chapter {match[1]}: {match[2]}"
+        else:
+            titles[item["id"]] = f"{chapter} ({item['id']})"
+    for item in code_items[2:]:
+        source = item["source"]
+        requires = []
+        if source.startswith('table([["Metric", "Two-trit adder"]]'):
+            requires = [opening]
+        elif source.startswith('pre = cache.run("adder2-pre"'):
+            requires = [opening,schematic]
+        elif source.startswith("assert (runtime_fingerprint"):
+            requires = [c["id"] for c in code_items[2:] if c is not item]
+        item["metadata"]["tritflow"] = {"requires":requires,"title":titles[item["id"]]}
+        item["source"] = ('if "_tf_cells" not in globals():\n'
+                          '    raise RuntimeError("Run setup and imports successfully before this chapter; rerun them after any requested runtime restart.")\n'
+                          f'with _tf_cells.running({item["id"]!r}, {titles[item["id"]]!r}, requires={requires!r}):\n'
+                          +textwrap.indent(source,"    "))
+    code_items[1]["source"] += "\n_tf_cells = CellState("+repr(titles)+")\n"
     # Keep long data-reader cells folded in Jupyter hosts that honor this hint;
     # source, editable controls and all outputs remain in the notebook.
     for item in cells:

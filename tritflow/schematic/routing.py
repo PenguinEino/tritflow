@@ -8,7 +8,7 @@ from collections import defaultdict
 import heapq
 from itertools import count
 
-from .model import Segment, natural
+from .model import JOG_PITCH, Segment, natural
 
 STEP=8
 DIRECTIONS=((8,0),(-8,0),(0,8),(0,-8))
@@ -52,16 +52,24 @@ def route(nodes,driver,loads,width,height,frames=()):
             return max(bounds[0]-p[0],0,p[0]-bounds[2])+max(bounds[1]-p[1],0,p[1]-bounds[3])
         # A shortest tree attachment ends at the first existing same-net point.
         q=[];serial=count();best={};previous={}
-        state=(start,2)
+        # The first leg is a terminal stub; only legs *between* corners must
+        # span a gate input pitch. Retain the capped run length in A* state so
+        # a cheap eight-pixel stair cannot displace a clean, straight channel.
+        minimum=JOG_PITCH//STEP
+        state=(start,4,minimum)
         heapq.heappush(q,(heuristic(start),0,next(serial),state));best[state]=0
         finish=None
         while q:
             _,cost,_,state=heapq.heappop(q)
             if cost!=best[state]:continue
-            p,old_axis=state
+            p,old_direction,run=state
+            old_axis=old_direction//2
             if p in tree:
                 finish=state;break
-            for dx,dy in DIRECTIONS:
+            for direction,(dx,dy) in enumerate(DIRECTIONS):
+                # A reversal would inflate the run length, then disappear
+                # when collinear edges merge, recreating the forbidden jog.
+                if old_direction!=4 and direction==(old_direction^1):continue
                 if p==start and (dx,dy)!=normal:continue
                 nxt=(p[0]+dx,p[1]+dy)
                 if not (8<=nxt[0]<=width-8 and 80<=nxt[1]<=height-48):continue
@@ -71,6 +79,8 @@ def route(nodes,driver,loads,width,height,frames=()):
                 used=edges.get(edge(p,nxt))
                 if used is not None and used!=signal:continue
                 new_axis=0 if dy==0 else 1
+                turning=old_axis!=2 and old_axis!=new_axis
+                if turning and run<minimum:continue
                 # Crossing a wire must continue straight. A corner or T join
                 # of another net is never a legal crossing point.
                 foreign=at[p].keys()-{signal}
@@ -78,9 +88,10 @@ def route(nodes,driver,loads,width,height,frames=()):
                 other=at[nxt].keys()-{signal}
                 if other and any(at[nxt][n]!={1-new_axis} for n in other):continue
                 if other and nxt in tree:continue
-                penalty=(24 if old_axis!=2 and old_axis!=new_axis else 0)+12*len(other)
+                penalty=(24 if turning else 0)+12*len(other)
                 new_cost=cost+8+penalty
-                new_state=(nxt,new_axis)
+                new_run=1 if turning else min(minimum,run+1)
+                new_state=(nxt,direction,new_run)
                 if new_cost<best.get(new_state,float('inf')):
                     best[new_state]=new_cost;previous[new_state]=state
                     heapq.heappush(q,(new_cost+heuristic(nxt),new_cost,next(serial),new_state))

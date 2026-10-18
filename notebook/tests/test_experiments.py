@@ -2,6 +2,7 @@
 
 from hashlib import sha256
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -69,3 +70,27 @@ def test_opening_sequence_exercises_all_outputs_and_carry_assert_release():
     for sign,label in ((1,"positive"),(-1,"negative")):
         assert int(values[labels.index(label+"_carry_assert")]["cout"]) == sign
         assert int(values[labels.index(label+"_carry_release")]["cout"]) == 0
+
+
+def test_recorded_mapping_compatibility_requires_every_other_byte_identical(tmp_path):
+    root = Path(__file__).resolve().parents[2]
+    record = json.loads((root/"results/full_add_load_sweep.json").read_text())
+    original = next(name for name in record["sources_sha256"] if name.endswith("/synth/mapping.py"))
+    expected = record["sources_sha256"][original]
+    path = tmp_path/"tritflow/synth/mapping.py"
+    path.parent.mkdir(parents=True)
+    raw = (root/"tritflow/synth/mapping.py").read_bytes()
+    path.write_bytes(raw)
+    source_record = {"sources_sha256":{original:expected}}
+    proofs = experiments.verify_publication_sources(source_record,tmp_path,tmp_path/"pdk")
+    # A future SIM republication may already include the new optional method.
+    assert proofs or sha256(raw).hexdigest() == expected
+    path.write_bytes(raw+b"\n# unrelated edit must not be normalized away\n")
+    with pytest.raises(RuntimeError,match="stale"):
+        experiments.verify_publication_sources(source_record,tmp_path,tmp_path/"pdk")
+    path.write_bytes(raw.replace(b'def schematic(self, **options):',b'@staticmethod\n    def schematic(self, **options):'))
+    with pytest.raises(RuntimeError,match="stale"):
+        experiments.verify_publication_sources(source_record,tmp_path,tmp_path/"pdk")
+    path.write_bytes(raw.replace(b'"logic_depth": max',b'"changed_logic_depth": max'))
+    with pytest.raises(RuntimeError,match="stale"):
+        experiments.verify_publication_sources(source_record,tmp_path,tmp_path/"pdk")

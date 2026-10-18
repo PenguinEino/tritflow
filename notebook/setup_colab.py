@@ -22,6 +22,8 @@ import tarfile
 import tempfile
 from urllib.request import urlopen
 
+from runtime_support import MINIMUM_VERSIONS, SETUP_SCHEMA, check_minimum_versions, print_tool_versions
+
 
 HERE = Path(__file__).resolve().parent
 PINS = json.loads((HERE/"setup_pins.json").read_text())
@@ -94,13 +96,16 @@ def main(argv=None):
     commands = [privilege+["apt-get", "update"],
                 privilege+["apt-get", "install", "-y", "--no-install-recommends", "ngspice", "ca-certificates"],
                 privilege+["apt-get", "install", "-y", str(prefix/"klayout.deb")],
-                [sys.executable, "-m", "pip", "install", "-r", str(HERE/"requirements-colab.txt"), "-e", str(source)],
+                [sys.executable, "-m", "pip", "install", "--no-deps", "-r", str(HERE/"requirements-colab.txt"), "-e", str(source)],
                 ["/usr/bin/klayout", "-b", "-r", str(HERE/"ruby_smoke.drc")]]
     plan = {"ubuntu": version, "klayout": package, "pdk_archive": url, "pdk_root": str(pdk),
-            "source": str(source), "commands": commands}
+            "source": str(source), "commands": commands,
+            "host_scientific_minimums": MINIMUM_VERSIONS,
+            "scientific_packages_installed": False}
     if args.plan:
         print(json.dumps(plan, indent=2))
         return 0
+    check_minimum_versions()
     prefix.mkdir(parents=True, exist_ok=True)
     environment = {**os.environ, "DEBIAN_FRONTEND": "noninteractive", "QT_QPA_PLATFORM": "offscreen"}
     for command in commands[:2]:
@@ -134,9 +139,11 @@ def main(argv=None):
     if not legacy.exists():
         legacy.symlink_to(binary)
     config = {"TR1UM_PDK": str(pdk), "TRITFLOW_ROOT": str(source), "KLAYOUT_BINARY": str(binary),
-              "QT_QPA_PLATFORM": "offscreen"}
+              "QT_QPA_PLATFORM": "offscreen", "TRITFLOW_SETUP_SCHEMA": SETUP_SCHEMA}
     (HERE/"runtime.json").write_text(json.dumps(config, indent=2)+"\n")
     print(json.dumps(config, indent=2))
+    os.environ["KLAYOUT_BINARY"] = str(binary)
+    print_tool_versions()
     return 0
 
 

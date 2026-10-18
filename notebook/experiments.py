@@ -1,5 +1,6 @@
 """Notebook-sized experiments assembled only from public stream APIs."""
 
+import ast
 import json
 from hashlib import sha256
 from pathlib import Path
@@ -133,16 +134,54 @@ def load_edited(example, source, directory):
     return flow.load(edited, example.top)
 
 
+def schematic_extension_proof(path, expected):
+    """Prove one optional display hook is the only change to recorded mapping.
+
+    The complete recorded file SHA must be recovered by deleting the exact
+    public SCHEM delegate, including at most its following blank line. No
+    normalization of the remaining source is allowed. The delegate has no
+    decorators, default expressions or annotations, and no class-time effects.
+    This is compatibility with an old recorded run, never new qualification.
+    """
+    path = Path(path)
+    if path.name != "mapping.py" or path.parent.name != "synth":
+        return None
+    raw = path.read_bytes()
+    try:
+        tree = ast.parse(raw)
+    except SyntaxError:
+        return None
+    methods = [method for cls in tree.body if isinstance(cls,ast.ClassDef) and cls.name == "SynthesizedNetlist"
+               for method in cls.body if isinstance(method,ast.FunctionDef) and method.name == "schematic"]
+    if len(methods) != 1:
+        return None
+    method = methods[0]
+    start, end = method.lineno-1, method.end_lineno
+    if isinstance(method.body[0],ast.Expr) and isinstance(method.body[0].value,ast.Constant) and isinstance(method.body[0].value.value,str):
+        method.body.pop(0)
+    safe = ast.parse("def schematic(self, **options):\n from tritflow.schematic import draw\n return draw(self, **options)\n").body[0]
+    if ast.dump(method,include_attributes=False) != ast.dump(safe,include_attributes=False):
+        return None
+    lines = raw.splitlines(keepends=True)
+    ends = [end] + ([end+1] if end < len(lines) and not lines[end].strip() else [])
+    if any(sha256(b"".join(lines[:start]+lines[stop:])).hexdigest() == expected for stop in ends):
+        return {"path":str(path),"recorded_sha256":expected,"live_sha256":sha256(raw).hexdigest(),
+                "proof":"Only the optional schematic(self, **options) display delegate was added; deleting it recovers the complete recorded source SHA. All mapping/report code bytes are identical. Recorded results, not new qualification."}
+    return None
+
+
 def verify_publication_sources(record, root, pdk):
     """Check a published run's sources after relocation, without needing build/.
 
     Raw ignored build artifacts are provenance of the recorded run, not inputs
     to plotting committed JSON. Code/library/HDL/PDK hashes must still agree.
-    This does not assert that the recorded DRC/LVS has been rerun locally.
+    Returns disclosed compatibility proofs for an exact display-only extension;
+    every other consumed byte must match. This does not rerun DRC/LVS.
     """
     sources = record.get("sources_sha256")
     if not sources:
         raise RuntimeError("published source fingerprints are missing")
+    compatible = []
     for original, expected in sources.items():
         if "/build/" in original:
             continue
@@ -158,5 +197,12 @@ def verify_publication_sources(record, root, pdk):
                           for anchor in ("tritflow", "examples", "cells") if f"/{anchor}/" in original]
             if not candidates:
                 raise RuntimeError(f"unrecognized publication source: {original}")
-        if not any(p.is_file() and sha256(p.read_bytes()).hexdigest() == expected for p in candidates):
+        if any(p.is_file() and sha256(p.read_bytes()).hexdigest() == expected for p in candidates):
+            continue
+        proof = next((proof for p in candidates if p.is_file()
+                      and (proof := schematic_extension_proof(p,expected))),None)
+        if proof:
+            compatible.append(proof)
+        else:
             raise RuntimeError(f"published result is stale relative to {original}")
+    return compatible

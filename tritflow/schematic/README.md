@@ -23,7 +23,7 @@ print(flat.metrics)                  # wire length, bends, crossings and aspect
 legend().show()
 ```
 
-`net.schematic(**options)` is the requested one-line FRONTEND delegate to
+`net.schematic(**options)` is the FRONTEND delegate to
 `draw`; SCHEM does not alter the shared netlist classes. The callable hook
 works with `flow.Netlist`, `SynthesizedNetlist` and netlists loaded from JSON.
 
@@ -57,9 +57,10 @@ A ripple adder is one row of digit blocks, with `cout` and the next `cin` on
 the same horizontal track. `a[i]` and `b[i]` enter locally from above;
 `sum[i]` leaves below its producer. Full-adder flat views frame the two half
 adders side by side and fold their latter stages into a lower feedforward
-row. A downward gate marks that row transition. Larger flat adders use
+row. Every gate faces left to right, including the lower row. Larger flat adders use
 multiple rows of these panels. The standalone half adder instead keeps the
-`t` net as a straight trunk from `g_t` to `g_d`, with a branch to `g_u`.
+`t` net as a straight trunk from `g_t` to `g_d`, with a branch to `g_u`;
+`g_u` also lines up directly with `g_c`'s lower input.
 
 The public mapped netlist currently drops original module types and port
 aliases. `arithmetic.py` therefore verifies exact cell-and-ordered-pin
@@ -91,6 +92,9 @@ terminal access, forbids wire-through-symbol and shared edges between nets,
 and permits only straight unconnected crossings. Collinear same-net segments
 merge; T joins get dots and different-net crossings get gaps. Placement and
 wire coordinates use an eight-pixel grid.
+Between two corners, a routing leg spans at least one gate input pitch
+(32 pixels). Short terminal stubs remain possible. Tracking direction and
+run length prevents a backtracking walk from disguising a short stair.
 
 ## Reuse after P&R
 
@@ -123,7 +127,11 @@ uncalibrated lumped wire estimate.
 
 `sch.metrics` reports total unique wire length in drawing pixels, total and
 mean/maximum bends per net, nets over two bends, crossings and canvas aspect,
-plus per-net details. A bend is a degree-two orthogonal corner; T junctions
+plus per-net details. It also reports `short_jogs`, `rotated_gates` and
+`symbol_edge_runs`. A short jog is a leg shorter than 32 pixels between two
+degree-two corners, excluding terminal stubs and T joins. An edge run is
+positive wire overlap along a symbol/label keep-out boundary; perpendicular
+pin contact is allowed. A bend is a degree-two orthogonal corner; T junctions
 are excluded. Crossings are distinct different-net perpendicular
 intersections. Aspect includes the annotation table when present. These are
 drawing metrics, not chip wirelength or electrical performance estimates.
@@ -152,8 +160,10 @@ The gallery does not rerun DRC/LVS or claim new signoff evidence.
 
 `index.html` displays the figures and before/after results. `metrics.md`
 compares **every item** with the frozen reviewed gallery in
-`assets/baseline_metrics.json`; `manifest.json` includes per-net details and
-real-C provenance. Tests enforce wire/bend budgets, a straight ripple chain,
+`assets/phase2_metrics.json`; `manifest.json` includes per-net details,
+real-C provenance, the phase-2 `previous` metrics and the original `before`
+metrics from `assets/baseline_metrics.json`. Tests enforce wire/bend budgets,
+zero short jogs, right-facing gates, zero symbol-edge runs, a straight ripple chain,
 formal/local digit ports, ≤2 bends/net in the standalone half adder, a near
 2:1 full-adder flat view, exact connectivity, no symbol overlap, clear pin
 access, no wire-through-symbol, and no text overlap/clipping.
