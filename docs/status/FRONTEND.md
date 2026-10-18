@@ -1,10 +1,10 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 6 validation in progress.**
+Updated: 2026-10-18. **Phase 6 complete.**
 
 ## Phase 6 handoff
 
-Implementation is complete; final notebook runs are in progress. The Colab
+Implementation and local notebook/circuit validation are complete. The Colab
 bootstrap code cell is byte-identical to phase 5 / committed
 `23f27e20455b29b7abf6d2ce166cd3f2f9c927e0`. Colab verification is postponed
 by instruction. No git-writing commands or edits to other streams' files.
@@ -83,8 +83,49 @@ synthesis/P&R/official DRC/strict LVS: **8 tests passed in 16.19 s**.
 The initial combined suite passed **195 tests in 20.05 s**, including nested cache
 restoration, edited shared includes, and portable publication-source validation.
 The final suite passed **228 tests in 23.82 s** (including the newly available
-CELLS visualization regressions); no skips. Final full-notebook/default/choice
-results will be recorded below.
+CELLS visualization regressions); no skips. After the final portable-reader
+adjustments, its focused regressions passed **2 tests in 0.19 s**.
+
+The **31-cell default notebook passed every chapter in 392.8 s locally**,
+excluding installation, with all nine expensive cache stages computed fresh.
+This includes both adder widths used in the narrative, every shared design's
+official DRC/strict LVS/matched pre/post checks, and the default min/max sorter.
+Log: `/tmp/tritflow-notebook-phase6-final.log`; generated artifacts/caches:
+`/tmp/tritflow-notebook-phase6-final/`. This is a local cold runtime measurement,
+not a Colab or installation-inclusive guarantee.
+
+The actual chapter-8 cells were also executed with `TRITFLOW_CIRCUIT` set to
+each remaining choice. All independent exhaustive source/mapped checks,
+physical checks and complete selected pre/post input-state sequences passed:
+sign **4.69 s**, compare2 **123.35 s**, mul2 **344.89 s**. Log:
+`/tmp/tritflow-choices-phase6.log`; artifacts are in the same output tree.
+The multiplier is the most expensive selection; changing choices reuses the
+common notebook stages when their context/artifacts are unchanged. Its full
+analog sweep is outside the default min/max Run all timing above.
+
+SIM published its grids, scaling and load-boundary records during this work.
+The final publication-reader adjustment recognizes both relocated repository
+names and PDK PDF provenance (`openIP62/`). A fresh execution of the actual
+publication-slot cell loaded/checked **both current result JSONs** and serialized
+their figures successfully: `/tmp/tritflow-publications-phase6.log`. The full
+notebook's earlier pass had honestly left TODOs while those fingerprints were
+changing. No raw `build/` evidence was needed to display the published data.
+
+Pinned-PDK provenance check: the official PDFs exist in the pinned archive,
+but current SIM scaling/load records hash the installed
+`libs.tech/klayout/tech/lvs/01_Extract.lvs`, which differs from commit
+`5d963db9d44e192d37a0489c208bfccf2e2f690c`. Both readers correctly reject a
+current-result claim against that pinned copy. **SIM/integrator request:**
+republish these measured records using the bootstrap's pinned PDK before
+expecting their slots to appear as current in Colab. The explicit TODO remains
+until provenance matches; no result hashes or measurements were rewritten by
+FRONTEND. This does not block the requested notebook scaffolding or local
+physical/arithmetic validation. Full Colab verification stays postponed.
+
+The Colab bootstrap cell remains byte-identical to phase 5. Notebook generation,
+syntax/chapters, owned-path `git diff --check`, cache restoration and circuit
+include editing checks pass. Other streams continued committing/editing in the
+shared checkout; no foreign changes were reverted. No git-writing command ran.
 No packages installed.
 
 ## Phase 5 handoff
@@ -614,6 +655,9 @@ None.
 2. **SIM — sizing chapter: resolved in phase 6.** The exact requested API and
    cached grids are available and integrated conditionally. Publication slots
    retain explicit missing/stale TODOs, including the scaling/load boundary.
+   **Pinned provenance follow-up:** regenerate scaling/load publications with
+   bootstrap PDK commit `5d963db9d44e192d37a0489c208bfccf2e2f690c`; the current
+   installed `01_Extract.lvs` hash differs, as documented in the phase 6 handoff.
 3. **Schematic assets: resolved in phase 4.** All requested SVGs are bundled and
    integrated; no asset request remains with another stream.
 

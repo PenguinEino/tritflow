@@ -171,3 +171,13 @@ last passing and first failing measured loads, per-output times and failed
 checkpoints. The figure omits unsettled delays rather than inventing finite
 values. The bracket is local to the measured sequence; no unmeasured monotonic
 load, PVT, or silicon guarantee is implied.
+
+`results['fits']` and `tritflow.sim.scaling.fit_scaling(results)` provide OLS
+carry-delay/trit and representative DC-power/cell fits, with a free intercept,
+residuals and R². `tritflow.viz.scaling.scaling_fit_figure(results)` returns the
+chapter-7 figure; the producer writes `results/adder_scaling_fit.html`.
+The static-power fit describes this adder cell mix at documented DC states.
+Resistive dividers consume power while inputs are held; clock reduction alone
+does not eliminate that bias current. Fits do not measure switching energy or
+establish PVT bounds. `results/phase4_comparison.json` compares the saved Phase 3
+records against requalified layouts; the IP62 audit is `results/pdk_parameters.json`.
