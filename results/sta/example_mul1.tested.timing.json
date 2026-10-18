@@ -42,7 +42,8 @@
         "input_transition_s": 1e-09,
         "settling_tail_s": 5.460417968217497e-09,
         "output_slew_10_90_s": 7.869749356267166e-09,
-        "metric": "ordered_midpoint"
+        "metric": "ordered_midpoint",
+        "time_order_adjustment_s": 0.0
       },
       {
         "instance": "g_t3",
@@ -71,7 +72,8 @@
         "input_transition_s": 9.837186695333958e-09,
         "settling_tail_s": 5.878111195625823e-09,
         "output_slew_10_90_s": 8.97736712212636e-09,
-        "metric": "ordered_midpoint"
+        "metric": "ordered_midpoint",
+        "time_order_adjustment_s": 0.0
       },
       {
         "instance": "g_p",
@@ -102,7 +104,8 @@
         "input_transition_s": 1.1221708902657949e-08,
         "settling_tail_s": 4.582869610334578e-09,
         "output_slew_10_90_s": 7.643262258827572e-09,
-        "metric": "ordered_midpoint"
+        "metric": "ordered_midpoint",
+        "time_order_adjustment_s": 0.0
       }
     ]
   },
@@ -119,11 +122,11 @@
     }
   },
   "loads": {
-    "_n1": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 2.8531101e-14,
+    "a": {
+      "fanout_f": 4.835121595128594e-13,
+      "wire_f": 4.7970608599999994e-14,
       "external_f": 0.0,
-      "total_f": 1.429571812330077e-13
+      "total_f": 5.314827681128594e-13
     },
     "p": {
       "fanout_f": 0.0,
@@ -131,17 +134,17 @@
       "external_f": 1e-14,
       "total_f": 6.784583119999999e-14
     },
-    "_n0": {
-      "fanout_f": 2.0613144150076912e-13,
-      "wire_f": 3.23767502e-14,
-      "external_f": 0.0,
-      "total_f": 2.385081917007691e-13
-    },
     "_n2": {
       "fanout_f": 2.059554318367356e-13,
       "wire_f": 4.468314320000001e-14,
       "external_f": 0.0,
       "total_f": 2.5063857503673564e-13
+    },
+    "_n1": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 2.8531101e-14,
+      "external_f": 0.0,
+      "total_f": 1.429571812330077e-13
     },
     "b": {
       "fanout_f": 4.839436672518686e-13,
@@ -149,11 +152,11 @@
       "external_f": 0.0,
       "total_f": 5.361611558518686e-13
     },
-    "a": {
-      "fanout_f": 4.835121595128594e-13,
-      "wire_f": 4.7970608599999994e-14,
+    "_n0": {
+      "fanout_f": 2.0613144150076912e-13,
+      "wire_f": 3.23767502e-14,
       "external_f": 0.0,
-      "total_f": 5.314827681128594e-13
+      "total_f": 2.385081917007691e-13
     }
   },
   "assumptions": [
@@ -194,7 +197,7 @@
     "graph_nodes": 66,
     "graph_choices": 0,
     "search_expansions": 0,
-    "runtime_s": 0.0009015989926410839,
+    "runtime_s": 0.0009043079917319119,
     "all_endpoint_pairs": false,
     "cancelled_pulses": 0,
     "overlapping_ramps": 0,

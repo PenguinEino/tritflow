@@ -19,17 +19,16 @@ class SymbolLegend:
             col,row = index%2,index//2
             x,y = 32+col*528,80+row*96
             label = kind if kind not in {'input','output'} else function
-            node = Symbol(kind,kind,label,x=x,y=y,width=112,height=96)
-            cy = y+64 if kind not in {'input','output'} else y+48
-            if kind in {'input'} or kind.startswith('TIE'):
-                node.outputs={'Y':'net'}; node.pins={'Y':(x+112,cy)}
-            elif kind == 'output':
-                node.inputs={'port':'net'}; node.pins={'port':(x,cy)}
+            from .placement import anchors
+            node = Symbol(kind,kind,label,x=x,y=y,width=80,height=96)
+            if kind=='input' or kind.startswith('TIE'):
+                node.outputs={'Y':'net'}
+            elif kind=='output':node.inputs={'port':'net'}
             else:
                 node.inputs={'A':'a'} if kind in {'INV','BUF'} else {'A':'a','B':'b'}
                 node.outputs={'Y':'y'}
-                node.pins = {p:(x,cy+o) for p,o in zip(node.inputs,[0] if len(node.inputs)==1 else [-16,16])}
-                node.pins['Y']=(x+112,cy)
+            if kind in {'input','output'}:node.x+=16;node.y+=32
+            anchors(node)
             _symbol(v,node)
             v.text(x+136,y+40,function,size=14,weight='bold')
             v.text(x+136,y+61,meaning,size=11,color=SECONDARY)

@@ -66,7 +66,7 @@ def place(nodes,driver,loads,arithmetic):
         positions=({'g_na':(0,0),'g_t':(0,112),'g_u':(112,112),'g_c':(224,0),
                     'g_d':(112,240),'g_nd':(224,288),'g_s':(336,304)} if fold else
                    {'g_t':(0,128),'g_u':(128,0),'g_na':(128,256),'g_c':(256,0),
-                    'g_d':(384,144),'g_nd':(512,144),'g_s':(640,160)})
+                    'g_d':(384,144),'g_nd':(512,144),'g_s':(640,192)})
         for role,(dx,dy) in positions.items():
             node=nodes['cell:'+pattern.cells[role]]
             put(node,x+dx,y+dy,'down' if fold and role=='g_d' else 'right')
@@ -106,12 +106,20 @@ def place(nodes,driver,loads,arithmetic):
         elif scope=='' and all('block:'+child in nodes or all('cell:'+name in nodes for name in arithmetic.get(child,m).cells.values()) for child in ('ha1','ha2')):
             candidates.append(m)
     candidates.sort(key=lambda m:natural(m.scope))
+    full_keys={'cell:'+name for m in candidates for name in m.cells.values()}
+    full_keys.update('block:'+m.scope for m in candidates)
+    external_core=bool(candidates) and any(
+        n.kind not in {'input','output'} and n.key not in full_keys for n in nodes.values())
+    if any(m.scope=='' for m in candidates):external_core=False
+    # Keep external multiplier/min/max producers to the left of their full
+    # adder load, including when the latter is a single collapsed block.
+    base_x=960 if external_core else 160
     if candidates:
         closed=all('block:'+m.scope in nodes for m in candidates)
         if closed:
             for k,m in enumerate(candidates):
                 node=nodes['block:'+m.scope]
-                put(node,160+224*k,200)
+                put(node,base_x+224*k,200)
                 panels.append((node.x,node.y,node.x+160,node.y+160))
         else:
             # Two full cells per row for N>=3; two-trit flat views stack panels
@@ -119,7 +127,8 @@ def place(nodes,driver,loads,arithmetic):
             columns=2 if len(candidates)>=3 else 1
             if len(candidates)==1:columns=1
             for k,m in enumerate(candidates):
-                x=160+(k%columns)*1392;y=176+(k//columns)*640
+                x=base_x+(k%columns)*1392
+                y=(320 if external_core else 176)+(k//columns)*640
                 if 'block:'+m.scope in nodes:
                     node=nodes['block:'+m.scope];put(node,x,y)
                     size=(160,160)
@@ -130,26 +139,48 @@ def place(nodes,driver,loads,arithmetic):
         if root and root.module=='half_add' and all('cell:'+n in nodes for n in root.cells.values()):
             w,h=half(root,160,160,False);panels.append((160,160,160+w,160+h))
 
+    # Other recognized module instances also remain visually grouped when
+    # flattened (e.g. four one-trit multipliers and two half adders in mul2).
+    units=[];unit_members=set()
+    for scope,m in sorted(arithmetic.items(),key=lambda kv:(-len(kv[0]),natural(kv[0]))):
+        keys={'cell:'+name for name in m.cells.values()}
+        if not scope or m.module not in {'half_add','mul1'} or keys&placed or keys&unit_members:continue
+        if keys<=nodes.keys():
+            units.append(m);unit_members.update(keys)
+    if units:
+        units.sort(key=lambda m:(min(nodes['cell:'+n].level for n in m.cells.values()),natural(m.scope)))
+        columns=3 if len(units)>=5 else 2
+        base_y=max((n.y+n.height for n in nodes.values() if n.key in placed),default=64)+112
+        for k,m in enumerate(units):
+            x=160+(k%columns)*560;y=base_y+(k//columns)*560
+            if m.module=='half_add':w,h=half(m,x+24,y+40,True)
+            else:
+                coords={'g_t1':(0,0),'g_t2':(0,128),'g_t3':(128,128),'g_p':(256,64)}
+                for role,(dx,dy) in coords.items():put(nodes['cell:'+m.cells[role]],x+24+dx,y+40+dy)
+                w,h=336,224
+            frames.append(Frame(m.scope,(x,y,x+w+48,y+h+64),tuple(m.cells.values())))
+
     core=[n for n in nodes.values() if n.kind not in {'input','output'} and n.key not in placed]
     if core:
-        # Compact longest-path columns with a 32-pixel routing gutter. Long
-        # generic chains fold after four columns; no artificial per-net lanes.
         levels=defaultdict(list)
         for n in core:levels[n.level].append(n)
-        bottom=max((n.y+n.height for n in nodes.values() if n.key in placed),default=80)
-        offset_y=bottom+112 if placed else 160
+        bottom=max((n.y+n.height for n in nodes.values() if n.key in placed),default=48)
+        offset_y=160 if external_core or not placed else bottom+112
+        fold_span=max(min(3,len(v)) for v in levels.values())*208+112
         unique=sorted(levels)
-        for k,level in enumerate(unique):
+        column=0;fold=0
+        for level in unique:
             group=sorted(levels[level],key=lambda n:natural(n.key))
+            across=math.ceil(len(group)/3)
+            if column+across>4:column=0;fold+=1
             for row,node in enumerate(group):
-                col=k%4
-                fold=k//4
-                put(node,160+col*208,offset_y+fold*432+row*208)
+                put(node,160+(column+row//3)*208,offset_y+fold*fold_span+(row%3)*208)
+            column+=across
 
     # External terminals follow their consumers/producers, not a bus-name sort
     # at opposite edges of the entire sheet. Preserve bit order within ties.
     occupied=[n.box for n in nodes.values() if n.key in placed]
-    def free(box):return not any(_overlap(box,b,8) for b in occupied)
+    def free(box):return not any(_overlap(box,b,0) for b in occupied)
     def port(node,preferred,orient):
         px,py=preferred
         # Search nearby whole-grid offsets, keeping horizontal anchors aligned

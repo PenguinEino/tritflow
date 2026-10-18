@@ -40,52 +40,69 @@ def gate(v,kind,cx,cy):
 
 
 def _symbol(v,node):
-    x,y,x1,y1 = node.box
-    cx = (x+x1)/2
-    if node.kind == 'block':
-        _rect(v,x,y+8,node.width,node.height-16,fill='#f8f8f5',width=1.5)
-        v.text(cx,y+29,node.label,size=12,weight='bold',anchor='middle')
-        v.text(cx,y+44,f'{len(node.members)} cells',size=9,color=SECONDARY,anchor='middle')
-        for pin,signal in node.inputs.items():
-            px,py = node.pins[pin]
-            v.line((px,py),(px+8,py))
-            v.text(px+12,py+3,signal,size=9)
-        for pin,signal in node.outputs.items():
-            px,py = node.pins[pin]
-            v.line((px-8,py),(px,py))
-            v.text(px-12,py+3,signal,size=9,anchor='end')
+    x,y,x1,y1=node.box
+    cx=(x+x1)/2
+    if node.kind=='block':
+        _rect(v,x,y,node.width,node.height,fill='white',width=.8)
+        full=node.module=='full_add'
+        v.text(cx,y+(56 if full else 28),node.label,size=11,weight='bold',anchor='middle')
+        v.text(cx,y+(74 if full else 46),node.module or f'{len(node.members)} cells',size=10,color=SECONDARY,anchor='middle')
+        for pin,signal in {**node.inputs,**node.outputs}.items():
+            px,py=node.pins[pin];side=node.sides[pin]
+            label=node.pin_labels.get(pin,signal)
+            if side=='left':
+                v.line((px,py),(px+8,py));v.text(px+12,py+3,label,size=10)
+            elif side=='right':
+                v.line((px-8,py),(px,py));v.text(px-12,py+3,label,size=10,anchor='end')
+            elif side=='top':
+                v.line((px,py),(px,py+8));v.text(px,py+22,label,size=10,anchor='middle')
+            else:
+                v.line((px,py-8),(px,py));v.text(px,py-14,label,size=10,anchor='middle')
         return
-    pin = next(iter((node.pins[p] for p in node.outputs)), next(iter(node.pins.values())))
-    cy = pin[1]
     if node.kind in {'input','output'}:
-        # Both external port flags point in the direction of signal flow.
-        v.path([('M',x,cy-12),('L',x1-12,cy-12),('L',x1,cy),
-                ('L',x1-12,cy+12),('L',x,cy+12),('Z',)],fill='#f4f4f1',width=1.3)
-        v.text(cx-3,cy+4,node.label,size=11,anchor='middle')
-        return
-    scope,_,local = node.label.rpartition('.')
-    v.text(cx,y+20,local or node.label,size=11,anchor='middle')
-    if scope:
-        v.text(cx,y+34,scope,size=8,color=SECONDARY,anchor='middle')
-    if node.kind.startswith('TIE'):
-        value = {'TIEP':'+1','TIEZ':'0','TIEN':'−1'}[node.kind]
-        # Rail-style source, with its level explicitly printed; never imply
-        # that TIEZ is a digital ground or that negative logic is a boolean 0.
-        v.line((cx-20,cy-12),(cx+20,cy-12),width=2)
-        v.line((cx,cy-12),(cx,cy))
-        v.line((cx,cy),(x1,cy))
-        v.text(cx,cy-18,value,size=12,anchor='middle')
-        return
-    left,right = gate(v,node.kind,cx,cy)
-    for name,(px,py) in node.pins.items():
-        if name in node.outputs:
-            v.line((right,cy),(px,py))
+        if node.orient=='down':
+            v.path([('M',x,y),('L',x1,y),('L',x1,y1-8),('L',cx,y1),('L',x,y1-8),('Z',)],fill='white',width=.8)
+            v.text(cx,y+16,node.label,size=11,anchor='middle')
         else:
-            end = left
-            if node.kind == 'NOR':
-                # Exact quadratic back-outline intersection at y = +/-16.
-                end = cx-35+9*(1-(16/24)**2)
-            v.line((px,py),(end,py))
+            cy=y+16
+            v.path([('M',x,cy-12),('L',x1-8,cy-12),('L',x1,cy),('L',x1-8,cy+12),('L',x,cy+12),('Z',)],fill='white',width=.8)
+            v.text(cx-3,cy+4,node.label,size=11,anchor='middle')
+        return
+    local=node.label.rsplit('.',1)[-1]
+    v.text(cx,y+16,local,size=10.6667,anchor='middle')
+    cy=y+56
+    if node.kind.startswith('TIE'):
+        value={'TIEP':'+1','TIEZ':'0','TIEN':'−1'}[node.kind]
+        v.line((cx-20,cy-12),(cx+20,cy-12),width=1.2)
+        v.line((cx,cy-12),(cx,cy));v.line((cx,cy),(x1,cy))
+        v.text(cx,cy-18,value,size=11,anchor='middle');return
+    body=Vector(0,0)
+    left,right=gate(body,node.kind,0,0)
+    for item in body.items:
+        item=dict(item)
+        if item['kind']=='text':
+            item['x']+=cx;item['y']+=cy
+        elif item['kind']=='circle':
+            a,b=item['x'],item['y']
+            item['x'],item['y']=(cx-b,cy+a) if node.orient=='down' else (cx+a,cy+b)
+        else:
+            commands=[]
+            for cmd in item['commands']:
+                op,*coords=cmd;points=[]
+                for k in range(0,len(coords),2):
+                    a,b=coords[k:k+2]
+                    points.extend((cx-b,cy+a) if node.orient=='down' else (cx+a,cy+b))
+                commands.append((op,*points))
+            item['commands']=commands
+        v.items.append(item)
+    for pin,(px,py) in node.pins.items():
+        if pin in node.outputs:
+            end=(cx,cy+right) if node.orient=='down' else (cx+right,cy)
+        else:
+            offset=left
+            if node.kind=='NOR':offset=-35+9*(1-(16/24)**2)
+            end=(px,cy+offset) if node.orient=='down' else (cx+offset,py)
+        v.line((px,py),end)
 
 
 def _wire_styles(scene,values,caps):
@@ -93,7 +110,7 @@ def _wire_styles(scene,values,caps):
     styles = {}
     for signal in {s.net for s in scene.segments}:
         fraction = math.sqrt(caps.get(signal,0)/maximum) if maximum else 0
-        width = 1.5+2.5*fraction
+        width = 1.6+1.6*fraction
         if values is not None and signal in values:
             color = TRIT_COLOR[values[signal]]
             # Increased C also darkens the settled-value hue.
@@ -110,11 +127,19 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
     """Paint an existing scene; geometry does not depend on any overlay."""
     caps = caps or {}
     title = scene.top if title is None else title
-    v = Vector(scene.width,scene.height)
-    v.text(48,32,title,size=20,weight='bold')
-    gates = sum(len(n.members) for n in scene.symbols)
-    blocks = sum(n.kind == 'block' for n in scene.symbols)
-    v.text(48,54,f'Synthesized logic  ·  {gates} cells  ·  {blocks} closed scopes',size=11,color=SECONDARY)
+    visible=sorted({s.net for s in scene.segments})
+    annotated=values is not None or caps or net_names
+    columns=max(1,scene.width//240)
+    rows=math.ceil(len(visible)/columns) if annotated else 0
+    extra=48+rows*18 if annotated else 0
+    v = Vector(scene.width,scene.height+extra)
+    v.text(48,32,title,size=16,weight='bold')
+    gates=sum(len(n.members) for n in scene.symbols)
+    v.text(48,52,f'{gates} synthesized cells',size=10.6667,color=SECONDARY)
+    for frame in scene.frames:
+        x0,y0,x1,y1=frame.box
+        _rect(v,x0,y0,x1-x0,y1-y0,stroke='#c3c2b7',fill='#fafaf8',width=.8)
+        v.text(x0+16,y0+20,frame.label,size=11,color=SECONDARY)
     styles = _wire_styles(scene,values,caps)
     # Vertical trunks first. White under-strokes on all horizontals open the
     # perpendicular crossing; same-net T junctions are restored by dots.
@@ -140,23 +165,22 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
             v.circle(x,y,2.4+width*.2,fill=color,stroke=color,width=0,net=signal)
     for node in scene.symbols:
         _symbol(v,node)
-    for signal,(x,y) in scene.labels.items():
-        parts = []
-        if net_names: parts.append(signal)
-        if values is not None and signal in values: parts.append({-1:'−1',0:'0',1:'+1'}[values[signal]])
-        if signal in caps: parts.append(f'{caps[signal]*1e15:.1f} fF')
-        if parts:
-            v.text(x,y,'  '.join(parts),size=9,color=styles[signal][0])
-    footer = scene.height-42
-    if values is not None:
-        for k,(value,label) in enumerate([(-1,'−1  (−5 V)'),(0,'0  (0 V)'),(1,'+1  (+5 V)')]):
-            x = 48+k*140
-            v.line((x,footer-4),(x+24,footer-4),stroke=TRIT_COLOR[value],width=2.5)
-            v.text(x+32,footer,label,size=10)
-    else:
-        v.text(48,footer,'Signal flow →    • connected branch    Crossings with gaps are unconnected',size=10,color=SECONDARY)
-    if caps:
-        v.text(48,scene.height-20,'Wire C: thicker / darker means larger estimated lumped capacitance; not signoff PEX.',size=10,color=SECONDARY)
+    footer=scene.height-24
+    v.text(48,footer,'• Connected branch    Crossing gaps: no connection',size=10,color=SECONDARY)
+    if annotated:
+        baseline=scene.height+4
+        v.text(48,baseline,'Net / settled trit / routed wire C',size=11,weight='bold')
+        cell_width=(scene.width-96)/columns
+        for k,signal in enumerate(visible):
+            col=k//max(1,rows);row=k%max(1,rows)
+            x=48+col*cell_width;y=baseline+22+row*18
+            parts=[signal] if net_names or caps else []
+            if values is not None:parts.append({-1:'−1',0:'0',1:'+1'}[values[signal]])
+            if signal in caps:parts.append(f'{caps[signal]*1e15:.1f} fF')
+            color,width=styles[signal]
+            v.line((x,y-4),(x+16,y-4),stroke=color,width=width)
+            v.text(x+24,y,'   '.join(parts),size=10,color=color)
+        if caps:v.text(48,v.height-10,'Wire C is an estimated lumped parasitic; darker / thicker = more C.',size=10,color=SECONDARY)
     return v
 
 

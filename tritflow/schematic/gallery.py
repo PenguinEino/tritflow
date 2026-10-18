@@ -1,10 +1,10 @@
-"""Reproduce the SCHEM visual review set from the committed HDL examples.
+"""Render the review set and before/after geometry report from committed HDL.
 
     python3 -m tritflow.schematic.gallery --output build/schematic-review
 
-This is a developer review utility, not a dependency of drawing a GateNetlist.
-It renders both views of every requested design, plus the symbol legend and
-one explicitly synthetic wire-C overlay; it never launches physical tools.
+The overlay routes the real half-adder cell library and calls the public PNR
+net_parasitics() method. The geometry comparison uses the frozen gallery that
+received the integrator's review, with identical metric definitions.
 """
 from __future__ import annotations
 
@@ -14,14 +14,26 @@ import json
 from pathlib import Path
 
 from . import draw, legend
+from .metrics import measure
 
 
-def generate(root, output):
+def _summary(name,before,after):
+    return (f'| {name} | {before["wire_length_px"]} → {after["wire_length_px"]} | '
+            f'{before["bends_total"]} → {after["bends_total"]} | '
+            f'{before["bends_per_net_mean"]:.2f} → {after["bends_per_net_mean"]:.2f} | '
+            f'{before["bends_per_net_max"]} → {after["bends_per_net_max"]} | '
+            f'{before["crossings"]} → {after["crossings"]} | '
+            f'{before["aspect_ratio"]:.2f} → {after["aspect_ratio"]:.2f} |')
+
+
+def generate(root,output):
     from tritflow.flow import load
+    from tritflow.pnr import Library, place_and_route
     from examples.curated import DESIGNS
     output.mkdir(parents=True,exist_ok=True)
-    cases = [('half_add','half_add',None),('full_add','full_add',None),
-             ('adder2','adder',2),('adder4','adder',4),('mul1','mul1',None),('mac1','mac1',None)]
+    baseline=json.loads((Path(__file__).parent/'assets/baseline_metrics.json').read_text())['items']
+    cases=[('half_add','half_add',None),('full_add','full_add',None),('adder2','adder',2),
+           ('adder4','adder',4),('mul1','mul1',None),('mac1','mac1',None)]
     cases += [(name,item.top,None) for name,item in DESIGNS.items()]
     manifest=[]
     for stem,top,n in cases:
@@ -29,34 +41,54 @@ def generate(root, output):
         for mode,expand in [('hierarchical',None),('flat','*')]:
             name=f'{stem}-{mode}'
             sch=draw(net,expand=expand,title=f'{stem} · {mode}')
-            for ext in ('svg','png','pdf'):
-                sch.save(output/f'{name}.{ext}')
+            for ext in ('svg','png','pdf'):sch.save(output/f'{name}.{ext}')
             manifest.append({'name':name,'cells':len(net.instances),'symbols':len(sch.scene.symbols),
-                             'segments':len(sch.scene.segments),'size':[sch.scene.width,sch.scene.height],
+                             'metrics':measure(sch.scene),'before':baseline[name],
                              'notes':list(sch.scene.notes)})
     net=load(root/'examples/half_add.tv','half_add').synthesize()
-    # These deliberately fabricated values test the overlay's visual range.
-    # They are labelled as such and never presented as a PNR measurement.
-    caps={s:(i+1)*10e-15 for i,s in enumerate(sorted(net.nets()))}
-    overlay=draw(net,inputs={'a':-1,'b':1},parasitics=caps,net_names=True,
-                 title='half_add · settled values / synthetic C legend')
+    result=place_and_route(net,Library.load(root/'cells'),output_dir=output/'physical',
+                           run_pdk_drc=False,anneal_steps=0)
+    report=result.net_parasitics()
+    overlay=draw(net,inputs={'a':-1,'b':1},parasitics=result,net_names=True,
+                 title='half_add · settled trits and routed wire capacitance')
+    metrics=measure(overlay.scene)
+    vector=overlay._vector()
+    metrics.update(width_px=vector.width,height_px=vector.height,aspect_ratio=vector.width/vector.height)
     for ext in ('svg','png','pdf'):
         overlay.save(output/f'half_add-overlay.{ext}')
         legend().save(output/f'legend.{ext}')
-    manifest.append({'name':'half_add-overlay','size':[overlay.scene.width,overlay.scene.height]})
-    manifest.append({'name':'legend','size':[1088,624]})
+    manifest.append({'name':'half_add-overlay','metrics':metrics,'before':baseline['half_add-overlay'],
+                     'parasitics':{'schema':report['schema'],'source':'physical/half_add.net_parasitics.json',
+                                    'library_mock':result.data['library']['mock'],
+                                    'wire_capacitance_f':sum(overlay.capacitance_f.values())}})
+    empty=measure(type('LegendScene',(),{'segments':(),'width':1088,'height':624})())
+    manifest.append({'name':'legend','metrics':empty,'before':baseline['legend']})
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+    rows=['# Schematic geometry: original → revised','',
+          'Wire length is in drawing pixels, not chip micrometres. A bend is a unique same-net '
+          'degree-two orthogonal corner; T joins are excluded. Crossings count distinct '
+          'different-net perpendicular intersections. Aspect is full canvas width / height; '
+          'the real-C overlay includes its annotation table.','',
+          '| Figure | Wire px | Bends total | Bends/net mean | Bends/net max | Crossings | Aspect |',
+          '|---|---:|---:|---:|---:|---:|---:|']
+    rows += [_summary(item['name'],item['before'],item['metrics']) for item in manifest]
+    (output/'metrics.md').write_text('\n'.join(rows)+'\n')
     cards=[]
     for entry in manifest:
-        name=entry['name']
-        cards.append(f'<section><h2>{escape(name)}</h2><p><a href="{name}.svg">SVG</a> · '
-                     f'<a href="{name}.pdf">PDF</a> · <a href="{name}.png">PNG at native resolution</a></p>'
-                     f'<div><img src="{name}.svg" alt="{escape(name)}"/></div></section>')
+        name=entry['name'];m=entry['metrics'];old=entry['before']
+        detail=(f'Wire {old["wire_length_px"]:,} → {m["wire_length_px"]:,} px; '
+                f'bends {old["bends_total"]} → {m["bends_total"]}; '
+                f'crossings {old["crossings"]} → {m["crossings"]}; '
+                f'aspect {old["aspect_ratio"]:.2f} → {m["aspect_ratio"]:.2f}.')
+        cards.append(f'<section><h2>{escape(name)}</h2><p>{detail}</p><p><a href="{name}.svg">SVG</a> · '
+                     f'<a href="{name}.pdf">PDF</a> · <a href="{name}.png">PNG</a></p>'
+                     f'<img src="{name}.svg" alt="{escape(name)}"/></section>')
     (output/'index.html').write_text('<!doctype html><meta charset="utf-8"><title>TritFlow schematic review</title>'
-        '<style>body{font:15px sans-serif;margin:32px;color:#0b0b0b}section{margin:40px 0}section div{overflow:auto;'
-        'border:1px solid #e1e0d9;padding:16px}img{max-height:1000px}a{color:#2a78d6}</style>'
-        '<h1>TritFlow schematic review</h1><p>Pan horizontally for the full-resolution flat views. '
-        'The overlay preview uses explicitly synthetic capacitances.</p>'+''.join(cards))
+        '<style>body{font:16px Georgia,serif;margin:40px auto;max-width:1400px;padding:0 32px;color:#0b0b0b}'
+        'section{margin:56px 0}img{width:100%;height:auto;border:1px solid #e1e0d9}a{color:#2a78d6}</style>'
+        '<h1>TritFlow schematic review</h1><p><a href="metrics.md">Before / after metrics for every figure</a>. '
+        'The overlay uses real routed cell-library geometry and PnrResult.net_parasitics(). '
+        'Capacitance is an uncalibrated wire-C estimate; this gallery does not rerun DRC/LVS.</p>'+''.join(cards))
     return manifest
 
 
@@ -66,8 +98,7 @@ def main():
     parser.add_argument('--output',type=Path,default=Path('build/schematic-review'))
     args=parser.parse_args()
     manifest=generate(args.root,args.output)
-    print(f'Rendered {len(manifest)} figures in {args.output}; open index.html for SVG/PDF/PNG.')
+    print(f'Rendered {len(manifest)} figures with before/after metrics in {args.output}.')
 
 
-if __name__=='__main__':
-    main()
+if __name__=='__main__':main()

@@ -123,7 +123,7 @@ from tritflow.viz.layout import render_gds, layout_figure, placement_animation, 
 from tritflow.viz.cell import cell_figure, device_mapping, row_abutment
 from tritflow.sim.provenance import pdk_provenance
 from tritflow.sim.postlayout import logical_nodeset
-from cache import Cache, runtime_fingerprint, source_fingerprint
+from cache import Cache, runtime_fingerprint, source_fingerprint, source_manifest
 from campaign import RecordedCampaign
 from schematics import schematic_gallery
 from experiments import (complete_design, experiment_artifacts, assert_experiment,
@@ -132,11 +132,12 @@ EXTENDED = os.environ.get("TRITFLOW_EXTENDED", "0") == "1"
 BUILD = Path(os.environ.get("TRITFLOW_NOTEBOOK_BUILD", ROOT/"build/notebook")).resolve()
 qualified_pdk = pdk_provenance(PDK_ROOT)
 assert qualified_pdk["qualified_commit"] == json.loads((ROOT/"notebook/setup_pins.json").read_text())["pdk_commit"]
-cache = Cache(BUILD/"cache", runtime_fingerprint(ROOT, PDK_ROOT),
-              force=os.environ.get("TRITFLOW_FORCE_RUN", "0") == "1")
-campaign_sources = source_fingerprint(ROOT,PDK_ROOT)
-recorded_campaign = RecordedCampaign(ROOT/"notebook/assets/four_designs.zip",campaign_sources,
+native_sources = source_manifest(ROOT,PDK_ROOT)
+cache = Cache(BUILD/"cache", runtime_fingerprint(ROOT, PDK_ROOT,names=native_sources),
+              force=os.environ.get("TRITFLOW_FORCE_RUN", "0") == "1",sources=native_sources)
+recorded_campaign = RecordedCampaign(ROOT/"notebook/assets/four_designs.zip",ROOT,PDK_ROOT,
                                      enabled=not cache.force)
+renderer_sha256 = hashlib.sha256((ROOT/"tritflow/viz/layout.py").read_bytes()).hexdigest()
 from presentation import show, table, evidence
 ''')
 md('''
@@ -231,7 +232,7 @@ table([["Logical input states (exhaustive)", len(logical[inputs[0]])],
        ["Max error (V)", demo["measurements"]["max_error_v"]]])
 show(color_nets(net, dict(zip(inputs, vectors[2]))))
 show(waveform_figure(demo, outputs, title="Extracted two-trit adder: representative vectors"))
-raster = cache.run("adder2-raster", {"gds":hashlib.sha256(lay.gds_path.read_bytes()).hexdigest()},
+raster = cache.run("adder2-raster", {"gds":hashlib.sha256(lay.gds_path.read_bytes()).hexdigest(),"renderer":renderer_sha256},
     lambda: {"png":str(render_gds(lay.gds_path, out/"adder2_demo.layout.png", top=net.top))},
     artifacts=lambda r: [r["png"]])
 display(Image(filename=raster["png"], width=900))
@@ -807,8 +808,8 @@ Sources: [OpenSUSI TR-1um](https://github.com/OpenSUSI/TR-1um),
 The setup pins the PDK commit and verifies SHA-256 archive/package downloads.
 ''')
 code('''
-assert (runtime_fingerprint(ROOT,PDK_ROOT) == cache.fingerprint and
-        source_fingerprint(ROOT,PDK_ROOT) == campaign_sources), "consumed sources changed during Run all; rerun after publication settles"
+assert (runtime_fingerprint(ROOT,PDK_ROOT,names=native_sources) == cache.fingerprint and
+        source_manifest(ROOT,PDK_ROOT,names=native_sources) == native_sources), "consumed sources changed during Run all; rerun after publication settles"
 table([["Stage", "Fresh / local cache / recorded", "Wall time this run (s)"]]+[
     [r["stage"],r["state"],round(r["elapsed_s"],3)] for r in sorted(cache.timings,key=lambda r:r["elapsed_s"],reverse=True)])
 table([["Design", "Measured producer phase", "Wall time (s)", "Process + child CPU time (s)"]]+[
