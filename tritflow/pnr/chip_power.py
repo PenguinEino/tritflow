@@ -95,7 +95,7 @@ def _power_header(data, macro_pins, core, margin):
         # finite metal resistance shares current across the upper TC arrays;
         # no individual cut or narrow common neck carries the entire bank.
         upper_x = x + (-14.0 if rail == "VDD" else 14.0)
-        column_w = (44.0 - 3 * 2.4) / 4
+        column_w = (44.8 - 3 * 2.4) / 4
         column_xs = [upper_x + (i - 1.5) * (column_w + 2.4) for i in range(4)]
         power["rails"].append(
             {
@@ -140,7 +140,10 @@ def _power_header(data, macro_pins, core, margin):
             )
             _via_array(power["vias"], rail, cx, bars[rail], column_w, widths[rail])
         fingers.append(
-            (min(x - finger_w / 2, upper_x - 22), max(x + finger_w / 2, upper_x + 22))
+            (
+                min(x - finger_w / 2, upper_x - 22.4),
+                max(x + finger_w / 2, upper_x + 22.4),
+            )
         )
     # Find three genuinely empty M1 corridors, also disjoint from each other.
     used, pads = list(fingers), []
