@@ -268,8 +268,13 @@ def analyze(netlist,pnr=None,**kwargs):
     if getattr(library,'metric',None)=='midpoint' and pairs is not None:
         from .propagation import analyze_patterns
         options=kwargs.copy();options.pop('vector_pairs')
+        ordered_events=options.pop('ordered_events',True)
         if pnr is not None and options.get('wire_caps') is None:
             from tritflow.extract import wire_capacitance
             options['wire_caps']=wire_capacitance(_load_data(pnr))
+        if ordered_events and options.get('propagate_slew',True):
+            from .events import analyze_events
+            options.pop('propagate_slew',None)
+            return analyze_events(netlist,pairs,**options)
         return analyze_patterns(netlist,pairs,**options)
     return _settling_analyze(netlist,pnr,**kwargs)

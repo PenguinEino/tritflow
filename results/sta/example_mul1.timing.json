@@ -1,18 +1,18 @@
 {
   "top": "mul1",
   "arrival": {
-    "p": 4.453987916322499e-08
+    "p": 2.170339844620906e-08
   },
   "transition_arrival": {
     "p": {
-      "-1->0": 1.030431805904092e-08,
-      "-1->1": 3.047221932760194e-08,
-      "0->-1": 4.0081712168974366e-08,
-      "0->0": 2.4652676606276265e-08,
-      "0->1": 2.9722978995875655e-08,
-      "1->-1": 4.453987916322499e-08,
-      "1->0": 2.8717918125018953e-08,
-      "1->1": 2.8418051680249678e-08
+      "-1->0": 5.2802232015174165e-09,
+      "-1->1": 1.5330899158506418e-08,
+      "0->-1": 2.170339844620906e-08,
+      "0->0": 1.255000357853754e-08,
+      "0->1": 1.5674803103658658e-08,
+      "1->-1": 1.4738189928166786e-08,
+      "1->0": 7.165942745972936e-09,
+      "1->1": 1.3238322377721504e-08
     }
   },
   "paths": {
@@ -24,26 +24,29 @@
         "input_net": "a",
         "output_net": "_n1",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
+          "A": 0,
           "B": -1
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NOR:05",
-        "delay_s": 2.4512716162729526e-08,
-        "arrival_s": 2.4512716162729526e-08,
+        "arc_id": "NOR:29",
+        "delay_s": 1.0637312173273918e-08,
+        "arrival_s": 1.1137312173273918e-08,
         "load_f": 1.429571812330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.1854315116465028e-08,
+        "output_slew_10_90_s": 1.9391396091313992e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "g_t3",
@@ -52,24 +55,27 @@
         "input_net": "_n1",
         "output_net": "_n2",
         "input_transition": [
-          1,
+          0,
           -1
         ],
         "output_transition": [
-          -1,
+          0,
           1
         ],
         "from_inputs": {
-          "A": 1
+          "A": 0
         },
         "to_inputs": {
           "A": -1
         },
-        "arc_id": "INV:04",
-        "delay_s": 1.1107741763825919e-08,
-        "arrival_s": 3.5620457926555445e-08,
+        "arc_id": "INV:02",
+        "delay_s": 2.9530636195001415e-09,
+        "arrival_s": 1.409037579277406e-08,
         "load_f": 2.5063857503673564e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 5.624191434267224e-09,
+        "output_slew_10_90_s": 7.755009790264229e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "g_p",
@@ -78,33 +84,36 @@
         "input_net": "_n2",
         "output_net": "p",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          1,
+          0,
           -1
         ],
         "from_inputs": {
           "A": 1,
-          "B": -1
+          "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 1
         },
-        "arc_id": "NAND:55",
-        "delay_s": 8.919421236669542e-09,
-        "arrival_s": 4.453987916322499e-08,
+        "arc_id": "NAND:63",
+        "delay_s": 3.1326414591520137e-09,
+        "arrival_s": 2.170339844620906e-08,
         "load_f": 6.784583119999999e-14,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.480381194282988e-09,
+        "output_slew_10_90_s": 6.547889769070591e-09,
+        "metric": "midpoint"
       }
     ]
   },
   "patterns": {
     "p": {
       "before": {
-        "a": -1,
+        "a": 0,
         "b": -1
       },
       "after": {
@@ -114,17 +123,29 @@
     }
   },
   "loads": {
-    "_n0": {
-      "fanout_f": 2.0613144150076912e-13,
-      "wire_f": 3.23767502e-14,
-      "external_f": 0.0,
-      "total_f": 2.385081917007691e-13
+    "p": {
+      "fanout_f": 0.0,
+      "wire_f": 5.78458312e-14,
+      "external_f": 1e-14,
+      "total_f": 6.784583119999999e-14
     },
     "b": {
       "fanout_f": 4.839436672518686e-13,
       "wire_f": 5.22174886e-14,
       "external_f": 0.0,
       "total_f": 5.361611558518686e-13
+    },
+    "a": {
+      "fanout_f": 4.835121595128594e-13,
+      "wire_f": 4.7970608599999994e-14,
+      "external_f": 0.0,
+      "total_f": 5.314827681128594e-13
+    },
+    "_n0": {
+      "fanout_f": 2.0613144150076912e-13,
+      "wire_f": 3.23767502e-14,
+      "external_f": 0.0,
+      "total_f": 2.385081917007691e-13
     },
     "_n1": {
       "fanout_f": 1.144260802330077e-13,
@@ -137,23 +158,11 @@
       "wire_f": 4.468314320000001e-14,
       "external_f": 0.0,
       "total_f": 2.5063857503673564e-13
-    },
-    "a": {
-      "fanout_f": 4.835121595128594e-13,
-      "wire_f": 4.7970608599999994e-14,
-      "external_f": 0.0,
-      "total_f": 5.314827681128594e-13
-    },
-    "p": {
-      "fanout_f": 0.0,
-      "wire_f": 5.78458312e-14,
-      "external_f": 1e-14,
-      "total_f": 6.784583119999999e-14
     }
   },
   "assumptions": [
     "Nominal \u00b15/0 V models; settling means final entry into ideal \u00b10.5 V through the measured observation window.",
-    "Exact endpoint sensitization; maximum additive cell settling with a fixed full input ramp at every stage.",
+    "Measured midpoint delays compose; only the endpoint settling tail is added. Global graph uses a fixed input ramp.",
     "No propagated slew, analog waveform/skew or intermediate endpoint-stable glitch propagation; no guaranteed upper bound.",
     "Simultaneous-input table delays use synchronous equal ramps; path endpoint patterns do not prove hazard-free operation.",
     "Fanout C uses maximum measured biased input C; default external output load is 10 fF.",
@@ -176,17 +185,23 @@
       "/home/ishi-kai/code-a-chip/cells/out/NOR/NOR.timing.json": "4342814c1bd3a2dccac039d4cceff5c97ce94faf323e88320db7f300fe8c03bf",
       "/home/ishi-kai/code-a-chip/cells/out/TIEN/TIEN.timing.json": "6146e0d3e89b1e3f25576fda4e3a4361e47c0a9f7efebe1deab12f061295f744",
       "/home/ishi-kai/code-a-chip/cells/out/TIEP/TIEP.timing.json": "f4b76fb5211680d0d612db599c4f6b95d570238323e697d29d55b3db5c488e2c",
-      "/home/ishi-kai/code-a-chip/cells/out/TIEZ/TIEZ.timing.json": "7dff780b967943349e7aee29b4cb2c3f631215a15ae84fe0ec1520eed4aa3f7d"
+      "/home/ishi-kai/code-a-chip/cells/out/TIEZ/TIEZ.timing.json": "7dff780b967943349e7aee29b4cb2c3f631215a15ae84fe0ec1520eed4aa3f7d",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/BUF.propagation.json": "dbc813bb37d9b6ad22406002a1ccc8c1ade897fc91b156207152c2657639be15",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/INV.propagation.json": "f7dc96ae4c57bf46f38124a755d9a642510b2bf3a62093b208db746897806f0d",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NAND.propagation.json": "5f20d705a00590871a64d7f2104230b4dbf49e7df268818f3b1ca7041bc6ae46",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NANY.propagation.json": "1e23d88c9b7c00dd4513744b3bd642d937edd32ae0198584522eba0e05046a72",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NOR.propagation.json": "3e56bc93bd3571072057875957a078b82cda2abfbbf40821ca987c2e570f8430"
     },
     "load_policy": "linear",
-    "input_transition_s": 1e-09
+    "input_transition_s": 1e-09,
+    "metric": "midpoint_with_endpoint_tail"
   },
   "statistics": {
     "decision_nodes": 290,
     "graph_nodes": 290,
     "graph_choices": 266,
-    "search_expansions": 42,
-    "runtime_s": 0.0018391680059721693,
+    "search_expansions": 40,
+    "runtime_s": 0.002051318995654583,
     "all_endpoint_pairs": true
   }
 }

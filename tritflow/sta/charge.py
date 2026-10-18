@@ -53,7 +53,9 @@ def cell_charge(cell, *, step_s=.1e-9):
             rows.append({'from_inputs':dict(zip(base['inputs'],first)),'to_inputs':dict(zip(base['inputs'],last)),
                 'pin':pin,'charge_c':charge,'capacitance_f':capacitance})
     result={'cell':cell,'configuration':key,'rows':rows,'passed':True,
-        'method':'Integral of input-source current, stationary leakage removed, divided by signed full voltage transition; unloaded-side fixture output 100 fF, 1 ns full ramp.',
+        'method':'Integral of input-source current, stationary leakage removed, divided by signed full voltage transition; fixture output 10 fF, 1 ns full ramp.',
+        'adopted_in_timing_model':False,
+        'limitation':'This is signed multi-terminal charge inferred from sampled source current. Negative and widely varying values do not define a nonnegative lumped shunt-C model; no replacement of published AC pin C is justified.',
         'per_pin':{p:{'min_f':min(r['capacitance_f'] for r in rows if r['pin']==p),
                       'max_f':max(r['capacitance_f'] for r in rows if r['pin']==p),
                       'mean_f':float(np.mean([r['capacitance_f'] for r in rows if r['pin']==p])),

@@ -13,6 +13,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shutil
 import time
 
 import numpy as np
@@ -132,12 +133,42 @@ def _run_case(task,*,timeout=600):
             nominal_max_error_v=max(abs(v) for row in dc for v in row['nominal_error_v'].values()),
             max_static_current_a=max(abs(v) for row in dc for v in row['rail_current_a'].values()),
             max_static_power_w=max(row['static_power_w'] for row in dc))
-        run=_simulate_cached(folder,'transient',text,top,inputs,outputs,vectors,expected,
+        initial=None if guesses is None else guesses(vectors[0])
+        electrical=_key(dict(circuit=text,top=top,inputs=inputs,outputs=outputs,vectors=vectors,
+            expected=[expected(v) for v in vectors],conditions=conditions,models=inventory['model_sha256'],
+            core={name:code[name] for name in ('bench.py','measure.py','runner.py','spice.py')},nodeset=initial))
+        transient_folder=ROOT/'build/corners/electrical'/electrical
+        transient_folder.mkdir(parents=True,exist_ok=True)
+        # PNR may add reporting metadata without changing the simulated circuit.
+        # Keep raw evidence by electrical content, independently of case/source
+        # metadata. The common runner still checks its complete configuration
+        # digest before accepting copied evidence and remeasures every waveform.
+        import fcntl
+        with (transient_folder/'.populate.lock').open('w') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            target=transient_folder/'transient'
+            if not (target/'simulation.json').is_file() and RESULT.is_file():
+                previous=json.loads(RESULT.read_text()).get('rows',[])
+                for old in previous:
+                    if (old.get('state')!='complete' or not old.get('transient')
+                            or old.get('dut')!=dut or old.get('conditions')!=conditions
+                            or old.get('sources_sha256',{}).get(str(source))!=file_hash(source)):
+                        continue
+                    candidate=Path(old['transient']['measurements']).parent
+                    names=('waveforms.npz','measurements.json','tb.spice','ngspice.log','simulation.json')
+                    if all((candidate/name).is_file() for name in names):
+                        target.mkdir(exist_ok=True)
+                        for name in names:shutil.copyfile(candidate/name,target/name)
+                        break
+        run=_simulate_cached(transient_folder,'transient',text,top,inputs,outputs,vectors,expected,
             hold_s=hold_s,step_s=step_s,load_f=10e-15,timeout=timeout,
-            temperature_c=temperature,supplies_v=rails,nodeset=None if guesses is None else guesses(vectors[0]))
+            temperature_c=temperature,supplies_v=rails,nodeset=initial)
         tracking=run['measurements'];nominal=measure_sequence(run['waveforms'],run['stimulus'],expected,ideal_volts=TRIT_VOLTS)
         result['transient']=dict(tracking=_compact(tracking),nominal=_compact(nominal),
-                                 input_order=inputs,measurements=str(folder/'transient/measurements.json'))
+                                 input_order=inputs,measurements=str(transient_folder/'transient/measurements.json'),
+                                 reused_identical_electrical_run=run.get('cached',False),
+                                 evidence_sha256={str(transient_folder/'transient'/name):file_hash(transient_folder/'transient'/name)
+                                     for name in ('simulation.json','waveforms.npz','tb.spice','ngspice.log')})
         _save(folder/'both_measurements.json',dict(tracking=tracking,nominal=nominal))
         result['state']='complete'
     except (SimulationError,OSError,ValueError) as error:
@@ -161,8 +192,10 @@ def run_corners(*,temperatures=(-40.,27.,85.),supply_scales=(.9,1.,1.1),
     if include_adder:
         directory=ROOT/'build/full_add'
         qualification=json.loads((directory/'postlayout/summary.json').read_text())
-        if not qualification.get('passed') or any(qualification.get('input_sha256',{}).get(str(p.resolve()))!=file_hash(p)
-                for p in (directory/'full_add.gds',directory/'full_add.pnr.json',directory/'full_add.json')):
+        if (not qualification.get('passed')
+                or qualification.get('pdk_provenance',{}).get('consumed_sha256')!=inventory['pdk_provenance']['consumed_sha256']
+                or any(qualification.get('input_sha256',{}).get(str(p.resolve()))!=file_hash(p)
+                for p in (directory/'full_add.gds',directory/'full_add.pnr.json',directory/'full_add.json'))):
             raise RuntimeError('Full-adder post-layout evidence is stale; rerun examples/postlayout_all.py first')
     if any(c not in ('INV','NAND','NOR','NANY','BUF') for c in cells):raise ValueError('Unsupported cell')
     if jobs<1 or any(not np.isfinite(t) or t<=-273.15 for t in temperatures) or any(not np.isfinite(s) or s<=0 for s in supply_scales):

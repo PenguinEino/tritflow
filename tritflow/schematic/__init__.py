@@ -129,7 +129,7 @@ class Schematic:
         return self
 
 
-def draw(netlist, *, expand=None, inputs=None, net_names=False, parasitics=None, title=None):
+def draw(netlist, *, expand=None, inputs=None, net_names=False, parasitics=None, title=None, hierarchy=None):
     """Draw a mapped GateNetlist with default collapsed module-instance blocks.
 
     ``expand='*'`` gives the full cell view. A path or sequence such as
@@ -138,7 +138,7 @@ def draw(netlist, *, expand=None, inputs=None, net_names=False, parasitics=None,
     Supply bit-blasted scalar trits via ``inputs={'a[0]': -1, ...}``.
     ``parasitics`` accepts a PnrResult, its report, or ``{net: farads}``.
     """
-    scene = layout(netlist,expand)
+    scene = layout(netlist,expand,hierarchy)
     return Schematic(netlist,scene,_values(netlist,inputs),_caps(parasitics,netlist.nets()),bool(net_names),title)
 
 

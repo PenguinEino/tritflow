@@ -90,14 +90,51 @@ def probe(directory, destination, *, step_s=2e-9):
     return report
 
 
+def audit():
+    """Compare archived phase-1 paths with actual internal waveforms, without fitting."""
+    observations=[]
+    for name,group in [('full_add','example'),('adder6','scaling')]:
+        data=json.loads((ROOT/f'results/sta/diagnosis/{name}/measurements.json').read_text())
+        base=json.loads((ROOT/f'results/sta/phase1/{group}_{name}.tested.timing.json').read_text())
+        for pin in base['arrival']:
+            pattern=base['patterns'][pin]
+            row=next(r for r in data['rows'] if r['before']==pattern['before'] and r['after']==pattern['after'])
+            stages=[]
+            for stage in base['paths'][pin]:
+                measured=next((s for s in row['stages'] if s['instance']==stage['instance'] and s['input_pin']==stage['input_pin']),None)
+                stages.append({'instance':stage['instance'],'cell':stage['cell'],
+                    'old_settling_contribution_s':stage['delay_s'],'measured':measured})
+            complete=all(s['measured'] is not None for s in stages);output=row['nets'][pin]
+            composed=.5e-9+sum(s['measured']['midpoint_delay_s'] for s in stages)+output['tail_s'] if complete and output['tail_s'] is not None else None
+            worst=max(data['rows'],key=lambda r:r['nets'][pin]['settling_s'] or 0.)
+            observations.append({'design':name,'output':pin,'phase1_predicted_s':base['arrival'][pin],
+                'phase1_pattern_segment':row['segment'],'same_pattern_observed_s':output['settling_s'],
+                'measured_midpoints_plus_endpoint_tail_s':composed,
+                'internal_settling_overlap_sum_s':sum(s['measured']['settling_overlap_s'] for s in stages[1:]) if complete else None,
+                'phase1_path_stages':stages,'worst_sim_segment':worst['segment'],
+                'worst_sim_output_metrics':worst['nets'][pin]})
+    report={'phase':'Diagnosis before adopting midpoint STA model','observations':observations,
+        'conclusions':['Full band-entry times do not compose: internal tails overlap downstream propagation.',
+            'Actual edge slopes differ strongly from a fixed full 1 ns ramp.',
+            'Endpoint feasibility does not establish synchronous in-circuit waveforms; negative measured per-pin d50 occurs under reconvergent skew.',
+            'The worst full-adder sum is an endpoint-stable glitch, requiring event history beyond endpoint-only timing.'],
+        'measurement_identity_warning':'Measured internal midpoint differences telescope by construction; this diagnoses the reference metric and is not independent prediction validation.'}
+    write(ROOT/'results/sta/diagnosis/phase1_audit.json',report)
+    return report
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('directory',type=Path)
+    parser.add_argument('directory',type=Path,nargs='?')
     parser.add_argument('--name')
     parser.add_argument('--step-ns',type=float,default=2.)
+    parser.add_argument('--audit',action='store_true')
     args=parser.parse_args()
-    destination=ROOT/'results/sta/diagnosis'/(args.name or args.directory.name)
-    probe(args.directory,destination,step_s=args.step_ns*1e-9)
+    if args.audit:audit()
+    elif args.directory is not None:
+        destination=ROOT/'results/sta/diagnosis'/(args.name or args.directory.name)
+        probe(args.directory,destination,step_s=args.step_ns*1e-9)
+    else:parser.error('Specify a build directory or --audit')
 
 
 if __name__=='__main__':main()

@@ -49,3 +49,14 @@ def test_midpoint_pattern_is_jointly_sensitizable(library):
     r=analyze(n,library=models)
     assert set(r.transition_arrival['y'])=={'0->0'}
     assert r.critical_path[-1].metric=='local_recovery'
+
+
+def test_ordered_reconvergence_propagates_logical_pulse(library):
+    models=midpoint_library(library)
+    n=GateNetlist('pulse',[Port('a','input'),Port('y','output')],
+        [Instance('i','INV',{'A':'a','Y':'na'}),Instance('n','NANY',{'A':'a','B':'na','Y':'m'}),
+         Instance('b','BUF',{'A':'m','Y':'y'})])
+    r=analyze(n,library=models,vector_pairs=[({'a':-1},{'a':1})])
+    assert r.arrival['y']==pytest.approx(13.5e-9)
+    assert r.critical_path[-1].output_transition==(-1,0)
+    assert r.statistics['event_model']
