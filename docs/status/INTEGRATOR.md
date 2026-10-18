@@ -47,3 +47,4 @@
   Figures: regenerate (figures/make_all.py) and then notebook/paper_evidence.py --refresh-presentation BEFORE make_notebook.
 - FRONTEND stream was interrupted at the user's request; it may be resumed for later work, but notebook/
   is now edited by the integrator.
+- Pending release: fig_gates recoloured (refresh paper evidence + full release procedure together with SCHEM phase 5).
