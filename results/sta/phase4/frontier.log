@@ -1,0 +1,18 @@
+scaling adder1
+scaling adder2
+scaling adder3
+scaling adder4
+scaling adder5
+Traceback (most recent call last):
+  File "/home/ishi-kai/code-a-chip/results/sta/phase4/frontier.py", line 64, in <module>
+    result,dom,detail,nc=candidate(net,report['loads'])
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ishi-kai/code-a-chip/results/sta/phase4/frontier.py", line 31, in candidate
+    d=m.sample(arc,load,r,field='propagation_s' if changing else 'recovery_s',load_policy='linear')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ishi-kai/code-a-chip/tritflow/sta/propagation.py", line 32, in sample
+    j,y=_bracket(self.data['axes']['input_transition_s'],ramp_s)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ishi-kai/code-a-chip/tritflow/sta/model.py", line 28, in _bracket
+    raise ModelDomainError(f"{value:g} outside measured axis {axis}; extension limit is 2x maximum")
+tritflow.sta.model.ModelDomainError: 1.55e-07 outside measured axis [2.5e-10, 1e-09, 5e-09, 1.5e-08, 5e-08, 1.5e-07]; extension limit is 2x maximum

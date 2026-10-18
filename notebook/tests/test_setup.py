@@ -89,3 +89,16 @@ def test_checksum_and_safe_tar_paths(tmp_path):
 
 def test_bash_wrapper_syntax():
     subprocess.run(["bash", "-n", str(ROOT/"notebook/colab_setup.sh")], check=True)
+
+
+def test_host_minimum_check_fails_before_installation(monkeypatch,tmp_path):
+    monkeypatch.setattr(setup,"ubuntu_version",lambda:"24.04")
+    monkeypatch.setattr(setup.platform,"machine",lambda:"x86_64")
+    def old_stack(): raise RuntimeError("host stack is too old")
+    monkeypatch.setattr(setup,"check_minimum_versions",old_stack)
+    monkeypatch.setattr(setup.subprocess,"run",lambda *a,**k:pytest.fail("must not install"))
+    monkeypatch.setattr(setup,"download",lambda *a,**k:pytest.fail("must not download"))
+    prefix=tmp_path/"runtime"
+    with pytest.raises(RuntimeError,match="host stack is too old"):
+        setup.main(["--prefix",str(prefix)])
+    assert not prefix.exists()

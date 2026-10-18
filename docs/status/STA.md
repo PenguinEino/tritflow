@@ -1,3 +1,12 @@
+# STA stream — phase 4 in progress: tightening and component attribution
+
+2026-10-18. Phase-3 publication preserved at `results/sta/phase3/`. Testing
+class-conditioned slew transport and measured recovery/endpoint terms against
+all 838 saved observations. The qualified phase-3 bound remains active until a
+replacement passes; matched accuracy is unchanged.
+
+---
+
 # STA stream — phase 3 complete: conservative nominal envelope, accuracy kept separate
 
 2026-10-18. Only STA-owned paths changed; no packages installed, foreign
