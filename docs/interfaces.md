@@ -26,6 +26,7 @@ Constants live in `tritflow/__init__.py`.
 | `notebook/narrative/` | EDITOR |
 | other `tritflow/viz/` | later |
 | `tritflow/sta/`, `tests/sta/`, `results/sta/` | STA |
+| `tritflow/schematic/`, `tests/schematic/` | SCHEM |
 | `docs/status/<stream>.md` | that stream |
 
 ## Cell library
