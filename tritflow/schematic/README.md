@@ -32,8 +32,8 @@ works with `flow.Netlist`, `SynthesizedNetlist` and netlists loaded from JSON.
 ![Ternary symbol legend](assets/legend.svg)
 
 The triangle and inversion bubble preserve the familiar INV/BUF convention.
-NAND uses the AND outline with `min` inside; NOR uses the OR outline with
-`max` inside. The bubble means **arithmetic sign reversal**, leaving zero
+NAND uses the AND outline; NOR uses the OR outline. Their minimum/maximum
+functions are explained in the legend, leaving the gate bodies uncluttered. The bubble means **arithmetic sign reversal**, leaving zero
 unchanged. NANY uses a clipped summing body with a Σ and an output bubble:
 sum, saturate to −1…+1, then reverse the sign. Clipped corners distinguish it
 from AND, OR, XOR and an amplifier triangle. TIE symbols resemble supply
@@ -41,8 +41,9 @@ sources and print +1, 0 or −1. Directional flags identify external ports.
 
 Colours, serif font preferences and nominal line weights follow
 `figures/style.py`: −1 blue `#2a78d6`, 0 grey `#6f6e69`, +1 red `#e34948`;
-Nimbus Roman / Liberation Serif / DejaVu Serif; 8 pt gate labels, 0.6 pt
-symbol outlines and 1.2 pt unannotated signals. The package copies these
+Nimbus Roman / Liberation Serif / DejaVu Serif. Labels are at least 9 pt
+when the drawing is displayed at 1000 px wide; symbol strokes are at least
+0.8 display pixels. Gate name strips and port flags reserve room for this type. The package copies these
 small constants instead of depending on repository figure scripts.
 
 ## Hierarchy and placement
@@ -55,12 +56,24 @@ while siblings stay closed. Unknown paths raise `ValueError`.
 
 A ripple adder is one row of digit blocks, with `cout` and the next `cin` on
 the same horizontal track. `a[i]` and `b[i]` enter locally from above;
-`sum[i]` leaves below its producer. Full-adder flat views frame the two half
-adders side by side and fold their latter stages into a lower feedforward
-row. Every gate faces left to right, including the lower row. Larger flat adders use
-multiple rows of these panels. The standalone half adder instead keeps the
-`t` net as a straight trunk from `g_t` to `g_d`, with a branch to `g_u`;
-`g_u` also lines up directly with `g_c`'s lower input.
+`sum[i]` leaves below its producer. Expanded half adders reuse the standalone
+half-adder cell positions and internal routes, including the straight `t`
+trunk from `g_t` to `g_d` and `g_u`'s alignment with `g_c`'s lower input.
+There is one template, not a separate folded placement for framed copies.
+Full adders place their two halves side by side; larger flat adders use one
+digit per row to preserve type size. A/b enter beside ha1, cin sits between
+frames, sum leaves ha2, and the carry combiner uses a channel above ha2.
+The full-adder flat aspect is about 3.7:1, accepting the width of the two
+unaltered standalone templates instead of folding their cells to reach 2:1.
+
+Each frame has named boundary pins and is a solid keep-out to the parent
+router. Parent wires use only the channels between/around frames. Boundary
+adapters replace standalone port flags, preserving every cell and internal
+net lane. Multipliers reuse the standalone mul1 drawing; mul2 retains its
+2×2 product matrix and puts the two accumulating halves at right. MAC's
+exact multiplier cone also exposes the two Boolean taps as t1/t3 boundary
+pins. Local gate labels use canonical circuit roles; metadata retains the
+original instance names and every original terminal.
 
 The public mapped netlist currently drops original module types and port
 aliases. `arithmetic.py` therefore verifies exact cell-and-ordered-pin
@@ -96,13 +109,15 @@ The routing pitch is 32 pixels, distinct from the 8-pixel raster. Different
 parallel nets are at least a pitch apart. Every pin reserves a straight
 32-pixel approach, with no turn or branch inside it. Foreign wires stay at
 least 16 pixels from pin stubs, symbol/label keep-outs and branch dots.
-Each fanout net has one explicit rail; parallel rails of different nets are
+Each routing domain (a frame or its parent) has one explicit rail per
+fanout net; parallel rails of different nets are
 at least 48 pixels apart. Local taps attach to that rail; external module
 consumers and output flags can branch at the producer. Unused rail tails
 are pruned. Straight crossings remain allowed away from pins and dots.
 Direction and run length prevent a short stair at a pin's escape tip or
-between corners. The final scene is cropped to a 48-pixel header and
-24-pixel side margins, with a modest 12-pixel title.
+between corners. The final scene has 24-pixel side margins and a header/footer sized for
+the displayed font. Compact generic circuits stay feedforward where possible;
+compare2 no longer returns its last stages to the left edge.
 
 ## Reuse after P&R
 
@@ -139,10 +154,11 @@ uncalibrated lumped wire estimate.
 
 `sch.metrics` reports total unique wire length in drawing pixels, total and
 mean/maximum bends per net, nets over two bends, crossings and canvas aspect,
-plus per-net details. It also reports `short_jogs`, `rotated_gates` and
+plus per-net details and `min_font_pt_at_1000px`. It also reports `short_jogs`, `rotated_gates` and
 `symbol_edge_runs`, plus `clearance_violations` from an independent geometric
 auditor: parallel tracks, rails, pin stubs, pin turns/approaches, symbol
-outlines, branch dots and missing/duplicate fanout rails. A short jog is a leg shorter than 32 pixels between two
+outlines, branch dots, missing/duplicate fanout rails and parent wires inside
+frames. A short jog is a leg shorter than 32 pixels between two
 degree-two corners, excluding terminal stubs and T joins. An edge run is
 positive wire overlap along a symbol/label keep-out boundary; perpendicular
 pin contact is allowed. A bend is a degree-two orthogonal corner; T junctions
@@ -158,7 +174,7 @@ PDF timestamps are disabled for byte-identical exports.
 
 SVG metadata accounts for every original terminal exactly once, including
 terminals inside closed blocks. It records block membership, formal labels
-and hierarchy frames. Hidden terminals have `pin: null`; visible boundary
+and hierarchy frames with boundary pins and parent interconnect. Hidden terminals have `pin: null`; visible boundary
 terminals resolve to exact pin anchors.
 
 ```bash
@@ -174,20 +190,21 @@ The gallery does not rerun DRC/LVS or claim new signoff evidence.
 
 `index.html` displays the figures and before/after results. `metrics.md`
 compares **every item** with the frozen reviewed gallery in
-`assets/phase3_metrics.json`; `manifest.json` includes per-net details,
-real-C provenance, the phase-3 `previous` metrics and the original `before`
+`assets/phase4_metrics.json`; `manifest.json` includes per-net details,
+real-C provenance, the phase-4 `previous` metrics and the original `before`
 metrics from `assets/baseline_metrics.json`. Tests enforce wire/bend budgets,
 zero short jogs, right-facing gates, zero symbol-edge runs, a straight ripple chain,
-formal/local digit ports, ≤2 bends/net in the standalone half adder, a near
-2:1 full-adder flat view, exact connectivity, no symbol overlap, clear pin
+formal/local digit ports, ≤2 bends/net in the standalone half adder, exact
+standalone macro reuse, isolated frame channels, ≥9 pt labels at 1000 px,
+exact connectivity, no symbol overlap, clear pin
 access, no wire-through-symbol, and no text overlap/clipping.
 
 For a browser-faithful review of all 22 gallery figures and the four notebook
 views, use the installed CairoSVG review helper (not a runtime dependency):
 
 ```bash
-python3 -m tritflow.schematic.review --output build/schematic-review/round4/after
+python3 -m tritflow.schematic.review --output build/schematic-review/round5/after
 ```
 
-Each resulting PNG comes from its SVG at scale 1.25. Notebook views use
+Each resulting PNG comes from its SVG at exactly 1000 px wide. Notebook views use
 `net.schematic()` and `.annotate()` with actual cell-library PNR wire C.

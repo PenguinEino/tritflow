@@ -1,202 +1,186 @@
-# SCHEM status — phase 4 complete
+# SCHEM status — phase 5 complete
 
-2026-10-19. Implemented the requested drawing rules without changing the
-`net.schematic()` / `.annotate()` API. **135 tests pass**. Opened the four
-integrator PNGs before editing, then rendered and personally inspected all
-22 gallery figures plus all four notebook views through CairoSVG. Final
-remaining defects from the requested review: **none observed**.
+Updated 2026-10-19. Owner paths: `tritflow/schematic/`, `tests/schematic/`,
+`docs/status/SCHEM.md`. Public `net.schematic()` / `.annotate()` APIs are unchanged.
+No other stream's source was edited; no git state changes or package installs.
 
-## Done
+## Result and review artifacts
 
-- Parallel wires from different nets have **32 px** separation. Pin stubs,
-  symbol/label keep-outs and branch dots have at least **16 px** foreign-wire
-  clearance. Dot routing uses a more conservative 24 px centre separation.
-  Orthogonal crossings remain explicit gaps, away from pins and dots.
-- Every fanout net gets one explicit rail, with **48 px** between parallel
-  rails of different nets. Operand buses follow a deterministic order. Local
-  loads tap their rail; output flags/external module consumers can branch at
-  the producer. This removes the ambiguous close a/b ladders in half/minmax.
-- Every pin gets a protected **32 px straight approach**, without turns or
-  branches inside it. The router retains the pin direction at the escape tip;
-  this also eliminates short stairs immediately after an otherwise legal stub.
-  No short jogs, rotated gates or symbol-edge runs remain in any final view.
-- The inverter-output and carry channels in the half adder are separated from
-  neighbouring pins. Its t trunk stays straight and every net remains within
-  **2 bends**. Minmax now also has a **2-bend maximum**.
-- Legends appear only with settled values or wire C, and contain **port nets
-  only**. `net_names=True` alone creates no empty legend. Internal SVG hover
-  captions use the producing gate/module terminal, such as `g_t.Y`; exact
-  logical names remain in metadata and `data-net`. Unknown anonymous block
-  pins get readable `in 1` / `out 1` labels; supplied formal names are retained.
-- Separate graphical branch/crossing keys replace the whitespace-dependent
-  footnote. The header is **48 px**, side margins **24 px**, title **12 px**.
-  Placement's unused routing workspace is cropped away. Fonts, colours and
-  symbol strokes retain the paper style.
-- Full-adder halves remain side by side; the carry stage occupies the middle
-  of each panel and lower rails sit inside its light frame. Full-add flat
-  aspect is **2.17:1**. Multirow adders leave enough space for the next row's
-  operand flags to sit outside the preceding frame.
-- Mul2 flat uses a **2×2 partial-product matrix**, with accumulating halves at
-  right. Crossings fall **21 → 15** against phase 3 (36 in the intermediate
-  round-4 layout). The hierarchical low-product flag sits above its producer,
-  preserving the operand-bus channel between multiplier blocks.
+- Before/after PNG review for **all 22 gallery + 4 notebook views**:
+  `build/schematic-review/round5/index.html`.
+- Frozen phase-4 PNG/SVG/PDF files: `round5/before/{gallery,notebook}/`.
+- Final CairoSVG PNGs, each **1000 px wide**, and SVG/PDF originals:
+  `round5/after/{gallery,notebook}/`.
+- Every gallery metric before/after: `round5/after/gallery/metrics.md`;
+  per-net numbers and real-PNR provenance: `manifest.json` beside it.
+- Four notebook comparisons: `round5/notebook-metrics.md`.
+- Current gallery also published at `build/schematic-review/index.html`.
+  Documentation example SVGs and `assets/review_metrics.json` are current.
 
-## Visual loop and resolved defects
+I opened the phase-4 full_add-flat PNG first. I inspected every final gallery
+PNG and all four notebook PNGs, including the actual PNR-capacitance overlays,
+at 1000 px wide. Final inspection found no remaining port loops beyond the
+sheet edge, inconsistent module interiors, cramped labels, text collisions,
+short pin-entry jogs or wires on symbol edges. The 20 circuit SVGs were also
+regenerated from the final source and matched the inspected files exactly.
 
-| Review | Images inspected | Remaining defects found | Resolution |
-|---|---:|---|---|
-| Supplied notebook PNGs | 4 | Operand ladders only 8 px apart; nearby pins/dots; name-only legend and anonymous carry; collapsed footnote; large top margin/title | Added real wire/pin clearances, port-only overlays, graphical key and crop |
-| pass1 | 22 + 4 | Minmax/sign lead-in hooks; unused short spurs in several views; lower-stage spacing | Explicit rails, source-aware routing, terminal-aware spur trimming and larger local channels |
-| pass2 | 22 + 4 | Carry rails outside frame; pin-tip short stairs found by tests; mul2 wrapped operand buses | Frame margin, initial pin-direction tracking, 2×2 product matrix |
-| final after, including row-gap correction | 22 + 4 | A next-row operand flag initially sat inside the preceding flat-adder frame | Increased row spacing and added a port/frame ownership regression check; rerendered and reinspected |
-| Final remaining defects | 26 | **None observed** | Every geometry counter is zero; labels checked against wires, symbols and other labels |
+## Implementation and decisions
 
-The supplied notebook PNGs are preserved unchanged in
-`build/schematic-review/round4/before/notebook/`. Gallery before PNGs come
-from the saved phase-3 SVGs through CairoSVG. Final PNGs come from final SVGs
-at scale 1.25; this catches browser whitespace/layout behaviour that the
-Matplotlib-only previews missed. Intermediate successful reviews are retained
-under `pass1/` and `pass2/`. The final set is `after/{gallery,notebook}/`.
+`macros.py` obtains the same standalone half_add / mul1 layout used by the
+public renderer, then copies cell positions, orientations, pin coordinates
+and internal-net routes into each frame. There is no second folded half-adder
+placement. Exact ordered-pin grammars identify modules, independent of cell
+instance names; missing serialized child scopes can be recovered from the
+verified full-adder grammar. Original instance names and terminals remain in
+the connection ledger; framed gate labels use the canonical circuit roles.
 
-## Objective validation and decisions
+Standalone port flags become explicit named frame pins. Short, fixed boundary
+adapters separate half-adder a/b terminals; mul1 operands enter at opposite
+ends of their existing fan-out trunks. These adapters affect port nets only.
+Carry leaves above its actual producer, and sum leaves at right. Parent A*
+routing treats each entire frame as a solid keep-out. Its separate
+`scene.interconnect` geometry and frame pin maps are serialized and audited;
+a parent wire cannot enter a frame interior.
 
-- `audit.py` independently checks parallel spacing, trunk spacing, foreign
-  pin-stub clearance, pin turns and full approaches, symbol clearance, branch
-  dot clearance, and exactly one rail for each fanout net. All eight counters
-  are **zero** for every final gallery and notebook schematic. Tests also
-  reject dangling wire tails and ports inside unrelated hierarchy frames.
-- Renderer font measurements check labels against routed wires, other symbols
-  and other labels. Tests retain exact terminal accounting, electrical
-  connectivity, no wire-through-symbol, no shared different-net edges,
-  deterministic ordering, hierarchy expansion, formal aliases and exports.
-- The old short-wire budgets assumed 8 px parallel channels. Their bounds
-  were revised explicitly for the new 32/48/16 px rules; the original 101
-  test cases remain, with 34 additional cases. Tests retain bounds against the
-  original gallery, a near-2:1 full-add flat panel and the half-add bend target.
-  Tight spacing is no longer rewarded as a shorter wire metric.
-- The cost is visible in the tables: half-add wire length **2,200 → 3,776 px**;
-  adder4-flat **23,856 → 46,360 px**, crossings **32 → 62**. Those crossings
-  have clear gaps and full feature separation. Mul2's matrix removes needless
-  wrapping, reducing its flat crossings **21 → 15**. No aggregate hides these
-  tradeoffs. Aspect now reflects compact margins rather than artificial blank
-  top/bottom space (notably the wide two-block full-add hierarchy).
-- The new phase-3 fixture includes before clearance counts. They were computed
-  by rebuilding the saved phase-3 placement/routing; each rebuilt wire length
-  matches its frozen metric exactly. Old notebook canvas aspects match the
-  supplied screenshot dimensions within raster rounding. Geometry comparisons
-  do not compare physical C values between independent selected routes.
-- Both overlays use **real cell-library PNR** and public
-  `PnrResult.net_parasitics()`, reading `wire_capacitance_f`. The half-add's
-  nine logical nets still total **447.7378164 fF**; its legend shows only the
-  four port nets. The notebook's annotated adder uses its own real PNR report.
-  No synthetic capacitance, new DRC/LVS claim, package install, shared source
-  edit or git-state change was introduced.
+Full_add-flat keeps ha1/ha2 side by side, a/b directly left of ha1, cin in the
+gap, sum directly right of ha2, and the carry-combining gates and cout above
+ha2 in a dedicated channel. The **3.66:1** full canvas deliberately replaces
+the old folded **2.17:1** arrangement: the latest instruction to reuse the
+clean standalone module takes precedence over folding its gates to reach 2:1.
+Flat adder2/adder4 use one digit per row so 9 pt labels remain readable at
+1000 px; hierarchical ripple adders retain the straight cout→cin chain.
 
-## Review artifacts
+Mul2 keeps four identical mul1 frames in a 2×2 product matrix, with the two
+identical half-adders at right. Its shared b[1] flag sits above the second
+column. MAC's exact four-cell multiplier cone is framed too; its two exported
+Boolean taps have t1/t3 boundary pins and separate buffer rows. Compare2's
+seven dependency columns now stay feedforward: no final-stage return to the
+left edge, and crossings fall from 3 to 0.
 
-[All 26 before/after PNG pairs](../../build/schematic-review/round4/index.html) ·
-[Final gallery](../../build/schematic-review/round4/after/gallery/index.html) ·
-[Every-gallery metrics](../../build/schematic-review/round4/after/gallery/metrics.md) ·
-[Notebook metrics](../../build/schematic-review/round4/notebook-metrics.md) ·
-[API and rendering guide](../../tritflow/schematic/README.md)
+All text has a **9 pt minimum when displayed at 1000 px wide**, including
+frame labels, formal pin names, gate names, footnotes and overlays. Text size
+in SVG pixels is converted with `size × 0.75 × 1000 / canvas_width` for the
+independent test. Gate name strips and larger flags reserve space for it;
+actual text bounds are checked against every wire, foreign symbol and label.
+Names may extend a few pixels into their own empty side halo, above the gate
+outline, without moving the gate or changing the shared template. Symbol
+strokes have a 0.8 display-pixel minimum. NAND/NOR use their familiar outlines;
+minimum/maximum are explained in the legend instead of cramped body text.
+The serif family and trit palette continue to match `figures/style.py`.
 
-Committed review data/figures:
-[current per-net metrics](../../tritflow/schematic/assets/review_metrics.json),
-[phase-3 baseline](../../tritflow/schematic/assets/phase3_metrics.json),
-[full-add flat](../../tritflow/schematic/assets/full_add-flat.svg),
-[full-add hierarchy](../../tritflow/schematic/assets/full_add.svg),
-[adder4 hierarchy](../../tritflow/schematic/assets/adder4.svg),
-[legend](../../tritflow/schematic/assets/legend.svg).
-The established `build/schematic-review/index.html` also has the final gallery.
+One primary fan-out trunk is required **per routing domain**: each reusable
+module retains its local operand trunk, while the parent gets one bus between
+frame boundary pins. Different-net parallel wires still need 32 px spacing;
+primary trunks need 48 px; foreign pins/dots/outlines need 16 px clearance;
+each pin keeps a straight 32 px approach. All counters remain zero. This
+scoped rule is necessary for identical module reuse; the same electrical net
+can have a local bus in several instances and one parent bus.
 
-## Every gallery item: phase 3 → phase 4
+Real-C demos still call **PnrResult.net_parasitics()** on actual library routes
+(`library_mock=false`); they use `wire_capacitance_f`, not pin C or synthetic
+values. The gallery half-adder has nine reported nets, with total estimated
+wire C of 447.7378164 fF. Notebook annotated uses the real adder2 PNR result. Overlays
+reuse the exact scene; plain diagrams have no empty net-name legend.
 
-Wire length is in drawing pixels, not chip micrometres. A bend is a unique same-net degree-two orthogonal corner; T joins are excluded. Crossings count distinct different-net perpendicular intersections. Aspect is full canvas width / height; the real-C overlay includes its annotation table.
+## Visual loop and defects resolved
 
-| Figure | Wire px | Bends total | Bends/net mean | Bends/net max | Crossings | Aspect |
-|---|---:|---:|---:|---:|---:|---:|
-| half_add-hierarchical | 2200 → 3776 | 9 → 8 | 1.00 → 0.89 | 2 → 2 | 5 → 5 | 1.68 → 2.66 |
-| half_add-flat | 2200 → 3776 | 9 → 8 | 1.00 → 0.89 | 2 → 2 | 5 → 5 | 1.68 → 2.66 |
-| full_add-hierarchical | 1072 → 1360 | 8 → 6 | 0.89 → 0.67 | 4 → 4 | 0 → 0 | 1.85 → 4.24 |
-| full_add-flat | 5040 → 9792 | 31 → 38 | 1.63 → 2.00 | 6 → 7 | 8 → 11 | 2.15 → 2.17 |
-| adder2-hierarchical | 448 → 496 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 1.28 → 1.51 |
-| adder2-flat | 11152 → 21704 | 69 → 78 | 1.86 → 2.11 | 8 → 7 | 16 → 24 | 1.13 → 1.11 |
-| adder4-hierarchical | 864 → 944 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 2.12 → 2.57 |
-| adder4-flat | 23856 → 46360 | 137 → 158 | 1.88 → 2.16 | 8 → 7 | 32 → 62 | 2.16 → 2.26 |
-| mul1-hierarchical | 1152 → 1856 | 9 → 8 | 1.50 → 1.33 | 3 → 2 | 2 → 2 | 1.67 → 2.84 |
-| mul1-flat | 1152 → 1856 | 9 → 8 | 1.50 → 1.33 | 3 → 2 | 2 → 2 | 1.67 → 2.84 |
-| mac1-hierarchical | 2176 → 3488 | 12 → 10 | 0.92 → 0.77 | 3 → 3 | 3 → 2 | 2.32 → 3.27 |
-| mac1-flat | 6920 → 12672 | 42 → 46 | 1.56 → 1.70 | 6 → 7 | 10 → 12 | 2.72 → 3.18 |
-| sign-hierarchical | 312 → 592 | 2 → 2 | 0.67 → 0.67 | 2 → 2 | 0 → 0 | 0.83 → 1.40 |
-| sign-flat | 312 → 592 | 2 → 2 | 0.67 → 0.67 | 2 → 2 | 0 → 0 | 0.83 → 1.40 |
-| compare2-hierarchical | 3048 → 4224 | 9 → 10 | 0.64 → 0.71 | 4 → 4 | 3 → 3 | 1.27 → 1.58 |
-| compare2-flat | 3048 → 4224 | 9 → 10 | 0.64 → 0.71 | 4 → 4 | 3 → 3 | 1.27 → 1.58 |
-| mul2-hierarchical | 2848 → 5728 | 23 → 24 | 1.92 → 2.00 | 3 → 4 | 7 → 7 | 1.74 → 2.52 |
-| mul2-flat | 14032 → 20904 | 71 → 73 | 2.09 → 2.15 | 7 → 7 | 21 → 15 | 1.47 → 1.38 |
-| minmax-hierarchical | 768 → 1360 | 5 → 4 | 0.83 → 0.67 | 3 → 2 | 2 → 2 | 1.23 → 2.09 |
-| minmax-flat | 768 → 1360 | 5 → 4 | 0.83 → 0.67 | 3 → 2 | 2 → 2 | 1.23 → 2.09 |
-| half_add-overlay | 2200 → 3776 | 9 → 8 | 1.00 → 0.89 | 2 → 2 | 5 → 5 | 1.44 → 2.35 |
-| legend | 0 → 0 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 1.74 → 1.74 |
+- Original / pass 1: confirmed the different folded half-adder placement and
+  a/b sheet-edge loops. Replaced them with standalone templates and boundary
+  routing. Found faint strokes, undersized flags and missing MAC tap ports.
+- Passes 2–3: enlarged flags/type, reserved pin access while placing flags,
+  separated MAC buffers, and fixed too-close entry leads beside operand
+  trunks. Parent wires were confined to frame channels.
+- Passes 4–5 (all 26 PNGs): found compare2's returning lower row and unnecessary
+  multiplier entry bends. Kept compare2 feedforward and moved mul1 entries to
+  its existing trunks. Preserved mul2's 2×2 matrix and put its halves at right.
+- Pass 6: an experimental wider gate keep-out caused half-adder carry detours;
+  the clearance audit and direct image inspection caught this. Restored the
+  clean standalone half geometry; handled readable labels in the name strip
+  and flags instead. Fixed a shared-input/output flag stub conflict in mul2.
+- Pass 7 / final `after/`: inspected all 22 gallery and 4 notebook PNGs. Fixed
+  the last large-font C-footnote clipping case. No remaining visual defects
+  observed; all independent clearance/type/connectivity checks pass.
 
-A short jog is a leg shorter than one gate input pitch (32 px) between two degree-two corners. Terminal stubs and T joins are excluded; pin access uses the finer 8 px raster. Edge runs count positive overlap along any symbol/label keep-out boundary; perpendicular pin contact is allowed.
+## Objective metrics — phase 4 → phase 5
 
-| Figure | Short jogs | Rotated gates | Symbol-edge runs | Clearance violations |
-|---|---:|---:|---:|---:|
-| half_add-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 27 → 0 |
-| half_add-flat | 0 → 0 | 0 → 0 | 0 → 0 | 27 → 0 |
-| full_add-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 16 → 0 |
-| full_add-flat | 0 → 0 | 0 → 0 | 0 → 0 | 93 → 0 |
-| adder2-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 0 |
-| adder2-flat | 0 → 0 | 0 → 0 | 0 → 0 | 195 → 0 |
-| adder4-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 0 |
-| adder4-flat | 0 → 0 | 0 → 0 | 0 → 0 | 381 → 0 |
-| mul1-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 26 → 0 |
-| mul1-flat | 0 → 0 | 0 → 0 | 0 → 0 | 26 → 0 |
-| mac1-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 37 → 0 |
-| mac1-flat | 0 → 0 | 0 → 0 | 0 → 0 | 124 → 0 |
-| sign-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 4 → 0 |
-| sign-flat | 0 → 0 | 0 → 0 | 0 → 0 | 4 → 0 |
-| compare2-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 23 → 0 |
-| compare2-flat | 0 → 0 | 0 → 0 | 0 → 0 | 23 → 0 |
-| mul2-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 72 → 0 |
-| mul2-flat | 0 → 0 | 0 → 0 | 0 → 0 | 206 → 0 |
-| minmax-hierarchical | 0 → 0 | 0 → 0 | 0 → 0 | 18 → 0 |
-| minmax-flat | 0 → 0 | 0 → 0 | 0 → 0 | 18 → 0 |
-| half_add-overlay | 0 → 0 | 0 → 0 | 0 → 0 | 27 → 0 |
-| legend | 0 → 0 | 0 → 0 | 0 → 0 | 0 → 0 |
+Length is unique drawing-wire length, not chip micrometres. Bends are unique
+same-net degree-two corners, excluding T joins. Counts include both module
+interiors and parent interconnect; aspect includes overlay tables.
 
-## Four notebook views: phase 3 → phase 4
+The full-adder templates reduce bends **38→30** (max/net **7→5**), and flat
+adder2/adder4 reduce bends **78→64 / 158→132**. Blocked interiors cost longer
+parent routes: MAC/mul2 flat wire rises **12672→17696 / 20904→29152**, and their
+crossings rise **12→16 / 15→26**. All crossings have gaps and stay clear of
+pins/dots. These costs are reported rather than hidden by moving gates away
+from their standalone templates. Original wire/bend budgets remain; the
+additional comparison budget now uses the immediately reviewed phase-4
+baseline, with explicit bounds for frame-channel costs.
 
-Before geometry uses the saved phase-3 drawing and renderer; its canvas aspect matches each supplied screenshot. After uses the public notebook calls. Drawing pixels are independent of PNG export scale. Wire C is real PNR in the after image; this table compares drawing geometry only.
+| Figure | Wire px | Bends total | Bends/net mean | Bends/net max | Crossings | Aspect | Min font pt @1000px |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| half_add-hierarchical | 3776 → 3648 | 8 → 8 | 0.89 → 0.89 | 2 → 2 | 5 → 5 | 2.66 → 2.54 | 4.7 → 9.0 |
+| half_add-flat | 3776 → 3648 | 8 → 8 | 0.89 → 0.89 | 2 → 2 | 5 → 5 | 2.66 → 2.54 | 4.7 → 9.0 |
+| full_add-hierarchical | 1360 → 1344 | 6 → 8 | 0.67 → 0.89 | 4 → 4 | 0 → 0 | 4.24 → 4.48 | 6.0 → 9.0 |
+| full_add-flat | 9792 → 11072 | 38 → 30 | 2.00 → 1.58 | 7 → 5 | 11 → 12 | 2.17 → 3.66 | 3.4 → 9.0 |
+| adder2-hierarchical | 496 → 512 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 1.51 → 1.58 | 10.5 → 10.0 |
+| adder2-flat | 21704 → 24768 | 78 → 64 | 2.11 → 1.73 | 7 → 7 | 24 → 29 | 1.11 → 1.83 | 3.3 → 9.0 |
+| adder4-hierarchical | 944 → 960 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 2.57 → 2.64 | 6.2 → 9.0 |
+| adder4-flat | 46360 → 52224 | 158 → 132 | 2.16 → 1.81 | 7 → 7 | 62 → 63 | 2.26 → 0.90 | 1.6 → 9.0 |
+| mul1-hierarchical | 1856 → 1808 | 8 → 8 | 1.33 → 1.33 | 2 → 2 | 2 → 2 | 2.84 → 2.64 | 6.9 → 9.0 |
+| mul1-flat | 1856 → 1808 | 8 → 8 | 1.33 → 1.33 | 2 → 2 | 2 → 2 | 2.84 → 2.64 | 6.9 → 9.0 |
+| mac1-hierarchical | 3488 → 3224 | 10 → 12 | 0.77 → 0.92 | 3 → 3 | 2 → 2 | 3.27 → 3.09 | 4.3 → 9.0 |
+| mac1-flat | 12672 → 17696 | 46 → 56 | 1.70 → 2.07 | 7 → 8 | 12 → 16 | 3.18 → 2.14 | 2.1 → 9.0 |
+| sign-hierarchical | 592 → 592 | 2 → 2 | 0.67 → 0.67 | 2 → 2 | 0 → 0 | 1.40 → 1.45 | 14.1 → 12.4 |
+| sign-flat | 592 → 592 | 2 → 2 | 0.67 → 0.67 | 2 → 2 | 0 → 0 | 1.40 → 1.45 | 14.1 → 12.4 |
+| compare2-hierarchical | 4224 → 2728 | 10 → 8 | 0.71 → 0.57 | 4 → 4 | 3 → 0 | 1.58 → 3.69 | 6.6 → 9.0 |
+| compare2-flat | 4224 → 2728 | 10 → 8 | 0.71 → 0.57 | 4 → 4 | 3 → 0 | 1.58 → 3.69 | 6.6 → 9.0 |
+| mul2-hierarchical | 5728 → 5648 | 24 → 24 | 2.00 → 2.00 | 4 → 4 | 7 → 7 | 2.52 → 2.55 | 4.3 → 9.0 |
+| mul2-flat | 20904 → 29152 | 73 → 76 | 2.15 → 2.24 | 7 → 9 | 15 → 26 | 1.38 → 2.29 | 2.7 → 9.0 |
+| minmax-hierarchical | 1360 → 1328 | 4 → 4 | 0.67 → 0.67 | 2 → 2 | 2 → 2 | 2.09 → 1.96 | 9.4 → 9.2 |
+| minmax-flat | 1360 → 1328 | 4 → 4 | 0.67 → 0.67 | 2 → 2 | 2 → 2 | 2.09 → 1.96 | 9.4 → 9.2 |
+| half_add-overlay | 3776 → 3648 | 8 → 8 | 0.89 → 0.89 | 2 → 2 | 5 → 5 | 2.35 → 2.14 | 4.7 → 9.0 |
+| legend | 0 → 0 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 1.74 → 1.74 | 6.9 → 9.0 |
 
-| Figure | Wire px | Bends total | Bends/net mean | Bends/net max | Crossings | Aspect |
-|---|---:|---:|---:|---:|---:|---:|
-| half | 2200 → 3776 | 9 → 8 | 1.00 → 0.89 | 2 → 2 | 5 → 5 | 1.44 → 2.43 |
-| minmax | 768 → 1360 | 5 → 4 | 0.83 → 0.67 | 3 → 2 | 2 → 2 | 1.02 → 2.09 |
-| adder2 | 448 → 496 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 1.02 → 1.25 |
-| annotated | 448 → 496 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 1.02 → 1.21 |
 
-All four after views have zero short jogs, rotated gates, symbol-edge runs and clearance violations.
+### Notebook views
 
-## Tests and regeneration
+| Figure | Wire px | Bends total | Bends/net mean | Bends/net max | Crossings | Aspect | Min font pt @1000px |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| half | 3776 → 3648 | 8 → 8 | 0.89 → 0.89 | 2 → 2 | 5 → 5 | 2.43 → 2.23 | 4.7 → 9.0 |
+| minmax | 1360 → 1328 | 4 → 4 | 0.67 → 0.67 | 2 → 2 | 2 → 2 | 2.09 → 1.96 | 9.4 → 9.2 |
+| adder2 | 496 → 512 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 1.25 → 1.31 | 10.5 → 10.0 |
+| annotated | 496 → 512 | 0 → 0 | 0.00 → 0.00 | 0 → 0 | 0 → 0 | 1.21 → 1.26 | 10.5 → 10.0 |
+
+
+Across all final gallery and notebook scenes: **0 short jogs, 0 rotated gates,
+0 symbol-edge runs, 0 clearance violations, 0 parent-frame intrusions**.
+Every displayed label meets the 9 pt minimum; all figures include exact
+terminal accounting and connected same-net geometry.
+
+## Validation and reproduction
+
+`python3 -m pytest tests/schematic -q` → **170 passed in 37.05 s**.
+This retains the prior 135 tests and adds 35 cases for exact standalone macro
+reuse, fixed internal routes, boundary-channel isolation, local flags,
+1000 px type size, one digit per row, feedforward compare2, hierarchy recovery,
+selective expansion, frame-contained templates and unused-input preservation.
+SVG/PDF/PNG, deterministic ordering, every terminal, real PNR integration,
+all-overlay text bounds and the phase-4 spacing rules remain covered.
+`git diff --check` on the owned paths is clean.
+
+Reproduce the complete gallery and notebook PNGs:
 
 ```bash
-python3 -m pytest tests/schematic -q
-# 135 passed in the final run, including real cell-library PNR integration.
-python3 -m compileall -q tritflow/schematic
-python3 -m tritflow.schematic.review --output build/schematic-review/round4/after
+python3 -m tritflow.schematic.review --output build/schematic-review/round5/after
 ```
 
-The review helper enforces zero clearance/jog violations before accepting a
-review set. CairoSVG was already installed; it is a review-only dependency.
-Production native SVG and vector PDF APIs have no new dependency. Fresh-process
-SVG and PDF hashes agree at PYTHONHASHSEED=1,42,123 for half_add, full_add-flat,
-adder4-flat and mul2-flat. Reversed netlist/port ordering is also tested.
+CairoSVG is an already installed review-only dependency. Runtime SVG remains
+standard-library Python; PDF/PNG use the existing Matplotlib dependency.
+No packages were installed. Phase-4 geometry/type baseline is frozen in
+`tritflow/schematic/assets/phase4_metrics.json`; original/phase-2/phase-3
+baselines and the round-4 artifacts remain available for historical review.
 
-## Interface requests / in progress / blockers
+## In progress / blockers / interface requests
 
-No phase-4 interface request or blocker. The existing FRONTEND delegate and
-notebook calls use the improved renderer automatically. Optional source module
-port metadata for arbitrary authored modules remains supported by `hierarchy=`;
-verified arithmetic already has formal aliases. All requested SCHEM work and
-final visual inspection are complete.
+None. Phase 5 is complete. FRONTEND's existing schematic delegate and notebook
+calls pick up these improvements without any API or notebook changes.

@@ -2,16 +2,16 @@
 from collections import defaultdict
 import math
 
-from .model import Frame, natural
+from .model import natural
 
 
-def anchors(node):
+def anchors(node, font=20):
     """Keep every logic gate facing right, including gates in folded rows."""
     x,y=node.x,node.y
     if node.kind in {'input','output'}:
-        node.width,node.height=max(48,16*math.ceil((len(node.label)*6+16)/16)),32
+        node.width,node.height=max(48,16*math.ceil((len(node.label)*font*.52+16)/16)),64 if font>44 else 48 if font>28 else 32
         side=('bottom' if node.kind=='input' else 'top') if node.orient=='down' else ('right' if node.kind=='input' else 'left')
-        point={'bottom':(x+node.width//2,y+32),'top':(x+node.width//2,y),'left':(x,y+16),'right':(x+node.width,y+16)}[side]
+        point={'bottom':(x+node.width//2,y+node.height),'top':(x+node.width//2,y),'left':(x,y+node.height//2),'right':(x+node.width,y+node.height//2)}[side]
         node.pins={'port':point};node.sides={'port':side}
         return
     if node.kind=='block':
@@ -31,11 +31,11 @@ def anchors(node):
                               'top':(x+offset,y),'bottom':(x+offset,y+node.height)}[side]
         return
     node.orient='right'
-    node.width,node.height=80,96
-    cy=y+56
+    node.width,node.height=(128 if len(node.label.rsplit('.',1)[-1])>4 else 96),128
+    cy=y+80
     offsets=[0] if len(node.inputs)==1 else [-16,16]
     node.pins={p:(x,cy+off) for p,off in zip(node.inputs,offsets)}
-    node.pins.update({p:(x+80,cy) for p in node.outputs})
+    node.pins.update({p:(x+node.width,cy) for p in node.outputs})
     node.sides={p:'left' for p in node.inputs}|{p:'right' for p in node.outputs}
 
 
@@ -44,11 +44,10 @@ def _overlap(a,b,pad=0):
 
 
 def place(nodes,driver,loads,arithmetic):
-    """Place verified arithmetic as small panels, then compact remaining logic.
+    """Place standalone cells and collapsed hierarchy with local external ports.
 
-    A full-adder flat panel contains two side-by-side framed half adders. Each
-    half folds its latter stages into a lower left-to-right feedforward row.
-    Standalone halves retain a straight t-net lane and align u with c's input.
+    Expanded hierarchy is composed in macros.py before reaching this placer.
+    The half-adder coordinates here are the single source for every copy.
     """
     frames=[];placed=set()
     for node in nodes.values():anchors(node)
@@ -57,41 +56,25 @@ def place(nodes,driver,loads,arithmetic):
         node.x,node.y,node.orient=int(x),int(y),orient
         anchors(node);placed.add(node.key)
 
-    def half(pattern,x,y,fold):
-        positions=({'g_na':(0,0),'g_t':(0,160),'g_u':(192,96),'g_c':(384,272),
-                    'g_d':(192,496),'g_nd':(384,496),'g_s':(576,544)} if fold else
-                   {'g_t':(0,160),'g_u':(192,16),'g_na':(192,352),'g_c':(384,0),
-                    'g_d':(576,176),'g_nd':(768,176),'g_s':(960,224)})
+    def half(pattern,x,y):
+        positions={'g_t':(0,160),'g_u':(192,16),'g_na':(192,352),'g_c':(384,0),
+                   'g_d':(576,176),'g_nd':(768,176),'g_s':(960,224)}
         for role,(dx,dy) in positions.items():
-            node=nodes['cell:'+pattern.cells[role]]
-            put(node,x+dx,y+dy)
-        return (656,640) if fold else (1040,448)
+            put(nodes['cell:'+pattern.cells[role]],x+dx,y+dy)
 
     def full(pattern,x,y):
-        cursor=x;children=[]
+        cursor=x
         for child in ('ha1','ha2'):
             scope=(pattern.scope+'.' if pattern.scope else '')+child
-            block=nodes.get('block:'+scope)
-            if block:
-                put(block,cursor,y+64);w=160
-            else:
-                sub=arithmetic.get(scope)
-                if sub is None:return None
-                w0,h0=half(sub,cursor+24,y+40,True)
-                w,h=w0+48,h0+112
-                frames.append(Frame(scope,(cursor,y,cursor+w,y+h),tuple(sub.cells.values())))
-            children.append((cursor,w,block));cursor+=w+(224 if block else 128)
-        x2,w2,second_block=children[1]
-        # Carry combining gates sit alongside the upper half-adder row, so the
-        # sum output can leave the lower row next to its actual producer.
-        final_x=x2+w2+(128 if second_block else 40)
-        # Align the second carry with B; the first carry needs one full-pitch
-        # vertical leg. Leave the collapsed half's sum flag its own channel.
+            put(nodes['block:'+scope],cursor,y+64)
+            cursor+=352
+        final_x=cursor-96
+        # Align the second carry with B and keep the sum flag's own lane.
         carry=nodes['cell:'+pattern.cells['g_nc']].inputs['B']
         key,pin=driver[carry]
-        final_y=nodes[key].pins[pin][1]-72
+        final_y=nodes[key].pins[pin][1]-96
         put(nodes['cell:'+pattern.cells['g_nc']],final_x,final_y)
-        put(nodes['cell:'+pattern.cells['g_cout']],final_x+112,final_y)
+        put(nodes['cell:'+pattern.cells['g_cout']],final_x+160,final_y)
 
     # Prefer deepest aliases when generate-only and module scopes contain the
     # same instances; never draw a generate wrapper as another arithmetic unit.
@@ -120,50 +103,11 @@ def place(nodes,driver,loads,arithmetic):
                 node=nodes['block:'+m.scope]
                 put(node,base_x+224*k,200)
         else:
-            # Two full cells per row for N>=3; two-trit flat views stack panels
-            # to avoid recreating the original very wide ripple diagram.
-            columns=2 if len(candidates)>=3 else 1
-            for k,m in enumerate(candidates):
-                x=base_x+(k%columns)*2080
-                y=(320 if external_core else 176)+(k//columns)*896
-                if 'block:'+m.scope in nodes:
-                    node=nodes['block:'+m.scope];put(node,x,y)
-                else:full(m,x,y)
+            for k,m in enumerate(candidates):full(m,base_x+k*1280,176)
     if not placed:
         root=arithmetic.get('')
         if root and root.module=='half_add' and all('cell:'+n in nodes for n in root.cells.values()):
-            half(root,288,128,False)
-
-    # Other recognized module instances also remain visually grouped when
-    # flattened (e.g. four one-trit multipliers and two half adders in mul2).
-    units=[];unit_members=set()
-    for scope,m in sorted(arithmetic.items(),key=lambda kv:(-len(kv[0]),natural(kv[0]))):
-        keys={'cell:'+name for name in m.cells.values()}
-        if not scope or m.module not in {'half_add','mul1'} or keys&placed or keys&unit_members:continue
-        if keys<=nodes.keys():
-            units.append(m);unit_members.update(keys)
-    if units:
-        units.sort(key=lambda m:(min(nodes['cell:'+n].level for n in m.cells.values()),natural(m.scope)))
-        columns=3 if len(units)>=5 else 2
-        base_y=max((n.y+n.height for n in nodes.values() if n.key in placed),default=64)+112
-        multipliers=[m for m in units if m.module=='mul1']
-        halves=[m for m in units if m.module=='half_add']
-        product_array=len(multipliers)==4 and len(halves)==2 and len(units)==6
-        for k,m in enumerate(units):
-            x=288+(k%columns)*800;y=base_y+(k//columns)*720
-            if product_array:
-                # Keep the 2x2 partial products in their operand matrix. This
-                # lets each operand bus serve one row/column without wrapping
-                # around all four products. Accumulating halves sit at right.
-                if m.module=='mul1':
-                    i=multipliers.index(m);x=288+(i%2)*800;y=base_y+(i//2)*480
-                else:x=1888;y=base_y+halves.index(m)*880
-            if m.module=='half_add':w,h=half(m,x+24,y+40,True)
-            else:
-                coords={'g_t1':(0,0),'g_t2':(0,160),'g_t3':(192,160),'g_p':(384,64)}
-                for role,(dx,dy) in coords.items():put(nodes['cell:'+m.cells[role]],x+24+dx,y+40+dy)
-                w,h=464,256
-            frames.append(Frame(m.scope,(x,y,x+w+48,y+h+112),tuple(m.cells.values())))
+            half(root,288,128)
 
     core=[n for n in nodes.values() if n.kind not in {'input','output'} and n.key not in placed]
     if core:
@@ -172,7 +116,8 @@ def place(nodes,driver,loads,arithmetic):
         bottom=max((n.y+n.height for n in nodes.values() if n.key in placed),default=48)
         offset_y=160 if external_core or not placed else bottom+112
         blocks=any(n.kind=='block' for n in core)
-        row_pitch=288 if blocks else 160
+        feedforward=len(core)>8 and len(levels)<=8
+        row_pitch=288 if blocks or feedforward else 160
         column_pitch=320 if blocks else 256
         fold_span=max(min(3,len(v)) for v in levels.values())*row_pitch+112
         unique=sorted(levels)
@@ -191,7 +136,7 @@ def place(nodes,driver,loads,arithmetic):
             group=sorted(levels[level],key=lambda n:(aligned_y(n),natural(n.key)))
             percol=2 if len(group)>=4 and all(n.kind=='block' for n in group) else 3
             across=math.ceil(len(group)/percol)
-            if column+across>4:column=0;fold+=1
+            if column+across>(8 if feedforward else 4):column=0;fold+=1
             bottom_by_column={}
             for row,node in enumerate(group):
                 col=column+row//percol
@@ -240,7 +185,6 @@ def place(nodes,driver,loads,arithmetic):
     for node in ports:
         if len(loads[node.label])>1:
             bus_count[min(nodes[k].x for k,_ in loads[node.label])]+=1
-    top_slots=defaultdict(int)
     for node in ports:
         sinks=loads[node.label]
         if not sinks:
@@ -251,15 +195,10 @@ def place(nodes,driver,loads,arithmetic):
         if target.sides[pin]=='top':
             port(node,(tx-node.width//2,ty-80),'down')
         else:
-            containing=[f for f in frames if target.members and target.members[0] in f.members]
-            if containing:
-                frame=containing[0];slot=top_slots[frame.label];top_slots[frame.label]+=1
-                port(node,(frame.box[0]+48+slot*88,frame.box[1]-80),'down')
-            else:
-                ys=[nodes[k].pins[p][1] for k,p in sinks if nodes[k].x==target.x]
-                cy=8*round(sum(ys)/len(ys)/8)
-                offset=224+48*max(0,bus_count[target.x]-2) if len(sinks)>1 else 96
-                port(node,(tx-offset,cy-16),'right')
+            ys=[nodes[k].pins[p][1] for k,p in sinks if nodes[k].x==target.x]
+            cy=8*round(sum(ys)/len(ys)/8)
+            offset=224+48*max(0,bus_count[target.x]-2) if len(sinks)>1 else node.width+64
+            port(node,(tx-offset,cy-16),'right')
     for node in sorted((n for n in nodes.values() if n.kind=='output'),key=lambda n:natural(n.label)):
         key,pin=driver[node.label];producer=nodes[key];x,y=producer.pins[pin]
         side=producer.sides[pin]

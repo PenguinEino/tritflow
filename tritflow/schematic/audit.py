@@ -1,5 +1,5 @@
 """Independent geometry checks for publication schematic clearances."""
-from collections import Counter
+from collections import Counter,defaultdict
 
 from .model import Segment
 from .rules import PITCH,CLEARANCE,TRUNK_PITCH,PIN_RUN,box,distance,parallel_gap
@@ -59,17 +59,32 @@ def inspect(scene):
         for p in points:
             for w in wires:
                 if w.net!=net and distance((p[0],p[1],p[0],p[1]),box(w))<CLEARANCE:problems.append(('dot_clearance',net,p,w))
-    fanouts=Counter()
+    # One trunk in each routing domain. Reusing a module preserves its own
+    # local operand buses; the parent has one separate bus between boundaries.
+    domains=defaultdict(Counter)
+    framed={m:f.label for f in scene.frames if f.pins for m in f.members}
     for n in scene.symbols:
-        for signal in n.inputs.values():fanouts[signal]+=1
-    expected={s for s,count in fanouts.items() if count>1}
+        domain=next((framed[m] for m in n.members if m in framed),'')
+        for signal in n.inputs.values():domains[domain][signal]+=1
+    for f in scene.frames:
+        for name,signal in f.nets.items():
+            if f.sides[name]=='left':domains[''][signal]+=1
+            else:domains[f.label][signal]+=1
+    expected=Counter()
+    for fanouts in domains.values():expected.update(s for s,count in fanouts.items() if count>1)
     counts=Counter(s.net for s in scene.trunks)
-    if counts!=Counter({s:1 for s in expected}):problems.append(('fanout_trunks',expected,counts))
+    if counts!=expected:problems.append(('fanout_trunks',expected,counts))
+    for frame in scene.frames:
+        for w in scene.interconnect:
+            a,b,c,d=frame.box
+            inside=(a<w.a[0]<c and max(b,w.a[1])<min(d,w.b[1]) if w.a[0]==w.b[0]
+                    else b<w.a[1]<d and max(a,w.a[0])<min(c,w.b[0]))
+            if inside:problems.append(('frame_channel',frame.label,w))
     return problems
 
 
 def counts(scene):
     """Stable review counters without serializing internal geometry objects."""
     result=Counter(p[0] for p in inspect(scene))
-    names=('parallel','trunk_spacing','pin_clearance','pin_jog','pin_run','symbol_clearance','dot_clearance','fanout_trunks')
+    names=('parallel','trunk_spacing','pin_clearance','pin_jog','pin_run','symbol_clearance','dot_clearance','fanout_trunks','frame_channel')
     return {name:result[name] for name in names}

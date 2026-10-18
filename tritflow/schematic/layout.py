@@ -1,6 +1,8 @@
 """Hierarchy boundaries, exact terminal accounting and compact circuit scenes."""
 from __future__ import annotations
 
+import math
+
 from collections import defaultdict, deque
 from collections.abc import Iterable
 
@@ -208,7 +210,7 @@ def _junctions(segments):
     return {s:tuple(points) for s,points in result.items()}
 
 
-def layout(net, expand=None, hierarchy=None):
+def layout(net, expand=None, hierarchy=None, *, _macros=True):
     """Build a compact circuit drawing from public logical connectivity."""
     from .arithmetic import recognize
     from .placement import place
@@ -224,28 +226,43 @@ def layout(net, expand=None, hierarchy=None):
         node.module=supplied.get('module',known.module if known else '')
         reverse={signal:name for name,signal in aliases.items()}
         node.pin_labels={p:reverse.get(signal,signal) for p,signal in {**node.inputs,**node.outputs}.items()}
-    frames,width,height=place(nodes,driver,loads,arithmetic)
-    try:routed,trunks=route(nodes,driver,loads,width,height,frames)
+    from .macros import compose
+    composed=compose(nodes,arithmetic) if _macros else None
+    if composed:
+        outer,driver,loads,frames,local,local_trunks,width,height=composed
+        routing_nodes=outer
+        routing_frames=()
+    else:
+        frames,width,height=place(nodes,driver,loads,arithmetic)
+        routing_nodes=nodes;routing_frames=frames;local=[];local_trunks=[]
+    try:routed,trunks=route(routing_nodes,driver,loads,width,height,routing_frames)
     except ValueError:
         # Dense block fanout can need its branches before the local nets.
         # Retry from an empty routing state, preserving the same clearances.
-        routed,trunks=route(nodes,driver,loads,width,height,frames,fanout_first=True)
-    segments=_merge(routed)
+        routed,trunks=route(routing_nodes,driver,loads,width,height,routing_frames,fanout_first=True)
+    interconnect=_merge(routed) if composed else ()
+    segments=_merge([*local,*routed]);trunks=(*local_trunks,*trunks)
     # Crop the drawing, rather than leaving placement's routing workspace as
     # a large empty margin. Translation keeps pins and every wire unchanged.
     bounds=[n.box for n in nodes.values()]+[f.box for f in frames]
     bounds += [(s.a[0],s.a[1],s.b[0],s.b[1]) for s in segments]
     min_x=min((b[0] for b in bounds),default=0);min_y=min((b[1] for b in bounds),default=0)
-    dx,dy=24-min_x,48-min_y
+    width=max(400,max((b[2] for b in bounds),default=0)-min_x+48)
+    font=12*width/1000
+    header=max(48,8*math.ceil(font*1.5/8))
+    footer=max(40,8*math.ceil(font*1.5/8))
+    dx,dy=24-min_x,header-min_y
     for node in nodes.values():
         node.x+=dx;node.y+=dy
         node.pins={p:(x+dx,y+dy) for p,(x,y) in node.pins.items()}
     segments=tuple(Segment(s.net,(s.a[0]+dx,s.a[1]+dy),(s.b[0]+dx,s.b[1]+dy)) for s in segments)
     trunks=tuple(Segment(s.net,(s.a[0]+dx,s.a[1]+dy),(s.b[0]+dx,s.b[1]+dy)) for s in trunks)
     from .model import Frame
-    frames=tuple(Frame(f.label,(f.box[0]+dx,f.box[1]+dy,f.box[2]+dx,f.box[3]+dy),f.members) for f in frames)
+    frames=tuple(Frame(f.label,(f.box[0]+dx,f.box[1]+dy,f.box[2]+dx,f.box[3]+dy),f.members,
+                       f.module,{p:(q[0]+dx,q[1]+dy) for p,q in f.pins.items()},f.sides,f.nets) for f in frames)
+    interconnect=tuple(Segment(s.net,(s.a[0]+dx,s.a[1]+dy),(s.b[0]+dx,s.b[1]+dy)) for s in interconnect)
     width=max(400,max((b[2] for b in bounds),default=0)+dx+24)
-    height=max((b[3] for b in bounds),default=0)+dy+40
+    height=max((b[3] for b in bounds),default=0)+dy+footer
     visible={s.net for s in segments}
     return Scene(net.top,tuple(nodes.values()),segments,_junctions(segments),tuple(connections),{},width,height,
-                 tuple(sorted(net.nets()-visible,key=natural)),tuple(notes),frames,trunks)
+                 tuple(sorted(net.nets()-visible,key=natural)),tuple(notes),frames,trunks,interconnect)
