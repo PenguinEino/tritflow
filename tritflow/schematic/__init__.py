@@ -93,7 +93,7 @@ class Schematic:
 
     @property
     def metrics(self):
-        """Drawing wire length, bends, crossings and rendered canvas aspect."""
+        """Drawing length/bends/crossings, canvas aspect and clearance audits."""
         from .metrics import measure
         result=measure(self.scene)
         vector=self._vector()

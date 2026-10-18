@@ -59,6 +59,7 @@ def measure(scene):
             if h.a[0]<v.a[0]<h.b[0] and v.a[1]<h.a[1]<v.b[1]:
                 crossings.add((min(h.net,v.net),max(h.net,v.net),v.a[0],h.a[1]))
     bends=[n['bends'] for n in by_net.values()]
+    from .audit import counts
     return {'wire_length_px':sum(n['wire_length_px'] for n in by_net.values()),
             'bends_total':sum(bends),'bends_per_net_mean':sum(bends)/max(1,len(bends)),
             'bends_per_net_max':max(bends,default=0),'nets_over_two_bends':sum(n>2 for n in bends),
@@ -67,4 +68,5 @@ def measure(scene):
             'symbol_edge_runs':sum(_edge_run(s,n.box) for s in scene.segments for n in scene.symbols),
             'rotated_gates':sum(n.orient!='right' for n in scene.symbols
                                 if n.kind not in {'input','output','block'}),
+            'clearance_violations':counts(scene),
             'width_px':scene.width,'height_px':scene.height,'nets':by_net}

@@ -12,6 +12,16 @@ def _rect(v,x,y,w,h,**style):
     v.path([('M',x,y),('L',x+w,y),('L',x+w,y+h),('L',x,y+h),('Z',)],**style)
 
 
+def _anonymous(name):
+    return name.startswith('_n') and name[2:].isdigit()
+
+
+def _wire_name(node,pin,signal,ports):
+    if signal in ports:return signal
+    label=node.pin_labels.get(pin,pin)
+    return f'{node.label}.{pin if _anonymous(label) else label}'
+
+
 def gate(v,kind,cx,cy):
     """Draw a 64x48 body; bubbles mean arithmetic sign reversal in ternary."""
     left,right = cx-32,cx+24
@@ -51,6 +61,7 @@ def _symbol(v,node):
         for pin,signal in {**node.inputs,**node.outputs}.items():
             px,py=node.pins[pin];side=node.sides[pin]
             label=node.pin_labels.get(pin,signal)
+            if _anonymous(label):label=('in ' if pin in node.inputs else 'out ')+str(list(node.inputs if pin in node.inputs else node.outputs).index(pin)+1)
             if side=='left':
                 v.line((px,py),(px+8,py));v.text(px+12,py+3,label,size=10)
             elif side=='right':
@@ -110,15 +121,19 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
     """Paint an existing scene; geometry does not depend on any overlay."""
     caps = caps or {}
     title = scene.top if title is None else title
-    visible=sorted({s.net for s in scene.segments},key=natural)
-    annotated=values is not None or caps or net_names
-    columns=max(1,scene.width//240)
+    ports={c.net for c in scene.connections if c.endpoint.startswith('port:')}
+    visible=sorted(ports&{s.net for s in scene.segments},key=natural)
+    visible=[n for n in visible if values is not None or n in caps]
+    annotated=bool(visible)
+    columns=max(1,min(len(visible),scene.width//192))
     rows=math.ceil(len(visible)/columns) if annotated else 0
-    extra=48+rows*18 if annotated else 0
+    extra=32+rows*18+(20 if caps else 0) if annotated else 0
     v = Vector(scene.width,scene.height+extra)
-    v.text(48,32,title,size=16,weight='bold')
+    v.net_labels={signal:_wire_name(n,p,signal,ports)
+                  for n in scene.symbols for p,signal in n.outputs.items()}
+    v.text(24,20,title,size=12,weight='bold')
     gates=sum(len(n.members) for n in scene.symbols)
-    v.text(48,52,f'{gates} synthesized cells',size=10.6667,color=SECONDARY)
+    v.text(scene.width-24,20,f'{gates} cells',size=9,color=SECONDARY,anchor='end')
     for frame in scene.frames:
         x0,y0,x1,y1=frame.box
         _rect(v,x0,y0,x1-x0,y1-y0,stroke='#c3c2b7',fill='#fafaf8',width=.8)
@@ -148,22 +163,35 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
             v.circle(x,y,2.4+width*.2,fill=color,stroke=color,width=0,net=signal)
     for node in scene.symbols:
         _symbol(v,node)
-    footer=scene.height-24
-    v.text(48,footer,'• Connected branch    Crossing gaps: no connection',size=10,color=SECONDARY)
+    footer=scene.height-16
+    if scene.junctions:
+        v.line((24,footer-3),(48,footer-3),width=1.2)
+        v.line((36,footer-11),(36,footer-3),width=1.2)
+        v.circle(36,footer-3,2.4,fill=INK,stroke=INK,width=0)
+        v.text(56,footer,'Branch',size=9,color=SECONDARY)
+    if any(h.net!=s.net and h.a[1]==h.b[1] and s.a[0]==s.b[0]
+           and h.a[0]<s.a[0]<h.b[0] and s.a[1]<h.a[1]<s.b[1]
+           for h in horizontal for s in vertical):
+        v.line((144,footer-11),(144,footer+5),width=1.2)
+        v.line((132,footer-3),(156,footer-3),stroke='white',width=5)
+        v.line((132,footer-3),(156,footer-3),width=1.2)
+        v.text(164,footer,'Crossing: no connection',size=9,color=SECONDARY)
     if annotated:
-        baseline=scene.height+4
-        v.text(48,baseline,'Net / settled trit / routed wire C',size=11,weight='bold')
-        cell_width=(scene.width-96)/columns
+        baseline=scene.height+8
+        heading='Port values' if values is not None else 'Port wire C'
+        if values is not None and caps:heading+=' / wire C'
+        v.text(24,baseline,heading,size=10,weight='bold')
+        cell_width=(scene.width-48)/columns
         for k,signal in enumerate(visible):
             col=k//max(1,rows);row=k%max(1,rows)
-            x=48+col*cell_width;y=baseline+22+row*18
-            parts=[signal] if net_names or caps else []
+            x=24+col*cell_width;y=baseline+20+row*18
+            parts=[signal]
             if values is not None:parts.append({-1:'−1',0:'0',1:'+1'}[values[signal]])
             if signal in caps:parts.append(f'{caps[signal]*1e15:.1f} fF')
             color,width=styles[signal]
             v.line((x,y-4),(x+16,y-4),stroke=color,width=width)
             v.text(x+24,y,'   '.join(parts),size=10,color=color)
-        if caps:v.text(48,v.height-10,'Wire C is an estimated lumped parasitic; darker / thicker = more C.',size=10,color=SECONDARY)
+        if caps:v.text(24,v.height-8,'Estimated wire C (fF); darker / thicker = more C.',size=9,color=SECONDARY)
     return v
 
 
@@ -173,5 +201,6 @@ def metadata(scene,values,caps):
             'symbols':[{'key':n.key,'kind':n.kind,'members':list(n.members),
                         'module':n.module,'pin_labels':n.pin_labels} for n in scene.symbols],
             'frames':[asdict(f) for f in scene.frames],
+            'trunks':[asdict(t) for t in scene.trunks],
             'hidden_nets':list(scene.hidden_nets),'notes':list(scene.notes),
             'values':values,'capacitance_f':caps}
