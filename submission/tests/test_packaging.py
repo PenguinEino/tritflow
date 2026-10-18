@@ -149,7 +149,7 @@ def test_public_schematic_svg_gets_saved_png_fallback():
 
 def test_colab_verification_note_states_the_latest_first_run_pass():
     note=builder.run_note()
-    assert ' s including setup' in note and '34 code cells' in note
+    assert ' s including setup' in note and 'code cells completed' in note
     assert builder.COLAB_EVIDENCE['first_attempt_completed'] is True
     text=builder.release_notice({"default_ref":"colab-v0","commit":"a"*40})
     assert "TODO" not in text and "predates" not in text
