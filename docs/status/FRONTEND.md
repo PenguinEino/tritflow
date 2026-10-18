@@ -1,6 +1,6 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 12: Colab round-3 fixes implemented; fresh execution/package validation in progress.**
+Updated: 2026-10-18. **Phase 12 complete: Colab round-3 fixes, fresh native/default captures and submission rebuild.**
 
 ## Phase 12 — Colab round-3 presentation and evidence repair
 
@@ -29,7 +29,7 @@ Updated: 2026-10-18. **Phase 12: Colab round-3 fixes implemented; fresh executio
   no current Colab verification. A new successful real-Colab run and explicit
   promotion are required before adding a verified-run note.
 
-### Phase 12 validation in progress
+### Phase 12 validation and runtime
 
 - **285 tests passed** in 26.98 s (HDL, synthesis, viz, notebook and submission;
   packaged-payload check excluded until rebuild). After the final prose edit,
@@ -41,13 +41,66 @@ Updated: 2026-10-18. **Phase 12: Colab round-3 fixes implemented; fresh executio
   real-Colab verification**. Evidence under `/tmp/tritflow-phase12-preview/`
   (`results.json`, `math.png`, `sizing.png`, `scope.png`). Temporary pinned
   MathJax/marked browser scripts were downloaded there; no packages installed.
-- Full native capture, fresh default capture and saved-output submission
-  rebuild are running; final runtimes and payload counts will be recorded here.
+- **All 18 code cells pass** in both fresh captures with empty build/cache
+  directories: default **70.76 s**; forced native notebook-stage
+  recomputation **398.27 s**. Times include the local kernel, setup
+  checks and plotting, but exclude tool installation and final packaging.
+  They are not Colab times. Default stage records prove opening/INV DC/paired
+  adder simulation/edited sorter were calculated; only the four-design matrix
+  was read as recorded evidence. Forced native records show all nine cached
+  stages freshly ran; published cell/sizing/width/load datasets stay explicitly
+  precomputed in either mode.
+- Runtime comes mainly from ngspice: default opening 29.71 s, paired adder
+  comparison 27.73 s, custom circuit 8.36 s; full native four-design matrix
+  330.24 s. These are nbclient cell intervals. Adder4's producer phases were
+  P&R+DRC 18.99 s, strict LVS 0.82 s, pre/post ngspice 56.14/56.56 s.
+- Refreshed `notebook/assets/four_designs.zip` from the completed native capture:
+  **4,727,165 bytes, 4 designs, 54 native files**, with source/PDK/native hashes
+  verified by the publisher. No manual rekey or inherited PASS flags.
+- Rebuilt payload: **8 files / 5,241,738 bytes**, **18 executed
+  code cells, 67 saved outputs, 8 embedded paper PNGs, 7 live PNGs and
+  25 HTML tables**; no errors or warning streams. LICENSE and NOTICE
+  exactly match the root files. `colab_verified=false`,
+  `captured_revision_colab_verified=false`, `colab_verification=null`.
+  Source SHA-256: `fb39cbdc4f585d88d6506562edb5ee5a8ddad99b5b0e024801c5074512ab856e`.
+- Final presentation/packaging regressions: **16 passed**. Builder `--check`,
+  source validation (33 cells, chapters 0–9) and `git diff --check` pass.
+  Complete regressions against the captured narrative/source snapshot:
+  **286 passed in 29.30 s**, including the actual payload check. This snapshot
+  is `/tmp/tritflow-phase12-matched-fj5bxcq_` (committed source at `505626a`, new archive/payload overlaid).
+
+Reproduction (matching captured narrative; pinned PDK/tools installed):
+
+```sh
+# Integrate pending narrative fields first if using the newer EDITOR draft.
+python3 notebook/paper_evidence.py --refresh-presentation
+python3 notebook/make_notebook.py
+TRITFLOW_FORCE_RUN=1 python3 submission/build_submission.py --workdir /tmp/tritflow-submission-phase12/native --timeout 1800
+PYTHONPATH=. python3 notebook/campaign.py /tmp/tritflow-submission-phase12/native/flow/cache
+python3 submission/build_submission.py --workdir /tmp/tritflow-submission-phase12/default --timeout 1800
+python3 submission/build_submission.py --check
+```
+
+Raw evidence: `/tmp/tritflow-submission-phase12/{native,default}/executed.raw.ipynb`;
+logs `/tmp/tritflow-phase12-{native,default,archive,package-check,final-targeted,matched-tests}.log`.
+The source notebook remains output-free; the compact submission contains the
+saved reading copy. No older verified-runtime statement appears in either.
 
 ### Phase 12 handoff / interface requests
 
 - Release matching notebook/helpers/evidence at `colab-v0` (or the selected
   `TRITFLOW_REF`) before the next real-Colab round. Bootstrap is unchanged.
+- Concurrent EDITOR phase-3 draft changes arrived after the captured narrative
+  snapshot. They add routing-realization placeholders and sizing endpoints not
+  implemented in the phase-12 generator/context. They were neither edited nor
+  silently incorporated into this tested notebook. The captured notebook's
+  `narrative_sha256` identifies the exact matching text. Its complete tests run
+  in a temporary `git archive` export with the new archive/payload overlaid,
+  so the reproducibility test cannot overwrite the captured source from an
+  unrelated in-progress draft. Integrate that new handoff separately, including
+  the requested portable paper seed/GDS identity fields and per-row run labels,
+  before regenerating against the phase-3 narrative. The two timed captures and
+  submission share the exact source SHA above.
 - Figure owner: the committed `fig_sizing.png` itself clips the end of the
   rightmost panel's x-axis label. The responsive notebook now fits the complete
   image within the column; source figure margins/label wrapping need a separate
