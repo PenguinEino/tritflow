@@ -51,6 +51,37 @@ def publish(stage, *, reason):
                 raise ValueError(f'Stale characterization for {name}')
     timestamp=datetime.now(timezone.utc).isoformat()
     generation={'id':timestamp,'reason':reason,'height_um':json.loads((stage/'template.json').read_text())['height']}
+    timings=[stage/e['name']/f'{e["name"]}.timing.json' for e in entries]
+    if any(p.exists() for p in timings):
+        if not all(p.exists() for p in timings):raise ValueError('Timing publication requires all nine cell tables')
+        for entry,path in zip(entries,timings):
+            name=entry['name'];timing=json.loads(path.read_text())
+            digest=hashlib.sha256((stage/name/f'{name}.ext.spice').read_bytes()).hexdigest()
+            if not timing['complete'] or timing['source_sha256']!=digest:
+                raise ValueError(f'Incomplete/stale timing table for {name}')
+            timing['generation']=generation
+            path.write_text(json.dumps(timing,indent=2,allow_nan=False)+'\n')
+            entry['timing']=str(path.relative_to(stage))
+            for suffix in ('poly.json','poly.timing.json'):
+                extra=stage/name/f'{name}.{suffix}'
+                if extra.exists():
+                    evidence=json.loads(extra.read_text())
+                    if evidence['source_sha256']!=digest:
+                        raise ValueError(f'Stale poly evidence for {name}')
+                    if evidence['annotated_sha256']!=hashlib.sha256((stage/name/f'{name}.poly.spice').read_bytes()).hexdigest():
+                        raise ValueError(f'Stale poly annotation for {name}')
+                    evidence['generation']=generation
+                    extra.write_text(json.dumps(evidence,indent=2,allow_nan=False)+'\n')
+        (stage/'library.json').write_text(json.dumps(entries,indent=2)+'\n')
+        timing_report=json.loads((stage/'timing_report.json').read_text())
+        timing_report['generation']=generation
+        for name in timing_report['cells']:
+            timing_report['cells'][name]['timing_sha256']=hashlib.sha256((stage/name/f'{name}.timing.json').read_bytes()).hexdigest()
+        (stage/'timing_report.json').write_text(json.dumps(timing_report,indent=2,allow_nan=False)+'\n')
+        poly_summary=stage/'poly_timing_report.json'
+        if poly_summary.exists():
+            value=json.loads(poly_summary.read_text());value['generation']=generation
+            poly_summary.write_text(json.dumps(value,indent=2,allow_nan=False)+'\n')
     (stage/'generation.json').write_text(json.dumps(generation,indent=2)+'\n')
     evidence=stage/'equivalence_report.json'
     if evidence.exists():
@@ -96,6 +127,8 @@ def qualified_build(out, names=None):
     build(stage)
     if not verify(stage)['passed']:raise RuntimeError(f'Qualification failed: {stage}')
     characterize(stage)
+    from .timing import characterize_all
+    if not characterize_all(stage)['complete']:raise RuntimeError(f'Timing characterization incomplete: {stage}')
     result=publish(stage,reason='Compact complete-library rebuild')
     shutil.rmtree(stage)  # old generation; the exchange already made the new one live
     return result

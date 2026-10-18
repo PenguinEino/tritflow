@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from itertools import product
+import math
 
 from tritflow import TRIT_VOLTS, VDD, VMID, VSS
 from .runner import run_ngspice, SimulationError
@@ -36,13 +37,22 @@ def build_testbench(subckts: str, top: str, inputs: list[str], outputs: list[str
                     vectors, *, hold_s: float = 200e-9, edge_s: float = 1e-9,
                     step_s: float = 0.5e-9, loads_f: float | dict = 10e-15,
                     nodeset: dict | None = None, initial_outputs: dict | None = None,
-                    pdk=None, temperature_c: float = 27) -> dict:
+                    pdk=None, temperature_c: float = 27, supplies_v: dict | None = None) -> dict:
     """Drive any subckt by its declared pins; input vectors contain trits, not volts.
 
     Edges begin at k*hold_s. Outputs and optional hierarchical internal nodes get
     .nodeset initial guesses, never .ic/uic constraints on the transient solution.
     """
     vectors = [tuple(row) for row in vectors]
+    supplies = {'VDD':VDD,'VMID':VMID,'VSS':VSS}
+    if supplies_v is not None:
+        if set(supplies_v)-supplies.keys():raise ValueError('Unknown supply rail')
+        supplies.update(supplies_v)
+    if (any(isinstance(v,bool) or not isinstance(v,(int,float)) or not math.isfinite(v) for v in supplies.values())
+            or not supplies['VDD']>supplies['VMID']>supplies['VSS']
+            or not math.isfinite(temperature_c) or temperature_c<=-273.15):
+        raise ValueError('Require finite ordered supply rails and physical temperature')
+    trit_volts={-1:supplies['VSS'],0:supplies['VMID'],1:supplies['VDD']}
     if not vectors or any(len(row) != len(inputs) or any(v not in TRIT_VOLTS for v in row) for row in vectors):
         raise ValueError('Input vectors must contain one valid trit per input')
     if not (0 < step_s <= hold_s and 0 < edge_s < hold_s - 1e-9):
@@ -61,13 +71,13 @@ def build_testbench(subckts: str, top: str, inputs: list[str], outputs: list[str
     models = model_includes() if pdk is None else model_includes(pdk)
     lines = ['TritFlow ternary testbench', models, simulation_netlist(subckts),
              f'.temp {temperature_c:g}', '.options rshunt=1e12',
-             f'VDD VDD 0 {VDD:g}', f'VMID VMID 0 {VMID:g}', f'VSS VSS 0 {VSS:g}',
+             *(f'{rail} {rail} 0 {value:g}' for rail,value in supplies.items()),
              'Xdut ' + ' '.join(pins) + f' {top}']
     for col, pin in enumerate(inputs):
-        points = [f'0 {TRIT_VOLTS[vectors[0][col]]:g}']
+        points = [f'0 {trit_volts[vectors[0][col]]:g}']
         for k in range(1, len(vectors)):
-            points.extend([f'{k * hold_s:.15g} {TRIT_VOLTS[vectors[k-1][col]]:g}',
-                           f'{k * hold_s + edge_s:.15g} {TRIT_VOLTS[vectors[k][col]]:g}'])
+            points.extend([f'{k * hold_s:.15g} {trit_volts[vectors[k-1][col]]:g}',
+                           f'{k * hold_s + edge_s:.15g} {trit_volts[vectors[k][col]]:g}'])
         lines.append(f'Vin{col} {pin} 0 PWL(' + ' '.join(points) + ')')
     for i, pin in enumerate(outputs):
         load = loads_f.get(pin, 0) if isinstance(loads_f, dict) else loads_f
@@ -75,14 +85,14 @@ def build_testbench(subckts: str, top: str, inputs: list[str], outputs: list[str
             raise ValueError('Load capacitance cannot be negative')
         if load:
             lines.append(f'Cload{i} {pin} 0 {load:.15g}')
-    guesses = {pin: TRIT_VOLTS[(initial_outputs or {}).get(pin, 0)] for pin in outputs}
+    guesses = {pin: trit_volts[(initial_outputs or {}).get(pin, 0)] for pin in outputs}
     guesses.update(nodeset or {})
     for pin, voltage in guesses.items():
         lines.append(f'.nodeset v({pin})={voltage:.15g}')
     probes = [f'v({p})' for p in inputs + outputs] + ['i(vdd)', 'i(vmid)', 'i(vss)']
     return dict(netlist='\n'.join(lines), commands=f'tran {step_s:.15g} {len(vectors)*hold_s:.15g} 0 {step_s:.15g}',
                 probes=probes, vectors=vectors, inputs=inputs, outputs=outputs,
-                hold_s=hold_s, edge_s=edge_s, step_s=step_s)
+                hold_s=hold_s, edge_s=edge_s, step_s=step_s,supplies_v=supplies,temperature_c=temperature_c)
 
 
 def simulate(subckts: str, top: str, inputs: list[str], outputs: list[str], vectors,

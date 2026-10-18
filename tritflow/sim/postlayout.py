@@ -127,24 +127,30 @@ def prepare_prelayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=
 
 
 def _simulate_cached_unlocked(out, mode, circuit, top, inputs, outputs, vectors, expected, *,
-                     hold_s, step_s, load_f, timeout):
+                     hold_s, step_s, load_f, timeout, temperature_c=27, supplies_v=None,nodeset=None):
     """Reuse a completed identical electrical experiment when only metadata changed."""
     folder=out/mode;folder.mkdir(exist_ok=True)
     configuration={'circuit':circuit,'top':top,'inputs':inputs,'outputs':outputs,
                    'vectors':vectors,'expected':[expected(v) for v in vectors],
                    'hold_s':hold_s,'step_s':step_s,'load_f':load_f,
                    'models':{p.name:file_hash(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}}
+    options={}
+    if temperature_c!=27:options['temperature_c']=temperature_c
+    if supplies_v is not None:options['supplies_v']=supplies_v
+    if nodeset is not None:options['nodeset']=nodeset
+    configuration.update(options)
     digest=hashlib.sha256(json.dumps(configuration,sort_keys=True).encode()).hexdigest()
     manifest=folder/'simulation.json'
     if all((folder/name).is_file() for name in ('simulation.json','waveforms.npz','measurements.json')) and json.loads(manifest.read_text()).get('sha256')==digest:
         with np.load(folder/'waveforms.npz') as data: waveforms={k:data[k] for k in data.files}
-        bench=build_testbench(circuit,top,inputs,outputs,vectors,hold_s=hold_s,step_s=step_s,loads_f=load_f)
+        bench=build_testbench(circuit,top,inputs,outputs,vectors,hold_s=hold_s,step_s=step_s,loads_f=load_f,
+                              initial_outputs=expected(vectors[0]),**options)
         from .measure import measure_sequence
         measured=measure_sequence(waveforms,bench,expected)
         _save(folder/'measurements.json',measured)
         return {'waveforms':waveforms,'stimulus':bench,'measurements':measured,'cached':True}
     result=simulate(circuit,top,inputs,outputs,vectors,expected,hold_s=hold_s,step_s=step_s,
-                    loads_f=load_f,timeout=timeout,workdir=folder)
+                    loads_f=load_f,timeout=timeout,workdir=folder,**options)
     _save(folder/'measurements.json',result['measurements'])
     np.savez_compressed(folder/'waveforms.npz',**result['waveforms'])
     _save(manifest,{'sha256':digest})

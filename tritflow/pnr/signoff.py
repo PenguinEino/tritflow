@@ -81,6 +81,21 @@ def _layout_audit(path, top):
         "frame_cells": [c.name for c in layout.each_cell() if c.name in ("OSS_FRAME", "OSS_FRAME_TEG")]}
 
 
+def _metal_preservation(drawing, mask, top):
+    """MDP must preserve contacts and routed conductors as exact regions."""
+    before, after = db.Layout(), db.Layout()
+    before.read(str(drawing)); after.read(str(mask))
+    if before.dbu != after.dbu:
+        return {"clean": False, "error": "MDP changed the database unit"}
+    differences = {}
+    for name, layer in (("CO", 11), ("M1", 13), ("V1", 19), ("M2", 20)):
+        a = db.Region(before.cell(top).begin_shapes_rec(before.layer(layer, 0)))
+        b = db.Region(after.cell(top).begin_shapes_rec(after.layer(layer, 0)))
+        differences[name] = (a ^ b).area()*before.dbu**2
+    return {"clean": all(area == 0 for area in differences.values()),
+            "xor_area_um2": differences, "method": "independent flattened Region XOR"}
+
+
 def _floating_gates(mask, report_path, data, netlist, library):
     """Trace WAR06 SG islands through real contacts/M1/V1/M2 to named nets.
 
@@ -223,7 +238,8 @@ def signoff(result, netlist=None, library=None, *, output_dir=None, pdk_root=PDK
         "-rd", f"cellname={top}", "-rd", f"output={mask}"], run_dir, "mdp", timeout)
     if mdp["exit_code"] or not mask.exists():
         raise RuntimeError(f"MDP failed to generate mask GDS; inspect {mdp['log_path']}")
-    mdp.update(completed=True, output_path=str(mask), output_sha256=_hash(mask))
+    mdp.update(completed=True, output_path=str(mask), output_sha256=_hash(mask),
+               metal_preservation=_metal_preservation(drawing, mask, top))
     mask_check = _drc(binary, snapshot/"drc/run_IP62.drc", mask, top, run_dir, "mask_drc", timeout)
     audit = _layout_audit(drawing, top)
     mask_audit = _layout_audit(mask, top)
@@ -236,6 +252,7 @@ def signoff(result, netlist=None, library=None, *, output_dir=None, pdk_root=PDK
                         template_path=str(template), expected_bbox_um=[-1250., -1250., 1250., 1250.],
                         frame_present=bool(audit["frame_cells"]))
     clean = (drawing_check["clean"] and drawing_lvs["matched"] and mask_check["clean"]
+             and mdp["metal_preservation"]["clean"]
              and all(c["clean"] for c in own.values()) and audit["waiver_polygon_count"] == 0
              and mask_audit["waiver_polygon_count"] == 0)
     stable = all(_hash(path) == digest for path, digest in inputs.items())

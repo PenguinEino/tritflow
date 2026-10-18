@@ -29,6 +29,8 @@ def test_real_input_gate_warnings_fail_and_verified_cache_is_reused(tmp_path, mo
     assert not report["clean"] and not report["submission_ready"]
     assert report["drawing_drc"]["clean"] and report["drawing_lvs"]["matched"]
     assert report["mdp"]["completed"]
+    assert report["mdp"]["metal_preservation"]["clean"]
+    assert not any(report["mdp"]["metal_preservation"]["xor_area_um2"].values())
     assert set(report["mask_drc"]["categories"]) == {"WAR06: Floating SG Detected"}
     count = report["mask_drc"]["violations"]
     assert count > 0
