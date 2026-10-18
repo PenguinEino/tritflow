@@ -99,3 +99,17 @@ def value_selector(net):
                                   'frame':{'duration':0,'redraw':True},'transition':{'duration':0}}]}
                               for i,v in enumerate(choices)],'x':0,'y':1.08}])
     return figure
+
+
+def highlight_devices(mapping, devices, *, title):
+    """Outline the named schematic devices on the cell layout; returns the figure.
+
+    These are LVS-matched device outlines, not a simulated current-density map.
+    """
+    assert set(devices) <= {r['name'] for r in mapping.rows}
+    for trace in mapping.figure.data:
+        meta = trace.meta or {}
+        if meta.get('kind') == 'device' and meta.get('device') in devices:
+            trace.update(line={'color':'#d13c28','width':4},opacity=1)
+    mapping.figure.update_layout(title=title)
+    return mapping.figure

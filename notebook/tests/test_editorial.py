@@ -67,14 +67,24 @@ def test_static_context_and_embedded_figures_have_no_unresolved_results():
     intro = document['cells'][0]['source']
     assert 'Japan' in intro and 'taped out' in intro and 'mW' in intro and 'Open in Colab' in intro
     assert intro.index('data:image/png;base64,') < intro.index('<summary>Author')
-    assert sum(c['source'].count('data:image/png;base64,') for c in document['cells']) == 8
+    assert sum(c['source'].count('data:image/png;base64,') for c in document['cells']) == 9
     markdown = '\n'.join(c['source'] for c in document['cells'] if c['cell_type']=='markdown')
     assert '## Appendix A.' in markdown and not TOKEN.search(markdown)
-    edit = next(c for c in document['cells'] if c['id'] == 'edit')
+    cells = {c['id']:c for c in document['cells']}
+    edit = cells['method-edit']
     assert 'source = """module minmax' in edit['source'] and not edit['metadata'].get('jupyter',{}).get('source_hidden')
-    custom = next(c['source'] for c in document['cells'] if c['id'] == 'custom')
-    assert 'custom.schematic(' in custom and 'render_gds(custom_layout.gds_path' in custom
-    assert 'custom_result' in custom and 'oracle(vector)' in custom
+    order = [c['id'] for c in document['cells']]
+    # The reader's edit is synthesized and checked against the oracle before any physical work.
+    assert order.index('method-custom') < order.index('custom_check') < order.index('method-custom_layout') < order.index('custom')
+    assert 'custom.schematic(' in cells['method-custom']['source']
+    assert 'render_gds(custom_lay.gds_path' in cells['method-custom_layout']['source']
+    assert 'oracle(vector)' in cells['custom_check']['source'] and 'custom_result' in cells['custom']['source']
+    # Visible method cells stay short; checks live in collapsed form cells.
+    for c in document['cells']:
+        if c['cell_type'] == 'code' and c['id'].startswith('method-'):
+            assert len(c['source'].strip().splitlines()) <= 14, c['id']
+        elif c['cell_type'] == 'code':
+            assert c['metadata'].get('cellView') == 'form' and c['source'].startswith('#@title'), c['id']
 
 
 def test_failed_reader_edit_reports_the_arithmetic_counterexample_before_routing(tmp_path):
@@ -86,6 +96,8 @@ def test_failed_reader_edit_reports_the_arithmetic_counterexample_before_routing
     namespace = {'example':DESIGNS['minmax'],'source':
         'module minmax(input trit a,b,output trit lo,hi); assign lo=a|b; assign hi=a|b; endmodule',
         'BUILD':tmp_path,'load_edited':load_edited,'evaluate_netlist':evaluate_netlist}
-    before_physical = stages.CUSTOM.split('details_html(',1)[0]
+    exec('custom_circuit = load_edited(example, source, BUILD/"src"/example.top)\n'
+         'custom = custom_circuit.synthesize()\n',namespace)
+    before_physical = stages.CUSTOM_CHECK.split('details_html(',1)[0]
     with pytest.raises(AssertionError,match='Independent reference disagreement at.*expected.*HDL.*cells'):
         exec(before_physical,namespace)

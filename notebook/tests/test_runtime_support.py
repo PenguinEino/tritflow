@@ -67,7 +67,8 @@ def test_failed_rerun_blocks_stale_downstream_results():
 def test_every_chapter_cell_without_setup_fails_with_recovery_not_nameerror():
     document=json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())
     code=[c for c in document["cells"] if c["cell_type"] == "code"]
-    for cell in code[1:]:
+    # Tracked (collapsed) chapter cells guard themselves; visible method cells are plain API code.
+    for cell in [c for c in code[1:] if "tritflow" in c["metadata"] or c["id"] == "imports"]:
         with pytest.raises(RuntimeError,match="setup.*(successfully|restart)"):
             exec(compile(cell["source"],cell["id"],"exec"),{})
 
@@ -76,8 +77,9 @@ def test_physical_views_reject_partial_opening_globals_before_any_work():
     document=json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())
     code=[c for c in document["cells"] if c["cell_type"] == "code"]
     titles={c["id"]:c.get("metadata",{}).get("tritflow",{}).get("title",c["id"]) for c in code}
-    views=[c for c in code if 'Full physical statistics' in c["source"] or 'pre = cache.run("adder2-pre"' in c["source"]]
-    assert len(views) == 2
+    views=[c for c in code if "opening" in c.get("metadata",{}).get("tritflow",{}).get("requires",[])
+           and c["id"] != "final"]
+    assert {c["id"] for c in views} == {"pnr","pre","sta"}
     for cell in views:
         namespace={"_tf_cells":runtime.CellState(titles),"lay":object(),"demo":{"partial":True}}
         with pytest.raises(RuntimeError,match="first run Chapter 0"):

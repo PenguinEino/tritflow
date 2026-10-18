@@ -155,4 +155,30 @@ def context(root):
     put('paper_post',states=p['states'],hold_ns=p['hold_s']*1e9,load_ff=p['load_f']*1e15,
         pre_sum_ns=p['pre_sum_s']*1e9,post_sum_ns=p['post_sum_s']*1e9,
         run_id=routing_label(p['routing']))
+    # Static timing: recorded validation against post-layout SPICE (matched transitions).
+    sta = json.loads((root/'results/sta/validation.json').read_text())
+    matched = sta['statistics']['sim_endpoint_pairs']
+    outliers = sta['outside_accuracy_target']
+    assert len(outliers) == 1, 'the narrative names a single STA exception'
+    groups = {}
+    for design in sta['designs']:
+        groups.setdefault(design['group'],[]).append(design['design'])
+    put('sta',within_target=sta['outputs_within_target'],output_count=matched['count'],
+        target_pct=sta['accuracy_target_percent'],mape_pct=matched['mean_absolute_percent_error'],
+        outlier_endpoint=f"{outliers[0]['design']}/{outliers[0]['output']}",
+        outlier_error_pct=outliers[0]['error_percent'],
+        bound_mean_factor=sta['worst_case_validation']['pessimism_vs_output_maxima']['mean_factor'],
+        run_ids='; '.join(f"STA {group}: {', '.join(names)}" for group,names in groups.items()))
+    # Shuttle-ready top: committed snapshot of the recorded to_chip()/signoff() run.
+    chip = json.loads((root/'notebook/assets/chip/adder4/signoff.json').read_text())
+    assert chip['drawing_drc']['clean'] and chip['mask_drc']['clean']
+    assert chip['drawing_lvs']['matched'] and chip['drawing_lvs']['strict_ports']
+    put('chip',die_um=dimensions(chip['die_um']),pad_count=chip['pad_count'],
+        drawing_drc_items=chip['drawing_drc']['violations'],lvs_status='Match',
+        mask_drc_items=chip['mask_drc']['violations'],
+        precheck_status='Pass' if chip['mpw_precheck']['clean'] and chip['mpw_precheck']['exit_code'] == 0 else 'Fail',
+        submission_ready=str(chip['submission_ready']).lower())
+    # The public release tag serves both the Colab launch and pip installs.
+    put('reuse',source_ref='colab-v0')
+    put('release',colab_url='https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb')
     return values
