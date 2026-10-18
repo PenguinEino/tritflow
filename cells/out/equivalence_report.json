@@ -45884,11 +45884,17 @@
     "explanation": "Generic MOS-polarity guesses can converge to a nonphysical root in both networks. Deep NANY cascades now use unconstrained single-cell operating-point values as .nodeset initial guesses. No IC/uic or device changes.",
     "mixed_chain_initialization": "Applying homogeneous-NANY initialization to the mixed chain also causes a nonphysical root; the original mixed-chain initial-guess policy is retained. Both original and compact cases show the same effect."
   },
-  "updated_utc": "2026-10-18T08:07:34.359407+00:00",
+  "updated_utc": "2026-10-18T08:22:49.239261+00:00",
   "initialization": "Unconstrained .nodeset guesses. The homogeneous six-stage NANY stress test uses separately solved single-cell DC operating points; original mixed-chain and other protocols retain their original connectivity-derived guesses. No .ic/uic or device changes.",
   "runner_sha256": {
     "reference.py": "393942af46ffb3290f337cf37b63a758361a2530beac414a01ac6984850c8f8b",
     "regression.py": "0c401c53de8982d6d37d051219f9fc82f1aa16acbaf865627c089f221b3cc67a",
     "equivalence.py": "f0bab1afa8258d7460bc2bd83decccea4e9e8cb5d286637456b0874f1b218b6d"
+  },
+  "validation": {
+    "command": "python3 -m pytest tests/cells -q",
+    "passed": 16,
+    "duration_s": 504.21,
+    "scope": "Independent private rebuild; full official DRC/LVS/DC, source equivalence, original/compact transient/cascade protocols and pin-access checks"
   }
 }

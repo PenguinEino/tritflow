@@ -83,10 +83,10 @@ def main(argv=None):
     package = package_for(version, args.arch or platform.machine())
     source, prefix = args.source.resolve(), args.prefix.expanduser().resolve()
     if not (source/"pyproject.toml").is_file():
-        raise FileNotFoundError("provide --source with the TritFlow checkout; no publication URL is configured yet")
+        raise FileNotFoundError("provide --source with the complete TritFlow git checkout")
     for name in ["cells/template.json", "cells/out/library.json", "cells/out/all.spice", "examples/adder.tv"]:
         if not (source/name).is_file():
-            raise FileNotFoundError(f"source archive must include published cell/example assets: {name}")
+            raise FileNotFoundError(f"source checkout must include committed cell/example assets: {name}")
     revision = PINS["pdk_commit"]
     pdk = prefix/f"TR-1um-{revision}"
     url = f"https://codeload.github.com/OpenSUSI/TR-1um/tar.gz/{revision}"

@@ -58,29 +58,41 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
                 value if rail != "VMID" or cell.name == "NANY" else 0.)
     if not all(math.isfinite(v) for values in rail_currents.values() for v in values.values()):
         raise ValueError("Non-finite characterized rail current")
-    total = sum(currents.values())
-    # Each side supplies half the worst-case total current.
-    required = max(6., total / (2 * current_density_a_per_um))
-    count = math.ceil(required / 42.)
-    width = math.ceil(max(6., required/count) * 10) / 10
-    pitch = library.template["grid"]
-    stride = math.ceil((width + 3.) / pitch) * pitch
-    bank = 3 * count * stride
-    margin = math.ceil((bank + 4*pitch) / pitch) * pitch
-    for row in {pl["row"] for pl in placements}:
-        load = sum(currents[pl["inst"]] for pl in placements if pl["row"] == row)
+    spans = max((pl.get("span", 0) for pl in placements), default=0)+1
+    bank_loads = [0.]*(spans+1)
+    groups = {}
+    for pl in placements:
+        key = (pl["row"], pl.get("span", 0))
+        groups[key] = groups.get(key, 0.)+currents[pl["inst"]]
+    for (row, span), load in groups.items():
+        bank_loads[span] += load/2
+        bank_loads[span+1] += load/2
         for name, band in library.template["rails"].items():
-            if load / (2 * current_density_a_per_um) > band[1]-band[0] + 1e-9:
-                raise ValueError(f"Row {row} {name}: current requires a wider cell rail; "
-                                 "increase rows or the assumed current density")
+            if load/(2*current_density_a_per_um) > band[1]-band[0]+1e-9:
+                raise ValueError(f"Row {row} span {span} {name}: current requires a wider cell rail")
             if band[1]-band[0] > 45:
                 raise ValueError("Cell rail exceeds the PDK unslotted 45 µm limit")
-    return {"margin": margin, "trunk_width": width, "trunks_per_supply_per_side": count,
-            "stride": stride, "currents_a": currents, "rail_currents_a": rail_currents, "current_sources": sources,
+    banks = []
+    for index, load in enumerate(bank_loads):
+        required = max(6.4, load/current_density_a_per_um)
+        count = math.ceil(required/42.)
+        width = math.ceil(max(6.4, required/count)*10)/10
+        bank_width = 3*count*width+(3*count-1)*2.4
+        banks.append({"index": index, "width": width, "count": count,
+                      "bank_width": bank_width, "current_a": load})
+    pitch = library.template["grid"]
+    outer = max(banks[0]["bank_width"], banks[-1]["bank_width"])
+    margin = math.ceil((9.+outer+3.7)/pitch)*pitch
+    internal = max((bank["bank_width"] for bank in banks[1:-1]), default=0.)
+    gap = math.ceil((internal+13.4)/pitch)*pitch if spans > 1 else 0.
+    return {"margin": margin, "trunk_width": max(b["width"] for b in (banks[0], banks[-1])),
+            "trunks_per_supply_per_side": max(b["count"] for b in (banks[0], banks[-1])),
+            "stride": banks[0]["width"]+2.4, "feed_banks": banks, "span_gap": gap,
+            "currents_a": currents, "rail_currents_a": rail_currents, "current_sources": sources,
             "assumptions": {"default_cell_current_a": default_cell_current_a,
                 "allowed_current_a_per_um": current_density_a_per_um,
                 "sheet_resistance_ohm_per_square": sheet_resistance_ohm,
-                "qualification": "linear width scaling and constant-current assumptions; not EM sign-off",
+                "qualification": "linear width scaling, centered load spans and constant-current assumptions; not EM sign-off",
                 "current_reference": "OS00 rev1.1 I.3.1/I.3.2: M1(2um) 900uA flat / 500uA stepped; M2(3um) 3.7mA; V1 780uA/cut"}}
 
 
@@ -88,33 +100,45 @@ def draw_power(data, placements, library, plan):
     """Connect each row at both ends; crossings between unlike metals have no via."""
     t, rules = library.template, library.template["rules"]
     w, h = data["die"]
-    p, width, stride = t["grid"], plan["trunk_width"], plan["stride"]
-    count = plan["trunks_per_supply_per_side"]
+    p = t["grid"]
     straps, rail_wires, vias, pins = [], [], [], []
     row_ys = {i: row["y"] for i, row in enumerate(data["rows"])}
+    banks = plan["feed_banks"]
     for k, rail in enumerate(RAILS):
-        xs = []
-        for side in ("left", "right"):
+        feeds = []
+        for bank in banks:
+            index, width, count = bank["index"], bank["width"], bank["count"]
+            if index == 0:
+                start = 9.
+                side = "left"
+            elif index == len(banks)-1:
+                start = w-9.-bank["bank_width"]
+                side = "right"
+            else:
+                start = (plan["margin"] + index*plan["span_width"] +
+                         (index-.5)*plan["span_gap"]-bank["bank_width"]/2)
+                side = "internal"
             for j in range(count):
-                # Signal I/O sits outside these banks and crosses them on M1.
-                xleft = 2*p + (k*count+j)*stride
-                x = xleft + width/2 if side == "left" else w-xleft-width/2
-                xs.append(x)
+                x = start+(k*count+j)*(width+2.4)+width/2
+                feeds.append((x, width))
                 straps.append({"net": rail, "layer": "M2", "width": width,
-                               "points": [[x, p+width/2], [x, h-width/2]], "side": side})
+                               "points": [[x, p+width/2], [x, h-width/2]],
+                               "side": side, "bank": index})
                 pins.append({"name": rail, "layer": "M2", "rect": [x-width/2, h-p, x+width/2, h]})
+        xs = [x for x, _ in feeds]
         y0, y1 = t["rails"][rail]
         railwidth = y1-y0
         for row, y in sorted(row_ys.items()):
             cy = y+(y0+y1)/2
             rail_wires.append({"net": rail, "layer": "M1", "width": railwidth,
-                               "points": [[min(xs)-width/2, cy], [max(xs)+width/2, cy]]})
+                               "points": [[min(x-width/2 for x, width in feeds), cy],
+                                          [max(x+width/2 for x, width in feeds), cy]]})
             cut = rules["V1"]
             enclosure = max(rules["V1_enc_M1"], rules["V1_enc_M2"])
             spacing = math.ceil((cut + 1.5)*20)/20
-            nx = max(1, math.floor((width-2*enclosure-cut)/spacing)+1)
             ny = max(1, math.floor((railwidth-2*enclosure-cut)/spacing)+1)
-            for x in xs:
+            for x, width in feeds:
+                nx = max(1, math.floor((width-2*enclosure-cut)/spacing)+1)
                 for i in range(nx):
                     for j in range(ny):
                         vias.append({"net": rail, "x": round(x+(i-(nx-1)/2)*spacing, 6),
@@ -137,8 +161,10 @@ def solve_rails(placements, library, plan, straps, row_ys, die_height):
     rows = sorted(row_ys)
     for rail, nominal, sign in (("VDD", 5., -1), ("VMID", 0., 1), ("VSS", -5., 1)):
         selected = [s for s in straps if s["net"] == rail]
-        xl = np.mean([s["points"][0][0] for s in selected if s["side"] == "left"])
-        xr = np.mean([s["points"][0][0] for s in selected if s["side"] == "right"])
+        bank_ids = sorted({s["bank"] for s in selected})
+        bank_x = {bank: float(np.mean([s["points"][0][0] for s in selected if s["bank"] == bank]))
+                  for bank in bank_ids}
+        bank_width = {bank: sum(s["width"] for s in selected if s["bank"] == bank) for bank in bank_ids}
         railwidth = library.template["rails"][rail][1]-library.template["rails"][rail][0]
         yc = sum(library.template["rails"][rail])/2
         nodes = {}
@@ -148,24 +174,23 @@ def solve_rails(placements, library, plan, straps, row_ys, die_height):
                 nodes[key] = len(nodes)
             return nodes[key]
         for row in rows:
-            cells = sorted((pl for pl in placements if pl["row"] == row), key=lambda pl: pl["x"])
-            ordered = [(node((row, "left")), xl)]
-            for pl in cells:
+            ordered = [(node((row, "bank", bank)), x) for bank, x in bank_x.items()]
+            for pl in (pl for pl in placements if pl["row"] == row):
                 index = node((row, pl["inst"]))
                 loads[index] = plan["rail_currents_a"][pl["inst"]][rail]
                 ordered.append((index, pl["x"]+library.cells[pl["cell"]].width/2))
-            ordered.append((node((row, "right")), xr))
+            ordered.sort(key=lambda item: item[1])
             for (a, x0), (b, x1) in zip(ordered, ordered[1:]):
                 edges.append((a, b, rho*max(x1-x0, .05)/railwidth))
         fixed = []
-        trunkwidth = plan["trunk_width"] * plan["trunks_per_supply_per_side"]
-        for side in ("left", "right"):
+        for bank in bank_ids:
             for low, high in zip(rows, rows[1:]):
-                edges.append((node((low, side)), node((high, side)),
-                              rho*(row_ys[high]-row_ys[low])/trunkwidth))
+                edges.append((node((low, "bank", bank)), node((high, "bank", bank)),
+                              rho*(row_ys[high]-row_ys[low])/bank_width[bank]))
             if rows:
                 last = rows[-1]
-                fixed.append((node((last, side)), rho*max(die_height-row_ys[last]-yc, .05)/trunkwidth))
+                fixed.append((node((last, "bank", bank)),
+                              rho*max(die_height-row_ys[last]-yc, .05)/bank_width[bank]))
         size = len(nodes)
         matrix, rhs = np.zeros((size, size)), np.zeros(size)
         for a, b, resistance in edges:
