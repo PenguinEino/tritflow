@@ -38,7 +38,9 @@ class TimingReport:
     """Seconds throughout. Arrival is the maximum modeled settling per output.
 
     ``patterns[output]`` gives complete before/after primary-input assignments.
-    The global graph proves joint settled endpoint sensitization. Ordered event
+    The fixed-ramp endpoint graph proves joint settled endpoint sensitization.
+    Slew windows instead record compatible_primary_endpoints, without asserting
+    a realizable time ordering or full pulse amplitude. Ordered event
     paths instead list timed intermediate pin states in the event approximation;
     those states need not equal the whole-vector endpoints at each internal net.
     ``transition_arrival`` includes local unchanged-output hazard recovery.

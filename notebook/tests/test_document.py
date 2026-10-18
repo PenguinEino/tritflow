@@ -33,3 +33,19 @@ def test_truth_tables_are_rendered_as_html_and_required_results_have_no_todo_fal
     author = (ROOT/"docs/author.md").read_text()
     block = author[author.index("- Name:"):].split("\n\n",1)[0]
     assert block in document["cells"][0]["source"]
+
+
+def test_verified_run_note_replaces_intro_process_prose_and_details_move_to_appendix():
+    import json
+    document=json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())
+    intro=document["cells"][0]["source"]
+    record=json.loads((ROOT/"notebook/colab_verified.json").read_text())
+    assert record["commit"].startswith("842afe2") and record["passed_code_cells"] == 17
+    report=(ROOT/record["report"]).read_text()
+    assert record["passed"] is True and record["commit"] in report
+    assert f'{record["run_all_seconds_including_setup"]} s' in report
+    assert "Run all ≈ 6.5 min" in intro and "384.1 s" in intro and "842afe2" in intro
+    assert all(text not in intro for text in ("Release TODO","predates","unverified","content-keyed","TRITFLOW_FORCE_RUN"))
+    appendix=next(c["source"] for c in document["cells"] if c["source"].startswith("## Appendix B."))
+    assert "TRITFLOW_REF" in appendix and "TRITFLOW_FORCE_RUN" in appendix
+    assert "not a fresh" in appendix and "recorded" in appendix

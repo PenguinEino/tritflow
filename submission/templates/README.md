@@ -25,7 +25,13 @@ not an assertion that the whole working tree was clean.
 
 ## Reproduce
 
+{{COLAB_RUN_NOTE}}
+
+<details><summary>Source reference for this saved notebook</summary>
+
 {{RELEASE_STATUS}}
+
+</details>
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
 
@@ -36,15 +42,14 @@ into `/content/tritflow`, prints the resolved commit and installs it editably.
 using that badge. The bootstrap installs ngspice, the pinned official KLayout
 binary/Python dependencies and a checksum-verified PDK archive at commit
 `5d963db9d44e192d37a0489c208bfccf2e2f690c`.
-Clean Colab installation and its total runtime remain **unverified/postponed**;
-saved outputs were executed locally, as recorded in the build information.
-The older `colab-v0` was separately tested and failed in NumPy/SciPy import.
+The run note identifies the verified revision. The saved outputs in this
+package were executed locally; later presentation edits have local checks.
 This setup preserves Colab's scientific packages, checks minimum versions and
 live/disk consistency, and prints actual KLayout/ngspice versions. Only KLayout
 and Lark wheels are pinned; pip uses `--no-deps`. If an earlier installation
 left mixed versions loaded, follow the explicit restart-once message, then
-rerun setup/imports. Local tests do not establish a successful latest-release
-Colab run. Chapter cells report missing/failed prerequisites before using results.
+rerun setup/imports. Chapter cells report missing/failed prerequisites before
+using results. Appendix B records setup and rerun details.
 
 For a local run, use the complete TritFlow checkout and its documented PDK and
 EDA tools. Open `notebook/tritflow_tr1um.ipynb`, or set `TRITFLOW_ROOT` to that

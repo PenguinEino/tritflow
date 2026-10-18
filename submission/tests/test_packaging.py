@@ -141,3 +141,13 @@ def test_public_schematic_svg_gets_saved_png_fallback():
     builder.portable_outputs(document,{})
     data=document.cells[0].outputs[0].data
     assert data["image/svg+xml"] == svg and "image/png" in data
+
+
+def test_colab_note_is_scoped_to_observed_commit_without_obsolete_release_todos():
+    note=builder.run_note()
+    assert "842afe2" in note and "384.1 s" in note and "6.5 min" in note
+    text=builder.release_notice({"default_ref":"colab-v0","commit":"a"*40})
+    assert "TODO" not in text and "predates" not in text
+    assert "Appendix B" in text
+    readme=builder.render_readme(json.loads((ROOT/"submission/team.json").read_text()))
+    assert note in readme and "unverified/postponed" not in readme

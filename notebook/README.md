@@ -99,8 +99,8 @@ first cell to override the tag (branch names also work; their resolved commits
 are printed). An existing checkout is reused only when its origin and resolved
 ref match and it has no tracked edits; otherwise start a fresh Colab runtime.
 The notebook never silently falls back to `main`. The archive-URL bootstrap has
-been removed. **Release TODO:** the existing `colab-v0` tag predates this notebook. Publish a matching immutable
-release and update the selected ref/badge before filing.
+been removed. Round 2 verified `colab-v0` at commit `842afe2`; source-selection
+and rerun details are in Appendix B of the notebook.
 
 ```sh
 bash notebook/colab_setup.sh --source /content/tritflow
@@ -126,9 +126,11 @@ The official packages and their release mapping were checked against
 is the [OpenSUSI commit](https://github.com/OpenSUSI/TR-1um/commit/5d963db9d44e192d37a0489c208bfccf2e2f690c).
 The downloaded `.deb` hashes/package metadata and pinned archive contents were
 checked locally; pinned-deck LVS and post-layout simulation passed locally.
-The actual apt/pip install, notebook display in Colab, Ubuntu ngspice package
-behavior, and install-inclusive cold runtime require a clean Colab test. Local
-validation cannot establish the ten-minute Colab budget.
+Real free-Colab round 2 passed at commit `842afe2`: all 17 code cells in
+384.1 s including setup (about 6.5 min), with the labelled recorded experiments.
+The observed versions and scope are in `docs/status/COLAB.md`;
+`notebook/colab_verified.json` retains a small evidence record. Later
+presentation edits have separate local checks.
 
 Required SIM publications use `load_grid()` / `sizing_figure()` for
 `cells/out/sizing/`, `load_scaling()` / `scaling_figure()` for
@@ -158,12 +160,10 @@ python3 -m pytest tests/synth/test_curated.py -q
 TRITFLOW_CIRCUIT=mul2 python3 notebook/validate_notebook.py --execute
 ```
 
-Latest-release Colab verification remains pending. The separate COLAB stream
-tested the older colab-v0 and recorded a NumPy/SciPy import failure; that is
-not a successful verification of this source notebook. Bootstrap behavior is
-unchanged in phases 6–8 and is corrected in phase 9 to preserve the preloaded
-scientific stack. Release-tag publication and final measurement
-hardware/schedule remain integrator tasks; no draft TODO is presented as a result.
+Colab round 2 completed in one uninterrupted Run all, without dependency
+changes, manual reruns or restarts. Setup preserves the host scientific stack.
+The verified revision is `842afe2`; later presentation-only changes are checked
+locally and are not silently relabelled as the same Colab capture.
 
 The six taped-out source schematics are bundled under `assets/schematics/`,
 each with an opaque light and dark SVG. Chapter 1 expands one selected primitive in a theme-aware gallery
