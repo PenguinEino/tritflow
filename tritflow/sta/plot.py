@@ -65,6 +65,6 @@ def pessimism_figure(validation=None):
         hovertemplate='%{x}<br>SPICE %{customdata[0]:.2f} ns<br>Envelope %{customdata[1]:.2f} ns<br>Factor %{y:.2f}×<extra></extra>'))
     figure.add_hline(y=1.,line_dash='dash',annotation_text='Measured maximum')
     figure.update_layout(title='Nominal slew-window bound: pessimism over measured maxima',
-        yaxis_title='Envelope / SPICE maximum (×)',xaxis_title='Design / output',template='plotly_white',
+        yaxis_title='Bound / SPICE maximum (×)',xaxis_title='Design / output',template='plotly_white',
         meta=validation.get('worst_case_validation'))
     return figure

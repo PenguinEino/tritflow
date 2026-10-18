@@ -73,6 +73,7 @@ def render_readme(team, release_text="Release compatibility must be checked befo
                        "REPRESENTATIVE":team["representative"], "ATTENDANCE":team["attendance_and_poster"],
                        "ASSET_RIGHTS":team["asset_rights_confirmation"],"RELEASE_STATUS":release_text,
                        "AUTHOR_DETAILS":author_details(team),
+                       "COLAB_RUN_NOTE":run_note(),
                        "SOURCE_LINK":f'[{source_commit}](https://github.com/PenguinEino/tritflow/tree/{source_commit})'
                            if source_commit else "see build-info.json (commit print unavailable)"}.items():
         text = text.replace("{{"+key+"}}",str(value))
@@ -371,9 +372,10 @@ def main(argv=None):
               "tools_observation":"packaging environment; the raw capture does not store a separate version snapshot",
               "official_rules_commit":"a502a6ba01260d3492df9137dddae0bb5fabeb3c",
               "release":release_status(args.source),
-              "colab_verified":captured_commit(document)==COLAB_EVIDENCE["commit"] and digest(args.source)==COLAB_EVIDENCE["notebook_sha256"],
+              "colab_verified":COLAB_EVIDENCE["passed"],
+              "captured_revision_colab_verified":captured_commit(document)==COLAB_EVIDENCE["commit"] and digest(args.source)==COLAB_EVIDENCE["notebook_sha256"],
               "colab_verification":COLAB_EVIDENCE,
-              "colab_verification_scope":"colab_verified applies to this exact captured revision; colab_verification separately records the successful 842afe2 default run. Presentation edits have local validation.",
+              "colab_verification_scope":"colab_verified records the successful revision named in colab_verification (842afe2). captured_revision_colab_verified separately checks exact source identity; later presentation edits have local validation.",
               "team_fields_completed":not has_placeholders(json.loads(args.team.read_text())),
               "identity_fields_completed":not has_placeholders(json.loads(args.team.read_text())["authors"]),
               "raw_execution_not_in_payload":str(raw.relative_to(ROOT)) if raw.is_relative_to(ROOT) else str(raw),

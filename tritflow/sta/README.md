@@ -1,171 +1,144 @@
 # Ternary static timing
 
-`analyze` uses measured midpoint propagation and an endpoint-only settling tail.
-No SPICE is launched by analysis, plotting or validation; characterization is a
-separate offline producer. Without `vector_pairs`, the default is a conservative local-class/ramp envelope.
-It considers independently every measured transient class and internal ramp,
-propagates a recovery guard on endpoint-stable nets, and adds the final tail
-once. Supply complete `vector_pairs` for matched slew/event timing. The exact
-fixed-ramp endpoint graph remains available as `global_mode="endpoint"`.
+`analyze(netlist, pnr=None)` uses measured midpoint propagation, measured output
+slew and one endpoint settling term. No SPICE runs during analysis, plotting or
+validation. Independent characterization is an offline producer.
+
+Without vector pairs, the default uses transition-specific slew windows and
+symbolic primary-input compatibility. With complete `vector_pairs`, it uses the
+unchanged matched-event model. The two claims are separate:
+
+- Default bound: all **838 saved observations / 799 transition observations**
+  covered, **zero underpredictions**, **1.026–3.072×** measured output maxima,
+  mean **2.182×**. The requested 1.5× target is **not achieved** (2/39 outputs).
+- Matched accuracy: **38/39 within ±20%, MAPE 6.782%**, unchanged from phase 2.
+  Scaling adder2 `cout` remains the documented partial-pulse outlier.
 
 ```python
 from tritflow.sta import analyze
-from tritflow.sta.plot import validation_figure
+from tritflow.sta.plot import validation_figure, pessimism_figure
 
-report = analyze("build/full_add/full_add.json",
-                 "build/full_add/full_add.pnr.json",
-                 vector_pairs=[({"a": -1, "b": 1, "cin": 1},
-                                {"a": 0, "b": -1, "cin": -1})])
-print(report.arrival)                 # output -> settling estimate in seconds
-print(report.sensitizing_pattern)     # complete primary-input endpoints
+report = analyze('build/full_add/full_add.json',
+                 'build/full_add/full_add.pnr.json')
+print(report.arrival)  # output -> seconds
 for stage in report.critical_path:
     print(stage.instance, stage.input_transition, stage.output_transition,
           stage.delay_s, stage.settling_tail_s)
-report.to_html("results/sta/full_add.html")
-validation_figure().show()
+report.to_html('results/sta/full_add.html')
+validation_figure().show()  # matched accuracy, optional separate bound trace
+pessimism_figure().show()   # bound / measured maximum
 ```
 
-The example checks one endpoint pair. The validation command uses every
-consecutive pair from each of SIM's ten complete vector sequences.
-GateNetlist objects/dicts and PnrResult objects are also accepted. Fanout load
-sums each connected pin's maximum published biased AC input C, plus merged
-route/external-pin C from the public extraction API. With no PNR, load is fanout
-only. External output load defaults to 10 fF; `output_load_f` accepts a scalar
-or output-name dict. `wire_caps={logical_net: farads}` overrides route C. The
-validation uses SIM's exact LVS-mapped full top-net metal C, including connected
-cell terminal metal once; the public route-only estimate excludes that metal.
+GateNetlist objects/dicts and PnrResult objects are accepted. Loads sum each
+connected pin's maximum measured biased AC input C, supplied wire C, and output
+test C (10 fF by default). `output_load_f` accepts a scalar or output-name dict.
+`wire_caps={logical_net: farads}` overrides the PNR route estimate. Validation
+uses SIM's exact LVS-mapped top-net GDS C, including cell terminal metal once.
+All loads are identical to phases 2/3; no fitted C or delay multiplier is used.
 
-The measured quantities for each directed old/new trit pair are:
+## Measurements and composition
+
+For the actual old/new ideal levels:
 
 ```
 p50 = t50(output) - t50(input)
 slew = t90(output) - t10(output)
-tail = final_band_entry(output) - t50(output)
-
+tail = final entry into the ideal ±0.5 V band - t50(output)
 next_t50 = input_t50 + p50
+next_equivalent_full_ramp = slew / 0.8
 endpoint_settling = endpoint_t50 + endpoint_tail
-next_full_ramp = output_slew / 0.8
 ```
 
-Only `p50` composes through intermediate stages. Each stage starts moving before
-its input has fully settled. The midpoint is between the old and new ideal
-levels: −1→0 crosses −2.5 V; −1→+1 crosses 0 V. The last directional crossing is
-used, with crossing counts retained. Negative midpoint propagation is allowed
-when the output crosses before the selected input's midpoint. The tail is added
-once, at the observed endpoint, rather than at every gate.
+Only midpoint propagation composes. Intermediate band-entry tails overlap the
+next gate's response and are not added. The midpoint for −1→0 is −2.5 V; for
+−1→+1 it is 0 V. Last directional crossings and their counts are retained.
+Negative p50 is allowed. Stable-output classes have scalar recovery, no
+invented midpoint or full-level slew.
 
-STA-owned schema-2 surfaces are under `results/sta/propagation/tables/`: five
-cells, 150 load/ramp profiles, 6,840 directed observations. Loads are
-10/100/500/1000/2000 fF; full input ramps are 0.25/1/5/15/50/150 ns. All profiles
-pass nominal ideal ±5/0 V band checks. Extracted device models, model hashes and
-cell generation must match the current CELLS publication. The isolated
-characterization uses existing public SIM APIs and Newton initial guesses;
-no voltage is forced during transient analysis. CELLS/SIM files are read only.
-Every profile retains its deck, log and measurements; representative waveforms
-are compressed. Earlier finer-step/longer-plateau observations retain their
-original provenance when reused. No circuit-level timing fit is applied.
+STA-owned tables at `results/sta/propagation/tables/` contain **175 profiles /
+7,980 observations** from five extracted cells, all passing. Loads are
+10/100/500/1000/2000 fF; full ramps are 0.25/1/5/15/50/150/**200 ns**. Phase 4
+added 25 independent SPICE profiles at 200 ns. All previous measured rows are
+unchanged. Extraction/model hashes and CELLS generation must match the current
+publication. Real decks, logs, measurements and representative waves are kept.
+No circuit-level simulation is used to fit these tables.
 
-Interpolation is bilinear in physical load/ramp units. Strict cell sampling
-never crosses failed/null points. `analyze` defaults to explicitly reported
-linear load extension down to zero or up to twice the largest measured load;
-use `load_policy="error"` to forbid load extension. Pattern analysis clips
-an out-of-domain equivalent ramp to the measured boundary and reports it.
-It does not extrapolate a ramp silently. These policies do not establish bounds.
+Interpolation is bilinear in physical units. Failed/null points are rejected.
+The explicit `linear` load policy permits extension down to zero or up to twice
+the largest measured load; `load_policy='error'` forbids it. No present load
+needs extension. The default bound **raises on out-of-domain slew**, rather than
+clip it. The current 39-output label domains close within 200 ns.
 
-Pattern analysis orders input midpoint events, using measured single-pin arcs
-with the intermediate side-input trits. Equal-time changes use synchronous
-multi-pin observations. Output slew supplies the next equivalent ramp. Logical
-pulses can traverse nets whose final endpoint values are unchanged. A reversed
-request before a pending output midpoint suppresses that pulse; overlapping
-ramps, pulse cancellations, unpropagated analog hazards and time-order clamps
-are counted. Any clamp is also explicit in the path stage's
-`time_order_adjustment_s`; subtract it from `delay_s` to recover the sampled
-propagation delay. This is a timing-event approximation, not an analog solver.
-Paths in this mode contain timed intermediate states, which need not equal
-all internal nets' whole-vector endpoints. Partial pulse amplitude and arbitrary
-skew/shape require additional characterization.
+## Tightened global analysis
 
-The diagnostic fixed-ramp endpoint graph retains separate transitions and every predecessor. Reduced
-ternary decision diagrams intersect path conditions; best-first backward search
-rejects incompatible reconvergence. Its critical endpoint pattern is jointly
-sensitizable in settled logic. Fixed-ramp global timing is a distinct model
-from the tested-pattern event analysis and is not a global analog bound.
-Resource limits raise rather than return partial success.
+A label carries a local output transition and a narrow equivalent-ramp interval
+(default 5 ns bins). The measured output-slew function transports each interval
+to the next gate. Splitting at input knots and output-bin crossings retains
+piecewise-linear extrema. The endpoint contribution maximizes d50 + tail on
+the same segment; it does not splice independent worst tails onto a path.
 
-Phase 3 corrects the unsafe interpretation of the old global estimate. It
-underpredicted 35/39 maxima (down to −38.47%). The isolated tables already
-contain every six/72 directed local class. The problem was discarded slew and
-transient classes excluded by settled endpoint constraints. Relaxing those
-constraints at the same 1 ns ramp leaves eight underpredictions (down to
-−11.87%), so class coverage alone is insufficient. Maximizing local midpoint
-and endpoint-tail terms over the measured internal ramp knots removes all
-underpredictions. The recovery clock adds protection for downstream activity
-on nets that return to their original level. Actual loads are unchanged.
+Backward search intersects primary-input conditions along the whole path.
+Transient side-input states include both settled endpoints and intermediate
+logical values. Their time alignment and pulse amplitude are still relaxed.
+The report supplies `compatible_primary_endpoints` for these constraints;
+`before`/`after` are null because this is **not** a jointly realizable temporal
+waveform witness. Stable recovery remains a local measured endpoint term; it
+is not promoted to an arbitrary full-level transition at every next gate.
+Propagation of partial analog recovery is explicitly unmodeled.
 
-The new default `predicted_s` is conservative against **all 838 saved output
-observations (799 transitions)**, covering all 39 maxima. It is deliberately
-pessimistic: **4.52–8.50×**, mean **6.02×**, the measured maximum (+351.89% to
-+750.08%). Every term comes from independent isolated-cell SPICE; there is no
-circuit fit, simulated-value floor or fitted multiplier. Known primary ramps
-remain 1 ns; internal ramps range across all measured knots. The endpoint tail
-uses the same local class and ramp as its propagation term, and is added once.
-The maximizing local classes are independent, so no jointly sensitizing vector
-is asserted for an envelope path. `global_mode="endpoint"` still provides a
-joint settled-endpoint witness when that diagnostic is needed.
+The old broad relaxation increased timing mainly through arbitrary slow ramps:
+95.34% of its increase over the fixed-ramp/no-guard/no-tail baseline came from
+ramp relaxation, 2.58% from recovery activity and 2.08% from the endpoint tail
+(order-independent three-factor attribution). Narrow measured slew windows
+reduce mean bound/max from 6.016× to 2.182×, without changing matched accuracy.
 
-This establishes conservatism on the saved nominal dataset, not an analog
-signoff guarantee. All-class output slew can exceed the 150 ns input-ramp axis;
-reports explicitly flag non-closed domains, without silently clipping a bound.
-Arbitrary partial pulses, unequal multi-input ramps, waveform history, PVT and
-wire/poly RC remain outside the scalar characterization. Tighter useful global
-bounds need class-correlated slew and skew/pulse characterization; claiming
-that accuracy from this deliberately relaxed envelope would be misleading.
-`worst_case_conservative` is the finite-dataset coverage flag;
-`certified_analog_bound` remains false. The same 39 matched results below are
-unchanged and are the only accuracy claim.
+The 1.5× target is not justified by the current scalar tables. Removing
+transient classes misses three saved observations. Smaller bins converge above
+the target: adder2 `cout` changes from 186.86 ns at 1 ns bins to 185.85 ns at
+0.25 ns bins. An exact-circuit replay of that model-selected endpoint vector
+settles in 152.35 ns, versus the original sequence's 105.36 ns maximum. Only
+5.68 ns remains below a 1.5× ceiling, while the same-pattern event and window
+models are respectively 20.13 ns and 33.50 ns high. Unequal input ramps/skew,
+partial pulses and waveform shape require additional characterization and
+joint timing history to justify tighter global constraints. This does not
+prove a 1.5× physical bound impossible; it records why it is not achieved here.
 
-Validation covers the same 39 outputs as phase 1: **38 within ±20%**, MAPE
-**6.78%**, signed error **−7.90% to +36.48%**. The remaining scaling-adder2
-`cout` estimate is 143.79 ns versus the sequence's observed maximum 105.36 ns.
-The predicted worst pattern actually settles in 14.72 ns: internal probing
-shows that a modeled intermediate +1 level never occurs. Its waveform stays
-between roughly −5 and 0 V and does not cross +2.5 V. Full-level event timing
-therefore propagates a false late transition. Accurate treatment requires pulse
-amplitude and overlapping-input waveforms. `accuracy_passed` remains false;
-this outlier is retained, and no fitted correction is applied.
+`worst_case_conservative` describes coverage of the saved nominal dataset.
+`certified_analog_bound` remains false. The smallest measured margin is only
+0.408 ns; source sampling and unmodeled waveform effects preclude treating
+this as signoff margin. PVT, calibrated signal/poly RC, coupling and package
+are also outside the model.
 
-The successive comparisons are archived: additive settling MAPE 70.31%;
-midpoint composition with fixed ramp 35.91%; midpoint with propagated slew but
-synchronous endpoint classes 10.30%; ordered midpoint events 6.78%. Phase-1
-reports remain in `results/sta/phase1/`; the complete phase-2 publication is
-archived in `results/sta/phase2/`. The default validation figure shows the
-matched-pattern event estimates and ±20% reference lines; the conservative envelope
-trace is available in the legend. `pessimism_figure()` and
-`results/sta/pessimism.html` show envelope / measured maximum separately. Empirical error ranges apply only to the
-finite nominal dataset. No PVT, calibrated wire/poly RC, coupling or package
-claim is made. A finite-transition input-charge experiment was not adopted:
-signed multi-terminal charge does not justify replacing pin C with a positive
-lumped capacitor inferred from those samples.
+## Modes, artifacts and reproduction
+
+- Default `global_mode='windows'`: compatible transient slew windows.
+- `global_mode='endpoint'`: diagnostic fixed-ramp, exact settled endpoint graph.
+- `global_mode='envelope'`: broad independent ramp/recovery relaxation over the
+  current table domain. Archived phase-3 tables retain the original 150 ns axis.
+- Explicit legacy `TimingLibrary`: historical additive settling ablation.
+- `vector_pairs=[(before, after), ...]`: matched ordered events; flags
+  `ordered_events=False` / `propagate_slew=False` select the block/fixed-ramp
+  accuracy ablations. All pairs must specify every primary input.
+
+Current publication: `results/sta/validation.json` (schema 4), twenty timing
+reports, `validation.html`, `pessimism.html`. Phase-4 attribution, candidate
+comparisons, source audit and independent SPICE witnesses are under
+`results/sta/phase4/`. `tightening.html` compares all 39 old/new factors against
+1.5×. Phases 1–3 are preserved in their own archive directories.
 
 ```sh
 python3 -m tritflow.sta.validate
-python3 -m tritflow.sta.worst_audit
-python3 -m tritflow.sta.validate --watch-seconds 600
+PYTHONPATH=. python3 results/sta/phase4/audit.py
 python3 -m pytest tests/sta -q
 
-# Offline producers; never needed for cached notebook reads:
+# Optional diagnostic reproduction; isolated cell/circuit SPICE only in STA paths:
+PYTHONPATH=. python3 results/sta/phase4/attribute.py
+PYTHONPATH=. python3 results/sta/phase4/windows.py
+PYTHONPATH=. python3 results/sta/phase4/exact_witness.py
 python3 -m tritflow.sta.characterize --jobs 2
-python3 -m tritflow.sta.characterize --resolution
-python3 -m tritflow.sta.diagnose build/full_add --step-ns 0.25
-python3 -m tritflow.sta.diagnose build/adder_scaling/adder6 --name adder6
-python3 -m tritflow.sta.diagnose --audit
 ```
 
-`PropagationLibrary` loads the new surfaces. An explicitly supplied legacy
-`TimingLibrary` retains additive settling for comparison. Pattern flags
-`ordered_events=False` and `propagate_slew=False` select the block and fixed-ramp
-ablations. Published validation fingerprints all foreign results, consumed
-physical evidence, current cell tables, the STA propagation tables and imported
-STA code. A changed publication triggers retries; watch mode repeats on later
-changes. No foreign producer is started or stopped. Cached design calculations
-are invalidated by consumed-content changes, including unchanged timestamps.
+Validation fingerprints foreign results, consumed physical evidence, current
+cell tables, STA surfaces and executing source before/after calculation.
+Changed publications trigger retries; `--watch-seconds` repeats on later
+changes. No foreign producer is started or stopped.

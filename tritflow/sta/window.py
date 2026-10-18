@@ -10,7 +10,6 @@ is a finite scalar timing model, not arbitrary-waveform signoff.
 """
 from __future__ import annotations
 
-from dataclasses import replace
 from itertools import product
 import math
 from pathlib import Path

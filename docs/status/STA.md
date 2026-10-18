@@ -1,9 +1,179 @@
-# STA stream — phase 4 in progress: tightening and component attribution
+# STA stream — phase 4 complete: tighter bound; 1.5× target not achieved
 
-2026-10-18. Phase-3 publication preserved at `results/sta/phase3/`. Testing
-class-conditioned slew transport and measured recovery/endpoint terms against
-all 838 saved observations. The qualified phase-3 bound remains active until a
-replacement passes; matched accuracy is unchanged.
+2026-10-18. Only STA-owned paths changed. No packages installed, PDK/reference
+edits, foreign producer/process changes or git-state mutations. Qualification
+remains public PDK `5d963db9d44e192d37a0489c208bfccf2e2f690c` and CELLS generation
+`2026-10-18T10:26:47.211617+00:00`. Phases 1–3 are archived separately.
+
+## Result and target status
+
+The new default uses **measured transition/slew windows with compatible source
+conditions**. It covers **838/838 saved observations (799 transitions)** with
+**zero underpredictions**, while reducing bound / measured maximum from
+**4.519–8.501×, mean 6.016×**, to **1.026–3.072×, mean 2.182×** (median 2.370×).
+The mean factor is **63.7% smaller**. Absolute overestimates now range from
+**0.408 ns to 457.24 ns**.
+
+The requested **1.5× target is not met**: only **2/39 outputs** lie between 1×
+and 1.5×. The schema-4 publication explicitly records
+`bound_target_passed:false`, `bound_target_factor:1.5`, and
+`bound_outputs_within_target:2`. No observation was dropped and no empirical
+multiplier, circuit-derived floor, delay cap or C correction was introduced.
+
+**Matched accuracy is unchanged bit for bit:** **38/39 within ±20%, MAPE
+6.782%, MAE 10.479 ns**, signed error −7.903%…+36.479%. Scaling adder2 `cout`
+remains the phase-2 partial-pulse exception. `tested_predicted_s` is the only
+accuracy claim. The new `predicted_s` is a conservative comparison against the
+saved nominal dataset; **`certified_analog_bound:false`** remains explicit.
+
+**35 STA tests pass**, final run **23.11 s**. Current validation refreshes all
+ten designs and compares every saved output observation. The separate phase-4
+audit verifies producer/code fingerprints, unchanged loads, unchanged matched
+predictions, unchanged old table rows and exact diagnostic circuit identity.
+
+## What dominated phase 3
+
+`results/sta/phase4/attribution.json` reproduces a full 2×2×2 experiment using
+the archived 150 ns-axis tables and identical loads. The factors are arbitrary
+internal ramp range, propagated recovery activity, and the endpoint tail.
+Order-independent Shapley attribution (all six application orders) of the
+increase over fixed-1-ns/no-guard/no-tail timing is:
+
+| Factor | Mean added time | Share of relaxation increase |
+|---|---:|---:|
+| Broad internal ramp envelope | **794.74 ns** | **95.34%** |
+| Propagated recovery activity | 21.51 ns | 2.58% |
+| Endpoint tail | 17.31 ns | 2.08% |
+
+Even removing **both recovery propagation and the endpoint tail** from the
+broad-ramp model leaves factors **1.175–7.799×**. Tail/guard trimming alone
+therefore cannot approach the target. Dropping tails is also physically wrong:
+a direct output still needs its measured time from midpoint to the ±0.5 V band.
+
+## Measured terms replacing the broad relaxation
+
+`tritflow/sta/window.py` now carries each output transition with a **5 ns-wide
+full-ramp interval**. Measured output 10–90% slew / 0.8 transports that interval
+to the receiving gate. Input knots and inverse output-bin crossings split the
+piecewise-linear surfaces. Different transition histories no longer share an
+arbitrary 150 ns ramp, and delay/slew correlations are retained within each
+narrow segment. Backward symbolic search intersects the complete path's
+primary-input compatibility instead of splicing incompatible source histories.
+Transient side-input values are admitted, including endpoint-stable logical
+pulses, but relative time and partial pulse amplitude are still relaxed.
+
+The endpoint term maximizes **d50 + tail on the same segment**, then subtracts
+the segment's d50 maximum to obtain the residual added once at the endpoint.
+It does not splice independent maximum d50 and maximum tail from unrelated
+conditions. Intermediate tails remain uncounted in composed arrival; path
+fields retain local endpoint data for inspection.
+
+Recovery is kept as the **measured local scalar band-recovery term**. It is
+never turned into a fictitious full-level crossing or a made-up output slew
+and repeated downstream. Representative saved waves at 100 fF / 1 ns show
+why duration is insufficient: stable-output NANY classes peak at **1.966 V**
+from their ideal level (none cross a 2.5 V half-level), while NAND/NOR include
+larger partial pulses (maxima **3.145/3.103 V**). These observations are scoped
+to that profile; they do not justify dropping analog propagation generally.
+Full-level logical pulses are represented through transient classes; propagation
+of **partial analog recovery remains explicitly unmodeled**. Zero misses are
+established on all 838 observations, not asserted for arbitrary pulse shapes.
+
+Some class-conditioned slew ranges reached 154–157 ns, beyond the old table
+axis. Phase 4 independently measured **25 additional profiles at 200 ns**, all
+passing. The five tables now contain **175 profiles / 7,980 observations**.
+Every original row is unchanged, and extraction/model/generation identities
+still match CELLS. Every used internal slew label in the current analysis fits
+the measured domain. **Out-of-domain labels raise instead of being clipped.**
+No load extension is needed. The old phase-3 tables are preserved under
+`results/sta/phase3/propagation_tables/` for exact attribution reproduction.
+
+## Why the remaining gap cannot be justified away with these data
+
+The controlled model comparisons on the same 39 maxima are:
+
+| Model | Factor range | Mean factor | Missed saved observations |
+|---|---:|---:|---:|
+| Phase 3, broad ramp/recovery relaxation | 4.519–8.501× | 6.016× | 0 |
+| Narrow transition/slew labels, unconstrained side states | 1.026–3.084× | 2.201× | 0 |
+| Source-compatible transient classes (new default) | 1.026–3.072× | 2.182× | 0 |
+| Settled endpoint classes only (rejected) | 0.981–1.831× | 1.351× | **3** |
+
+The three endpoint-only misses are scaling adder1 `sum[0]`, scaling adder3
+`sum[0]`, and example mac1 `cout`. Restricting classes just because that tighter
+model averages below 1.5× would restore measured underprediction.
+
+1. **Numerical bin width is not the main remaining error.** For adder2 `cout`,
+   endpoint-window timing is 192.88 ns at 5 ns bins, 186.86 ns at 1 ns bins,
+   and **185.85 ns at 0.25 ns bins**. The last refinement changes it by only
+   **1.01 ns**. The same selected vector's synchronous block estimate is
+   **185.80 ns**, so the scalar cell model itself converges above the target.
+2. **An unseen physical transition almost exhausts a 1.5× ceiling already.**
+   A SPICE replay of that model-selected vector uses the **exact published
+   adder2 network, device/wire/output C, supplies and 1 ns ramps**; only the
+   stimulus sequence/hold/sampling changes. `cout` settles in **152.35 ns**,
+   versus the original seven-vector maximum **105.36 ns**: **1.446×**. Only
+   **5.68 ns** remains below the requested 1.5× ceiling. This replay is separate
+   diagnostic evidence and does not silently replace the 838 observations.
+3. **The missing information is waveform/timing history.** On that same
+   vector, matched ordered-event timing is **172.48 ns** (**20.13 ns high**),
+   and finest-bin endpoint-window timing is **185.85 ns** (**33.50 ns high**).
+   Equal-ramp isolated-cell tables do not distinguish unequal pin slopes,
+   relative skew, partial pulse amplitude, or charge left by overlapping
+   transitions. Reachable side levels need not be present at the same time.
+   Full-level pulse assumptions admit late transitions that never reach their
+   assumed voltage. Neither smaller scalar bins nor a trimmed final tail can
+   bound these effects to the remaining 5.68 ns without new information.
+
+**This is not a proof that a physical 1.5× bound is impossible.** It is a
+specific failure to justify or achieve it with the present scalar measurements.
+A tighter global model needs joint arrival/slew/history constraints plus
+measured two-input skew and pulse-width/amplitude responses (and retained
+internal waveforms). Fitting a percentage or clipping to the finite sequence's
+observed maxima would conceal the gap. Those shortcuts are not adopted.
+
+The minimum nominal slack is only **0.408 ns**, while some source sequences
+use 2 ns sampling. Finite-grid observation coverage, even with all used scalar
+slews characterized, is not analog signoff margin. PVT, signal/poly RC,
+waveform history and arbitrary analog hazards remain outside qualification.
+
+## Artifacts, API and integrator handoff
+
+- `results/sta/validation.json`: schema 4, all 838-case coverage, explicit failed
+  1.5× target, separate matched accuracy and current provenance.
+- `results/sta/phase4/audit.json`: source/code checks, component attribution,
+  candidate failures, unchanged-load/table/matched checks and SPICE witness.
+- `results/sta/phase4/tightening.html`: all 39 old/new factors and a 1.5× line.
+  Root `validation.html` and `pessimism.html` are refreshed as well.
+- `phase4/attribution.json`, `windows.json`, `bin_convergence.json`: reproducible
+  numerical experiments. `phase4/exact_witness/` and `phase4/witnesses/` retain
+  diagnostic decks, logs, measurements and waveforms. Additional carry/random
+  candidates are separate from the original validation set.
+- `analyze()` defaults to `global_mode="windows"`. `global_mode="endpoint"`
+  retains fixed-ramp settled-endpoint timing; `global_mode="envelope"` retains
+  the broad relaxation over the current table axis. Explicit legacy libraries
+  and matched `vector_pairs` behavior remain available.
+- Default paths have compatible primary endpoints, **not a joint temporal
+  waveform witness**. `before/after:null` and a reason prevent a false
+  sensitization claim; `compatible_primary_endpoints` records the constraints.
+
+```sh
+python3 -m tritflow.sta.validate
+PYTHONPATH=. python3 results/sta/phase4/audit.py
+python3 -m pytest tests/sta -q
+
+# Optional exact reproductions:
+PYTHONPATH=. python3 results/sta/phase4/attribute.py
+PYTHONPATH=. python3 results/sta/phase4/windows.py
+PYTHONPATH=. python3 results/sta/phase4/exact_witness.py
+```
+
+**Interface request / handoff:** show the improved 1.03–3.07× nominal bound and
+its failed 1.5× target honestly. Keep `tested_predicted_s` as the accuracy claim.
+Further CELLS/SIM waveform/skew characterization would support another step;
+no shared interface or foreign stream file was edited. No question or approval
+is pending. The investigation and tighter publication are complete; the
+remaining 1.5× accuracy/conservatism gap is documented above.
 
 ---
 

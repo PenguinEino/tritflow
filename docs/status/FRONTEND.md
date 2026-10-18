@@ -1,5 +1,55 @@
 # FRONTEND status
 
+Updated: 2026-10-18. **Phase 10 presentation fixes implemented; saved-output refresh in progress.**
+
+## Phase 10 — in progress
+
+- `notebook/presentation.py` reserves separate title/control/subplot bands on
+  copied Plotly figures. Routing dropdowns and Play/Pause use that wrapper.
+  Native traces, frames, slider steps and button actions remain identical;
+  source figures are unmodified. Inspected actual 1100 px routing and placement
+  PNGs: titles, closed dropdowns, Play/Pause and subplot titles do not overlap.
+- Intro now states the factual free-Colab run: approximately 6.5 min including
+  setup, 384.1 s, all 17 code cells, verified at `842afe2`. Setup/recovery/ref
+  selection and recorded/recompute details moved to a real Appendix B. Old
+  release-TODO prose was removed from the notebook and current reader docs.
+- `notebook/colab_verified.json` records the observed commit/notebook SHA,
+  duration and passing-cell count, generated from COLAB's retained machine-
+  readable timing/cell evidence (their hashes are retained). `colab_evidence.py`
+  formats the shared run note. Submission metadata distinguishes the verified
+  842afe2 run from local captures of later presentation edits.
+- The load plot is a direct `tritflow.viz.scaling.load_sweep_figure` call.
+  No frontend range wrapper exists; see the SIM interface request below.
+- Targeted presentation/document/packaging tests: 16 passed (0.64 s; old saved
+  payload excluded); required-publication tests: 5 passed (0.25 s).
+- Notebook/source fingerprints conservatively include display files. The
+  four-design record will be regenerated once so a published default session
+  retains its recorded-data reuse after these text/display edits. Scientific
+  models, stimuli, acceptance and PNR options are unchanged.
+
+### Phase 10 Interface request — SIM
+
+**Resolved during this follow-up by SIM.** Its public figure now returns
+`xaxis.range=(-2, log10(30))` (0.01…30 pF), `autorange=False`, and a boundary
+caption with paper coordinates. The window caption is at the line's lower
+left. Confirmed these fields through the public API; SIM records 8 targeted
+and 71 full SIM/extract tests passing. The final default capture starts a fresh
+interpreter and consumes this update. No SIM source was edited by FRONTEND.
+
+Original request:
+
+Please repair `tritflow.viz.scaling.load_sweep_figure` (currently lines 41–66):
+its log x-axis extends to 1T pF although all measured loads are in the pF range.
+`add_vrect` creates a boundary annotation using raw pF x while log annotations
+need log10 coordinates; the boundary annotation drives autorange and overlaps
+its 500 ns-window label. Set an explicit log range from positive measured loads
+and move the boundary text into a separate paper-coordinate band or use log10
+for its data-coordinate x. Keep PASS/FAIL/null-settling data and thresholds.
+Real-Colab evidence: `docs/status/COLAB.md`, presentation finding 2 and
+`logs/colab/round2-15b-ch07-load-boundary.png`. FRONTEND leaves the SIM function
+and its axes/annotations unchanged, as requested in phase 10. The numeric
+boundary table and all publication checks pass.
+
 Updated: 2026-10-18. **Phase 9 complete locally: Colab-safe setup, schematic stage, saved-output package and fresh timings verified.**
 
 ## Phase 9 — complete
