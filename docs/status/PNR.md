@@ -78,7 +78,7 @@ The pinned `OSS_FRAME_TEG` is copied with its exact seal ring and prohibited reg
 | adder4 | 23 (4 / 1 / 4 / 14) | 0 / Match | Generated / 0 | Pass | 21.85% | 11.65 |
 | full_add | 8 (1 / 1 / 1 / 5) | 0 / Match | Generated / 0 | Pass | 36.01% | 6.57 |
 
-Canonical chip artifacts are `build/<design>/chip/tr_1um_<design>.gds`, `.cir`, `.chip.json`, a KLayout-rendered `.png` with layer legend, `README.md` with the actual pad map, and `signoff/signoff.summary.json`. Immutable run directories retain drawing/mask GDS, all reports/logs, the reference and copied rules. `ChipResult.signoff()` validates its input/output cache (roughly 15 ms adder4 / 7 ms full_add here). Failed qualification raises and preserves the preceding canonical GDS/JSON/reference. Exact flattened CO/M1/V1/M2 XOR before/after MDP is zero; drawing and mask waiver counts are zero.
+Canonical chip artifacts are `build/<design>/chip/tr_1um_<design>.gds`, `.cir`, `.chip.json`, a KLayout-rendered `.png` with layer legend, `README.md` with the actual pad map, and `signoff/signoff.summary.json`. Immutable run directories retain drawing/mask GDS, all reports/logs, the reference and copied rules. `ChipResult.signoff()` validates its input/output cache (7–34 ms in the observed calls). Failed qualification raises and preserves the preceding canonical GDS/JSON/reference. Exact flattened CO/M1/V1/M2 XOR before/after MDP is zero; drawing and mask waiver counts are zero.
 
 Standalone macro sign-off still correctly reports 46 adder4 / 16 full_add `WAR06: Floating SG Detected` items and a missing full-chip frame. The wrapped GDS resolves these with real terminals, not fixed-bias input ties or warning filters. The inspected template defines no post-MDP LVS stage: `mask_lvs.defined=false`, `matched=null`; drawing LVS is a real strict Match.
 
@@ -132,6 +132,52 @@ Machine-readable complete evidence: `build/pnr_pinned_qualification.json`; the u
 - **CELLS:** pinned generation is consumed and qualified; no remaining cell interface request.
 - Only development formatting packages were installed using the permitted user-pip flags: Black 26.10.1, mypy-extensions 1.1.0, pathspec 1.1.1, pytokens 0.4.1. No runtime dependency was added.
 
+<!-- PNR_RESULTS_BEGIN -->
+## Current verified build results
+
+Published template height: **132 µm**. Input content fingerprint: `6df7cbddebf8448e32a22c28c37c2ef26f33348991f9df976472b235a8369289`.
+
+All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
+
+| Design | Seed | Die (µm) | Aspect | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS | PNR / +LVS (s) |
+|---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|
+| adder4 | 7 | 1692 × 1590 | 1.064 | 46.87% | 47274 | 43333 | 551 / 800 | 0 violations | Match | 6.59 / 8.01 |
+| full_add | 19 | 876 × 702 | 1.248 | 51.26% | 6300 | 6200.5 | 125 / 240 | 0 violations | Match | 2.12 / 3.72 |
+| mac1 | 0 | 876 × 1038 | 1.185 | 47.21% | 7782 | 9195.5 | 167 / 360 | 0 violations | Match | 2.17 / 3.51 |
+| mul1 | 0 | 420 × 366 | 1.148 | 46.37% | 822 | 1022.5 | 25 / 80 | 0 violations | Match | 2.04 / 3.60 |
+
+## Phase 2 → phase 3
+
+Before artifacts are preserved in each design's `phase2/`; cell library and input netlists are unchanged.
+
+| Design | Die before → after (µm) | Aspect before → after | Utilization before → after | Die area reduction | Signal length before → after (µm) |
+|---|---:|---:|---:|---:|---:|
+| adder4 | 1176 × 3534 → 1692 × 1590 | 3.005 → 1.064 | 30.34% → 46.87% | 35.27% | 91254 → 90607 |
+| full_add | 924 × 942 → 876 × 702 | 1.019 → 1.248 | 36.21% → 51.26% | 29.35% | 11817.5 → 12500.5 |
+| mac1 | 912 × 1374 → 876 × 1038 | 1.507 → 1.185 | 34.26% → 47.21% | 27.44% | 17899.5 → 16977.5 |
+| mul1 | 612 × 510 → 420 × 366 | 1.200 → 1.148 | 22.84% → 46.37% | 50.75% | 2106.5 → 1844.5 |
+
+## Placement seed comparison
+
+Cell-terminal HPWL excludes external ports. Each before/after pair uses the same final floorplan. Seed selection prefers aspect ≤1.5 and utilization ≥45%, then smallest die area and drawn signal wirelength; HPWL and seed break ties. All reported runtimes are measured on this machine, include PDK DRC, and exclude seed-search overhead.
+
+| Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | PNR / +LVS (s) | DRC / LVS |
+|---|---:|---:|---:|---:|---:|---|
+| adder4 | 0 | 82552.5 | 53907 | 34.70% | 27.00 / 28.25 | clean / Match |
+| adder4 | 7 | 72040.5 | 48070.5 | 33.27% | 6.14 / 7.45 | clean / Match |
+| adder4 | 19 | 77296.5 | 53035.5 | 31.39% | 17.07 / 18.72 | clean / Match |
+| full_add | 0 | 9135 | 5088 | 44.30% | 2.32 / 4.02 | clean / Match |
+| full_add | 7 | 9831 | 5376 | 45.32% | 3.59 / 5.47 | clean / Match |
+| full_add | 19 | 9135 | 4680 | 48.77% | 2.38 / 3.82 | clean / Match |
+| mac1 | 0 | 16659.5 | 7353 | 55.86% | 2.20 / 3.80 | clean / Match |
+| mac1 | 7 | 16659.5 | 8070.5 | 51.56% | 2.41 / 3.73 | clean / Match |
+| mac1 | 19 | 18171.5 | 10235 | 43.68% | 4.19 / 5.64 | clean / Match |
+| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 1.46 / 3.04 | clean / Match |
+| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 1.48 / 3.00 | clean / Match |
+| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 1.49 / 2.93 | clean / Match |
+
+Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.
+<!-- PNR_RESULTS_END -->
 ---
 
 # Historical phase-1…5 record (superseded dev-PDK evidence)
@@ -720,50 +766,3 @@ No shared-contract changes requested. PNR JSON adds dimensions/hierarchy,
 statistics while preserving contracted placements/wires/vias/pins/power/history.
 Own changes are confined to PNR paths, the explicitly assigned visualization
 and test files, `examples/pnr_all.py`, and generated `build/` outputs.
-
-<!-- PNR_RESULTS_BEGIN -->
-## Current verified build results
-
-Published template height: **132 µm**. Input content fingerprint: `6df7cbddebf8448e32a22c28c37c2ef26f33348991f9df976472b235a8369289`.
-
-All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
-
-| Design | Seed | Die (µm) | Aspect | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS | PNR / +LVS (s) |
-|---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|
-| adder4 | 7 | 1692 × 1590 | 1.064 | 46.87% | 47274 | 43333 | 551 / 800 | 0 violations | Match | 6.59 / 8.01 |
-| full_add | 19 | 876 × 702 | 1.248 | 51.26% | 6300 | 6200.5 | 125 / 240 | 0 violations | Match | 2.12 / 3.72 |
-| mac1 | 0 | 876 × 1038 | 1.185 | 47.21% | 7782 | 9195.5 | 167 / 360 | 0 violations | Match | 2.17 / 3.51 |
-| mul1 | 0 | 420 × 366 | 1.148 | 46.37% | 822 | 1022.5 | 25 / 80 | 0 violations | Match | 2.04 / 3.60 |
-
-## Phase 2 → phase 3
-
-Before artifacts are preserved in each design's `phase2/`; cell library and input netlists are unchanged.
-
-| Design | Die before → after (µm) | Aspect before → after | Utilization before → after | Die area reduction | Signal length before → after (µm) |
-|---|---:|---:|---:|---:|---:|
-| adder4 | 1176 × 3534 → 1692 × 1590 | 3.005 → 1.064 | 30.34% → 46.87% | 35.27% | 91254 → 90607 |
-| full_add | 924 × 942 → 876 × 702 | 1.019 → 1.248 | 36.21% → 51.26% | 29.35% | 11817.5 → 12500.5 |
-| mac1 | 912 × 1374 → 876 × 1038 | 1.507 → 1.185 | 34.26% → 47.21% | 27.44% | 17899.5 → 16977.5 |
-| mul1 | 612 × 510 → 420 × 366 | 1.200 → 1.148 | 22.84% → 46.37% | 50.75% | 2106.5 → 1844.5 |
-
-## Placement seed comparison
-
-Cell-terminal HPWL excludes external ports. Each before/after pair uses the same final floorplan. Seed selection prefers aspect ≤1.5 and utilization ≥45%, then smallest die area and drawn signal wirelength; HPWL and seed break ties. All reported runtimes are measured on this machine, include PDK DRC, and exclude seed-search overhead.
-
-| Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | PNR / +LVS (s) | DRC / LVS |
-|---|---:|---:|---:|---:|---:|---|
-| adder4 | 0 | 82552.5 | 53907 | 34.70% | 27.00 / 28.25 | clean / Match |
-| adder4 | 7 | 72040.5 | 48070.5 | 33.27% | 6.14 / 7.45 | clean / Match |
-| adder4 | 19 | 77296.5 | 53035.5 | 31.39% | 17.07 / 18.72 | clean / Match |
-| full_add | 0 | 9135 | 5088 | 44.30% | 2.32 / 4.02 | clean / Match |
-| full_add | 7 | 9831 | 5376 | 45.32% | 3.59 / 5.47 | clean / Match |
-| full_add | 19 | 9135 | 4680 | 48.77% | 2.38 / 3.82 | clean / Match |
-| mac1 | 0 | 16659.5 | 7353 | 55.86% | 2.20 / 3.80 | clean / Match |
-| mac1 | 7 | 16659.5 | 8070.5 | 51.56% | 2.41 / 3.73 | clean / Match |
-| mac1 | 19 | 18171.5 | 10235 | 43.68% | 4.19 / 5.64 | clean / Match |
-| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 1.46 / 3.04 | clean / Match |
-| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 1.48 / 3.00 | clean / Match |
-| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 1.49 / 2.93 | clean / Match |
-
-Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.
-<!-- PNR_RESULTS_END -->

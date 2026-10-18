@@ -31,6 +31,11 @@ def _sha(path):
 
 
 _IMPORTED_CODE_SHA256 = {p.name: _sha(p) for p in Path(__file__).parent.glob('*.py')}
+_DESIGN_CACHE = {}
+
+
+class PublicationChanged(RuntimeError):
+    """The shared producer published while validation was reading its evidence."""
 
 
 def fingerprint(root=ROOT):
@@ -46,11 +51,19 @@ def fingerprint(root=ROOT):
         directory = root/directory.relative_to(ROOT)
         out = directory/'postlayout'
         paths += [out/p for p in ('summary.json','capacitance.json','vectors.json','lvs.json','post/measurements.json')]
+        if (out/'summary.json').is_file():
+            try:
+                paths += [Path(p) for p in _read(out/'summary.json').get('input_sha256', {})]
+            except (ValueError, OSError):
+                pass  # The changing summary itself still participates in the fingerprint.
         paths += list((out/'inputs').glob('*.json'))
         paths += list((out/'lvs').glob('*.lvsdb'))
         paths += list((out/'lvs').glob('reference.spice'))
         paths += [directory/f'{name}.json', directory/f'{name}.pnr.json']
-    return {str(p.relative_to(root)): _sha(p) if p.exists() else None for p in sorted(set(paths))}
+    def key(path):
+        try: return str(path.relative_to(root))
+        except ValueError: return str(path)
+    return {key(p): _sha(p) if p.exists() else None for p in sorted(set(paths))}
 
 
 def statistics(rows, field):
@@ -147,7 +160,17 @@ def validate(*, output_dir=None, retries=3):
         for group, name, directory in DESIGNS:
             print(f'STA: {group}/{name}', flush=True)
             try:
-                record, artifacts = _validate_design(group, name, directory, models, scaling)
+                prefix = str(directory.relative_to(ROOT))+'/'
+                consumed = {p:h for p,h in before.items() if p.startswith((prefix, 'cells/', '/'))
+                            or (group == 'scaling' and p == 'results/adder_scaling.json')}
+                cache_key = hashlib.sha256(json.dumps(consumed, sort_keys=True).encode()).hexdigest()
+                key = group, name
+                cached = _DESIGN_CACHE.get(key)
+                if cached and cached[0] == cache_key:
+                    record, artifacts = cached[1:]
+                else:
+                    record, artifacts = _validate_design(group, name, directory, models, scaling)
+                    _DESIGN_CACHE[key] = cache_key, record, artifacts
                 records.append(record); reports.update(artifacts)
             except (OSError, ValueError, RuntimeError, KeyError) as error:
                 records.append({'group': group, 'design': name, 'qualified_current': False,
@@ -183,7 +206,7 @@ def validate(*, output_dir=None, retries=3):
         from .plot import validation_figure
         validation_figure(result).write_html(output/'validation.html', include_plotlyjs='cdn')
         return result
-    raise RuntimeError('Shared results changed on every validation attempt; rerun when a publication finishes')
+    raise PublicationChanged('Shared results changed on every validation attempt; retry after publication')
 
 
 def _save(path, data):
@@ -197,15 +220,19 @@ def main():
     parser.add_argument('--watch-seconds', type=float, default=0,
                         help='After initial validation, revalidate changed results for this many seconds')
     args = parser.parse_args()
-    validate()
     deadline = time.monotonic()+args.watch_seconds
-    previous = fingerprint()
-    while time.monotonic() < deadline:
-        time.sleep(min(5., max(0., deadline-time.monotonic())))
+    previous = None
+    while True:
         current = fingerprint()
         if current != previous:
-            validate()
-            previous = fingerprint()
+            try:
+                result = validate()
+                previous = result['source_sha256']
+            except PublicationChanged:
+                if not args.watch_seconds: raise
+                print('STA: publishers are active; watching for the next stable snapshot', flush=True)
+        if time.monotonic() >= deadline: break
+        time.sleep(min(5., max(0., deadline-time.monotonic())))
 
 
 if __name__ == '__main__': main()

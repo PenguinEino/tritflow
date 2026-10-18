@@ -24,10 +24,11 @@ changed. No packages installed, reference/PDK edits or git state changes.
   coverage, source freshness and pinned provenance, not timing accuracy.
 - Plotly notebook figures `timing_figure(report)` and `validation_figure()`;
   portable comparison at `results/sta/validation.html`.
-- Tests: **8 passed in 9.58 s**. Includes independent exhaustive small-circuit
+- Tests: **10 passed in 7.62 s**. Includes independent exhaustive small-circuit
   timing comparisons, reconvergence/false paths, tied inputs, constants,
   restricted vectors, bilinear interpolation/domain failures, source integrity,
-  load accounting, HTML, content-fingerprint changes and a real six-trit adder
+  load accounting, HTML, content-fingerprint changes, active-publication retry,
+  per-design cache invalidation, running-SIM rejection and a real six-trit adder
   with its critical-path pattern checked through every cell.
 
 ## Decisions / electrical limits
@@ -103,8 +104,8 @@ sequence's exact consecutive endpoint pairs.
 | example/mac1 | 147.56 | 313.77 | 241.26 | 2 |
 | example/mul1 | 17.14 | 44.54 | 27.27 | 0 |
 
-The recorded all-endpoint N=6 run took 9.27 s under concurrent stream load;
-its tested-pattern analysis took 0.079 s. Runtime is host/load dependent.
+The recorded all-endpoint N=6 run took 8.07 s under concurrent stream load;
+its tested-pattern analysis took about 0.08 s. Runtime is host/load dependent.
 
 Validation fingerprints **all foreign `results/` content**, consumed physical
 JSON/LVS evidence, cell timing/source files and generation before/after reading.
@@ -113,6 +114,10 @@ SIM's historical `inputs_unchanged` flag is independently checked against live
 source hashes. Every design records actual model/deck pin qualification and
 stale paths. Imported STA code hashes are frozen and code changes require a
 fresh producer, preventing new-file hashes from describing old loaded code.
+The watcher also remains active through repeated publication races. Per-design
+content caches reuse graph calculations when only unrelated corner results
+change, then refresh the complete fingerprint and statistics. Changed consumed
+physical/model/cell inputs invalidate that design's cached calculation.
 
 ## API / reproduction
 
@@ -144,3 +149,6 @@ by these analysis/plotting/validation commands. Validation writes only under
 
 None. Later SIM publications can refresh the complete comparison with the
 same producer/watch command. No shared interface changes are requested.
+The temporary watcher was stopped after its refreshed source snapshot remained
+current; no STA background process is left running. Final content and STA-code
+hashes match the saved validation publication.
