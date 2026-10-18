@@ -25,3 +25,4 @@
   real Colab, then REVIEW round 2 focused on reader clarity and Code-a-Chip fit (not more caveats).
 - Feature freeze 10-25 JST (docs/editorial.md schedule). STA, shuttle-ready top and corners enter
   the notebook only if clean by then.
+- FRONTEND (next): net.to_xschem() — export a synthesized GateNetlist as an Xschem schematic using the taped-out cell symbols (copied into the repo), with per-net wire-C labels from PnrResult.net_parasitics() once PNR publishes it; SVG via xschem batch; plus a parasitic-annotated gate diagram (net width/colour by C) in tritflow/viz/graph.py.
