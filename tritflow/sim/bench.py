@@ -109,11 +109,12 @@ def simulate(subckts: str, top: str, inputs: list[str], outputs: list[str], vect
 
 def dc_transfer(subckts: str, top: str, inputs: list[str], outputs: list[str],
                 sweep_pin: str, *, fixed_trits: dict | None = None,
-                start_v=-5.0, stop_v=5.0, step_v=0.05, **kwargs) -> dict:
+                start_v=-5.0, stop_v=5.0, step_v=0.05, timeout=120, workdir=None, **kwargs) -> dict:
     """Sweep one ideal input voltage with the remaining inputs held at fixed trits."""
     if sweep_pin not in inputs or step_v == 0 or (stop_v-start_v)*step_v <= 0:
         raise ValueError('Invalid DC sweep pin or direction')
     vector = tuple((fixed_trits or {}).get(pin, 0) for pin in inputs)
     bench = build_testbench(subckts, top, inputs, outputs, [vector], **kwargs)
     source = f'Vin{inputs.index(sweep_pin)}'
-    return run_ngspice(bench['netlist'], f'dc {source} {start_v:g} {stop_v:g} {step_v:g}', bench['probes'])
+    return run_ngspice(bench['netlist'], f'dc {source} {start_v:g} {stop_v:g} {step_v:g}',
+                       bench['probes'], timeout=timeout, workdir=workdir)

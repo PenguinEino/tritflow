@@ -25,14 +25,17 @@ def logic_value(cell: str, values) -> int:
     raise ValueError(f'No logic function for {cell}')
 
 
-def dc_operating_points(subckts, top, inputs, outputs, vectors, expected, **kwargs):
+def dc_operating_points(subckts, top, inputs, outputs, vectors, expected, *, timeout=120,
+                        workdir=None, **kwargs):
     """Solve a separate DC operating point for every bias (true static currents)."""
     rows = []
-    for vector in vectors:
+    for index, vector in enumerate(vectors):
         ideal = expected(vector)
         bench = build_testbench(subckts, top, inputs, outputs, [vector],
                                 initial_outputs=ideal, loads_f=0, **kwargs)
-        data = run_ngspice(bench['netlist'], 'op', bench['probes'])['data']
+        folder = None if workdir is None else Path(workdir)/f'state_{index:03d}'
+        data = run_ngspice(bench['netlist'], 'op', bench['probes'],
+                           timeout=timeout, workdir=folder)['data']
         out = {pin: float(data[f'v({pin})'.lower()][-1]) for pin in outputs}
         errors = {pin: out[pin] - 5*ideal[pin] for pin in outputs}
         rows.append({'input_trits': list(vector), 'output_v': out, 'error_v': errors,

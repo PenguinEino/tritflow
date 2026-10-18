@@ -94,7 +94,7 @@ def transfer_figure(result: dict, input_pin: str, outputs, *, currents=('VDD',),
     for pin in outputs:
         fig.add_trace(go.Scatter(x=x,y=data[f'v({pin})'.lower()],name=f'V({pin})',mode='lines'), secondary_y=False)
     for rail in currents:
-        fig.add_trace(go.Scatter(x=x,y=data[f'i({rail.lower()})']*1e6,name=f'I({rail})',mode='lines',
+        fig.add_trace(go.Scatter(x=x,y=np.asarray(data[f'i({rail.lower()})'])*1e6,name=f'I({rail})',mode='lines',
                                 line={'dash':'dash'}), secondary_y=True)
     fig.update_xaxes(title_text=f'V({input_pin}) (V)')
     fig.update_yaxes(title_text='Output voltage (V)',range=[-5.85,5.85],secondary_y=False)

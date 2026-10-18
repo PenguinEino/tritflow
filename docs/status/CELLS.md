@@ -1,4 +1,4 @@
-# CELLS — Phase 3 and Phase 2 complete
+# CELLS — Phase 4 in progress; compact library qualified
 
 ## Published generation
 
@@ -76,7 +76,11 @@ not a forced IC: unseeded NOR occasionally converged to a nonphysical ~526 V
 root even though source and generated networks LVS-match. Phase 2 additionally
 uses connectivity-derived internal-node initial guesses, as the original checks do.
 
-## Phase 2 equivalence
+## Phase 2 device-level identity only
+
+**The table below proves device-level identity only.** Neither extraction contains
+interconnect parasitics. Identical numbers therefore do not establish physical
+layout performance equivalence or show the effect of compaction on wire delay.
 
 `cells/out/equivalence_report.json` now reports **passed** for five electrical
 circuits and all four cascade protocols. INV/NAND/NOR/NANY are compared against
@@ -153,7 +157,9 @@ runs phase 2 against `~/balanced-ternary-logic`. `--out` selects a private stage
 `python3 -m pytest tests/cells -q` includes the ported Phase 2 checks. Final
 run: **16 passed in 504.21 s (8:24)**, against an independently rebuilt private
 compact library. All published GDS/extraction/abstract verification hashes were
-rechecked after this run and still match. No outstanding CELLS work or blockers.
+rechecked after this run and still match. Phase 4 is in progress: compare actual-GDS
+estimated metal C on both layouts, document long-poly resistance, and publish
+the completed evidence atomically.
 
 No extra packages installed. No reference or PDK files changed. Only owned paths
 were edited. No git-state-changing commands were run.
@@ -170,3 +176,71 @@ Publish 2026-10-18T07:47:24.187502+00:00: Phase 3 compact cells, 132 um common h
 Evidence publish 2026-10-18T08:07:34.359407+00:00: five-cell original/compact equivalence and four cascade protocols PASS; cell-view generation remains 2026-10-18T07:47:24.187502+00:00. Failed unseeded diagnostics retained.
 
 Final verification 2026-10-18T08:22:49.239261+00:00: 16 CELLS tests passed; published phase-1 and phase-2 reports both passed; live input hashes unchanged.
+
+## Phase 4 — estimated wire C and poly resistance (in progress)
+
+The previous Phase 2 results establish **device-level identity only**, not
+layout performance equivalence: both networks omit all interconnect parasitics.
+The new comparison stages a full copy of the live generation, measures connected
+M1/M2 polygons in the actual original and compact GDS with SIM's public
+`gds_wire_capacitance`, maps corresponding nets through the independent schematic
+LVS cross-reference, and calls `append_wire_capacitance` on both extracted models.
+Annotated models, per-net geometry/C and runnable benches are retained separately;
+LVS `.ext.spice`, GDS and existing characterization remain unchanged.
+
+SIM's assumptions are epsilon_r=3.9, effective metal heights M1/M2=1/2 um,
+area C=0.03453/0.01727 fF/um2 and fringe=0.02 fF/um perimeter. This is estimated
+lumped substrate C, **not calibrated/signoff PEX**. Coupling, shielding, via C,
+poly C and wire R are absent. Unconnected/purged metal is explicitly reported
+by the API. BUF's original reference is two original INV macros with an ideal
+connection, not a fabricated BUF layout; no original inter-macro route is invented.
+The same DC grids/current checks, 10/100 fF transitions, NANY skew cases and four
+cascade protocols are being repeated. Functional bands and hold times remain
+unchanged; geometry-dependent timing differences are measured, not forced to zero.
+
+### W/L sweep ownership decision
+
+FRONTEND's exact proposal in `docs/status/FRONTEND.md` requests
+`tritflow.sim.sizing.sweep_dimensions(cell, candidates, *, sweep_pin="A",
+fixed_trits=None, start_v=-5.0, stop_v=5.0, step_v=0.1, temperature_c=27.0,
+pdk=None, workdir=None, timeout=120.0)`.
+It explicitly creates temporary source-level SPICE variants for nominal DC
+experiments and never generates/qualifies layout or mutates published extracts.
+This is pure simulation and belongs to **SIM**. CELLS already supplies the
+canonical device IDs and adopted dimensions through `circuits()`/published source.
+SIM's current `tritflow/sim/sizing.py` now contains the requested entrypoint;
+CELLS does not duplicate or edit it. No cell-generation sizing API is needed.
+
+### Long-poly resistance assessment
+
+The installed PDK supplies no calibrated sheet resistance for gate/interconnect
+GC (8/1). `models_IP62_res_v5.lib` uses 95*magRS ohm/square for resistor poly
+GR (8/2); `models_IP62_mos_v2.lib` has MOS diffusion `rsh=44.9607`. Neither
+represents GC, so neither is substituted for it. The documented GC assumption is
+**20 ohm/square**, with sensitivity **5–100 ohm/square**. No poly resistance is
+inserted into the capacitance-only comparisons.
+
+The inventory uses actual LVS-connected GC polygons, removes active regions and
+contact cuts, and decomposes straight field-poly rectangles at bends/widenings.
+It lists every section at least 10 um long and at most 3 um wide, with its net,
+bounding box, L/W and R=Rsheet*L/W in `parasitic_aware.poly_resistance`.
+These are straight-segment estimates, not solved end-to-end gate resistances.
+The longest signal sections (all 1 um wide) are:
+
+| Cell | Longest field-poly section, original / compact (um) | Estimated segment R, original / compact (ohm) |
+|---|---:|---:|
+| INV | 10.95 / 10.95 | 219 / 219 |
+| NAND | 39.20 / 31.20 | 784 / 624 |
+| NOR | 31.45 / 31.45 | 629 / 629 |
+| NANY | 30.20 / 30.20 | 604 / 604 |
+| BUF | 10.95 / 10.95 | 219 / 219 |
+
+NAND's upper gate runs are 8 um shorter; NOR's upper runs also shorten by 8 um,
+while its longest lower B run is retained. INV/NANY signal poly is inherited
+without lengthening. BUF contains two INV copies. RR guard-ring sections on VDD
+include 41x2 um rectangles (410 ohm under the assumption); these are distinguished
+from signal gate buses in the inventory. The worst compact signal section is
+629 ohm nominal, or 157–3145 ohm across the assumed sheet-R range. Gate charging
+through these distributed resistances remains a timing concern. Metal-C checks
+cannot validate that effect; calibrated GC/contact R and poly C are needed for
+that claim. This limitation also applies to the original layout.

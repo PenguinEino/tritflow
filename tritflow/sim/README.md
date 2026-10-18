@@ -104,3 +104,70 @@ negative single-digit probes. Input order, labels and independent expected
 arithmetic are saved in `vectors.json`. Default hold is 500 ns (after longer-window qualification), maximum timestep
 2 ns and output load 10 fF; CLI options change timing resolution explicitly.
 See `tritflow.viz.waves.waveform_figure` and `transfer_figure` for reusable plots.
+
+### Chapter 2 sizing (cached nominal DC experiment)
+
+```python
+from tritflow.sim.sizing import sweep_dimensions, load_grid
+from tritflow.viz.scaling import sizing_figure
+from tritflow.viz.waves import transfer_figure
+
+grid = load_grid('INV')                 # precomputed, no ngspice
+sizing_figure(grid)                      # star = adopted source dimensions
+row = grid['rows'][grid['adopted_index']]
+transfer_figure(row['transfer'], 'A', ['Y'])
+
+# Sparse canonical device-ID changes; unspecified W/L inherit the source.
+result = sweep_dimensions('INV', [
+    {'MP': {'w_um': 16}, 'MN': {'l_um': 2}, 'RP': {'l_um': 45}},
+])                                      # baseline is included once
+```
+
+`python3 -m tritflow.sim.sizing` precomputes INV (90 points) and NANY (18).
+The grid covers W, common MOS L and RR length, not connectivity or new layout.
+NANY transfer sweeps A with B=0, but its error/current metrics cover **all nine**
+trit states. `device_ids`, fully resolved `dimensions`, `adopted_index`, source
+and model hashes make each point traceable. `fixed_trits` addresses nonswept
+inputs only. Solver failures retain null unavailable metrics and diagnostics.
+`workdir=...` forces execution and preserves each candidate's transfer/DC files;
+otherwise only the authorized result cache persists. `timeout` is per ngspice
+invocation, in seconds. Published source/layout/extraction files are never changed.
+
+### Chapter 7 adder scaling and output loading
+
+```sh
+python3 examples/adder_scaling.py --jobs 2
+python3 examples/adder_scaling.py --sizes 1 2 3 4 5 6 --skip-load
+python3 examples/adder_scaling.py --load-only
+```
+
+The producer uses public HDL/synthesis and `pnr.place_and_route`, real cells,
+normal PDK DRC, strict PDK LVS, actual-GDS wire C, pre/post ngspice and IR solving.
+Artifacts live in `build/adder_scaling/adderN/postlayout/`; the portable result
+matrix is `results/adder_scaling.json`. Each size has both signs of carry
+assertion and release through every digit, plus overflow/zero/opposite/alternating
+states. The carry metric takes the worst of COUT and the most-significant SUM
+endpoint on those four transitions. N=1 also checks all 27 states. Static power
+uses independent post-layout operating points on unique documented states,
+`-sum(Vrail * I(source))`, rather than transient tail current. Its maximum is
+over those states, not an exhaustive all-input maximum for N>1. IR uses the
+separate per-cell rail-current envelope; it does not feed back into SPICE.
+
+`tritflow.sim.scaling.load_scaling()` and
+`tritflow.sim.load_sweep.load_sweep_results()` are fast reads of the published
+measurements, with no simulator/PNR work. `scaling_figure()` and
+`load_sweep_figure()` in `tritflow.viz.scaling` return Plotly figures. The producer
+validates source/model/code and output hashes before reusing expensive results;
+rerun it after cell changes. Cached measured datasets retain their provenance
+when read on a machine without their original `build/` files.
+
+The load experiment attaches equal external capacitance to SUM and COUT on the
+verified extracted full adder, including GDS wire C, and visits all 27 states
+in lexicographic order (26 transitions; not all 702 directed transitions).
+Each segment is 500 ns with a 1 ns ramp and 2 ns maximum timestep. Checks occur
+at 499 ns; settling is final ±0.5 V band entry through segment end. The first
+coarse FAIL is bracketed and refined to 2% or 50 fF. JSON includes the exact
+last passing and first failing measured loads, per-output times and failed
+checkpoints. The figure omits unsettled delays rather than inventing finite
+values. The bracket is local to the measured sequence; no unmeasured monotonic
+load, PVT, or silicon guarantee is implied.

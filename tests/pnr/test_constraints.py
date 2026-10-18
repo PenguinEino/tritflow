@@ -95,11 +95,37 @@ def test_every_saved_placement_respects_row_current_capacity(tmp_path):
     library = mock_library()
     library.cells["INV"].characterization = {"max_static_current_a": .0008}
     result = place_and_route(chain(20), library, output_dir=tmp_path,
-                             anneal_steps=100, history_every=10, seed=19, run_pdk_drc=False)
+                             rows=2, anneal_steps=100, history_every=10, seed=19, run_pdk_drc=False)
     limit = 2*.00025*min(y1-y0 for y0, y1 in library.template["rails"].values())
     currents = result.data["power"]["currents_a"]
-    assert result.stats["row_count"] == 4
+    assert result.stats["spans_per_row"] > 1
+    assert any(s["side"] == "internal" for s in result.data["power"]["straps"])
     for snapshot in result.data["history"]:
-        for row in {p["row"] for p in snapshot["placements"]}:
-            load = sum(currents[p["inst"]] for p in snapshot["placements"] if p["row"] == row)
+        plan = result.data["power"]
+        for pl in snapshot["placements"]:
+            left = plan["margin"]+pl["span"]*(plan["span_width"]+plan["span_gap"])
+            assert left <= pl["x"] <= left+plan["span_width"]-pl["width"]
+        for row, span in {(p["row"], p["span"]) for p in snapshot["placements"]}:
+            load = sum(currents[p["inst"]] for p in snapshot["placements"]
+                       if (p["row"], p["span"]) == (row, span))
             assert load <= limit+1e-12
+        for span in {p["span"] for p in snapshot["placements"]}:
+            load = sum(currents[p["inst"]] for p in snapshot["placements"] if p["span"] == span)
+            assert load <= result.data["power"]["span_current_limit_a"]+1e-12
+
+
+def test_public_rows_and_effort_control_the_physical_floorplan(tmp_path):
+    library = mock_library()
+    circuit = chain(12)
+    a = place_and_route(circuit, library, output_dir=tmp_path/"two", rows=2,
+                        anneal_steps=0, run_pdk_drc=False)
+    b = place_and_route(circuit, library, output_dir=tmp_path/"four", rows=4,
+                        anneal_steps=100, run_pdk_drc=False)
+    assert (a.stats["row_count"], b.stats["row_count"]) == (2, 4)
+    assert a.data["die"] != b.data["die"]
+    assert a.stats["hpwl_before_um"] == a.stats["hpwl_after_um"]
+    assert b.stats["hpwl_after_um"] <= b.stats["hpwl_before_um"]
+    assert all(c["clean"] for c in b.data["checks"].values() if c["clean"] is not None)
+    for invalid in (0, -1, 2.5):
+        with pytest.raises(ValueError, match="rows"):
+            place_and_route(circuit, library, output_dir=tmp_path, rows=invalid)

@@ -69,6 +69,7 @@ def checked_artifacts(build_root, designs, views):
 
 def _lvs(result, netlist, cell_subckts, directory):
     from tritflow.extract import extract_layout
+    started = time.perf_counter()
     report = extract_layout(result.gds_path, netlist.top, directory,
                             gate_netlist=netlist, cell_subckts=cell_subckts)
     summary = {key: value for key, value in report.items() if key != "log"}
@@ -76,6 +77,9 @@ def _lvs(result, netlist, cell_subckts, directory):
     write_json(path, summary)
     result.data["checks"]["lvs"] = {"clean": report["matched"], "summary_path": str(path),
                                    "report_path": report["report"], "errors": report["errors"]}
+    timing = result.stats["runtime_s"]
+    timing["lvs"] = time.perf_counter()-started
+    timing["with_lvs"] = timing["total"]+timing["lvs"]
     write_json(result.json_path, result.data)
     if not report["matched"]:
         raise RuntimeError(f"{netlist.top}: strict LVS mismatch; inspect {path}")
@@ -83,7 +87,7 @@ def _lvs(result, netlist, cell_subckts, directory):
 
 
 def build_design(name, build_root, library, seeds, anneal_steps, *, views=True):
-    """Compare fully routed/DRC/LVS-checked seeds and publish the lowest HPWL."""
+    """Compare verified seeds, preferring compact dies and short drawn routes."""
     from tritflow.viz.layout import save_layout_views
     out = Path(build_root)/name
     netlist = GateNetlist.load(out/f"{name}.json")
@@ -107,18 +111,24 @@ def build_design(name, build_root, library, seeds, anneal_steps, *, views=True):
     passing = [trial for trial in trials if trial["passed"]]
     if not passing:
         raise RuntimeError(f"{name}: all seeds failed; inspect {out/name}.seed_comparison.json")
-    best = min(passing, key=lambda trial: (trial["hpwl_after_um"], sum(trial["wirelength_um"].values()), trial["seed"]))
+    best = min(passing, key=lambda trial: (
+        trial["aspect_ratio"] > 1.5, trial["utilization"] < .45, trial["die_area_um2"],
+        sum(trial["wirelength_um"].values()), trial["hpwl_after_um"], trial["seed"]))
     # Regenerate at the canonical location: report paths and self-check evidence
     # refer to build/<design>/ rather than a copied seed directory or /tmp.
     print(f"{name}: publishing seed {best['seed']} to {out}", flush=True)
     result = place_and_route(netlist, library, output_dir=out, seed=best["seed"], anneal_steps=anneal_steps)
     lvs = _lvs(result, netlist, subckts, out/"lvs")
+    view_start = time.perf_counter()
     figures = save_layout_views(result) if views else {}
-    summary = {"design": name, "selected_seed": best["seed"], "selection": "minimum final cell-terminal HPWL among DRC/LVS-passing seeds",
+    view_seconds = time.perf_counter()-view_start
+    summary = {"design": name, "selected_seed": best["seed"],
+               "selection": "DRC/LVS pass, aspect <= 1.5, utilization >= 45%, then minimum die area, drawn signal wirelength, HPWL, seed",
                "stats": result.stats, "checks": result.data["checks"], "seed_comparison": trials,
                "gds_path": str(result.gds_path), "json_path": str(result.json_path),
                "views": {key: str(path) for key, path in figures.items()},
-               "lvs": lvs}
+               "lvs": lvs, "view_runtime_s": view_seconds,
+               "canonical_runtime_with_views_s": result.stats["runtime_s"]["with_lvs"]+view_seconds}
     write_json(out/f"{name}.pnr.summary.json", summary)
     return summary
 
@@ -133,26 +143,44 @@ def update_status(build_root, cells_root, results, fingerprint):
     lines = ["<!-- PNR_RESULTS_BEGIN -->", "## Current verified build results", "",
              f"Published template height: **{height:g} µm**. Input content fingerprint: `{fingerprint}`.", "",
              "All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.", "",
-             "| Design | Seed | Die (µm) | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS |",
-             "|---|---:|---:|---:|---:|---:|---:|---|---|"]
+             "| Design | Seed | Die (µm) | Aspect | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS | PNR / +LVS (s) |",
+             "|---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|"]
     for result in results:
         stats, checks = result["stats"], result["checks"]
         width, height = stats["die_size_um"]
         lines.append(f"| {result['design']} | {result['selected_seed']} | {width:g} × {height:g} | "
-                     f"{stats['utilization']:.2%} | {stats['wirelength_um']['M1']:g} | {stats['wirelength_um']['M2']:g} | "
+                     f"{stats['aspect_ratio']:.3f} | {stats['utilization']:.2%} | {stats['wirelength_um']['M1']:g} | {stats['wirelength_um']['M2']:g} | "
                      f"{stats['via_count']} / {stats['power_via_count']} | {checks['pdk_drc']['violations']} violations | "
-                     f"{'Match' if checks['lvs']['clean'] else 'FAILED'} |")
+                     f"{'Match' if checks['lvs']['clean'] else 'FAILED'} | "
+                     f"{stats['runtime_s']['total']:.2f} / {stats['runtime_s']['with_lvs']:.2f} |")
+    baseline_path = Path(build_root)/"pnr_phase2_baseline.json"
+    if baseline_path.exists():
+        baseline = {r["design"]: r for r in json.loads(baseline_path.read_text())}
+        lines += ["", "## Phase 2 → phase 3", "",
+                  "Before artifacts are preserved in each design's `phase2/`; cell library and input netlists are unchanged.", "",
+                  "| Design | Die before → after (µm) | Aspect before → after | Utilization before → after | Die area reduction | Signal length before → after (µm) |",
+                  "|---|---:|---:|---:|---:|---:|"]
+        for result in results:
+            before, after = baseline[result["design"]]["stats"], result["stats"]
+            bw, bh = before["die_size_um"]
+            aw, ah = after["die_size_um"]
+            lines.append(f"| {result['design']} | {bw:g} × {bh:g} → {aw:g} × {ah:g} | "
+                         f"{max(bw,bh)/min(bw,bh):.3f} → {after['aspect_ratio']:.3f} | "
+                         f"{before['utilization']:.2%} → {after['utilization']:.2%} | "
+                         f"{1-after['die_area_um2']/before['die_area_um2']:.2%} | "
+                         f"{sum(before['wirelength_um'].values()):g} → {sum(after['wirelength_um'].values()):g} |")
     lines += ["", "## Placement seed comparison", "",
-              "Cell-terminal HPWL excludes external ports. Each before/after pair uses the same final floorplan. Seeds can select different row counts/channel widths; select the lowest final HPWL among fully routed, DRC/LVS-passing candidates, then wirelength and seed as tie-breaks.", "",
-              "| Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | DRC / LVS |",
-              "|---|---:|---:|---:|---:|---|"]
+              "Cell-terminal HPWL excludes external ports. Each before/after pair uses the same final floorplan. Seed selection prefers aspect ≤1.5 and utilization ≥45%, then smallest die area and drawn signal wirelength; HPWL and seed break ties. All reported runtimes are measured on this machine, include PDK DRC, and exclude seed-search overhead.", "",
+              "| Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | PNR / +LVS (s) | DRC / LVS |",
+              "|---|---:|---:|---:|---:|---:|---|"]
     for result in results:
         for trial in result["seed_comparison"]:
             if trial["passed"]:
                 lines.append(f"| {result['design']} | {trial['seed']} | {trial['hpwl_before_um']:g} | "
-                             f"{trial['hpwl_after_um']:g} | {trial['hpwl_improvement_pct']:.2f}% | clean / Match |")
+                             f"{trial['hpwl_after_um']:g} | {trial['hpwl_improvement_pct']:.2f}% | "
+                             f"{trial['runtime_s']['total']:.2f} / {trial['runtime_s']['with_lvs']:.2f} | clean / Match |")
             else:
-                lines.append(f"| {result['design']} | {trial['seed']} | — | — | — | FAILED; see seed comparison JSON |")
+                lines.append(f"| {result['design']} | {trial['seed']} | — | — | — | — | FAILED; see seed comparison JSON |")
     lines += ["", "Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.", "<!-- PNR_RESULTS_END -->"]
     block = "\n".join(lines)+"\n"
     path = ROOT/"docs/status/PNR.md"

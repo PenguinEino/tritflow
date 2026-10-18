@@ -18,7 +18,7 @@ Constants live in `tritflow/__init__.py`.
 | `tritflow/pnr/`, `tests/pnr/` | PNR |
 | `tritflow/sim/`, `tritflow/extract/`, `tests/sim/`, `tests/extract/` | SIM |
 | `tritflow/viz/graph.py`, `tests/viz/` | FRONTEND |
-| `tritflow/viz/waves.py` | SIM |
+| `tritflow/viz/waves.py`, `tritflow/viz/scaling.py`, `results/`, `cells/out/sizing/` | SIM |
 | `tritflow/viz/layout.py`, `tests/viz/test_layout*.py` | PNR |
 | `tritflow/flow.py` | FRONTEND |
 | `notebook/` | FRONTEND (draft) |

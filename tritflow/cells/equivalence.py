@@ -26,7 +26,7 @@ def _delay_difference(left,right):
     return result
 
 
-def compare_cell(cell, original, compact, proof, folder):
+def compare_cell(cell, original, compact, proof, folder, *, wire_c=False):
     """Compare one independent extracted cell, retaining every protocol result."""
     result={'intrinsic_parameters_identical':device_parameters(original)==device_parameters(compact)}
     grids={};samples={};ops={};trans={}
@@ -46,16 +46,19 @@ def compare_cell(cell, original, compact, proof, folder):
     result.update(dc_grid=grids,operating_points=ops,transient=trans,
                   comparison={'max_grid_difference_v':delta,'max_static_current_difference_a':current,
                               'max_settling_difference_s':delays})
+    result['acceptance_scope']=('Both layouts meet the original functional bands and hold times; '
+                              'wire-C timing differences are measured, not required to vanish.' if wire_c else
+                              'Device-level identity only; no interconnect parasitics in either network.')
     result['passed']=(proof['passed'] and result['intrinsic_parameters_identical']
                       and all(g['passed'] for g in grids.values()) and all(o['passed'] for o in ops.values())
                       and all(t['passed'] for suite in trans.values() for t in suite.values())
                       and delta<=1e-4 and current<=1e-9
-                      and all(v is not None and v<=1e-9 for v in delays.values()))
+                      and all(v is not None and (wire_c or v<=1e-9) for v in delays.values()))
     print(cell,'equivalence',result['passed'],'grid delta',delta,'delay differences',delays,flush=True)
     return result
 
 
-def compare_chain(kind, original, compact, folder):
+def compare_chain(kind, original, compact, folder, *, wire_c=False):
     """Compare one complete cascade protocol with all stages observed."""
     rows={};data={}
     for label,texts in [('original',original),('compact',compact)]:
@@ -63,7 +66,7 @@ def compare_chain(kind, original, compact, folder):
     outputs=list(rows['original']['stages'])
     delta=max(float(np.max(abs(data['original'][f'v({p})']-data['compact'][f'v({p})']))) for p in outputs)
     delays=_delay_difference(rows['original']['transient'],rows['compact']['transient'])
-    passed=all(r['passed'] for r in rows.values()) and delta<=1e-3 and delays is not None and delays<=1e-9
+    passed=all(r['passed'] for r in rows.values()) and delta<=1e-3 and delays is not None and (wire_c or delays<=1e-9)
     result={**rows,'max_dc_difference_v':delta,'max_settling_difference_s':delays,'passed':passed}
     print(kind,'chain equivalence',passed,'DC delta',delta,flush=True)
     return result
@@ -84,7 +87,7 @@ def equivalence(out=CELLS_DIR/'out',reference=Path.home()/'balanced-ternary-logi
                           'loads_f':[10e-15,100e-15],'input_skew_s':2e-9},
             'comparison_tolerances':{'grid_voltage_v':1e-4,'static_current_a':1e-9,
                                      'settling_difference_s':1e-9,'chain_voltage_v':1e-3},
-            'scope':'Fresh PDK device/junction extraction, no interconnect RC. Nominal 27 C only.',
+            'scope':'Device-level identity only: fresh PDK device/junction extraction without interconnect parasitics in either layout. Nominal 27 C only; does not prove layout performance equivalence.',
             'cells':{},'chains':{}}
     for cell in original:
         report['cells'][cell]=compare_cell(cell,original[cell],compact[cell],proof[cell],work/cell)

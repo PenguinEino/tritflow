@@ -32,7 +32,8 @@ def cell_current(cell, default):
 
 
 def power_plan(placements, library, *, current_density_a_per_um=.00025,
-               default_cell_current_a=.0001, sheet_resistance_ohm=.05):
+               default_cell_current_a=.0001, sheet_resistance_ohm=.05,
+               span_current_limit_a=None):
     """Plan split M2 trunks; template rail bands are immutable cell geometry.
 
     Width scaling is an assumption; the conservative default uses the manual's
@@ -72,6 +73,11 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
                 raise ValueError(f"Row {row} span {span} {name}: current requires a wider cell rail")
             if band[1]-band[0] > 45:
                 raise ValueError("Cell rail exceeds the PDK unslotted 45 µm limit")
+    if span_current_limit_a is not None:
+        # Reserve this envelope during placement as well as sizing. Interior
+        # banks feed half of each neighboring span's aggregate current.
+        bank_loads = [span_current_limit_a*(.5 if i in (0, spans) else 1.)
+                      for i in range(spans+1)]
     banks = []
     for index, load in enumerate(bank_loads):
         required = max(6.4, load/current_density_a_per_um)
@@ -88,6 +94,7 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
     return {"margin": margin, "trunk_width": max(b["width"] for b in (banks[0], banks[-1])),
             "trunks_per_supply_per_side": max(b["count"] for b in (banks[0], banks[-1])),
             "stride": banks[0]["width"]+2.4, "feed_banks": banks, "span_gap": gap,
+            "span_current_limit_a": span_current_limit_a,
             "currents_a": currents, "rail_currents_a": rail_currents, "current_sources": sources,
             "assumptions": {"default_cell_current_a": default_cell_current_a,
                 "allowed_current_a_per_um": current_density_a_per_um,
@@ -125,7 +132,6 @@ def draw_power(data, placements, library, plan):
                                "points": [[x, p+width/2], [x, h-width/2]],
                                "side": side, "bank": index})
                 pins.append({"name": rail, "layer": "M2", "rect": [x-width/2, h-p, x+width/2, h]})
-        xs = [x for x, _ in feeds]
         y0, y1 = t["rails"][rail]
         railwidth = y1-y0
         for row, y in sorted(row_ys.items()):

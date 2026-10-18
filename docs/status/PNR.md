@@ -1,4 +1,4 @@
-# PNR stream — phase 2
+# PNR stream — phase 3
 
 ## Done
 
@@ -27,9 +27,11 @@ Phase-1 `/tmp` artifacts are superseded by these project-local results.
 
 ## In progress / blockers
 
-None. Phase 2 is complete: all four canonical designs and all twelve seed
-candidates pass connectivity, own routing DRC, official PDK DRC and strict LVS.
-The content-aware cache also verified that every checked artifact is current.
+Phase-3 compact, near-square builds are complete. All four canonical designs
+and all twelve seed candidates pass drawn connectivity, routing DRC, official
+PDK DRC and strict LVS. All canonical aspect ratios are ≤1.5 and utilization
+is ≥45%. See the generated before/after and timing tables below.
+No blockers; no background PNR processes are left running.
 
 ## Decisions and physical scope
 
@@ -48,50 +50,69 @@ an obstacle between channel or pin coordinates. Via cuts are 1.4 µm with 1 µm
 metal enclosure; signal landings are 3.4 µm square. Signal M1/M2 wires use
 1.8/3.0 µm widths, with conservative 3.4 µm M2 occupancy reservations.
 
-**Compact pin escapes.** NANY/NAND/NOR A and B share a column at different y
-coordinates. The lower pin must escape downward and the upper pin upward.
-These mandatory M2 stubs and their first channel landing, plus boundary-port
-landings, are reserved before maze routing other nets. This removed a full-
-adder routing failure that horizontal widening alone had inflated to 73 tracks;
-the compact full-adder now routes in 12-track channels.
+**Compact pin escapes and MY.** NANY/NAND/NOR A and B share a column at
+different y coordinates. The lower pin escapes downward, the upper upward.
+Those mandatory M2 stubs and first channel landings, plus boundary-port
+landings, are reserved before routing. Rows initially alternate R0/MY; annealing
+also flips individual instances. This can share vertical pin-access columns
+between rows while preserving supply polarity. All abstract constraints are
+reflected with each cell. The selected adder contains both orientations.
 
-**Vertical capacity.** The compact NANY exposes only three full-height free M2
-columns, two of which carry signal terminals. Horizontal-channel widening
-cannot repair a lack of vertical transit capacity. Compact builds therefore
-reserve eight additional vertical signal tracks per side between the cell rows
-and power banks. Routing failure grows both the horizontal channels and these
-vertical corridors. This is an explicit die-area cost, included in utilization,
-wirelength and HPWL measurements. Cell metal is never removed or ignored.
+**Floorplan and route capacity.** Automatic sizing enumerates physical row counts
+and independently fed spans per row, including actual power-bank widths and
+channel height in its area/aspect objective. It prefers aspect ≤1.5, then
+minimum die area. Cell rows remain separated by horizontal routing channels.
+Full_add/mac1/mul1 start with four tracks per channel; adder4 starts with eight.
+Eight deterministic rip-up/reorder passes precede channel expansion by two
+tracks (compact library). Only failed attempts add an extra side bypass track.
+The selected four designs require no added side bypass tracks. The compact
+NANY's three advertised full-height M2 tracks remain binding throughout.
 
-**Placement metric.** Saved HPWL is computed from actual selected cell signal
-accesses, excluding external ports. Initial and final snapshots are evaluated
-in the same final floorplan, including any channel expansion. Width/height and
-source `hier` are embedded in each placement and history snapshot. The selected
-seed minimizes final HPWL among candidates that pass complete routing, own
-checks, PDK DRC and strict LVS; total signal wirelength and seed break ties.
-Different seeds can require different row counts or channel widths, so their
-initial HPWL values need not be identical. The tables retain those differences.
-Initial row packing and every annealing candidate must satisfy the worst-case
-row-current capacity; overloaded swaps/moves are rejected. This replaced the
-late-overload retry behavior and reduced the selected four-trit adder from
-25 to 16 rows (6.442 to 4.156 mm²), while keeping all saved snapshots within
-the same current limit. Its final HPWL is 49743 µm versus 96081 µm initially.
+**Placement.** Default effort is 600 annealing steps, seed 0. Swaps, moves and
+MY flips minimize cell-terminal HPWL with a weak row-width penalty. Each
+(row, span) has a hard current limit, every span has a fixed physical width,
+and each span's aggregate current remains within the feed-bank envelope.
+These constraints apply to the initial packing, every candidate and every
+saved history frame. Cells are centered in their span on the 6 µm grid.
+History HPWL is recomputed on the final routing-channel coordinates, so each
+before/after pair compares identical floorplan dimensions. HPWL excludes
+external ports; drawn wirelength includes their routes.
 
-**Power.** Missing characterization uses 100 µA per logic cell and zero intrinsic
-current for FILL/TIE. SIM's `max_static_current_a` and `dc[*].rail_current_a`
-override defaults. Sizing sums cell maxima; rail IR uses independently maximized
-per-rail currents, a conservative envelope rather than one realizable vector.
-Both row ends feed separate VDD/VMID/VSS M2 banks. Individual unslotted trunks
-remain at most 42 µm and are split when more total width is required. The compact
-4 µm lower rails and assumed current limit can require extra cell rows.
+**Power / SIM compatibility.** Missing characterization uses 100 µA per logic
+cell and zero intrinsic current for FILL/TIE. SIM's `max_static_current_a` and
+`dc[*].rail_current_a` override defaults. The conservative 0.00025 A/µm width
+scaling and immutable 4 µm lower cell rails previously limited adder4 to four
+cells per row and forced sixteen rows. Internal vertical M2 banks now subdivide
+long rows into independently fed spans. Adder4 uses eight physical rows with
+two spans each and three banks (left/internal/right); the other designs need
+only the two end banks. Each span still has the same two-ended current limit.
+Internal banks are sized for half the aggregate load of each adjacent span;
+an outer bank supplies half of its single neighboring span. The maximum
+initial span load is reserved throughout annealing, so bank sizing stays valid.
+Parallel unslotted trunks remain ≤42 µm. A 6.4 µm minimum trunk fits two V1
+cuts at each 4 µm rail crossing; via arrays use the available rail/trunk widths.
+
+SIM continues reading `build/<design>/<top>.pnr.json`. The `power.straps`,
+`power.rails`, `power.vias`, `power.pins`, current maps, assumptions and
+`ir_drop` records preserve their existing fields and units. Geometry lists
+remain the authority for IR extraction. Additions are `feed_banks`,
+`span_width`, `span_gap`, `span_current_limit_a`, and each strap's `bank` index;
+`side` additionally accepts `internal`. Legacy trunk/stride fields describe
+the outer banks only; internal banks can contain more parallel trunks.
+Placements/history additionally carry `span`; `row` still means physical row.
+No SIM source files or processes were changed. A file-based compatibility
+check with SIM's existing `estimate_ir_drop` is retained separately as
+`<design>.pnr.ir_compatibility.json`.
 
 The PDK's local `openIP62/IP62/Technology/doc/OS00_リファレンスマニュアル_rev1.1.pdf`,
 I.3.1/I.3.2, specifies M1(2 µm) 900 µA flat / 500 µA stepped, M2(3 µm) 3.7 mA,
 and V1 780 µA/cut. Default `current_density_a_per_um=0.00025` uses the lower
 stepped-M1 value with **assumed linear width scaling** for both metals; this is
-not EM sign-off. The IR estimate assumes 0.05 Ω/square, groups parallel trunks
-at their mean x, and omits via/package resistance. Divider zero shift uses equal
-pull-up/down conductance for INV/NAND/NOR/BUF; NANY reports its VMID envelope.
+not EM sign-off. Two-ended load sharing is a sizing approximation. PNR's IR
+estimate assumes 0.05 Ω/square, groups parallel trunks at their mean x, and
+omits via/package resistance. Divider zero shift uses equal pull-up/down
+conductance for INV/NAND/NOR/BUF; NANY reports its VMID envelope. SIM's separate
+geometry-based solver includes every drawn via and its assumed resistance.
 
 **Verification.** Connectivity unions flattened drawn M1/V1/M2 islands and
 checks every expected signal/power terminal and route. Direct-metal mock TIE
@@ -101,6 +122,9 @@ and enclosure. The complete PDK deck runs without waived regions, disabled
 warnings or skipped antenna rules; external TXM1/TXM2 labels are at the top
 hierarchy because the deck reads top-cell labels for external gates. Official
 report item counts, not process exit codes alone, determine DRC pass/fail.
+An independent per-layer Region XOR of every used cell master in the archived
+phase-2 and canonical phase-3 GDSs is empty for all four designs; area gains
+come from the floorplan/routing changes with identical cell geometry.
 
 Strict LVS compares the GDS against the GateNetlist plus `cells/out/all.spice`.
 It establishes device/interconnect connectivity, not post-layout timing or
@@ -131,12 +155,10 @@ count as a cached pass. The actual batch observed publication changes and
 restarted all four designs; the final run completed on a stable publication. The runner refreshes only the result-table block in this
 status file for full canonical project builds. Custom/test builds leave it alone.
 
-A live `python3 examples/pnr_all.py --watch` process is running: **PID 171041**,
-also recorded in `build/pnr_watch.pid`. It has confirmed the unchanged-input
-cache path and will rebuild/refresh the result tables for new published views.
-Stop this watcher with `kill -INT 171041`. Restart it after changing PNR Python
-implementation code; cell/template/characterization publications reload without
-restarting the process.
+No watcher is running. `--watch` is an opt-in foreground script the integrator
+can start and interrupt; a normal run exits after verification. Restart a watcher
+after PNR Python implementation changes; cell/template/characterization
+publications reload without restarting it. No watcher PID file is retained.
 
 Each `build/<design>/` contains:
 
@@ -145,6 +167,54 @@ Each `build/<design>/` contains:
   LVS databases, extracted SPICE, reference SPICE and the unmodified deck log.
 - `pnr_seeds/seed{0,7,19}/` retains each candidate's physical and LVS evidence.
 - `<design>.layout.png` and `.layout.html`, `.placement.html`, `.routing.html`.
+
+## Public floorplan / placement controls
+
+`place_and_route(..., rows=None, anneal_steps=600)` exposes the two notebook
+controls. `rows=None` automatically sizes a near-square die; a positive integer
+fixes its physical row count and adapts its power spans. `anneal_steps=0` keeps
+initial placement, 600 is the fast default, and 2400 gives more optimization.
+The CLI also accepts `--rows K --anneal-steps N`. Fixed rows can reduce
+utilization; the API honors that explicit choice.
+
+```python
+from tritflow.pnr import place_and_route
+from tritflow.viz.layout import placement_animation
+
+r = place_and_route("build/adder4/adder4.json",
+                    output_dir="build/adder4/notebook_rows10_steps2400",
+                    rows=10, anneal_steps=2400, seed=7)
+print(r.stats["die_size_um"], r.stats["utilization"], r.stats["runtime_s"])
+placement_animation(r).show()
+```
+
+Controlled adder4 measurements (seed 7, same cells/netlist, every candidate
+PDK-DRC clean and strict-LVS matched):
+
+| Rows requested | Steps | Actual rows / spans | Die (µm) | Utilization | HPWL before → after (µm) | Signal length (µm) | PNR / +LVS (s) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Auto | 0 | 8 / 2 | 1752 × 1698 | 42.38% | 76903.5 → 76903.5 | 116083 | 8.70 / 9.61 |
+| Auto | 600 | 8 / 2 | 1740 × 1590 | 45.57% | 74515.5 → 47968.5 | 79949 | 3.20 / 4.04 |
+| Auto | 2400 | 8 / 2 | 1740 × 1590 | 45.57% | 74515.5 → 31296 | 65938 | 3.35 / 4.21 |
+| 10 | 600 | 10 / 2 | 1518 × 1974 | 42.08% | 94653 → 52837.5 | 87766 | 3.70 / 4.67 |
+
+Raw records and DRC/LVS evidence: `build/adder4/floorplan_comparison.json` and
+`build/adder4/floorplan_comparison/`. Zero effort needed two more channel tracks;
+its HPWL therefore uses those wider final channel coordinates for both frames.
+All tested adder4 API runs finish below 10 s including strict LVS. Canonical
+PNR timings below include library discovery, placement, routing, GDS export,
+geometry checks and the PDK DRC. `+LVS` adds extraction/comparison; view rendering
+is separate in each summary JSON. No phase-2 runtime was archived, so the
+comparison makes no phase-2 speedup claim.
+
+Canonical PNR + strict LVS + all four exported notebook views took adder4 12.50 s, full_add 4.51 s, mac1 5.87 s, mul1 2.68 s.
+Timings are wall-clock measurements on this machine; concurrent stream/test
+activity affects them. The slowest adder4 seed in the final batch is 6.90 s including LVS.
+
+SIM compatibility checks on the canonical JSONs completed with every cell
+connected to all three supply pads. Maximum rail deviations from SIM's
+geometry-based solver are adder4 13.54 mV, full_add 7.27 mV, mac1 9.86 mV,
+mul1 2.17 mV under its independent per-rail worst-current envelope.
 
 ## Notebook figures
 
@@ -185,13 +255,13 @@ python3 -m pytest tests/pnr tests/viz/test_layout.py -q
 python3 -m compileall -q tritflow/pnr tritflow/viz/layout.py examples/pnr_all.py
 ```
 
-Final combined run: **26 passed in 50.42 s**. This includes the original
+Final phase-3 combined run: **27 passed in 60.16 s** (concurrent with the final batch). This includes the original
 synthetic suite and real four-trit adder, actual obstructed/mirrored mock GDS
 through the full PDK deck, V1-implied metal, free-column metadata, alternative
 pin access, portable raster/HTML, net/hierarchy selection, linked animation
 frames, content changes with preserved mtimes, mid-build publication restart,
-cache reuse, rebuilding a deleted checked GDS, and row-current compliance of
-every saved placement snapshot. A subsequent unchanged-input batch invocation
+cache reuse, rebuilding a deleted checked GDS, and current/width/feed-envelope compliance of
+every saved placement snapshot, plus the public row/annealing controls. A subsequent unchanged-input batch invocation
 returned immediately with all checked artifacts current. `git diff --check`
 and `compileall` on owned paths pass. The final actual GDS PNGs were visually
 inspected, including the compact adder and mixed NAND/NOR/INV multiplier.
@@ -210,35 +280,46 @@ and test files, `examples/pnr_all.py`, and generated `build/` outputs.
 <!-- PNR_RESULTS_BEGIN -->
 ## Current verified build results
 
-Published template height: **132 µm**. Input content fingerprint: `37e45ccdab2ee60426955fa9461d62a972a60e5365ae7b45b3ef46871590869e`.
+Published template height: **132 µm**. Input content fingerprint: `d3a2eaa7dafec41abc1eacd0e0959d0f3b91611ae0957fc92cb9eae9324360cf`.
 
 All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
 
-| Design | Seed | Die (µm) | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS |
-|---|---:|---:|---:|---:|---:|---:|---|---|
-| adder4 | 7 | 1176 × 3534 | 30.34% | 27912 | 63342 | 562 / 2304 | 0 violations | Match |
-| full_add | 0 | 924 × 942 | 36.21% | 4494 | 7323.5 | 111 / 128 | 0 violations | Match |
-| mac1 | 19 | 912 × 1374 | 34.26% | 6150 | 11749.5 | 168 / 288 | 0 violations | Match |
-| mul1 | 7 | 612 × 510 | 22.84% | 468 | 1638.5 | 29 / 16 | 0 violations | Match |
+| Design | Seed | Die (µm) | Aspect | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS | PNR / +LVS (s) |
+|---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|
+| adder4 | 0 | 1740 × 1590 | 1.094 | 45.57% | 35778 | 41737.5 | 528 / 1152 | 0 violations | Match | 5.38 / 8.18 |
+| full_add | 0 | 792 × 702 | 1.128 | 56.70% | 3924 | 6158.5 | 115 / 128 | 0 violations | Match | 2.11 / 4.15 |
+| mac1 | 7 | 804 × 1038 | 1.291 | 51.44% | 7218 | 9730 | 172 / 288 | 0 violations | Match | 3.45 / 5.26 |
+| mul1 | 0 | 372 × 366 | 1.016 | 52.35% | 750 | 1022.5 | 25 / 32 | 0 violations | Match | 1.30 / 2.54 |
+
+## Phase 2 → phase 3
+
+Before artifacts are preserved in each design's `phase2/`; cell library and input netlists are unchanged.
+
+| Design | Die before → after (µm) | Aspect before → after | Utilization before → after | Die area reduction | Signal length before → after (µm) |
+|---|---:|---:|---:|---:|---:|
+| adder4 | 1176 × 3534 → 1740 × 1590 | 3.005 → 1.094 | 30.34% → 45.57% | 33.43% | 91254 → 77515.5 |
+| full_add | 924 × 942 → 792 × 702 | 1.019 → 1.128 | 36.21% → 56.70% | 36.12% | 11817.5 → 10082.5 |
+| mac1 | 912 × 1374 → 804 × 1038 | 1.507 → 1.291 | 34.26% → 51.44% | 33.40% | 17899.5 → 16948 |
+| mul1 | 612 × 510 → 372 × 366 | 1.200 → 1.016 | 22.84% → 52.35% | 56.38% | 2106.5 → 1772.5 |
 
 ## Placement seed comparison
 
-Cell-terminal HPWL excludes external ports. Each before/after pair uses the same final floorplan. Seeds can select different row counts/channel widths; select the lowest final HPWL among fully routed, DRC/LVS-passing candidates, then wirelength and seed as tie-breaks.
+Cell-terminal HPWL excludes external ports. Each before/after pair uses the same final floorplan. Seed selection prefers aspect ≤1.5 and utilization ≥45%, then smallest die area and drawn signal wirelength; HPWL and seed break ties. All reported runtimes are measured on this machine, include PDK DRC, and exclude seed-search overhead.
 
-| Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | DRC / LVS |
-|---|---:|---:|---:|---:|---|
-| adder4 | 0 | 125457 | 79987.5 | 36.24% | clean / Match |
-| adder4 | 7 | 96081 | 49743 | 48.23% | clean / Match |
-| adder4 | 19 | 96081 | 52189.5 | 45.68% | clean / Match |
-| full_add | 0 | 7824 | 4956 | 36.66% | clean / Match |
-| full_add | 7 | 7824 | 5100 | 34.82% | clean / Match |
-| full_add | 19 | 7824 | 5712 | 26.99% | clean / Match |
-| mac1 | 0 | 17019.5 | 9742 | 42.76% | clean / Match |
-| mac1 | 7 | 17019.5 | 8712 | 48.81% | clean / Match |
-| mac1 | 19 | 17019.5 | 7719 | 54.65% | clean / Match |
-| mul1 | 0 | 1228.5 | 795.5 | 35.25% | clean / Match |
-| mul1 | 7 | 1228.5 | 766.5 | 37.61% | clean / Match |
-| mul1 | 19 | 1228.5 | 766.5 | 37.61% | clean / Match |
+| Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | PNR / +LVS (s) | DRC / LVS |
+|---|---:|---:|---:|---:|---:|---|
+| adder4 | 0 | 74515.5 | 50436 | 32.31% | 4.88 / 6.35 | clean / Match |
+| adder4 | 7 | 74515.5 | 47968.5 | 35.63% | 4.65 / 6.28 | clean / Match |
+| adder4 | 19 | 74515.5 | 41388 | 44.46% | 5.12 / 6.90 | clean / Match |
+| full_add | 0 | 6750 | 4752 | 29.60% | 6.12 / 8.36 | clean / Match |
+| full_add | 7 | 6750 | 4617 | 31.60% | 3.15 / 5.06 | clean / Match |
+| full_add | 19 | 6750 | 5115 | 24.22% | 3.34 / 5.04 | clean / Match |
+| mac1 | 0 | 14685.5 | 6631.5 | 54.84% | 2.24 / 3.85 | clean / Match |
+| mac1 | 7 | 14685.5 | 6723.5 | 54.22% | 2.40 / 4.75 | clean / Match |
+| mac1 | 19 | 15501.5 | 8573.5 | 44.69% | 2.97 / 5.87 | clean / Match |
+| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 1.70 / 3.04 | clean / Match |
+| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 1.82 / 3.27 | clean / Match |
+| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 1.38 / 3.03 | clean / Match |
 
 Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.
 <!-- PNR_RESULTS_END -->

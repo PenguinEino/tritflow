@@ -211,3 +211,25 @@ script also exited 0 for all four designs using the stored electrical caches.
 None. Newly granted ownership was used only for `tritflow/viz/waves.py`,
 `examples/postlayout_all.py` and generated result paths, alongside prior SIM
 paths and the explicitly authorized cell characterization JSON files.
+
+## Phase 3 — in progress (2026-10-18)
+
+`tritflow.sim.sizing.sweep_dimensions` implements FRONTEND's exact proposed
+signature/schema. Canonical device IDs and adopted W/L come from the published
+schematic, candidates inherit unspecified dimensions, every trit state has its
+own DC operating point, and errors remain explicit failed rows. Successful rows
+are content-addressed by source/models/analysis code/conditions. Supplying
+`workdir` retains independent transfer/DC decks and logs. Published cells and
+PDK files are never edited by the experiment.
+
+Precomputed `cells/out/sizing/INV.grid.json`: **90 candidates, 76 PASS**;
+`NANY.grid.json`: **18 candidates, 17 PASS**. INV varies MP/MN W, common MOS L,
+and both RR lengths; NANY varies common MOS W factor/L and both RR lengths.
+`load_grid()` reads slider data immediately; `sweep_dimensions()` also reuses
+individual candidate caches. `python3 -m tritflow.sim.sizing` reproduces both.
+`tritflow.viz.scaling.sizing_figure()` marks `adopted_index` with a star.
+
+Actual-layout adder scaling and the 500 ns full-adder load boundary are running.
+They use the existing strict PDK LVS/real-GDS wire-C/IR pipeline, independent
+radix-3 carry oracles and source/artifact fingerprints. Completed measurements
+and the final reproduction/test commands will be recorded below.
