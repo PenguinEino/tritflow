@@ -8,6 +8,12 @@ will define a matching SPICE experiment.
 
 <!-- figure: ch9 -->
 
+| Measurement | Record with the result | Compare with SPICE |
+|---|---|---|
+| Input DC sweep | Supply voltages, temperature and rail currents | Transfer curve and middle-level error |
+| Trit-to-trit step | Input edge, skew and total output loading | Final entry into the target voltage band |
+| Supply and temperature sweep | Actual operating point at each measurement | Level and current sensitivity |
+
 The first comparison will sweep the input through the middle region and
 measure the output and each rail current. Next, step between trit levels,
 measure final entry into the same voltage bands, and repeat at several loads.

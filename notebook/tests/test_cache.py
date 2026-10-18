@@ -100,6 +100,12 @@ def test_real_abstract_pin_obstruction_manifest_and_publication_invalidate(tmp_p
     relocated = tmp_path/"relocated"
     shutil.copytree(clone, relocated)
     assert module.runtime_fingerprint(relocated, PDK_ROOT) == initial
+    independent = clone/"tritflow/sta/logic.py"
+    independent.parent.mkdir(parents=True)
+    independent.write_text("# independently developed STA, not consumed here\n")
+    assert fingerprint() == initial
+    independent.write_text("# another STA revision\n")
+    assert fingerprint() == initial
 
 
 def test_force_reruns_valid_cache_and_records_actual_stage_times(tmp_path):

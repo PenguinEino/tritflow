@@ -23,30 +23,32 @@ P_{\rm hand}(N)=\sum_c n_c(N)P_c(0).
 \]
 
 <!-- figure: ch7 -->
+<!-- hero: fig_postlayout + fig_scaling; captions: captions.md -->
 
-*Move the load slider to the first observed failure, then choose an adder width
-in the scaling panel. The prediction stays visible beside the measured points.*
+![Full-adder input sequence, output settling, transition detail and load sweep.](../../figures/out/fig_postlayout.png)
 
-> **What this shows.** At width {scaling.selected_n}, the carry-path estimate
-> is {scaling.predicted_ns} ns and device-only SPICE gives
-> {scaling.device_ns} ns; adding wire capacitance gives
-> {scaling.wired_ns} ns. Across the displayed passing widths, the fitted
-> slopes are {scaling.device_slope_ns} and {scaling.wired_slope_ns} ns/trit.
-> Zero-state power is {scaling.predicted_power_mw} mW by cell summation and
-> {scaling.zero_power_mw} mW by full-circuit DC simulation.
+![Carry-endpoint settling, tested-state DC power and die area versus adder width.](../../figures/out/fig_scaling.png)
 
-The static-power fit gives {scaling.power_per_cell_mw} mW per mapped cell
-for this adder mix and the tested-state maxima. At width {scaling.selected_n},
-the largest measured static power over {scaling.static_states} states is
-{scaling.max_power_mw} mW. This current flows with the inputs held still;
-reducing switching frequency alone does not remove it.
+> **What this shows.** With {paper_post.states} full-adder states and
+> {load.hold_ns} ns input intervals, the load test brackets a pass and failure
+> between {load.last_pass_pf} and {load.first_fail_pf} pF per output.
+> Over widths {paper_scaling.width_min}–{paper_scaling.width_max}, fitted
+> carry-endpoint settling slopes are {scaling.device_slope_ns} ns/trit for
+> devices alone and {scaling.wired_slope_ns} ns/trit with wire capacitance.
+> The tested-state static-power fit gives {scaling.power_per_cell_mw} mW per
+> mapped cell, reaching {scaling.max_power_mw} mW at width {scaling.selected_n}.
 
-With {load.hold_ns} ns input intervals, the full-adder load test brackets an
-observed pass and failure between {load.last_pass_pf} and
-{load.first_fail_pf} pF per output. The separate DC rail calculation predicts
-up to {scaling.rail_deviation_mv} mV rail deviation and
-{scaling.zero_shift_mv} mV middle-level shift; its most heavily loaded branch
-uses {scaling.current_utilization_pct}% of the width-scaled published DC limit.
+Compare the hand estimates with the widest displayed adder. The delay
+comparison uses the same carry and most-significant-sum endpoints as the plot;
+the power comparison uses a separate all-zero DC state.
+
+| Quantity | Hand estimate | SPICE |
+|---|---|---|
+| Carry-path settling, devices only (ns) | {scaling.predicted_ns} | {scaling.device_ns} |
+| All-zero static power (mW) | {scaling.predicted_power_mw} | {scaling.zero_power_mw} |
+
+The current flows with the inputs held still; reducing switching frequency
+alone does not remove it. The separate rail-network results appear in Appendix B.
 
 These results cover the displayed input sequences and model conditions;
 Appendix A collects their scope.

@@ -122,9 +122,13 @@ def test_failed_mask_check_preserves_previous_canonical(wrapped, monkeypatch):
 
     monkeypatch.setattr(module, "_drc", rejected)
     before = full.gds_path.read_bytes()
+    metadata = full.json_path.read_bytes()
+    reference = full.gds_path.with_suffix(".cir").read_bytes()
     with pytest.raises(PhysicalVerificationError, match="Chip qualification failed"):
         chip(macro, output_dir=full.gds_path.parent, force_signoff=True)
     assert full.gds_path.read_bytes() == before
+    assert full.json_path.read_bytes() == metadata
+    assert full.gds_path.with_suffix(".cir").read_bytes() == reference
     assert full.gds_path.with_name(full.data["top"] + ".failed.gds").exists()
 
 

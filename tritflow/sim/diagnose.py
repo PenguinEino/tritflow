@@ -123,6 +123,7 @@ def audit_rail_currents(destination=ROOT/'results/rail_current_audit.json'):
     not a claim that all cells attain their individual maxima in one vector.
     """
     from tritflow.extract import estimate_ir_drop
+    from tritflow.extract.technology import EM_LIMITS
     template=json.loads((CELLS_DIR/'template.json').read_text())
     paths=sorted((ROOT/'build').glob('*/*.pnr.json'))+sorted((ROOT/'build/adder_scaling').glob('*/*.pnr.json'))
     corners_path=ROOT/'results/corners/summary.json'
@@ -143,8 +144,10 @@ def audit_rail_currents(destination=ROOT/'results/rail_current_audit.json'):
             sizing_assumptions=assumptions,uses_published_M1_step_limit=rate is not None and rate<=.00025,
             current_sources=sorted(set(power.get('current_sources',{}).values())),
             worst_row_span_centered_feed_utilization=group_worst,
-            feed_banks=[dict(**bank,published_limit_a=bank['width']*bank['count']*.00025,
-                 utilization=bank['current_a']/(bank['width']*bank['count']*.00025)) for bank in power.get('feed_banks',[])],
+            feed_banks=[dict(**bank,metal='M2',
+                 published_limit_a=bank['width']*bank['count']*EM_LIMITS['M2_field']['current_a']/EM_LIMITS['M2_field']['width_um'],
+                 utilization=bank['current_a']/(bank['width']*bank['count']*EM_LIMITS['M2_field']['current_a']/EM_LIMITS['M2_field']['width_um']))
+                 for bank in power.get('feed_banks',[])],
             nominal_solved_em_check=nominal,pvt=[])
         if corners and all(name in {'INV','NANY','NAND','NOR','BUF'} for name in used):
             for t in corners['temperatures_c']:

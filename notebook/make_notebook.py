@@ -684,7 +684,9 @@ md('''
 The committed width-scaling and load-boundary campaigns below read
 `results/adder_scaling.json` and `results/full_add_load_sweep.json`.
 Required records must match the source, library and pinned PDK; missing/stale
-records stop execution rather than substituting another process revision. The precomputed readers/figures are fast. Producing
+records stop execution rather than substituting another process revision. This is a separate recorded width/load campaign; its routing seeds and
+conditions identify the geometry rather than assuming the four-design layouts.
+The precomputed readers/figures are fast. Producing
 the full matrix or refining a failing load is an opt-in experiment, outside
 default Run all: `run_scaling(sizes=range(1,7), *, jobs=1, destination=..., **kwargs)`
 and `sweep_output_load(directory, *, loads_f=..., hold_s=500e-9, step_s=2e-9,
@@ -707,8 +709,8 @@ for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figu
     evidence("Published experiment scope: "+filename,result.get("coverage",result.get("scope")))
     evidence("Published limits / conditions",result.get("limits",result.get("conditions")))
     if filename == "adder_scaling.json":
-        table([["Width", "Recorded state", "PASS", "Error"]]+
-              [[r["n"],r["state"],r["passed"],r["error"]] for r in result["rows"]])
+        table([["Width", "Selected routing seed", "Recorded state", "PASS", "Error"]]+
+              [[r["n"],r.get("seed"),r["state"],r["passed"],r["error"]] for r in result["rows"]])
     else:
         table([["Measured boundary (F)",result["boundary"]], ["Boundary found",result["boundary_found"]],
                ["Outputs / input-state count",[result["outputs"],len(result["vectors"])]]])

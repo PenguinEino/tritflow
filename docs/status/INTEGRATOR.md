@@ -6,7 +6,7 @@
   (resume manually with `-c model_reasoning_effort=medium`, DISPLAY=:1, cua_repl Chrome surface).
 - Session IDs: CELLS 01a14de1-e546-73c3-b107-83224180c233, FRONTEND 01a14de1-e570-7390-8e6f-fbf5cf52108a,
   PNR 01a14de1-e575-7962-ac48-83f16782f534, SIM 01a14de1-e58e-79b0-8f5e-a66a20bfa06a,
-  COLAB 01a14e20-608d-7be2-b35c-eb488ca8442b; STA, REVIEW, EDITOR: `grep "session id" logs/<S>.log`.
+  COLAB 01a14e20-608d-7be2-b35c-eb488ca8442b; EDITOR 01a14e83-d378-7cc0-8912-2a1a3d2b9558; STA, REVIEW: `grep "session id" logs/<S>.log`.
 - Integrator commits and pushes to https://github.com/PenguinEino/tritflow (main) as
   52006822+PenguinEino@users.noreply.github.com; local pre-squash history in branch dev-history.
 

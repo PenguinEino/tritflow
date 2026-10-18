@@ -31,6 +31,10 @@ def test_supply_tracking_and_project_bands_are_separate():
     nominal=measure_sequence(run['waveforms'],run['stimulus'],lambda v:{'Y':-v[0]},ideal_volts=TRIT_VOLTS)
     assert not nominal['passed'] and nominal['max_error_v']>.5
     assert np.isfinite(run['waveforms']['v(Y)']).all()
+    from tritflow.viz.waves import waveform_figure
+    figure=waveform_figure(run)
+    assert list(figure.layout.yaxis.tickvals)==[-4.5,0.,4.5]
+    assert any(shape.y0==4.0 and shape.y1==5.0 for shape in figure.layout.shapes)
 
 
 def test_intrinsic_device_changes_cannot_be_hidden_as_wire_capacitance():

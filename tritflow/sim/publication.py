@@ -40,6 +40,10 @@ def publish_audit(destination=ROOT/'results/pinned_requalification.json'):
         for name,digest in record.get(field,{}).items():
             path=Path(name)
             if not path.is_file() or file_hash(path)!=digest:errors.append(f'Stale {field}: {name}')
+            if '/libs.tech/' in name:
+                relative='libs.tech/'+name.rsplit('/libs.tech/',1)[1]
+                if relative in pdk['consumed_sha256'] and digest!=pdk['consumed_sha256'][relative]:
+                    errors.append(f'Consumed PDK file differs from pin: {name}')
     for design in ('adder4','full_add','mac1','mul1'):
         path=ROOT/f'build/{design}/postlayout/summary.json';record=_read(path)
         if not record or not record.get('passed'):errors.append(f'No passing postlayout: {design}');continue
@@ -57,10 +61,10 @@ def publish_audit(destination=ROOT/'results/pinned_requalification.json'):
     if not scaling or not scaling.get('passed'):errors.append('Scaling is incomplete')
     else:
         if not qualified_pdk(scaling,pdk):errors.append('Unqualified PDK: scaling')
-        verify(scaling,'sources_sha256');sources.update(scaling['sources_sha256'])
         previous={r['n']:r for r in (_read(baseline/'results/adder_scaling.json') or {}).get('rows',[])}
         values=[]
         for row in scaling['rows']:
+            verify(row,'sources_sha256');sources.update(row['sources_sha256'])
             verify(row,'artifacts_sha256');old=previous.get(row['n'],{})
             spice=next((Path(p) for p in row['artifacts_sha256'] if p.endswith('/postlayout/postlayout.spice')),None)
             if spice and spice.is_file():

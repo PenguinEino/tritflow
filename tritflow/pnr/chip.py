@@ -98,7 +98,7 @@ def chip(
     if not top or any(c in top for c in "/\\") or top == netlist.top:
         raise ValueError("Chip top must be a safe name distinct from the macro")
     w, h = result.data["die"]
-    if w > 1850 or h > 1650:
+    if w > 1850 or h > 1602:
         raise ValueError(
             f"Macro {w:g} x {h:g} um does not fit the TEG power/pad channels; try fewer rows, another seed or more annealing"
         )
@@ -209,7 +209,7 @@ def chip(
             p = macro_signal[port.name]
             desired = (p["rect"][1] + p["rect"][3]) / 2
             ys.append(max(desired, ys[-1] + 150 if ys else -1000.0))
-        ceiling = min(900.0, core[3] - 24.0)
+        ceiling = min(900.0, core[3] - 45.0)
         if ys and ys[-1] > ceiling:
             ys = [y - (ys[-1] - ceiling) for y in ys]
         if ys and ys[0] < -1000.0:
@@ -379,8 +379,13 @@ def chip(
         "build_runtime_s": time.perf_counter() - started,
     }
     json_path = out / (top + ".chip.json")
+    reference_path = out / (top + ".cir")
+    previous_exports = {
+        path: path.read_bytes() if path.exists() else None
+        for path in (json_path, reference_path)
+    }
     _write(json_path, data)
-    _reference(netlist, library, out / (top + ".cir"), top)
+    _reference(netlist, library, reference_path, top)
     wrapped = ChipResult(candidate, json_path, data, {})
     try:
         report = chip_signoff(
@@ -399,6 +404,13 @@ def chip(
     except Exception:
         failed = out / (top + ".failed.gds")
         candidate.replace(failed)
+        for path, previous in previous_exports.items():
+            if path.exists():
+                shutil.copy2(path, path.with_name(path.name + ".failed"))
+            if previous is None:
+                path.unlink(missing_ok=True)
+            else:
+                path.write_bytes(previous)
         raise
     published = out / (top + ".gds")
     candidate.replace(published)

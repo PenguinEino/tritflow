@@ -1,6 +1,7 @@
 # Placeholder registry and integration contract
 
-All reader-visible substitutions in the chapter files, teaser and pitch are
+All reader-visible substitutions in the chapter files, teaser, pitch, captions,
+repository README draft and official-repository PR draft are
 listed below. They are specifications for FRONTEND's renderer, not attributes
 already added to the Python API. Do not use Python `str.format` over whole
 Markdown files: LaTeX has its own braces. Replace only the exact registered
@@ -12,6 +13,14 @@ product names are structural constants, not experimental claims. The short
 intro precedes chapter 0; teaser.md supplies its two-sentence figure caption.
 Main text and figures go together; figures.md and predict_first.md are handoff
 documents and are not inserted as notebook chapters.
+
+Phase 2 makes the existing paper figures the primary heroes. Their fixed
+four-trit example is the `paper_adder`/`paper_pnr` context below; the `adder`
+context still means the separately executed default example. Retained original
+tokens that are unused in the static chapters remain available to the optional
+interactive specifications. They do not all have to appear in the main text.
+Resolve captions and image inputs together; current numerical substitutions
+cannot repair stale labels or curves already rendered into an image.
 
 ## Read and validation rules
 
@@ -30,6 +39,9 @@ documents and are not inserted as notebook chapters.
    `comparison_scope` and verify the identical-device/+wire-C experiment.
 3. Load `grid = tritflow.sim.sizing.load_grid('INV')` for the INV estimate;
    `j` is a selected complete grid row and `a = grid['adopted_index']`.
+   In the static chapter choose the longest common RP/RN length at adopted
+   MP/MN dimensions among the finite plotted transfer curves, as specified
+   in predict_first.md; no live selector is required.
    `z(j)` below means the unique `grid['rows'][j]['dc']` row with
    `input_trits == [0]`. `load_grid` validates sources/models/analysis.
 4. Read the library generation before/after multi-file cell views; retry if
@@ -111,7 +123,8 @@ NANY. The new prediction implementation belongs to FRONTEND.
 
 ## Standard-cell comparison
 
-Let `C` be the selected cell, `abstract` be
+For the static `fig_cell` hero set `C = 'NANY'`; optional interactive views may
+select a different cell with their own caption. Let `abstract` be
 `cells/out/<C>/<C>.abstract.json`, and `eq` be
 `cells/out/equivalence_report.json`. `pc = eq['parasitic_aware']['cells'][C]`.
 Use only reference logic cells INV/NAND/NOR/NANY for this success box.
@@ -176,7 +189,8 @@ the native reports; loading a layout alone is not a new check.
 
 `fits = tritflow.sim.scaling.fit_scaling(scale)`; recompute after validation
 instead of trusting a potentially stale saved fit. `row` is the selected
-complete passing width. Show actual widths used in every fit; retain failed
+complete passing width, initially the largest displayed N for the static
+chapter. Show actual widths used in every fit; retain failed
 or running rows in the overview. `sweep = load_sweep_results(ROOT/'results/full_add_load_sweep.json')`
 also needs `verify_publication_sources` and native artifact checks.
 
@@ -234,6 +248,7 @@ and fresh/recorded status where relevant. It is acceptable and required to say
 | `{evidence.pdk_commit}` | `tritflow.sim.provenance.pdk_provenance(PDK_ROOT)['qualified_commit']`, asserted equal to setup pin and actual consumed deck/model hashes. |
 | `{evidence.tools}` | Live `runtime_fingerprint(ROOT, PDK_ROOT)` tool-version entries, or `sys.version`, `importlib.metadata.version('klayout')`, and actual `klayout -v`/`ngspice --version` stdout using configured executable paths. Keep recorded-experiment tool versions separate; pins alone are not installed versions. |
 | `{evidence.cell_checks}` | `cells/out/verify_report.json: $.cells` and `$.passed`, per-cell `drc.items`, `lvs.passed`, `dc.passed`. Validate `$.artifact_sha256` and `$.deck_sha256`; retain FILL's documented probe-fixture/empty-extraction qualification instead of inventing ordinary LVS. |
+| `{evidence.sizing_checks}` | `cells/out/sizing/{INV,NANY}.grid.json: $.rows`, counts of total candidates, finite error/current pairs, `passed`, errors outside the band and unavailable rows with `$.rows[*].error`. List unavailable rows and their dimensions/reasons explicitly; finite points alone cannot prove every candidate passed. |
 | `{evidence.abutment_checks}` | Same report `$.abutment.ordered_pair_orientation_cases`, `.items`, `.passed`; these count ordered pair/orientation cases, not unique pairs only. |
 | `{evidence.adder_checks}` | Selected adder native `drc`, `lvs`, `post['measurements']` plus the synthesis equivalence report, with the separate logic/state/transition counts. |
 | `{evidence.width_checks}` | `results/adder_scaling.json: $.rows[*]`, fields n/state/passed/drc_clean/lvs_matched/pre_passed/post_passed/error, with `vector_plan`/`synthesis_equivalence` scope. Include incomplete rows. |
@@ -256,3 +271,127 @@ and fresh/recorded status where relevant. It is acceptable and required to say
 - STA, corner sweeps and the chip wrapper are optional. No unconditional
   result tokens or performance claims depend on them. If included, give each
   its actual report, conditions, state coverage and independent approval scope.
+
+## Paper-figure source contexts
+
+The following additional tokens are for fixed static figures and their
+captions. They are kept separate from notebook variables that may refer to a
+different design. Every numeric token must come from the exact input used in
+the regenerated image, not from `figures/README.md`'s draft caption.
+
+### Fixed opening adder and placement
+
+Read `report = JSON('build/adder4/adder4.report.json')`,
+`physical = JSON('build/adder4/adder4.pnr.json')`,
+`proof = JSON('build/adder4/adder4.lvs.summary.json')` and the matching
+`build/adder4/adder4.json` gate netlist. Confirm real drawing DRC and strict
+LVS reports, GDS/library hashes and the associated extracted simulation.
+`fig_flow.py` and `fig_pnr.py` read these exact files.
+
+| Token | Exact source or calculation |
+|---|---|
+| `{paper_adder.width}` | Number of scalar input ports named `a[...]` in `build/adder4/adder4.json: $.ports`, asserted consistent with the `N` used for this build and the illustrated sum MSB. |
+| `{paper_adder.hdl_lines}` | `len(Path('examples/adder.tv').read_text().splitlines())`, the same operation used in `figures/fig_flow.py`; shared module files are additional inputs. |
+| `{paper_adder.nany}` | `report['cells']['NANY']`. |
+| `{paper_adder.inv}` | `report['cells']['INV']`. |
+| `{paper_adder.cells}` | `report['total_cells']`, cross-check actual gate instances. |
+| `{paper_adder.equivalence_mode}` | `report['equivalence']['mode']`, with `passed` asserted. |
+| `{paper_adder.die_um}` | `physical['die']`, components joined with × and checked against its GDS boundary. |
+| `{paper_adder.drc_items}` | `physical['checks']['pdk_drc']['violations']`, require present numeric count, `clean` and matching report. Missing is not zero, regardless of the script's older fallback. |
+| `{paper_adder.lvs_status}` | “Match” only when `proof['matched']` and actual strict-port/native report evidence agrees. |
+| `{paper_pnr.initial_hpwl_mm}` | `physical['history'][0]['hpwl']/1e3`. |
+| `{paper_pnr.final_hpwl_mm}` | `physical['history'][-1]['hpwl']/1e3`. |
+| `{paper_pnr.hpwl_reduction_pct}` | `100*(1-physical['history'][-1]['hpwl']/physical['history'][0]['hpwl'])`; require positive initial HPWL. |
+
+### DC and sizing panels
+
+For the precise INV point in `fig_gates`, run the same public call as its
+script: `dc_transfer(Path('cells/out/INV/INV.ext.spice').read_text(), 'INV',
+['A'], ['Y'], 'A', fixed_trits={}, step_v=0.02)`.
+Let `q = result['data']` and choose `i = argmin(abs(q['v-sweep']))`, asserting
+the sample is at VMID to numerical tolerance. Both the figure and the source
+use the nominal bench temperature; verify it against the characterized source.
+The call does not retain the full figure curves in a portable JSON; save its
+conditions/results with the final figure render if the exact point is needed
+without rerunning SPICE. Existing char zero-input DC rows can cross-check it.
+
+Let `gi`/`gn` be validated INV/NANY sizing grids. A finite plotted row has both
+`max_error_v` and `max_static_current_a` present and finite. Count unavailable
+candidates separately in Appendix B. Do not infer all-pass from the plot title.
+
+| Token | Exact source or calculation |
+|---|---|
+| `{paper_gates.temperature_c}` | Nominal `build_testbench`/`dc_transfer` temperature, cross-checked with `cells/out/INV/INV.char.json: $.conditions.temperature_c`; require equal conditions for all four displayed cells. |
+| `{paper_gates.inv_zero_v}` | `q['v(y)'][i]` at that zero-input sample. |
+| `{paper_gates.inv_current_ma}` | `abs(q['i(vdd)'][i])*1e3`; this is the lower-panel metric, not a sum of rail currents. |
+| `{paper_gates.inv_power_mw}` | `-1e3*sum(V[r]*q['i('+r.lower()+')'][i] for r in ('VDD','VMID','VSS'))`, using the actual nominal `tritflow` rail values. |
+| `{paper_sizing.resistor_lengths_um}` | Sorted unique `rows[*].dimensions.RP.l_um` for the INV transfer subset with MP and MN dimension maps equal to the adopted maps and nonempty `transfer`; join as a list. Cross-check RN's matching length and the displayed curves. |
+| `{paper_sizing.inv_count}` | Count finite plotted rows in `cells/out/sizing/INV.grid.json: $.rows`. |
+| `{paper_sizing.nany_count}` | Count finite plotted rows in `cells/out/sizing/NANY.grid.json: $.rows`; one unavailable candidate at inspection must not count as a finite point or a pass. |
+| `{paper_sizing.nany_error_mv}` | `gn['rows'][gn['adopted_index']]['max_error_v']*1e3`. |
+| `{paper_sizing.nany_current_ua}` | `gn['rows'][gn['adopted_index']]['max_static_current_a']*1e6`. |
+| `{paper_sizing.error_floor_mv}` | The explicit plotting floor passed as `floor_mv` to INV `scatter` in `figures/fig_sizing.py: make`; a display setting, not a measurement. Below-floor triangle points retain their unmodified measured values in data. |
+
+### Cell and arithmetic panels
+
+| Token | Exact source or calculation |
+|---|---|
+| `{paper_cell.original_die_um}` | `notebook/narrative/reference_geometry.json: $.cells.NANY.bbox_um`; width = x1-x0, height = y1-y0, joined by ×. Its GDS SHA must match the independent reference proof as above. |
+| `{paper_cell.row_count}` | `len(ROW)` in `figures/fig_cell.py`, currently the INV/NAND/NOR/NANY sequence; validate those actual GDS references and aligned rails. |
+| `{paper_synth.ha_cells}` | `flow.load('examples/half_add.tv','half_add').synthesize().report()['total_cells']`; this is the graph used in `fig_synth`, not the full-adder hierarchy's count. |
+
+The existing `cell.*` tokens use fixed NANY for this figure, while
+`arithmetic.*` comes from current synthesis of the actual two module sources.
+The shown arithmetic vector is an illustration of the radix identity;
+full coverage still requires the independent truth-table checks.
+
+### Post-layout and width panels
+
+For `fig_postlayout`, load `ps = JSON('build/full_add/postlayout/summary.json')`,
+`mp = JSON('build/full_add/postlayout/pre/measurements.json')` and
+`mw = JSON('build/full_add/postlayout/post/measurements.json')`.
+Choose `k` exactly as the script does: the index after initialization with
+largest finite `mw['rows'][k]['outputs']['sum']['settling_s']`.
+Failing or unsettled measurements must not be coerced to zero to select a
+passing-looking zoom. Compare the same row k in both runs, with matching
+input history, ramp, load and device fingerprint. The current comparison is
+device-only versus devices+wire-C; “schematic” is the wrong baseline name.
+
+| Token | Exact source or calculation |
+|---|---|
+| `{paper_post.states}` | `len({tuple(r['input_trits']) for r in mw['rows']})`; cross-check all expected full-adder states and the load-sweep input set. |
+| `{paper_post.hold_ns}` | `ps['hold_s']*1e9`. |
+| `{paper_post.load_ff}` | `ps['output_load_f']*1e15`, cross-checked against actual Cload devices in each retained bench. |
+| `{paper_post.pre_sum_ns}` | `mp['rows'][k]['outputs']['sum']['settling_s']*1e9`. |
+| `{paper_post.post_sum_ns}` | `mw['rows'][k]['outputs']['sum']['settling_s']*1e9`. |
+| `{paper_scaling.width_min}` | Minimum `n` of the complete, passing, validated rows displayed from `results/adder_scaling.json: $.rows`. |
+| `{paper_scaling.width_max}` | Maximum `n` of those same displayed rows; show the full actual width set in Appendix B, since a range alone could hide a gap. |
+| `{paper_scaling.load_ff}` | `rows[*].conditions.load_f*1e15`, asserted equal across the displayed width series. |
+
+The existing `scaling.*`/`load.*` tokens retain their exact current source
+definitions. All displayed rows must be complete and passing before calling
+the series DRC/LVS checked and simulated. Use free-intercept fits to the same
+rows as the plotted points. Do not reuse old printed slopes; do not silently
+drop failed widths. The maximum static-power caption refers only to the
+documented sampled DC states, not all possible inputs of a wide adder.
+
+## Public README and official-repository PR substitutions
+
+`readme_draft.md` is intended for the public source repository's root README;
+its file/image links resolve from that destination. `pr_description.md` has
+the proposed PR title as its first heading and the reviewable body below.
+The exact author block is copied from docs/author.md in both drafts. No phone
+number, membership, attendance or approval status is inferred.
+
+| Token | Exact source or calculation |
+|---|---|
+| `{release.colab_url}` | Construct the Colab URL from the public repository and selected immutable ref, using `submission/ISSCC27/submitted_notebooks/TritFlow/build-info.json: $.release.default_ref` only after `$.release.compatible` and `$.release.matches_source_notebook` are true for this submitted source. Otherwise omit the badge/link and show the explicit unavailable release state; do not emit the known-incompatible old tag as a ready launch. |
+| `{release.source_commit}` | Same build-info `$.source_commit_at_bootstrap`, after checking `$.source_notebook_sha256` against the submitted notebook's source and `$.capture.source_sha256`. Do not substitute a newer packaging or working-tree commit for the executed source identity. |
+| `{release.capture_status}` | Same build-info `$.capture.completed`, `$.capture.elapsed_s`, `$.source_notebook_sha256` and `$.capture.source_sha256`; format completion/environment/scope only after matching the actual submitted notebook source. If stale, say “No matching execution recorded for this submitted source.” Tools recorded only at packaging must retain `$.tools_observation` scope. |
+
+`evidence.colab_status` must match the selected submitted-source revision in
+these public drafts, and `evidence.tests` must state its own scope/revision.
+The current legacy payload is neither a matching release nor a successful
+Colab run. Keep the appropriate unavailable text until a matching record
+exists. Proposed filing scope is only the TritFlow project folder; no actual
+official-repository diff or PR is asserted or created by this text draft.

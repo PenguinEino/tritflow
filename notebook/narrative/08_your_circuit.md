@@ -8,8 +8,8 @@ and extracted simulation then follow the same path as the opening adder.
 
 <!-- figure: ch8 -->
 
-*Choose a circuit, inspect its HDL, then change an expression. The layout
-and waveform update when you run the design cell.*
+*Set the circuit choice in the code cell, inspect its HDL, then change an
+expression. The generated layout and waveform belong to that edited source.*
 
 Keep the arithmetic reference while making an equivalent implementation.
 If you change the intended function, edit that specification as well.

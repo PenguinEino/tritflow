@@ -1,6 +1,7 @@
 # Prediction calculations for FRONTEND
 
-This file specifies calculations, not new simulation APIs. Render only the
+This file specifies calculations, not new simulation APIs. The phase-2 static
+heroes are the default; predictions need no new interactive control. Render only the
 short equations and computed comparisons already placed in chapters 1, 2 and
 7. Compute each prediction before revealing the comparison trace. Preserve
 full precision internally and use the same display rounding as measured data.
@@ -71,7 +72,12 @@ static-power comparisons.
 
 ## Chapter 2 — a change of W/L or resistor length
 
-Use the same nominal INV model inputs as chapter 1. For grid row j, read
+Use the same nominal INV model inputs as chapter 1. In the static chapter,
+select j from the transfer curves in `fig_sizing`: keep MP and MN dimensions
+equal to the adopted point and choose the largest supported common RP/RN
+length with a finite DC result. This deterministic comparison is visible in
+the existing transfer panel. The optional interactive extension may select
+other candidates with its own matching readout. For grid row j, read
 `grid['rows'][j]['dimensions']`; row `grid['adopted_index']` is the baseline.
 Hold the zero-input gate voltages fixed while changing dimensions.
 

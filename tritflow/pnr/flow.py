@@ -157,6 +157,26 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
                                    for name, cell in library.cells.items()}}})
         draw_power(data, data["placements"], library,
                    {**plan, "margin": plan["margin"]+bypass_tracks*library.template["grid"]})
+        # Power feasibility is independent of signal routing. Reject and
+        # resize the floorplan before spending time on its maze routes.
+        assessment = dc_current_check(data, library)
+        data["power"]["dc_current_check"] = assessment
+        if assessment["defined"] and not assessment["reserved_margin_met"]:
+            # Geometry changes in discrete cell increments. Tighten row capacity
+            # until the *solved* network meets the requested reserve as well.
+            tightened = min(current_density_a_per_um, .00025)*min(.9,
+                .95*assessment["target_max_utilization"]/assessment["max_utilization"])
+            result = place_and_route(netlist, library, output_dir=out, rows=rows, seed=seed,
+                anneal_steps=anneal_steps, history_every=history_every, channel_tracks=channel_tracks,
+                max_expansions=max_expansions, ripup_passes=ripup_passes, run_pdk_drc=run_pdk_drc,
+                current_density_a_per_um=tightened, default_cell_current_a=default_cell_current_a,
+                sheet_resistance_ohm=sheet_resistance_ohm, current_margin=current_margin,
+                pdk_root=pdk_root, klayout_binary=klayout_binary)
+            result.data.setdefault("dc_sizing_attempts", []).insert(0, assessment)
+            elapsed = time.perf_counter()-started
+            result.stats["runtime_s"]["total"] = elapsed
+            result.json_path.write_text(json.dumps(result.data, indent=2)+"\n")
+            return result
         try:
             log = route(data, terminals, library, seed+expansion, ripup_passes)
             attempts.append({"channel_tracks": tracks, "bypass_tracks_per_side": bypass_tracks,
@@ -181,24 +201,6 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
             if compact_metal:
                 bypass_tracks += 1
     routed_at = time.perf_counter()
-    assessment = dc_current_check(data, library)
-    data["power"]["dc_current_check"] = assessment
-    if assessment["defined"] and not assessment["reserved_margin_met"]:
-        # Geometry changes in discrete cell increments. Tighten row capacity
-        # until the *solved* network meets the requested reserve as well.
-        tightened = min(current_density_a_per_um, .00025)*min(.9,
-            .95*assessment["target_max_utilization"]/assessment["max_utilization"])
-        result = place_and_route(netlist, library, output_dir=out, rows=rows, seed=seed,
-            anneal_steps=anneal_steps, history_every=history_every, channel_tracks=channel_tracks,
-            max_expansions=max_expansions, ripup_passes=ripup_passes, run_pdk_drc=run_pdk_drc,
-            current_density_a_per_um=tightened, default_cell_current_a=default_cell_current_a,
-            sheet_resistance_ohm=sheet_resistance_ohm, current_margin=current_margin,
-            pdk_root=pdk_root, klayout_binary=klayout_binary)
-        result.data.setdefault("dc_sizing_attempts", []).insert(0, assessment)
-        elapsed = time.perf_counter()-started
-        result.stats["runtime_s"]["total"] = elapsed
-        result.json_path.write_text(json.dumps(result.data, indent=2)+"\n")
-        return result
     data["routing_attempts"] = attempts
     # Animation coordinates must match the final floorplan, including expansion.
     for snapshot in history:

@@ -32,9 +32,12 @@ def experiment_sources():
              ROOT/'tritflow/netlist.py']
     for folder in ('hdl','synth','pnr','sim','extract'):
         paths += [p for p in sorted((ROOT/'tritflow'/folder).glob('*.py'))
-                  if folder!='pnr' or not p.name.startswith(('chip','signoff'))]
+                  if (folder!='pnr' or not p.name.startswith(('chip','signoff')))
+                  and (folder!='sim' or p.name not in {'diagnose.py','corners.py','sizing.py','publication.py'})]
     # This study calls macro place_and_route, never chip packaging/signoff.
     # Those independent producers must not invalidate measured macro physics.
+    # Separate sizing, robustness, diagnosis and publication readers likewise
+    # hash their own experiments; they are not called by scaling/load producers.
     # Cell-generator implementation does not affect an already published
     # library; fingerprint the consumed views below, plus the sizing ID table.
     paths.append(ROOT/'tritflow/cells/circuits.py')
