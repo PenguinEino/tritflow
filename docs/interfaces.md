@@ -22,7 +22,7 @@ Constants live in `tritflow/__init__.py`.
 | `tritflow/viz/cell.py`, `tests/viz/test_cell*.py` | CELLS |
 | `tritflow/viz/layout.py`, `tests/viz/test_layout*.py`, `examples/fuzz_pnr.py`, `examples/pnr_all.py` | PNR |
 | `tritflow/flow.py` | FRONTEND |
-| `notebook/` | FRONTEND (draft) |
+| `notebook/`, `submission/` | FRONTEND |
 | other `tritflow/viz/` | later |
 | `tritflow/sta/`, `tests/sta/`, `results/sta/` | STA |
 | `docs/status/<stream>.md` | that stream |
