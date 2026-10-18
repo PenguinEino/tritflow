@@ -55,6 +55,16 @@ by instruction. No git-writing commands or edits to other streams' files.
   and an operator-specific repair hint before physical work. The parser's
   existing diagnostics already supply filename/line/column, so no parser change
   was needed.
+- Chapter 8's sorter initially exposed a nonphysical BSIM operating-point
+  root despite correct logic and DRC/LVS. Diagnostics remain under
+  `/tmp/tritflow-notebook-phase6/your_circuit/minmax/{pre,post}`. Through SIM's
+  public `nodeset` argument, selected circuits now initialize internal Newton
+  guesses from mapped trits, with extracted names obtained from the strict LVS
+  cross-reference. These are released `.nodeset` guesses, never `.ic`/`uic`,
+  device changes or relaxed acceptance. The actual guesses are displayed.
+  Independent arithmetic still checks every output. The seeded sorter passed
+  both pre/post probes; source and extracted decks/logs are under
+  `/tmp/tritflow-minmax-seeded/`.
 - Cached pre/post pairs now restore nested NumPy waveform arrays correctly.
   Cache context includes notebook helpers and example/reference code. Saved
   pass flags and artifact hashes are checked as well as fresh producer checks.
@@ -70,9 +80,11 @@ TRITFLOW_NOTEBOOK_BUILD=/tmp/tritflow-notebook-phase6 python3 notebook/validate_
 
 The four catalog designs passed all independent exhaustive checks and real
 synthesis/P&R/official DRC/strict LVS: **8 tests passed in 16.19 s**.
-The combined owned suite passed **195 tests in 20.05 s**, including nested cache
+The initial combined suite passed **195 tests in 20.05 s**, including nested cache
 restoration, edited shared includes, and portable publication-source validation.
-Final full-notebook/default/choice results will be recorded below.
+The final suite passed **228 tests in 23.82 s** (including the newly available
+CELLS visualization regressions); no skips. Final full-notebook/default/choice
+results will be recorded below.
 No packages installed.
 
 ## Phase 5 handoff

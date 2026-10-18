@@ -100,11 +100,16 @@ def verify_publication_sources(record, root, pdk):
         if "/build/" in original:
             continue
         if "/libs.tech/" in original:
-            current = Path(pdk)/"libs.tech"/original.split("/libs.tech/", 1)[1]
+            candidates = [Path(pdk)/"libs.tech"/original.rsplit("/libs.tech/", 1)[1]]
+        elif "/openIP62/" in original:
+            candidates = [Path(pdk)/"openIP62"/original.rsplit("/openIP62/", 1)[1]]
         else:
-            anchor = next((s for s in ("tritflow", "examples", "cells") if f"/{s}/" in original), None)
-            if anchor is None:
+            # A checkout itself can be named tritflow; package subdirectories
+            # can be named cells. Resolve against existing content, rather than
+            # treating either occurrence as an unambiguous repository boundary.
+            candidates = [Path(root)/anchor/original.rsplit(f"/{anchor}/", 1)[1]
+                          for anchor in ("tritflow", "examples", "cells") if f"/{anchor}/" in original]
+            if not candidates:
                 raise RuntimeError(f"unrecognized publication source: {original}")
-            current = Path(root)/anchor/original.split(f"/{anchor}/", 1)[1]
-        if not current.is_file() or sha256(current.read_bytes()).hexdigest() != expected:
-            raise RuntimeError(f"published result is stale relative to {current}")
+        if not any(p.is_file() and sha256(p.read_bytes()).hexdigest() == expected for p in candidates):
+            raise RuntimeError(f"published result is stale relative to {original}")

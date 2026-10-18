@@ -24,6 +24,12 @@ class PnrResult:
     json_path: Path
     stats: dict
     data: dict
+    netlist: GateNetlist | None = None
+
+    def signoff(self, **options):
+        """Run optional cached MDP/IP62 qualification; inspect clean/submission_ready."""
+        from .signoff import signoff
+        return signoff(self, **options)
 
 
 def _floorplan_choice(netlist, library, rows, channel_tracks, currents, capacity, power_options):
@@ -231,4 +237,4 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
         "total": finished-started}
     json_path.write_text(json.dumps(data, indent=2)+"\n")
     failure_path.unlink(missing_ok=True)
-    return PnrResult(gds_path, json_path, data["stats"], data)
+    return PnrResult(gds_path, json_path, data["stats"], data, netlist)

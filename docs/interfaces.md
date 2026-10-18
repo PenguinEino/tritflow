@@ -24,6 +24,7 @@ Constants live in `tritflow/__init__.py`.
 | `tritflow/flow.py` | FRONTEND |
 | `notebook/` | FRONTEND (draft) |
 | other `tritflow/viz/` | later |
+| `tritflow/sta/`, `tests/sta/`, `results/sta/` | STA |
 | `docs/status/<stream>.md` | that stream |
 
 ## Cell library

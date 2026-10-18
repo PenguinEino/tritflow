@@ -338,14 +338,24 @@ def compare_phase3(result, *, baseline=ROOT/'results/phase3_assumed', destinatio
             zero_shift_delta_v=row['max_zero_shift_v']-before['max_zero_shift_v']))
     original = []
     for name in ('adder4','full_add','mac1','mul1'):
-        before = json.loads((baseline/f'{name}.postlayout.json').read_text())
-        after = json.loads((ROOT/f'build/{name}/postlayout/summary.json').read_text())
+        old_path = baseline/f'{name}.postlayout.json'
+        new_path = ROOT/f'build/{name}/postlayout/summary.json'
+        if not old_path.is_file() or not new_path.is_file():
+            original.append(dict(design=name,passed=False,state='unavailable',
+                                 error='Run the original post-layout examples before comparing them'))
+            continue
+        before = json.loads(old_path.read_text());after = json.loads(new_path.read_text())
+        if not before.get('passed') or not after.get('passed') or 'settling' not in after:
+            original.append(dict(design=name,passed=False,state=after.get('state','unavailable'),
+                                 error='No complete passing pair of post-layout summaries; producer may still be running'))
+            continue
         original.append(dict(design=name,passed=after['passed'],
             post_settling_delta_s={pin:value-before['settling']['post_max_settling_s'][pin]
                                   for pin,value in after['settling']['post_max_settling_s'].items()},
             rail_deviation_delta_v=after['max_rail_deviation_v']-before['max_rail_deviation_v'],
             zero_shift_delta_v=after['max_zero_shift_v']-before['max_zero_shift_v']))
     comparison = dict(scaling=scaling,original_postlayout=original,
+        original_postlayout_complete=all(row['passed'] for row in original),
         interpretation='Metal/contact/via R and substrate/fringe C were not published in reviewed IP62 data; numerical R/C defaults retained. New PDK current-limit checks/provenance do not alter ideal-rail ngspice. Nonzero changes can include independently changed PNR geometry, extracted device values, or numerical convergence; they are not invented PDK R/C corrections.')
     _save(destination,comparison)
     return comparison
