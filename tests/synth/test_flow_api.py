@@ -118,6 +118,7 @@ def test_real_full_chain_and_reopen(tmp_path):
     assert layout.lvs()["matched"]
     extracted = layout.extract()
     assert extracted.capacitance["nets"]
+    assert "Ctfwire" in extracted.spice
     result = extracted.simulate([(-1,), (0,), (1,)], load=100e-15)
     assert result["measurements"]["passed"]
     reopened = flow.load_layout(net, tmp_path)

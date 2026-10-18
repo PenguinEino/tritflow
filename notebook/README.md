@@ -7,7 +7,7 @@ runs an actual two-trit adder from HDL through GDS, DRC, LVS and post-layout
 ngspice. Logical coverage is exhaustive; its labelled analog states exercise every output at all three levels and are
 explicitly representative. The default run also includes NANY DC, the compact published
 library/characterization tables, all four shared designs through matched
-pre/post-layout simulation, and one selected circuit from chapter 8.
+device-only/added-wire-C simulation, and one selected circuit from chapter 8.
 Gate, layout, animation, DC, sizing, scaling and transient figures use
 the streams' public `tritflow.viz.*` functions.
 
@@ -175,7 +175,10 @@ relocated. Source files and PDK symbols are never opened for writing. Primitive
 crops omit stale free-text sizing sidebars while retaining actual instance
 properties; color/stroke normalization changes presentation only. Source inputs
 are hash-checked after export. The standalone light/dark variants and native
-SVG text remain readable without host-page CSS.
+SVG text remain readable without host-page CSS. RR property text is shifted into empty space
+without changing paths, terminal labels or values. Chapter 3 uses labelled
+CELLS device mapping, layer controls and row-abutment figures rather than an
+unlabelled cell raster.
 
 The review pass removes hand-entered result counts from prose, derives coverage
 and conditions in tables, and asserts cached/fresh pass flags equally. Published
