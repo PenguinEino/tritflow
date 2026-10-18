@@ -73,3 +73,25 @@ def signal_waveform(data, pin):
     """Prefer a case-sensitive logical key; support legacy lowercase raw data."""
     key = f'v({pin})'
     return data[key] if key in data else data[key.lower()]
+
+
+def rename_formal_nodes(definition, mapping):
+    """Rename exact terminal tokens, preserving model/device/subcircuit names."""
+    lines=[]
+    for line in re.sub(r'\n\s*\+\s*',' ',definition['text']).splitlines():
+        fields=line.split()
+        if not fields or fields[0].startswith('*'):
+            lines.append(line); continue
+        first=fields[0].upper()
+        if first=='.SUBCKT':
+            indices=range(2,2+len(definition['pins']))
+        elif first.startswith('X'):
+            end=next((i for i,t in enumerate(fields) if '=' in t or t.lower()=='params:'),len(fields))
+            indices=range(1,end-1)
+        elif first[0] in 'MRCLDVIE':
+            indices=range(1,min(len(fields),5 if first[0] in 'ME' else 3))
+        else:
+            lines.append(line);continue
+        for i in indices: fields[i]=mapping.get(fields[i],fields[i])
+        lines.append(' '.join(fields))
+    return '\n'.join(lines)

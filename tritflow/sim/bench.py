@@ -7,7 +7,7 @@ import re
 
 from tritflow import TRIT_VOLTS, VDD, VMID, VSS
 from .runner import run_ngspice, SimulationError
-from .spice import subcircuits, simulation_netlist, model_includes, logical_spice_names
+from .spice import subcircuits, simulation_netlist, model_includes, logical_spice_names, rename_formal_nodes
 
 
 def restore_signals(data, bench):
@@ -89,12 +89,14 @@ def build_testbench(subckts: str, top: str, inputs: list[str], outputs: list[str
     if len(set(logical)) != len(logical) or set(decoded.values()) != set(logical) or len(decoded) != len(logical):
         raise ValueError(f'Input/output pins do not match {top}: {pins}')
     declared = {p.lower() for p in pins if p not in decoded}
+    if declared-{'vdd','vmid','vss'}:
+        raise ValueError(f'Input/output pins do not match {top}: {pins}')
     if not {'vdd', 'vss'} <= declared:
         raise ValueError('VDD and VSS supply pins are required')
     # Formal order stays positional. Rewrite exact tokens in this top only;
     # SPICE must never see two formals differing only in case.
     rename = {p: names[name] for p, name in decoded.items()}
-    rewritten = re.sub(r'\S+', lambda m: rename.get(m[0], m[0]), definition['text'])
+    rewritten = rename_formal_nodes(definition, rename)
     subckts = subckts.replace(definition['text'], rewritten, 1)
     pins = [rename.get(p, p) for p in pins]
     models = model_includes() if pdk is None else model_includes(pdk)
