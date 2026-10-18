@@ -16,6 +16,7 @@ import textwrap
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from colab_evidence import run_note
 from editorial import context, context_identity, render
+from markdown_support import colab_markdown, responsive_image
 import stages
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,16 +44,15 @@ def build():
             code_ids[key] = item['id']
         cells.append(item)
         return item
-    def md(source): return cell('markdown',source)
+    def md(source): return cell('markdown',colab_markdown(source))
     def code(key,requires=(),hidden=True):
         return cell('code',getattr(stages,key.upper()),key,requires,hidden)
     captions = (NARRATIVE/'captions.md').read_text()
     def caption(name):
         return render(captions.split(f'## fig_{name}\n\n',1)[1].split('\n## ',1)[0].strip(),values)
-    def image(name,alt):
+    def image(name,alt,include_caption=True):
         data = base64.b64encode((ROOT/f'figures/out/fig_{name}.png').read_bytes()).decode()
-        # Colab's own inserted-image syntax: entirely portable, no local link.
-        return f'![{alt}](data:image/png;base64,{data})\n\n'+caption(name)
+        return responsive_image(data,alt)+('\n\n'+caption(name) if include_caption else '')
     def prose(name):
         text = (NARRATIVE/name).read_text()
         # Images are inserted once at the editorial anchors below.
@@ -60,6 +60,14 @@ def build():
         text = re.sub(r'<!--[^>]*-->\n*','',text)
         text = text.replace('[mapped half adder](../../figures/out/fig_synth.png)',
                             '[mapped half adder](#4.-Describe-signed-arithmetic-in-TritVerilog)')
+        if name == '01_gates.md':
+            # Two short rows fit Colab's text column after math is typeset.
+            text = re.sub(r'\\\[[\s\S]*?\\\]',lambda _:r'''$$
+\begin{aligned}
+\mathrm{INV}(a)&=-a, & \mathrm{NAND}(a,b)&=-\min(a,b),\\
+\mathrm{NOR}(a,b)&=-\max(a,b), & \mathrm{NANY}(a,b)&=-\mathrm{clamp}(a+b,-1,1).
+\end{aligned}
+$$''',text,count=1)
         return text
     def chapter(filename,hero=None):
         nonlocal chapter_title
@@ -85,13 +93,17 @@ def build():
         'cells, DRC-clean and LVS-matched GDS, and transistor-level waveforms.')
     author = (ROOT/'docs/author.md').read_text()
     author_block = author[author.index('- Name:'):].split('\n\n',1)[0]
-    headline = render((NARRATIVE/'teaser.md').read_text(),values)
     power = (f"The middle level has a standing cost: {values['scaling.power_per_cell_mw']:.3g} mW "
              f"per mapped cell for this adder mix, reaching {values['scaling.max_power_mw']/1e3:.3g} W "
              f"at {values['scaling.selected_n']} trits. Sizing trades current against voltage accuracy.")
     badge = '[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)'
-    md(render(intro,values)+'\n\n'+image('flow','HDL → cells → checked GDS → extracted SPICE, four-trit paper example')+
-       '\n\n'+headline+'\n\n'+power+'\n\n'+badge+'\n\n'+run_note()+
+    # One generated result sentence replaces the caption/teaser/result repeats.
+    headline = (f"**The illustrated {values['paper_adder.width']}-trit adder:** "
+                f"{values['paper_adder.hdl_lines']} top-level HDL lines plus shared modules → "
+                f"{values['paper_adder.cells']} cells, a {values['paper_adder.die_um']} µm GDS, "
+                f"{values['paper_adder.drc_items']} drawing-DRC markers and LVS {values['paper_adder.lvs_status']}.")
+    md(render(intro,values)+'\n\n'+image('flow','HDL → cells → checked GDS → extracted SPICE, four-trit paper example',False)+
+       '\n\n'+headline+'\n\n'+power+'\n\n'+badge+('\n\n'+run_note() if run_note() else '')+
        '\n\n<details><summary>Author and license</summary>\n\n'+author_block+
        '\n\nApache-2.0, including historical schematic assets released by their author.\n\n</details>')
     cell('code',stages.SETUP,'setup')
@@ -137,18 +149,19 @@ def build():
     appendix = appendix.replace('{evidence.session_seconds}', 'printed in the closing cell')
     appendix = appendix.replace('The measured runtime for this session is\nprinted in the closing cell s including setup.',
                                 'The closing cell prints the measured runtime for this session, including setup.')
-    md(appendix+'\n\n'+run_note()+' This is the verified earlier revision, not a fresh Colab test of this editorial revision.\n\n'+'''
+    appendix = appendix.replace(' The clean-Colab result above\nstates whether an installation-inclusive Run all has completed successfully.','')
+    md(appendix+('\n\n'+run_note() if run_note() else '')+'\n\n'+textwrap.dedent('''
     <details><summary>Setup, recovery and source selection</summary>
 
     Colab shallow-clones `colab-v0` into `/content/tritflow`; `TRITFLOW_REF` selects another release.
     Use the source revision matching this notebook. Setup preserves Colab's NumPy/SciPy/Matplotlib/Plotly,
     checks minimum versions, and prints KLayout/ngspice versions. If mixed versions are detected,
     restart once and rerun setup/imports. After a failed chapter, rerun its named prerequisite.
-    Missing or changed scientific inputs stop execution. The real-Colab time above includes the
-    labelled recorded experiments; it is not a fresh recomputation of every sweep.
+    Missing or changed scientific inputs stop execution; changed illustrations only warn.
+    The closing table distinguishes calculations from recorded experiments.
 
     </details>
-    ''')
+    '''))
     code('characterization')
     code('four')
     code('final',requires=tuple(code_ids)[2:])

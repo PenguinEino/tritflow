@@ -58,6 +58,6 @@ python3 submission/build_submission.py --from-executed build/submission_capture/
 That command repackages a recorded execution; it does not claim a new EDA run
 or refresh its source/model context. Omit it to execute the current flow afresh.
 Use `--workdir`, `--output` or `--team` for isolated drafts. Saved outputs were
-generated locally. Real Colab round 2 passed at commit `842afe2` in 384.1 s
-including setup; later presentation edits have local checks. This builder
+generated locally. A current verified Colab note is withheld pending the next
+successful real-Colab Run all. This builder
 never performs git-writing commands, opens a PR or submits personal information.

@@ -1,6 +1,59 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 11 complete: editorial notebook, learning controls, edited-circuit outputs and submission rebuilt.**
+Updated: 2026-10-18. **Phase 12: Colab round-3 fixes implemented; fresh execution/package validation in progress.**
+
+## Phase 12 — Colab round-3 presentation and evidence repair
+
+- Refreshed **29 presentation hashes from committed figure/script bytes**, all
+  checked against `git show HEAD:<path>`. The **19 scientific input hashes and
+  native measurements are unchanged**. Schema 2 separates illustration hashes
+  from scientific input hashes; legacy mixed records remain readable.
+- `load_paper()` warns when any figure or figure script is changed/missing,
+  including SVG metadata-only regeneration. It continues using the saved
+  measurement record; changed/missing scientific inputs still raise. The final
+  notebook check no longer asserts equality of presentation bytes. Regression
+  cases change only an SVG date, remove the SVG, and change the data independently.
+  Refresh presentation only with
+  `python3 notebook/paper_evidence.py --refresh-presentation`, followed by
+  `python3 notebook/make_notebook.py`; no simulator/build directory is needed.
+- The generator converts prose to Colab dollar math, replaces `\operatorname`
+  with `\mathrm`, preserves fenced code, and keeps equations outside HTML
+  Details. Four gate definitions now occupy two rows. Narrative sources are
+  untouched. Paper images use `width="100%"`, `max-width:100%`, `height:auto`;
+  prose/output tables use fixed layout and wrapping cells. Expanded evidence
+  also wraps long JSON strings. Appendix B's recovery Details indentation is fixed.
+- The introduction states the generated adder result once after its image;
+  duplicate teaser/caption sentences are removed. Historical round-2 evidence
+  is retained for audit with `publish=false`, but its runtime/commit is absent
+  from the notebook and submission run notes. Current package metadata records
+  no current Colab verification. A new successful real-Colab run and explicit
+  promotion are required before adding a verified-run note.
+
+### Phase 12 validation in progress
+
+- **285 tests passed** in 26.98 s (HDL, synthesis, viz, notebook and submission;
+  packaged-payload check excluded until rebuild). After the final prose edit,
+  notebook/submission preflight: **71 passed**, 1 payload check deferred.
+- Local Chrome/MathJax preview of the actual generated chapter 1/2/7 Markdown:
+  **17 math containers, zero math errors**. At a **1350 px viewport / 1100 px
+  text column**, sizing image and Appendix A table both measure 1100 px, with
+  no element/page overflow. Screenshots inspected locally; this is **not a
+  real-Colab verification**. Evidence under `/tmp/tritflow-phase12-preview/`
+  (`results.json`, `math.png`, `sizing.png`, `scope.png`). Temporary pinned
+  MathJax/marked browser scripts were downloaded there; no packages installed.
+- Full native capture, fresh default capture and saved-output submission
+  rebuild are running; final runtimes and payload counts will be recorded here.
+
+### Phase 12 handoff / interface requests
+
+- Release matching notebook/helpers/evidence at `colab-v0` (or the selected
+  `TRITFLOW_REF`) before the next real-Colab round. Bootstrap is unchanged.
+- Figure owner: the committed `fig_sizing.png` itself clips the end of the
+  rightmost panel's x-axis label. The responsive notebook now fits the complete
+  image within the column; source figure margins/label wrapping need a separate
+  figure-owner adjustment. No edits/regeneration of figures were attempted.
+- Frozen HDL/synthesis and other streams' files remain untouched. No git write,
+  push or PR; no package installation.
 
 ## Phase 11 — complete
 
