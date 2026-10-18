@@ -26,6 +26,15 @@ class PnrResult:
     data: dict
     netlist: GateNetlist | None = None
 
+    def net_parasitics(self, **options):
+        """Return logical-net wire/pin loads and write <top>.net_parasitics.json.
+
+        Optional ``lvs_report`` and ``capacitance_path`` map and compare SIM's
+        connected-metal estimate. External output loads are excluded.
+        """
+        from .parasitics import result_net_parasitics
+        return result_net_parasitics(self, **options)
+
     def signoff(self, **options):
         """Run optional cached MDP/IP62 qualification; inspect clean/submission_ready."""
         from .signoff import signoff
@@ -263,10 +272,14 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
     if run_pdk_drc:
         data["checks"]["pdk_drc"]["command"] = [s.replace(str(candidate.resolve()), str(gds_path.resolve()))
                                                 for s in data["checks"]["pdk_drc"]["command"]]
+    from .parasitics import estimate_net_parasitics
+    data["net_parasitics"] = estimate_net_parasitics(data, netlist, library)
     finished = time.perf_counter()
     data["stats"]["runtime_s"] = {"placement": placed_at-started,
         "routing": routed_at-placed_at, "export_and_verification": finished-routed_at,
         "total": finished-started}
     json_path.write_text(json.dumps(data, indent=2)+"\n")
     failure_path.unlink(missing_ok=True)
-    return PnrResult(gds_path, json_path, data["stats"], data, netlist)
+    result = PnrResult(gds_path, json_path, data["stats"], data, netlist)
+    result.net_parasitics()
+    return result

@@ -42,10 +42,11 @@ class _Choice:
     region: int
 
 
-def _worst(target, choices, upper, conditions, dd, allowed, budget):
+def _worst(target, choices, upper, conditions, dd, allowed, budget, *, midpoint=False, ramp=1e-9):
     """Branch and bound over paths, with exact conjunction of endpoint conditions."""
     sequence = 0
-    heap = [(-upper[target], sequence, target, 0., allowed, ())]
+    endpoint_tail=max((c.stage.settling_tail_s for c in choices[target]),default=0.) if midpoint else 0.
+    heap = [(-(upper[target]+endpoint_tail), sequence, target, 0., allowed, ())]
     best_seen = {}
     expanded = 0
     while heap:
@@ -57,16 +58,20 @@ def _worst(target, choices, upper, conditions, dd, allowed, budget):
             region = dd.intersect(region, conditions[node])
             if region:
                 stages = []
-                arrival = 0.
+                arrival = ramp/2 if midpoint else 0.
                 for stage in reversed(path):
                     arrival += stage.delay_s
                     stages.append(replace(stage, arrival_s=arrival))
-                return delay, region, stages, expanded
+                if midpoint and stages:
+                    arrival+=stages[-1].settling_tail_s
+                    stages[-1]=replace(stages[-1],arrival_s=arrival)
+                return arrival, region, stages, expanded
             continue
         for choice in choices[node]:
             remaining = dd.intersect(region, choice.region)
             if not remaining: continue
             cumulative = delay + choice.stage.delay_s
+            if midpoint and not path:cumulative+=choice.stage.settling_tail_s
             key = choice.parent, remaining
             if cumulative <= best_seen.get(key, -1.): continue
             best_seen[key] = cumulative
@@ -87,7 +92,7 @@ def _load_data(pnr):
     return pnr.data if hasattr(pnr, "data") else pnr
 
 
-def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
+def _settling_analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
             input_transition_s=1e-9, load_policy="linear", wire_caps=None,
             vector_pairs=None, max_nodes=1_000_000, max_labels=100_000):
     """Estimate output settling with a verifiable critical endpoint pattern.
@@ -112,6 +117,7 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
     ordered = ordered_instances(netlist)
     if load_policy not in {"error", "linear"}: raise ValueError("Unknown load policy")
     models = library or TimingLibrary(i.cell for i in ordered)
+    midpoint=getattr(models,'metric',None)=='midpoint'
     inputs = sorted((p.name for p in netlist.ports if p.dir == "input"), key=_input_order)
     outputs = [p.name for p in netlist.ports if p.dir == "output"]
     dd = Diagram([(phase, name) for name in inputs for phase in ("before", "after")], max_nodes)
@@ -179,7 +185,15 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
             condition = dd.intersect(allowed, *(truth[inst.pins[p]][phase][arc[key][p]]
                  for phase, key in ((0, "from_inputs"), (1, "to_inputs")) for p in pins))
             if not condition: continue
-            delay = model.sample(arc, load, input_transition_s, load_policy=load_policy)
+            changing=arc['output_from']!=arc['output_to']
+            if midpoint:
+                delay=model.sample(arc,load,input_transition_s,load_policy=load_policy,
+                                   field='propagation_s' if changing else 'recovery_s')
+                tail=model.sample(arc,load,input_transition_s,load_policy=load_policy,field='tail_s') if changing else 0.
+                slew=model.sample(arc,load,input_transition_s,load_policy=load_policy,field='output_slew_10_90_s') if changing else None
+            else:
+                delay = model.sample(arc, load, input_transition_s, load_policy=load_policy)
+                tail,slew=0.,None
             transition = (arc["output_from"], arc["output_to"])
             key = name,*transition
             for pin in arc["changed_inputs"]:
@@ -189,9 +203,10 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
                 arrival = upper[parent] + delay
                 stage = PathStage(inst.name, inst.cell, pin, inst.pins[pin], name,
                     pair, transition, arc["from_inputs"], arc["to_inputs"], arc["id"],
-                    delay, arrival, load, input_transition_s)
+                    delay, arrival, load, input_transition_s,tail,slew,
+                    'midpoint' if midpoint and changing else 'local_recovery' if midpoint else 'settling')
                 choices.setdefault(key, []).append(_Choice(parent, stage, condition))
-                upper[key] = max(upper.get(key, 0.), arrival)
+                upper[key] = max(upper.get(key, float('-inf')), arrival)
                 total_choices += 1
     arrival, transitions, paths, patterns = {}, {}, {}, {}
     total_expanded = 0
@@ -204,7 +219,8 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
             key = name,a,b
             if key not in upper: continue
             dd.rollback(graph_nodes)
-            value, region, path, expanded = _worst(key, choices, upper, conditions, dd, allowed, max_labels)
+            value, region, path, expanded = _worst(key, choices, upper, conditions, dd, allowed, max_labels,
+                                                 midpoint=midpoint,ramp=input_transition_s)
             peak_nodes = max(peak_nodes, len(dd.nodes))
             total_expanded += expanded
             if region:
@@ -217,7 +233,7 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
             patterns[name] = {phase: {p: witness[phase,p] for p in inputs} for phase in ("before", "after")}
         else:
             patterns[name] = {"before": None, "after": None}
-    return TimingReport(netlist.top, arrival, transitions, paths, patterns, loads,
+    report=TimingReport(netlist.top, arrival, transitions, paths, patterns, loads,
         ["Nominal ±5/0 V models; settling means final entry into ideal ±0.5 V through the measured observation window.",
          "Exact endpoint sensitization; maximum additive cell settling with a fixed full input ramp at every stage.",
          "No propagated slew, analog waveform/skew or intermediate endpoint-stable glitch propagation; no guaranteed upper bound.",
@@ -230,3 +246,30 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
         {"decision_nodes": peak_nodes, "graph_nodes": graph_nodes,
          "graph_choices": total_choices, "search_expansions": total_expanded,
          "runtime_s": time.perf_counter()-started, "all_endpoint_pairs": vector_pairs is None})
+    if midpoint:
+        report.assumptions[1]='Measured midpoint delays compose; only the endpoint settling tail is added. Global graph uses a fixed input ramp.'
+        report.provenance['metric']='midpoint_with_endpoint_tail'
+    return report
+
+
+def analyze(netlist,pnr=None,**kwargs):
+    """Analyze ternary timing; STA-owned midpoint tables are the default model.
+
+    Passing a legacy TimingLibrary explicitly retains the historical additive
+    settling model for controlled ablations. With vector_pairs, midpoint analysis
+    also propagates measured output slew between gates. See sta/README.md.
+    """
+    library=kwargs.get('library')
+    if library is None:
+        from .propagation import PropagationLibrary
+        net=GateNetlist.load(netlist) if isinstance(netlist,(str,Path)) else GateNetlist.from_dict(netlist) if isinstance(netlist,dict) else netlist
+        kwargs['library']=library=PropagationLibrary([i.cell for i in net.instances])
+    pairs=kwargs.get('vector_pairs')
+    if getattr(library,'metric',None)=='midpoint' and pairs is not None:
+        from .propagation import analyze_patterns
+        options=kwargs.copy();options.pop('vector_pairs')
+        if pnr is not None and options.get('wire_caps') is None:
+            from tritflow.extract import wire_capacitance
+            options['wire_caps']=wire_capacitance(_load_data(pnr))
+        return analyze_patterns(netlist,pairs,**options)
+    return _settling_analyze(netlist,pnr,**kwargs)

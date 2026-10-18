@@ -1,0 +1,64 @@
+TritFlow ternary testbench
+*
+.parameters vthMP	= 0
+.parameters vthMN 	= 0
+.parameters vthMPE      = 0
+.parameters vthMNE      = 0
+.parameters magRR       = 1
+.parameters magRS       = 1 
+.parameters magCSIO     = 1 
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib"
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NANY A B Y VDD VMID VSS
+* device instance $1 r0 *1 56,100 PMOS
+XM_ex_1 n_ex_7 A Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $2 r0 *1 71,100 PMOS
+XM_ex_2 n_ex_9 B Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $3 r0 *1 41,100 PMOS
+XM_ex_3 n_ex_30 B n_ex_43 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $4 r0 *1 26,100 PMOS
+XM_ex_4 n_ex_43 A VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $5 r0 *1 56,27 NMOS
+XM_ex_5 n_ex_7 B VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $6 r0 *1 71,27 NMOS
+XM_ex_6 n_ex_9 A VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $7 r0 *1 26,27 NMOS
+XM_ex_7 n_ex_17 A n_ex_5 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $8 r0 *1 41,27 NMOS
+XM_ex_8 VSS B n_ex_17 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $9 r0 *1 118.5,54 F_RR
+XR_ex_9 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $10 r0 *1 118.5,84 F_RR
+XR_ex_10 n_ex_30 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+.ends NANY
+
+.temp 27
+.options rshunt=1e12
+VDD VDD 0 5
+VMID VMID 0 0
+VSS VSS 0 -5
+Xdut A B Y VDD VMID VSS NANY
+Vin0 A 0 PWL(0 -5 3e-07 -5 3.01e-07 5 6e-07 5 6.01e-07 5 9e-07 5 9.01e-07 5 1.2e-06 5 1.201e-06 5 1.5e-06 5 1.501e-06 5 1.8e-06 5 1.801e-06 0 2.1e-06 0 2.101e-06 5 2.4e-06 5 2.401e-06 0 2.7e-06 0 2.701e-06 5 3e-06 5 3.001e-06 0 3.3e-06 0 3.301e-06 5 3.6e-06 5 3.601e-06 -5 3.9e-06 -5 3.901e-06 5 4.2e-06 5 4.201e-06 -5 4.5e-06 -5 4.501e-06 5 4.8e-06 5 4.801e-06 -5 5.1e-06 -5 5.101e-06 5 5.4e-06 5 5.401e-06 5 5.7e-06 5 5.701e-06 5 6e-06 5 6.001e-06 0 6.3e-06 0 6.301e-06 5 6.6e-06 5 6.601e-06 0 6.9e-06 0 6.901e-06 5 7.2e-06 5 7.201e-06 0 7.5e-06 0 7.501e-06 5 7.8e-06 5 7.801e-06 -5 8.1e-06 -5 8.101e-06 5 8.4e-06 5 8.401e-06 -5 8.7e-06 -5 8.701e-06 5 9e-06 5 9.001e-06 -5 9.3e-06 -5 9.301e-06 5 9.6e-06 5 9.601e-06 0 9.9e-06 0 9.901e-06 5 1.02e-05 5 1.0201e-05 0 1.05e-05 0 1.0501e-05 5 1.08e-05 5 1.0801e-05 0 1.11e-05 0 1.1101e-05 5 1.14e-05 5 1.1401e-05 -5 1.17e-05 -5 1.1701e-05 5 1.2e-05 5 1.2001e-05 -5 1.23e-05 -5 1.2301e-05 5 1.26e-05 5 1.2601e-05 -5 1.29e-05 -5 1.2901e-05 0 1.32e-05 0 1.3201e-05 0 1.35e-05 0 1.3501e-05 0 1.38e-05 0 1.3801e-05 0 1.41e-05 0 1.4101e-05 0 1.44e-05 0 1.4401e-05 -5 1.47e-05 -5 1.4701e-05 0 1.5e-05 0 1.5001e-05 -5 1.53e-05 -5 1.5301e-05 0 1.56e-05 0 1.5601e-05 -5 1.59e-05 -5 1.5901e-05 0 1.62e-05 0 1.6201e-05 0 1.65e-05 0 1.6501e-05 0 1.68e-05 0 1.6801e-05 -5 1.71e-05 -5 1.7101e-05 0 1.74e-05 0 1.7401e-05 -5 1.77e-05 -5 1.7701e-05 0 1.8e-05 0 1.8001e-05 -5 1.83e-05 -5 1.8301e-05 0 1.86e-05 0 1.8601e-05 -5 1.89e-05 -5 1.8901e-05 0 1.92e-05 0 1.9201e-05 -5 1.95e-05 -5 1.9501e-05 0 1.98e-05 0 1.9801e-05 -5 2.01e-05 -5 2.0101e-05 -5 2.04e-05 -5 2.0401e-05 -5 2.07e-05 -5 2.0701e-05 -5 2.1e-05 -5 2.1001e-05 -5 2.13e-05 -5 2.1301e-05 -5 2.16e-05 -5 2.1601e-05 -5)
+Vin1 B 0 PWL(0 -5 3e-07 -5 3.01e-07 5 6e-07 5 6.01e-07 0 9e-07 0 9.01e-07 5 1.2e-06 5 1.201e-06 -5 1.5e-06 -5 1.501e-06 5 1.8e-06 5 1.801e-06 5 2.1e-06 5 2.101e-06 5 2.4e-06 5 2.401e-06 0 2.7e-06 0 2.701e-06 5 3e-06 5 3.001e-06 -5 3.3e-06 -5 3.301e-06 5 3.6e-06 5 3.601e-06 5 3.9e-06 5 3.901e-06 5 4.2e-06 5 4.201e-06 0 4.5e-06 0 4.501e-06 5 4.8e-06 5 4.801e-06 -5 5.1e-06 -5 5.101e-06 0 5.4e-06 0 5.401e-06 -5 5.7e-06 -5 5.701e-06 0 6e-06 0 6.001e-06 5 6.3e-06 5 6.301e-06 0 6.6e-06 0 6.601e-06 0 6.9e-06 0 6.901e-06 0 7.2e-06 0 7.201e-06 -5 7.5e-06 -5 7.501e-06 0 7.8e-06 0 7.801e-06 5 8.1e-06 5 8.101e-06 0 8.4e-06 0 8.401e-06 0 8.7e-06 0 8.701e-06 0 9e-06 0 9.001e-06 -5 9.3e-06 -5 9.301e-06 -5 9.6e-06 -5 9.601e-06 5 9.9e-06 5 9.901e-06 -5 1.02e-05 -5 1.0201e-05 0 1.05e-05 0 1.0501e-05 -5 1.08e-05 -5 1.0801e-05 -5 1.11e-05 -5 1.1101e-05 -5 1.14e-05 -5 1.1401e-05 5 1.17e-05 5 1.1701e-05 -5 1.2e-05 -5 1.2001e-05 0 1.23e-05 0 1.2301e-05 -5 1.26e-05 -5 1.2601e-05 -5 1.29e-05 -5 1.2901e-05 5 1.32e-05 5 1.3201e-05 0 1.35e-05 0 1.3501e-05 5 1.38e-05 5 1.3801e-05 -5 1.41e-05 -5 1.4101e-05 5 1.44e-05 5 1.4401e-05 5 1.47e-05 5 1.4701e-05 5 1.5e-05 5 1.5001e-05 0 1.53e-05 0 1.5301e-05 5 1.56e-05 5 1.5601e-05 -5 1.59e-05 -5 1.5901e-05 0 1.62e-05 0 1.6201e-05 -5 1.65e-05 -5 1.6501e-05 0 1.68e-05 0 1.6801e-05 5 1.71e-05 5 1.7101e-05 0 1.74e-05 0 1.7401e-05 0 1.77e-05 0 1.7701e-05 0 1.8e-05 0 1.8001e-05 -5 1.83e-05 -5 1.8301e-05 -5 1.86e-05 -5 1.8601e-05 5 1.89e-05 5 1.8901e-05 -5 1.92e-05 -5 1.9201e-05 0 1.95e-05 0 1.9501e-05 -5 1.98e-05 -5 1.9801e-05 -5 2.01e-05 -5 2.0101e-05 5 2.04e-05 5 2.0401e-05 0 2.07e-05 0 2.0701e-05 5 2.1e-05 5 2.1001e-05 -5 2.13e-05 -5 2.1301e-05 0 2.16e-05 0 2.1601e-05 -5)
+Cload0 Y 0 1e-14
+.nodeset v(Y)=5
+.nodeset v(xdut.n_ex_7)=0
+.nodeset v(xdut.n_ex_9)=0
+.nodeset v(xdut.n_ex_30)=5
+.nodeset v(xdut.n_ex_43)=5
+.nodeset v(xdut.n_ex_17)=-5
+.nodeset v(xdut.n_ex_5)=-5
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+set numdgt=15
+tran 1e-10 2.19e-05 0 1e-10
+wrdata waveform.txt v(A) v(B) v(Y) i(vdd) i(vmid) i(vss) i(vin0) i(vin1)
+quit
+.endc
+.end

@@ -106,7 +106,8 @@ def scaling_fit_figure(result, *, title='Ripple carry and the DC-power cost of t
             fig.add_trace(go.Scatter(x=fit['x'],y=[v*1e9 for v in fit['predicted']],
                 mode='lines',name=f'{"Device-only" if mode=="pre" else "+ wire C"} fit',line={'color':color,'dash':'dash'}),row=1,col=1)
             r2 = 'undefined' if fit['r_squared'] is None else f'{fit["r_squared"]:.5f}'
-            annotations.append(f'{mode}: {fit["slope"]*1e9:.3f} ns/trit + {fit["intercept"]*1e9:.3f} ns; R²={r2}')
+            label='device-only' if mode=='pre' else '+ wire C'
+            annotations.append(f'{label}: {fit["slope"]*1e9:.3f} ns/trit + {fit["intercept"]*1e9:.3f} ns; R²={r2}')
     fig.add_trace(go.Scatter(x=[r['cell_count'] for r in rows],
         y=[r['static_power_worst_w']*1e3 for r in rows],mode='markers',
         name='DC power measured',marker={'color':'#23865c','size':9}),row=1,col=2)

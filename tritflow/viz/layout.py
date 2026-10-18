@@ -7,6 +7,7 @@ The GDS raster is rendered by KLayout's LayoutView, not redrawn from abstracts.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 # A small, fixed drawing palette keeps raster and vector layer names consistent.
@@ -317,8 +318,76 @@ def routing_progress(pnr):
     return fig
 
 
+def capacitance_figure(pnr, *, parasitics=None, colorscale="Viridis"):
+    """Colour signal routes by estimated routed wire C (fF), with load hover.
+
+    Accept a PnrResult, PNR JSON path or dictionary. New PNR JSON contains the
+    frozen characterization and merged-metal estimate; ``parasitics`` can also
+    supply a net_parasitics() report or sidecar path. This is the routed-metal
+    substrate estimate, excluding connected cell metal and external loads.
+    """
+    import plotly.graph_objects as go
+    from plotly.colors import sample_colorscale
+
+    data = _data(pnr)
+    report = _data(parasitics) if parasitics is not None else data.get("net_parasitics")
+    if report is None and hasattr(pnr, "net_parasitics"):
+        report = pnr.net_parasitics()
+    if report is None:
+        raise ValueError("No net parasitic report: rebuild PNR or supply parasitics=<report/path>")
+    if report["top"] != data["top"]:
+        raise ValueError("Parasitic report and PNR top names differ")
+    nets = report["nets"]
+    routed = {w["net"] for w in data["wires"]} | {v["net"] for v in data["vias"]} | {p["name"] for p in data["pins"]}
+    if routed - nets.keys():
+        raise ValueError(f"Parasitic report missing routed nets: {sorted(routed-nets.keys())}")
+    values = [n["wire_capacitance_f"]*1e15 for n in nets.values()]
+    if any(not math.isfinite(v) or v < 0 for v in values):
+        raise ValueError("Wire capacitance must be finite and nonnegative")
+    high = max(values, default=0.)
+    fig = go.Figure(_cell_traces(data))
+    for trace in fig.data:
+        trace.opacity = .35
+    for net, row in nets.items():
+        value = row["wire_capacitance_f"]*1e15
+        color = sample_colorscale(colorscale, [value/high if high else 0.])[0]
+        pin_c = row["cell_input_capacitance_f"]
+        load = row["total_load_f"]
+        hover = f"{net}<br>Routed wire C: {value:.4g} fF"
+        hover += f"<br>Cell input C: {pin_c*1e15:.4g} fF" if pin_c is not None else "<br>Cell input C: unavailable"
+        hover += (f"<br>On-chip load: {load*1e15:.4g} fF" if load is not None else "<br>On-chip load: unavailable")
+        hover += f"<br>Fan-out: {row['fanout']} · pins: {row['pin_count']} · vias: {row['via_count']}"
+        for layer in ("M1", "M2", "V1"):
+            wires = [w for w in data["wires"] if w["net"] == net and w["layer"] == layer]
+            vias = [v for v in data["vias"] if v["net"] == net]
+            if not wires and (layer != "V1" or not vias):
+                continue
+            trace = _route_trace(net, layer, wires, vias)
+            trace.line.color = color
+            trace.marker.color = color
+            trace.hovertemplate = hover+f"<br>{layer}<extra></extra>"
+            trace.meta = {**trace.meta, "wire_capacitance_f": row["wire_capacitance_f"]}
+            fig.add_trace(trace)
+        # A retained unused input still has a boundary pad and nonzero metal C.
+        for pin in (p for p in data["pins"] if p["name"] == net):
+            x0, y0, x1, y1 = pin["rect"]
+            fig.add_trace(go.Scatter(x=[(x0+x1)/2], y=[(y0+y1)/2], mode="markers",
+                marker={"color": color, "size": 6, "symbol": "square"}, showlegend=False,
+                hovertemplate=hover+"<br>Boundary pin<extra></extra>",
+                meta={"kind": "capacitance_pin", "net": net, "wire_capacitance_f": row["wire_capacitance_f"]}))
+    fig.add_trace(go.Scatter(x=[None], y=[None], mode="markers", showlegend=False,
+        marker={"color": [0], "cmin": 0, "cmax": high if high else 1.,
+                "colorscale": colorscale, "showscale": True,
+                "colorbar": {"title": {"text": "Routed wire C (fF)"}}},
+        hoverinfo="skip", meta={"kind": "capacitance_scale"}))
+    _axes(fig, data, f"{data['top']} · estimated routed wire capacitance")
+    fig.update_layout(margin={"r": 160}, meta={"capacitance_scope": report["wire_scope"],
+        "parameter_origin": report["parameter_origin"]})
+    return fig
+
+
 def save_layout_views(pnr, gds_path=None, output_dir=None):
-    """Write the raster and three notebook figures beside a PNR result."""
+    """Write the raster and four notebook figures beside a PNR result."""
     data = _data(pnr)
     if gds_path is None and hasattr(pnr, "gds_path"):
         gds_path = pnr.gds_path
@@ -330,7 +399,8 @@ def save_layout_views(pnr, gds_path=None, output_dir=None):
     paths = {"png": render_gds(gds_path, out/f"{stem}.layout.png", top=stem)}
     for suffix, figure in (("layout", layout_figure(data, show_power=True)),
                            ("placement", placement_animation(data)),
-                           ("routing", routing_progress(data))):
+                           ("routing", routing_progress(data)),
+                           ("capacitance", capacitance_figure(pnr))):
         path = out/f"{stem}.{suffix}.html"
         figure.write_html(path, include_plotlyjs=True, full_html=True)
         paths[suffix] = path

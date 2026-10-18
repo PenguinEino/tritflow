@@ -1,4 +1,13 @@
-# STA stream — complete
+# STA stream — phase 2 in progress
+
+Integrator follow-up: diagnose the additive-settling overprediction before
+replacing the numerical model. Phase-1 reports are archived under
+`results/sta/phase1/`. STA will characterize midpoint propagation, output slew
+and endpoint-only settling tails from SPICE under `results/sta/`; no CELLS/SIM
+source or publication will be edited. The same 39 outputs remain the validation
+set. Target is roughly ±20%, with explicit electrical/coverage limits otherwise.
+
+The phase-1 completion evidence below is historical until phase 2 is validated.
 
 2026-10-18. Qualified against public PDK
 `5d963db9d44e192d37a0489c208bfccf2e2f690c`, with CELLS generation

@@ -23,6 +23,9 @@ class PathStage:
     arrival_s: float
     load_f: float
     input_transition_s: float
+    settling_tail_s: float = 0.
+    output_slew_10_90_s: float | None = None
+    metric: str = 'settling'
 
     @property
     def transition(self):

@@ -19,7 +19,7 @@ from tritflow import ROOT
 from tritflow.extract import reference_net_map
 from tritflow.netlist import GateNetlist
 from .analyze import analyze
-from .model import TimingLibrary
+from .propagation import PropagationLibrary as TimingLibrary
 
 PIN = "5d963db9d44e192d37a0489c208bfccf2e2f690c"
 DESIGNS = [*(('scaling', f'adder{n}', ROOT/'build/adder_scaling'/f'adder{n}') for n in range(1,7)),
@@ -47,6 +47,7 @@ def fingerprint(root=ROOT):
     paths += list((root/'cells/out').glob('*/*.timing.json'))
     paths += list((root/'cells/out').glob('*/*.ext.spice'))
     paths += [root/'cells/out/generation.json']
+    paths += list((root/'results/sta/propagation/tables').glob('*.propagation.json'))
     for _, name, directory in DESIGNS:
         directory = root/directory.relative_to(ROOT)
         out = directory/'postlayout'
@@ -107,6 +108,10 @@ def _validate_design(group, name, directory, models, scaling):
                   output_load_f=summary['output_load_f'], input_transition_s=1e-9)
     predicted = analyze(net, **kwargs)
     tested = analyze(net, vector_pairs=pairs, **kwargs)
+    fixed = analyze(net, vector_pairs=pairs, propagate_slew=False, **kwargs)
+    baseline_path=ROOT/'results/sta/phase1/validation.json'
+    baseline=_read(baseline_path) if baseline_path.exists() else {'designs':[]}
+    legacy={r['output']:r for d in baseline['designs'] if d['group']==group and d['design']==name for r in d['outputs']}
     # A report's historical inputs_unchanged flag does not establish freshness now.
     stale = [p for p,h in summary.get('input_sha256', {}).items() if not Path(p).is_file() or _sha(p) != h]
     pdk = summary.get('pdk_provenance', {})
@@ -125,6 +130,8 @@ def _validate_design(group, name, directory, models, scaling):
             stale.append('results/adder_scaling.json does not match physical measurement snapshot')
         outputs.append({'design': f'{group}/{name}', 'output': pin,
             'predicted_s': value, 'tested_predicted_s': tested.arrival[pin], 'simulated_s': observed,
+            'fixed_ramp_midpoint_s':fixed.arrival[pin],
+            'legacy_tested_s':legacy.get(pin,{}).get('tested_predicted_s'),
             'error_s': None if observed is None else value-observed,
             'error_percent': None if not observed else 100*(value/observed-1),
             'tested_error_percent': None if not observed else 100*(tested.arrival[pin]/observed-1)})
@@ -141,7 +148,7 @@ def _validate_design(group, name, directory, models, scaling):
         'tested_pairs_runtime_s': tested.statistics['runtime_s'],
         'load_extension_count': len(predicted.warnings),
         'wire_scope': caps.get('scope'),
-        'electrical_scope': 'Maximum biased device input C plus exact same LVS-mapped top-net metal C used by SIM; fixed full 1 ns ramp per cell.'}
+        'electrical_scope': 'Measured midpoint propagation and endpoint-only settling tail; output slew propagated on tested patterns. Maximum biased device C and matching top-net metal C.'}
     return record, {f'{report_name}.timing.json': predicted.to_dict(),
                     f'{report_name}.tested.timing.json': tested.to_dict()}
 
@@ -161,7 +168,7 @@ def validate(*, output_dir=None, retries=3):
             print(f'STA: {group}/{name}', flush=True)
             try:
                 prefix = str(directory.relative_to(ROOT))+'/'
-                consumed = {p:h for p,h in before.items() if p.startswith((prefix, 'cells/', '/'))
+                consumed = {p:h for p,h in before.items() if p.startswith((prefix, 'cells/', '/', 'results/sta/propagation/tables/'))
                             or (group == 'scaling' and p == 'results/adder_scaling.json')}
                 cache_key = hashlib.sha256(json.dumps(consumed, sort_keys=True).encode()).hexdigest()
                 key = group, name
@@ -183,19 +190,22 @@ def validate(*, output_dir=None, retries=3):
             continue
         rows = [r for d in records for r in d['outputs']]
         current = [r for d in records if d['qualified_current'] for r in d['outputs']]
-        result = {'schema_version': 1, 'created_utc': datetime.now(timezone.utc).isoformat(),
+        accurate=[r for r in rows if r.get('tested_error_percent') is not None and abs(r['tested_error_percent'])<=20]
+        result = {'schema_version': 2, 'created_utc': datetime.now(timezone.utc).isoformat(),
             'complete': len(records) == 10 and all(d['outputs'] for d in records),
             'qualified_current': len(records) == 10 and all(d['qualified_current'] for d in records),
-            'accuracy_passed': None,
-            'scope': 'Nominal analytical estimates checked against finite post-layout SPICE sequences; no accuracy acceptance threshold or certified error bound is claimed.',
+            'accuracy_passed':len(rows)==39 and len(accurate)==39,
+            'accuracy_target_percent':20.,'outputs_within_target':len(accurate),
+            'scope': 'Midpoint propagation plus endpoint-only tail; nominal finite-vector validation with a ±20% empirical target, not a certified bound.',
             'limitations': ['Full graph considers all settled input endpoint pairs; SPICE maxima cover only consecutive documented vectors.',
                 'Tested-pair comparison removes endpoint coverage differences, but does not reproduce analog slew/skew/history or propagated glitches.',
-                'Maximum biased AC input C and additive per-cell settling can be strongly pessimistic; inspect measured error before use.',
+                'Input slew is reduced to an equivalent linear ramp; unequal multi-input midpoints use synchronous surfaces. Intermediate endpoint-stable glitches are not propagated.',
                 'Wire coefficients are assumed, not calibrated PEX; signal/poly RC, PVT and package are outside the model.',
                 'Explicit bounded load extensions are uncharacterized estimates, not measured table points.'],
             'designs': records, 'cell_generation': models.generation,
             'statistics': {'all_endpoint_pairs': statistics(rows, 'predicted_s'),
                            'sim_endpoint_pairs': statistics(rows, 'tested_predicted_s'),
+                           'fixed_ramp_midpoint':statistics(rows,'fixed_ramp_midpoint_s'),
                            'current_all_endpoint_pairs': statistics(current, 'predicted_s'),
                            'current_sim_endpoint_pairs': statistics(current, 'tested_predicted_s')},
             'source_sha256': before,
