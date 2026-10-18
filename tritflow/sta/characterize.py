@@ -94,6 +94,8 @@ def characterize(*,output=None,jobs=2,cells=('INV','NAND','NOR','NANY','BUF'),lo
         data['axes']={'load_f':list(loads),'input_transition_s':list(ramps)}
         data['metric']='Last directional ideal-step midpoint propagation, plus endpoint-only final settling tail.'
         data['created_utc']=datetime.now(timezone.utc).isoformat()
+        data['base_timing_sha256']=sha(CELLS_DIR/'out'/cell/f'{cell}.timing.json')
+        data['code_sha256']={p.name:sha(p) for p in [Path(__file__),Path(__file__).with_name('metrics.py')]}
         lookups={key:{(tuple(r['from']),tuple(r['to'])):r for r in p['rows']} for key,p in points[cell].items()}
         for arc in data['arcs']+data['simultaneous']:
             key=tuple(arc['from_inputs'][p] for p in data['inputs']),tuple(arc['to_inputs'][p] for p in data['inputs'])
@@ -101,6 +103,10 @@ def characterize(*,output=None,jobs=2,cells=('INV','NAND','NOR','NANY','BUF'),lo
                 arc[field]=[[lookups[r,l][key][field] for l in loads] for r in ramps]
             for field in ('status','error_v'):arc.pop(field,None)
         data['runs']=[p['provenance'] for p in points[cell].values()]
+        data['conditions']['hold_s_by_ramp']=[min(points[cell][r,l]['provenance']['hold_s'] for l in loads) for r in ramps]
+        data['conditions']['max_step_s_by_ramp']=[max(points[cell][r,l]['provenance']['step_s'] for l in loads) for r in ramps]
+        data['coverage']['measured_grid_points']=len(loads)*len(ramps)
+        data['max_settling_s']=max(row['settling_s'] or 0. for point in points[cell].values() for row in point['rows'])
         data['complete']=len(points[cell])==len(loads)*len(ramps)
         data['passed']=all(p['passed'] for p in points[cell].values())
         data['conditions']['delay_reference']='Input ideal-step midpoint to output ideal-step midpoint. Full-ramp axis unchanged.'
@@ -115,7 +121,23 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--jobs',type=int,default=2)
     parser.add_argument('--cells',nargs='+',default=['INV','NAND','NOR','NANY','BUF'])
-    args=parser.parse_args();characterize(jobs=args.jobs,cells=args.cells)
+    parser.add_argument('--resolution',action='store_true',help='50 ps INV/NANY control at 100 fF, 1 ns ramp')
+    args=parser.parse_args()
+    if args.resolution:
+        result=[]
+        for cell in ('INV','NANY'):
+            fine=profile(cell,100e-15,1e-9,ROOT/'results/sta/resolution',step=.05e-9)
+            primary=json.loads((ROOT/f'results/sta/propagation/runs/{cell}/r1e-09_c1e-13/measurements.json').read_text())
+            pairs=list(zip(primary['rows'],fine['rows']))
+            delta={field:max((abs(a[field]-b[field]) for a,b in pairs if a[field] is not None and b[field] is not None),default=0.) for field in FIELDS}
+            result.append({'cell':cell,'primary_step_s':primary['provenance']['step_s'],
+                'fine_step_s':fine['provenance']['step_s'],'max_absolute_difference_s':delta,
+                'changing_output_d50_within_250ps':delta['propagation_s']<=.25e-9,
+                'passed':primary['passed'] and fine['passed']})
+            print(cell,delta,flush=True)
+        write(ROOT/'results/sta/resolution/comparison.json',{'controls':result,
+            'scope':'100 fF, 1 ns ramp controls only; finite-grid sampling is not a bound over all loads/ramps or circuit glitches.'})
+    else:characterize(jobs=args.jobs,cells=args.cells)
 
 
 if __name__=='__main__':main()

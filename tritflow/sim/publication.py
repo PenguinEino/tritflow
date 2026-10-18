@@ -116,7 +116,9 @@ def publish_audit(destination=ROOT/'results/pinned_requalification.json'):
     if not corner or len(corner['rows'])!=54 or any(r['state']!='complete' for r in corner['rows']):errors.append('Corner matrix is incomplete')
     else:
         if not qualified_pdk({'pdk_provenance':corner['inventory'].get('pdk_provenance',{})},pdk):errors.append('Unqualified PDK: corners')
-        for row in corner['rows']:verify(row,'sources_sha256');sources.update(row['sources_sha256'])
+        for row in corner['rows']:
+            verify(row,'sources_sha256');sources.update(row['sources_sha256'])
+            verify(row.get('transient') or {},'evidence_sha256')
     for path in sorted((ROOT/'results').glob('*.json')):
         if path.name not in ('pinned_requalification.json',):artifacts[str(path.resolve())]=file_hash(path)
     for path in (CELLS_DIR/'generation.json',CELLS_DIR/'out/generation.json',CELLS_DIR/'template.json'):

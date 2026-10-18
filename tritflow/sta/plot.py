@@ -38,9 +38,10 @@ def validation_figure(validation=None):
                                   ("tested_predicted_s", "SIM endpoint pairs, propagated slew", "diamond")):
         figure.add_scatter(x=[r["simulated_s"]*1e9 for r in rows], y=[r[field]*1e9 for r in rows],
             mode="markers", name=label, marker_symbol=symbol,
+            visible='legendonly' if field=='predicted_s' else True,
             text=[f"{r['design']}: {r['output']}" for r in rows],
             hovertemplate="%{text}<br>SPICE %{x:.2f} ns<br>STA %{y:.2f} ns<extra>%{fullData.name}</extra>")
-    maximum = max([r[k]*1e9 for r in rows for k in ("simulated_s", "predicted_s", "tested_predicted_s")], default=1)
+    maximum = max([r[k]*1e9 for r in rows for k in ("simulated_s", "tested_predicted_s")], default=1)
     figure.add_scatter(x=[0, maximum], y=[0, maximum], mode="lines", line=dict(dash="dash", color="gray"), name="Equality")
     figure.add_scatter(x=[0,maximum],y=[0,maximum*.8],mode='lines',line=dict(dash='dot',color='lightgray'),name='−20%')
     figure.add_scatter(x=[0,maximum],y=[0,maximum*1.2],mode='lines',line=dict(dash='dot',color='lightgray'),name='+20%')

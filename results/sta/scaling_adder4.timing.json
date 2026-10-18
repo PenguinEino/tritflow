@@ -1,60 +1,60 @@
 {
   "top": "adder4",
   "arrival": {
-    "sum[3]": 7.02544019507466e-07,
-    "sum[2]": 5.517556866127457e-07,
-    "sum[1]": 3.9878033841971296e-07,
-    "sum[0]": 2.5514858672788417e-07,
-    "cout": 7.057078202401599e-07
+    "sum[3]": 2.2139499389432844e-07,
+    "sum[2]": 1.748847939337208e-07,
+    "sum[1]": 1.3069263906416137e-07,
+    "sum[0]": 8.983097250797107e-08,
+    "cout": 2.1549539043564998e-07
   },
   "transition_arrival": {
     "sum[3]": {
-      "-1->-1": 6.78859469786462e-07,
-      "-1->0": 6.430798162557027e-07,
-      "-1->1": 6.759427503413944e-07,
-      "0->-1": 6.693647534975527e-07,
-      "0->1": 6.897292996848684e-07,
-      "1->-1": 6.856054276342856e-07,
-      "1->0": 6.30881292060733e-07,
-      "1->1": 7.02544019507466e-07
+      "-1->-1": 1.9816972631601372e-07,
+      "-1->0": 1.872796474090305e-07,
+      "-1->1": 2.2139499389432844e-07,
+      "0->-1": 2.165967045014617e-07,
+      "0->1": 2.1096840706105507e-07,
+      "1->-1": 2.1302025743614136e-07,
+      "1->0": 1.9384640185397335e-07,
+      "1->1": 2.1150051360731213e-07
     },
     "sum[2]": {
-      "-1->-1": 5.341345600466619e-07,
-      "-1->0": 4.852386782322402e-07,
-      "-1->1": 5.236142782259448e-07,
-      "0->-1": 5.235623397262363e-07,
-      "0->1": 5.359864822558806e-07,
-      "1->-1": 5.310871187892163e-07,
-      "1->0": 4.811865212451534e-07,
-      "1->1": 5.517556866127457e-07
+      "-1->-1": 1.534928151438092e-07,
+      "-1->0": 1.3995303632379185e-07,
+      "-1->1": 1.748847939337208e-07,
+      "0->-1": 1.6949578273554486e-07,
+      "0->1": 1.6471287624161268e-07,
+      "1->-1": 1.659465011288255e-07,
+      "1->0": 1.467578874056799e-07,
+      "1->1": 1.6520497538660025e-07
     },
     "sum[1]": {
-      "-1->-1": 3.8810250725399773e-07,
-      "-1->0": 3.324575078953356e-07,
-      "-1->1": 3.7315663708236455e-07,
-      "0->-1": 3.782826498208757e-07,
-      "0->1": 3.8336909709790613e-07,
-      "1->-1": 3.826535129785432e-07,
-      "1->0": 3.353625223750253e-07,
-      "1->1": 3.9878033841971296e-07
+      "-1->-1": 1.0903451495767789e-07,
+      "-1->0": 9.459765379700141e-08,
+      "-1->1": 1.3069263906416137e-07,
+      "0->-1": 1.2532515975505154e-07,
+      "0->1": 1.1745242379763809e-07,
+      "1->-1": 1.2215751132138333e-07,
+      "1->0": 1.0170283111054413e-07,
+      "1->1": 1.1795278792070863e-07
     },
     "sum[0]": {
-      "-1->-1": 2.524435623947361e-07,
-      "-1->0": 1.8777026515696047e-07,
-      "-1->1": 2.3068585468935576e-07,
-      "0->-1": 2.352438657728013e-07,
-      "0->1": 2.3711004106806434e-07,
-      "1->-1": 2.3183434227812394e-07,
-      "1->0": 2.0025119359225724e-07,
-      "1->1": 2.5514858672788417e-07
+      "-1->-1": 7.931602351297056e-08,
+      "-1->0": 6.064553684813493e-08,
+      "-1->1": 8.983097250797107e-08,
+      "0->-1": 8.052226613057864e-08,
+      "0->1": 8.505671532579763e-08,
+      "1->-1": 8.125133704048972e-08,
+      "1->0": 6.636368747391074e-08,
+      "1->1": 8.01489187167249e-08
     },
     "cout": {
-      "-1->0": 6.926716275123702e-07,
-      "-1->1": 6.765828513186354e-07,
-      "0->-1": 7.057078202401599e-07,
-      "0->1": 6.817443283671713e-07,
-      "1->-1": 6.999911130641355e-07,
-      "1->0": 6.82210534984762e-07
+      "-1->0": 2.0732074004008355e-07,
+      "-1->1": 1.9052958979107199e-07,
+      "0->-1": 2.1549539043564998e-07,
+      "0->1": 2.0147861469528877e-07,
+      "1->-1": 2.0467626936846804e-07,
+      "1->0": 1.9865420764623096e-07
     }
   },
   "paths": {
@@ -62,30 +62,33 @@
       {
         "instance": "digit[0].fa.ha1.g_t",
         "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "a[0]",
+        "input_pin": "B",
+        "input_net": "b[0]",
         "output_net": "_n24",
         "input_transition": [
-          1,
-          0
+          0,
+          -1
         ],
         "output_transition": [
-          -1,
+          0,
           1
         ],
         "from_inputs": {
-          "A": 1,
+          "A": 0,
           "B": 0
         },
         "to_inputs": {
           "A": 0,
           "B": -1
         },
-        "arc_id": "NANY:59",
-        "delay_s": 4.938505172463127e-08,
-        "arrival_s": 4.938505172463127e-08,
+        "arc_id": "NANY:35",
+        "delay_s": 1.3137865400926656e-08,
+        "arrival_s": 1.3637865400926655e-08,
         "load_f": 9.56421221254466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.621328937479219e-08,
+        "output_slew_10_90_s": 3.5320606247321844e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_d",
@@ -94,26 +97,29 @@
         "input_net": "_n24",
         "output_net": "_n27",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
+          "A": 0,
           "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:14",
-        "delay_s": 2.557818908110915e-08,
-        "arrival_s": 7.496324080574041e-08,
+        "arc_id": "NANY:38",
+        "delay_s": 1.034928088570995e-08,
+        "arrival_s": 2.3987146286636606e-08,
         "load_f": 4.037425594330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.105384369156485e-08,
+        "output_slew_10_90_s": 1.706747582650354e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_nd",
@@ -122,24 +128,27 @@
         "input_net": "_n27",
         "output_net": "_n28",
         "input_transition": [
-          1,
+          0,
           -1
         ],
         "output_transition": [
-          -1,
+          0,
           1
         ],
         "from_inputs": {
-          "A": 1
+          "A": 0
         },
         "to_inputs": {
           "A": -1
         },
-        "arc_id": "INV:04",
-        "delay_s": 1.8137330723791538e-08,
-        "arrival_s": 9.310057152953195e-08,
+        "arc_id": "INV:02",
+        "delay_s": 4.622277045413534e-09,
+        "arrival_s": 2.860942333205014e-08,
         "load_f": 4.494815543919998e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 9.34574818981429e-09,
+        "output_slew_10_90_s": 1.2810542977248223e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_s",
@@ -148,110 +157,89 @@
         "input_net": "_n28",
         "output_net": "_n29",
         "input_transition": [
-          -1,
+          0,
           1
-        ],
-        "output_transition": [
-          1,
-          -1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "arc_id": "NANY:14",
-        "delay_s": 3.697098711767604e-08,
-        "arrival_s": 1.30071558647208e-07,
-        "load_f": 7.696206982250074e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "_n29",
-        "output_net": "_n31",
-        "input_transition": [
-          1,
-          -1
-        ],
-        "output_transition": [
-          -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": -1
-        },
-        "arc_id": "NANY:56",
-        "delay_s": 4.6693229889619306e-08,
-        "arrival_s": 1.767647885368273e-07,
-        "load_f": 9.336392076544658e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_u",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n31",
-        "output_net": "_n32",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
-          0
-        ],
-        "from_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 1
-        },
-        "arc_id": "NANY:26",
-        "delay_s": 7.685324231251993e-09,
-        "arrival_s": 1.844501127680793e-07,
-        "load_f": 5.388728324624662e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_c",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n32",
-        "output_net": "_n33",
-        "input_transition": [
-          1,
-          0
         ],
         "output_transition": [
           0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 0,
+          "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:22",
-        "delay_s": 4.539296030659018e-08,
-        "arrival_s": 2.2984307307466948e-07,
+        "arc_id": "NANY:38",
+        "delay_s": 1.3219544028192958e-08,
+        "arrival_s": 4.1828967360243096e-08,
+        "load_f": 7.696206982250074e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.7403954901101777e-08,
+        "output_slew_10_90_s": 2.5323997172255e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_na",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n29",
+        "output_net": "_n30",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 6.309698476104142e-09,
+        "arrival_s": 4.813866583634724e-08,
+        "load_f": 6.512632267919998e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.3174372504545345e-08,
+        "output_slew_10_90_s": 1.80288018696699e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n30",
+        "output_net": "_n33",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:38",
+        "delay_s": 1.8117614360033614e-08,
+        "arrival_s": 6.625628019638085e-08,
         "load_f": 1.3974863193873984e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.866476388540222e-08,
+        "output_slew_10_90_s": 4.0292868103774466e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.g_nc",
@@ -276,10 +264,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.8531082204022148e-08,
-        "arrival_s": 2.483741552786916e-07,
+        "delay_s": 6.3883511223119506e-09,
+        "arrival_s": 7.26446313186928e-08,
         "load_f": 1.689346026330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.1643296068601306e-08,
+        "output_slew_10_90_s": 1.5361322120440446e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.g_cout",
@@ -302,10 +293,13 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.6473775254565056e-08,
-        "arrival_s": 2.7484793053325664e-07,
+        "delay_s": 8.54244153367474e-09,
+        "arrival_s": 8.118707285236753e-08,
         "load_f": 8.933729572544659e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.742980995838926e-08,
+        "output_slew_10_90_s": 2.3969132328182393e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_t",
@@ -330,10 +324,13 @@
           "B": -1
         },
         "arc_id": "NANY:56",
-        "delay_s": 4.86041869823292e-08,
-        "arrival_s": 3.2345211751558584e-07,
+        "delay_s": 1.0677281543266998e-08,
+        "arrival_s": 9.186435439563453e-08,
         "load_f": 9.88556210854466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.742123311795117e-08,
+        "output_slew_10_90_s": 3.479093234289759e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_u",
@@ -358,10 +355,13 @@
           "B": 1
         },
         "arc_id": "NANY:26",
-        "delay_s": 7.195141215132261e-09,
-        "arrival_s": 3.306472587307181e-07,
+        "delay_s": 2.591334740262546e-09,
+        "arrival_s": 9.445568913589707e-08,
         "load_f": 4.646480140624661e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.102495488021359e-09,
+        "output_slew_10_90_s": 5.686773249606648e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_c",
@@ -386,10 +386,13 @@
           "B": 0
         },
         "arc_id": "NANY:22",
-        "delay_s": 4.868812703841124e-08,
-        "arrival_s": 3.793353857691293e-07,
+        "delay_s": 1.7405600903572726e-08,
+        "arrival_s": 1.118612900394698e-07,
         "load_f": 1.5260842833873985e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.098447232253318e-08,
+        "output_slew_10_90_s": 4.331138556147445e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.g_nc",
@@ -414,10 +417,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.8974350484915772e-08,
-        "arrival_s": 3.983097362540451e-07,
+        "delay_s": 6.532227461023691e-09,
+        "arrival_s": 1.1839351750049348e-07,
         "load_f": 1.854137706330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.1944393339782046e-08,
+        "output_slew_10_90_s": 1.577376875205749e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.g_cout",
@@ -440,10 +446,13 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.824918534527862e-08,
-        "arrival_s": 4.265589215993237e-07,
+        "delay_s": 9.080568713308727e-09,
+        "arrival_s": 1.274740862138022e-07,
         "load_f": 9.612293812544659e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.8667073422269067e-08,
+        "output_slew_10_90_s": 2.5656169228019667e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_t",
@@ -468,10 +477,13 @@
           "B": -1
         },
         "arc_id": "NANY:56",
-        "delay_s": 4.735363222259117e-08,
-        "arrival_s": 4.7391255382191486e-07,
+        "delay_s": 1.0385779014876946e-08,
+        "arrival_s": 1.3785986522867913e-07,
         "load_f": 9.52617821654466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.646241106736822e-08,
+        "output_slew_10_90_s": 3.3874232537561477e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_u",
@@ -496,10 +508,13 @@
           "B": 1
         },
         "arc_id": "NANY:26",
-        "delay_s": 7.165759120614839e-09,
-        "arrival_s": 4.810783129425297e-07,
+        "delay_s": 2.578874397668491e-09,
+        "arrival_s": 1.4043873962634763e-07,
         "load_f": 4.601492556624661e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.085760779129497e-09,
+        "output_slew_10_90_s": 5.660414109642806e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_c",
@@ -524,10 +539,13 @@
           "B": 0
         },
         "arc_id": "NANY:22",
-        "delay_s": 5.0369642856904116e-08,
-        "arrival_s": 5.314479557994338e-07,
+        "delay_s": 1.792563103150669e-08,
+        "arrival_s": 1.5836437065785433e-07,
         "load_f": 1.5917075213873986e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.216924841284451e-08,
+        "output_slew_10_90_s": 4.4903881343604905e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.g_nc",
@@ -552,10 +570,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.9804450446256745e-08,
-        "arrival_s": 5.512524062456905e-07,
+        "delay_s": 6.800935278725638e-09,
+        "arrival_s": 1.6516530593657995e-07,
         "load_f": 2.1619076503300768e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.2506731743576758e-08,
+        "output_slew_10_90_s": 1.654406660153488e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.g_cout",
@@ -578,66 +599,44 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.986691073252679e-08,
-        "arrival_s": 5.811193169782173e-07,
+        "delay_s": 9.570949494293404e-09,
+        "arrival_s": 1.7473625543087336e-07,
         "load_f": 1.0230590736544659e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.9796159399206732e-08,
+        "output_slew_10_90_s": 2.7197991941411373e-08,
+        "metric": "midpoint"
       },
       {
-        "instance": "digit[3].fa.ha2.g_t",
+        "instance": "digit[3].fa.ha2.g_u",
         "cell": "NANY",
-        "input_pin": "B",
+        "input_pin": "A",
         "input_net": "_n45",
-        "output_net": "_n46",
+        "output_net": "_n48",
         "input_transition": [
           0,
           -1
         ],
         "output_transition": [
           -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": -1
-        },
-        "arc_id": "NANY:56",
-        "delay_s": 4.573765491330667e-08,
-        "arrival_s": 6.26856971891524e-07,
-        "load_f": 9.061779348544659e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[3].fa.ha2.g_u",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n46",
-        "output_net": "_n48",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
           0
         ],
         "from_inputs": {
           "A": 0,
-          "B": -1
+          "B": 1
         },
         "to_inputs": {
           "A": -1,
           "B": 1
         },
-        "arc_id": "NANY:26",
-        "delay_s": 7.540868519894075e-09,
-        "arrival_s": 6.34397840411418e-07,
+        "arc_id": "NANY:42",
+        "delay_s": 4.812573213736682e-09,
+        "arrival_s": 1.7954882864461005e-07,
         "load_f": 5.172162964624662e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 5.2804836319840644e-09,
+        "output_slew_10_90_s": 8.78560819491418e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.ha2.g_c",
@@ -646,7 +645,7 @@
         "input_net": "_n48",
         "output_net": "_n49",
         "input_transition": [
-          1,
+          -1,
           0
         ],
         "output_transition": [
@@ -654,18 +653,21 @@
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 1,
+          "B": -1
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:22",
-        "delay_s": 4.700552810247685e-08,
-        "arrival_s": 6.814033685138949e-07,
+        "arc_id": "NANY:54",
+        "delay_s": 1.5120863314992256e-08,
+        "arrival_s": 1.946696919596023e-07,
         "load_f": 1.4604187753873985e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.978219322071213e-08,
+        "output_slew_10_90_s": 4.122513072902545e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.ha2.g_d",
@@ -678,22 +680,25 @@
           -1
         ],
         "output_transition": [
-          1,
+          -1,
           0
         ],
         "from_inputs": {
-          "A": -1,
+          "A": 1,
           "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NANY:13",
-        "delay_s": 9.221480560976715e-09,
-        "arrival_s": 6.906248490748716e-07,
+        "arc_id": "NANY:62",
+        "delay_s": 2.6040141053163453e-09,
+        "arrival_s": 1.9727370606491866e-07,
         "load_f": 1.898350330330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 5.96435171766789e-09,
+        "output_slew_10_90_s": 7.788788175963878e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.ha2.g_nd",
@@ -702,24 +707,27 @@
         "input_net": "_n50",
         "output_net": "_n51",
         "input_transition": [
-          1,
-          0
-        ],
-        "output_transition": [
           -1,
           0
         ],
+        "output_transition": [
+          1,
+          0
+        ],
         "from_inputs": {
-          "A": 1
+          "A": -1
         },
         "to_inputs": {
           "A": 0
         },
-        "arc_id": "INV:05",
-        "delay_s": 8.188484538778913e-09,
-        "arrival_s": 6.988133336136506e-07,
+        "arc_id": "INV:00",
+        "delay_s": 2.4748498362360438e-09,
+        "arrival_s": 1.997485559011547e-07,
         "load_f": 4.783576443919998e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.742143440511015e-09,
+        "output_slew_10_90_s": 6.56332752939129e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.ha2.g_s",
@@ -727,36 +735,6 @@
         "input_pin": "A",
         "input_net": "_n51",
         "output_net": "sum[3]",
-        "input_transition": [
-          -1,
-          0
-        ],
-        "output_transition": [
-          1,
-          1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "arc_id": "NANY:10",
-        "delay_s": 3.730685893815235e-09,
-        "arrival_s": 7.025440195074658e-07,
-        "load_f": 1.67174367e-13,
-        "input_transition_s": 1e-09
-      }
-    ],
-    "sum[2]": [
-      {
-        "instance": "digit[0].fa.ha1.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "a[0]",
-        "output_net": "_n24",
         "input_transition": [
           1,
           0
@@ -774,10 +752,46 @@
           "B": -1
         },
         "arc_id": "NANY:59",
-        "delay_s": 4.938505172463127e-08,
-        "arrival_s": 4.938505172463127e-08,
+        "delay_s": 4.6478076520243264e-09,
+        "arrival_s": 2.2139499389432844e-07,
+        "load_f": 1.67174367e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.6998630341149408e-08,
+        "output_slew_10_90_s": 1.5463915601753393e-08,
+        "metric": "midpoint"
+      }
+    ],
+    "sum[2]": [
+      {
+        "instance": "digit[0].fa.ha1.g_t",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "b[0]",
+        "output_net": "_n24",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 1.3137865400926656e-08,
+        "arrival_s": 1.3637865400926655e-08,
         "load_f": 9.56421221254466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.621328937479219e-08,
+        "output_slew_10_90_s": 3.5320606247321844e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_d",
@@ -786,26 +800,29 @@
         "input_net": "_n24",
         "output_net": "_n27",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
+          "A": 0,
           "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:14",
-        "delay_s": 2.557818908110915e-08,
-        "arrival_s": 7.496324080574041e-08,
+        "arc_id": "NANY:38",
+        "delay_s": 1.034928088570995e-08,
+        "arrival_s": 2.3987146286636606e-08,
         "load_f": 4.037425594330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.105384369156485e-08,
+        "output_slew_10_90_s": 1.706747582650354e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_nd",
@@ -814,24 +831,27 @@
         "input_net": "_n27",
         "output_net": "_n28",
         "input_transition": [
-          1,
+          0,
           -1
         ],
         "output_transition": [
-          -1,
+          0,
           1
         ],
         "from_inputs": {
-          "A": 1
+          "A": 0
         },
         "to_inputs": {
           "A": -1
         },
-        "arc_id": "INV:04",
-        "delay_s": 1.8137330723791538e-08,
-        "arrival_s": 9.310057152953195e-08,
+        "arc_id": "INV:02",
+        "delay_s": 4.622277045413534e-09,
+        "arrival_s": 2.860942333205014e-08,
         "load_f": 4.494815543919998e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 9.34574818981429e-09,
+        "output_slew_10_90_s": 1.2810542977248223e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_s",
@@ -840,110 +860,89 @@
         "input_net": "_n28",
         "output_net": "_n29",
         "input_transition": [
-          -1,
+          0,
           1
-        ],
-        "output_transition": [
-          1,
-          -1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "arc_id": "NANY:14",
-        "delay_s": 3.697098711767604e-08,
-        "arrival_s": 1.30071558647208e-07,
-        "load_f": 7.696206982250074e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "_n29",
-        "output_net": "_n31",
-        "input_transition": [
-          1,
-          -1
-        ],
-        "output_transition": [
-          -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": -1
-        },
-        "arc_id": "NANY:56",
-        "delay_s": 4.6693229889619306e-08,
-        "arrival_s": 1.767647885368273e-07,
-        "load_f": 9.336392076544658e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_u",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n31",
-        "output_net": "_n32",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
-          0
-        ],
-        "from_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 1
-        },
-        "arc_id": "NANY:26",
-        "delay_s": 7.685324231251993e-09,
-        "arrival_s": 1.844501127680793e-07,
-        "load_f": 5.388728324624662e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_c",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n32",
-        "output_net": "_n33",
-        "input_transition": [
-          1,
-          0
         ],
         "output_transition": [
           0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 0,
+          "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:22",
-        "delay_s": 4.539296030659018e-08,
-        "arrival_s": 2.2984307307466948e-07,
+        "arc_id": "NANY:38",
+        "delay_s": 1.3219544028192958e-08,
+        "arrival_s": 4.1828967360243096e-08,
+        "load_f": 7.696206982250074e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.7403954901101777e-08,
+        "output_slew_10_90_s": 2.5323997172255e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_na",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n29",
+        "output_net": "_n30",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 6.309698476104142e-09,
+        "arrival_s": 4.813866583634724e-08,
+        "load_f": 6.512632267919998e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.3174372504545345e-08,
+        "output_slew_10_90_s": 1.80288018696699e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n30",
+        "output_net": "_n33",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:38",
+        "delay_s": 1.8117614360033614e-08,
+        "arrival_s": 6.625628019638085e-08,
         "load_f": 1.3974863193873984e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.866476388540222e-08,
+        "output_slew_10_90_s": 4.0292868103774466e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.g_nc",
@@ -968,10 +967,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.8531082204022148e-08,
-        "arrival_s": 2.483741552786916e-07,
+        "delay_s": 6.3883511223119506e-09,
+        "arrival_s": 7.26446313186928e-08,
         "load_f": 1.689346026330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.1643296068601306e-08,
+        "output_slew_10_90_s": 1.5361322120440446e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.g_cout",
@@ -994,10 +996,13 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.6473775254565056e-08,
-        "arrival_s": 2.7484793053325664e-07,
+        "delay_s": 8.54244153367474e-09,
+        "arrival_s": 8.118707285236753e-08,
         "load_f": 8.933729572544659e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.742980995838926e-08,
+        "output_slew_10_90_s": 2.3969132328182393e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_t",
@@ -1022,10 +1027,13 @@
           "B": -1
         },
         "arc_id": "NANY:56",
-        "delay_s": 4.86041869823292e-08,
-        "arrival_s": 3.2345211751558584e-07,
+        "delay_s": 1.0677281543266998e-08,
+        "arrival_s": 9.186435439563453e-08,
         "load_f": 9.88556210854466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.742123311795117e-08,
+        "output_slew_10_90_s": 3.479093234289759e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_u",
@@ -1050,10 +1058,13 @@
           "B": 1
         },
         "arc_id": "NANY:26",
-        "delay_s": 7.195141215132261e-09,
-        "arrival_s": 3.306472587307181e-07,
+        "delay_s": 2.591334740262546e-09,
+        "arrival_s": 9.445568913589707e-08,
         "load_f": 4.646480140624661e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.102495488021359e-09,
+        "output_slew_10_90_s": 5.686773249606648e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_c",
@@ -1078,10 +1089,13 @@
           "B": 0
         },
         "arc_id": "NANY:22",
-        "delay_s": 4.868812703841124e-08,
-        "arrival_s": 3.793353857691293e-07,
+        "delay_s": 1.7405600903572726e-08,
+        "arrival_s": 1.118612900394698e-07,
         "load_f": 1.5260842833873985e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.098447232253318e-08,
+        "output_slew_10_90_s": 4.331138556147445e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.g_nc",
@@ -1106,10 +1120,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.8974350484915772e-08,
-        "arrival_s": 3.983097362540451e-07,
+        "delay_s": 6.532227461023691e-09,
+        "arrival_s": 1.1839351750049348e-07,
         "load_f": 1.854137706330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.1944393339782046e-08,
+        "output_slew_10_90_s": 1.577376875205749e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.g_cout",
@@ -1132,66 +1149,44 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.824918534527862e-08,
-        "arrival_s": 4.265589215993237e-07,
+        "delay_s": 9.080568713308727e-09,
+        "arrival_s": 1.274740862138022e-07,
         "load_f": 9.612293812544659e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.8667073422269067e-08,
+        "output_slew_10_90_s": 2.5656169228019667e-08,
+        "metric": "midpoint"
       },
       {
-        "instance": "digit[2].fa.ha2.g_t",
+        "instance": "digit[2].fa.ha2.g_u",
         "cell": "NANY",
-        "input_pin": "B",
+        "input_pin": "A",
         "input_net": "_n40",
-        "output_net": "_n41",
+        "output_net": "_n42",
         "input_transition": [
           0,
           -1
         ],
         "output_transition": [
           -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": -1
-        },
-        "arc_id": "NANY:56",
-        "delay_s": 4.735363222259117e-08,
-        "arrival_s": 4.7391255382191486e-07,
-        "load_f": 9.52617821654466e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[2].fa.ha2.g_u",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n41",
-        "output_net": "_n42",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
           0
         ],
         "from_inputs": {
           "A": 0,
-          "B": -1
+          "B": 1
         },
         "to_inputs": {
           "A": -1,
           "B": 1
         },
-        "arc_id": "NANY:26",
-        "delay_s": 7.165759120614839e-09,
-        "arrival_s": 4.810783129425297e-07,
+        "arc_id": "NANY:42",
+        "delay_s": 4.458211659041506e-09,
+        "arrival_s": 1.319322978728437e-07,
         "load_f": 4.601492556624661e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.920865224391569e-09,
+        "output_slew_10_90_s": 8.148185937490594e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_c",
@@ -1200,7 +1195,7 @@
         "input_net": "_n42",
         "output_net": "_n43",
         "input_transition": [
-          1,
+          -1,
           0
         ],
         "output_transition": [
@@ -1208,18 +1203,21 @@
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 1,
+          "B": -1
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:22",
-        "delay_s": 5.0369642856904116e-08,
-        "arrival_s": 5.314479557994338e-07,
+        "arc_id": "NANY:54",
+        "delay_s": 1.6170396477912836e-08,
+        "arrival_s": 1.4810269435075654e-07,
         "load_f": 1.5917075213873986e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.2154903948984246e-08,
+        "output_slew_10_90_s": 4.446080792612293e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_d",
@@ -1232,22 +1230,25 @@
           -1
         ],
         "output_transition": [
-          1,
+          -1,
           0
         ],
         "from_inputs": {
-          "A": -1,
+          "A": 1,
           "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NANY:13",
-        "delay_s": 9.235474889983899e-09,
-        "arrival_s": 5.406834306894177e-07,
+        "arc_id": "NANY:62",
+        "delay_s": 2.6192431699826325e-09,
+        "arrival_s": 1.5072193752073918e-07,
         "load_f": 1.9215593463300769e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 5.978550358683123e-09,
+        "output_slew_10_90_s": 7.815614571244623e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_nd",
@@ -1256,24 +1257,27 @@
         "input_net": "_n53",
         "output_net": "_n54",
         "input_transition": [
-          1,
-          0
-        ],
-        "output_transition": [
           -1,
           0
         ],
+        "output_transition": [
+          1,
+          0
+        ],
         "from_inputs": {
-          "A": 1
+          "A": -1
         },
         "to_inputs": {
           "A": 0
         },
-        "arc_id": "INV:05",
-        "delay_s": 7.404797561513348e-09,
-        "arrival_s": 5.48088228250931e-07,
+        "arc_id": "INV:00",
+        "delay_s": 2.2468480380025146e-09,
+        "arrival_s": 1.529687855587417e-07,
         "load_f": 4.257324419919998e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.224768888588112e-09,
+        "output_slew_10_90_s": 5.875243966804298e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_s",
@@ -1281,36 +1285,6 @@
         "input_pin": "A",
         "input_net": "_n54",
         "output_net": "sum[2]",
-        "input_transition": [
-          -1,
-          0
-        ],
-        "output_transition": [
-          1,
-          1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "arc_id": "NANY:10",
-        "delay_s": 3.6674583618146707e-09,
-        "arrival_s": 5.517556866127457e-07,
-        "load_f": 1.750575446e-13,
-        "input_transition_s": 1e-09
-      }
-    ],
-    "sum[1]": [
-      {
-        "instance": "digit[0].fa.ha1.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "a[0]",
-        "output_net": "_n24",
         "input_transition": [
           1,
           0
@@ -1328,10 +1302,46 @@
           "B": -1
         },
         "arc_id": "NANY:59",
-        "delay_s": 4.938505172463127e-08,
-        "arrival_s": 4.938505172463127e-08,
+        "delay_s": 4.713560895823951e-09,
+        "arrival_s": 1.748847939337208e-07,
+        "load_f": 1.750575446e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.7202447479155174e-08,
+        "output_slew_10_90_s": 1.5657413172383664e-08,
+        "metric": "midpoint"
+      }
+    ],
+    "sum[1]": [
+      {
+        "instance": "digit[0].fa.ha1.g_t",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "b[0]",
+        "output_net": "_n24",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 1.3137865400926656e-08,
+        "arrival_s": 1.3637865400926655e-08,
         "load_f": 9.56421221254466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.621328937479219e-08,
+        "output_slew_10_90_s": 3.5320606247321844e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_d",
@@ -1340,26 +1350,29 @@
         "input_net": "_n24",
         "output_net": "_n27",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
+          "A": 0,
           "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:14",
-        "delay_s": 2.557818908110915e-08,
-        "arrival_s": 7.496324080574041e-08,
+        "arc_id": "NANY:38",
+        "delay_s": 1.034928088570995e-08,
+        "arrival_s": 2.3987146286636606e-08,
         "load_f": 4.037425594330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.105384369156485e-08,
+        "output_slew_10_90_s": 1.706747582650354e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_nd",
@@ -1368,24 +1381,27 @@
         "input_net": "_n27",
         "output_net": "_n28",
         "input_transition": [
-          1,
+          0,
           -1
         ],
         "output_transition": [
-          -1,
+          0,
           1
         ],
         "from_inputs": {
-          "A": 1
+          "A": 0
         },
         "to_inputs": {
           "A": -1
         },
-        "arc_id": "INV:04",
-        "delay_s": 1.8137330723791538e-08,
-        "arrival_s": 9.310057152953195e-08,
+        "arc_id": "INV:02",
+        "delay_s": 4.622277045413534e-09,
+        "arrival_s": 2.860942333205014e-08,
         "load_f": 4.494815543919998e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 9.34574818981429e-09,
+        "output_slew_10_90_s": 1.2810542977248223e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_s",
@@ -1394,110 +1410,89 @@
         "input_net": "_n28",
         "output_net": "_n29",
         "input_transition": [
-          -1,
+          0,
           1
-        ],
-        "output_transition": [
-          1,
-          -1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "arc_id": "NANY:14",
-        "delay_s": 3.697098711767604e-08,
-        "arrival_s": 1.30071558647208e-07,
-        "load_f": 7.696206982250074e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "_n29",
-        "output_net": "_n31",
-        "input_transition": [
-          1,
-          -1
-        ],
-        "output_transition": [
-          -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": -1
-        },
-        "arc_id": "NANY:56",
-        "delay_s": 4.6693229889619306e-08,
-        "arrival_s": 1.767647885368273e-07,
-        "load_f": 9.336392076544658e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_u",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n31",
-        "output_net": "_n32",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
-          0
-        ],
-        "from_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 1
-        },
-        "arc_id": "NANY:26",
-        "delay_s": 7.685324231251993e-09,
-        "arrival_s": 1.844501127680793e-07,
-        "load_f": 5.388728324624662e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_c",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n32",
-        "output_net": "_n33",
-        "input_transition": [
-          1,
-          0
         ],
         "output_transition": [
           0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 0,
+          "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:22",
-        "delay_s": 4.539296030659018e-08,
-        "arrival_s": 2.2984307307466948e-07,
+        "arc_id": "NANY:38",
+        "delay_s": 1.3219544028192958e-08,
+        "arrival_s": 4.1828967360243096e-08,
+        "load_f": 7.696206982250074e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.7403954901101777e-08,
+        "output_slew_10_90_s": 2.5323997172255e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_na",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n29",
+        "output_net": "_n30",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 6.309698476104142e-09,
+        "arrival_s": 4.813866583634724e-08,
+        "load_f": 6.512632267919998e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.3174372504545345e-08,
+        "output_slew_10_90_s": 1.80288018696699e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n30",
+        "output_net": "_n33",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:38",
+        "delay_s": 1.8117614360033614e-08,
+        "arrival_s": 6.625628019638085e-08,
         "load_f": 1.3974863193873984e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.866476388540222e-08,
+        "output_slew_10_90_s": 4.0292868103774466e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.g_nc",
@@ -1522,10 +1517,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.8531082204022148e-08,
-        "arrival_s": 2.483741552786916e-07,
+        "delay_s": 6.3883511223119506e-09,
+        "arrival_s": 7.26446313186928e-08,
         "load_f": 1.689346026330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.1643296068601306e-08,
+        "output_slew_10_90_s": 1.5361322120440446e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.g_cout",
@@ -1548,66 +1546,44 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.6473775254565056e-08,
-        "arrival_s": 2.7484793053325664e-07,
+        "delay_s": 8.54244153367474e-09,
+        "arrival_s": 8.118707285236753e-08,
         "load_f": 8.933729572544659e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.742980995838926e-08,
+        "output_slew_10_90_s": 2.3969132328182393e-08,
+        "metric": "midpoint"
       },
       {
-        "instance": "digit[1].fa.ha2.g_t",
+        "instance": "digit[1].fa.ha2.g_u",
         "cell": "NANY",
-        "input_pin": "B",
+        "input_pin": "A",
         "input_net": "_n35",
-        "output_net": "_n36",
+        "output_net": "_n37",
         "input_transition": [
           0,
           -1
         ],
         "output_transition": [
           -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": -1
-        },
-        "arc_id": "NANY:56",
-        "delay_s": 4.86041869823292e-08,
-        "arrival_s": 3.2345211751558584e-07,
-        "load_f": 9.88556210854466e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[1].fa.ha2.g_u",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n36",
-        "output_net": "_n37",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
           0
         ],
         "from_inputs": {
           "A": 0,
-          "B": -1
+          "B": 1
         },
         "to_inputs": {
           "A": -1,
           "B": 1
         },
-        "arc_id": "NANY:26",
-        "delay_s": 7.195141215132261e-09,
-        "arrival_s": 3.306472587307181e-07,
+        "arc_id": "NANY:42",
+        "delay_s": 4.486637524044706e-09,
+        "arrival_s": 8.567371037641224e-08,
         "load_f": 4.646480140624661e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.948768285809092e-09,
+        "output_slew_10_90_s": 8.1983232163753e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_c",
@@ -1616,7 +1592,7 @@
         "input_net": "_n37",
         "output_net": "_n38",
         "input_transition": [
-          1,
+          -1,
           0
         ],
         "output_transition": [
@@ -1624,18 +1600,21 @@
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 1,
+          "B": -1
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:22",
-        "delay_s": 4.868812703841124e-08,
-        "arrival_s": 3.793353857691293e-07,
+        "arc_id": "NANY:54",
+        "delay_s": 1.5645798851401647e-08,
+        "arrival_s": 1.0131950922781388e-07,
         "load_f": 1.5260842833873985e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.096893054630924e-08,
+        "output_slew_10_90_s": 4.28434902102823e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_d",
@@ -1648,22 +1627,25 @@
           -1
         ],
         "output_transition": [
-          1,
+          -1,
           0
         ],
         "from_inputs": {
-          "A": -1,
+          "A": 1,
           "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": -1
         },
-        "arc_id": "NANY:13",
-        "delay_s": 9.180459469507705e-09,
-        "arrival_s": 3.8851584523863703e-07,
+        "arc_id": "NANY:62",
+        "delay_s": 2.5593736760151247e-09,
+        "arrival_s": 1.03878882903829e-07,
         "load_f": 1.830318546330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 5.922731733492694e-09,
+        "output_slew_10_90_s": 7.71015289348408e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_nd",
@@ -1672,24 +1654,27 @@
         "input_net": "_n56",
         "output_net": "_n57",
         "input_transition": [
-          1,
-          0
-        ],
-        "output_transition": [
           -1,
           0
         ],
+        "output_transition": [
+          1,
+          0
+        ],
         "from_inputs": {
-          "A": 1
+          "A": -1
         },
         "to_inputs": {
           "A": 0
         },
-        "arc_id": "INV:05",
-        "delay_s": 7.404797561513348e-09,
-        "arrival_s": 3.959206428001504e-07,
+        "arc_id": "INV:00",
+        "delay_s": 2.2468480380025146e-09,
+        "arrival_s": 1.0612573094183152e-07,
         "load_f": 4.257324419919998e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.224768888588112e-09,
+        "output_slew_10_90_s": 5.875243966804298e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_s",
@@ -1697,314 +1682,6 @@
         "input_pin": "A",
         "input_net": "_n57",
         "output_net": "sum[1]",
-        "input_transition": [
-          -1,
-          0
-        ],
-        "output_transition": [
-          1,
-          1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "arc_id": "NANY:10",
-        "delay_s": 2.8596956195624594e-09,
-        "arrival_s": 3.9878033841971286e-07,
-        "load_f": 2.5257909339999996e-13,
-        "input_transition_s": 1e-09
-      }
-    ],
-    "sum[0]": [
-      {
-        "instance": "digit[0].fa.ha1.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "a[0]",
-        "output_net": "_n24",
-        "input_transition": [
-          0,
-          1
-        ],
-        "output_transition": [
-          1,
-          -1
-        ],
-        "from_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "to_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "arc_id": "NANY:30",
-        "delay_s": 4.2969232210167595e-08,
-        "arrival_s": 4.2969232210167595e-08,
-        "load_f": 9.56421221254466e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha1.g_d",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "_n24",
-        "output_net": "_n27",
-        "input_transition": [
-          1,
-          -1
-        ],
-        "output_transition": [
-          -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "arc_id": "NANY:57",
-        "delay_s": 2.8831454268420795e-08,
-        "arrival_s": 7.180068647858839e-08,
-        "load_f": 4.037425594330077e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha1.g_nd",
-        "cell": "INV",
-        "input_pin": "A",
-        "input_net": "_n27",
-        "output_net": "_n28",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
-          -1
-        ],
-        "from_inputs": {
-          "A": -1
-        },
-        "to_inputs": {
-          "A": 1
-        },
-        "arc_id": "INV:01",
-        "delay_s": 1.843451438844652e-08,
-        "arrival_s": 9.023520086703491e-08,
-        "load_f": 4.494815543919998e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha1.g_s",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "_n28",
-        "output_net": "_n29",
-        "input_transition": [
-          1,
-          -1
-        ],
-        "output_transition": [
-          -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "arc_id": "NANY:57",
-        "delay_s": 4.159227808619003e-08,
-        "arrival_s": 1.3182747895322493e-07,
-        "load_f": 7.696206982250074e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "_n29",
-        "output_net": "_n31",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
-          -1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": -1
-        },
-        "to_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "arc_id": "NANY:06",
-        "delay_s": 4.238715602048345e-08,
-        "arrival_s": 1.742146349737084e-07,
-        "load_f": 9.336392076544658e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_u",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n31",
-        "output_net": "_n32",
-        "input_transition": [
-          1,
-          -1
-        ],
-        "output_transition": [
-          0,
-          1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": 1
-        },
-        "to_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "arc_id": "NANY:18",
-        "delay_s": 2.771759560516104e-08,
-        "arrival_s": 2.0193223057886943e-07,
-        "load_f": 5.388728324624662e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_c",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n32",
-        "output_net": "_n33",
-        "input_transition": [
-          0,
-          1
-        ],
-        "output_transition": [
-          -1,
-          0
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 1
-        },
-        "arc_id": "NANY:58",
-        "delay_s": 2.1128889756368775e-08,
-        "arrival_s": 2.230611203352382e-07,
-        "load_f": 1.3974863193873984e-12,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_d",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n33",
-        "output_net": "_n59",
-        "input_transition": [
-          -1,
-          0
-        ],
-        "output_transition": [
-          0,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": -1
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "arc_id": "NANY:49",
-        "delay_s": 1.8094432639831333e-08,
-        "arrival_s": 2.4115555297506953e-07,
-        "load_f": 1.9406448663300768e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_nd",
-        "cell": "INV",
-        "input_pin": "A",
-        "input_net": "_n59",
-        "output_net": "_n60",
-        "input_transition": [
-          0,
-          1
-        ],
-        "output_transition": [
-          0,
-          -1
-        ],
-        "from_inputs": {
-          "A": 0
-        },
-        "to_inputs": {
-          "A": 1
-        },
-        "arc_id": "INV:03",
-        "delay_s": 1.3993033752814623e-08,
-        "arrival_s": 2.5514858672788417e-07,
-        "load_f": 4.153127339919998e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_s",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "_n60",
-        "output_net": "sum[0]",
-        "input_transition": [
-          0,
-          -1
-        ],
-        "output_transition": [
-          1,
-          1
-        ],
-        "from_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "arc_id": "NANY:25",
-        "delay_s": 0.0,
-        "arrival_s": 2.5514858672788417e-07,
-        "load_f": 8.17458206e-14,
-        "input_transition_s": 1e-09
-      }
-    ],
-    "cout": [
-      {
-        "instance": "digit[0].fa.ha1.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "a[0]",
-        "output_net": "_n24",
         "input_transition": [
           1,
           0
@@ -2022,10 +1699,46 @@
           "B": -1
         },
         "arc_id": "NANY:59",
-        "delay_s": 4.938505172463127e-08,
-        "arrival_s": 4.938505172463127e-08,
+        "delay_s": 5.360164785348256e-09,
+        "arrival_s": 1.3069263906416137e-07,
+        "load_f": 2.5257909339999996e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.9206743336981618e-08,
+        "output_slew_10_90_s": 1.7560228524951137e-08,
+        "metric": "midpoint"
+      }
+    ],
+    "sum[0]": [
+      {
+        "instance": "digit[0].fa.ha1.g_t",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "b[0]",
+        "output_net": "_n24",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 1.3137865400926656e-08,
+        "arrival_s": 1.3637865400926655e-08,
         "load_f": 9.56421221254466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.621328937479219e-08,
+        "output_slew_10_90_s": 3.5320606247321844e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_d",
@@ -2034,26 +1747,29 @@
         "input_net": "_n24",
         "output_net": "_n27",
         "input_transition": [
-          -1,
+          0,
           1
         ],
         "output_transition": [
-          1,
+          0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
+          "A": 0,
           "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:14",
-        "delay_s": 2.557818908110915e-08,
-        "arrival_s": 7.496324080574041e-08,
+        "arc_id": "NANY:38",
+        "delay_s": 1.034928088570995e-08,
+        "arrival_s": 2.3987146286636606e-08,
         "load_f": 4.037425594330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.105384369156485e-08,
+        "output_slew_10_90_s": 1.706747582650354e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_nd",
@@ -2062,24 +1778,27 @@
         "input_net": "_n27",
         "output_net": "_n28",
         "input_transition": [
-          1,
+          0,
           -1
         ],
         "output_transition": [
-          -1,
+          0,
           1
         ],
         "from_inputs": {
-          "A": 1
+          "A": 0
         },
         "to_inputs": {
           "A": -1
         },
-        "arc_id": "INV:04",
-        "delay_s": 1.8137330723791538e-08,
-        "arrival_s": 9.310057152953195e-08,
+        "arc_id": "INV:02",
+        "delay_s": 4.622277045413534e-09,
+        "arrival_s": 2.860942333205014e-08,
         "load_f": 4.494815543919998e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 9.34574818981429e-09,
+        "output_slew_10_90_s": 1.2810542977248223e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.ha1.g_s",
@@ -2088,110 +1807,364 @@
         "input_net": "_n28",
         "output_net": "_n29",
         "input_transition": [
-          -1,
+          0,
           1
-        ],
-        "output_transition": [
-          1,
-          -1
-        ],
-        "from_inputs": {
-          "A": -1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "arc_id": "NANY:14",
-        "delay_s": 3.697098711767604e-08,
-        "arrival_s": 1.30071558647208e-07,
-        "load_f": 7.696206982250074e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_t",
-        "cell": "NANY",
-        "input_pin": "A",
-        "input_net": "_n29",
-        "output_net": "_n31",
-        "input_transition": [
-          1,
-          -1
-        ],
-        "output_transition": [
-          -1,
-          1
-        ],
-        "from_inputs": {
-          "A": 1,
-          "B": 0
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": -1
-        },
-        "arc_id": "NANY:56",
-        "delay_s": 4.6693229889619306e-08,
-        "arrival_s": 1.767647885368273e-07,
-        "load_f": 9.336392076544658e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_u",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n31",
-        "output_net": "_n32",
-        "input_transition": [
-          -1,
-          1
-        ],
-        "output_transition": [
-          1,
-          0
-        ],
-        "from_inputs": {
-          "A": 0,
-          "B": -1
-        },
-        "to_inputs": {
-          "A": -1,
-          "B": 1
-        },
-        "arc_id": "NANY:26",
-        "delay_s": 7.685324231251993e-09,
-        "arrival_s": 1.844501127680793e-07,
-        "load_f": 5.388728324624662e-13,
-        "input_transition_s": 1e-09
-      },
-      {
-        "instance": "digit[0].fa.ha2.g_c",
-        "cell": "NANY",
-        "input_pin": "B",
-        "input_net": "_n32",
-        "output_net": "_n33",
-        "input_transition": [
-          1,
-          0
         ],
         "output_transition": [
           0,
           -1
         ],
         "from_inputs": {
-          "A": -1,
-          "B": 1
+          "A": 0,
+          "B": 0
         },
         "to_inputs": {
           "A": 1,
           "B": 0
         },
-        "arc_id": "NANY:22",
-        "delay_s": 4.539296030659018e-08,
-        "arrival_s": 2.2984307307466948e-07,
+        "arc_id": "NANY:38",
+        "delay_s": 1.3219544028192958e-08,
+        "arrival_s": 4.1828967360243096e-08,
+        "load_f": 7.696206982250074e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.7403954901101777e-08,
+        "output_slew_10_90_s": 2.5323997172255e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_na",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n29",
+        "output_net": "_n30",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 6.309698476104142e-09,
+        "arrival_s": 4.813866583634724e-08,
+        "load_f": 6.512632267919998e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.3174372504545345e-08,
+        "output_slew_10_90_s": 1.80288018696699e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n30",
+        "output_net": "_n33",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:38",
+        "delay_s": 1.8117614360033614e-08,
+        "arrival_s": 6.625628019638085e-08,
         "load_f": 1.3974863193873984e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.866476388540222e-08,
+        "output_slew_10_90_s": 4.0292868103774466e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_d",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "_n33",
+        "output_net": "_n59",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          -1,
+          0
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": -1
+        },
+        "arc_id": "NANY:62",
+        "delay_s": 2.6317665194546536e-09,
+        "arrival_s": 6.888804671583551e-08,
+        "load_f": 1.9406448663300768e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 5.990226357659945e-09,
+        "output_slew_10_90_s": 7.837674778521765e-09,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n59",
+        "output_net": "_n60",
+        "input_transition": [
+          -1,
+          0
+        ],
+        "output_transition": [
+          1,
+          0
+        ],
+        "from_inputs": {
+          "A": -1
+        },
+        "to_inputs": {
+          "A": 0
+        },
+        "arc_id": "INV:00",
+        "delay_s": 2.2017040375479287e-09,
+        "arrival_s": 7.108975075338344e-08,
+        "load_f": 4.153127339919998e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.1223295342139136e-09,
+        "output_slew_10_90_s": 5.739004494559414e-09,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n60",
+        "output_net": "sum[0]",
+        "input_transition": [
+          1,
+          0
+        ],
+        "output_transition": [
+          -1,
+          1
+        ],
+        "from_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:59",
+        "delay_s": 3.922090391955661e-09,
+        "arrival_s": 8.983097250797107e-08,
+        "load_f": 8.17458206e-14,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.4819131362631971e-08,
+        "output_slew_10_90_s": 1.339503016595285e-08,
+        "metric": "midpoint"
+      }
+    ],
+    "cout": [
+      {
+        "instance": "digit[0].fa.ha1.g_t",
+        "cell": "NANY",
+        "input_pin": "B",
+        "input_net": "b[0]",
+        "output_net": "_n24",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 0,
+          "B": -1
+        },
+        "arc_id": "NANY:35",
+        "delay_s": 1.3137865400926656e-08,
+        "arrival_s": 1.3637865400926655e-08,
+        "load_f": 9.56421221254466e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.621328937479219e-08,
+        "output_slew_10_90_s": 3.5320606247321844e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha1.g_d",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n24",
+        "output_net": "_n27",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:38",
+        "delay_s": 1.034928088570995e-08,
+        "arrival_s": 2.3987146286636606e-08,
+        "load_f": 4.037425594330077e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.105384369156485e-08,
+        "output_slew_10_90_s": 1.706747582650354e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha1.g_nd",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n27",
+        "output_net": "_n28",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 4.622277045413534e-09,
+        "arrival_s": 2.860942333205014e-08,
+        "load_f": 4.494815543919998e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 9.34574818981429e-09,
+        "output_slew_10_90_s": 1.2810542977248223e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha1.g_s",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n28",
+        "output_net": "_n29",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:38",
+        "delay_s": 1.3219544028192958e-08,
+        "arrival_s": 4.1828967360243096e-08,
+        "load_f": 7.696206982250074e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.7403954901101777e-08,
+        "output_slew_10_90_s": 2.5323997172255e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_na",
+        "cell": "INV",
+        "input_pin": "A",
+        "input_net": "_n29",
+        "output_net": "_n30",
+        "input_transition": [
+          0,
+          -1
+        ],
+        "output_transition": [
+          0,
+          1
+        ],
+        "from_inputs": {
+          "A": 0
+        },
+        "to_inputs": {
+          "A": -1
+        },
+        "arc_id": "INV:02",
+        "delay_s": 6.309698476104142e-09,
+        "arrival_s": 4.813866583634724e-08,
+        "load_f": 6.512632267919998e-13,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.3174372504545345e-08,
+        "output_slew_10_90_s": 1.80288018696699e-08,
+        "metric": "midpoint"
+      },
+      {
+        "instance": "digit[0].fa.ha2.g_c",
+        "cell": "NANY",
+        "input_pin": "A",
+        "input_net": "_n30",
+        "output_net": "_n33",
+        "input_transition": [
+          0,
+          1
+        ],
+        "output_transition": [
+          0,
+          -1
+        ],
+        "from_inputs": {
+          "A": 0,
+          "B": 0
+        },
+        "to_inputs": {
+          "A": 1,
+          "B": 0
+        },
+        "arc_id": "NANY:38",
+        "delay_s": 1.8117614360033614e-08,
+        "arrival_s": 6.625628019638085e-08,
+        "load_f": 1.3974863193873984e-12,
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.866476388540222e-08,
+        "output_slew_10_90_s": 4.0292868103774466e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.g_nc",
@@ -2216,10 +2189,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.8531082204022148e-08,
-        "arrival_s": 2.483741552786916e-07,
+        "delay_s": 6.3883511223119506e-09,
+        "arrival_s": 7.26446313186928e-08,
         "load_f": 1.689346026330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.1643296068601306e-08,
+        "output_slew_10_90_s": 1.5361322120440446e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[0].fa.g_cout",
@@ -2242,10 +2218,13 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.6473775254565056e-08,
-        "arrival_s": 2.7484793053325664e-07,
+        "delay_s": 8.54244153367474e-09,
+        "arrival_s": 8.118707285236753e-08,
         "load_f": 8.933729572544659e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.742980995838926e-08,
+        "output_slew_10_90_s": 2.3969132328182393e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_t",
@@ -2270,10 +2249,13 @@
           "B": -1
         },
         "arc_id": "NANY:56",
-        "delay_s": 4.86041869823292e-08,
-        "arrival_s": 3.2345211751558584e-07,
+        "delay_s": 1.0677281543266998e-08,
+        "arrival_s": 9.186435439563453e-08,
         "load_f": 9.88556210854466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.742123311795117e-08,
+        "output_slew_10_90_s": 3.479093234289759e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_u",
@@ -2298,10 +2280,13 @@
           "B": 1
         },
         "arc_id": "NANY:26",
-        "delay_s": 7.195141215132261e-09,
-        "arrival_s": 3.306472587307181e-07,
+        "delay_s": 2.591334740262546e-09,
+        "arrival_s": 9.445568913589707e-08,
         "load_f": 4.646480140624661e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.102495488021359e-09,
+        "output_slew_10_90_s": 5.686773249606648e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.ha2.g_c",
@@ -2326,10 +2311,13 @@
           "B": 0
         },
         "arc_id": "NANY:22",
-        "delay_s": 4.868812703841124e-08,
-        "arrival_s": 3.793353857691293e-07,
+        "delay_s": 1.7405600903572726e-08,
+        "arrival_s": 1.118612900394698e-07,
         "load_f": 1.5260842833873985e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.098447232253318e-08,
+        "output_slew_10_90_s": 4.331138556147445e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.g_nc",
@@ -2354,10 +2342,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.8974350484915772e-08,
-        "arrival_s": 3.983097362540451e-07,
+        "delay_s": 6.532227461023691e-09,
+        "arrival_s": 1.1839351750049348e-07,
         "load_f": 1.854137706330077e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.1944393339782046e-08,
+        "output_slew_10_90_s": 1.577376875205749e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[1].fa.g_cout",
@@ -2380,10 +2371,13 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.824918534527862e-08,
-        "arrival_s": 4.265589215993237e-07,
+        "delay_s": 9.080568713308727e-09,
+        "arrival_s": 1.274740862138022e-07,
         "load_f": 9.612293812544659e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.8667073422269067e-08,
+        "output_slew_10_90_s": 2.5656169228019667e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_t",
@@ -2408,10 +2402,13 @@
           "B": -1
         },
         "arc_id": "NANY:56",
-        "delay_s": 4.735363222259117e-08,
-        "arrival_s": 4.7391255382191486e-07,
+        "delay_s": 1.0385779014876946e-08,
+        "arrival_s": 1.3785986522867913e-07,
         "load_f": 9.52617821654466e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.646241106736822e-08,
+        "output_slew_10_90_s": 3.3874232537561477e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_u",
@@ -2436,10 +2433,13 @@
           "B": 1
         },
         "arc_id": "NANY:26",
-        "delay_s": 7.165759120614839e-09,
-        "arrival_s": 4.810783129425297e-07,
+        "delay_s": 2.578874397668491e-09,
+        "arrival_s": 1.4043873962634763e-07,
         "load_f": 4.601492556624661e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.085760779129497e-09,
+        "output_slew_10_90_s": 5.660414109642806e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.ha2.g_c",
@@ -2464,10 +2464,13 @@
           "B": 0
         },
         "arc_id": "NANY:22",
-        "delay_s": 5.0369642856904116e-08,
-        "arrival_s": 5.314479557994338e-07,
+        "delay_s": 1.792563103150669e-08,
+        "arrival_s": 1.5836437065785433e-07,
         "load_f": 1.5917075213873986e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.216924841284451e-08,
+        "output_slew_10_90_s": 4.4903881343604905e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.g_nc",
@@ -2492,10 +2495,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.9804450446256745e-08,
-        "arrival_s": 5.512524062456905e-07,
+        "delay_s": 6.800935278725638e-09,
+        "arrival_s": 1.6516530593657995e-07,
         "load_f": 2.1619076503300768e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.2506731743576758e-08,
+        "output_slew_10_90_s": 1.654406660153488e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[2].fa.g_cout",
@@ -2518,10 +2524,13 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 2.986691073252679e-08,
-        "arrival_s": 5.811193169782173e-07,
+        "delay_s": 9.570949494293404e-09,
+        "arrival_s": 1.7473625543087336e-07,
         "load_f": 1.0230590736544659e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.9796159399206732e-08,
+        "output_slew_10_90_s": 2.7197991941411373e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.ha2.g_t",
@@ -2546,10 +2555,13 @@
           "B": -1
         },
         "arc_id": "NANY:56",
-        "delay_s": 4.573765491330667e-08,
-        "arrival_s": 6.26856971891524e-07,
+        "delay_s": 1.000909701210238e-08,
+        "arrival_s": 1.8474535244297574e-07,
         "load_f": 9.061779348544659e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 3.522341320236608e-08,
+        "output_slew_10_90_s": 3.268966538981098e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.ha2.g_u",
@@ -2574,10 +2586,13 @@
           "B": 1
         },
         "arc_id": "NANY:26",
-        "delay_s": 7.540868519894075e-09,
-        "arrival_s": 6.34397840411418e-07,
+        "delay_s": 2.7329839088279794e-09,
+        "arrival_s": 1.8747833635180373e-07,
         "load_f": 5.172162964624662e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 4.305086443118782e-09,
+        "output_slew_10_90_s": 5.9997955311632075e-09,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.ha2.g_c",
@@ -2602,10 +2617,13 @@
           "B": 0
         },
         "arc_id": "NANY:22",
-        "delay_s": 4.700552810247685e-08,
-        "arrival_s": 6.814033685138949e-07,
+        "delay_s": 1.688523580781063e-08,
+        "arrival_s": 2.0436357215961436e-07,
         "load_f": 1.4604187753873985e-12,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.9798933080526446e-08,
+        "output_slew_10_90_s": 4.171786400251917e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.g_nc",
@@ -2630,10 +2648,13 @@
           "B": -1
         },
         "arc_id": "NANY:35",
-        "delay_s": 1.937005230946421e-08,
-        "arrival_s": 7.007734208233591e-07,
+        "delay_s": 6.660659082370432e-09,
+        "arrival_s": 2.1102423124198478e-07,
         "load_f": 2.0012394663300768e-13,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 1.2213168671897625e-08,
+        "output_slew_10_90_s": 1.6141940406214658e-08,
+        "metric": "midpoint"
       },
       {
         "instance": "digit[3].fa.g_cout",
@@ -2656,10 +2677,13 @@
           "A": 1
         },
         "arc_id": "INV:03",
-        "delay_s": 4.934399416800624e-09,
-        "arrival_s": 7.057078202401597e-07,
+        "delay_s": 1.8011837862713605e-09,
+        "arrival_s": 2.1549539043564998e-07,
         "load_f": 5.693346459999999e-14,
-        "input_transition_s": 1e-09
+        "input_transition_s": 1e-09,
+        "settling_tail_s": 2.6699754073938433e-09,
+        "output_slew_10_90_s": 3.827587381266228e-09,
+        "metric": "midpoint"
       }
     ]
   },
@@ -2667,14 +2691,14 @@
     "sum[3]": {
       "before": {
         "cin": 0,
-        "a[0]": 1,
+        "a[0]": 0,
         "b[0]": 0,
         "a[1]": 0,
         "b[1]": 1,
         "a[2]": 0,
         "b[2]": 1,
         "a[3]": -1,
-        "b[3]": -1
+        "b[3]": 0
       },
       "after": {
         "cin": -1,
@@ -2691,12 +2715,12 @@
     "sum[2]": {
       "before": {
         "cin": 0,
-        "a[0]": 1,
+        "a[0]": 0,
         "b[0]": 0,
         "a[1]": 0,
         "b[1]": 1,
         "a[2]": -1,
-        "b[2]": -1,
+        "b[2]": 0,
         "a[3]": 0,
         "b[3]": 0
       },
@@ -2715,10 +2739,10 @@
     "sum[1]": {
       "before": {
         "cin": 0,
-        "a[0]": 1,
+        "a[0]": 0,
         "b[0]": 0,
         "a[1]": -1,
-        "b[1]": -1,
+        "b[1]": 0,
         "a[2]": 0,
         "b[2]": 0,
         "a[3]": 0,
@@ -2740,7 +2764,7 @@
       "before": {
         "cin": -1,
         "a[0]": 0,
-        "b[0]": -1,
+        "b[0]": 0,
         "a[1]": 0,
         "b[1]": 0,
         "a[2]": 0,
@@ -2749,9 +2773,9 @@
         "b[3]": 0
       },
       "after": {
-        "cin": 0,
-        "a[0]": 1,
-        "b[0]": 0,
+        "cin": -1,
+        "a[0]": 0,
+        "b[0]": -1,
         "a[1]": 0,
         "b[1]": 0,
         "a[2]": 0,
@@ -2763,7 +2787,7 @@
     "cout": {
       "before": {
         "cin": 0,
-        "a[0]": 1,
+        "a[0]": 0,
         "b[0]": 0,
         "a[1]": 0,
         "b[1]": 1,
@@ -2786,47 +2810,59 @@
     }
   },
   "loads": {
-    "_n19": {
+    "_n34": {
       "fanout_f": 1.144260802330077e-13,
-      "wire_f": 1.308188464e-13,
+      "wire_f": 5.45085224e-14,
       "external_f": 0.0,
-      "total_f": 2.452449266330077e-13
+      "total_f": 1.689346026330077e-13
     },
-    "_n20": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 5.84628106e-14,
+    "_n45": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.582672796e-13,
       "external_f": 0.0,
-      "total_f": 4.291940479919998e-13
+      "total_f": 1.0230590736544659e-12
     },
-    "_n57": {
+    "_n48": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.231557398e-13,
+      "external_f": 0.0,
+      "total_f": 5.172162964624662e-13
+    },
+    "sum[1]": {
+      "fanout_f": 0.0,
+      "wire_f": 2.4257909339999995e-13,
+      "external_f": 1e-14,
+      "total_f": 2.5257909339999996e-13
+    },
+    "_n41": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.8782602760000001e-13,
+      "external_f": 0.0,
+      "total_f": 9.52617821654466e-13
+    },
+    "a[0]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 9.47253752e-14,
+      "external_f": 0.0,
+      "total_f": 5.798826928250075e-13
+    },
+    "_n3": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 2.770333494e-13,
+      "external_f": 0.0,
+      "total_f": 1.435885700116932e-12
+    },
+    "_n54": {
       "fanout_f": 3.707312373919998e-13,
       "wire_f": 5.50012046e-14,
       "external_f": 0.0,
       "total_f": 4.257324419919998e-13
     },
-    "_n6": {
-      "fanout_f": 4.851573176250075e-13,
-      "wire_f": 1.589002222e-13,
+    "_n26": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 3.025668858e-13,
       "external_f": 0.0,
-      "total_f": 6.440575398250075e-13
-    },
-    "_n16": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 3.293353612e-13,
-      "external_f": 0.0,
-      "total_f": 1.094127155254466e-12
-    },
-    "_n27": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 2.8931647920000003e-13,
-      "external_f": 0.0,
-      "total_f": 4.037425594330077e-13
-    },
-    "a[3]": {
-      "fanout_f": 4.851573176250075e-13,
-      "wire_f": 4.27065408e-13,
-      "external_f": 0.0,
-      "total_f": 9.122227256250075e-13
+      "total_f": 1.461419236516932e-12
     },
     "_n10": {
       "fanout_f": 1.158852350716932e-12,
@@ -2840,209 +2876,11 @@
       "external_f": 0.0,
       "total_f": 5.156163319919998e-13
     },
-    "cin": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 3.483758114e-13,
-      "external_f": 0.0,
-      "total_f": 1.113167605454466e-12
-    },
-    "_n14": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 1.112963034e-13,
-      "external_f": 0.0,
-      "total_f": 4.820275407919998e-13
-    },
-    "_n21": {
-      "fanout_f": 4.851573176250075e-13,
-      "wire_f": 1.208687838e-13,
-      "external_f": 0.0,
-      "total_f": 6.060261014250075e-13
-    },
-    "_n23": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 1.323460406e-13,
-      "external_f": 0.0,
-      "total_f": 5.030772779919998e-13
-    },
-    "_n32": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 1.448122758e-13,
-      "external_f": 0.0,
-      "total_f": 5.388728324624662e-13
-    },
-    "_n40": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.964375872e-13,
-      "external_f": 0.0,
-      "total_f": 9.612293812544659e-13
-    },
-    "sum[1]": {
-      "fanout_f": 0.0,
-      "wire_f": 2.4257909339999995e-13,
-      "external_f": 1e-14,
-      "total_f": 2.5257909339999996e-13
-    },
-    "a[1]": {
-      "fanout_f": 4.851573176250075e-13,
-      "wire_f": 2.2705551039999997e-13,
-      "external_f": 0.0,
-      "total_f": 7.122128280250074e-13
-    },
-    "_n9": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 8.16200894e-14,
-      "external_f": 0.0,
-      "total_f": 4.756806460624661e-13
-    },
-    "_n51": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 1.07626407e-13,
-      "external_f": 0.0,
-      "total_f": 4.783576443919998e-13
-    },
-    "_n62": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 8.56978664e-14,
-      "external_f": 0.0,
-      "total_f": 2.0012394663300768e-13
-    },
-    "_n29": {
-      "fanout_f": 4.851573176250075e-13,
-      "wire_f": 2.844633806e-13,
-      "external_f": 0.0,
-      "total_f": 7.696206982250074e-13
-    },
-    "_n4": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 7.87203064e-14,
-      "external_f": 0.0,
-      "total_f": 1.931463866330077e-13
-    },
-    "_n46": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.413861408e-13,
-      "external_f": 0.0,
-      "total_f": 9.061779348544659e-13
-    },
-    "_n50": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 7.54089528e-14,
-      "external_f": 0.0,
-      "total_f": 1.898350330330077e-13
-    },
-    "_n8": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.6823448959999998e-13,
-      "external_f": 0.0,
-      "total_f": 9.33026283654466e-13
-    },
-    "_n43": {
-      "fanout_f": 1.1821816699873985e-12,
-      "wire_f": 4.0952585140000006e-13,
-      "external_f": 0.0,
-      "total_f": 1.5917075213873986e-12
-    },
-    "_n47": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 4.45814966e-14,
-      "external_f": 0.0,
-      "total_f": 4.153127339919998e-13
-    },
-    "cout": {
-      "fanout_f": 0.0,
-      "wire_f": 4.6933464599999996e-14,
-      "external_f": 1e-14,
-      "total_f": 5.693346459999999e-14
-    },
-    "_n54": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 5.50012046e-14,
-      "external_f": 0.0,
-      "total_f": 4.257324419919998e-13
-    },
-    "_n56": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 6.86057744e-14,
-      "external_f": 0.0,
-      "total_f": 1.830318546330077e-13
-    },
-    "_n59": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 7.96384064e-14,
-      "external_f": 0.0,
-      "total_f": 1.9406448663300768e-13
-    },
-    "_n60": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 4.45814966e-14,
-      "external_f": 0.0,
-      "total_f": 4.153127339919998e-13
-    },
-    "_n36": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 2.237644168e-13,
-      "external_f": 0.0,
-      "total_f": 9.88556210854466e-13
-    },
     "_n37": {
       "fanout_f": 3.940605566624661e-13,
       "wire_f": 7.05874574e-14,
       "external_f": 0.0,
       "total_f": 4.646480140624661e-13
-    },
-    "_n13": {
-      "fanout_f": 4.851573176250075e-13,
-      "wire_f": 2.096245202e-13,
-      "external_f": 0.0,
-      "total_f": 6.947818378250075e-13
-    },
-    "_n44": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 1.0176468479999999e-13,
-      "external_f": 0.0,
-      "total_f": 2.1619076503300768e-13
-    },
-    "_n15": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 9.61891414e-14,
-      "external_f": 0.0,
-      "total_f": 4.669203787919998e-13
-    },
-    "_n35": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.2858116319999999e-13,
-      "external_f": 0.0,
-      "total_f": 8.933729572544659e-13
-    },
-    "_n49": {
-      "fanout_f": 1.1821816699873985e-12,
-      "wire_f": 2.782371054e-13,
-      "external_f": 0.0,
-      "total_f": 1.4604187753873985e-12
-    },
-    "_n31": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.688474136e-13,
-      "external_f": 0.0,
-      "total_f": 9.336392076544658e-13
-    },
-    "_n24": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.9162942720000001e-13,
-      "external_f": 0.0,
-      "total_f": 9.56421221254466e-13
-    },
-    "_n1": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 1.0777368299999999e-13,
-      "external_f": 0.0,
-      "total_f": 4.785049203919998e-13
-    },
-    "_n22": {
-      "fanout_f": 3.707312373919998e-13,
-      "wire_f": 8.87120246e-14,
-      "external_f": 0.0,
-      "total_f": 4.594432619919998e-13
     },
     "_n30": {
       "fanout_f": 3.707312373919998e-13,
@@ -3050,89 +2888,11 @@
       "external_f": 0.0,
       "total_f": 6.512632267919998e-13
     },
-    "b[1]": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 4.392939398e-13,
-      "external_f": 0.0,
-      "total_f": 1.204085733854466e-12
-    },
-    "b[2]": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.766106714e-13,
-      "external_f": 0.0,
-      "total_f": 9.41402465454466e-13
-    },
-    "_n2": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 1.976948358e-13,
-      "external_f": 0.0,
-      "total_f": 5.917553924624662e-13
-    },
-    "_n34": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 5.45085224e-14,
-      "external_f": 0.0,
-      "total_f": 1.689346026330077e-13
-    },
-    "_n33": {
-      "fanout_f": 1.1821816699873985e-12,
-      "wire_f": 2.153046494e-13,
-      "external_f": 0.0,
-      "total_f": 1.3974863193873984e-12
-    },
-    "_n42": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 6.608869900000001e-14,
-      "external_f": 0.0,
-      "total_f": 4.601492556624661e-13
-    },
-    "_n17": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 8.100716540000001e-14,
-      "external_f": 0.0,
-      "total_f": 4.750677220624662e-13
-    },
-    "_n48": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 1.231557398e-13,
-      "external_f": 0.0,
-      "total_f": 5.172162964624662e-13
-    },
-    "b[3]": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.4491905620000001e-13,
-      "external_f": 0.0,
-      "total_f": 9.09710850254466e-13
-    },
-    "_n25": {
-      "fanout_f": 3.940605566624661e-13,
-      "wire_f": 1.088964934e-13,
-      "external_f": 0.0,
-      "total_f": 5.029570500624661e-13
-    },
-    "a[2]": {
+    "_n13": {
       "fanout_f": 4.851573176250075e-13,
-      "wire_f": 3.481285336e-13,
+      "wire_f": 2.096245202e-13,
       "external_f": 0.0,
-      "total_f": 8.332858512250074e-13
-    },
-    "_n39": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 7.09876904e-14,
-      "external_f": 0.0,
-      "total_f": 1.854137706330077e-13
-    },
-    "_n11": {
-      "fanout_f": 1.144260802330077e-13,
-      "wire_f": 1.4492990399999999e-13,
-      "external_f": 0.0,
-      "total_f": 2.593559842330077e-13
-    },
-    "_n3": {
-      "fanout_f": 1.158852350716932e-12,
-      "wire_f": 2.770333494e-13,
-      "external_f": 0.0,
-      "total_f": 1.435885700116932e-12
+      "total_f": 6.947818378250075e-13
     },
     "_n0": {
       "fanout_f": 7.647917940544659e-13,
@@ -3140,23 +2900,29 @@
       "external_f": 0.0,
       "total_f": 1.003180125254466e-12
     },
-    "sum[2]": {
-      "fanout_f": 0.0,
-      "wire_f": 1.650575446e-13,
-      "external_f": 1e-14,
-      "total_f": 1.750575446e-13
-    },
-    "_n12": {
+    "_n1": {
       "fanout_f": 3.707312373919998e-13,
-      "wire_f": 8.30715806e-14,
+      "wire_f": 1.0777368299999999e-13,
       "external_f": 0.0,
-      "total_f": 4.538028179919998e-13
+      "total_f": 4.785049203919998e-13
     },
-    "_n26": {
-      "fanout_f": 1.158852350716932e-12,
-      "wire_f": 3.025668858e-13,
+    "_n27": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 2.8931647920000003e-13,
       "external_f": 0.0,
-      "total_f": 1.461419236516932e-12
+      "total_f": 4.037425594330077e-13
+    },
+    "_n60": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 4.45814966e-14,
+      "external_f": 0.0,
+      "total_f": 4.153127339919998e-13
+    },
+    "b[3]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.4491905620000001e-13,
+      "external_f": 0.0,
+      "total_f": 9.09710850254466e-13
     },
     "_n53": {
       "fanout_f": 1.144260802330077e-13,
@@ -3164,41 +2930,59 @@
       "external_f": 0.0,
       "total_f": 1.9215593463300769e-13
     },
-    "sum[3]": {
-      "fanout_f": 0.0,
-      "wire_f": 1.57174367e-13,
-      "external_f": 1e-14,
-      "total_f": 1.67174367e-13
-    },
-    "b[0]": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 2.29019725e-13,
+    "a[2]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 3.481285336e-13,
       "external_f": 0.0,
-      "total_f": 9.93811519054466e-13
+      "total_f": 8.332858512250074e-13
     },
-    "sum[0]": {
+    "cout": {
       "fanout_f": 0.0,
-      "wire_f": 7.17458206e-14,
+      "wire_f": 4.6933464599999996e-14,
       "external_f": 1e-14,
-      "total_f": 8.17458206e-14
+      "total_f": 5.693346459999999e-14
     },
-    "_n28": {
+    "_n16": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 3.293353612e-13,
+      "external_f": 0.0,
+      "total_f": 1.094127155254466e-12
+    },
+    "b[1]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 4.392939398e-13,
+      "external_f": 0.0,
+      "total_f": 1.204085733854466e-12
+    },
+    "_n14": {
       "fanout_f": 3.707312373919998e-13,
-      "wire_f": 7.8750317e-14,
+      "wire_f": 1.112963034e-13,
       "external_f": 0.0,
-      "total_f": 4.494815543919998e-13
+      "total_f": 4.820275407919998e-13
     },
-    "_n18": {
-      "fanout_f": 1.158852350716932e-12,
-      "wire_f": 3.59282627e-13,
+    "_n43": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 4.0952585140000006e-13,
       "external_f": 0.0,
-      "total_f": 1.5181349777169318e-12
+      "total_f": 1.5917075213873986e-12
     },
-    "_n41": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 1.8782602760000001e-13,
+    "_n19": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.308188464e-13,
       "external_f": 0.0,
-      "total_f": 9.52617821654466e-13
+      "total_f": 2.452449266330077e-13
+    },
+    "_n39": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 7.09876904e-14,
+      "external_f": 0.0,
+      "total_f": 1.854137706330077e-13
+    },
+    "_n47": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 4.45814966e-14,
+      "external_f": 0.0,
+      "total_f": 4.153127339919998e-13
     },
     "_n38": {
       "fanout_f": 1.1821816699873985e-12,
@@ -3206,28 +2990,268 @@
       "external_f": 0.0,
       "total_f": 1.5260842833873985e-12
     },
-    "_n45": {
-      "fanout_f": 7.647917940544659e-13,
-      "wire_f": 2.582672796e-13,
+    "_n12": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 8.30715806e-14,
       "external_f": 0.0,
-      "total_f": 1.0230590736544659e-12
+      "total_f": 4.538028179919998e-13
     },
-    "a[0]": {
+    "_n21": {
       "fanout_f": 4.851573176250075e-13,
-      "wire_f": 9.47253752e-14,
+      "wire_f": 1.208687838e-13,
       "external_f": 0.0,
-      "total_f": 5.798826928250075e-13
+      "total_f": 6.060261014250075e-13
+    },
+    "sum[3]": {
+      "fanout_f": 0.0,
+      "wire_f": 1.57174367e-13,
+      "external_f": 1e-14,
+      "total_f": 1.67174367e-13
     },
     "_n7": {
       "fanout_f": 3.707312373919998e-13,
       "wire_f": 1.64186511e-13,
       "external_f": 0.0,
       "total_f": 5.349177483919998e-13
+    },
+    "_n49": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 2.782371054e-13,
+      "external_f": 0.0,
+      "total_f": 1.4604187753873985e-12
+    },
+    "_n18": {
+      "fanout_f": 1.158852350716932e-12,
+      "wire_f": 3.59282627e-13,
+      "external_f": 0.0,
+      "total_f": 1.5181349777169318e-12
+    },
+    "_n25": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.088964934e-13,
+      "external_f": 0.0,
+      "total_f": 5.029570500624661e-13
+    },
+    "_n22": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 8.87120246e-14,
+      "external_f": 0.0,
+      "total_f": 4.594432619919998e-13
+    },
+    "_n35": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.2858116319999999e-13,
+      "external_f": 0.0,
+      "total_f": 8.933729572544659e-13
+    },
+    "b[0]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.29019725e-13,
+      "external_f": 0.0,
+      "total_f": 9.93811519054466e-13
+    },
+    "_n32": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.448122758e-13,
+      "external_f": 0.0,
+      "total_f": 5.388728324624662e-13
+    },
+    "b[2]": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.766106714e-13,
+      "external_f": 0.0,
+      "total_f": 9.41402465454466e-13
+    },
+    "_n42": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 6.608869900000001e-14,
+      "external_f": 0.0,
+      "total_f": 4.601492556624661e-13
+    },
+    "_n56": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 6.86057744e-14,
+      "external_f": 0.0,
+      "total_f": 1.830318546330077e-13
+    },
+    "_n44": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.0176468479999999e-13,
+      "external_f": 0.0,
+      "total_f": 2.1619076503300768e-13
+    },
+    "_n2": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 1.976948358e-13,
+      "external_f": 0.0,
+      "total_f": 5.917553924624662e-13
+    },
+    "_n46": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.413861408e-13,
+      "external_f": 0.0,
+      "total_f": 9.061779348544659e-13
+    },
+    "_n15": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 9.61891414e-14,
+      "external_f": 0.0,
+      "total_f": 4.669203787919998e-13
+    },
+    "_n31": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.688474136e-13,
+      "external_f": 0.0,
+      "total_f": 9.336392076544658e-13
+    },
+    "cin": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 3.483758114e-13,
+      "external_f": 0.0,
+      "total_f": 1.113167605454466e-12
+    },
+    "_n9": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 8.16200894e-14,
+      "external_f": 0.0,
+      "total_f": 4.756806460624661e-13
+    },
+    "_n28": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 7.8750317e-14,
+      "external_f": 0.0,
+      "total_f": 4.494815543919998e-13
+    },
+    "_n62": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 8.56978664e-14,
+      "external_f": 0.0,
+      "total_f": 2.0012394663300768e-13
+    },
+    "a[1]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 2.2705551039999997e-13,
+      "external_f": 0.0,
+      "total_f": 7.122128280250074e-13
+    },
+    "_n29": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 2.844633806e-13,
+      "external_f": 0.0,
+      "total_f": 7.696206982250074e-13
+    },
+    "_n33": {
+      "fanout_f": 1.1821816699873985e-12,
+      "wire_f": 2.153046494e-13,
+      "external_f": 0.0,
+      "total_f": 1.3974863193873984e-12
+    },
+    "_n6": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 1.589002222e-13,
+      "external_f": 0.0,
+      "total_f": 6.440575398250075e-13
+    },
+    "sum[2]": {
+      "fanout_f": 0.0,
+      "wire_f": 1.650575446e-13,
+      "external_f": 1e-14,
+      "total_f": 1.750575446e-13
+    },
+    "_n23": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 1.323460406e-13,
+      "external_f": 0.0,
+      "total_f": 5.030772779919998e-13
+    },
+    "_n17": {
+      "fanout_f": 3.940605566624661e-13,
+      "wire_f": 8.100716540000001e-14,
+      "external_f": 0.0,
+      "total_f": 4.750677220624662e-13
+    },
+    "_n50": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 7.54089528e-14,
+      "external_f": 0.0,
+      "total_f": 1.898350330330077e-13
+    },
+    "a[3]": {
+      "fanout_f": 4.851573176250075e-13,
+      "wire_f": 4.27065408e-13,
+      "external_f": 0.0,
+      "total_f": 9.122227256250075e-13
+    },
+    "_n36": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 2.237644168e-13,
+      "external_f": 0.0,
+      "total_f": 9.88556210854466e-13
+    },
+    "_n59": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 7.96384064e-14,
+      "external_f": 0.0,
+      "total_f": 1.9406448663300768e-13
+    },
+    "_n11": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 1.4492990399999999e-13,
+      "external_f": 0.0,
+      "total_f": 2.593559842330077e-13
+    },
+    "_n20": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 5.84628106e-14,
+      "external_f": 0.0,
+      "total_f": 4.291940479919998e-13
+    },
+    "_n40": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.964375872e-13,
+      "external_f": 0.0,
+      "total_f": 9.612293812544659e-13
+    },
+    "_n24": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.9162942720000001e-13,
+      "external_f": 0.0,
+      "total_f": 9.56421221254466e-13
+    },
+    "_n8": {
+      "fanout_f": 7.647917940544659e-13,
+      "wire_f": 1.6823448959999998e-13,
+      "external_f": 0.0,
+      "total_f": 9.33026283654466e-13
+    },
+    "_n57": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 5.50012046e-14,
+      "external_f": 0.0,
+      "total_f": 4.257324419919998e-13
+    },
+    "_n51": {
+      "fanout_f": 3.707312373919998e-13,
+      "wire_f": 1.07626407e-13,
+      "external_f": 0.0,
+      "total_f": 4.783576443919998e-13
+    },
+    "_n4": {
+      "fanout_f": 1.144260802330077e-13,
+      "wire_f": 7.87203064e-14,
+      "external_f": 0.0,
+      "total_f": 1.931463866330077e-13
+    },
+    "sum[0]": {
+      "fanout_f": 0.0,
+      "wire_f": 7.17458206e-14,
+      "external_f": 1e-14,
+      "total_f": 8.17458206e-14
     }
   },
   "assumptions": [
     "Nominal \u00b15/0 V models; settling means final entry into ideal \u00b10.5 V through the measured observation window.",
-    "Exact endpoint sensitization; maximum additive cell settling with a fixed full input ramp at every stage.",
+    "Measured midpoint delays compose; only the endpoint settling tail is added. Global graph uses a fixed input ramp.",
     "No propagated slew, analog waveform/skew or intermediate endpoint-stable glitch propagation; no guaranteed upper bound.",
     "Simultaneous-input table delays use synchronous equal ramps; path endpoint patterns do not prove hazard-free operation.",
     "Fanout C uses maximum measured biased input C; default external output load is 10 fF.",
@@ -3235,19 +3259,7 @@
     "Estimated metal C only; no signal wire R, calibrated poly RC, PVT or package effects.",
     "Linear load extension, when enabled, is limited to zero through twice maximum measured load; input ramps never extrapolate."
   ],
-  "warnings": [
-    "digit[3].fa.ha1.g_t/NANY: load 1.00318e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[1].fa.ha1.g_t/NANY: load 1.09413e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[3].fa.ha1.g_c/NANY: load 1.43589e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[2].fa.ha1.g_c/NANY: load 1.43324e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[1].fa.ha1.g_c/NANY: load 1.51813e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[0].fa.ha1.g_c/NANY: load 1.46142e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[0].fa.ha2.g_c/NANY: load 1.39749e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[1].fa.ha2.g_c/NANY: load 1.52608e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[2].fa.ha2.g_c/NANY: load 1.59171e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[2].fa.g_cout/INV: load 1.02306e-12 F outside [5e-15, 1e-12] F; policy=linear.",
-    "digit[3].fa.ha2.g_c/NANY: load 1.46042e-12 F outside [5e-15, 1e-12] F; policy=linear."
-  ],
+  "warnings": [],
   "provenance": {
     "cell_generation": {
       "height_um": 132.0,
@@ -3262,17 +3274,23 @@
       "/home/ishi-kai/code-a-chip/cells/out/NOR/NOR.timing.json": "4342814c1bd3a2dccac039d4cceff5c97ce94faf323e88320db7f300fe8c03bf",
       "/home/ishi-kai/code-a-chip/cells/out/TIEN/TIEN.timing.json": "6146e0d3e89b1e3f25576fda4e3a4361e47c0a9f7efebe1deab12f061295f744",
       "/home/ishi-kai/code-a-chip/cells/out/TIEP/TIEP.timing.json": "f4b76fb5211680d0d612db599c4f6b95d570238323e697d29d55b3db5c488e2c",
-      "/home/ishi-kai/code-a-chip/cells/out/TIEZ/TIEZ.timing.json": "7dff780b967943349e7aee29b4cb2c3f631215a15ae84fe0ec1520eed4aa3f7d"
+      "/home/ishi-kai/code-a-chip/cells/out/TIEZ/TIEZ.timing.json": "7dff780b967943349e7aee29b4cb2c3f631215a15ae84fe0ec1520eed4aa3f7d",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/BUF.propagation.json": "dbc813bb37d9b6ad22406002a1ccc8c1ade897fc91b156207152c2657639be15",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/INV.propagation.json": "f7dc96ae4c57bf46f38124a755d9a642510b2bf3a62093b208db746897806f0d",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NAND.propagation.json": "5f20d705a00590871a64d7f2104230b4dbf49e7df268818f3b1ca7041bc6ae46",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NANY.propagation.json": "1e23d88c9b7c00dd4513744b3bd642d937edd32ae0198584522eba0e05046a72",
+      "/home/ishi-kai/code-a-chip/results/sta/propagation/tables/NOR.propagation.json": "3e56bc93bd3571072057875957a078b82cda2abfbbf40821ca987c2e570f8430"
     },
     "load_policy": "linear",
-    "input_transition_s": 1e-09
+    "input_transition_s": 1e-09,
+    "metric": "midpoint_with_endpoint_tail"
   },
   "statistics": {
-    "decision_nodes": 64290,
+    "decision_nodes": 71597,
     "graph_nodes": 54264,
     "graph_choices": 2456,
-    "search_expansions": 6609,
-    "runtime_s": 0.8190320589928888,
+    "search_expansions": 19860,
+    "runtime_s": 1.1410131160082528,
     "all_endpoint_pairs": true
   }
 }

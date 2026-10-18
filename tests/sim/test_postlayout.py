@@ -25,15 +25,30 @@ def test_mac_and_multiplier_independent_arithmetic():
             else: assert out['sum']+3*out['cout']==values['x']+values['a']*values['b']+values['cin']
 
 
-def test_waveform_cache_reuses_only_same_electrical_experiment(tmp_path):
+def test_waveform_cache_reuses_only_same_electrical_experiment(tmp_path,monkeypatch):
+    import shutil
+    import tritflow.sim.postlayout as postlayout
     from tritflow.sim.postlayout import _simulate_cached
     circuit='.subckt passive A Y VDD VMID VSS\nR1 A Y 1k\n.ends passive\n'
-    args=(tmp_path,'pre',circuit,'passive',['A'],['Y'],[(0,),(1,)],lambda v:{'Y':v[0]})
+    args=(tmp_path/'original','pre',circuit,'passive',['A'],['Y'],[(0,),(1,)],lambda v:{'Y':v[0]})
     options=dict(hold_s=20e-9,step_s=.5e-9,load_f=10e-15,timeout=10)
     first=_simulate_cached(*args,**options)
     second=_simulate_cached(*args,**options)
     assert first['measurements']['passed'] and second['measurements']['passed']
     assert second['cached']
+    # Moving identical raw evidence to the corner electrical-content cache is
+    # safe only if the common runner validates the entire configuration again.
+    shutil.copytree(tmp_path/'original/pre',tmp_path/'relocated/pre')
+    calls=[];simulate=postlayout.simulate
+    def counted(*args,**kwargs):
+        calls.append(True)
+        return simulate(*args,**kwargs)
+    monkeypatch.setattr(postlayout,'simulate',counted)
+    args=(tmp_path/'relocated',*args[1:])
+    relocated=_simulate_cached(*args,**options)
+    assert relocated['cached'] and not calls
     options['load_f']=100e-15
     third=_simulate_cached(*args,**options)
     assert 'cached' not in third
+    assert len(calls)==1
+    assert third['measurements']['max_settling_s']['Y']>first['measurements']['max_settling_s']['Y']

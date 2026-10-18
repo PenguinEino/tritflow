@@ -109,6 +109,7 @@ def _validate_design(group, name, directory, models, scaling):
     predicted = analyze(net, **kwargs)
     tested = analyze(net, vector_pairs=pairs, **kwargs)
     fixed = analyze(net, vector_pairs=pairs, propagate_slew=False, **kwargs)
+    block = analyze(net,vector_pairs=pairs,ordered_events=False,**kwargs)
     baseline_path=ROOT/'results/sta/phase1/validation.json'
     baseline=_read(baseline_path) if baseline_path.exists() else {'designs':[]}
     legacy={r['output']:r for d in baseline['designs'] if d['group']==group and d['design']==name for r in d['outputs']}
@@ -131,6 +132,7 @@ def _validate_design(group, name, directory, models, scaling):
         outputs.append({'design': f'{group}/{name}', 'output': pin,
             'predicted_s': value, 'tested_predicted_s': tested.arrival[pin], 'simulated_s': observed,
             'fixed_ramp_midpoint_s':fixed.arrival[pin],
+            'synchronous_block_midpoint_s':block.arrival[pin],
             'legacy_tested_s':legacy.get(pin,{}).get('tested_predicted_s'),
             'error_s': None if observed is None else value-observed,
             'error_percent': None if not observed else 100*(value/observed-1),
@@ -147,6 +149,7 @@ def _validate_design(group, name, directory, models, scaling):
         'all_pairs_runtime_s': predicted.statistics['runtime_s'],
         'tested_pairs_runtime_s': tested.statistics['runtime_s'],
         'load_extension_count': len(predicted.warnings),
+        'event_diagnostics':tested.statistics,
         'wire_scope': caps.get('scope'),
         'electrical_scope': 'Measured midpoint propagation and endpoint-only settling tail; output slew propagated on tested patterns. Maximum biased device C and matching top-net metal C.'}
     return record, {f'{report_name}.timing.json': predicted.to_dict(),
@@ -206,6 +209,7 @@ def validate(*, output_dir=None, retries=3):
             'statistics': {'all_endpoint_pairs': statistics(rows, 'predicted_s'),
                            'sim_endpoint_pairs': statistics(rows, 'tested_predicted_s'),
                            'fixed_ramp_midpoint':statistics(rows,'fixed_ramp_midpoint_s'),
+                           'synchronous_block_midpoint':statistics(rows,'synchronous_block_midpoint_s'),
                            'current_all_endpoint_pairs': statistics(current, 'predicted_s'),
                            'current_sim_endpoint_pairs': statistics(current, 'tested_predicted_s')},
             'source_sha256': before,

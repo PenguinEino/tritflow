@@ -28,6 +28,10 @@ class Symbol:
     width: int = 96
     height: int = 96
     pins: dict[str, Point] = field(default_factory=dict)
+    pin_labels: dict[str, str] = field(default_factory=dict)
+    sides: dict[str, str] = field(default_factory=dict)
+    orient: str = 'right'
+    module: str = ''
 
     @property
     def box(self):
@@ -51,6 +55,13 @@ class Connection:
     pin: str | None
 
 
+@dataclass(frozen=True)
+class Frame:
+    label: str
+    box: tuple[int, int, int, int]
+    members: tuple[str, ...]
+
+
 @dataclass
 class Scene:
     """Annotation-independent topology and routing, reusable after P&R."""
@@ -64,3 +75,4 @@ class Scene:
     height: int
     hidden_nets: tuple[str, ...] = ()
     notes: tuple[str, ...] = ()
+    frames: tuple[Frame, ...] = ()

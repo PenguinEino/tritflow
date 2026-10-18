@@ -3366,10 +3366,10 @@
     }
   ],
   "conclusions": [
-    "Full band-entry times do not compose. Internal settling tails overlap downstream propagation.",
-    "Inputs in circuit are non-linear and much slower than the fixed 1 ns full-ramp assumption.",
-    "Phase-1 exact endpoint constraints reject logically impossible path classes; synchronous table waveforms still differ from skewed in-circuit paths.",
-    "The worst full-adder sum is an endpoint-stable glitch; a changing-output-only midpoint model cannot cover it."
+    "Full band-entry times do not compose: internal tails overlap downstream propagation.",
+    "Actual edge slopes differ strongly from a fixed full 1 ns ramp.",
+    "Endpoint feasibility does not establish synchronous in-circuit waveforms; negative measured per-pin d50 occurs under reconvergent skew.",
+    "The worst full-adder sum is an endpoint-stable glitch, requiring event history beyond endpoint-only timing."
   ],
-  "measurement_identity_warning": "Summing measured internal midpoint differences telescopes by construction; this is diagnosis, not an independently predicted accuracy result."
+  "measurement_identity_warning": "Measured internal midpoint differences telescope by construction; this diagnoses the reference metric and is not independent prediction validation."
 }

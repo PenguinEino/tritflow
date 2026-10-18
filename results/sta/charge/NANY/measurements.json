@@ -3,7 +3,7 @@
   "configuration": {
     "source_sha256": "50a9558ca7588b76ce8e21fca30c73455c010f82078142a9d61bfd2272d5972f",
     "step_s": 1e-10,
-    "code_sha256": "21385c7f864021601a5e77e3e65b12db3dc00e24e09c40c3227334e24e253ebf"
+    "code_sha256": "ee9aaaa260360a54caca3a1753a2005bbce6333516053e8624a35c83fc62fa56"
   },
   "rows": [
     {
@@ -1412,7 +1412,9 @@
     }
   ],
   "passed": true,
-  "method": "Integral of input-source current, stationary leakage removed, divided by signed full voltage transition; unloaded-side fixture output 100 fF, 1 ns full ramp.",
+  "method": "Integral of input-source current, stationary leakage removed, divided by signed full voltage transition; fixture output 10 fF, 1 ns full ramp.",
+  "adopted_in_timing_model": false,
+  "limitation": "This is signed multi-terminal charge inferred from sampled source current. Negative and widely varying values do not define a nonnegative lumped shunt-C model; no replacement of published AC pin C is justified.",
   "per_pin": {
     "A": {
       "min_f": -3.259688358532873e-12,
