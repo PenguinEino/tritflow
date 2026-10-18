@@ -1,16 +1,18 @@
 ## 5. Follow an expression into cells
 
 Synthesis expands parameters and hierarchy, simplifies ternary expressions,
-then maps them to the library. Follow one signal from the source hierarchy
-through the half-adder graph in the preceding figure. Its net colors expose
-intermediate trits as well as the final sum and carry.
+then maps them to the library. The method cell below draws the mapped half
+adder as a schematic: inputs on the left, sum and carry on the right, each
+box one library cell (Σ = NANY, triangle = INV). Click an input trit and
+every wire recolors to the value it settles to.
 
 <!-- figure: ch5 -->
 <!-- hero-reuse: fig_synth panels (b,c); caption: captions.md#fig_synth -->
 
-In the [mapped half adder](../../figures/out/fig_synth.png), blue, gray and
-red traces carry −1, 0 and +1. Follow the shared intermediate nets before
-checking the sum and carry.
+Blue, gray and red wires carry −1, 0 and +1. Try a = b = +1: the inputs
+add to 2, which the cells write as sum = −1 and carry = +1, because
+2 = (−1) + 3·(+1). Follow the shared intermediate nets before checking
+the outputs.
 
 A negated minimum maps directly to NAND; a positive minimum adds INV.
 The analogous rule uses NOR for maximum. Constants map to TIE cells.

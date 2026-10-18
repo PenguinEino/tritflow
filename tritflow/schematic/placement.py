@@ -9,7 +9,7 @@ def anchors(node, font=20):
     """Keep every logic gate facing right, including gates in folded rows."""
     x,y=node.x,node.y
     if node.kind in {'input','output'}:
-        node.width,node.height=max(48,16*math.ceil((len(node.label)*font*.52+16)/16)),64 if font>44 else 48 if font>28 else 32
+        node.width,node.height=max(48,16*math.ceil((len(node.label)*font*.52+16)/16)),64 if font>44 else 48 if font>32 else 32
         side=('bottom' if node.kind=='input' else 'top') if node.orient=='down' else ('right' if node.kind=='input' else 'left')
         point={'bottom':(x+node.width//2,y+node.height),'top':(x+node.width//2,y),'left':(x,y+node.height//2),'right':(x+node.width,y+node.height//2)}[side]
         node.pins={'port':point};node.sides={'port':side}
@@ -49,16 +49,20 @@ def place(nodes,driver,loads,arithmetic):
     Expanded hierarchy is composed in macros.py before reaching this placer.
     The half-adder coordinates here are the single source for every copy.
     """
-    frames=[];placed=set()
+    frames=[];placed=set();port_font=20
     for node in nodes.values():anchors(node)
 
     def put(node,x,y,orient='right'):
         node.x,node.y,node.orient=int(x),int(y),orient
-        anchors(node);placed.add(node.key)
+        anchors(node,font=port_font);placed.add(node.key)
 
     def half(pattern,x,y):
-        positions={'g_t':(0,160),'g_u':(192,16),'g_na':(192,352),'g_c':(384,0),
-                   'g_d':(576,176),'g_nd':(768,176),'g_s':(960,224)}
+        # Put the sign-reversal branch above the sum path. The u→c and
+        # t→d lanes remain straight, without a tall lower inverter branch.
+        pitch=176
+        positions={'g_t':(0,256),'g_na':(pitch,0),'g_u':(pitch,160),
+                   'g_c':(2*pitch,144),'g_d':(3*pitch,272),
+                   'g_nd':(4*pitch,272),'g_s':(5*pitch,320)}
         for role,(dx,dy) in positions.items():
             put(nodes['cell:'+pattern.cells[role]],x+dx,y+dy)
 
@@ -101,7 +105,7 @@ def place(nodes,driver,loads,arithmetic):
         if closed:
             for k,m in enumerate(candidates):
                 node=nodes['block:'+m.scope]
-                put(node,base_x+224*k,200)
+                put(node,base_x+192*k,200)
         else:
             for k,m in enumerate(candidates):full(m,base_x+k*1280,176)
     if not placed:
@@ -148,6 +152,11 @@ def place(nodes,driver,loads,arithmetic):
                 bottom_by_column[col]=y+max(row_pitch,node.height+32)
             column+=across
 
+    core_bounds=[n.box for n in nodes.values() if n.key in placed]
+    span=max((b[2] for b in core_bounds),default=0)-min((b[0] for b in core_bounds),default=0)+384
+    port_font=max(20,(44/3 if len(core_bounds)<=10 else 12)*span/1000)
+    for node in nodes.values():
+        if node.kind in {'input','output'}:anchors(node,font=port_font)
     # External terminals follow their consumers/producers, not a bus-name sort
     # at opposite edges of the entire sheet. Preserve bit order within ties.
     occupied=[n.box for n in nodes.values() if n.key in placed]

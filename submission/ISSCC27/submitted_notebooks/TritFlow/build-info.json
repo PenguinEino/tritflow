@@ -1,23 +1,42 @@
 {
   "schema_version": 1,
-  "created_utc": "2026-10-18T19:26:27.584655+00:00",
-  "source_notebook_sha256": "db3cd0b85ae01263e5e036944e961665226f162eb8216b91f2f9d9709f7a0d52",
-  "source_commit_at_bootstrap": "04fac41e53fdd8b64cfcb1844b23edd9f80274c8",
-  "packaging_commit": "04fac41e53fdd8b64cfcb1844b23edd9f80274c8",
+  "created_utc": "2026-10-18T20:25:54.703873+00:00",
+  "source_notebook_sha256": "80ad9afa6a945c531b72e4b3c53e1616985ccd09d00be162425f866c5777f389",
+  "source_commit_at_bootstrap": "1710d14cc272692827e85dc42252b51b9172c1df",
+  "packaging_commit": "1710d14cc272692827e85dc42252b51b9172c1df",
   "tracked_working_changes_at_packaging": [
+    "docs/status/SCHEM.md",
+    "figures/fig_synth.py",
+    "figures/out/fig_synth.pdf",
+    "figures/out/fig_synth.png",
+    "figures/out/fig_synth.svg",
     "notebook/assets/four_designs.zip",
     "notebook/assets/paper_evidence.json",
     "notebook/colab_verified.json",
-    "notebook/tests/test_colab_presentation.py",
+    "notebook/learning.py",
+    "notebook/methods.py",
+    "notebook/narrative/05_synthesis.md",
     "notebook/tritflow_tr1um.ipynb",
-    "submission/ISSCC27/submitted_notebooks/TritFlow/README.md",
-    "submission/ISSCC27/submitted_notebooks/TritFlow/build-info.json",
-    "submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_tr1um.ipynb",
-    "submission/tests/test_packaging.py"
+    "submission/build_submission.py",
+    "tritflow/schematic/README.md",
+    "tritflow/schematic/__init__.py",
+    "tritflow/schematic/assets/adder4.svg",
+    "tritflow/schematic/assets/full_add-flat.svg",
+    "tritflow/schematic/assets/full_add.svg",
+    "tritflow/schematic/assets/legend.svg",
+    "tritflow/schematic/assets/metrics.md",
+    "tritflow/schematic/assets/review_metrics.json",
+    "tritflow/schematic/gallery.py",
+    "tritflow/schematic/legend.py",
+    "tritflow/schematic/placement.py",
+    "tritflow/schematic/render.py",
+    "tritflow/schematic/review.py",
+    "tritflow/schematic/routing.py",
+    "tritflow/schematic/vector.py"
   ],
   "capture": {
-    "source_sha256": "db3cd0b85ae01263e5e036944e961665226f162eb8216b91f2f9d9709f7a0d52",
-    "elapsed_s": 71.80529590701917,
+    "source_sha256": "80ad9afa6a945c531b72e4b3c53e1616985ccd09d00be162425f866c5777f389",
+    "elapsed_s": 70.23764290800318,
     "renderer": "png",
     "completed": true
   },
@@ -43,7 +62,7 @@
   "official_rules_commit": "a502a6ba01260d3492df9137dddae0bb5fabeb3c",
   "release": {
     "default_ref": "colab-v0",
-    "commit": "cf010a078a0e783875f5ccc9ad763ea3d0f6932b",
+    "commit": "7b62e63f9f75acfa5f935c8da58a77a9db42e0cc",
     "matches_source_notebook": false,
     "missing_required_helpers": [],
     "compatible": false
@@ -52,22 +71,22 @@
   "captured_revision_colab_verified": false,
   "colab_verification": {
     "publish": true,
-    "publication_reason": "Round-8 complete first Run all.",
-    "commit": "cf010a078a0e783875f5ccc9ad763ea3d0f6932b",
+    "publication_reason": "Round-9 complete first Run all.",
+    "commit": "7b62e63f9f75acfa5f935c8da58a77a9db42e0cc",
     "date_utc": "2026-10-19",
     "platform": "free Google Colab CPU",
-    "run_all_seconds_including_setup": 499.2,
+    "run_all_seconds_including_setup": 384.4,
     "passed_code_cells": 35,
     "run_all_attempts": 1,
     "first_attempt_completed": true,
     "initial_setup_attempt_seconds": null,
     "timing_scope": "Single Run all in a fresh runtime, including setup.",
-    "notebook_sha256": "8143c2c99c399da88e052364bb585014c7167f001d478bd592b459a0a0ccb53b",
+    "notebook_sha256": "db3cd0b85ae01263e5e036944e961665226f162eb8216b91f2f9d9709f7a0d52",
     "scope": "Default run with labelled recorded campaigns; first-attempt completion in a fresh free runtime.",
     "report": "docs/status/COLAB.md",
     "evidence_sha256": {
-      "logs/colab/round8-timing.json": "a239ab8d5eb5c5951aa19b7bf7e1bf3e81e752d478d9adac708e3ff3d470bd49",
-      "logs/colab/round8-cells.json": "692cd35cc170a30b2e798490bf955c6163b98b5f7e9b966ef677a5e7f5a7d512"
+      "logs/colab/round9-timing.json": "31459d2f90f440afb233e349db023c89a5898a12b1c280dd6b85c7e2644f981c",
+      "logs/colab/round9-cells.json": "f6c7dbda9a160f6c250a8f3829f2250ebaf78d8c573780353045a7d881361b57"
     },
     "passed": true
   },
@@ -77,14 +96,14 @@
   "raw_execution_not_in_payload": "build/submission_capture/executed.raw.ipynb",
   "manifest_scope": "files excludes build-info.json itself; total_bytes includes it",
   "code_cells": 35,
-  "saved_outputs": 78,
-  "png_outputs": 12,
+  "saved_outputs": 77,
+  "png_outputs": 11,
   "embedded_paper_figures": 9,
   "html_tables": 28,
   "files": {
     "tritflow_tr1um.ipynb": {
-      "bytes": 5796375,
-      "sha256": "e4cf0e6d8a92580d0f7d97bd2337154e8b1511aae5a80e2f0d681d8843209046"
+      "bytes": 5701625,
+      "sha256": "a111bebd4963a95f12caa12d490077dca828aa7161d4a7955f1af403c80fa0b8"
     },
     "CHECKLIST.md": {
       "bytes": 5166,
@@ -104,7 +123,7 @@
     },
     "README.md": {
       "bytes": 7949,
-      "sha256": "aedeef6f0333f6c6c14f2578e9c51d969009caa926a4286d0a8dfb2455daf7ba"
+      "sha256": "6426986b60b789d9ffc93c02935d3ea43103d4f72a560a311abbc774ba9d0447"
     },
     "PITCH.md": {
       "bytes": 497,
@@ -112,5 +131,5 @@
     }
   },
   "file_count": 8,
-  "total_bytes": 5827510
+  "total_bytes": 5733360
 }

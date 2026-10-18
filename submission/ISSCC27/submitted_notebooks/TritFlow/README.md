@@ -22,19 +22,19 @@ frames; rerun for interactive figures. [Abstract](ABSTRACT.md),
 [three-sentence pitch](PITCH.md), and [requirements checklist](CHECKLIST.md)
 are included. [build-info.json](build-info.json) records source hashes, tools,
 capture conditions and the automatically measured package size.
-Captured bootstrap source commit: [04fac41e53fdd8b64cfcb1844b23edd9f80274c8](https://github.com/PenguinEino/tritflow/tree/04fac41e53fdd8b64cfcb1844b23edd9f80274c8). Any tracked working-tree
+Captured bootstrap source commit: [1710d14cc272692827e85dc42252b51b9172c1df](https://github.com/PenguinEino/tritflow/tree/1710d14cc272692827e85dc42252b51b9172c1df). Any tracked working-tree
 changes observed at packaging are recorded separately; a commit ID alone is
 not an assertion that the whole working tree was clean.
 
 ## Reproduce
 
-Free Colab verification at [cf010a0](https://github.com/PenguinEino/tritflow/commit/cf010a078a0e783875f5ccc9ad763ea3d0f6932b): all 35 code cells completed in 499.2 s including setup.
+Free Colab verification at [7b62e63](https://github.com/PenguinEino/tritflow/commit/7b62e63f9f75acfa5f935c8da58a77a9db42e0cc): all 35 code cells completed in 384.4 s including setup.
 
 If Run all stops after setup, choose Run all again.
 
 <details><summary>Source reference for this saved notebook</summary>
 
-The local source-ref check found `colab-v0` at `cf010a078a0e783875f5ccc9ad763ea3d0f6932b`. This capture includes later presentation edits. Build-info.json records the checked source-ref details. Source-selection and rerun instructions are in Appendix B.
+The local source-ref check found `colab-v0` at `7b62e63f9f75acfa5f935c8da58a77a9db42e0cc`. This capture includes later presentation edits. Build-info.json records the checked source-ref details. Source-selection and rerun instructions are in Appendix B.
 
 </details>
 

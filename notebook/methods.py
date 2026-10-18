@@ -61,15 +61,13 @@ SYNTHESIS = r'''
 fa_net = fa.synthesize()                         # rewrite → map to cells → equivalence check
 print(fa_net.report()["equivalence"])
 half_net = flow.load(ROOT/"examples/half_add.tv", "half_add").synthesize()
-show(value_selector(half_net))                   # pick inputs; every net shows its settled trit
+display(value_selector(half_net))                # click input trits; every net shows its settled value
 '''
 
 SCHEMATIC = r'''
 sch = net.schematic(inputs={"a[0]": 1, "a[1]": 0, "b[0]": 1, "b[1]": 0, "cin": 0}, net_names=True,
                     title="Two-trit adder: mapped hierarchy and settled trits")
 display(sch)                                     # the synthesized netlist, drawn as a schematic
-display(half_net.schematic(expand="*", inputs={"a": 1, "b": 1}, net_names=True,
-                           title="Half adder: flat mapped cells, a = b = +1"))
 '''
 
 PNR = r'''

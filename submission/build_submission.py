@@ -201,6 +201,20 @@ def gallery_outputs(html):
     return images
 
 
+def selector_outputs(html):
+    """A static reader keeps the initially selected input view of the trit selector."""
+    import cairosvg
+    import nbformat
+    view = re.search(r'<div data-key="[^"]+" style="display:block">.*?base64,([^"]+)"',html,flags=re.S)
+    if not view:
+        raise ValueError("trit selector markup changed; refusing to drop its schematic")
+    svg = b64decode(view[1]).decode()
+    png = cairosvg.svg2png(bytestring=svg.encode(),output_width=1100)
+    return [nbformat.v4.new_output("display_data",data={
+        "image/svg+xml":svg,"image/png":b64encode(png).decode(),
+        "text/plain":"Mapped half adder, initial input selection; rerun for the selector"},metadata={})]
+
+
 def portable_outputs(document, replacements):
     """Keep actual values; normalize machine paths and remove active/web payloads."""
     from PIL import Image
@@ -213,6 +227,9 @@ def portable_outputs(document, replacements):
                 raise ValueError("failed execution cannot be packaged")
             data = output.get("data",{})
             html = data.get("text/html","")
+            if 'data-trit-selector="1"' in html:
+                outputs.extend(selector_outputs(html))
+                continue
             if "data:image/svg+xml;base64," in html:
                 outputs.extend(gallery_outputs(html))
                 continue

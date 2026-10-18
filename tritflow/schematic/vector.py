@@ -26,6 +26,12 @@ class Vector:
     font_min: float = 0
     stroke_min: float = 0
 
+    @property
+    def display_size(self):
+        """Natural export size fits Colab; the routing grid stays in viewBox units."""
+        width=min(1000,self.width)
+        return width,round(self.height*width/self.width,3)
+
     def path(self, commands, *, stroke=INK, fill='none', width=0.8, net=None):
         self.items.append(dict(kind='path',commands=commands,stroke=stroke,fill=fill,width=max(width,self.stroke_min) if width else 0,net=net))
 
@@ -39,7 +45,8 @@ class Vector:
         self.items.append(dict(kind='text',x=x,y=y,text=str(text),size=max(size,self.font_min),color=color,anchor=anchor,weight=weight,owner=owner))
 
     def svg(self, title, metadata=None):
-        parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.width}" height="{self.height}" '
+        width,height=self.display_size
+        parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
                  f'viewBox="0 0 {self.width} {self.height}" xml:space="preserve" role="img" aria-label="{escape(title,quote=True)}">',
                  f'<title>{escape(title)}</title>',
                  '<desc>Left-to-right balanced-ternary logic. Dots mark connected branches; '
@@ -75,7 +82,9 @@ class Vector:
         from matplotlib.path import Path
         from matplotlib.patches import Circle, PathPatch
         with mpl.rc_context({'font.family':'serif','font.serif':FONT,'pdf.fonttype':42,'path.simplify':False}):
-            fig = Figure(figsize=(self.width/96,self.height/96),dpi=96,facecolor='white')
+            width,height=self.display_size
+            zoom=width/self.width
+            fig = Figure(figsize=(width/96,height/96),dpi=96,facecolor='white')
             FigureCanvasAgg(fig)
             ax = fig.add_axes([0,0,1,1])
             ax.set(xlim=(0,self.width),ylim=(self.height,0))
@@ -83,11 +92,11 @@ class Vector:
             for item in self.items:
                 kind = item['kind']
                 if kind == 'text':
-                    ax.text(item['x'],item['y'],item['text'],fontsize=item['size']*.75,
+                    ax.text(item['x'],item['y'],item['text'],fontsize=item['size']*.75*zoom,
                             color=item['color'],ha={'start':'left','middle':'center','end':'right'}[item['anchor']],
                             va='baseline',weight=item['weight'])
                     continue
-                style = dict(edgecolor=item['stroke'],facecolor=item['fill'],linewidth=item['width']*.75,
+                style = dict(edgecolor=item['stroke'],facecolor=item['fill'],linewidth=item['width']*.75*zoom,
                              capstyle='round',joinstyle='round')
                 if kind == 'circle':
                     ax.add_patch(Circle((item['x'],item['y']),item['r'],**style))
