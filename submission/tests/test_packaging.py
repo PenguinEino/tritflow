@@ -3,6 +3,8 @@
 from base64 import b64encode
 import importlib.util
 import io
+import json
+import re
 from pathlib import Path
 
 import nbformat
@@ -113,3 +115,17 @@ def test_actual_payload_has_readable_embedded_evidence():
                 with Image.open(io.BytesIO(b64decode(data["image/png"]))) as image:
                     assert image.width >= 500 and image.height >= 100
                     image.verify()
+
+
+def test_author_identity_matches_integrator_record_and_asset_authorization():
+    text = (ROOT/"docs/author.md").read_text()
+    fields = {m[1].lower():" ".join(m[2].split()) for m in
+              re.finditer(r"^- (Name|Affiliation|Status|Email|GitHub): (.*(?:\n  .*)*)",text,re.M)}
+    team = json.loads((ROOT/"submission/team.json").read_text())
+    assert team["authors"] == [fields]
+    assert team["representative"] == fields["name"]
+    readme = builder.render_readme(team)
+    for value in fields.values(): assert value in readme
+    assert "releases the derived assets" in readme and "Apache-2.0" in readme
+    assert not {"phone", "telephone", "tel"} & team.keys()
+    assert "confirm the rights field" not in readme

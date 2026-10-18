@@ -11,6 +11,7 @@ import importlib.metadata
 import shutil
 import subprocess
 import os
+import time
 
 import numpy as np
 
@@ -20,15 +21,21 @@ def file_hash(path):
 
 
 def runtime_fingerprint(root, pdk):
-    """Include code, physical/electrical library views, PDK decks and models."""
+    """Hash consumed code/views/publication identity, using relative filenames.
+
+    Pin access, obstructions and free tracks can change without changing a
+    transistor or GDS byte. They and the manifest/publication barrier therefore
+    participate explicitly. Relocating an identical checkout/PDK is harmless.
+    """
     root, pdk = Path(root), Path(pdk)
     files = [*root.glob("tritflow/**/*.py"), *root.glob("cells/out/**/*.gds"),
              *root.glob("cells/out/**/*.spice"), *root.glob("cells/out/**/*.char.json"),
+             *root.glob("cells/out/**/*.abstract.json"), *root.glob("cells/out/*.json"),
              root/"cells/template.json", root/"notebook/setup_pins.json",
              root/"notebook/tritflow_tr1um.ipynb", *root.glob("notebook/*.py"),
              *root.glob("examples/*.tv"), *root.glob("examples/*.py")]
-    files += [p for folder in ["libs.tech/klayout/tech/drc", "libs.tech/klayout/tech/lvs",
-                              "libs.tech/spice/models"] for p in (pdk/folder).rglob("*") if p.is_file()]
+    pdk_files = [p for folder in ["libs.tech/klayout/tech/drc", "libs.tech/klayout/tech/lvs",
+                                "libs.tech/spice/models"] for p in (pdk/folder).rglob("*") if p.is_file()]
     digest = sha256(sys.version.encode())
     for package in ["numpy", "scipy", "klayout", "plotly", "lark"]:
         digest.update(f"{package}={importlib.metadata.version(package)}".encode())
@@ -38,9 +45,12 @@ def runtime_fingerprint(root, pdk):
             digest.update(Path(binary).read_bytes())
             run = subprocess.run([str(binary), "-v"], capture_output=True, text=True, timeout=15)
             digest.update((run.stdout+run.stderr).encode())
-    for path in sorted(files):
-        digest.update(str(path).encode())
-        digest.update(path.read_bytes())
+    for origin, base, paths in (("source", root, files), ("pdk", pdk, pdk_files)):
+        for path in sorted(set(paths)):
+            digest.update(f"{origin}/{path.relative_to(base)}".encode()+b"\0")
+            raw = path.read_bytes()
+            digest.update(len(raw).to_bytes(8, "big"))
+            digest.update(raw)
     return digest.hexdigest()
 
 
@@ -72,22 +82,26 @@ def _restore(value):
 class Cache:
     """Cache native dict results only when context/options/artifact hashes agree."""
 
-    def __init__(self, directory, fingerprint):
+    def __init__(self, directory, fingerprint, *, force=False):
         self.directory = Path(directory)
         self.fingerprint = fingerprint
         self.events = []
+        self.timings = []
+        self.force = force
 
     def run(self, name, options, producer, *, artifacts=()):
         if not name or Path(name).name != name:
             raise ValueError("cache name must be one filename component")
         key = sha256(json.dumps([self.fingerprint, options], sort_keys=True, default=_json).encode()).hexdigest()
         path = self.directory/f"{name}.json.gz"
-        if path.is_file():
+        started = time.perf_counter()
+        if path.is_file() and not self.force:
             with gzip.open(path, "rt") as stream:
                 saved = json.load(stream)
             if saved["key"] == key and all(Path(p).is_file() and file_hash(p) == h
                                            for p, h in saved["artifacts"].items()):
                 self.events.append((name, "hit"))
+                self.timings.append({"stage":name, "state":"hit", "elapsed_s":time.perf_counter()-started})
                 print(f"Cache hit: {name}")
                 return _restore(saved["result"])
         print(f"Running: {name}")
@@ -100,4 +114,5 @@ class Cache:
             json.dump({"key": key, "result": result, "artifacts": hashes}, stream, default=_json, allow_nan=False)
         temporary.replace(path)
         self.events.append((name, "run"))
+        self.timings.append({"stage":name, "state":"run", "elapsed_s":time.perf_counter()-started})
         return result

@@ -4,11 +4,36 @@ import json
 from hashlib import sha256
 from pathlib import Path
 import shutil
+import time
 
 from tritflow import flow, TRIT_VOLTS
 from tritflow.extract import estimate_ir_drop, reference_net_map
 from tritflow.sim.spice import simulation_netlist
 from tritflow.synth import write_artifacts, evaluate_netlist
+
+
+def adder_demo_vectors(inputs, width=2):
+    """Ordered rail-restoration and carry assert/release cases, never a truth tour.
+
+    Digits in the case definitions are least-significant first. Return vectors
+    in the actual elaborated port order rather than relying on bus ordering.
+    """
+    zero = [0]*width
+    cases = [("zero", zero, zero, 0)]
+    for bit in range(width):
+        for sign, label in ((1,"positive"),(-1,"negative")):
+            operand = zero.copy()
+            operand[bit] = sign
+            cases.append((f"{label}_digit_{bit}",operand,zero,0))
+    for sign, label in ((1,"positive"),(-1,"negative")):
+        for suffix, carry in (("setup",0),("carry_assert",sign),("carry_release",0)):
+            cases.append((f"{label}_{suffix}",[sign]*width,zero,carry))
+    cases.append(("return_zero",zero,zero,0))
+    vectors = []
+    for _, a, b, carry in cases:
+        values = {f"a[{i}]":a[i] for i in range(width)} | {f"b[{i}]":b[i] for i in range(width)} | {"cin":carry}
+        vectors.append(tuple(values[p] for p in inputs))
+    return vectors, [label for label, *_ in cases]
 
 
 def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
@@ -22,11 +47,30 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
     SPICE kept separate. Every assertion applies on the producer path; callers
     must also assert cached flags before displaying them.
     """
+    timings = {}
+    def timed(name, action):
+        start = time.perf_counter()
+        value = action()
+        timings[name] = time.perf_counter()-start
+        return value
     write_artifacts(net, directory)
-    lay = net.place_and_route(output_dir=directory, rows=rows, anneal_steps=anneal_steps, seed=seed)
-    drc, lvs = lay.drc(), lay.lvs()
+    lay = timed("pnr_including_drc", lambda: net.place_and_route(
+        output_dir=directory, rows=rows, anneal_steps=anneal_steps, seed=seed))
+    # PNR just ran the official deck on the published GDS. Reuse its actual
+    # report here; no second identical DRC invocation is needed in this stage.
+    drc = lay.data["checks"]["pdk_drc"]
+    lvs = timed("strict_lvs", lay.lvs)
     assert drc["clean"] and lvs["matched"], (drc, lvs)
-    extracted = lay.extract()
+    device_only = lay.extract(wire_c=False)
+    extracted = timed("wire_capacitance", lay.extract)
+    added = [line for line in extracted.spice.splitlines() if line.startswith("Ctfwire")]
+    assert len(added) == sum(row["capacitance_f"] > 0 for row in extracted.capacitance["nets"].values())
+    # Only wire capacitors may distinguish this controlled experiment. The
+    # original mapped-cell schematic remains the independent LVS reference.
+    def intrinsic(text):
+        return [line.strip() for line in text.splitlines()
+                if line.strip() and not line.lstrip().startswith("*") and not line.startswith("Ctfwire")]
+    assert intrinsic(device_only.spice) == intrinsic(extracted.spice)
     options = dict(load=load_f, hold_s=hold_s, step_s=step_s, expected=expected, timeout=300)
     guesses = {"pre": {}, "post": {}}
     if initialize_internal:
@@ -43,8 +87,11 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
             node = simulation_netlist("\\"+node if node.startswith("$") else node)
             guesses["pre"]["xdut."+name] = voltage
             guesses["post"]["xdut."+node] = voltage
-    pre = net.simulate(vectors, workdir=directory/"pre", nodeset=guesses["pre"], **options)
-    post = extracted.simulate(vectors, workdir=directory/"post", nodeset=guesses["post"], **options)
+    # Both runs use the same extracted terminal orientation (including the
+    # asymmetric F_RR intrinsic C); this isolates the added wire-C effect.
+    guesses["pre"] = guesses["post"].copy()
+    pre = timed("pre_ngspice", lambda: device_only.simulate(vectors, workdir=directory/"pre", nodeset=guesses["pre"], **options))
+    post = timed("post_ngspice", lambda: extracted.simulate(vectors, workdir=directory/"post", nodeset=guesses["post"], **options))
     assert pre["measurements"]["passed"] and post["measurements"]["passed"], {
         mode:result["measurements"] for mode,result in (("pre",pre),("post",post))}
     assert pre["stimulus"]["vectors"] == post["stimulus"]["vectors"]
@@ -57,7 +104,8 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
                          {c: read(f"out/{c}/{c}.abstract.json") for c in used},
                          {c: read(f"out/{c}/{c}.char.json") for c in used})
     return {"pre": pre, "post": post, "drc": drc, "lvs": lvs, "stats": lay.stats,
-            "capacitance": extracted.capacitance, "ir": ir, "initial_nodeset_v": guesses}
+            "capacitance": extracted.capacitance, "ir": ir, "initial_nodeset_v": guesses,
+            "timings_s": timings}
 
 
 def experiment_artifacts(result, directory, top):

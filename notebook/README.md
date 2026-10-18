@@ -4,8 +4,8 @@
 
 `tritflow_tr1um.ipynb` follows chapters 0–9 of `docs/concept.md`. Chapter 0
 runs an actual two-trit adder from HDL through GDS, DRC, LVS and post-layout
-ngspice. Logical coverage is exhaustive; its six analog states are explicitly
-representative. The default run also includes NANY DC, the compact published
+ngspice. Logical coverage is exhaustive; its labelled analog states exercise every output at all three levels and are
+explicitly representative. The default run also includes NANY DC, the compact published
 library/characterization tables, all four shared designs through matched
 pre/post-layout simulation, and one selected circuit from chapter 8.
 Gate, layout, animation, DC, sizing, scaling and transient figures use
@@ -38,6 +38,7 @@ uses only public stream functions and never silently chooses a mock library.
 For local validation with the existing PDK/tools:
 
 ```sh
+export TR1UM_PDK="$HOME/pdk/TR-1um-pinned"
 python3 notebook/make_notebook.py
 python3 notebook/validate_notebook.py
 python3 notebook/validate_notebook.py --execute
@@ -57,7 +58,8 @@ arithmetic. Rail IR is a separate nominal-current/resistance estimate.
 Notebook
 caches include code/library/PDK hashes, package and tool versions, options and
 produced artifact hashes. Cache hits identify the original verified artifacts;
-they do not claim that checks ran again. Delete the cache to force a fresh run.
+they do not claim that checks ran again. Set `TRITFLOW_FORCE_RUN=1` before Run all or delete the cache to force a fresh run.
+The final cell reports stage times and recorded PNR/LVS/pre/post-SPICE times.
 The checked-in notebook is output-free; `make_notebook.py` regenerates it.
 
 Runtime inputs are committed under `cells/out/` (including the template,
@@ -93,8 +95,8 @@ first cell to override the tag (branch names also work; their resolved commits
 are printed). An existing checkout is reused only when its origin and resolved
 ref match and it has no tracked edits; otherwise start a fresh Colab runtime.
 The notebook never silently falls back to `main`. The archive-URL bootstrap has
-been removed. **Release TODO:** the integrator must publish the `colab-v0` tag
-after committing these files; the badge targets that same tag.
+been removed. **Release TODO:** the existing `colab-v0` tag predates this notebook. Publish a matching immutable
+release and update the selected ref/badge before filing.
 
 ```sh
 bash notebook/colab_setup.sh --source /content/tritflow
@@ -123,11 +125,10 @@ The actual apt/pip install, notebook display in Colab, Ubuntu ngspice package
 behavior, and install-inclusive cold runtime require a clean Colab test. Local
 validation cannot establish the ten-minute Colab budget.
 
-SIM publication slots use `load_grid()` / `sizing_figure()` for
+Required SIM publications use `load_grid()` / `sizing_figure()` for
 `cells/out/sizing/`, `load_scaling()` / `scaling_figure()` for
 `results/adder_scaling.json`, and `load_sweep_results()` / `load_sweep_figure()`
-for `results/full_add_load_sweep.json`. Missing/stale publications print a
-clearly marked TODO. Cached W/L candidates expose adopted dimensions and a
+for `results/full_add_load_sweep.json`. Missing/stale publications stop execution. Cached W/L candidates expose adopted dimensions and a
 selectable candidate's actual DC transfer/current curves; failed points retain
 their flags. Expensive sizing, width scaling and load-boundary producers are
 documented but not run by default. Published scaling/load records are checked
@@ -153,13 +154,13 @@ TRITFLOW_CIRCUIT=mul2 python3 notebook/validate_notebook.py --execute
 ```
 
 Final Colab verification is postponed by the integrator. Bootstrap behavior is
-unchanged in phase 6. Release-tag publication and final measurement
+unchanged in phases 6–8. Release-tag publication and final measurement
 hardware/schedule remain integrator tasks; no draft TODO is presented as a result.
 
 The six taped-out source schematics are bundled under `assets/schematics/`,
-each with an opaque light and dark SVG. Chapter 1 displays a theme-aware gallery
+each with an opaque light and dark SVG. Chapter 1 expands one selected primitive in a theme-aware gallery
 using embedded data URLs, so no Xschem installation is needed in Colab. The
-manifest records source/dependency/exporter/output hashes and actual symbol
+HA/FA drawings sit beside chapter 4. The manifest records source/dependency/exporter/output hashes and actual symbol
 counts. The gallery checks output hashes; the arithmetic chapter checks mapped
 HA/FA counts against the source hierarchy counts.
 

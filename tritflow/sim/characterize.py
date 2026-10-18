@@ -15,6 +15,9 @@ from .runner import run_ngspice, SimulationError
 from .spice import CELL_PINS
 from .provenance import pdk_provenance
 
+_ANALYSIS_SHA256 = {name:hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()
+                   for name in ('characterize.py','bench.py','spice.py','runner.py','measure.py','cascade.py')}
+
 
 def logic_value(cell: str, values) -> int:
     """Ideal ternary truth functions, including sign inversion after min/max."""
@@ -126,6 +129,7 @@ def characterize_cell(cell: str, subckts: str | None = None, *, top: str | None 
     result['model_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sorted(model_dir.iterdir()) if p.is_file()}
     result['pdk_provenance'] = pdk_provenance(kwargs.get('pdk', PDK_ROOT))
+    result['analysis_sha256'] = _ANALYSIS_SHA256
     if include_cascade and inputs:
         from .cascade import characterize_cascade, attach_cascade
         cascade = characterize_cascade(cell, subckts, fanouts=cascade_fanouts,

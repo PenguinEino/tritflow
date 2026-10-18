@@ -54,3 +54,18 @@ def test_published_sources_relocate_without_recorded_build_directory(tmp_path):
         experiments.verify_publication_sources(record,root,pdk)
     with pytest.raises(RuntimeError,match="fingerprints"):
         experiments.verify_publication_sources({},root,pdk)
+
+
+def test_opening_sequence_exercises_all_outputs_and_carry_assert_release():
+    from tritflow import flow
+    circuit = flow.load("examples/adder.tv", "adder", {"N":2})
+    inputs = circuit.design.inputs
+    vectors, labels = experiments.adder_demo_vectors(inputs)
+    assert len(vectors) == len(labels) and all(a != b for a,b in zip(vectors,vectors[1:]))
+    values = [circuit.design.evaluate(dict(zip(inputs,v,strict=True))) for v in vectors]
+    for output in circuit.design.outputs:
+        assert {int(v[output]) for v in values} == {-1,0,1}
+        assert any(a[output] != b[output] for a,b in zip(values,values[1:]))
+    for sign,label in ((1,"positive"),(-1,"negative")):
+        assert int(values[labels.index(label+"_carry_assert")]["cout"]) == sign
+        assert int(values[labels.index(label+"_carry_release")]["cout"]) == 0

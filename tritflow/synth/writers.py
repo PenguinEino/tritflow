@@ -40,7 +40,13 @@ def tritverilog(net: GateNetlist) -> str:
 
 
 def spice_names(names, reserved=()):
-    """SPICE is case insensitive: encode punctuation, reserved names and clashes."""
+    """Shared HDL→SPICE boundary for writers, SIM and physical comparison.
+
+    Deterministic case-insensitive unique names encode punctuation, rail-name
+    reservations and case collisions. ``spice`` emits inverse ``* net safe =
+    logical`` annotations for every changed name; consumers must restore exact
+    logical spelling before comparing oracle/waveform or physical-label keys.
+    """
     used = {name.lower() for name in reserved}
     result = {}
     for name in sorted(names):

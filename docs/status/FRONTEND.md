@@ -1,6 +1,67 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 7 packaging and local validation complete.**
+Updated: 2026-10-18. **Phase 8 review fixes implemented; pinned-publication integration and saved-output rebuild in progress.**
+
+## Phase 8 handoff (in progress)
+
+- Author fields now follow `docs/author.md` exactly, including student status and
+  GitHub; no telephone field is included. The user has explicitly authorized
+  Apache-2.0 for their derived historical schematic assets; submission licensing
+  text reflects that authorization rather than requesting it again.
+- REVIEW 4: `Layout.lvs()` delegates to `pnr.strict_lvs` with actual PNR data and
+  a freshly loaded physical library. Reuse fingerprints include GDS, gate
+  reference, PNR data, template, library/publication JSON, every abstract,
+  cell SPICE and named LVS-deck contents. Inputs are checked before/after LVS.
+  Real pinned-PDK unused-input synthesis/P&R/DRC/LVS/extracted-ngspice passes;
+  deleting its actual TXM2 pad label invalidates the prior proof and blocks
+  `extract()`. `Layout.signoff()` delegates to PNR's documented public method,
+  retaining explicit clean/submission_ready flags and carried settings.
+- REVIEW 5: notebook fingerprints hash relative filenames and content for every
+  abstract, root manifest/publication JSON, physical/electrical views, source,
+  decks/models and tools. A real INV abstract test edits only pin access or M2
+  obstruction metadata, with unchanged GDS/SPICE; both invalidate. Manifest and
+  generation edits invalidate; byte-identical relocation preserves the key.
+- REVIEW 6 writer side: `spice_names`/`spice` are documented as the common
+  reversible boundary already adopted by SIM. A writer/SIM contract regression
+  covers a/A, y/Y, rail case and an encoded-prefix collision. No SIM/PNR files
+  were edited; PNR owns decoding its physical-label/formal comparisons.
+- REVIEW 7: chapter 0 uses labelled ± single-digit, carry assert/release and
+  return vectors in elaborated port order. Every output, including sum MSB and
+  carry, must visit all three ideal levels, actually change, and have measured
+  nonzero settling in the analog result.
+- REVIEW 8: only the selected primitive expands (NANY by default); HA/FA move
+  beside chapter 4. Chapter 3 uses CELLS' public `cell_figure`, `device_mapping`
+  and `row_abutment`, with labelled original/published devices and both devices
+  of the Y→VMID clamp branch highlighted. Branch terminal topology and its
+  measured DC state are asserted; highlights are not current-density data.
+  Raw reports/conditions/provenance use collapsed controls. Static submission
+  captures retain the selected schematic; runtime can expand alternatives.
+- Runtime: prior capture metadata attributes 699 s of 789 s to the four-design
+  loop; recorded PNR time was only a few seconds/design. New cache/stage and
+  PNR/LVS/pre/post-SPICE timers will resolve the dominant analog work. The
+  experiment helper reuses the official DRC report just produced by PNR,
+  avoiding an identical second invocation. Cached reports remain labelled
+  recorded evidence; `TRITFLOW_FORCE_RUN=1` or deleting the documented cache
+  forces recomputation. No state coverage or SPICE accuracy was reduced.
+- Required sizing/width/load publication slots now fail on missing/stale data
+  instead of printing TODOs. Pinned cell-qualification deck hashes are also
+  checked. Final Run all verifies that consumed inputs did not change during
+  execution. Only public PDK `5d963db` at `$TR1UM_PDK` is used for qualification;
+  reference SVG export tests now use `~/pdk/TR-1um-pinned` too.
+
+Focused regression so far: 30 tests passed (31.61 s), before the added
+presentation/demo tests. No extra packages, git-writing commands or foreign
+path edits. Final notebook timings/publication coverage/package checks pending.
+
+### Interface requests
+
+SIM/CELLS/PNR: final capture requires republished pinned-PDK sizing, cell
+qualification, width-scaling and load-boundary records with current consumed
+hashes. The readers now require these records; they do not weaken provenance
+or turn stale data into a result. The current live cell `verify_report.json`
+still names the dev PDK and differs from pinned decks as of this intermediate
+check. The release-ref mismatch from phase 7 remains an integrator action;
+no tag or bootstrap write was performed here.
 
 ## Phase 7 handoff
 

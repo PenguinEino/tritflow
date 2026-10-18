@@ -66,14 +66,14 @@ def _compact(measurements):
 
 
 def _adder_guesses(net,lvs_report,inputs,rails):
-    mapping={a.lower():b for a,b in reference_net_map(lvs_report,net.top).items()}
-    ports={p.name.lower() for p in net.ports};levels={-1:rails['VSS'],0:rails['VMID'],1:rails['VDD']}
+    mapping=reference_net_map(lvs_report,net.top)
+    ports={p.name for p in net.ports};levels={-1:rails['VSS'],0:rails['VMID'],1:rails['VDD']}
     def guesses(vector):
         values=evaluate_netlist(net,dict(zip(inputs,vector)),return_all=True)
         result={}
         for name,value in values.items():
-            if name.lower() in ports:continue
-            node=mapping[name.lower()]
+            if name in ports:continue
+            node=mapping[name]
             node=simulation_netlist('\\'+node if node.startswith('$') else node)
             result['xdut.'+node]=levels[int(value)]
         return result
@@ -105,6 +105,7 @@ def _run_case(task,*,timeout=600):
         coverage='all 27 states in lexicographic order; 26 transitions' if dut=='full_add' else 'all discrete states and every directed input-vector transition')
     sources={str(source):file_hash(source)}|extra
     code={name:file_hash(Path(__file__).with_name(name)) for name in ['corners.py','bench.py','measure.py','runner.py','spice.py','characterize.py']}
+    code['extract/capacitance.py']=file_hash(ROOT/'tritflow/extract/capacitance.py')
     digest=_key(dict(sources=sources,conditions=conditions,models=inventory['model_sha256'],pdk=inventory['pdk_provenance'],code=code))
     cache=ROOT/f'results/corners/cases/{digest}.json.gz';cache.parent.mkdir(parents=True,exist_ok=True)
     if cache.is_file():
@@ -157,6 +158,12 @@ def run_corners(*,temperatures=(-40.,27.,85.),supply_scales=(.9,1.,1.1),
                 cells=('INV','NAND','NOR','NANY','BUF'),include_adder=True,jobs=3,timeout=600):
     """Compute only the available nominal process across the requested T/V grid."""
     inventory=available_corners()
+    if include_adder:
+        directory=ROOT/'build/full_add'
+        qualification=json.loads((directory/'postlayout/summary.json').read_text())
+        if not qualification.get('passed') or any(qualification.get('input_sha256',{}).get(str(p.resolve()))!=file_hash(p)
+                for p in (directory/'full_add.gds',directory/'full_add.pnr.json',directory/'full_add.json')):
+            raise RuntimeError('Full-adder post-layout evidence is stale; rerun examples/postlayout_all.py first')
     if any(c not in ('INV','NAND','NOR','NANY','BUF') for c in cells):raise ValueError('Unsupported cell')
     if jobs<1 or any(not np.isfinite(t) or t<=-273.15 for t in temperatures) or any(not np.isfinite(s) or s<=0 for s in supply_scales):
         raise ValueError('Invalid T/V grid or worker count')

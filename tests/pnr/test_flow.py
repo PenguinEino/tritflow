@@ -167,7 +167,9 @@ def test_real_four_trit_adder(tmp_path):
     assert result.stats["instance_count"] >= 40
     assert all(check["clean"] for check in result.data["checks"].values())
     assert result.stats["aspect_ratio"] <= 1.5
-    assert result.stats["utilization"] >= .45
+    # Current reserve takes precedence over the earlier 45% area objective.
+    assert result.stats["utilization"] >= .40
+    assert result.data["power"]["dc_current_check"]["reserved_margin_met"]
     assert result.stats["runtime_s"]["total"] < 30
 
 

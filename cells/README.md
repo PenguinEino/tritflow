@@ -5,6 +5,7 @@ python3 -m tritflow.cells build
 python3 -m tritflow.cells verify
 python3 -m tritflow.cells equivalence
 python3 -m tritflow.cells parasitic
+python3 -m tritflow.cells timing --jobs 3
 python3 -m pytest tests/cells -q
 ```
 
@@ -14,11 +15,11 @@ crossovers and rail extensions. Abstracts include exact rectangular decompositio
 of M1, M2 and V1, plus full-height free M2 track coordinates/counts, calculated
 for a 3.4 um M2 wire and 2 um spacing. Public terminals remain accessible M1 pads.
 
-`TR1UM_PDK` selects the PDK (default `~/pdk/TR-1um`); `KLAYOUT_BIN` selects the
+`TR1UM_PDK` selects the PDK (default `~/pdk/TR-1um-pinned`); `KLAYOUT_BIN` selects the
 binary (default `~/bin/klayout/klayout`). Build/verify accept `--out DIR` for
 private staging and `--cells INV NANY` for focused work. A live build always
 builds all nine cells privately, runs official DRC/LVS/DC, regenerates full SIM
-characterization, then atomically exchanges the whole output directory. A focused
+characterization and timing tables, then atomically exchanges the whole output directory. A focused
 build must use a private output directory. Existing consumers should read
 `generation.json` before/after a multi-file load if they need a snapshot check.
 
@@ -70,7 +71,31 @@ The default command stages a complete snapshot and publishes atomically; use
 
 Wire C uses explicit engineering coefficients, not a calibrated PDK PEX deck.
 Poly R/C, wire resistance, coupling, shielding, via C, process corners, mismatch,
-pads/packages and manufacturing qualification remain outside the simulation.
-Poly resistance estimates are documented separately; they are not included in
-the reported settling times. Source-level W/L experiments belong to SIM's
+pads/packages and manufacturing qualification remain outside the Phase 4 simulation.
+Source-level W/L experiments belong to SIM's
 `tritflow.sim.sizing.sweep_dimensions`, not physical cell generation.
+
+Phase 6 adds `<CELL>.timing.json` for STA. Five logic cells have every directed
+input-vector transition at eight loads (5 fF to 1 pF) and four full linear input
+ramps (1/10/50/150 ns). Single-pin arcs retain the exact side-input trits;
+simultaneous multi-pin changes are separate. Matrix order is `[ramp][load]`.
+Delay is final entry into the new ideal output's ±0.5 V band, measured from input
+edge start and staying through the observation end. The primary model is the
+device-only extraction; fanout pin C comes from biased 1 MHz AC measurements,
+and STA adds actual-GDS wire C separately. Null/failed entries must remain
+explicit, and neither axis may be implicitly extrapolated. Ties and FILL have
+no input arcs. The full schema and numerical limits are in `docs/status/CELLS.md`.
+
+`<CELL>.poly.spice`, `.poly.json` and `.poly.timing.json` separately model field
+gate-poly sheet resistance and measure its effect at 10/100/1000 fF with
+1/150 ns ramps. A reduced 0.25 um sheet mesh uses the PDK's RS resistor-poly
+120 Ω/square **as an uncalibrated GC sensitivity proxy**. It does not change
+the structural extraction or primary STA model. Paired baselines use the same
+transient timestep. No poly C or contact resistance is invented.
+
+The `timing` command snapshots and atomically publishes the entire library;
+`--out DIR` measures a private existing library instead. It can take several
+minutes. Notebook/STA consumers read the published tables without running SPICE.
+Root `timing_report.json` and `poly_timing_report.json` summarize completeness,
+pass flags and generation; decks, logs and per-condition measurements remain
+under each cell's `timing/` and `timing_poly/` directories.

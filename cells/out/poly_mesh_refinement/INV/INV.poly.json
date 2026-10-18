@@ -1,0 +1,124 @@
+{
+  "cell": "INV",
+  "sheet_ohm_per_square": 120.0,
+  "pitch_um": 0.125,
+  "parameter_origin": "PDK RS resistor-poly specification used as a GC sensitivity proxy; GC applicability is uncalibrated.",
+  "pdk_source": {
+    "RR": 1000.0,
+    "RS_poly": 120.0,
+    "width_um": 6.0,
+    "tolerance_percent": 15.0,
+    "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+    "page": 9,
+    "table": "I-2-4",
+    "use": "Device-resistor specifications, not metal. Existing nonlinear PDK device models remain authoritative in SPICE."
+  },
+  "parameter_audit_sha256": "4358e3ccced80203e2223ac2f7ad08d04e244d3cc650875e23cf6fcaffdff263",
+  "source_sha256": "6d22452e4d595e929076929463d31fa80ca12db88143192e7e33a540447ded96",
+  "gds_sha256": "c295d2127767f1eeed86a106743a1716ff9f03ab6c57ab8ccde93427aefac0da",
+  "scope": "GC gate-interconnect sheet R only. No poly C/contact R; MOS gate-channel regions are equipotential. RR device models and all W/L/junction parameters are unchanged. Structural LVS extraction is preserved.",
+  "components": [
+    {
+      "terminals": [
+        "metal",
+        "gate_1",
+        "gate_2"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_1",
+          "squares": 11.636160011024705
+        },
+        {
+          "a": "metal",
+          "b": "gate_2",
+          "squares": 7.878355524031591
+        },
+        {
+          "a": "gate_1",
+          "b": "gate_2",
+          "squares": 9376.584690467478
+        }
+      ],
+      "mesh_vertices": 2932,
+      "gate_to_contact_squares": {
+        "gate_1": 11.62174975238122,
+        "gate_2": 7.871749752380842
+      },
+      "reduced_vertices": 3,
+      "unit_sheet_conductance": [
+        [
+          0.21286904616134095,
+          -0.08593900385114572,
+          -0.1269300423101838
+        ],
+        [
+          -0.08593900385114572,
+          0.08604565249060059,
+          -0.00010664863945788604
+        ],
+        [
+          -0.1269300423101838,
+          -0.00010664863945788604,
+          0.12703669094964098
+        ]
+      ],
+      "net": "A",
+      "bbox_um": [
+        17.900000000000002,
+        22.3,
+        20.5,
+        63.95
+      ]
+    }
+  ],
+  "gates": {
+    "1": {
+      "node": "tfpg_1",
+      "base_net": "A",
+      "origin_um": [
+        19.2,
+        56.0
+      ],
+      "w_um": 13.5,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 1394.6099702857464
+    },
+    "2": {
+      "node": "tfpg_2",
+      "base_net": "A",
+      "origin_um": [
+        19.2,
+        26.0
+      ],
+      "w_um": 5.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 944.6099702857011
+    }
+  },
+  "resistors": [
+    {
+      "name": "Rtfpg_0",
+      "a": "A",
+      "b": "tfpg_1",
+      "squares": 11.636160011024705,
+      "resistance_ohm": 1396.3392013229645
+    },
+    {
+      "name": "Rtfpg_1",
+      "a": "A",
+      "b": "tfpg_2",
+      "squares": 7.878355524031591,
+      "resistance_ohm": 945.4026628837909
+    },
+    {
+      "name": "Rtfpg_2",
+      "a": "tfpg_1",
+      "b": "tfpg_2",
+      "squares": 9376.584690467478,
+      "resistance_ohm": 1125190.1628560973
+    }
+  ],
+  "annotated_sha256": "d7c593ba86547660bcd899d4f82eca2e2fca5d660198245155ce54b4e1432b2e"
+}

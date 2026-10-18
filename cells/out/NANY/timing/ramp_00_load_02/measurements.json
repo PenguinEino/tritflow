@@ -1,0 +1,1133 @@
+{
+  "cell": "NANY",
+  "load_f": 2e-14,
+  "input_transition_s": 1e-09,
+  "hold_s": 3.01e-07,
+  "max_step_s": 5e-11,
+  "source_sha256": "50a9558ca7588b76ce8e21fca30c73455c010f82078142a9d61bfd2272d5972f",
+  "code_sha256": {
+    "cells/timing.py": "26a109dd8361349cd057b9f9b6fa83ec33e84b24f67c09f6bf81218b1e7b5dcb",
+    "cells/regression.py": "0c401c53de8982d6d37d051219f9fc82f1aa16acbaf865627c089f221b3cc67a",
+    "sim/bench.py": "890b0e720e5e4a251f31f5807162f0e5693f57b307acf9bf81672e6d21664a94",
+    "sim/runner.py": "8e5f6fefc4614214a341f920d212707a9343e3cda611da051ec05e72709a9dd3",
+    "sim/measure.py": "a886539162e948bc440e9bf21a6b8ba1f518ae8d9ddb0669807e2b918b46bcdd",
+    "sim/spice.py": "bfd941b42765eef041b5c51bd8437fecb46fdcd222fa929c04e5710630cb8ded",
+    "sim/characterize.py": "17fd223047d5193813a60effa4605f03ea881ba24c4b8dd0fd08e3672c222710"
+  },
+  "measurement_code": {
+    "cells_bytecode": "77e2f78acc5e5f7c598a1db8ed0d23c9a6dc9da47fe5e498abec5bac431ecb04",
+    "sim_source": {
+      "sim/bench.py": "890b0e720e5e4a251f31f5807162f0e5693f57b307acf9bf81672e6d21664a94",
+      "sim/runner.py": "8e5f6fefc4614214a341f920d212707a9343e3cda611da051ec05e72709a9dd3",
+      "sim/measure.py": "a886539162e948bc440e9bf21a6b8ba1f518ae8d9ddb0669807e2b918b46bcdd",
+      "sim/spice.py": "bfd941b42765eef041b5c51bd8437fecb46fdcd222fa929c04e5710630cb8ded",
+      "sim/characterize.py": "17fd223047d5193813a60effa4605f03ea881ba24c4b8dd0fd08e3672c222710"
+    }
+  },
+  "model_sha256": {
+    "ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec",
+    "models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+    "models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+    "models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+    "models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311"
+  },
+  "complete": true,
+  "rows": [
+    {
+      "from": [
+        -1,
+        -1
+      ],
+      "to": [
+        1,
+        1
+      ],
+      "settling_s": 9.321512585925789e-09,
+      "output_slew_10_90_s": 6.172715669531009e-09,
+      "error_v": 0.0004144330704942689,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        1
+      ],
+      "to": [
+        1,
+        0
+      ],
+      "settling_s": 6.233610510319553e-09,
+      "output_slew_10_90_s": null,
+      "error_v": 0.00046200137447804934,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        0
+      ],
+      "to": [
+        1,
+        1
+      ],
+      "settling_s": 1.3085938991002028e-09,
+      "output_slew_10_90_s": null,
+      "error_v": 4.482859958798713e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        1
+      ],
+      "to": [
+        1,
+        -1
+      ],
+      "settling_s": 7.481289820993807e-09,
+      "output_slew_10_90_s": 6.170944764649773e-09,
+      "error_v": 5.048413945068031e-08,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        -1
+      ],
+      "to": [
+        1,
+        1
+      ],
+      "settling_s": 7.71265960274337e-09,
+      "output_slew_10_90_s": 6.053504561029027e-09,
+      "error_v": 4.4828602252522387e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        1
+      ],
+      "to": [
+        0,
+        1
+      ],
+      "settling_s": 0.0,
+      "output_slew_10_90_s": null,
+      "error_v": 7.354902979983535e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        1
+      ],
+      "to": [
+        1,
+        1
+      ],
+      "settling_s": 0.0,
+      "output_slew_10_90_s": null,
+      "error_v": 0.00041415262420851917,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        1
+      ],
+      "to": [
+        0,
+        0
+      ],
+      "settling_s": 2.8931952918693333e-09,
+      "output_slew_10_90_s": 1.6966088918836588e-09,
+      "error_v": -0.04459433160297824,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        1,
+        1
+      ],
+      "settling_s": 8.618775901001053e-09,
+      "output_slew_10_90_s": 6.213603799201362e-09,
+      "error_v": 0.00041437713149683475,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        1
+      ],
+      "to": [
+        0,
+        -1
+      ],
+      "settling_s": 1.7223508250344993e-08,
+      "output_slew_10_90_s": 1.2109838608865668e-08,
+      "error_v": -0.00023127050850479947,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        -1
+      ],
+      "to": [
+        1,
+        1
+      ],
+      "settling_s": 9.269524318992234e-09,
+      "output_slew_10_90_s": 6.177845834530778e-09,
+      "error_v": 0.0004144264730188141,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        1
+      ],
+      "to": [
+        -1,
+        1
+      ],
+      "settling_s": 4.582574683824123e-09,
+      "output_slew_10_90_s": 3.30720565313802e-09,
+      "error_v": 5.0444120316883294e-08,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        1
+      ],
+      "to": [
+        1,
+        1
+      ],
+      "settling_s": 6.273100550075569e-09,
+      "output_slew_10_90_s": 5.273306349975507e-09,
+      "error_v": 0.00041429025995576296,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        1
+      ],
+      "to": [
+        -1,
+        0
+      ],
+      "settling_s": 1.5953918160741713e-08,
+      "output_slew_10_90_s": 1.075308213308817e-08,
+      "error_v": -2.392197166578569e-06,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        0
+      ],
+      "to": [
+        1,
+        1
+      ],
+      "settling_s": 9.263862849553345e-09,
+      "output_slew_10_90_s": 6.177808863719505e-09,
+      "error_v": 0.00041442504583422135,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        1
+      ],
+      "to": [
+        -1,
+        -1
+      ],
+      "settling_s": 1.5645836207682467e-08,
+      "output_slew_10_90_s": 1.065052478426553e-08,
+      "error_v": -0.00025282382355928945,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        -1
+      ],
+      "to": [
+        1,
+        0
+      ],
+      "settling_s": 1.4559481393969969e-08,
+      "output_slew_10_90_s": 1.1216272162296324e-08,
+      "error_v": 0.0006268483689533255,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        0
+      ],
+      "to": [
+        1,
+        -1
+      ],
+      "settling_s": 6.974879717419257e-09,
+      "output_slew_10_90_s": 5.9045025202932096e-09,
+      "error_v": 3.330065573074813e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        -1
+      ],
+      "to": [
+        1,
+        0
+      ],
+      "settling_s": 8.563395100936362e-09,
+      "output_slew_10_90_s": 7.035137495760738e-09,
+      "error_v": 0.000547444669985353,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        0
+      ],
+      "to": [
+        0,
+        1
+      ],
+      "settling_s": 0.0,
+      "output_slew_10_90_s": null,
+      "error_v": 7.354903557299508e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        1
+      ],
+      "to": [
+        1,
+        0
+      ],
+      "settling_s": 7.824327598601571e-09,
+      "output_slew_10_90_s": null,
+      "error_v": 0.00046281164730821445,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        0
+      ],
+      "to": [
+        0,
+        0
+      ],
+      "settling_s": 3.0188658586795928e-09,
+      "output_slew_10_90_s": 1.7368142931270254e-09,
+      "error_v": -0.04459433160296772,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        1,
+        0
+      ],
+      "settling_s": 1.2737572129824132e-08,
+      "output_slew_10_90_s": 9.411122077117873e-09,
+      "error_v": 0.00046961118635113763,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        0
+      ],
+      "to": [
+        0,
+        -1
+      ],
+      "settling_s": 1.7184528115693914e-08,
+      "output_slew_10_90_s": 1.1963536489552775e-08,
+      "error_v": -0.00023132269226788793,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        -1
+      ],
+      "to": [
+        1,
+        0
+      ],
+      "settling_s": 1.4527294287372593e-08,
+      "output_slew_10_90_s": 1.1224590599770945e-08,
+      "error_v": 0.0006267896015810237,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        0
+      ],
+      "to": [
+        -1,
+        1
+      ],
+      "settling_s": 3.998339591207285e-09,
+      "output_slew_10_90_s": 3.44638892173868e-09,
+      "error_v": 5.0444126459119186e-08,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        1
+      ],
+      "to": [
+        1,
+        0
+      ],
+      "settling_s": 1.082279822448308e-08,
+      "output_slew_10_90_s": 9.213208980836523e-09,
+      "error_v": 0.0004663712727639435,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        0
+      ],
+      "to": [
+        -1,
+        0
+      ],
+      "settling_s": 1.5587481858801746e-08,
+      "output_slew_10_90_s": 1.0521774176267286e-08,
+      "error_v": -2.392197255396411e-06,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        0
+      ],
+      "to": [
+        1,
+        0
+      ],
+      "settling_s": 1.4463704567719678e-08,
+      "output_slew_10_90_s": 1.1216109446400641e-08,
+      "error_v": 0.0006266803558583334,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        0
+      ],
+      "to": [
+        -1,
+        -1
+      ],
+      "settling_s": 1.502485291144706e-08,
+      "output_slew_10_90_s": 1.022499631914588e-08,
+      "error_v": -0.0002523969363563694,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        -1
+      ],
+      "to": [
+        1,
+        -1
+      ],
+      "settling_s": 9.913292008220499e-09,
+      "output_slew_10_90_s": 8.614024618792569e-09,
+      "error_v": 3.812562314132256e-05,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        -1
+      ],
+      "to": [
+        0,
+        1
+      ],
+      "settling_s": 7.828837646582231e-09,
+      "output_slew_10_90_s": 6.101178504767758e-09,
+      "error_v": 7.354903424072745e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        1
+      ],
+      "to": [
+        1,
+        -1
+      ],
+      "settling_s": 3.6949378043859145e-09,
+      "output_slew_10_90_s": 3.0257942514628903e-09,
+      "error_v": 5.04841361862479e-08,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        -1
+      ],
+      "to": [
+        0,
+        0
+      ],
+      "settling_s": 0.0,
+      "output_slew_10_90_s": null,
+      "error_v": -0.044594331602769606,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        1,
+        -1
+      ],
+      "settling_s": 0.0,
+      "output_slew_10_90_s": null,
+      "error_v": 5.048419178239075e-08,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        -1
+      ],
+      "to": [
+        0,
+        -1
+      ],
+      "settling_s": 1.4537049457871771e-08,
+      "output_slew_10_90_s": 1.24941590865642e-08,
+      "error_v": -0.0002286584077468845,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        -1
+      ],
+      "to": [
+        1,
+        -1
+      ],
+      "settling_s": 9.642423035080002e-09,
+      "output_slew_10_90_s": 8.445753919092633e-09,
+      "error_v": 3.8124505566121414e-05,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        -1
+      ],
+      "to": [
+        -1,
+        1
+      ],
+      "settling_s": 8.685169379051802e-10,
+      "output_slew_10_90_s": null,
+      "error_v": 5.044413995332364e-08,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        1
+      ],
+      "to": [
+        1,
+        -1
+      ],
+      "settling_s": 1.0834669991886852e-09,
+      "output_slew_10_90_s": null,
+      "error_v": 5.048417270295895e-08,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        -1
+      ],
+      "to": [
+        -1,
+        0
+      ],
+      "settling_s": 1.3429307979217795e-08,
+      "output_slew_10_90_s": 1.1428924155415198e-08,
+      "error_v": -2.392197166578569e-06,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        0
+      ],
+      "to": [
+        1,
+        -1
+      ],
+      "settling_s": 8.199106017183036e-09,
+      "output_slew_10_90_s": 7.1726531392678e-09,
+      "error_v": 3.8123017333594494e-05,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        1,
+        -1
+      ],
+      "to": [
+        -1,
+        -1
+      ],
+      "settling_s": 1.331144502734334e-08,
+      "output_slew_10_90_s": 1.1176922358198299e-08,
+      "error_v": -5.849167257210297e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        -1
+      ],
+      "to": [
+        0,
+        1
+      ],
+      "settling_s": 9.434657892724556e-09,
+      "output_slew_10_90_s": 6.3304974232414335e-09,
+      "error_v": 0.00015473694464329668,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        1
+      ],
+      "to": [
+        0,
+        0
+      ],
+      "settling_s": 2.4662086974416386e-09,
+      "output_slew_10_90_s": 1.6334648605740009e-09,
+      "error_v": -0.04451569536213268,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        0,
+        1
+      ],
+      "settling_s": 8.486317606230188e-09,
+      "output_slew_10_90_s": 6.257028650954796e-09,
+      "error_v": 7.354903956979797e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        1
+      ],
+      "to": [
+        0,
+        -1
+      ],
+      "settling_s": 1.64864456605447e-08,
+      "output_slew_10_90_s": 1.1728604011088751e-08,
+      "error_v": -0.00023081005345559902,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        -1
+      ],
+      "to": [
+        0,
+        1
+      ],
+      "settling_s": 9.364728602410068e-09,
+      "output_slew_10_90_s": 6.3380419713067395e-09,
+      "error_v": 0.00015473519839037664,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        1
+      ],
+      "to": [
+        -1,
+        1
+      ],
+      "settling_s": 4.378845150344678e-09,
+      "output_slew_10_90_s": 3.2704711180143114e-09,
+      "error_v": 3.326968554477338e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        1
+      ],
+      "to": [
+        0,
+        1
+      ],
+      "settling_s": 6.434013187728849e-09,
+      "output_slew_10_90_s": 5.3200649720852036e-09,
+      "error_v": 8.626058282690252e-05,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        1
+      ],
+      "to": [
+        -1,
+        0
+      ],
+      "settling_s": 1.4211591696475402e-08,
+      "output_slew_10_90_s": 9.253386186767543e-09,
+      "error_v": -2.392197166578569e-06,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        0
+      ],
+      "to": [
+        0,
+        1
+      ],
+      "settling_s": 9.374366955139596e-09,
+      "output_slew_10_90_s": 6.336083079107763e-09,
+      "error_v": 0.00015473299057244816,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        1
+      ],
+      "to": [
+        -1,
+        -1
+      ],
+      "settling_s": 1.4909980243660726e-08,
+      "output_slew_10_90_s": 1.03039169155172e-08,
+      "error_v": -0.00025231822652838076,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        -1
+      ],
+      "to": [
+        0,
+        0
+      ],
+      "settling_s": 4.969272869623611e-09,
+      "output_slew_10_90_s": 3.3297203465252625e-09,
+      "error_v": -0.04443566374842828,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        0,
+        -1
+      ],
+      "settling_s": 1.4535560832030998e-08,
+      "output_slew_10_90_s": 1.1724578525563865e-08,
+      "error_v": -0.00022979829078462188,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        -1
+      ],
+      "to": [
+        0,
+        0
+      ],
+      "settling_s": 4.924244991990788e-09,
+      "output_slew_10_90_s": 3.3293973530215746e-09,
+      "error_v": -0.044435689084872686,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        -1,
+        1
+      ],
+      "settling_s": 0.0,
+      "output_slew_10_90_s": null,
+      "error_v": 5.0444129004284627e-08,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        1
+      ],
+      "to": [
+        0,
+        0
+      ],
+      "settling_s": 0.0,
+      "output_slew_10_90_s": null,
+      "error_v": -0.044556216133652654,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        -1,
+        0
+      ],
+      "settling_s": 1.3455423609341668e-08,
+      "output_slew_10_90_s": 1.1255590415176005e-08,
+      "error_v": -2.3921972651663737e-06,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        0
+      ],
+      "to": [
+        0,
+        0
+      ],
+      "settling_s": 4.8030366664420735e-09,
+      "output_slew_10_90_s": 3.326772622547783e-09,
+      "error_v": -0.044435757559011864,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        0
+      ],
+      "to": [
+        -1,
+        -1
+      ],
+      "settling_s": 1.4064718217344125e-08,
+      "output_slew_10_90_s": 1.1225499153818066e-08,
+      "error_v": -0.0002517291200598848,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        -1
+      ],
+      "to": [
+        0,
+        -1
+      ],
+      "settling_s": 1.186548289238879e-09,
+      "output_slew_10_90_s": null,
+      "error_v": -0.00022520959452787537,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        -1
+      ],
+      "to": [
+        -1,
+        1
+      ],
+      "settling_s": 4.337334684053023e-09,
+      "output_slew_10_90_s": 3.121079072613528e-09,
+      "error_v": 3.7977288883836204e-05,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        1
+      ],
+      "to": [
+        0,
+        -1
+      ],
+      "settling_s": 1.3892530657909753e-08,
+      "output_slew_10_90_s": 1.19490977560857e-08,
+      "error_v": -0.00022923222199278115,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        -1
+      ],
+      "to": [
+        -1,
+        0
+      ],
+      "settling_s": 0.0,
+      "output_slew_10_90_s": null,
+      "error_v": -2.3921970040419183e-06,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        0
+      ],
+      "to": [
+        0,
+        -1
+      ],
+      "settling_s": 4.705142940066335e-09,
+      "output_slew_10_90_s": null,
+      "error_v": -0.00022676510762309476,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        0,
+        -1
+      ],
+      "to": [
+        -1,
+        -1
+      ],
+      "settling_s": 4.251753435581513e-09,
+      "output_slew_10_90_s": null,
+      "error_v": -5.849164699256448e-07,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        -1
+      ],
+      "to": [
+        -1,
+        1
+      ],
+      "settling_s": 4.501524997386103e-09,
+      "output_slew_10_90_s": 3.1387144808297477e-09,
+      "error_v": 3.797764905100774e-05,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        1
+      ],
+      "to": [
+        -1,
+        0
+      ],
+      "settling_s": 1.2049184028688751e-08,
+      "output_slew_10_90_s": 1.0801511370398236e-08,
+      "error_v": -2.3921971656903906e-06,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        0
+      ],
+      "to": [
+        -1,
+        1
+      ],
+      "settling_s": 4.382669221399203e-09,
+      "output_slew_10_90_s": 3.1442023966257813e-09,
+      "error_v": 3.7976698986842294e-05,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        1
+      ],
+      "to": [
+        -1,
+        -1
+      ],
+      "settling_s": 1.2878478868207479e-08,
+      "output_slew_10_90_s": 1.1205058256657255e-08,
+      "error_v": -0.00025090526297333327,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        -1
+      ],
+      "to": [
+        -1,
+        0
+      ],
+      "settling_s": 1.77589540237627e-09,
+      "output_slew_10_90_s": null,
+      "error_v": -2.392196967626603e-06,
+      "passed": true,
+      "status": "ok"
+    },
+    {
+      "from": [
+        -1,
+        0
+      ],
+      "to": [
+        -1,
+        -1
+      ],
+      "settling_s": 4.263036062120829e-09,
+      "output_slew_10_90_s": null,
+      "error_v": -0.00024206158947492895,
+      "passed": true,
+      "status": "ok"
+    }
+  ],
+  "initial_state_passed": true,
+  "passed": true,
+  "max_error_v": 0.04459433160297824,
+  "max_settling_s": 1.7223508250344993e-08,
+  "compatible_measurement_code": {
+    "cells_bytecode": "17065b86428ba16f934e8b6548042b9664a0bb2c7d20cb14bea523d2c6a80d79",
+    "sim_source": {
+      "sim/bench.py": "5cb2ed10e703769ee0f014b7733faa3c8f4a59cf5e3448495434c0362845cbf2",
+      "sim/runner.py": "8e5f6fefc4614214a341f920d212707a9343e3cda611da051ec05e72709a9dd3",
+      "sim/measure.py": "470fb860f01bfd83a6ecea78de9b7d4ea04dfbfdbe932fbf93a2920426c13bde",
+      "sim/spice.py": "b7bc56105e23fee12b7fa848b9edd95b24de20d18ddb471223336bfee299d5a3",
+      "sim/characterize.py": "fa45f8ab9ff866774cebffd12ba65312691b3fc50f47d7814eb48c0b48e6ed68"
+    }
+  },
+  "compatibility_reason": "Audited nominal circuit/model equivalence and unchanged settling calculation across SIM/name/supply/PDK-path updates; original at-run fingerprint retained. See timing_compatibility/compatibility_audit.json.",
+  "deck_sha256": "f04a00f860e36824efe27eea23ca57d504ae63484bad394dc9bef583f3d5d9e8"
+}

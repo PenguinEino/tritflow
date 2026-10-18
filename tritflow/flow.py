@@ -20,6 +20,7 @@ from hashlib import sha256
 from pathlib import Path
 import shutil
 import os
+import json
 
 from tritflow import CELLS_DIR, PDK_ROOT
 from tritflow import hdl, synth
@@ -141,26 +142,51 @@ class Layout:
         return pdk_drc(self.gds_path, self.netlist.top,
                        **{"pdk_root": self.settings.pdk, "binary": self.settings.klayout, **kwargs})
 
+    def signoff(self, *, output_dir=None, **kwargs):
+        """Delegate unwaived mask/MPW checks; inspect clean/submission_ready.
+
+        Drawing DRC/LVS alone do not establish manufacturing readiness. PNR
+        owns the report cache and validates all consumed and generated files.
+        """
+        from tritflow.pnr import Library
+
+        return self.result.signoff(netlist=self.netlist, library=Library.load(self.settings.cells),
+            output_dir=output_dir,
+            **{"pdk_root": self.settings.pdk, "klayout_binary": self.settings.klayout, **kwargs})
+
     def _fingerprint(self):
         digest = sha256(self.gds_path.read_bytes())
         digest.update(self.netlist.to_json().encode())
-        digest.update((self.settings.cells/"out/all.spice").read_bytes())
-        for path in sorted((self.settings.pdk/"libs.tech/klayout/tech/lvs").rglob("*")):
-            if path.is_file():
+        # PNR's unloaded-pad proof consumes the actual PNR record and physical
+        # abstracts as well as the GDS. Mutating those must invalidate the proof.
+        digest.update(json.dumps(self.data, sort_keys=True).encode())
+        views = [self.settings.cells/"template.json", self.settings.cells/"out/all.spice",
+                 *self.settings.cells.glob("out/*.json"),
+                 *self.settings.cells.glob("out/**/*.abstract.json")]
+        decks = [p for p in (self.settings.pdk/"libs.tech/klayout/tech/lvs").rglob("*") if p.is_file()]
+        for root, paths in ((self.settings.cells, views), (self.settings.pdk, decks)):
+            for path in sorted(set(paths)):
+                digest.update(str(path.relative_to(root)).encode()+b"\0")
                 digest.update(path.read_bytes())
         return digest.hexdigest()
 
     def lvs(self, *, output_dir=None, **kwargs):
-        """Extract and compare against the mapped cells, preserving all diagnostics."""
-        from tritflow.extract import extract_layout
+        """Strict device/port LVS, including PNR's isolated unused-input proof.
 
-        report = extract_layout(self.gds_path, self.netlist.top,
-                                output_dir or self.gds_path.parent/"lvs",
-                                gate_netlist=self.netlist,
-                                cell_subckts=(self.settings.cells/"out/all.spice").read_text(),
-                                **{"pdk": self.settings.pdk, "executable": self.settings.klayout, **kwargs})
+        An unused HDL input is valid only when its actual labeled M2 pad is
+        physically present and isolated. A missing label never becomes PASS
+        merely because that input has no device load.
+        """
+        from tritflow.pnr import Library, strict_lvs
+
+        before = self._fingerprint()
+        report = strict_lvs(self.gds_path, self.data, self.netlist,
+                            Library.load(self.settings.cells),
+                            output_dir or self.gds_path.parent/"lvs",
+                            (self.settings.cells/"out/all.spice").read_text(),
+                            **{"pdk": self.settings.pdk, "executable": self.settings.klayout, **kwargs})
         self._lvs_report = report
-        self._lvs_fingerprint = self._fingerprint() if not kwargs else None
+        self._lvs_fingerprint = before if not kwargs and before == self._fingerprint() else None
         self._lvs_outputs = self._output_fingerprint(report)
         return report
 

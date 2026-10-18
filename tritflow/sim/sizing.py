@@ -162,7 +162,7 @@ def sweep_dimensions(
     conditions = dict(supplies_v={'VDD':VDD, 'VMID':VMID, 'VSS':VSS}, temperature_c=temperature_c,
                       band_v=PASS_BAND, sweep_pin=sweep_pin, fixed_trits=fixed,
                       start_v=start_v, stop_v=stop_v, step_v=step_v)
-    result = dict(pdk_provenance=pdk_provenance(),cell=cell, source_sha256=hashlib.sha256(source.encode()).hexdigest(),
+    result = dict(pdk_provenance=pdk_provenance(root),cell=cell, source_sha256=hashlib.sha256(source.encode()).hexdigest(),
                   model_sha256=models, device_ids=list(baseline), adopted_index=0,
                   conditions=conditions, rows=[], scope=SCOPE)
     code = _analysis_hashes()

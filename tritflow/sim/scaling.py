@@ -113,16 +113,16 @@ def static_points(net, circuit, lvs_report, vectors, expected, *, folder, timeou
     """
     inputs = [p.name for p in net.ports if p.dir=='input']
     outputs = [p.name for p in net.ports if p.dir=='output']
-    mapping = {key.lower():value for key,value in reference_net_map(lvs_report,net.top).items()}
-    ports = {p.name.lower() for p in net.ports}
+    mapping = reference_net_map(lvs_report,net.top)
+    ports = {p.name for p in net.ports}
     def guesses(vector):
         values = evaluate_netlist(net,dict(zip(inputs,vector)),return_all=True)
         result = {}
         for name,value in values.items():
-            if name.lower() in ports: continue
-            if name.lower() not in mapping:
+            if name in ports: continue
+            if name not in mapping:
                 raise RuntimeError(f'LVS does not map internal reference net {name}')
-            node = mapping[name.lower()]
+            node = mapping[name]
             node = simulation_netlist('\\'+node if node.startswith('$') else node)
             result['xdut.'+node] = 5*int(value)
         return result

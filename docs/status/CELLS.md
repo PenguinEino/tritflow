@@ -1,8 +1,8 @@
-# CELLS — Phase 5 complete; compact library and notebook cell visuals qualified
+# CELLS — Phase 6 complete; compact cells, visuals and STA timing tables qualified
 
 ## Published generation
 
-The live library is generation `2026-10-18T08:40:04.261111+00:00` (Phase 4 evidence; physical views unchanged from `2026-10-18T07:47:24.187502+00:00`). All nine cells now use
+The live library is generation `2026-10-18T09:49:34.717678+00:00` (Phase 6 timing/poly-R evidence; physical views unchanged from `2026-10-18T07:47:24.187502+00:00`). All nine cells now use
 **132 um** common height and a **6 um** routing grid. The PNR library loader
 accepts every view. The tall generation remains in integrator tag `cells-v1-tall`.
 
@@ -457,10 +457,10 @@ characterizations and existing equivalence evidence remain as published. No
 shared notebook/viz exports, PNR/SIM code, PDK/reference files or git state were
 modified. No extra dependencies were installed. No blockers/interface requests.
 
-## Phase 6 — STA timing tables (in progress; schema contract)
+## Phase 6 — STA timing tables
 
-Producing `cells/out/<CELL>/<CELL>.timing.json` for all nine cells. Proposed schema
-is fixed here early for STA to implement against; publication will be atomic.
+`cells/out/<CELL>/<CELL>.timing.json` is the schema-1 contract for all nine cells.
+The producer stages all results privately before atomic publication.
 
 - `schema_version: 1`, `cell`, `inputs: [pin,...]`, `output: "Y"` (null for FILL),
   `source_sha256` (the clean `.ext.spice`), model/code provenance, `generation`,
@@ -498,7 +498,7 @@ metal C to input capacitance and then count that same metal again in PNR GDS
 wire C. STA may add its separately estimated net wire C. Poly-R augmentation and
 its measured sensitivity will be reported separately rather than silently
 changing the structural LVS extraction or claiming unverified calibrated GC R.
-SIM's IP62 parameter audit is being monitored for the published poly values.
+The poly sensitivity uses SIM's completed IP62 parameter audit described below.
 
 ### Phase 6 poly-R parameter and model decision
 
@@ -527,3 +527,123 @@ from `.timing.json.poly_resistance` with `adopted_in_primary:false`. A large
 resistor in a reduced equivalent network is not necessarily a long physical
 segment; `.poly.json.gates[*].effective_contact_resistance_ohm` gives each gate's
 resistance to the contacted metal with other gates open.
+
+### Measured primary surfaces and reproduction
+
+All **160** logic-cell load/ramp profiles pass, covering **7,296 directed
+transition observations**, **120 single-pin arcs**, and **108 separate
+simultaneous-input transitions**. Every matrix is 4×8. All **60** discrete-bias
+input-pin AC samples were recomputed with the current SIM public harness.
+Ties/FILL have explicit constant/physical records rather than invented arcs.
+
+The following maxima include unchanged-output hazard recovery and simultaneous
+input changes. Delays start at the beginning of the full input ramp, so a
+150 ns ramp contributes to the reported delay.
+
+| Cell | Worst at 10 fF / 1 ns ramp (ns) | Worst at 1 pF / 150 ns ramp (ns) | Worst across entire grid (ns) | Maximum pin C (fF) |
+|---|---:|---:|---:|---|
+| INV | 4.267 | 149.584 | 149.584 | A 114.426 |
+| NAND | 8.947 | 160.019 | 160.019 | A 206.131; B 205.955 |
+| NOR | 21.237 | 167.484 | 167.484 | A 277.381; B 277.988 |
+| NANY | 16.895 | 168.323 | 168.323 | A 370.731; B 394.061 |
+| BUF | 7.283 | 150.425 | 150.425 | A 114.426 |
+
+```sh
+# Existing live cell geometry, full primary grid + separate poly-R sensitivity:
+python3 -m tritflow.cells timing --jobs 3
+# Same producer on a private existing library snapshot:
+python3 -m tritflow.cells timing --out /path/to/private/library --jobs 3
+python3 -m pytest tests/cells -q
+```
+
+Python producer: `tritflow.cells.timing.characterize_all(out, jobs=3)` requires
+a private library directory; `publish_timing(jobs=3)` snapshots/publishes live.
+`characterize_library(out, loads_f=..., ramps_s=..., jobs=...)` supports a private
+custom primary grid. `poly.annotate(out, cell, sheet_ohm=..., pitch_um=...)`
+supports an explicit sheet-R sensitivity override. These are cell-library
+generation entrypoints, using unchanged public SIM bench/run/measurement/AC APIs.
+Notebook/STA readers only load the published JSON; no simulation is launched.
+
+Root `timing_report.json` includes coverage/pass flags, source and table hashes;
+`poly_timing_report.json` summarizes the separate sensitivity. Each measured
+point retains `tb.spice`, `ngspice.log`, and `measurements.json` under
+`<CELL>/timing/ramp_XX_load_YY/`. Text transient dumps are removed after
+measurement; the retained decks reproduce them. Per-run source/model/code
+fingerprints, actual timestep and observation length are retained. JSON uses
+finite numbers/null, never NaN. `library.json` exposes each cell's `timing` path.
+
+Each edge is followed through its full ramp plus **300 ns** plateau. Nominal
+conditions are 27 °C, +5/0/−5 V. SIM uses linear interpolation at final band entry;
+remaining in band is established through the finite sampled observation window,
+not an analog proof between samples or a PVT/indefinite-time guarantee. Maximum
+steps are 0.25/0.5/2/2 ns for INV/NAND, 0.05/0.5/2/2 ns for NOR/NANY/BUF; individual
+retained runs may be finer. At 10 fF / 1 ns, INV and NAND paired 50 ps/250 ps
+resolution differences were 12.7 ps and 46.5 ps. NANY's 250 ps experiment failed
+the 0.1 ns coarsening target: a simultaneous `[1,0]→[0,1]` unchanged-output
+hazard shifted recovery by 0.953 ns (single-pin output-changing maximum 13.0 ps).
+Its primary data therefore retain 50 ps steps. This rejected experiment remains
+explicitly `passed:false`, `coarsening_adopted:false` in
+`NANY/timing_resolution/resolution_comparison.json`; it is not a functional
+failure of the published timing grid.
+
+SIM added supply/name handling while this long sweep ran, and the integrator
+switched to the pinned PDK copy. Model bytes are identical. The retained
+`timing_compatibility/compatibility_audit.json` checks all **190** primary/poly
+nominal decks against the current public harness: zero network mismatches after
+model paths are normalized by content hash. The legacy/current settling function
+AST is identical; common numeric sequence-measurement results agree on synthetic
+all-directed nominal waveforms. The old source was recovered by its exact hash
+from repository history. Original per-run code fingerprints remain intact;
+explicit compatibility metadata records the audit. Interrupted artifacts were
+rerun, and tables were reassembled from the retained measurements rather than
+an older producer's in-memory results. These are audited nominal-compatible
+runs, not a claim that every profile was rerun under the newest SIM source.
+
+### Poly-R settling effect and final validation
+
+All **30** proxy profiles pass (1,368 directed transitions), with identical
+sampling settings in each paired no-R/proxy comparison. INV/NAND use dedicated
+50 ps baseline checks for the fast-ramp comparisons, instead of subtracting a
+250 ps primary-table result. Each `.poly.timing.json.comparisons[]` records the
+two retained run paths, load/ramp, actual timestep, pass/completeness flags and
+every transition's baseline/proxy delay and difference. Rows flag `single_pin`
+and `output_changes`. The primary table links the sensitivity file and maxima.
+
+| Cell | Effective gate-to-contact R range (kΩ) | Largest settling increase, all changes (ns) | Largest increase, single-pin output-changing arcs (ns) |
+|---|---:|---:|---:|
+| INV | 0.959–1.409 | 0.271 | 0.271 |
+| NAND | 2.759–3.839 | 4.194 | 1.271 |
+| NOR | 2.039–3.869 | 6.267 | 1.614 |
+| NANY | 0.419–3.719 | 2.998 | 1.650 |
+| BUF | 0.959–1.409 | 0.307 | 0.307 |
+
+The largest NOR change is the 1 pF / 1 ns simultaneous `[-1,+1]→[+1,−1]`
+swap: its ideal output remains +1, but hazard recovery increases from 23.563 to
+29.830 ns. The largest NANY change is a 10 fF / 1 ns simultaneous
+`[0,0]→[−1,+1]` transition: output stays nominally zero; the proxy adds a
+2.998 ns recovery where baseline stayed in band. These observations explain why
+simultaneous/hazard results are not merged into single-pin propagation arcs.
+The smallest slow-ramp differences are below their 2 ns timestep ceiling;
+matched sampling does not establish sub-timestep absolute accuracy.
+
+Mesh refinement from 0.25 to 0.125 um changes effective gate-contact R by at most
+1.52% INV/BUF, 0.51% NAND, 0.69% NOR and 3.47% NANY. Evidence is retained under
+`poly_mesh_refinement/`; the measured authoritative network remains 0.25 um.
+This numerical check does not calibrate GC resistivity. The ±15% RS specification
+was not swept and cannot establish a GC process range. No poly/contact C,
+contact R, metal signal R, coupling or process/temperature/supply corners were
+added. These are nominal sensitivity results, not sign-off parasitic extraction.
+
+Validation: **30 CELLS tests passed in 820.97 s**; final timing-focused rerun
+**6 passed in 56.95 s**. Coverage includes actual slow-ramp simulations, all
+two-input transitions and sensitizing side biases, null/failure retention,
+finite constant/physical records, analytic sheet-mesh convergence, unchanged
+MOS/RR dimensions/DC, and a measured nonzero poly-R effect. `compileall` and
+owned-path `git diff --check` pass. `timing_validation.json` independently checks
+all 7,296 matrix entries against retained point data, finite C values and source
+hashes. Existing GDS/SPICE/extraction/abstract/truth/PNG and physical verification
+hashes are unchanged. No SIM/extract/STA code, PDK/reference files or git state
+were modified. No extra dependencies were installed. No blockers/interface
+requests remain.
+
+Publish 2026-10-18T09:49:34.717678+00:00: Phase 6 PASS: nine STA timing tables, 160 load/ramp profiles and 7296 directed observations; 30 poly-R proxy profiles with matched baselines; physical cell views unchanged; latest SIM characterization/sizing preserved. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.

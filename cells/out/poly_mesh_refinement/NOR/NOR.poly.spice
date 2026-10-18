@@ -1,0 +1,23 @@
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt NOR A B Y VDD VMID VSS
+* device instance $1 r0 *1 26,100 PMOS
+XM_ex_1 n_ex_18 tfpg_1 VDD VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $2 r0 *1 41,100 PMOS
+XM_ex_2 n_ex_4 tfpg_2 n_ex_18 VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u
+* device instance $3 r0 *1 26,28 NMOS
+XM_ex_3 n_ex_5 tfpg_3 VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $4 r0 *1 41,28 NMOS
+XM_ex_4 n_ex_5 tfpg_4 VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u
+* device instance $5 r0 *1 96,54 F_RR
+XR_ex_5 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $6 r0 *1 96,84 F_RR
+XR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+* Gate-field-poly sheet-R sensitivity; uncalibrated GC proxy
+Rtfpg_0 A tfpg_1 2745.80000727364
+Rtfpg_1 A tfpg_3 3136.07608167421
+Rtfpg_2 tfpg_1 tfpg_3 8309106.79796001
+Rtfpg_3 B tfpg_2 2025.43712986187
+Rtfpg_4 B tfpg_4 3856.86529303327
+Rtfpg_5 tfpg_2 tfpg_4 7537383.44029906
+.ends NOR

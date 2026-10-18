@@ -82,6 +82,10 @@ def publish(stage, *, reason):
         if poly_summary.exists():
             value=json.loads(poly_summary.read_text());value['generation']=generation
             poly_summary.write_text(json.dumps(value,indent=2,allow_nan=False)+'\n')
+        validation=stage/'timing_validation.json'
+        if validation.exists():
+            value=json.loads(validation.read_text());value['generation']=generation
+            validation.write_text(json.dumps(value,indent=2,allow_nan=False)+'\n')
     (stage/'generation.json').write_text(json.dumps(generation,indent=2)+'\n')
     evidence=stage/'equivalence_report.json'
     if evidence.exists():

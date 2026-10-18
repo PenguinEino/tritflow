@@ -1,0 +1,433 @@
+{
+  "cell": "NANY",
+  "sheet_ohm_per_square": 120.0,
+  "pitch_um": 0.125,
+  "parameter_origin": "PDK RS resistor-poly specification used as a GC sensitivity proxy; GC applicability is uncalibrated.",
+  "pdk_source": {
+    "RR": 1000.0,
+    "RS_poly": 120.0,
+    "width_um": 6.0,
+    "tolerance_percent": 15.0,
+    "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+    "page": 9,
+    "table": "I-2-4",
+    "use": "Device-resistor specifications, not metal. Existing nonlinear PDK device models remain authoritative in SPICE."
+  },
+  "parameter_audit_sha256": "4358e3ccced80203e2223ac2f7ad08d04e244d3cc650875e23cf6fcaffdff263",
+  "source_sha256": "50a9558ca7588b76ce8e21fca30c73455c010f82078142a9d61bfd2272d5972f",
+  "gds_sha256": "f97c672944631d63c915657c80951d3f3b120bb09246c57715d4e67179b4e155",
+  "scope": "GC gate-interconnect sheet R only. No poly C/contact R; MOS gate-channel regions are equipotential. RR device models and all W/L/junction parameters are unchanged. Structural LVS extraction is preserved.",
+  "components": [
+    {
+      "terminals": [
+        "metal",
+        "gate_6"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_6",
+          "squares": 3.374112355128427
+        }
+      ],
+      "mesh_vertices": 1168,
+      "gate_to_contact_squares": {
+        "gate_6": 3.374112355128426
+      },
+      "reduced_vertices": 2,
+      "unit_sheet_conductance": [
+        [
+          0.2963742444676214,
+          -0.29637424446760535
+        ],
+        [
+          -0.29637424446760535,
+          0.2963742444676054
+        ]
+      ],
+      "net": "A",
+      "bbox_um": [
+        69.7,
+        21.8,
+        72.3,
+        36.300000000000004
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_1"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_1",
+          "squares": 4.374112355128433
+        }
+      ],
+      "mesh_vertices": 1616,
+      "gate_to_contact_squares": {
+        "gate_1": 4.374112355128504
+      },
+      "reduced_vertices": 2,
+      "unit_sheet_conductance": [
+        [
+          0.2286178128981078,
+          -0.22861781289809552
+        ],
+        [
+          -0.22861781289809552,
+          0.2286178128980918
+        ]
+      ],
+      "net": "A",
+      "bbox_um": [
+        54.7,
+        86.7,
+        57.300000000000004,
+        108.2
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_4",
+        "gate_7"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_4",
+          "squares": 18.37924569246122
+        },
+        {
+          "a": "metal",
+          "b": "gate_7",
+          "squares": 30.888614527022426
+        },
+        {
+          "a": "gate_4",
+          "b": "gate_7",
+          "squares": 65733.709877573
+        }
+      ],
+      "mesh_vertices": 6512,
+      "gate_to_contact_squares": {
+        "gate_4": 18.374110676018397,
+        "gate_7": 30.87411067601175
+      },
+      "reduced_vertices": 3,
+      "unit_sheet_conductance": [
+        [
+          0.08678358529800789,
+          -0.054409197022170445,
+          -0.032374388275821356
+        ],
+        [
+          -0.054409197022170445,
+          0.05442440991677522,
+          -1.5212894599475203e-05
+        ],
+        [
+          -0.032374388275821356,
+          -1.5212894599475203e-05,
+          0.03238960117043277
+        ]
+      ],
+      "net": "A",
+      "bbox_um": [
+        24.7,
+        20.3,
+        27.3,
+        118.2
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_5"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_5",
+          "squares": 3.374112355128427
+        }
+      ],
+      "mesh_vertices": 1168,
+      "gate_to_contact_squares": {
+        "gate_5": 3.374112355128426
+      },
+      "reduced_vertices": 2,
+      "unit_sheet_conductance": [
+        [
+          0.2963742444676214,
+          -0.29637424446760535
+        ],
+        [
+          -0.29637424446760535,
+          0.2963742444676054
+        ]
+      ],
+      "net": "B",
+      "bbox_um": [
+        54.7,
+        21.8,
+        57.300000000000004,
+        36.300000000000004
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_2"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_2",
+          "squares": 4.374112355128433
+        }
+      ],
+      "mesh_vertices": 1616,
+      "gate_to_contact_squares": {
+        "gate_2": 4.374112355128504
+      },
+      "reduced_vertices": 2,
+      "unit_sheet_conductance": [
+        [
+          0.2286178128981078,
+          -0.22861781289809552
+        ],
+        [
+          -0.22861781289809552,
+          0.2286178128980918
+        ]
+      ],
+      "net": "B",
+      "bbox_um": [
+        69.7,
+        86.7,
+        72.3,
+        108.2
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_3",
+        "gate_8"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_3",
+          "squares": 24.38256717709295
+        },
+        {
+          "a": "metal",
+          "b": "gate_8",
+          "squares": 24.882917807089278
+        },
+        {
+          "a": "gate_3",
+          "b": "gate_8",
+          "squares": 70252.81062062552
+        }
+      ],
+      "mesh_vertices": 6512,
+      "gate_to_contact_squares": {
+        "gate_3": 24.374110676025218,
+        "gate_8": 24.874110676016002
+      },
+      "reduced_vertices": 3,
+      "unit_sheet_conductance": [
+        [
+          0.08120112160236559,
+          -0.04101290863824564,
+          -0.04018821296412009
+        ],
+        [
+          -0.04101290863824564,
+          0.04102714294418064,
+          -1.4234305946848623e-05
+        ],
+        [
+          -0.04018821296412009,
+          -1.4234305946848623e-05,
+          0.040202447270075936
+        ]
+      ],
+      "net": "B",
+      "bbox_um": [
+        39.7,
+        20.3,
+        42.300000000000004,
+        118.2
+      ]
+    }
+  ],
+  "gates": {
+    "1": {
+      "node": "tfpg_1",
+      "base_net": "A",
+      "origin_um": [
+        56.0,
+        100.0
+      ],
+      "w_um": 14.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 524.8934826154205
+    },
+    "4": {
+      "node": "tfpg_4",
+      "base_net": "A",
+      "origin_um": [
+        26.0,
+        100.0
+      ],
+      "w_um": 34.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 2204.8932811222076
+    },
+    "6": {
+      "node": "tfpg_6",
+      "base_net": "A",
+      "origin_um": [
+        71.0,
+        27.0
+      ],
+      "w_um": 8.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 404.89348261541113
+    },
+    "7": {
+      "node": "tfpg_7",
+      "base_net": "A",
+      "origin_um": [
+        26.0,
+        27.0
+      ],
+      "w_um": 11.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 3704.89328112141
+    },
+    "2": {
+      "node": "tfpg_2",
+      "base_net": "B",
+      "origin_um": [
+        71.0,
+        100.0
+      ],
+      "w_um": 14.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 524.8934826154205
+    },
+    "3": {
+      "node": "tfpg_3",
+      "base_net": "B",
+      "origin_um": [
+        41.0,
+        100.0
+      ],
+      "w_um": 34.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 2924.893281123026
+    },
+    "5": {
+      "node": "tfpg_5",
+      "base_net": "B",
+      "origin_um": [
+        56.0,
+        27.0
+      ],
+      "w_um": 8.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 404.89348261541113
+    },
+    "8": {
+      "node": "tfpg_8",
+      "base_net": "B",
+      "origin_um": [
+        41.0,
+        27.0
+      ],
+      "w_um": 11.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 2984.89328112192
+    }
+  },
+  "resistors": [
+    {
+      "name": "Rtfpg_0",
+      "a": "A",
+      "b": "tfpg_6",
+      "squares": 3.374112355128427,
+      "resistance_ohm": 404.89348261541124
+    },
+    {
+      "name": "Rtfpg_1",
+      "a": "A",
+      "b": "tfpg_1",
+      "squares": 4.374112355128433,
+      "resistance_ohm": 524.8934826154119
+    },
+    {
+      "name": "Rtfpg_2",
+      "a": "A",
+      "b": "tfpg_4",
+      "squares": 18.37924569246122,
+      "resistance_ohm": 2205.5094830953467
+    },
+    {
+      "name": "Rtfpg_3",
+      "a": "A",
+      "b": "tfpg_7",
+      "squares": 30.888614527022426,
+      "resistance_ohm": 3706.6337432426913
+    },
+    {
+      "name": "Rtfpg_4",
+      "a": "tfpg_4",
+      "b": "tfpg_7",
+      "squares": 65733.709877573,
+      "resistance_ohm": 7888045.18530876
+    },
+    {
+      "name": "Rtfpg_5",
+      "a": "B",
+      "b": "tfpg_5",
+      "squares": 3.374112355128427,
+      "resistance_ohm": 404.89348261541124
+    },
+    {
+      "name": "Rtfpg_6",
+      "a": "B",
+      "b": "tfpg_2",
+      "squares": 4.374112355128433,
+      "resistance_ohm": 524.8934826154119
+    },
+    {
+      "name": "Rtfpg_7",
+      "a": "B",
+      "b": "tfpg_3",
+      "squares": 24.38256717709295,
+      "resistance_ohm": 2925.9080612511543
+    },
+    {
+      "name": "Rtfpg_8",
+      "a": "B",
+      "b": "tfpg_8",
+      "squares": 24.882917807089278,
+      "resistance_ohm": 2985.9501368507135
+    },
+    {
+      "name": "Rtfpg_9",
+      "a": "tfpg_3",
+      "b": "tfpg_8",
+      "squares": 70252.81062062552,
+      "resistance_ohm": 8430337.274475062
+    }
+  ],
+  "annotated_sha256": "985769d5bc36dde1b6bccd6b050f76ee9c496c5b35d58e2f3b24ed341ca3db81"
+}

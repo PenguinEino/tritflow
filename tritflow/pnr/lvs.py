@@ -49,7 +49,8 @@ def strict_lvs(gds, data, netlist, library, directory, cell_subckts, **extractio
     loaded ports and every native device/circuit mismatch still fail.
     """
     from tritflow.extract import extract_layout
-    from tritflow.sim.spice import gate_spice, subcircuits
+    from tritflow.sim.spice import gate_spice, subcircuits, logical_spice_names
+    from tritflow.synth.writers import spice_names
     proven = _isolated_inputs(gds, data, netlist, library)
     reference = copy.deepcopy(netlist)
     reference.ports = [p for p in reference.ports if p.name not in proven]
@@ -59,18 +60,24 @@ def strict_lvs(gds, data, netlist, library, directory, cell_subckts, **extractio
         return report
     path = Path(report["extracted"])
     raw = path.read_text()
-    definition = subcircuits(raw).get(netlist.top.lower())
+    safe_top = spice_names([netlist.top])[netlist.top]
+    definition = subcircuits(raw).get(safe_top.lower())
     if definition is None:
         return report
-    actual = {p.lower() for p in definition["pins"]}
+    decoded = logical_spice_names(raw)
+    actual = {decoded.get(p,p).lower() for p in definition["pins"]}
     expected = {p.name.lower() for p in netlist.ports} | {"vdd", "vmid", "vss"}
     if actual | {p.lower() for p in proven} != expected:
         report.update(matched=False, errors=["Full physical top-level port set differs after isolated-input proof"])
         return report
     path.with_name(f"{netlist.top}.before_unused_inputs.ext.spice").write_text(raw)
-    (Path(directory)/"full_port_reference.spice").write_text(gate_spice(netlist, cell_subckts))
-    signature = re.compile(r"(?im)^(\s*\.subckt\s+"+re.escape(netlist.top)+r"\b[^\n]*)")
-    path.write_text(signature.sub(lambda m: m[1]+" "+" ".join(proven), raw, count=1))
+    full_reference = gate_spice(netlist, cell_subckts)
+    (Path(directory)/"full_port_reference.spice").write_text(full_reference)
+    encoding = {logical:encoded for encoded,logical in logical_spice_names(full_reference).items()}
+    signature = re.compile(r"(?im)^(\s*\.subckt\s+"+re.escape(safe_top)+r"\b[^\n]*)")
+    restored = signature.sub(lambda m: m[1]+" "+" ".join(encoding.get(p,p) for p in proven), raw, count=1)
+    annotations = "\n".join(f"* net {encoding[p]} = {p}" for p in proven if p in encoding)
+    path.write_text(annotations+"\n"+restored)
     report.update(unused_input_formals_restored=proven,
         unloaded_input_proof="exact isolated M2 pad, no V1, actual TXM2 label, drawn connectivity; native LVS on all devices and loaded ports")
     return report

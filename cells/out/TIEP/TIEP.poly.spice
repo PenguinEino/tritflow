@@ -1,0 +1,7 @@
+* PDK extraction; public ports normalized, no parasitic RC
+.subckt TIEP Y VDD VMID VSS
+* device instance $1 r0 *1 36,55 F_RR
+XR_ex_1 VDD Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+
+* Gate-field-poly sheet-R sensitivity; uncalibrated GC proxy
+.ends TIEP

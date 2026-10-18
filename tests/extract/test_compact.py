@@ -42,3 +42,32 @@ def test_deleted_vmid_is_rejected(tmp_path, fault):
     assert not result['matched']
     assert 'VMID' not in result['unused_power_formals_restored']
     assert any('VMID' in error or 'vmid' in error for error in result['errors'])
+
+
+def test_encoded_vector_port_labels_do_not_weaken_strict_lvs(tmp_path):
+    """Normalize existing drawn labels; deleting a loaded label still fails."""
+    import klayout.db as db
+    from tritflow.netlist import GateNetlist,Port,Instance
+    from tritflow.sim import simulate,input_vectors
+    source=CELLS_DIR/'out/INV'
+    layout=db.Layout();layout.read(str(source/'INV.gds'))
+    top=layout.create_cell('vector_test');top.insert(db.CellInstArray(layout.cell('INV').cell_index(),db.Trans()))
+    top.flatten(True)
+    # Rename real cell signal labels, retaining their actual metal locations.
+    cell=top;labels=cell.shapes(layout.layer(48,0))
+    for shape in labels.each():
+        if shape.is_text() and shape.text.string in ('A','Y'):
+            text=shape.text;text.string={'A':'a[0]','Y':'y[0]'}[text.string];shape.text=text
+    gds=tmp_path/'vector.gds';layout.write(str(gds))
+    net=GateNetlist('vector_test',[Port('a[0]','input'),Port('y[0]','output')],
+                    [Instance('g','INV',{'A':'a[0]','Y':'y[0]'})])
+    result=extract_layout(gds,net.top,tmp_path/'good',gate_netlist=net,cell_subckts=(source/'INV.spice').read_text())
+    assert result['matched'] and result['spice_name_map']['a[0]'].startswith('tf_')
+    run=simulate(Path(result['extracted']).read_text(),net.top,['a[0]'],['y[0]'],
+                 input_vectors(1),lambda v:{'y[0]':-v[0]})
+    assert run['measurements']['passed']
+    for shape in list(labels.each()):
+        if shape.is_text() and shape.text.string=='a[0]':shape.delete()
+    layout.write(str(gds))
+    bad=extract_layout(gds,net.top,tmp_path/'bad',gate_netlist=net,cell_subckts=(source/'INV.spice').read_text())
+    assert not bad['matched']
