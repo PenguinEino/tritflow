@@ -1,6 +1,99 @@
-# EDITOR — phase 2 static-figure handoff complete
+# EDITOR — phase 3 review revisions complete
 
 Updated: 2026-10-18.
+
+## Phase 3 — REVIEW round 3 findings 3, 4 and 5
+
+### Done
+
+- **Finding 4:** rewrote the closing sizing comparison in `02_sizing.md`.
+  It now states that increasing both RR lengths at fixed MOS sizes reduces
+  current in the hand model and SPICE, but the model misses the sign of the
+  small zero-level shift. The explanation names its geometric RR resistance
+  and constant MOS on-resistance, both actual F_RR substrate connections to
+  VDD, their different terminal biases and MOS nonlinearity. The chapter ends
+  with the measured current-versus-error trade-off, without a generic caveat
+  or transition paragraph. All numerical endpoints remain placeholders.
+- `predict_first.md` preserves that distinction: the measured current values
+  must not be called the hand model's predictions, and the omitted dependencies
+  are not presented as a quantitatively isolated attribution to one model term.
+- **Finding 5:** added compact run identifiers to the paper flow, PNR,
+  full-adder/load and scaling captions. Added an Appendix B routing table
+  distinguishing the paper adder, paper full adder, width series and each of
+  the four archived designs. Detailed physical/per-output timing tables are
+  explicitly specified to repeat the same identifier on every row.
+- **Finding 3:** shortened the opening prose and moved the Run-all action into
+  it. Removed repeated line-count/cell-count/die/DRC/LVS claims from the
+  chapter-0 takeaway and teaser. The teaser now carries the electrical-cost
+  lesson and an edit action; the paper-width/live-width distinction remains.
+  `figures.md` specifies one compact result sentence, one power sentence,
+  the action and hero, with no full caption on the first screen.
+- Added exact sources for four sizing endpoint fields and seven routing
+  identifiers in `placeholders.md`. No new result constants were typed into
+  reader-facing text. No code, notebook, figure, archive or scientific-data
+  file was edited.
+
+### Validation
+
+- Rendered the actual comparison from the current INV grid and
+  `notebook/predictions.py:divider`: RR **30→45 µm**, predicted zero shift
+  **+7.98367 mV**, SPICE **−12.9019 mV**. The measured current changes
+  **407.166→260.672 µA**; worst error **39.5421→52.4439 mV**. At the existing
+  four-significant-digit display these read 407.2→260.7 µA and
+  39.54→52.44 mV. The hand currents themselves are **443.238→271.960 µA**;
+  the text claims the correct reduction trend, not exact current agreement.
+- Verified MP/MN dimensions remain fixed, RP/RN lengths match, measured
+  current agrees with the zero-input DC row, and both resistor substrates
+  are VDD in the actual canonical circuit/source SPICE.
+- Verified `paper/adder4 · seed 7` against the native PNR hash in the saved
+  paper evidence; GDS begins **c8b426ff5408**. The N=4 scaling GDS matches
+  that same artifact; all displayed widths use seed 7.
+- Verified `paper/full_add · seed 19` through the native summary's consumed
+  PNR digest and the saved paper-summary hash; GDS begins **3f51bddf7aaa**.
+  The load sweep consumes the identical full-adder GDS/PNR hashes.
+- Verified the archived adder4/full_add/mac1/mul1 PNR members against their
+  ZIP manifest hashes; all use **seed 0**. Rendered the new routing-identity
+  table successfully with those source-derived values. Equal paper/archive
+  full-adder die dimensions do not imply the same routing realization.
+- Editorial checks pass: **102 used tokens**, **140 unique registrations**,
+  ten chapter anchors/boxes, eight captions of 1–3 sentences, intact 100-word
+  abstract and two-sentence teaser, no literal sizing-result numbers or
+  internal-process words in chapters, balanced math/details and no trailing
+  whitespace. Main chapters are **2,326 whitespace words**; the intro is
+  **82 words**. The opening no longer repeats the numerical adder-result fields.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m pytest notebook/tests/test_presentation.py -q -p no:cacheprovider`
+  — **5 passed in 0.45 s**. No notebook-generation test or end-to-end run was
+  invoked; those would write FRONTEND's notebook and need the context additions
+  below. This handoff does not claim a new Colab rendering verification.
+
+### Interface requests / integration
+
+FRONTEND can integrate without changing the measured signs or repeating the
+adder result:
+
+1. Populate four new context values from the same adopted/longer-RR INV rows:
+   `sizing.adopted_rr_um`, `sizing.selected_rr_um`,
+   `sizing.selected_current_ua`, `sizing.selected_error_mv`.
+2. Populate `paper_adder.run_id`, `paper_post.run_id`,
+   `paper_scaling.run_id`, and `archive.{adder,full_add,mac1,mul1}_run_id`.
+   Exact formulas, source paths and hashes are in placeholders.md. Preserve
+   verified native paper seeds/GDS identities in the portable paper evidence;
+   runtime must not reach into ignored `build/`. The existing paper subsets
+   do not yet retain their seeds. Archive PNR members already do.
+3. Render the newly added Appendix B routing table before inserting it. The
+   inspected generator removes the old summary table but inserts the remaining
+   appendix text without general token substitution. Add **Routing realization**
+   to generated physical and per-output timing rows, retaining separate paper
+   and archive identities even when die dimensions match.
+4. Keep one generated adder-result sentence and one power/trade-off sentence
+   immediately before the hero, with the action visible. Use the new teaser
+   or its equivalent generated power line once. Keep the run identifier in
+   the compact headline when omitting the full paper caption. Colab code-folding
+   and selector-default fixes remain FRONTEND work, not EDITOR edits.
+
+No EDITOR authoring work remains. The changes are confined to
+`notebook/narrative/` and this status file. No packages installed, git writes,
+figure regeneration, data mutation, public README write or PR submission.
 
 ## Phase 2 — done
 

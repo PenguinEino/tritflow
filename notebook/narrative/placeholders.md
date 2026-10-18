@@ -120,6 +120,10 @@ NANY. The new prediction implementation belongs to FRONTEND.
 | `{sizing.current_ua}` | `grid['rows'][j]['max_static_current_a']*1e6`; maximum absolute rail current over DC states, not power. |
 | `{sizing.adopted_error_mv}` | `grid['rows'][a]['max_error_v']*1e3`. |
 | `{sizing.adopted_current_ua}` | `grid['rows'][a]['max_static_current_a']*1e6`. |
+| `{sizing.adopted_rr_um}` | `grid['rows'][a]['dimensions']['RP']['l_um']`, asserted equal to RN's length. This is the adopted INV row in `cells/out/sizing/INV.grid.json`. |
+| `{sizing.selected_rr_um}` | `grid['rows'][j]['dimensions']['RP']['l_um']`, asserted equal to RN's length, for the longest finite transfer variant at the same MP/MN dimensions. |
+| `{sizing.selected_current_ua}` | `grid['rows'][j]['max_static_current_a']*1e6`; assert that this value agrees with the zero-input absolute rail-current maximum for this fixed-MOS INV comparison before calling it the measured middle-level current. |
+| `{sizing.selected_error_mv}` | `grid['rows'][j]['max_error_v']*1e3`, the worst logical-level error over all discrete inputs of the same longer-RR INV variant. |
 
 ## Standard-cell comparison
 
@@ -395,3 +399,49 @@ The current legacy payload is neither a matching release nor a successful
 Colab run. Keep the appropriate unavailable text until a matching record
 exists. Proposed filing scope is only the TritFlow project folder; no actual
 official-repository diff or PR is asserted or created by this text draft.
+
+## Phase 3 — identify routing realizations and explain the sizing comparison
+
+The signs in `sizing.predicted_shift_mv` and `sizing.spice_shift_mv` must be
+preserved. Chapter 2 now says explicitly that the simplified divider gets the
+current-reduction trend right but misses the direction of the small zero-level
+shift. Its measured current/error endpoints come from the adopted and selected
+INV grid rows above, not from the hand model's currents. The actual substrate
+connections are `tritflow.cells.circuits.circuits()['INV'].resistors` (RP and
+RN both have well/substrate VDD), cross-checked with
+`cells/out/INV/INV.spice` XRP/XRN terminal order. Bias terms are in
+`$TR1UM_PDK/libs.tech/spice/models/models_IP62_res_v5.lib`, `F_RR`'s dedicated
+width branch; `notebook/predictions.py:divider` retains only its geometry
+polynomial and constant MOS on-resistance. Do not imply a quantitative split
+of the mismatch among nonlinear terms without a separate controlled experiment.
+
+Use a compact visible identifier of the form `data-set/circuit · seed <value>`.
+Seed alone is not an artifact identity: retain the matching GDS/PNR digest with
+the evidence, and do not copy a seed from another build with the same top name.
+
+| Token | Exact source or calculation |
+|---|---|
+| `{paper_adder.run_id}` | `paper/` + `build/adder4/adder4.json: $.top` + ` · seed ` + `build/adder4/adder4.pnr.json: $.seed`. Verify the PNR and GDS hashes against the paper figure's native evidence. The inspected value is `paper/adder4 · seed 7`. |
+| `{paper_post.run_id}` | `paper/full_add · seed ` + `build/full_add/full_add.pnr.json: $.seed`. Its digest must match `build/full_add/postlayout/summary.json: $.input_sha256[absolute PNR path]`; that summary must match the paper's saved native summary hash. Retain the GDS digest too. The inspected value is `paper/full_add · seed 19`, distinct from the archive despite equal die dimensions. |
+| `{paper_scaling.run_id}` | `width-sweep · seed ` + the common seed from `results/adder_scaling.json: $.rows[*].seed`, only if all displayed widths share it. Otherwise list each `(n,seed)` pair. Verify the N=4 GDS identity against the paper-adder view before treating it as the same realization. The inspected widths all use seed 7. |
+| `{archive.adder_run_id}` | Read `adder4/adder4.pnr.json: $.seed` inside `notebook/assets/four_designs.zip`, validate the member against `manifest.json: $.files['adder4/adder4.pnr.json']`, and format `four-design/adder4 · seed <value>`. |
+| `{archive.full_add_run_id}` | Same archive, `full_add/full_add.pnr.json: $.seed`, with its matching manifest member hash; format `four-design/full_add · seed <value>`. |
+| `{archive.mac1_run_id}` | Same archive, `mac1/mac1.pnr.json: $.seed`, with its matching manifest member hash; format `four-design/mac1 · seed <value>`. |
+| `{archive.mul1_run_id}` | Same archive, `mul1/mul1.pnr.json: $.seed`, with its matching manifest member hash; format `four-design/mul1 · seed <value>`. |
+
+For portable notebook rendering, FRONTEND must preserve the verified native
+paper seeds/GDS identities in `notebook/assets/paper_evidence.json` alongside
+their existing measurement records; the runtime must not require `build/`.
+The current saved `paper_pnr`/`paper_post` subsets do not carry those seed
+fields. This is a requested addition by their owner, not an EDITOR write to
+that snapshot. The archive already carries each full native PNR record.
+
+Populate these tokens in `notebook/editorial.py:context`, together with the
+four new sizing endpoint fields. Render the new Appendix B routing table
+before insertion: the current generator renders captions/chapters but inserts
+Appendix B prose without general token substitution after removing its old
+summary table. Also add **Routing realization** to every generated physical
+and per-output timing row, rather than relying only on a nearby prose note.
+For a fresh replacement of an archived experiment, derive its actual seed
+from that run's PNR/options and label it fresh; do not claim the archive's
+identity when its geometry or options differ.

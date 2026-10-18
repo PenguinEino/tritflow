@@ -21,6 +21,24 @@ saved report does not execute a new physical or electrical check.
 | Automated regression | {evidence.tests} |
 | Colab verification | {evidence.colab_status} |
 
+Use the routing realization below to distinguish paper figures from the
+four-design results; a circuit name alone does not identify its layout.
+
+| Figure or result set | Routing realization |
+|---|---|
+| Paper adder overview and placement | {paper_adder.run_id} |
+| Paper full-adder waveform and load sweep | {paper_post.run_id} |
+| Paper width sweep | {paper_scaling.run_id} |
+| Four-design archive: adder4 | {archive.adder_run_id} |
+| Four-design archive: full_add | {archive.full_add_run_id} |
+| Four-design archive: mac1 | {archive.mac1_run_id} |
+| Four-design archive: mul1 | {archive.mul1_run_id} |
+
+The detailed physical and timing tables repeat that identifier in a
+**Routing realization** column on every design/output row. The paper and
+archived full adders use different routes, so their sum-settling values are
+separate measurements even at the same external load and input interval.
+
 For each analog experiment, the expanded table gives the actual input order,
 unique states visited, possible states, interval, edge time, maximum timestep,
 temperature, external load, initialized segment and pass criteria. Per-output

@@ -102,6 +102,19 @@ discrete input state. Report `max_static_current_a` explicitly as maximum
 absolute rail current; use the zero-input signed rail sum for the optional
 power comparison. Mark failed rows and retain missing metrics as missing.
 
+Explain the signed voltage comparison in the chapter rather than presenting
+the numbers as agreement. At fixed adopted MOS sizes, the longer-RR variant
+reduces current in both the hand model and SPICE, but their small zero-level
+shifts have opposite signs. The hand calculation retains only the RR geometry
+polynomial and constant MOS on-resistances. In the actual INV schematic both
+RP and RN have their F_RR substrate terminal at VDD, while their PLUS/MINUS
+terminal voltages differ; the full PDK resistor model therefore has different
+bias corrections in the two branches. MOS I–V nonlinearity is also omitted.
+This identifies the missing circuit dependencies; it is not a quantitative
+attribution of the mismatch to any one model term. End the comparison with
+the measured current/error pair for the adopted and longer-RR dimensions.
+Do not relabel the measured current values as the hand model's predictions.
+
 The baseline marker means “dimensions used in the reference design”; a temporary
 sizing row does not update physical abstracts or validate a new cell. NANY's
 grid may be explored with the same measured panels, but the simple INV divider
