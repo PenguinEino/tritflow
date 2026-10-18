@@ -150,7 +150,7 @@ def _simulate_cached_unlocked(out, mode, circuit, top, inputs, outputs, vectors,
     return result
 
 
-def run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e-9,
+def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e-9,
                    load_f=10e-15, timeout=600, refresh_characterization=True, plots=True):
     """Validate current PNR files, snapshot sources, LVS, wire C, pre/post and IR.
 
@@ -230,3 +230,14 @@ def run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e-
     (out/'error.json').unlink(missing_ok=True)
     if not unchanged: raise RuntimeError('Inputs changed during post-layout run; rerun against the new PNR/library revision: '+', '.join(changed))
     return summary
+
+
+def run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e-9,
+                   load_f=10e-15, timeout=600, refresh_characterization=True, plots=True):
+    """Serialize one design's extraction, snapshots, simulation and result publication."""
+    import fcntl
+    directory=Path(directory).resolve();out=directory/'postlayout';out.mkdir(parents=True,exist_ok=True)
+    with (out/'.run.lock').open('w') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX)
+        return _run_postlayout(directory,cells_root=cells_root,hold_s=hold_s,step_s=step_s,
+            load_f=load_f,timeout=timeout,refresh_characterization=refresh_characterization,plots=plots)

@@ -1,5 +1,7 @@
 # TritFlow
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
+
 A balanced-ternary HDL → synthesis → place & route → GDS → DRC/LVS → post-layout ngspice
 flow on the open [OpenSUSI TR-1um](https://github.com/OpenSUSI/TR-1um) PDK, built around a
 standard-cell library derived from taped-out ternary cells

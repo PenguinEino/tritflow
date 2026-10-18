@@ -2,6 +2,97 @@
 
 Updated: 2026-10-18. **Complete.**
 
+## Phase 5 handoff
+
+**Complete:** git-based Colab bootstrap, notebook badges and clean tracked-tree
+runtime verification. This supersedes the phase 4 archive-publication TODO.
+Root README and other streams' files were not edited. No git-writing command
+was run; the integrator owns committing, tagging and pushing.
+
+- The standalone first cell shallow-clones
+  `https://github.com/PenguinEino/tritflow.git` with `--depth 1 --single-branch
+  --branch colab-v0` into `/content/tritflow`. `TRITFLOW_REF` overrides the
+  tag/branch name. The clone's resolved commit is printed before installation.
+  The existing setup installs it using `pip install -e /content/tritflow`.
+- Existing Colab clones must have the expected origin, matching resolved ref
+  and HEAD, and no tracked edits. Otherwise the cell requests a fresh runtime;
+  it never fetches/resets somebody's working tree or falls back to `main`.
+  The optional archive-URL path was removed as permitted in phase 5, avoiding
+  two source-provenance paths. Local notebook execution does not clone or
+  install anything.
+- Both `notebook/README.md` and the notebook introduction contain an Open in
+  Colab badge targeting `colab-v0`. Recommended **root README** Markdown for
+  the integrator (the badge becomes usable after that tag is published):
+
+  ```markdown
+  [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
+  ```
+
+- Runtime cell/GDS/SPICE/characterization/qualification inputs are tracked in
+  `cells/out/`; `cells/template.json` is a relative tracked symlink to the
+  tracked `out/template.json`. HDL examples/includes and the six light/dark
+  schematic assets/manifest are tracked too. The notebook regenerates its own
+  P&R, extraction, simulation, raster and cache files from an absent `build/`.
+  It never runs the optional reference-dependent schematic exporter.
+- `notebook/check_portability.py` exports only tracked working files, records
+  their hashes and base commit, freshly extracts the checksum-verified pinned
+  PDK, relocates the HOME KLayout distribution, removes inherited tool search
+  paths, and executes every notebook chapter. Python audit guards reject
+  reads from the original checkout and HOME PDK/reference/tool directories;
+  strace checks native children for any accesses to those paths. HOME itself
+  is unchanged and installed Python dependencies remain available.
+- Decision: a tracked working-tree export replaces the requested local git
+  clone because streams must not run git-writing commands. No `.git`, ignored
+  outputs or untracked helpers are copied. Pending tracked frontend edits are
+  included, so this tests the proposed notebook rather than just committed
+  HEAD. This is an asset-portability test, not a kernel filesystem sandbox.
+  User namespaces were unavailable (`bwrap`: UID-map permission denied).
+
+Phase 5 validation:
+
+```sh
+python3 notebook/make_notebook.py
+python3 notebook/validate_notebook.py
+python3 -m pytest tests/hdl tests/synth tests/viz notebook/tests -q
+python3 notebook/check_portability.py --workdir /tmp/tritflow-portable-phase5-clean --pdk-archive /tmp/tritflow-pdk-pinned.tar.gz
+```
+
+**184 tests passed in 7.24 s.** Tests execute the actual standalone bootstrap
+cell with git mutations/install commands intercepted: default/overridden ref,
+shallow clone arguments, printed commit, setup invocation, existing-clone
+reuse, dirty/mismatched checkout rejection and missing-tag failure. Both
+Ubuntu setup plans and the generated notebook structure remain checked.
+
+The clean tracked-tree run passed all **24 cells / chapters 0–9** in **51.54 s**
+under file tracing, excluding installation/staging. Initial `build/` was
+absent; all five expensive stages ran fresh. Full-flow DRC/LVS, extracted
+adder analog assertions, independent logical checks, source/asset hashes and
+the editable circuit's full input-state test passed. The trace contains **zero
+accesses** to the original checkout, `~/balanced-ternary-logic`, `~/pdk` or
+`~/bin/klayout`. The first attempt completed the notebook but its audit caught
+inherited PATH/LD_LIBRARY_PATH references to the original tool installation;
+the successful run removes those inherited paths.
+
+Evidence: `/tmp/tritflow-portable-phase5-clean/{report.json,tracked-files.json,
+execution.log,files.strace}`; regenerated outputs:
+`/tmp/tritflow-portable-phase5-clean/tritflow/build/notebook/`.
+Export: **631 tracked working files**, base commit
+`b91bd90bedeaaedd66f0484ea648686332eae76c`; the manifest records the tested
+working-file hashes (later documentation-only changes are outside that snapshot).
+Fresh PDK: `5d963db9d44e192d37a0489c208bfccf2e2f690c`, archive SHA-256
+`003010a0f64fafb96acf5a0d18614c096d8faf6ade29e13af4bde54d85262769`.
+Local tools: KLayout executable **0.30.9**, Python klayout **0.30.6**, ngspice
+**46+**. Therefore this run does not validate the pinned official 0.30.6 Ubuntu
+binary or Colab's apt ngspice, installation/display behavior, or the
+installation-inclusive ten-minute budget. No packages were installed.
+
+Read-only `git ls-remote` confirmed public `main` at the base commit above;
+`colab-v0` was absent at verification time, as expected. **Integrator release
+action:** commit the frontend changes (including new portability/bootstrap
+test scripts), create/push `colab-v0`, then run the badge in a fresh Colab
+runtime. The default intentionally fails until the tag exists. The separate
+W/L sizing and final N/load/IR matrix TODOs remain unchanged.
+
 ## Phase 4 handoff
 
 **Complete:** exported the six requested taped-out Xschem drawings, integrated
@@ -431,13 +522,10 @@ None.
 
 ## Interface requests
 
-1. **Integrator — publication (deferred by instruction):** the integrator will
-   supply a pinned source archive URL and SHA-256
-   containing package, cells/out, examples and notebook files. This checkout
-   has no origin remote, so no public package URL was invented. The bootstrap
-   accepts `TRITFLOW_ARCHIVE_URL` / `TRITFLOW_ARCHIVE_SHA256` or an uploaded
-   checkout at `/content/tritflow`. This is the remaining fresh-Colab bootstrap
-   configuration, not a request to edit another stream's code.
+1. **Integrator — release:** phase 5 supersedes the archive-URL request. Commit
+   and push these files, publish `colab-v0` in the public TritFlow repository,
+   add the recommended badge to root README, and verify a clean Colab launch.
+   The bootstrap defaults to that tag and prints its resolved commit.
 2. **SIM — sizing chapter:** implement the exact `sweep_dimensions` proposal
    above, with transfer/error/current results and adopted-size provenance.
    The notebook keeps the explicit TODO until that public function is ready.

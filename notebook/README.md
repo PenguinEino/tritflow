@@ -1,5 +1,7 @@
 # Submission notebook draft
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
+
 `tritflow_tr1um.ipynb` follows chapters 0–9 of `docs/concept.md`. Chapter 0
 runs an actual two-trit adder from HDL through GDS, DRC, LVS and post-layout
 ngspice. Logical coverage is exhaustive; its six analog states are explicitly
@@ -49,12 +51,41 @@ produced artifact hashes. Cache hits identify the original verified artifacts;
 they do not claim that checks ran again. Delete the cache to force a fresh run.
 The checked-in notebook is output-free; `make_notebook.py` regenerates it.
 
-For a fresh Colab Ubuntu runtime, make the complete source archive available,
-including `cells/out`, examples and this folder. The bootstrap cell accepts
-`TRITFLOW_ARCHIVE_URL` plus `TRITFLOW_ARCHIVE_SHA256`; a checkout uploaded to
-`/content/tritflow` also works. **Publication TODO:** this checkout has no origin
-remote, so the integrator must supply the archive URL/hash before a standalone
-launch can work. No nonexistent package/source URL is assumed.
+Runtime inputs are committed under `cells/out/` (including the template,
+characterization and verification reports), `examples/`, and
+`notebook/assets/schematics/`. The notebook generates its own GDS, reports,
+SPICE, rasters and caches under `build/notebook/`; no existing `build/` is
+needed. The taped-out reference repository and Xschem are needed only to
+**re-export** the bundled SVGs, never to run the notebook.
+
+To repeat the local portability check (requires strace and existing EDA/Python
+tools; downloads a checksum-verified pinned PDK archive unless supplied):
+
+```sh
+python3 notebook/check_portability.py --workdir /tmp/tritflow-portability
+# Optional: --pdk-archive /path/to/the/pinned-pdk.tar.gz
+```
+
+This exports only tracked working files into a new directory, with no `.git`
+or ignored outputs; it records the base commit and file hashes. It uses no
+git-writing command. Python audit guards reject original-checkout/reference
+reads, and a native-child file trace must show zero accesses to those paths.
+HOME remains unchanged; Python dependencies are reused, while the HOME tool
+installation is relocated and its inherited search paths are removed. Logs,
+the manifest and `report.json` remain in the work directory. This checks runtime
+asset independence; it does not test Colab installation or replace the release
+test after the integrator commits/tags the tree.
+
+The first cell in a fresh Colab runtime shallow-clones
+`https://github.com/PenguinEino/tritflow.git` at the default tag `colab-v0` into
+`/content/tritflow`. It prints the resolved commit before installing the package
+editably. Set `os.environ["TRITFLOW_REF"] = "another-tag"` before running the
+first cell to override the tag (branch names also work; their resolved commits
+are printed). An existing checkout is reused only when its origin and resolved
+ref match and it has no tracked edits; otherwise start a fresh Colab runtime.
+The notebook never silently falls back to `main`. The archive-URL bootstrap has
+been removed. **Release TODO:** the integrator must publish the `colab-v0` tag
+after committing these files; the badge targets that same tag.
 
 ```sh
 bash notebook/colab_setup.sh --source /content/tritflow
@@ -83,7 +114,7 @@ The actual apt/pip install, notebook display in Colab, Ubuntu ngspice package
 behavior, and install-inclusive cold runtime require a clean Colab test. Local
 validation cannot establish the ten-minute Colab budget.
 
-Remaining notebook TODOs are explicit: source publication, public W/L
+Remaining notebook TODOs are explicit: release-tag publication, public W/L
 sizing-sweep support, the final qualified N/load/IR result matrix,
 and final measurement hardware/schedule. No draft TODO is presented as a result.
 

@@ -1,4 +1,4 @@
-# CELLS — compact Phase 3 and Phase 2 complete; final tests running
+# CELLS — Phase 3 and Phase 2 complete
 
 ## Published generation
 
@@ -150,8 +150,10 @@ in both models, so these results do not measure layout-dependent wire delay.
 `python3 -m tritflow.cells build` privately builds, qualifies, characterizes and
 publishes a complete generation. `verify` runs phase-1 checks; `equivalence`
 runs phase 2 against `~/balanced-ternary-logic`. `--out` selects a private stage.
-`python3 -m pytest tests/cells -q` now includes the ported Phase 2 checks and is
-running against an independently rebuilt private compact library.
+`python3 -m pytest tests/cells -q` includes the ported Phase 2 checks. Final
+run: **16 passed in 504.21 s (8:24)**, against an independently rebuilt private
+compact library. All published GDS/extraction/abstract verification hashes were
+rechecked after this run and still match. No outstanding CELLS work or blockers.
 
 No extra packages installed. No reference or PDK files changed. Only owned paths
 were edited. No git-state-changing commands were run.
@@ -166,3 +168,5 @@ extraction scope when presenting results. Generation IDs support snapshot checks
 Publish 2026-10-18T07:47:24.187502+00:00: Phase 3 compact cells, 132 um common height; phase-1 checks and fresh full characterization passed. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.
 
 Evidence publish 2026-10-18T08:07:34.359407+00:00: five-cell original/compact equivalence and four cascade protocols PASS; cell-view generation remains 2026-10-18T07:47:24.187502+00:00. Failed unseeded diagnostics retained.
+
+Final verification 2026-10-18T08:22:49.239261+00:00: 16 CELLS tests passed; published phase-1 and phase-2 reports both passed; live input hashes unchanged.

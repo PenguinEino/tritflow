@@ -27,17 +27,21 @@ def code(source):
 md("""
 # TritFlow: balanced-ternary HDL to GDS on OpenSUSI TR-1um
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
+
 Draft for IEEE SSCS Code-a-Chip, ISSCC 2027. Audience: designers familiar with
 CMOS, synthesis, P&R and SPICE. We follow a real three-rail circuit through the
 flow, separating logical equivalence, physical connectivity and nominal analog
 settling. Coverage and conditions are generated beside each result.
 
-**Draft TODO — integrator:** publish a source archive containing this package,
-`cells/`, `examples/` and `notebook/`; set `TRITFLOW_ARCHIVE_URL` and its
-`TRITFLOW_ARCHIVE_SHA256` for a standalone Colab launch. Alternatively upload
-the checkout to `/content/tritflow`. This checkout has no publication remote.
-The setup script is complete for an available checkout; fresh Colab execution
-and the total install-inclusive ten-minute budget remain unverified.
+Colab shallow-clones [TritFlow](https://github.com/PenguinEino/tritflow) at
+`colab-v0` into `/content/tritflow`, prints the resolved commit and installs
+the package editably beside its committed cell/example/figure assets. Set
+`TRITFLOW_REF` before the first cell to select another tag or branch. An existing
+Colab checkout must match the requested ref and have no tracked edits.
+**Release TODO — integrator:** create the `colab-v0` tag after committing this
+notebook. Fresh Colab execution and the install-inclusive ten-minute budget
+remain unverified.
 
 The default run uses a small adder and representative analog vectors. Heavy
 stages use content-keyed JSON caches; `TRITFLOW_EXTENDED=1` enables additional
@@ -46,44 +50,48 @@ artifact hashes are checked. A cache is evidence of the recorded run, not a new
 DRC/LVS execution. Clear `build/notebook/cache` to force recomputation.
 """)
 code(r'''
-import os, sys, json, time, hashlib, tarfile, tempfile, subprocess, importlib.util
+import os, sys, json, time, hashlib, subprocess, importlib.util
 from pathlib import Path
-from urllib.request import urlretrieve
 started = time.monotonic()
 try:
     IN_COLAB = importlib.util.find_spec("google.colab") is not None
 except ModuleNotFoundError:
     IN_COLAB = False
-candidates = [Path(os.environ.get("TRITFLOW_ROOT", ".")), Path.cwd(), Path.cwd().parent,
-              Path("/content/tritflow")]
-ROOT = next((p.resolve() for p in candidates if (p/"pyproject.toml").is_file()
-             and (p/"tritflow").is_dir()), None)
-if ROOT is None:
-    url = os.environ.get("TRITFLOW_ARCHIVE_URL", "")
-    checksum = os.environ.get("TRITFLOW_ARCHIVE_SHA256", "")
-    if not url or len(checksum) != 64:
-        raise RuntimeError("TODO INTEGRATOR: configure the pinned source archive URL/SHA256, "
-                           "or upload the full checkout to /content/tritflow")
-    target = Path("/content/tritflow-source")
-    target.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory() as folder:
-        archive = Path(folder)/"source.tar.gz"
-        urlretrieve(url, archive)
-        assert hashlib.sha256(archive.read_bytes()).hexdigest() == checksum, "source archive SHA256"
-        with tarfile.open(archive) as stream:
-            stream.extractall(target, filter="data")
-    roots = [p.parent for p in target.rglob("pyproject.toml") if (p.parent/"tritflow").is_dir()]
-    assert len(roots) == 1, "archive must contain exactly one TritFlow checkout"
-    ROOT = roots[0]
+SOURCE_URL = "https://github.com/PenguinEino/tritflow.git"
+SOURCE_REF = os.environ.get("TRITFLOW_REF", "colab-v0")
+def source_git(*args):
+    return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True).strip()
 if IN_COLAB:
+    ROOT = Path("/content/tritflow")
+    if not SOURCE_REF or SOURCE_REF.startswith("-") or any(c.isspace() for c in SOURCE_REF):
+        raise ValueError("TRITFLOW_REF must name a Git tag or branch")
+    if not ROOT.exists():
+        subprocess.run(["git", "clone", "--depth", "1", "--single-branch", "--branch", SOURCE_REF,
+                        SOURCE_URL, str(ROOT)], check=True)
+    if not (ROOT/".git").is_dir():
+        raise RuntimeError("/content/tritflow must be a git clone; use a fresh Colab runtime")
+    if source_git("remote", "get-url", "origin").removesuffix(".git") != SOURCE_URL.removesuffix(".git"):
+        raise RuntimeError("existing checkout has a different origin; use a fresh Colab runtime")
+    SOURCE_COMMIT = source_git("rev-parse", "--verify", "HEAD^{commit}")
+    requested_commit = source_git("rev-parse", "--verify", SOURCE_REF+"^{commit}")
+    if SOURCE_COMMIT != requested_commit or source_git("status", "--porcelain", "--untracked-files=no"):
+        raise RuntimeError("existing checkout differs from TRITFLOW_REF; use a fresh Colab runtime")
+    print(f"Source: {SOURCE_URL} ref={SOURCE_REF} commit={SOURCE_COMMIT}", flush=True)
     runtime = ROOT/"notebook/runtime.json"
     if not runtime.is_file():
         subprocess.run(["bash", str(ROOT/"notebook/colab_setup.sh"), "--source", str(ROOT)], check=True)
     os.environ.update(json.loads(runtime.read_text()))
+else:
+    candidates = [Path(os.environ.get("TRITFLOW_ROOT", ".")), Path.cwd(), Path.cwd().parent]
+    ROOT = next((p.resolve() for p in candidates if (p/"pyproject.toml").is_file()
+                 and (p/"tritflow").is_dir()), None)
+    if ROOT is None:
+        raise RuntimeError("run locally from the full checkout or set TRITFLOW_ROOT")
+    SOURCE_COMMIT = source_git("rev-parse", "--verify", "HEAD^{commit}") if (ROOT/".git").exists() else "tracked-tree export (no .git)"
+    print(f"Source: {ROOT} commit={SOURCE_COMMIT}")
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT/"notebook"))
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-print("Source:", ROOT)
 ''')
 code('''
 import numpy as np
@@ -472,7 +480,7 @@ measured discrepancies. The generated core is not a padframe or ESD-qualified
 top, and nominal device simulation is not a lifetime qualification.
 
 **TODO — integrator:** confirm the measurement schedule and hardware details;
-replace draft placeholders, publish the source archive pin, and run this exact
+replace draft placeholders, publish the `colab-v0` tag, and run this exact
 notebook in a clean Colab runtime before submission. Record cold/warm runtimes
 and keep total default Run all near ten minutes.
 
