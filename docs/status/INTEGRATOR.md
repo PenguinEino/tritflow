@@ -26,5 +26,4 @@
 - Feature freeze 10-25 JST (docs/editorial.md schedule). STA, shuttle-ready top and corners enter
   the notebook only if clean by then.
 - FRONTEND (next): add the `schematic()` delegate and a notebook cell after synthesis per SCHEM status (schematic stage built by SCHEM).
-- After FRONTEND phase 10: tritflow/synth/mapping.py changed after SIM's electrical campaign (results/pinned_requalification.json flags it stale). Ask SIM to re-run the publication campaign (or prove outputs unchanged) once FRONTEND stops editing synth; then regenerate figures and move colab-v0 again before the final Colab run.
-- FRONTEND phase 11 (after phase 10; pipeline is complete, so the deferred editorial integration starts now): rebuild the notebook from notebook/narrative/ (EDITOR) + figures/out/ paper figures per docs/editorial.md, and fix REVIEW round-2 findings 1-5 (first screen sells the contribution; divider -> static power -> sizing taught with a predict-then-SPICE comparison; collapse repeated diagrams and move process text to appendices; sizing slider over cells/out/sizing as a Plotly slider; chapter 8 shows the edited HDL, its schematic and its new GDS).
+- DISPATCHED 10-18: SIM republish after synth change; FRONTEND phase 11 editorial integration (synth/hdl frozen). Next: regenerate figures, move colab-v0, COLAB round 3, REVIEW round 3.
