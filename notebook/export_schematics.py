@@ -9,6 +9,7 @@ opaque high-contrast backing, so embedding on either notebook background works.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from hashlib import sha256
 from html import escape
 import json
@@ -138,7 +139,9 @@ def export(reference, pdk, system_library, output, *, executable="xschem"):
                 path = output/name
                 path.write_text(_theme_svg(image, f"{label}: {filename}", theme))
                 outputs[theme] = {"file": name, "sha256": digest(path)}
+            symbols = re.findall(r"(?m)^C \{([^}\n]+)\}", (roots["reference"]/filename).read_text())
             records[label] = {"source": filename, "source_sha256": hashes[roots["reference"]/filename],
+                              "instances_by_symbol": dict(sorted(Counter(Path(s).stem for s in symbols).items())),
                               "crop": bounds, "themes": outputs}
         assert all(digest(path) == value for path, value in hashes.items()), "read-only source changed during export"
     binary = Path(shutil.which(executable) or executable)

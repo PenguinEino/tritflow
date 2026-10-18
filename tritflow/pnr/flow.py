@@ -9,8 +9,8 @@ from pathlib import Path
 from tritflow.netlist import GateNetlist
 from .gds import write_gds
 from .library import Library
-from .placement import pin_location, place
-from .power import draw_power, power_plan
+from .placement import RowCapacityError, pin_location, place
+from .power import cell_current, draw_power, power_plan
 from .router import RoutingFailure, floorplan, route
 from .verify import PhysicalVerificationError, connectivity, pdk_drc, routing_drc
 
@@ -50,20 +50,23 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
     elif isinstance(library, (str, Path)):
         library = Library.load(library)
     library.validate()
-    relative, history, row_count = place(netlist, library, rows, seed, anneal_steps, history_every)
+    currents = {inst.name: cell_current(library.cells[inst.cell],
+        0. if inst.cell in ("FILL", "TIEP", "TIEZ", "TIEN") else default_cell_current_a)[0]
+                for inst in netlist.instances}
+    capacity = 2*current_density_a_per_um*min(y1-y0 for y0, y1 in library.template["rails"].values())
+    trial_rows = rows
     while True:
         try:
+            relative, history, row_count = place(netlist, library, trial_rows, seed, anneal_steps, history_every,
+                instance_currents=currents, max_row_current_a=capacity)
             plan = power_plan(relative, library, current_density_a_per_um=current_density_a_per_um,
                               default_cell_current_a=default_cell_current_a,
                               sheet_resistance_ohm=sheet_resistance_ohm)
             break
-        except ValueError as error:
-            # A fixed template cannot widen its internal rails. Add rows to
-            # reduce current per row, unless the caller fixed the row count.
-            if rows is not None or "wider cell rail" not in str(error) or row_count >= len(netlist.instances):
+        except RowCapacityError as error:
+            if rows is not None or error.row_count >= len(netlist.instances):
                 raise
-            relative, history, row_count = place(netlist, library, row_count+1, seed,
-                                                  anneal_steps, history_every)
+            trial_rows = error.row_count+1
     ports = max((sum(port.dir == direction for port in netlist.ports) for direction in ("input", "output")), default=0)
     min_tracks = 2*math.ceil(ports/(row_count+1))+2
     tracks = channel_tracks or max(12, min_tracks, math.ceil(len(netlist.nets())/(row_count+1)*.4))
@@ -117,7 +120,7 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
     data["stats"] = {"die_size_um": data["die"], "die_area_um2": math.prod(data["die"]),
         "wirelength_um": wirelength, "via_count": len(data["vias"]),
         "power_via_count": len(data["power"]["vias"]), "utilization": area/math.prod(data["die"]),
-        "instance_count": len(netlist.instances), "net_count": len(netlist.nets()),
+        "instance_count": len(netlist.instances), "row_count": len(data["rows"]), "net_count": len(netlist.nets()),
         "routed_nets": len(terminals), "library_mock": library.mock,
         "max_supply_drop_v": data["power"]["ir_drop"]["max_drop_v"],
         "bypass_tracks_per_side": bypass_tracks,

@@ -2,6 +2,158 @@
 
 Updated: 2026-10-18. **Complete.**
 
+## Phase 4 handoff
+
+**Complete:** exported the six requested taped-out Xschem drawings, integrated
+chapter 1, reviewed all chapters as a skeptical circuit-design reviewer, and
+defined the SIM sizing interface below. Publication configuration is unchanged;
+the integrator will provide its URL later.
+
+- `notebook/export_schematics.py` runs native batch Xschem on temporary copies
+  of `inverter.sch`, `mul_nand.sch`, `mul_nor.sch`, `nany.sch`, `half_adder.sch`
+  and `full_adder.sch`. Every referenced local, PDK and system device symbol is
+  copied into that temporary library path. Only absolute path locators in the
+  copies are relocated. No Xschem invocation opens the original schematic.
+  Input/dependency hashes are checked again after export.
+- `notebook/assets/schematics/` contains `INV.svg`, `NAND.svg`, `NOR.svg`,
+  `NANY.svg`, `half_adder.svg`, `full_adder.svg`, plus a `.dark.svg` variant
+  of each and `manifest.json`. SVG geometry/text are the Xschem output;
+  presentation changes normalize stroke/color and add accessible titles.
+  Opaque high-contrast backing makes both variants independent of host CSS.
+  The theme foreground/background contrast exceeds 7:1 in automated checks.
+- Primitive crops omit obsolete free-text sizing sidebars in the reference
+  schematics (e.g. old RR length notes). Actual instance W/L labels remain.
+  The source is not edited to repair those historical annotations. Hierarchical
+  drawings retain the explanatory circuit text and original wiring.
+- `notebook/schematics.py` embeds all six drawings as a theme-aware data-URL
+  gallery in chapter 1, with a both-themes/provenance control. Display requires
+  no Xschem installation. The manifest records renderer, source, symbol and
+  output hashes, crop bounds and generated counts of each source symbol.
+  Chapter 4 independently checks RTL HA/FA gate counts against those counts.
+- All 12 variants were rasterized locally with the installed librsvg/cairo
+  libraries; primitive and HA/FA previews were visually inspected. Contrast,
+  complete SVG path/text content, source preservation, deterministic re-export
+  and gallery hash checking have automated tests. No packages were installed.
+
+Reviewer changes:
+
+- Removed hand-entered coverage/gate-count result numbers from prose. Coverage,
+  unique states, possible/selected transitions, cells, physical area, errors,
+  loads, timing settings and temperature now come from data or configuration.
+  Trit equations and supply/measurement definitions remain explicit.
+- Added independent gate truth assertions and both HA/FA integer invariants.
+  Printed mapping examples are synthesized and asserted against the expected
+  cell sequences; their displayed counts are calculated.
+- Fresh and cached reports both face explicit pass assertions. Characterization
+  source/model hashes and all recorded DC/transient pass flags are checked.
+  Published cell qualification flags are shown only after referenced artifact
+  hashes match. FILL is labeled as probe-based qualification, not a standalone
+  device-free strict LVS match.
+- Updated obsolete fanout text: the current JSON reports measured self-loading/
+  cascade evidence, whose method, conditions and scope are displayed directly.
+  No isolated-C ratio or synthesis default is presented as a general timing bound.
+- The routing chapter shows actual clean flags, routed-net coverage, legal
+  orientations and initial/final HPWL. It says optimization *seeks* shorter
+  connections rather than asserting a global/minimum HPWL result.
+- Pre/post checks assert matched stimuli/hold/step and show a load-derived title.
+  Settling is explicitly the sampled/interpolated final band entry from ramp
+  start. Sampled analog coverage, initialization exclusion, ideal rails,
+  uncalibrated substrate C, omitted poly/signal RC, PVT and missing IR results
+  remain limitations. The editable circuit asserts complete input-state coverage.
+- Historical schematics are not presented as new-layout or silicon-performance
+  proof. Measurement hardware/schedule, final N/load/IR matrix, W/L sweep and
+  fresh Colab verification remain explicit TODOs.
+- Confirmed the publication/bootstrap code cell is byte-identical to committed
+  HEAD; `TRITFLOW_ARCHIVE_URL` / `TRITFLOW_ARCHIVE_SHA256` behavior was untouched.
+
+Phase 4 validation:
+
+```sh
+python3 notebook/export_schematics.py
+python3 notebook/make_notebook.py
+python3 -m pytest notebook/tests tests/hdl tests/synth tests/viz -q
+TRITFLOW_NOTEBOOK_BUILD=/tmp/tritflow-notebook-phase4-final python3 notebook/validate_notebook.py --execute
+```
+
+Result: **178 tests passed in 12.72 s**. The revised default notebook executed
+all chapters successfully in **56.7 s** locally, excluding installation. Its
+fresh full-flow assertions and the new source/model/qualification checks passed.
+Log: `/tmp/tritflow-notebook-phase4-final.log`; assets/EDA outputs are under
+`/tmp/tritflow-notebook-phase4-final/`. This remains a local runtime measurement,
+not a Colab installation-inclusive claim.
+An unchanged-context repeat passed every chapter in **0.7 s**, with all five
+expensive stages reporting cache hits; log:
+`/tmp/tritflow-notebook-phase4-warm.log`. The gallery, source/qualification
+hashes and cached-result assertions were still evaluated on that repeat.
+
+### Requested chapter 2 SIM function (exact proposal)
+
+Please expose this in `tritflow.sim.sizing` (re-export from `tritflow.sim` is
+optional). The computation should not import notebook code.
+
+```python
+def sweep_dimensions(
+    cell: str,
+    candidates: Sequence[Mapping[str, Mapping[str, float]]],
+    *,
+    sweep_pin: str = "A",
+    fixed_trits: Mapping[str, int] | None = None,
+    start_v: float = -5.0,
+    stop_v: float = 5.0,
+    step_v: float = 0.1,
+    temperature_c: float = 27.0,
+    pdk: str | Path | None = None,
+    workdir: str | Path | None = None,
+    timeout: float = 120.0,
+) -> dict:
+    ...
+```
+
+Semantics and units:
+
+- `cell` is INV/NAND/NOR/NANY. Each candidate is a sparse device-ID map:
+  `{device_id: {"w_um": value, "l_um": value}}`. Use canonical schematic IDs
+  from `tritflow.cells.circuits.circuits()` (`MP`, `MN`, `RP`, `RN` for INV;
+  the corresponding per-device names for other cells), exposed in the result.
+  Omitted devices/dimensions inherit the published schematic baseline. Unknown
+  IDs/fields, nonpositive dimensions and invalid trit biases raise ValueError.
+- Both MOS and resistor W/L are in **µm**; no implicit scaling of unrelated
+  devices or connectivity changes. Build temporary source-level SPICE variants;
+  never mutate published cells, extracted junction geometry or PDK/source files.
+  This is a DC sizing experiment, not a generated-layout/LVS qualification.
+- Automatically include the adopted published baseline once, resolving its
+  dimensions from the source rather than requiring hand-entered marker values.
+  Return its index so the plot can mark the adopted point unambiguously.
+- Run the input-voltage transfer sweep with other inputs at `fixed_trits`
+  (default zero); separately evaluate all discrete trit input states for maximum
+  level error and true static rail currents. Supplies/band use project constants.
+  `workdir` retains artifacts only when supplied; times/timeout are seconds.
+
+Requested return schema:
+
+```text
+cell, source_sha256, model_sha256, device_ids, adopted_index,
+conditions {supplies_v, temperature_c, band_v, sweep_pin, fixed_trits,
+            start_v, stop_v, step_v},
+rows [
+  {dimensions: fully resolved device W/L in µm, is_adopted: bool,
+   transfer: native dc_transfer-compatible data/log result,
+   dc: native dc_operating_points rows,
+   max_error_v: float | null,
+   max_static_current_a: float | null,
+   passed: bool, error: str | null}
+],
+scope: "nominal source-level DC sizing; no layout/parasitic/PVT qualification"
+```
+
+Use native numeric arrays or JSON numeric lists for transfer data; the notebook
+can convert lists back to NumPy before the existing transfer figure helper.
+Return solver failures as failed rows with null unavailable metrics and a
+diagnostic; never drop them or turn them into passing points. The adopted
+index must refer to the same resolved baseline dimensions as the source hash.
+This is a requested interface, **not** an implemented/exported function yet;
+the chapter 2 TODO remains until SIM supplies it.
+
 Phase 3: **flow API and notebook draft complete**. Clean Colab execution and
 publication metadata are explicitly pending, as detailed below.
 
@@ -279,18 +431,18 @@ None.
 
 ## Interface requests
 
-1. **Integrator — publication:** supply a pinned source archive URL and SHA-256
+1. **Integrator — publication (deferred by instruction):** the integrator will
+   supply a pinned source archive URL and SHA-256
    containing package, cells/out, examples and notebook files. This checkout
    has no origin remote, so no public package URL was invented. The bootstrap
    accepts `TRITFLOW_ARCHIVE_URL` / `TRITFLOW_ARCHIVE_SHA256` or an uploaded
    checkout at `/content/tritflow`. This is the remaining fresh-Colab bootstrap
    configuration, not a request to edit another stream's code.
-2. **CELLS/SIM — sizing chapter:** provide a documented public W/L-sweep
-   entrypoint with transfer/error/current results, plus the adopted-size marker.
-   The notebook currently reads actual characterized cells and leaves this
-   experiment as an explicit TODO.
-3. **CELLS/integrator — schematic assets:** supply the exported Xschem SVGs
-   planned in the concept for the introductory gate/device comparison.
+2. **SIM — sizing chapter:** implement the exact `sweep_dimensions` proposal
+   above, with transfer/error/current results and adopted-size provenance.
+   The notebook keeps the explicit TODO until that public function is ready.
+3. **Schematic assets: resolved in phase 4.** All requested SVGs are bundled and
+   integrated; no asset request remains with another stream.
 
 No interface is missing for the core flow method chain. Shared contracts and
 other streams' source files were not edited by FRONTEND.

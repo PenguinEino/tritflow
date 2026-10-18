@@ -105,8 +105,8 @@ def show(figure):
         display(figure)
 def table(rows):
     from html import escape
-    display(HTML("<table>"+"".join("<tr>"+"".join("<td style='padding:.3em .8em'>"+
-        escape(str(v))+"</td>" for v in row)+"</tr>" for row in rows)+"</table>"))
+    display(HTML("<div style='overflow-x:auto'><table>"+"".join("<tr>"+"".join("<td style='padding:.3em .8em'>"+
+        escape(str(v))+"</td>" for v in row)+"</tr>" for row in rows)+"</table></div>"))
 ''')
 md('''
 ## 0. Start with the complete adder flow
@@ -127,7 +127,7 @@ inputs = [p.name for p in net.ports if p.dir == "input"]
 outputs = [p.name for p in net.ports if p.dir == "output"]
 vectors = [(-1,)*len(inputs), (0,)*len(inputs), (1,)*len(inputs),
            (1,-1,-1,1,0), (-1,1,1,-1,1), (-1,)*len(inputs)]
-LOAD_F, HOLD_S, STEP_S, EDGE_S = 100e-15, 1e-6, 2e-9, 1e-9
+LOAD_F, HOLD_S, STEP_S, EDGE_S, TEMP_C = 100e-15, 1e-6, 2e-9, 1e-9, 27
 assert all(len(v) == len(inputs) for v in vectors)
 assert len(logical[inputs[0]]) == 3**len(inputs)
 def adder_reference(vector):
@@ -148,13 +148,13 @@ def complete_adder():
     assert drc["clean"] and lvs["matched"], (drc, lvs)
     extracted = lay.extract()
     post = extracted.simulate(vectors, load=LOAD_F, hold_s=HOLD_S, step_s=STEP_S, edge_s=EDGE_S,
-                              expected=adder_reference, timeout=180, workdir=out/"post")
+                              temperature_c=TEMP_C, expected=adder_reference, timeout=180, workdir=out/"post")
     assert post["measurements"]["passed"], post["measurements"]
     return {**post, "stats": lay.stats, "drc": drc, "lvs": lvs,
             "extracted_spice": extracted.spice, "capacitance": extracted.capacitance}
 demo = cache.run("adder2-complete", {"net": net.to_json(), "vectors": vectors, "load": LOAD_F,
                                    "hold": HOLD_S, "step": STEP_S, "edge": EDGE_S,
-                                   "seed": 0, "anneal": 80}, complete_adder,
+                                   "temperature_c":TEMP_C, "seed": 0, "anneal": 80}, complete_adder,
     artifacts=lambda r: [out/"adder2_demo.gds", out/"adder2_demo.pnr.json",
                          r["drc"]["report_path"], r["lvs"]["report"], r["lvs"]["extracted"]])
 lay = flow.load_layout(net, out)
@@ -164,6 +164,7 @@ table([["Logical input states (exhaustive)", len(logical[inputs[0]])],
        ["Analog states / unique states", f"{len(vectors)} / {len(set(vectors))}"],
        ["Analog transitions (selected / possible)", f"{len(vectors)-1} / {3**len(inputs)*(3**len(inputs)-1)}"],
        ["Configured rails (trit: V)", TRIT_VOLTS], ["Level acceptance band (V)", PASS_BAND],
+       ["Nominal temperature (°C)", TEMP_C],
        ["Output load (fF)", LOAD_F*1e15], ["Hold / ramp / max step (ns)",
         [HOLD_S*1e9,EDGE_S*1e9,STEP_S*1e9]],
        ["Cells", net.report()["cells"]], ["GDS", lay.gds_path],
@@ -208,9 +209,12 @@ for name in ["INV","NAND","NOR","NANY"]:
     assert ("VMID" in body.upper()) == (name == "NANY"), name
 display(HTML(schematic_gallery(ROOT/"notebook/assets/schematics")))
 cell_spice = (CELLS_DIR/"out/NANY/NANY.ext.spice").read_text()
-curve = cache.run("nany-dc", {"fixed_B": 0, "step_v": .1}, lambda:
-    dc_transfer(cell_spice, "NANY", ["A","B"], ["Y"], "A", fixed_trits={"B":0}, step_v=.1))
-show(transfer_figure(curve, "A", ["Y"], title="NANY DC: B=0 trit (0 V)"))
+DC_FIXED_B, DC_STEP_V = 0, .1
+curve = cache.run("nany-dc", {"fixed_B": DC_FIXED_B, "step_v": DC_STEP_V}, lambda:
+    dc_transfer(cell_spice, "NANY", ["A","B"], ["Y"], "A",
+                fixed_trits={"B":DC_FIXED_B}, step_v=DC_STEP_V))
+show(transfer_figure(curve, "A", ["Y"],
+                     title=f"NANY DC: B={DC_FIXED_B} trit ({TRIT_VOLTS[DC_FIXED_B]:g} V)"))
 ''')
 md('''
 The primitive crops retain instance W/L properties and omit obsolete free-text
@@ -241,11 +245,13 @@ for cell, char in characters.items():
                  max(abs(i) for row in char["dc"] for i in row["rail_current_a"].values())*1e6,
                  char["input_capacitance"]["max_f"]*1e15, char["fanout"]["suggested_max"]])
 table(rows)
-table([[cell, char["conditions"], [r["load_f"]*1e15 for r in char["transient"]], char["fanout"]]
+table([["Cell", "Recorded conditions", "Tested loads (fF)", "Fanout evidence"]]+
+      [[cell, char["conditions"], [r["load_f"]*1e15 for r in char["transient"]], char["fanout"]]
        for cell,char in characters.items()])
 ''')
 md('''
-**TODO — CELLS/SIM sizing experiment:** expose a public W/L-sweep API and mark
+**TODO — SIM sizing experiment:** expose the requested `sweep_dimensions(...)`
+API (signature/schema in `docs/status/FRONTEND.md`) and mark
 the taped-out dimensions on its transfer/error/current curves. This draft reads
 the real characterized dimensions and does not replace them with synthetic
 sizing results. Full characterization is deliberately not rerun by default.
@@ -277,8 +283,12 @@ if qualification.is_file():
     for cell, artifacts in report["artifact_sha256"].items():
         for suffix, expected_hash in artifacts.items():
             assert hashlib.sha256((CELLS_DIR/f"out/{cell}/{cell}.{suffix}").read_bytes()).hexdigest() == expected_hash
-    table([["Cell", "Recorded DRC clean", "Recorded strict LVS clean"]]+[
-        [name, result["drc"]["passed"], result["lvs"]["passed"]] for name,result in report["cells"].items()])
+    table([["Cell", "Recorded DRC clean", "Recorded LVS qualification", "LVS method"]]+[
+        [name, result["drc"]["passed"], result["lvs"]["passed"],
+         result["lvs"].get("method","strict device/port comparison")]
+        for name,result in report["cells"].items()])
+    if "FILL" in report["cells"]:
+        print("FILL qualification:", report["cells"]["FILL"]["lvs"]["explanation"])
     print("Recorded qualification scope:", report["scope"])
 else:
     print("TODO CELLS: publish the cell qualification report; no cell-clean claim is made here")
@@ -303,7 +313,13 @@ assert np.array_equal(ha_table["a"]+ha_table["b"], ha_table["sum"]+3*ha_table["c
 assert np.array_equal(fa_table["a"]+fa_table["b"]+fa_table["cin"],
                       fa_table["sum"]+3*fa_table["cout"])
 ha_counts, fa_counts = ha.synthesize().report()["cells"], fa.synthesize().report()["cells"]
-assert fa_counts == {cell:2*count+1 for cell,count in ha_counts.items()}
+schematic_sources = json.loads((ROOT/"notebook/assets/schematics/manifest.json").read_text())["schematics"]
+ha_symbols = schematic_sources["half_adder"]["instances_by_symbol"]
+fa_symbols = schematic_sources["full_adder"]["instances_by_symbol"]
+symbol_names = {"INV":"inverter", "NANY":"nany"}
+assert ha_counts == {cell:ha_symbols[symbol] for cell,symbol in symbol_names.items()}
+assert fa_counts == {cell:fa_symbols["half_adder"]*ha_counts[cell]+fa_symbols[symbol]
+                     for cell,symbol in symbol_names.items()}
 table([["Circuit", "Cells", "Exhaustive input states"],
        ["half_add",ha_counts,len(ha_table["sum"])], ["full_add",fa_counts,len(fa_table["sum"])]])
 print((ROOT/"examples/adder.tv").read_text())
@@ -327,6 +343,15 @@ show(color_nets(fa_net, {"a": 1, "b": 1, "cin": -1}))
 table([["Report field", "Value"]]+[[k,v] for k,v in fa_net.report().items()])
 from tritflow.synth import tritverilog
 print(tritverilog(fa_net))
+mapping_cases = [("~a",["INV"]), ("~(a&b)",["NAND"]), ("a&b",["NAND","INV"]),
+                 ("~(a|b)",["NOR"]), ("a|b",["NOR","INV"]), ("nany(a,b)",["NANY"]),
+                 ("1'tT",["TIEN"]), ("1't0",["TIEZ"]), ("1't1",["TIEP"])]
+mapping_rows = [["HDL expression", "Computed cells"]]
+for expr, expected_cells in mapping_cases:
+    mapped = flow.loads(f"module mapping(input trit a,b,output trit y); assign y={expr}; endmodule").synthesize()
+    assert sorted(inst.cell for inst in mapped.instances) == sorted(expected_cells)
+    mapping_rows.append([expr, mapped.report()["cells"]])
+table(mapping_rows)
 ''')
 md('''
 ## 6. Place, route and inspect GDS
@@ -344,6 +369,7 @@ print("Placement snapshots:", len(lay.data["history"]))
 print("Routing attempts:", lay.data["routing_attempts"])
 assert all(check["clean"] for check in lay.data["checks"].values())
 assert lay.stats["routed_nets"] == len(net.nets())
+assert {p["orient"] for p in lay.data["placements"]} <= {"R0","MY"}
 table([["Check", "Clean"]]+[[name,check["clean"]] for name,check in lay.data["checks"].items()])
 table([["Initial / final cell-terminal HPWL (µm)",
         [lay.data["history"][i]["hpwl"] for i in (0,-1)]]])
@@ -377,14 +403,14 @@ resolution; initialization is excluded from maximum transition delay.
 The extracted devices retain intrinsic/junction effects. Added top-net wire C
 uses actual connected GDS area/perimeter with explicitly assumed coefficients;
 it is not calibrated signoff PEX. Signal-wire resistance, coupling, local poly
-RC and PVT/mismatch are outside this experiment. Power IR assumes constant
-nominal-bias currents; equal-divider zero shifts and NANY VMID shifts differ.
+RC and PVT/mismatch are outside this experiment. No rail-IR result is presented
+here; its separate experiment remains in the result-matrix TODO below.
 ''')
 code('''
 pre = cache.run("adder2-pre", {"net":net.to_json(),"vectors":vectors,"load":LOAD_F,
-                             "hold":HOLD_S,"step":STEP_S,"edge":EDGE_S}, lambda:
+                             "hold":HOLD_S,"step":STEP_S,"edge":EDGE_S,"temperature_c":TEMP_C}, lambda:
     net.simulate(vectors, load=LOAD_F, expected=adder_reference, hold_s=HOLD_S,
-                 step_s=STEP_S, edge_s=EDGE_S, timeout=180))
+                 step_s=STEP_S, edge_s=EDGE_S, temperature_c=TEMP_C, timeout=180))
 assert pre["measurements"]["passed"]
 assert pre["stimulus"]["vectors"] == demo["stimulus"]["vectors"]
 assert pre["stimulus"]["hold_s"] == demo["stimulus"]["hold_s"]

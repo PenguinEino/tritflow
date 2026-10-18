@@ -70,24 +70,41 @@ def pin_location(cell, pin: str, placement: dict) -> tuple[float, float]:
     return placement["x"] + x, placement["y"] + y
 
 
-def place(netlist, library, rows=None, seed=0, steps=600, history_every=25):
+class RowCapacityError(ValueError):
+    """The selected number of rows cannot pack the specified current envelope."""
+
+    def __init__(self, row_count):
+        self.row_count = row_count
+        super().__init__(f"{row_count} rows cannot fit the cell current envelope")
+
+
+def place(netlist, library, rows=None, seed=0, steps=600, history_every=25, *,
+          instance_currents=None, max_row_current_a=None):
     """Pack row lists, preserving rail polarity under R0 or left/right mirror."""
     if rows is not None and rows < 1:
         raise ValueError("rows must be positive")
     if steps < 0 or history_every < 1:
         raise ValueError("Invalid annealing schedule")
     order = validate_netlist(netlist, library)
+    if max_row_current_a is not None and (not math.isfinite(max_row_current_a) or max_row_current_a <= 0):
+        raise ValueError("Row current capacity must be finite and positive")
+    currents = instance_currents or {}
     h, p = library.template["height"], library.template["grid"]
     total = sum(library.cells[i.cell].width for i in order)
     count = rows or max(1, round(math.sqrt(total / (h + 12 * p))))
     count = min(count, max(1, len(order)))
     row_lists = [[] for _ in range(count)]
-    widths = [0.] * count
+    widths, row_currents = [0.] * count, [0.] * count
     # Topological breadth first order naturally fills successive columns.
     for inst in order:
-        r = min(range(count), key=lambda r: (widths[r], r))
+        legal_rows = [r for r in range(count) if max_row_current_a is None or
+                      row_currents[r]+currents.get(inst.name, 0.) <= max_row_current_a+1e-12]
+        if not legal_rows:
+            raise RowCapacityError(count)
+        r = min(legal_rows, key=lambda r: (widths[r], r))
         row_lists[r].append(inst.name)
         widths[r] += library.cells[inst.cell].width
+        row_currents[r] += currents.get(inst.name, 0.)
     by_name = {i.name: i for i in order}
     orientations = {i.name: "R0" for i in order}
 
@@ -104,6 +121,10 @@ def place(netlist, library, rows=None, seed=0, steps=600, history_every=25):
         return result
 
     def cost(placements):
+        if max_row_current_a is not None and any(
+                sum(currents.get(name, 0.) for name in row) > max_row_current_a+1e-12
+                for row in row_lists):
+            return math.inf, math.inf
         nets = defaultdict(list)
         for pl in placements:
             inst, cell = by_name[pl["inst"]], library.cells[pl["cell"]]

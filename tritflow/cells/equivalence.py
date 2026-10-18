@@ -90,6 +90,8 @@ def equivalence(out=CELLS_DIR/'out',reference=Path.home()/'balanced-ternary-logi
         report['cells'][cell]=compare_cell(cell,original[cell],compact[cell],proof[cell],work/cell)
     for kind in ('inverter_two','nor_six','nany_six','mixed_six'):
         report['chains'][kind]=compare_chain(kind,original,compact,work/'chains'/kind)
+    report['initialization']='Unconstrained .nodeset guesses; deep NANY internal nodes use separately solved single-cell DC operating points. No .ic/uic or device changes.'
+    report['runner_sha256']={name:sha(Path(__file__).with_name(name)) for name in ['reference.py','regression.py','equivalence.py']}
     report['model_sha256']={p.name:sha(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}
     report['passed']=all(c['passed'] for c in report['cells'].values()) and all(c['passed'] for c in report['chains'].values())
     report['interpretation']=('Identical device sizes/connectivity and intrinsic junction parameters; negligible numerical differences are expected. '
@@ -99,6 +101,11 @@ def equivalence(out=CELLS_DIR/'out',reference=Path.home()/'balanced-ternary-logi
     for cell in original:
         if sha(out/cell/f'{cell}.ext.spice')!=proof[cell]['compact_extracted_sha256']:
             raise RuntimeError('Live library changed during equivalence; do not publish mixed-generation results')
+    current=json.loads((out/'generation.json').read_text()) if (out/'generation.json').exists() else None
+    if current!=generation:raise RuntimeError('Library generation changed during equivalence')
+    for cell in original:
+        if sha(out/cell/f'{cell}.gds')!=proof[cell]['compact_gds_sha256']:
+            raise RuntimeError('Cell GDS changed during equivalence')
     temporary=out/'.equivalence_report.next.json'
     temporary.write_text(json.dumps(report,indent=2,allow_nan=False)+'\n')
     os.replace(temporary,out/'equivalence_report.json')

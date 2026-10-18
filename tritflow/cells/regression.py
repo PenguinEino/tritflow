@@ -133,7 +133,7 @@ def chain_definition(texts,kind):
                 ins=[fixed,previous] if mode=='b' else [previous,fixed]
             instances.append(f'X{inst} '+' '.join(ins+[out,'VDD','VMID','VSS',cell]))
             seed=guesses(texts[cell],f'xdut.x{inst.lower()}')
-            if cell=='NANY':
+            if cell=='NANY' and kind=='nany_six':
                 variable=-1 if i%2 else 1
                 vector=(variable,variable) if mode=='tied' else ((0,variable) if mode=='b' else (variable,0))
                 physical=physical_initial_state(texts[cell],vector)
