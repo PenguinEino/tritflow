@@ -22,7 +22,7 @@ def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--designs',nargs='+',default=['adder4','full_add','mac1','mul1'])
     parser.add_argument('--build-root',type=Path,default=ROOT/'build')
-    parser.add_argument('--hold-ns',type=float,default=2000)
+    parser.add_argument('--hold-ns',type=float,default=500)
     parser.add_argument('--step-ns',type=float,default=2)
     parser.add_argument('--timeout',type=float,default=600)
     parser.add_argument('--rebuild-pnr',action='store_true')
