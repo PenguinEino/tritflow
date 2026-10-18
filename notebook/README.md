@@ -141,6 +141,11 @@ regression. Edited HDL and its includes are staged in the notebook build tree;
 committed examples stay intact. A deliberately broken signal-arithmetic
 expression prints its located HDL error and a repair hint. Every selected
 circuit also runs extracted ngspice with all input states in the chosen order.
+Its initial internal-node Newton guesses come from mapped logic and strict-LVS
+net correspondence. The notebook displays those `.nodeset` values; no `.ic` or
+`uic` constrains the transient. This avoids the nonphysical operating-point
+root observed in the NOR-based sorter, while outputs still face the independent
+integer oracle and unchanged acceptance band.
 
 ```sh
 python3 -m pytest tests/synth/test_curated.py -q
@@ -177,6 +182,7 @@ characterization and qualification files are checked against their referenced
 artifacts before their numbers are displayed. FILL's probe-based qualification
 is labeled explicitly; it is not called a standalone strict LVS match. Both
 the nominal fanout method and measurement scope come from the SIM JSON. Band
-settling, finite-step resolution, sampled analog coverage and omitted RC/PVT/IR
-effects remain explicit limitations. The exact requested SIM sizing API and
+settling, finite-step resolution, sampled analog coverage, omitted signal
+R/coupling/PVT and ideal-rail transient assumptions remain explicit limitations.
+The exact requested SIM sizing API and
 return schema are in `docs/status/FRONTEND.md`.

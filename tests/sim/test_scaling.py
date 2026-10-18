@@ -60,3 +60,40 @@ def test_imported_code_provenance_is_frozen_but_model_inputs_are_live(monkeypatc
     after=scaling.experiment_sources()
     assert after[code_path]==before[code_path]  # running modules do not reload
     assert after[model_path]=='changed-on-disk'  # solver reads the current models
+
+
+def test_fits_recover_delay_per_trit_and_effective_power_per_cell():
+    import pytest
+    from tritflow.sim.scaling import fit_scaling
+    from tritflow.viz.scaling import scaling_fit_figure
+    rows=[]
+    for n in [1,2,3]:
+        rows.append({'n':n,'cell_count':16*n,'state':'complete','passed':True,
+                     'carry':{'pre':{'max_settling_s':(5+49*n)*1e-9},
+                              'post':{'max_settling_s':(7+50*n)*1e-9}},
+                     'static_power_worst_w':.004*16*n+.001})
+    # Failed designs are diagnostics, not measured fit points.
+    rows.append(dict(rows[-1],n=99,passed=False))
+    result={'rows':rows};fits=fit_scaling(result)
+    assert fits['widths']==[1,2,3]
+    assert fits['carry']['pre']['slope']==pytest.approx(49e-9)
+    assert fits['carry']['post']['intercept']==pytest.approx(7e-9)
+    assert fits['static_power']['slope']==pytest.approx(.004)
+    assert fits['static_power']['intercept']==pytest.approx(.001)
+    assert fits['static_power']['r_squared']==pytest.approx(1)
+    assert len(scaling_fit_figure(result).data)==6
+    assert fit_scaling({'rows':rows[:1]})['carry']['pre'] is None
+
+
+def test_comparison_reports_concurrent_or_missing_original_runs(tmp_path,monkeypatch):
+    from tritflow.sim import scaling
+    monkeypatch.setattr(scaling,'ROOT',tmp_path)
+    base=tmp_path/'baseline';base.mkdir()
+    (base/'adder_scaling.json').write_text('{"rows":[]}')
+    (base/'adder4.postlayout.json').write_text('{"passed":true}')
+    live=tmp_path/'build/adder4/postlayout';live.mkdir(parents=True)
+    (live/'summary.json').write_text('{"passed":false,"state":"running"}')
+    result=scaling.compare_phase3({'rows':[]},baseline=base,destination=tmp_path/'comparison.json')
+    assert result['original_postlayout_complete'] is False
+    assert result['original_postlayout'][0]['state']=='running'
+    assert result['original_postlayout'][1]['state']=='unavailable'

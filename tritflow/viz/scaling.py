@@ -86,3 +86,47 @@ def sizing_figure(result, *, title=None):
     fig.update_layout(title=title or f'{result["cell"]}: nominal DC sizing',template='plotly_white',
                       xaxis_title='Worst absolute static rail current (µA)',yaxis_title='Worst discrete-state level error (V)')
     return fig
+
+
+def scaling_fit_figure(result, *, title='Ripple carry and the DC-power cost of ternary dividers'):
+    """Measured points and free-intercept OLS lines; no unmeasured extrapolation."""
+    from tritflow.sim.scaling import fit_scaling
+    fits = result.get('fits') or fit_scaling(result)
+    rows = sorted((r for r in result['rows'] if r.get('passed') and r.get('state')=='complete'),key=lambda r:r['n'])
+    fig = make_subplots(rows=1,cols=2,horizontal_spacing=.16,
+                        subplot_titles=('Worst measured full-length carry','Worst representative static power'))
+    annotations = []
+    for mode,color in (('pre','#3478ad'),('post','#bc5a22')):
+        selected = [r for r in rows if r['carry'][mode]['max_settling_s'] is not None]
+        fig.add_trace(go.Scatter(x=[r['n'] for r in selected],
+            y=[r['carry'][mode]['max_settling_s']*1e9 for r in selected],
+            mode='markers',name=f'{mode}-layout measured',marker={'color':color,'size':9}),row=1,col=1)
+        fit = fits['carry'][mode]
+        if fit:
+            fig.add_trace(go.Scatter(x=fit['x'],y=[v*1e9 for v in fit['predicted']],
+                mode='lines',name=f'{mode}-layout fit',line={'color':color,'dash':'dash'}),row=1,col=1)
+            r2 = 'undefined' if fit['r_squared'] is None else f'{fit["r_squared"]:.5f}'
+            annotations.append(f'{mode}: {fit["slope"]*1e9:.3f} ns/trit + {fit["intercept"]*1e9:.3f} ns; R²={r2}')
+    fig.add_trace(go.Scatter(x=[r['cell_count'] for r in rows],
+        y=[r['static_power_worst_w']*1e3 for r in rows],mode='markers',
+        name='DC power measured',marker={'color':'#23865c','size':9}),row=1,col=2)
+    fit = fits['static_power']
+    if fit:
+        fig.add_trace(go.Scatter(x=fit['x'],y=[v*1e3 for v in fit['predicted']],
+            mode='lines',name='DC power fit',line={'color':'#23865c','dash':'dash'}),row=1,col=2)
+        r2 = 'undefined' if fit['r_squared'] is None else f'{fit["r_squared"]:.6f}'
+        fig.add_annotation(x=.58,y=.99,xref='paper',yref='paper',showarrow=False,xanchor='left',yanchor='top',
+            bgcolor='rgba(255,255,255,.85)',text=f'{fit["slope"]*1e3:.4f} mW/cell + {fit["intercept"]*1e3:.4f} mW<br>R²={r2}; fixed adder cell mix')
+    if annotations:
+        fig.add_annotation(x=.01,y=.99,xref='paper',yref='paper',showarrow=False,xanchor='left',yanchor='top',
+                           bgcolor='rgba(255,255,255,.85)',text='<br>'.join(annotations))
+    fig.add_annotation(x=0,y=-.26,xref='paper',yref='paper',xanchor='left',showarrow=False,align='left',
+        text='Resistive-divider ternary cells draw DC current without switching; lower clock frequency alone does not remove it.'
+             '<br>Nominal documented-state maxima; fit residuals are not PVT uncertainty. No extrapolation beyond measured widths.')
+    fig.update_xaxes(title_text='Adder width (trits)',dtick=1,row=1,col=1)
+    fig.update_xaxes(title_text='Mapped cells (fixed adder mix)',dtick=16,row=1,col=2)
+    fig.update_yaxes(title_text='Settling (ns)',row=1,col=1)
+    fig.update_yaxes(title_text='Static power (mW)',row=1,col=2)
+    fig.update_layout(title=title,template='plotly_white',height=530,
+                      legend={'orientation':'h','y':-.14},margin={'b':145})
+    return fig

@@ -18,12 +18,15 @@ def main():
     parser.add_argument('--load-only',action='store_true')
     parser.add_argument('--skip-load',action='store_true')
     args = parser.parse_args()
-    from tritflow.sim.scaling import run_scaling
-    from tritflow.viz.scaling import scaling_figure, load_sweep_figure
+    from tritflow.sim.scaling import run_scaling, compare_phase3
+    from tritflow.viz.scaling import scaling_figure, load_sweep_figure, scaling_fit_figure
     passed = True
     if not args.load_only:
         result = run_scaling(args.sizes,jobs=args.jobs)
         scaling_figure(result).write_html(ROOT/'results/adder_scaling.html',include_plotlyjs='cdn')
+        scaling_fit_figure(result).write_html(ROOT/'results/adder_scaling_fit.html',include_plotlyjs='cdn')
+        if (ROOT/'results/phase3_assumed/adder_scaling.json').is_file():
+            compare_phase3(result)
         passed = result['passed']
     if not args.skip_load:
         from tritflow.sim.load_sweep import sweep_output_load

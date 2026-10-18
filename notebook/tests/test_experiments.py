@@ -36,9 +36,17 @@ def test_published_sources_relocate_without_recorded_build_directory(tmp_path):
     model = pdk/"libs.tech/spice/models/model"
     model.parent.mkdir(parents=True)
     model.write_bytes(b"model")
+    manual = pdk/"openIP62/IP62/Technology/doc/reference.pdf"
+    manual.parent.mkdir(parents=True)
+    manual.write_bytes(b"PDK reference")
+    cell = root/"cells/out/INV/INV.spice"
+    cell.parent.mkdir(parents=True)
+    cell.write_bytes(b"cell")
     record = {"sources_sha256": {
-        "/old/repo/tritflow/sim/model.py":sha256(source.read_bytes()).hexdigest(),
+        "/old/tritflow/tritflow/sim/model.py":sha256(source.read_bytes()).hexdigest(),
+        "/old/tritflow/cells/out/INV/INV.spice":sha256(cell.read_bytes()).hexdigest(),
         "/old/PDK/libs.tech/spice/models/model":sha256(model.read_bytes()).hexdigest(),
+        "/old/PDK/openIP62/IP62/Technology/doc/reference.pdf":sha256(manual.read_bytes()).hexdigest(),
         "/old/repo/build/adder4/adder4.gds":"not-a-runtime-input"}}
     experiments.verify_publication_sources(record,root,pdk)
     source.write_bytes(b"new source")
