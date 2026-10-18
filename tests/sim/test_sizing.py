@@ -68,3 +68,14 @@ def test_finite_nonphysical_solver_root_is_not_a_design_measurement(tmp_path,mon
     assert row['max_error_v'] is None and row['max_static_current_a'] is None
     assert not row['passed'] and 'Nonphysical DC output' in row['error']
     assert row['transfer']['data']['v(y)']==[333.]  # preserve the rejected evidence
+
+
+def test_dc_nodeset_callable_is_only_an_initial_guess():
+    from tritflow.sim.characterize import dc_operating_points
+    source,_=sizing.published_dimensions('INV')
+    vectors=[(-1,),(0,),(1,)]
+    rows=dc_operating_points(source,'INV',['A'],['Y'],vectors,lambda v:{'Y':-v[0]},
+                             nodeset=lambda v:{'Y':3.2})
+    assert all(r['passed'] for r in rows)
+    assert rows[0]['output_v']['Y']>4.5 and rows[2]['output_v']['Y']< -4.5
+    assert abs(rows[1]['output_v']['Y'])<.5

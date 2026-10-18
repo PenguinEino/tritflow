@@ -19,7 +19,7 @@ Constants live in `tritflow/__init__.py`.
 | `tritflow/sim/`, `tritflow/extract/`, `tests/sim/`, `tests/extract/` | SIM |
 | `tritflow/viz/graph.py`, `tests/viz/` | FRONTEND |
 | `tritflow/viz/waves.py`, `tritflow/viz/scaling.py`, `results/`, `cells/out/sizing/` | SIM |
-| `tritflow/viz/layout.py`, `tests/viz/test_layout*.py` | PNR |
+| `tritflow/viz/layout.py`, `tests/viz/test_layout*.py`, `examples/fuzz_pnr.py`, `examples/pnr_all.py` | PNR |
 | `tritflow/flow.py` | FRONTEND |
 | `notebook/` | FRONTEND (draft) |
 | other `tritflow/viz/` | later |

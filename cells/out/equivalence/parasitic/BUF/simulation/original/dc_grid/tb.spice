@@ -1,0 +1,57 @@
+TritFlow ternary testbench
+*
+.parameters vthMP	= 0
+.parameters vthMN 	= 0
+.parameters vthMPE      = 0
+.parameters vthMNE      = 0
+.parameters magRR       = 1
+.parameters magRS       = 1 
+.parameters magCSIO     = 1 
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
+.subckt BUF A Y VDD VMID VSS
+Xstage0_M_ex_1 stage0_n_ex_4 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+Xstage0_M_ex_2 stage0_n_ex_5 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+Xstage0_R_ex_3 stage0_n_ex_5 mid VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+Xstage0_R_ex_4 stage0_n_ex_4 mid VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+Xstage1_M_ex_1 stage1_n_ex_4 mid VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+Xstage1_M_ex_2 stage1_n_ex_5 mid VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+Xstage1_R_ex_3 stage1_n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+Xstage1_R_ex_4 stage1_n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 5.15950868e-14
+Ctfwire1 A 0 1.985781e-15
+Ctfwire2 stage0_n_ex_4 0 6.368421e-15
+Ctfwire3 stage0_n_ex_5 0 7.536423e-15
+Ctfwire4 mid 0 6.5285726e-15
+Ctfwire5 VSS 0 3.69301728e-14
+Ctfwire6 stage1_n_ex_4 0 6.368421e-15
+Ctfwire7 stage1_n_ex_5 0 7.536423e-15
+Ctfwire8 Y 0 4.5427916e-15
+.ends BUF
+
+.temp 27
+.options rshunt=1e12
+VDD VDD 0 5
+VMID VMID 0 0
+VSS VSS 0 -5
+Xdut A Y VDD VMID VSS BUF
+Vin0 A 0 PWL(0 -5)
+Cload0 Y 0 1e-14
+.nodeset v(Y)=-5
+.nodeset v(xdut.stage0_n_ex_4)=5
+.nodeset v(xdut.stage0_n_ex_5)=-5
+.nodeset v(xdut.stage1_n_ex_4)=5
+.nodeset v(xdut.stage1_n_ex_5)=-5
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+set numdgt=15
+dc Vin0 -5 5 0.125
+wrdata waveform.txt v(A) v(Y) i(vdd) i(vmid) i(vss)
+quit
+.endc
+.end
