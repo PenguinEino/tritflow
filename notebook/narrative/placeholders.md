@@ -1,7 +1,7 @@
 # Placeholder registry and integration contract
 
 All reader-visible substitutions in the chapter files, teaser, pitch, captions,
-repository README draft and official-repository PR draft are
+repository README drafts, reuse appendix and official-repository PR draft are
 listed below. They are specifications for FRONTEND's renderer, not attributes
 already added to the Python API. Do not use Python `str.format` over whole
 Markdown files: LaTeX has its own braces. Replace only the exact registered
@@ -259,7 +259,7 @@ and fresh/recorded status where relevant. It is acceptable and required to say
 | `{evidence.load_checks}` | `results/full_add_load_sweep.json: $.rows[*]`, load_f/passed/unsettled/failures and `$.boundary`, `$.conditions`; include failing rows. |
 | `{evidence.routing_checks}` | `build/pnr_fuzz/summary.json: $.completed`, `.passed`, `.failed`, `.inputs_stable`, `.cases[*]`; verify its fingerprint and each `fuzz.result.json` native evidence using `examples/fuzz_pnr.py`'s recorded method. No matching distributed summary means “unavailable”, not the historical count. |
 | `{evidence.tests}` | A selected matching-revision JUnit XML, e.g. `build/sim_verification/pytest.xml`, via `xml.etree.ElementTree.parse(path)` and `testsuite` tests/failures/errors/skipped attributes, plus command, source revision and timestamp. Do not combine older stream totals into a supposed current full-suite count. `logs/review/pytest.xml` concerns the frozen review revision only. |
-| `{evidence.colab_status}` | Matching real-Colab observation report, currently `docs/status/COLAB.md`, “Overall result”/“Environment and procedure”, with its tested source identity. `logs/colab/run-timing.json` records a failed old-tag run and manual follow-up; `printedFinalElapsedIncludesManualFollowup` forbids using that value as a successful benchmark. Until a matching successful run exists, render “No successful clean-Colab Run all recorded for this revision.” |
+| `{evidence.colab_status}` | Read `notebook/colab_verified.json` and its linked `docs/status/COLAB.md` report; verify `publish`, `passed`, notebook/evidence hashes and the named tested source. State that revision, completed cells, attempt count and `timing_scope` together. The current successful retry excludes the initial setup attempt and retry gap; it is not an uninterrupted cold-install time. Label a historical success as historical and state that it does not verify the current revision. Without a matching successful observation, do not claim current-revision Colab verification. The legacy `logs/colab/run-timing.json` failure/manual-follow-up value remains unsuitable as a success benchmark. |
 | `{evidence.session_seconds}` | `time.monotonic()-started` in the closing notebook cell, where `started` is set before setup. Label actual environment and completion; local or failed/manual elapsed time is not a successful clean-Colab benchmark. |
 
 ## Integration requests and optional material
@@ -272,9 +272,10 @@ and fresh/recorded status where relevant. It is acceptable and required to say
   Its source hashes already match the independent equivalence report at authoring.
 - Successful release and real-Colab evidence replace the appendix's truthful
   unavailable state only when those actual checks have been completed.
-- STA, corner sweeps and the chip wrapper are optional. No unconditional
-  result tokens or performance claims depend on them. If included, give each
-  its actual report, conditions, state coverage and independent approval scope.
+- Phase 4 includes the validated STA and framed-top results as labelled
+  recorded evidence. Resolve their new contexts below, or replace their whole
+  result blocks with unavailable status. Corner sweeps remain optional. Give
+  every included study its actual conditions, coverage and approval scope.
 
 ## Paper-figure source contexts
 
@@ -381,8 +382,8 @@ documented sampled DC states, not all possible inputs of a wide adder.
 
 ## Public README and official-repository PR substitutions
 
-`readme_draft.md` is intended for the public source repository's root README;
-its file/image links resolve from that destination. `pr_description.md` has
+`readme_final.md` supersedes `readme_draft.md` for the public source repository's
+root README; both files' links resolve from that destination. `pr_description.md` has
 the proposed PR title as its first heading and the reviewable body below.
 The exact author block is copied from docs/author.md in both drafts. No phone
 number, membership, attendance or approval status is inferred.
@@ -395,9 +396,10 @@ number, membership, attendance or approval status is inferred.
 
 `evidence.colab_status` must match the selected submitted-source revision in
 these public drafts, and `evidence.tests` must state its own scope/revision.
-The current legacy payload is neither a matching release nor a successful
-Colab run. Keep the appropriate unavailable text until a matching record
-exists. Proposed filing scope is only the TritFlow project folder; no actual
+The legacy payload must not be promoted through a later historical Colab
+success; the selected submitted source still needs its own matching evidence.
+Keep the appropriate unavailable text when that record is absent. Proposed
+filing scope is only the TritFlow project folder; no actual
 official-repository diff or PR is asserted or created by this text draft.
 
 ## Phase 3 — identify routing realizations and explain the sizing comparison
@@ -445,3 +447,113 @@ and per-output timing row, rather than relying only on a nearby prose note.
 For a fresh replacement of an archived experiment, derive its actual seed
 from that run's PNR/options and label it fresh; do not claim the archive's
 identity when its geometry or options differ.
+
+## Phase 4 — STA, framed top, reuse and final README
+
+### STA comparison
+
+Let `sta = JSON('results/sta/validation.json')`. Use schema 4 or a reviewed
+compatible successor and require `complete`, `qualified_current` and
+`stable_snapshot`. Verify its `source_sha256`, `sta_code_sha256`, cell generation
+and timing-table inputs, plus each design's native SPICE/load/PNR evidence.
+The inspected report is complete and current but `accuracy_passed` is false:
+the outlier must remain visible. This is a successful validation with a stated
+exception, not an all-output accuracy pass.
+
+The scatter in `figures/fig_sta.py` uses each
+`sta['designs'][*]['outputs'][*]['tested_predicted_s']` against `simulated_s`,
+converted from seconds to ns. Each point is an output maximum over the same
+tested transition set; the independently selected predicted and measured maxima
+need not occur on one identical transition. Never describe it as one paired
+worst transition. `predicted_s` is the separate conservative window estimate.
+The API illustration uses the reader's actual `vectors`, scalar output
+`load_f`, input-ramp `ramp_s` and logical-net `wire_caps` dictionary; it does
+not execute the stored figure's whole
+multi-design validation in one call. For unequal output loads use the API's
+per-output load dictionary instead of scalar wording.
+
+Populate `wire_caps` in the collapsed helper by taking
+`reference_net_map(lvs['report'], net.top)` from `tritflow.extract` and looking
+up each mapped net's `capacitance_f` in the actual GDS-derived capacitance
+report, as `tritflow/sta/validate.py:_validate_design` does. Require all logical
+nets to map. Passing `layout.data` alone instead invokes the separate
+PNR-geometry wire estimator and would not reproduce the stated matched-load
+validation. The short visible code receives this dictionary rather than
+displaying that report-mapping plumbing.
+
+| Token | Exact source or calculation |
+|---|---|
+| `{sta.within_target}` | `sta['outputs_within_target']`; cross-check the count of finite output rows with `abs(tested_error_percent) <= sta['accuracy_target_percent']`. |
+| `{sta.output_count}` | `sta['statistics']['sim_endpoint_pairs']['count']`; require equality with the number of finite compared `tested_predicted_s`/`simulated_s` output pairs. |
+| `{sta.target_pct}` | `sta['accuracy_target_percent']`. |
+| `{sta.mape_pct}` | `sta['statistics']['sim_endpoint_pairs']['mean_absolute_percent_error']`; cross-check `mean(abs(100*(tested_predicted_s/simulated_s-1)))` over those output rows. This is a percentage, not the mean error in ns. |
+| `{sta.outlier_endpoint}` | For the unique inspected `sta['outside_accuracy_target']` row, join `design` and `output` with `/`. If a later report has several exceptions, replace the singular sentence with the complete list; never select one silently. |
+| `{sta.outlier_error_pct}` | The same row's signed `error_percent`; the current positive value supports “overpredicted.” If the sign changes, change that word. |
+| `{sta.bound_mean_factor}` | `sta['worst_case_validation']['pessimism_vs_output_maxima']['mean_factor']`; cross-check the mean of `predicted_s/simulated_s` over compared outputs. Preserve the separate finite nominal-case coverage and `certified_analog_bound` scope. |
+| `{sta.run_ids}` | For every `sta['designs']` row, select its native `<design>.pnr.json` path in `sta['source_sha256']`: `build/adder_scaling/<design>/...` for group `scaling`, `build/<design>/...` for group `example`. Verify its digest and corresponding GDS, then format `STA <group>/<design> · seed <pnr['seed']>`. The examples consume the paper routes, not the four-design ZIP. Common seeds may be grouped only with an explicit list/range of the included designs. Retain each individual identity on Appendix B output rows. |
+| `{evidence.sta_checks}` | Format the validated report's matched count, target, MAPE, all `outside_accuracy_target` rows and `accuracy_passed`; separately give conservative mean factor, `worst_case_validation.case_count`, `.transition_case_count`, `.underprediction_count`, `.all_slew_domains_closed` and `.certified_analog_bound`. Link the exact validation and per-design tested/global reports with source identity, nominal conditions, loads, input plans and routing realizations. Do not substitute the conservative estimate into the scatter's accuracy summary. |
+
+### Full-chip wrapper
+
+The chapter-9 and README result is the canonical paper adder's separate wrapper,
+not the taller seed-zero archived core. Read
+`chip_data = JSON('build/adder4/chip/tr_1um_adder4.chip.json')` and
+`signoff = JSON('build/adder4/chip/signoff/signoff.summary.json')`. Verify the
+source core's GDS/PNR identity, frame source digest and pinned PDK, consumed
+rules/binary/reference and produced reports/masks using PNR's recorded
+input/output verification. `clean` and `physical_checks_passed` are true in
+the inspected report; `submission_ready` is false. They are separate claims.
+
+| Token | Exact source or calculation |
+|---|---|
+| `{chip.die_um}` | `chip_data['stats']['die_size_um']`, components joined by ×, cross-check the actual frame boundary and `chip_data['die']`. |
+| `{chip.pad_count}` | `chip_data['stats']['pad_count']`, require agreement with `signoff['provenance']['frame']['pad_count']` and the actual pad map. |
+| `{chip.drawing_drc_items}` | `signoff['drawing_drc']['violations']`, require `clean` and a verified native report. Counts include warnings/visited items under the report's stated policy. |
+| `{chip.lvs_status}` | “Match” only when `signoff['drawing_lvs']['matched']` and `strict_ports` are true, with the actual native device/port report. This is drawing LVS before mask-data preparation. |
+| `{chip.mask_drc_items}` | `signoff['mask_drc']['violations']`, require `clean` and the native post-MDP mask-DRC report; no waiver or missing-as-zero fallback. |
+| `{chip.precheck_status}` | “Pass” only if `signoff['mpw_precheck']['clean']` is true and `exit_code == 0`, with the inspected template and retained log. |
+| `{chip.submission_ready}` | Lowercase JSON boolean from `signoff['submission_ready']`; retain its reason and remaining external approvals. If absent, say unavailable; do not infer it from `clean`. |
+| `{evidence.chip_checks}` | Format the above results plus source core run identifier, wrapper GDS identity, frame/pad map, MDP output, actual drawing/mask reports, MPW template/precheck, and `submission_ready`/reason. Preserve `mask_lvs.defined=false`, `matched=null` as “No post-mask LVS stage defined.” Do not convert null to Match. Include the full-adder wrapper only as a separately identified row with its own evidence. |
+
+The visible code calls `layout.result.to_chip()` (the `PnrResult` API) and then
+the returned `ChipResult.signoff()`. `flow.Layout` currently has no `to_chip`
+convenience method. `Layout.signoff()`/`PnrResult.signoff()` concern the macro,
+not a frame. Select the canonical compatible paper layout for the recorded
+demo, not whichever live/archived result happens to have the same top name.
+Use `library=`, `pdk_root=` and `klayout_binary=` explicitly with nondefault
+settings: the low-level wrapper is not a `flow.Settings` delegate. Check and
+display assertions/report identities in Appendix B or collapsed helper cells,
+not in the chapter's short method example.
+
+The native chip artifacts are currently under ignored `build/`. FRONTEND must
+export/reopen a verified portable subset for the recorded chapter; reading a
+status prose line is not a runtime replacement. The STA JSON is committed but
+its native consumed sources also need portable identity/coverage information.
+Do not start a new physical run or regenerate a figure merely to insert prose.
+The release step alone redraws figures, before capturing their hashes.
+
+### Installation and named Colab observation
+
+| Token | Exact source or calculation |
+|---|---|
+| `{reuse.source_ref}` | The selected public immutable source commit containing this API and its repository assets. For a frozen clean checkout use its resolved `SOURCE_COMMIT` / `git rev-parse --verify HEAD^{commit}`, after the release owner checks that the commit is publicly fetchable and contains the rendered guide. Require a full hexadecimal commit before inserting into the pip VCS URL. This is the source to install, not automatically the older Colab-tested commit or the source stored in an unrelated submission payload. If unavailable, replace the install block with the release's explicit unavailable state. |
+| `{colab.source_commit}` | `notebook/colab_verified.json: $.commit`, after checking `publish`, `passed`, referenced report and evidence/notebook hashes. It names a historical observation, not current-source verification. |
+| `{colab.code_cells}` | Same named record, `$.passed_code_cells`, consistent with its per-cell log. |
+| `{colab.seconds}` | Same record, `$.run_all_seconds_including_setup`, interpreted with `$.timing_scope`; in the inspected record it means the successful second Run all only, excluding the initial setup attempt and retry gap. The field name alone must not override this scope. |
+
+`readme_final.md` supersedes the earlier public README draft and includes a
+source-specific historical Colab paragraph. Its retry wording is valid for
+the current record (`run_all_attempts=2`, `first_attempt_completed=false`);
+if those change, replace the whole paragraph with wording for the actual run.
+Do not promote it to a current-revision or uninterrupted-install claim. The
+Colab badge still requires the independent compatible-release guard above.
+
+Appendix C and the README share the same exactly seven-line API example.
+Its `N=2`, zero vector, `100e-15` load and CLI seed are chosen example inputs,
+not measured result claims. The steady-state smoke test is explicitly
+distinguished from the notebook's independent arithmetic oracle and transition
+coverage. Editable VCS installation is deliberate: `pyproject.toml` discovers
+`tritflow*` packages, while cell/example/notebook data are repository assets.
+The native tools and pinned PDK still need setup. README links are root-relative;
+when Appendix C is inserted into the notebook, preserve code paths relative
+to the source root and rebase any narrative-source links appropriately.

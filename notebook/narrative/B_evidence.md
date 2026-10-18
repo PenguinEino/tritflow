@@ -17,6 +17,8 @@ saved report does not execute a new physical or electrical check.
 | Selected adder | {evidence.adder_checks} |
 | Width sweep | {evidence.width_checks} |
 | Load sweep | {evidence.load_checks} |
+| Static timing | {evidence.sta_checks} |
+| Framed-top physical checks | {evidence.chip_checks} |
 | Random-design routing checks | {evidence.routing_checks} |
 | Automated regression | {evidence.tests} |
 | Colab verification | {evidence.colab_status} |
@@ -52,8 +54,19 @@ The default session runs the opening adder and selected editable circuit;
 larger sizing, width and load sweeps can read their recorded data. The closing
 table labels fresh calculations, local reuse and recorded experiments, with
 wall time for each stage. The measured runtime for this session is
-{evidence.session_seconds} s including setup. The clean-Colab result above
-states whether an installation-inclusive Run all has completed successfully.
+{evidence.session_seconds} s including setup. The Colab record above names its
+tested source, completion and timing scope, including any setup retry; a
+historical successful run does not verify a later revision.
+
+The STA table compares `tested_predicted_s` with `simulated_s` for each
+design/output and identifies its matched input plan, load and routing
+realization. Keep the separate `predicted_s` conservative estimate and its
+coverage in separate columns. Show the out-of-target endpoint as well as the
+points within the accuracy band; a mostly accurate comparison is not an
+all-output accuracy pass. The framed-top table identifies the source core,
+frame and pad map and gives drawing DRC, strict drawing LVS, mask DRC and
+MPW precheck separately, alongside `submission_ready` and the remaining
+approval steps. No post-mask LVS result is implied.
 
 <details>
 <summary>Repeat the calculations</summary>
@@ -75,6 +88,12 @@ python3 examples/adder_scaling.py --jobs 1
 python3 -m tritflow.sim.publication
 python3 -m pytest tests/sim tests/extract -q
 ```
+
+With the same native SPICE outputs available, `python3 -m tritflow.sta.validate`
+recomputes the timing comparisons without rerunning SPICE. The chip API in
+chapter 9 retains its reports under the chip's `signoff/` directory;
+`chip.signoff(force=True)` requires fresh full-top checks. Default repeated
+calls validate the saved artifacts before reuse.
 
 `tritflow.sim.load_sweep.sweep_output_load(directory, destination=...)` repeats
 the full-adder load experiment against the generated physical design.
