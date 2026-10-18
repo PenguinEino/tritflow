@@ -25,7 +25,7 @@ Phase-1 `/tmp` artifacts are superseded by these project-local results.
   Plotly net/instance selection, placement + HPWL animation, and routing replay.
   Figures are normal notebook-ready Plotly Figures; exported HTML embeds Plotly.
 
-## Phase 5 — manufacturing qualification (in progress)
+## Phase 5 — manufacturing qualification
 
 The real local MPW flow was read from
 `~/TR-1um_MPW_Sanken/.github/workflows/check.yml`,
@@ -37,14 +37,110 @@ submission pass `cellname` to the MDP deck; the template passes `top_cell`,
 which that particular deck does not read. Both current PNR GDSs have one top;
 our call explicitly uses the supported `cellname` argument.
 
-Initial actual results: adder4 46 and full_add 16 `WAR06: Floating SG Detected`
+Final actual results: adder4 46 and full_add 16 `WAR06: Floating SG Detected`
 mask items, all traced through actual mask SG/CO/M1/V1/M2 to their external
 input nets. No other mask violation class appears. These are counted as
 failures. Drawing DRC and strict drawing LVS remain clean. The previous full
 adder's `FULL_ADDER_POST_LAYOUT.md` records the same 16 external-input warnings.
 The full-chip precheck rejects these unframed core macros: their boundaries
 are not [-1250,-1250,1250,1250] µm and no OSS_FRAME/OSS_FRAME_TEG exists.
-The final reports, provenance and regressions are being completed.
+Qualification result: **FAIL for both standalone macros**. Actual checks,
+provenance, diagnostics and the cached API are complete. Remaining manufacturing
+blockers are full-chip frame and real input-I/O/protection integration. No PNR
+metal-generation defect or cell-internal process-rule defect was found. The
+phase-3 choice to keep the canonical outputs as compact core macros is retained;
+a framed submission is a separate full-chip artifact requiring its I/O mapping.
+No reference files or PDK rules were modified.
+
+### Measured results and retained evidence
+
+Native KLayout is **0.30.9**, matching the inspected MPW workflow; Python
+`klayout.db` is **0.30.6**. The local PDK directory has no `.git` metadata;
+each report therefore retains SHA-256 of every consumed deck/include, native
+binary, GDS, cell reference/abstract and implementation file, plus byte copies
+of the DRC/LVS rule trees. The inspected MPW template checkout is
+`b3dab389ddaac1056c93bf5704230c6d2f52d5b2`.
+
+| Design | Drawing DRC | Strict drawing LVS | MDP | Mask IP62 DRC | MPW precheck | Macro clean / submission ready | Native run / cached call |
+|---|---:|---|---|---|---|---|---:|
+| adder4 | 0 | Match | Generated | 46 × WAR06 | Failed die/frame | false / false | 7.81 s / 15.5 ms |
+| full_add | 0 | Match | Generated | 16 × WAR06 | Failed die/frame | false / false | 4.94 s / 12.0 ms |
+
+Every warning is unwaived and unvisited in the actual native reports. The API
+also counts already visited items as failures, so opening/marking a report
+cannot manufacture a pass. Layer 63/0 waiver polygon count is zero in drawing
+and mask outputs. Independent flattened Region XOR proves **CO, M1, V1 and M2
+are identical before and after MDP** for both designs (all XOR areas zero).
+
+| Violation / precheck class | adder4 | full_add | Cause / ownership |
+|---|---:|---:|---|
+| `WAR06: Floating SG Detected` | 46 | 16 | Exposed primary-input gates lack an attached junction/pad path at standalone-core scope; full-chip I/O integration |
+| Other mask DRC classes | 0 | 0 | No routing geometry or cell-internal process violations observed |
+| Fixed MPW die boundary | 1740 × 1590 at (0,0) | 792 × 702 at (0,0) | Template requires centered 2500 × 2500 µm |
+| Required frame cell | absent | absent | `OSS_FRAME` or `OSS_FRAME_TEG` must be present in a full-chip submission |
+
+Gate-to-port counts from actual mask connectivity: adder4 has 4 warnings on
+each `a[0..3]`, 6 on each `b[0..3]`, and 6 on `cin`; full_add has `a:4`,
+`b:6`, `cin:6`. No marker is attributed to an internal/unmapped net. Labels
+alone satisfy the drawing deck’s top-port handling; the IP62 antenna check
+uses physical junction/pad connectivity. Exact marker boxes and net names
+are in `floating_gate_attribution` in each sign-off JSON.
+
+**Separate fixed-bias diagnostic:**
+`build/full_add/signoff/input_bias_diagnostic/summary.json` records drawing
+DRC **0**, strict device LVS **Match**, and mask DRC **0**. Its parent ties
+all three DUT inputs to the existing VDD feed, reproducing the earlier
+submission’s diagnostic method. The original functional GDS is unchanged.
+This fixed-input fixture establishes the source of WAR06; functional macro
+qualification retains its 16 warnings until real I/O integration.
+
+**Mask-level LVS:** neither the actual MPW workflow nor the prior submission
+check script defines a post-MDP LVS stage. The available legacy
+`libs.tech/klayout/tech/lvs/IP62/run.lvs` was additionally probed on a copied
+full_add mask: it exits **1 before extraction**, because its relative include
+points to missing `lvs/drc/00_Layers.drc`. It has no modern headless I/O
+parameter setup. No deck was repaired or substituted to claim mask LVS.
+Probe command/log: `build/full_add/signoff/legacy_mask_lvs_probe/probe.json`
+and `probe.log`. `mask_lvs.matched` is null; it is explicitly not a pass.
+
+Canonical summaries:
+
+- `build/adder4/signoff/signoff.summary.json`.
+- `build/full_add/signoff/signoff.summary.json`.
+
+Each summary points to `signoff/runs/<fingerprint>/`: input drawing snapshot,
+mask GDS, both complete DRC databases/logs, strict drawing LVS database and
+extracted/reference SPICE, MPW precheck log and copied unmodified rules. The
+initial raw MDP/IP62 discovery is retained in `signoff/discovery/`.
+
+### Public API and verification
+
+```python
+from tritflow.pnr import place_and_route
+
+lay = place_and_route("build/full_add/full_add.json", output_dir="build/full_add")
+checks = lay.signoff(mpw_template="/home/ishi-kai/TR-1um_MPW_Sanken")
+print(checks["clean"], checks["submission_ready"], checks["mask_drc"]["categories"])
+# A second identical call reuses the hashed result; force=True reruns checks.
+```
+
+`mpw_template` is optional: without one, macro qualification still runs, and
+`submission_ready` remains false because full-chip precheck was not proven.
+`PnrResult` retains its gate reference for immediate calls; reopening a saved
+result uses adjacent `<top>.json`, or accepts `netlist=...` explicitly.
+Other options: `output_dir`, `library`, `pdk_root`, `klayout_binary`, `timeout`
+and `force`. Missing mask output, tool failure and timeout raise with a log
+path. Physical-check failures return an explicit false result with all native
+evidence, consistent with the existing DRC/LVS report APIs. Canonical drawing
+GDS, PNR JSON and its power section are never rewritten by sign-off.
+
+Tests exercise actual INV mask warnings and net attribution, result reuse
+without invoking a native tool, invalidation after GDS/rule/reference/report
+changes, a missing MDP output despite exit 0, visited-warning rejection, mock
+library rejection and a clear missing-reference error. Final combined run: **36 passed in 67.67 s**. `compileall` and owned-path
+`git diff --check` pass. Repeated canonical sign-off calls confirmed cache
+reuse, unchanged input/output hashes and all native warning items still
+unvisited. No background PNR processes remain.
 
 **Interface requests for FRONTEND/integrator:** the owned public
 `PnrResult.signoff()` and `tritflow.pnr.signoff(result, ...)` are implemented.

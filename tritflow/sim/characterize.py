@@ -38,7 +38,8 @@ def dc_operating_points(subckts, top, inputs, outputs, vectors, expected, *, tim
         data = run_ngspice(bench['netlist'], 'op', bench['probes'],
                            timeout=timeout, workdir=folder)['data']
         out = {pin: float(data[f'v({pin})'.lower()][-1]) for pin in outputs}
-        errors = {pin: out[pin] - 5*ideal[pin] for pin in outputs}
+        rails=bench['supplies_v'];levels={-1:rails['VSS'],0:rails['VMID'],1:rails['VDD']}
+        errors = {pin: out[pin] - levels[ideal[pin]] for pin in outputs}
         rows.append({'input_trits': list(vector), 'output_v': out, 'error_v': errors,
                      'rail_current_a': {rail: float(data[f'i({rail.lower()})'][-1])
                                         for rail in ('VDD', 'VMID', 'VSS')},

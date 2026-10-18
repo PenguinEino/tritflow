@@ -35,9 +35,12 @@ def settling_time(time, voltage, ideal_v: float, start_s: float, end_s: float,
     return float(max(0, crossing - start_s))
 
 
-def measure_sequence(data: dict, bench: dict, expected) -> dict:
+def measure_sequence(data: dict, bench: dict, expected, *, ideal_volts=None) -> dict:
     """Check 1 ns before segment ends, and watch settling through the whole hold."""
     time = data['time']
+    if ideal_volts is None:
+        rails=bench.get('supplies_v',{'VDD':5.,'VMID':0.,'VSS':-5.})
+        ideal_volts={-1:rails['VSS'],0:rails['VMID'],1:rails['VDD']}
     rows = []
     for k, vector in enumerate(bench['vectors']):
         start = k * bench['hold_s']
@@ -46,19 +49,19 @@ def measure_sequence(data: dict, bench: dict, expected) -> dict:
         ideal = expected(vector)
         outputs = {}
         for pin in bench['outputs']:
-            target = TRIT_VOLTS[ideal[pin]]
+            target = ideal_volts[ideal[pin]]
             waveform = data[f'v({pin})'.lower()]
             observed = float(np.interp(check, time, waveform))
             error = observed - target
             settle = settling_time(time, waveform, target, start, end)
-            outputs[pin] = dict(ideal_trit=ideal[pin], voltage_v=observed, error_v=error,
+            outputs[pin] = dict(ideal_trit=ideal[pin],ideal_voltage_v=target, voltage_v=observed, error_v=error,
                                 passed=abs(error) <= PASS_BAND, settling_s=settle)
         currents = {rail: float(np.interp(check, time, data[f'i({rail.lower()})']))
                     for rail in ('VDD', 'VMID', 'VSS')}
         rows.append(dict(input_trits=list(vector), previous_trits=list(bench['vectors'][k-1]) if k else None,
                          check_s=check, outputs=outputs, rail_current_a=currents,
                          passed=all(v['passed'] and v['settling_s'] is not None for v in outputs.values())))
-    return dict(passed=all(r['passed'] for r in rows), rows=rows,
+    return dict(passed=all(r['passed'] for r in rows), rows=rows,ideal_volts={str(k):v for k,v in ideal_volts.items()},
                 max_error_v=max((abs(v['error_v']) for r in rows for v in r['outputs'].values()), default=0),
                 max_settling_s={p: max((r['outputs'][p]['settling_s'] for r in rows[1:]
                                        if r['outputs'][p]['settling_s'] is not None), default=None)
