@@ -33,7 +33,7 @@ def route(nodes,driver,loads,width,height,frames=()):
             signal=({**node.inputs,**node.outputs})[pin]
             terminals[point]=signal
             dx,dy=NORMAL[node.sides[pin]]
-            for k in (1,2):reserved[(point[0]+k*dx,point[1]+k*dy)]=signal
+            for k in (1,):reserved[(point[0]+k*dx,point[1]+k*dy)]=signal
     edges={};at=defaultdict(dict);segments=[]
 
     def axis(a,b):return 0 if a[1]==b[1] else 1

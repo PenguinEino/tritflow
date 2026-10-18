@@ -103,16 +103,27 @@ view, abstract, manifest and publication identity remains hashed. The real
 pin/obstruction invalidation test now also verifies isolation from STA edits;
 5 cache tests pass (0.85 s). No obsolete native run is published as current.
 
+The later capture completed the physical/analog loop and all publication
+checks, but the final broad source guard detected new unused modules and
+plotting-only updates from parallel work. It is retained as incomplete, never
+published. Cached physics now records the exact input filename/content map;
+rehashing that captured set rejects edits/deletions without treating unrelated
+module additions as consumed inputs. All actual abstracts, manifest and
+publication identity remain included. Fresh plots are not physics-cache inputs;
+GDS rasters carry a separate renderer hash. Tests for the revised manifest,
+real native campaign export/reload and notebook document pass (8 tests, 4.76 s).
+A new full native capture is running against the updated PNR core, before the
+recorded archive and default-run submission are rebuilt.
+
 ### Interface requests / current publication gate
 
 CELLS Phase 7 was published at generation `2026-10-18T10:26:47.211617+00:00`;
 the required pinned-deck and artifact checks pass. Both W/L grids now pass.
-Only SIM's width-scaling and load-boundary source hashes remain stale at this
-intermediate check. The new scaling file (19:38 JST) now matches the new cell
-views but still records an older `tritflow/sim/diagnose.py` hash; the load record
-still records the prior INV GDS. All declared source hashes remain enforced. The final capture is
-queued behind the real `notebook/tests/test_publications.py` checks, refreshed
-in a new interpreter on every poll. No stale flags are promoted to new results.
+SIM has now republished the width-scaling and load-boundary records against
+the pinned PDK and current cell views. All five required-publication tests pass
+(0.25 s); the previously stale source hashes are resolved. All declared source
+hashes remain enforced, and the final notebook also validates these records.
+No stale flags are promoted to new results.
 
 SIM's new public `postlayout.logical_nodeset(net, lvs_report, inputs, vector)`
 is consumed for the opening flow and both runs of all four designs, as well as

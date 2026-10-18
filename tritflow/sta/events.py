@@ -82,7 +82,7 @@ def analyze_events(netlist,pairs,*,library,wire_caps=None,output_load_f=10e-15,
                 if not samples:continue
                 event=max(samples,key=lambda e:e.time)
                 if a==b:
-                    if event.time>max(e.time for _,_,e in changes)+1e-9:
+                    if event.time>max(e.time for _,_,e in changes)+1e-18:
                         recovery.append(event);counters['unpropagated_local_hazards']+=1
                     continue
                 # Midpoint inertial approximation: a reversed request arriving
@@ -100,7 +100,8 @@ def analyze_events(netlist,pairs,*,library,wire_caps=None,output_load_f=10e-15,
                         delta=previous.time+1e-15-event.time
                         stage=event.path[-1]
                         event=replace(event,time=event.time+delta,path=event.path[:-1]+[
-                            replace(stage,delay_s=stage.delay_s+delta,arrival_s=stage.arrival_s+delta)])
+                            replace(stage,delay_s=stage.delay_s+delta,arrival_s=stage.arrival_s+delta,
+                                    time_order_adjustment_s=stage.time_order_adjustment_s+delta)])
                 generated.append(event)
             edges[name]=generated;recoveries[name]=recovery
         for pin in outputs:

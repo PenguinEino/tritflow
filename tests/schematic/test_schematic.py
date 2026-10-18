@@ -9,7 +9,7 @@ import pytest
 from tritflow.flow import load, loads
 from tritflow.netlist import GateNetlist, Instance, Port
 from tritflow.schematic import draw, legend
-from tritflow.schematic.vector import TRIT_COLOR
+from tritflow.schematic.vector import TRIT_COLOR, FONT
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -141,7 +141,8 @@ def test_constants_unused_input_fanout_repeated_pins_and_bus_order():
     assert_geometry(sch.scene)
     assert_connections(net,sch.scene)
     inputs=sorted((s for s in sch.scene.symbols if s.kind=='input'),key=lambda s:s.y)
-    assert [n.label for n in inputs]==[f'a[{i}]' for i in range(12)]
+    assert inputs[0].label=='a[10]'  # the used bit stays next to its consumer
+    assert [n.label for n in inputs[1:]]==[f'a[{i}]' for i in range(12) if i!=10]
     assert {'TIEP','TIEZ','TIEN'} <= {s.kind for s in sch.scene.symbols}
     assert sch.scene.junctions['a[10]']
 
@@ -189,7 +190,8 @@ def test_labels_never_overlap_with_all_overlays(name,n,expand):
              parasitics={s:100e-15 for s in net.nets()})
     renderer=RendererAgg(100,100,96)
     boxes=[]
-    for item in sch._vector().items:
+    vector=sch._vector()
+    for item in vector.items:
         if item['kind']!='text':
             # Check symbol pin stubs as well as the routed wires: gate curves
             # themselves use longer paths; every simple line is Manhattan.
@@ -197,12 +199,12 @@ def test_labels_never_overlap_with_all_overlays(name,n,expand):
                 (_,x0,y0),(_,x1,y1)=item['commands']
                 assert x0==x1 or y0==y1
             continue
-        font=FontProperties(family='DejaVu Sans',size=item['size']*.75,weight=item['weight'])
+        font=FontProperties(family=FONT,size=item['size']*.75,weight=item['weight'])
         w,h,d=renderer.get_text_width_height_descent(item['text'],font,False)
         x=item['x']-{'start':0,'middle':.5,'end':1}[item['anchor']]*w
         y=item['y']-h+d
         box=(x,y,x+w,y+h,item['text'])
-        assert x>=0 and y>=0 and x+w<=sch.scene.width and y+h<=sch.scene.height
+        assert x>=0 and y>=0 and x+w<=vector.width and y+h<=vector.height
         for other in boxes:
             assert (max(x,other[0])>=min(x+w,other[2]) or
                     max(y,other[1])>=min(y+h,other[3])),(box,other)

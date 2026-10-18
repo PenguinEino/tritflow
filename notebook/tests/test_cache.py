@@ -70,6 +70,8 @@ def test_real_abstract_pin_obstruction_manifest_and_publication_invalidate(tmp_p
     for directory in ("cells", "notebook", "tritflow", "examples"):
         (clone/directory).mkdir(parents=True)
     shutil.copy2(root/"cells/template.json", clone/"cells/template.json")
+    (clone/"cells/out").mkdir()
+    shutil.copy2(root/"cells/out/all.spice", clone/"cells/out/all.spice")
     shutil.copytree(root/"cells/out/INV", clone/"cells/out/INV")
     for name in ("library.json", "generation.json"):
         shutil.copy2(root/f"cells/out/{name}", clone/f"cells/out/{name}")
@@ -111,7 +113,10 @@ def test_real_abstract_pin_obstruction_manifest_and_publication_invalidate(tmp_p
         independent.write_text("# another independent revision\n")
         assert fingerprint() == initial
     dimensions = clone/"tritflow/cells/circuits.py"
-    dimensions.write_text("# consumed sizing ID/dimension table\n")
+    dimensions.write_text("# independent sizing ID/dimension table, not a cached physical input\n")
+    assert fingerprint() == initial
+    core = clone/"tritflow/pnr/flow.py"
+    core.write_text("# consumed macro implementation\n")
     assert fingerprint() != initial
 
 

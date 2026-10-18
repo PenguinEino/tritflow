@@ -12,6 +12,8 @@ import json
 
 INK = '#0b0b0b'
 SECONDARY = '#52514e'
+FONT = ['Nimbus Roman', 'Liberation Serif', 'DejaVu Serif']
+
 TRIT_COLOR = {-1: '#2a78d6', 0: '#6f6e69', 1: '#e34948'}
 
 
@@ -21,13 +23,13 @@ class Vector:
     height: int
     items: list[dict] = field(default_factory=list)
 
-    def path(self, commands, *, stroke=INK, fill='none', width=1.6, net=None):
+    def path(self, commands, *, stroke=INK, fill='none', width=0.8, net=None):
         self.items.append(dict(kind='path',commands=commands,stroke=stroke,fill=fill,width=width,net=net))
 
     def line(self,a,b,**style):
         self.path([('M',*a),('L',*b)],**style)
 
-    def circle(self,x,y,r,*,stroke=INK,fill='white',width=1.6,net=None):
+    def circle(self,x,y,r,*,stroke=INK,fill='white',width=0.8,net=None):
         self.items.append(dict(kind='circle',x=x,y=y,r=r,stroke=stroke,fill=fill,width=width,net=net))
 
     def text(self,x,y,text,*,size=11,color=INK,anchor='start',weight='normal'):
@@ -45,7 +47,7 @@ class Vector:
         for item in self.items:
             kind = item['kind']
             if kind == 'text':
-                parts.append(f'<text x="{item["x"]}" y="{item["y"]}" font-family="DejaVu Sans, sans-serif" '
+                parts.append(f'<text x="{item["x"]}" y="{item["y"]}" font-family="Nimbus Roman, Liberation Serif, DejaVu Serif, serif" '
                              f'font-size="{item["size"]}" text-anchor="{item["anchor"]}" '
                              f'font-weight="{item["weight"]}" fill="{item["color"]}">{escape(item["text"])}</text>')
                 continue
@@ -69,7 +71,7 @@ class Vector:
         from matplotlib.backends.backend_agg import FigureCanvasAgg
         from matplotlib.path import Path
         from matplotlib.patches import Circle, PathPatch
-        with mpl.rc_context({'font.family':'DejaVu Sans','pdf.fonttype':42,'path.simplify':False}):
+        with mpl.rc_context({'font.family':'serif','font.serif':FONT,'pdf.fonttype':42,'path.simplify':False}):
             fig = Figure(figsize=(self.width/96,self.height/96),dpi=96,facecolor='white')
             FigureCanvasAgg(fig)
             ax = fig.add_axes([0,0,1,1])

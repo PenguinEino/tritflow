@@ -19,7 +19,7 @@ import shutil
 import subprocess
 import zipfile
 
-from cache import source_fingerprint, runtime_fingerprint, restore_result
+from cache import source_fingerprint, source_manifest, runtime_fingerprint, restore_result
 from experiments import assert_experiment
 
 
@@ -43,10 +43,15 @@ def _relocate(value, replacements):
 def publish_campaign(cache_dir, destination, root, pdk, *, designs=DESIGNS):
     """Publish only current verified local runs; never rewrite their native files."""
     cache_dir, destination, root, pdk = map(Path,(cache_dir,destination,root,pdk))
-    sources = source_fingerprint(root,pdk)
-    runtime = runtime_fingerprint(root,pdk)
+    with gzip.open(cache_dir/f"four-{designs[0]}.json.gz","rt") as stream:
+        first=json.load(stream)
+    inputs=first.get("sources")
+    if not inputs or source_manifest(root,pdk,names=inputs) != inputs:
+        raise ValueError("capture input manifest is missing or changed; recompute before publishing")
+    sources = source_fingerprint(root,pdk,names=inputs)
+    runtime = runtime_fingerprint(root,pdk,names=inputs)
     manifest = {"schema_version":1,"created_utc":datetime.now(timezone.utc).isoformat(),
-        "source_fingerprint":sources,"recorded_runtime_fingerprint":runtime,
+        "source_fingerprint":sources,"source_files":inputs,"recorded_runtime_fingerprint":runtime,
         "tools":{p:importlib.metadata.version(p) for p in ("numpy","scipy","klayout","lark")},
         "python":platform.python_version(),"records":{},"files":{},
         "scope":"Recorded PNR/DRC/strict-LVS and identical extracted devices ± wire C; not new local checks."}
@@ -57,7 +62,7 @@ def publish_campaign(cache_dir, destination, root, pdk, *, designs=DESIGNS):
     data = {}
     for name in designs:
         with gzip.open(cache_dir/f"four-{name}.json.gz","rt") as stream: saved=json.load(stream)
-        if saved.get("fingerprint") != runtime:
+        if saved.get("fingerprint") != runtime or saved.get("sources") != inputs:
             raise ValueError(f"{name}: capture context changed; recompute before publishing")
         key=sha256(json.dumps([runtime,saved["options"]],sort_keys=True).encode()).hexdigest()
         if saved["key"] != key:
@@ -81,7 +86,7 @@ def publish_campaign(cache_dir, destination, root, pdk, *, designs=DESIGNS):
         replacements={str(directory):f"recorded:{name}",str(root):"$TRITFLOW_ROOT",str(pdk):"$TR1UM_PDK"}
         data[record] = (json.dumps(_relocate(result,replacements),allow_nan=False)+"\n").encode()
         manifest["records"][name] = {"result":record,"options_sha256":options_hash(saved["options"])}
-    if runtime_fingerprint(root,pdk) != runtime:
+    if runtime_fingerprint(root,pdk,names=inputs) != runtime:
         raise RuntimeError("source/tool publication changed during campaign export")
     manifest["files"] = {name:sha256(raw).hexdigest() for name,raw in data.items()}
     destination.parent.mkdir(parents=True,exist_ok=True)
@@ -101,14 +106,19 @@ class RecordedCampaign:
     No archive member is extracted, so paths inside reports are provenance only.
     """
 
-    def __init__(self, path, sources, *, enabled=True):
+    def __init__(self, path, root, pdk, *, enabled=True):
         self.path=Path(path)
         self.manifest=None
         self.records={}
         if not enabled or not self.path.is_file(): return
         with zipfile.ZipFile(self.path) as archive:
             manifest=json.loads(archive.read("manifest.json"))
-            if manifest["source_fingerprint"] != sources: return
+            inputs=manifest.get("source_files")
+            if not inputs: return
+            try:
+                if source_manifest(root,pdk,names=inputs) != inputs: return
+            except FileNotFoundError:
+                return
             if set(archive.namelist()) != {"manifest.json",*manifest["files"]}:
                 raise ValueError("recorded campaign member list differs from its manifest")
             for name,expected in manifest["files"].items():
