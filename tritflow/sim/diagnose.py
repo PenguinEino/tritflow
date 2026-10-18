@@ -82,19 +82,22 @@ def device_fingerprint(text):
 
 
 def refine_longest_carry(n=6):
-    """Paired negative-carry assertion at two finer timesteps, identical devices."""
+    """One paired carry with coarse and two finer steps, identical devices."""
     from .corners import _adder_guesses
     directory=ROOT/f'build/adder_scaling/adder{n}'
     net=GateNetlist.load(directory/f'adder{n}.json')
     inputs=[p.name for p in net.ports if p.dir=='input'];outputs=[p.name for p in net.ports if p.dir=='output']
     source=directory/'postlayout';lvs=json.loads((source/'lvs.json').read_text())
+    paths=[directory/f'adder{n}.gds',directory/f'adder{n}.pnr.json',directory/f'adder{n}.json',
+           Path(lvs['extracted']),source/'postlayout.spice']
+    hashes={str(p):file_hash(p) for p in paths}
     device=Path(lvs['extracted']).read_text();wire=(source/'postlayout.spice').read_text()
     if device_fingerprint(device)!=device_fingerprint(wire):raise ValueError('Device mismatch in wire-C control')
     vectors,labels=adder_vectors(n,inputs);pair=vectors[4:6]
     expected=adder_oracle(n,inputs,outputs)
     guesses=_adder_guesses(net,lvs['report'],inputs,{'VDD':5.,'VMID':0.,'VSS':-5.})(pair[0])
     rows=[]
-    for step in (.25e-9,.1e-9):
+    for step in (2e-9,.25e-9,.1e-9):
         results={}
         for mode,text in [('device_only',device),('device_plus_wire',wire)]:
             print(f'refined N={n} {mode} step={step*1e9:g}ns',flush=True)
@@ -107,7 +110,8 @@ def refine_longest_carry(n=6):
         rows.append(dict(step_s=step,device_only_s=before,device_plus_wire_s=after,delta_s=after-before,
                          measurements=results))
     result=dict(pdk_provenance=pdk_provenance(),n=n,labels=labels[4:6],vectors=pair,device_fingerprint=device_fingerprint(device),
-        rows=rows,scope='One isolated full-length negative-carry assertion, two timesteps; identical extracted devices and ideal input/rail sources. All other comparisons remain scoped to their documented sequence.')
+        source_sha256=hashes,rows=rows,scope='One isolated full-length negative-carry assertion, coarse and two finer timesteps; identical extracted devices and ideal input/rail sources. Other comparisons use their documented sequence and maximum step; sampling is not an integration-error bound.')
+    if any(file_hash(p)!=h for p,h in hashes.items()):raise RuntimeError('Source changed during refined carry control')
     _save(ROOT/'results/delay_refined.json',result);return result
 
 

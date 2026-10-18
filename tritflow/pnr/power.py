@@ -68,6 +68,7 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
     # OS00 p17 I-3-1: stepped M1 is 500 uA at 2 um. Reserve
     # 20% of that published DC limit, including when a caller asks for more.
     effective_density = min(current_density_a_per_um, .00025)*(1-current_margin)
+    m2_density = (3.7e-3/3)*min(1.,current_density_a_per_um/.00025)*(1-current_margin)
     currents, sources, rail_currents = {}, {}, {}
     for pl in placements:
         cell = library.cells[pl["cell"]]
@@ -106,9 +107,11 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
                       for i in range(spans+1)]
     banks = []
     for index, load in enumerate(bank_loads):
-        required = max(6.4, load/effective_density)
+        # M2 uses its published field rating. At least five TC columns fit
+        # in 16 um, allowing current spreading at the narrow row-rail taps.
+        required = max(16., load/m2_density)
         count = math.ceil(required/42.)
-        width = math.ceil(max(6.4, required/count)*10)/10
+        width = math.ceil(max(16., required/count)*10)/10
         bank_width = 3*count*width+(3*count-1)*2.4
         banks.append({"index": index, "width": width, "count": count,
                       "bank_width": bank_width, "current_a": load})
@@ -124,6 +127,7 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
             "currents_a": currents, "rail_currents_a": rail_currents, "current_sources": sources,
             "assumptions": {"default_cell_current_a": default_cell_current_a,
                 "allowed_current_a_per_um": effective_density,
+                "M2_allowed_current_a_per_um": m2_density,
                 "requested_current_a_per_um": current_density_a_per_um,
                 "published_M1_step_a_per_um": .00025,
                 "reserved_current_margin": current_margin,

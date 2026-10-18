@@ -56,7 +56,8 @@ def test_27_vector_post_layout_and_pre_post_comparison(extracted):
     assert caps['nets']['sum']['capacitance_f'] > 0
     assert caps['nets']['VDD']['layers']['M1']['area_um2'] > 0
     with_cap=append_wire_capacitance(post,'full_adder',caps)
-    simulated=simulate(with_cap,'full_adder',['a','b','cin'],['sum','cout'],input_vectors(3),arithmetic,hold_s=500e-9)
+    simulated=simulate(with_cap,'full_adder',['a','b','cin'],['sum','cout'],input_vectors(3),arithmetic,
+                       hold_s=500e-9,timeout=600)
     assert simulated['measurements']['passed']
     assert reference_net_map(report['report'],'full_adder')['SUM']=='sum'
 

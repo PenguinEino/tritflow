@@ -1,8 +1,10 @@
 """Compact PCell standard-cell views, adapted from the taped-out geometry."""
 import json
+import hashlib
 import os
 from pathlib import Path
 import sys
+import subprocess
 
 import klayout.db as db
 from tritflow import CELLS_DIR, PDK_ROOT
@@ -11,6 +13,20 @@ from .circuits import circuits, spice, truth_table
 LAYERS = {'WN': (140,0), 'GC': (8,1), 'M1': (13,0), 'M2': (20,0), 'TXM1': (48,0),
           'pin': (48,1), 'prBoundary': (235,0)}
 _LIBRARY = None
+
+
+def pinned_sources():
+    """Record the public PDK and reject tracked source edits to its fixed pin."""
+    from tritflow.sim.provenance import pdk_provenance
+    provenance=pdk_provenance()
+    if (PDK_ROOT/'.git').exists():
+        check=subprocess.run(['git','-C',str(PDK_ROOT),'diff','--quiet',provenance['qualified_commit'],
+            '--','libs.tech/klayout/tech','libs.tech/spice/models'],check=False)
+        if check.returncode:raise RuntimeError('PDK sources differ from the public pinned commit')
+        provenance['tracked_sources_match_pin']=True
+    provenance['pcell_sha256']={str(p.relative_to(PDK_ROOT)):hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in sorted((PDK_ROOT/'libs.tech/klayout/tech/python').rglob('*')) if p.is_file() and p.suffix=='.py'}
+    return provenance
 
 
 class Drawing:
@@ -42,9 +58,12 @@ class Drawing:
 def register_pdk():
     global _LIBRARY
     if _LIBRARY is None:
+        pinned_sources()
         sys.path.insert(0, str(PDK_ROOT/'libs.tech/klayout/tech/python'))
-        from cells import tr_1um
-        _LIBRARY = tr_1um('TR-1um')
+        import cells as pdk_cells
+        if not Path(pdk_cells.__file__).resolve().is_relative_to((PDK_ROOT/'libs.tech/klayout/tech/python').resolve()):
+            raise RuntimeError('PCell module was loaded from another PDK; restart Python with the public pinned PDK')
+        _LIBRARY = pdk_cells.tr_1um('TR-1um')
 
 
 def build_cell(circuit, out, template):
@@ -107,6 +126,8 @@ def build(out=CELLS_DIR/'out', names=None):
         qualified_build(out,names)
         return json.loads((out/'library.json').read_text())
     out.mkdir(parents=True,exist_ok=True)
+    provenance=pinned_sources()
+    (out/'pdk_provenance.json').write_text(json.dumps(provenance,indent=2)+'\n')
     from .compact import TEMPLATE
     template = TEMPLATE
     (out/'template.json').write_text(json.dumps(template,indent=2)+'\n')

@@ -201,7 +201,8 @@ def compare(out, reference=Path.home()/'balanced-ternary-logic'):
             path.write_text(annotated[label][cell])
             caps[label][cell]['annotated_sha256'] = sha(path)
             (folder/f'{label}.capacitance.json').write_text(json.dumps(caps[label][cell], indent=2)+'\n')
-    result = {'created_utc': datetime.now(timezone.utc).isoformat(),
+    from tritflow.sim.provenance import pdk_provenance
+    result = {'created_utc': datetime.now(timezone.utc).isoformat(),'pdk_provenance':pdk_provenance(),
               'scope': 'Nominal 27 C device models plus estimated actual-GDS connected M1/M2 lumped C to substrate. Not calibrated/signoff PEX; no poly C, coupling, shielding, via C, or signal-wire R.',
               'acceptance': 'Both layouts must pass the original +/-0.5 V bands, all original hold-time checkpoints, and DC identity. Timing differences are reported without a numerical identity requirement.',
               'interpretation': 'Added capacitors are open at DC, so DC levels and static currents should remain identical. Rail capacitors see ideal voltage sources; this is not rail IR/ground bounce simulation. Settling differences reflect estimated metal C only. Poly resistance remains an unmodeled concern assessed separately.',

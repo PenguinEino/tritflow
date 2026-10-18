@@ -5,12 +5,17 @@ from tritflow import CELLS_DIR
 from .circuits import circuits
 
 p = argparse.ArgumentParser(description=__doc__)
-p.add_argument('command', choices=['build','verify','equivalence','parasitic','timing'])
+p.add_argument('command', choices=['build','verify','equivalence','parasitic','timing','requalify'])
 p.add_argument('--out',type=Path,default=CELLS_DIR/'out')
 p.add_argument('--cells',nargs='+',choices=list(circuits()))
-p.add_argument('--jobs',type=int,default=3,help='Concurrent timing simulations (timing command)')
+p.add_argument('--jobs',type=int,default=3,help='Concurrent timing simulations (timing/requalify commands)')
 a = p.parse_args()
-if a.command == 'build':
+if a.command=='requalify':
+    if a.out.resolve()!=(CELLS_DIR/'out').resolve() or a.cells:
+        raise ValueError('requalify publishes all nine cells; --out/--cells apply to focused commands')
+    from .requalify import requalify
+    requalify(jobs=a.jobs)
+elif a.command == 'build':
     from .layout import build
     if a.out.resolve()==(CELLS_DIR/'out').resolve():
         from .publish import qualified_build

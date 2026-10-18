@@ -29,3 +29,9 @@ Code-a-Chip ISSCC 2027（締切 2026-10-31 11:59 AM PT）への応募準備。
 - PDK：https://github.com/OpenSUSI/TR-1um（Apache-2.0）
 - 元設計：https://github.com/PenguinEino/opensusi-tr10-balanced-ternary-logic
 - 公式募集：https://sscs.ieee.org/membership/awards/ieee-sscs-code-a-chip-travel-grant-awards/
+
+## 2026-10-18 夕方時点（VM上のClaude Codeが統合役）
+
+- 作業場所はVM（ishi-kai-EDA）の ~/code-a-chip。codex（gpt-6.1-sol, xhigh）を複数ストリームで並列に動かし、Claudeが統合・コミット・pushを担当。
+- 再開手順：docs/status/INTEGRATOR.md を読み、`pgrep -af "codex exec"` で動作中のストリームを確認し、終わったものの logs/<S>.last.md と docs/status/<S>.md を読んで次の段階を投げる。
+- 方針の最新版：docs/concept.md「現状と方針」と docs/editorial.md。

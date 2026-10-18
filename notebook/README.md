@@ -50,8 +50,11 @@ code with headless Plotly serialization. It does not install anything locally.
 `TRITFLOW_NOTEBOOK_BUILD` overrides `build/notebook`; `TRITFLOW_EXTENDED=1`
 enables routing replay and additional loads. `PNR_ROWS`/`PNR_ANNEAL_STEPS`
 control chapter 0. Chapter 6 has opt-in fixed-row/effort/seed controls, showing
-measured die dimensions, aspect, utilization and HPWL. Chapter 7 regenerates
-adder4/full_add/mac1/mul1 locally; it never consumes their existing build trees.
+measured die dimensions, aspect, utilization and HPWL. Chapter 7 uses a compressed recorded adder4/full_add/mac1/mul1 campaign when
+its consumed-source/PDK/options and every native-artifact hash match. It labels
+that producer's tools and recorded checks; it never claims new local verification.
+Missing/stale records trigger local regeneration. `TRITFLOW_FORCE_RUN=1` bypasses
+the record and local stage caches. No pre-existing ignored build tree is needed.
 Its small circuits visit all input states, while adder4 uses SIM's documented
 carry/overflow/cancellation plan. Expected values are independent radix
 arithmetic. Rail IR is a separate nominal-current/resistance estimate.
@@ -153,7 +156,9 @@ python3 -m pytest tests/synth/test_curated.py -q
 TRITFLOW_CIRCUIT=mul2 python3 notebook/validate_notebook.py --execute
 ```
 
-Final Colab verification is postponed by the integrator. Bootstrap behavior is
+Latest-release Colab verification remains pending. The separate COLAB stream
+tested the older colab-v0 and recorded a NumPy/SciPy import failure; that is
+not a successful verification of this source notebook. Bootstrap behavior is
 unchanged in phases 6–8. Release-tag publication and final measurement
 hardware/schedule remain integrator tasks; no draft TODO is presented as a result.
 
@@ -190,3 +195,21 @@ settling, finite-step resolution, sampled analog coverage, omitted signal
 R/coupling/PVT and ideal-rail transient assumptions remain explicit limitations.
 The exact requested SIM sizing API and
 return schema are in `docs/status/FRONTEND.md`.
+
+
+To publish the repeated four-design evidence after a successful full fresh run:
+
+```sh
+TRITFLOW_FORCE_RUN=1 TRITFLOW_NOTEBOOK_BUILD=/tmp/tritflow-full python3 notebook/validate_notebook.py --execute
+python3 notebook/campaign.py /tmp/tritflow-full/cache
+```
+
+The publisher rejects stale runtime fingerprints or changed native artifacts.
+`assets/four_designs.zip` contains native GDS/PNR/DRC/LVS proof and compressed
+waveform/measurement JSON, with relative member names and a hash manifest.
+Its separate publication fingerprint includes every consumed abstract, manifest
+and publication identity, source and PDK. Cross-platform reading remains
+**recorded evidence on the named producer tools**, not reuse of a local PASS.
+The opening adder and selected chapter-8 circuit still execute physical and
+analog work in a fresh session. Full characterization/sizing/scaling/load and
+the repeated four-design matrix are the explicitly precomputed work.

@@ -5,6 +5,7 @@ from hashlib import sha256
 from pathlib import Path
 import shutil
 import time
+import resource
 
 from tritflow import flow, TRIT_VOLTS
 from tritflow.extract import estimate_ir_drop, reference_net_map
@@ -48,10 +49,16 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
     must also assert cached flags before displaying them.
     """
     timings = {}
+    cpu_times = {}
     def timed(name, action):
         start = time.perf_counter()
+        before = resource.getrusage(resource.RUSAGE_CHILDREN)
+        process_before = time.process_time()
         value = action()
         timings[name] = time.perf_counter()-start
+        after = resource.getrusage(resource.RUSAGE_CHILDREN)
+        cpu_times[name] = (time.process_time()-process_before +
+                          after.ru_utime+after.ru_stime-before.ru_utime-before.ru_stime)
         return value
     write_artifacts(net, directory)
     lay = timed("pnr_including_drc", lambda: net.place_and_route(
@@ -68,7 +75,7 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
     # Only wire capacitors may distinguish this controlled experiment. The
     # original mapped-cell schematic remains the independent LVS reference.
     def intrinsic(text):
-        return [line.strip() for line in text.splitlines()
+        return [" ".join(line.split()).upper() for line in text.splitlines()
                 if line.strip() and not line.lstrip().startswith("*") and not line.startswith("Ctfwire")]
     assert intrinsic(device_only.spice) == intrinsic(extracted.spice)
     options = dict(load=load_f, hold_s=hold_s, step_s=step_s, expected=expected, timeout=300)
@@ -81,11 +88,10 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
         ports = {p.name for p in net.ports}
         values = evaluate_netlist(net,dict(zip(pins,vectors[0],strict=True)),return_all=True)
         internal = {name:TRIT_VOLTS[int(value)] for name,value in values.items() if name not in ports}
-        mapping = {name.lower():node for name,node in reference_net_map(lvs["report"],net.top).items()}
+        mapping = reference_net_map(lvs["report"],net.top)
         for name, voltage in internal.items():
-            node = mapping[name.lower()]
+            node = mapping[name]
             node = simulation_netlist("\\"+node if node.startswith("$") else node)
-            guesses["pre"]["xdut."+name] = voltage
             guesses["post"]["xdut."+node] = voltage
     # Both runs use the same extracted terminal orientation (including the
     # asymmetric F_RR intrinsic C); this isolates the added wire-C effect.
@@ -105,7 +111,7 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
                          {c: read(f"out/{c}/{c}.char.json") for c in used})
     return {"pre": pre, "post": post, "drc": drc, "lvs": lvs, "stats": lay.stats,
             "capacitance": extracted.capacitance, "ir": ir, "initial_nodeset_v": guesses,
-            "timings_s": timings}
+            "timings_s": timings, "cpu_times_s": cpu_times}
 
 
 def experiment_artifacts(result, directory, top):

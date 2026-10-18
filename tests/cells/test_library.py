@@ -70,6 +70,26 @@ def test_physical_contract(library):
         assert (folder/f'{name}.png').read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
 
 
+@pytest.mark.parametrize('damage',['deleted','severed','unlabelled'])
+def test_unloaded_vmid_requires_a_physical_continuous_rail(library,tmp_path,damage):
+    """A schematic-unused formal cannot rescue damaged INV pass-through metal."""
+    out,_,_=library
+    ly=db.Layout();ly.read(str(out/'INV/INV.gds'));top=ly.cell('INV');top.flatten(-1,True)
+    layer=ly.layer(13,0);metal=db.Region(top.begin_shapes_rec(layer))
+    cut=db.DBox(0,6,108,10) if damage=='deleted' else db.DBox(50,6,54,10)
+    if damage!='unlabelled':
+        metal-=db.Region(cut.to_itype(ly.dbu));top.shapes(layer).clear();top.shapes(layer).insert(metal)
+    else:
+        labels=top.shapes(ly.layer(48,0))
+        for shape in list(labels.each()):
+            if shape.is_text() and shape.text.string=='VMID':shape.delete()
+    gds=tmp_path/'INV.gds';ly.write(str(gds))
+    shutil.copyfile(out/'INV/INV.lvs.spice',tmp_path/'INV.lvs.spice')
+    result=lvs(gds,circuits()['INV'],tmp_path)
+    assert not result['passed'],result
+    assert any('VMID' in e or 'vmid' in e for e in result['errors']),result
+
+
 def test_m2_pin_landings(library,tmp_path):
     """Drop the real PDK via at every abstract access, in both legal orientations."""
     out,manifest,_=library

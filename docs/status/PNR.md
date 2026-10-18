@@ -1,23 +1,87 @@
-# PNR stream — pinned-PDK migration / phase 6 in progress
+# PNR stream — pinned PDK / phase 6
 
-2026-10-18: all new qualification uses `~/pdk/TR-1um-pinned`, public commit
-`5d963db9d44e192d37a0489c208bfccf2e2f690c`. Earlier phase-5 local-dev PDK
-results below are historical and are **not current qualification**.
+Only qualification against public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c**
+at `~/pdk/TR-1um-pinned` is current. Native KLayout is 0.30.9; Python API is
+0.30.6. Earlier dev-PDK results below are historical, not current qualification.
 
-**Interface request for SIM (pinned LVS):** first new campaign currently fails
-at LVS for all designs. `build/adder1/lvs/klayout.log` reports `ERROR : Netlists
-don't match`, although every native circuit pair is `Match`, no errors, and
-layout ports use `a[0]` while the reference uses encoded `tf_615b305d`.
-`build/adder1/adder1.lvs.summary.json` retains the evidence. Please ensure
-strict native/reference port names are normalized consistently for this pinned
-deck; PNR will rerun the complete campaign after the extractor settles. No PDK
-checks or strict ports will be weakened. Source paths outside PNR remain read-only.
+## In progress
 
-Current sizing changes reserve 20% of OS00 p17 Tables I-3-1/I-3-3 DC limits and
-independently assess every real result with SIM's branch-current solver; failed
-reserve triggers tighter row capacity and a complete reroute. The PNR JSON
-`power` section retains its existing schema and adds `assumptions` fields and
-`dc_current_check`; the chip wrapper will have separate artifacts.
+Waiting for CELLS Phase 7 atomic publication before the final complete rerun.
+Provisional pinned-deck campaigns already pass all 100 deterministic random
+circuits, the four examples, and adders 1–6/8. The pinned strict-port mismatch
+was resolved by SIM's label-only normalization using synthesis annotations;
+PNR's isolated-input restoration now decodes/restores the same mapping, including
+bracketed unused input names. No physical label is invented and no PDK rule or
+strict-port setting is weakened.
+
+The optional **`tritflow.pnr.chip(result, ...)` / `PnrResult.to_chip()`** builds
+separate `build/<design>/chip/` artifacts. Provisional adder4 and full_add both
+have **zero drawing DRC, strict LVS Match, MDP, zero mask DRC, and passing MPW
+precheck**. Original macro GDS/PNR JSON are unchanged. The copied pinned
+`OSS_FRAME_TEG` retains its exact seal ring and prohibited regions; its stock
+pad bank is replaced by peripheral **real `OSS_PAD_TEG` masters**. Pins align
+with macro ports to avoid detours. Adder4 has 23 pads (four each for VDD/VSS,
+one VMID, fourteen signals); full_add has eight. All same-domain supply pads
+must be bonded/probed. VMID has a separate bottom terminal; substrate/common
+VSS remains −5 V. No 5 V two-rail ESD network is silently attached to the
+accepted +5/0/−5 V domains.
+
+Generator-side fixes found by full-chip verification: preserve the copied
+63/1 prohibited side strips; honor 64 µm pad-opening separation; add real
+40 µm × 14 µm lead-outs; keep ordinary TC outside pad enclosure regions;
+apply 14 µm pad-to-metal spacing even to disjoint metal of the same net;
+avoid large-pad centerline artifacts with distributed pad taps; use multiple
+supply pads and 2.9 µm-pitch TC arrays to retain the DC reserve. No cell-internal
+mask defect has been found. All native report items count, including warnings;
+there are no waiver polygons or marker tricks.
+
+Sizing reserves **20%** of OS00 p17 Tables I-3-1/I-3-3: stepped M1 500 µA/2 µm,
+field M2 3.7 mA/3 µm, TC 780 µA/cut. Width scaling is an engineering
+interpretation, not foundry lifetime EM signoff. Every real PNR result is
+independently solved using SIM's characterized per-rail envelope and resistor
+network. If any solved branch misses the reserve, row capacity tightens and
+PNR reruns before publishing. The original `power` schema is retained; new
+`assumptions` fields and `dc_current_check` are additive. SIM continues reading
+`build/<design>/<top>.pnr.json`; chip metadata is a separate `.chip.json`.
+Provisional chip worst utilizations: adder4 **79.01%** (M1), full_add **63.99%**.
+
+The N=7 routing stress case exposed poor floorplan/seed combinations. A measured
+passing run uses seed 19, `anneal_steps=3000`, `channel_tracks=16`, reaching
+18 tracks automatically; 65.47 s with concurrent jobs, 2904 × 2634 µm. The
+scale producer records these explicit options. For macros above 100 cells,
+default adaptive routing now skips the two predictably undersized channel
+trials while retaining their placement and seed offsets. N=6 remains below
+60 s in the provisional pinned runs (26.96 s, including strict LVS).
+
+## Real shuttle submission work
+
+This wrapper requires a **full centered 2500 × 2500 µm allocation**; the prior
+balanced-ternary macro's 1800 × 1000 µm shared slot cannot hold adder4. Obtain
+organizer approval for the custom TEG pad map and allocation, complete the bond
+map/package/probe plan (including every supply pad), agree VSS/common substrate
+and die attach, and obtain the process/ESD decision for the accepted rail
+span. Passive TEG pads provide no ESD network. Simulate package/probe loading
+and supply impedance; the DC envelope does not qualify current crowding,
+transients, temperature/lifetime derating or pad/bond reliability. Complete the
+shuttle `info.yaml`, schematic/reference, licence and project metadata and run
+its final CI on the final frozen revision. The code does not upload or submit.
+The inspected MPW flow defines drawing LVS before MDP and no post-MDP LVS;
+`mask_lvs` is explicitly undefined, not reported as a pass.
+
+## Interface requests
+
+- CELLS: publish the Phase 7 pinned generation journal; PNR will then rerun all
+  final examples, fuzz/scaling, and full-chip evidence automatically.
+- FRONTEND: optional notebook delegate `Layout.to_chip(**opts)` can forward to
+  `self.result.to_chip(**opts)` and show `chip.report`, its pad map and GDS PNG.
+  `ChipResult.signoff()` caches verified artifacts; `submission_ready` remains
+  false until the external allocation/package/ESD approvals described above.
+- SIM: encoded-port handoff is adopted. Power JSON keys are stable with the
+  additive current-reserve fields above; no chip operation changes macro JSON.
+
+Development tooling installed with the permitted user-pip flags: Black (and
+its pip dependencies), used only to format PNR-owned new code; no runtime
+package dependency or reference tree was changed.
 
 # PNR stream — phase 5
 
@@ -607,16 +671,16 @@ and test files, `examples/pnr_all.py`, and generated `build/` outputs.
 <!-- PNR_RESULTS_BEGIN -->
 ## Current verified build results
 
-Published template height: **132 µm**. Input content fingerprint: `2257fa4fd3520b1a4793cddbb64c5667ae958948fe53e2b8c6a3d5d9e30974b9`.
+Published template height: **132 µm**. Input content fingerprint: `4cd439c1bb70fc18b84b17341ce76688f285eda6bd640fc4bcf297e31a2ec5f3`.
 
 All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
 
 | Design | Seed | Die (µm) | Aspect | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS | PNR / +LVS (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|
-| adder4 | 0 | 1740 × 1590 | 1.094 | 45.57% | 35778 | 41737.5 | 528 / 1152 | 0 violations | Match | 3.27 / 4.24 |
-| full_add | 0 | 792 × 702 | 1.128 | 56.70% | 3924 | 6158.5 | 115 / 128 | 0 violations | Match | 1.30 / 2.05 |
-| mac1 | 7 | 804 × 1038 | 1.291 | 51.44% | 7218 | 9730 | 172 / 288 | 0 violations | Match | 1.54 / 2.32 |
-| mul1 | 0 | 372 × 366 | 1.016 | 52.35% | 750 | 1022.5 | 25 / 32 | 0 violations | Match | 0.99 / 1.75 |
+| adder4 | 7 | 1848 × 1590 | 1.162 | 42.91% | 43494 | 40263 | 524 / 1376 | 0 violations | Match | 18.55 / 22.60 |
+| full_add | 0 | 840 × 702 | 1.197 | 53.46% | 4608 | 6277.5 | 111 / 144 | 0 violations | Match | 6.03 / 9.39 |
+| mac1 | 0 | 888 × 1038 | 1.169 | 46.57% | 7458 | 9195.5 | 165 / 384 | 0 violations | Match | 7.21 / 11.68 |
+| mul1 | 0 | 372 × 366 | 1.016 | 52.35% | 750 | 1022.5 | 25 / 32 | 0 violations | Match | 3.96 / 8.47 |
 
 ## Phase 2 → phase 3
 
@@ -624,9 +688,9 @@ Before artifacts are preserved in each design's `phase2/`; cell library and inpu
 
 | Design | Die before → after (µm) | Aspect before → after | Utilization before → after | Die area reduction | Signal length before → after (µm) |
 |---|---:|---:|---:|---:|---:|
-| adder4 | 1176 × 3534 → 1740 × 1590 | 3.005 → 1.094 | 30.34% → 45.57% | 33.43% | 91254 → 77515.5 |
-| full_add | 924 × 942 → 792 × 702 | 1.019 → 1.128 | 36.21% → 56.70% | 36.12% | 11817.5 → 10082.5 |
-| mac1 | 912 × 1374 → 804 × 1038 | 1.507 → 1.291 | 34.26% → 51.44% | 33.40% | 17899.5 → 16948 |
+| adder4 | 1176 × 3534 → 1848 × 1590 | 3.005 → 1.162 | 30.34% → 42.91% | 29.30% | 91254 → 83757 |
+| full_add | 924 × 942 → 840 × 702 | 1.019 → 1.197 | 36.21% → 53.46% | 32.25% | 11817.5 → 10885.5 |
+| mac1 | 912 × 1374 → 888 × 1038 | 1.507 → 1.169 | 34.26% → 46.57% | 26.44% | 17899.5 → 16653.5 |
 | mul1 | 612 × 510 → 372 × 366 | 1.200 → 1.016 | 22.84% → 52.35% | 56.38% | 2106.5 → 1772.5 |
 
 ## Placement seed comparison
@@ -635,18 +699,18 @@ Cell-terminal HPWL excludes external ports. Each before/after pair uses the same
 
 | Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | PNR / +LVS (s) | DRC / LVS |
 |---|---:|---:|---:|---:|---:|---|
-| adder4 | 0 | 74515.5 | 50436 | 32.31% | 3.57 / 4.87 | clean / Match |
-| adder4 | 7 | 74515.5 | 47968.5 | 35.63% | 3.32 / 4.30 | clean / Match |
-| adder4 | 19 | 74515.5 | 41388 | 44.46% | 3.38 / 4.27 | clean / Match |
-| full_add | 0 | 6750 | 4752 | 29.60% | 1.40 / 2.21 | clean / Match |
-| full_add | 7 | 6750 | 4617 | 31.60% | 1.32 / 2.07 | clean / Match |
-| full_add | 19 | 6750 | 5115 | 24.22% | 1.30 / 2.05 | clean / Match |
-| mac1 | 0 | 14685.5 | 6631.5 | 54.84% | 1.46 / 2.25 | clean / Match |
-| mac1 | 7 | 14685.5 | 6723.5 | 54.22% | 1.52 / 2.34 | clean / Match |
-| mac1 | 19 | 15501.5 | 8573.5 | 44.69% | 1.91 / 2.70 | clean / Match |
-| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 0.97 / 1.73 | clean / Match |
-| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 0.96 / 1.71 | clean / Match |
-| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 0.96 / 1.72 | clean / Match |
+| adder4 | 0 | 80608.5 | 52066.5 | 35.41% | 43.72 / 48.50 | clean / Match |
+| adder4 | 7 | 75352.5 | 50692.5 | 32.73% | 21.18 / 24.99 | clean / Match |
+| adder4 | 19 | 77980.5 | 56133 | 28.02% | 27.68 / 32.43 | clean / Match |
+| full_add | 0 | 9135 | 5088 | 44.30% | 5.68 / 9.57 | clean / Match |
+| full_add | 7 | 9135 | 4896 | 46.40% | 6.11 / 10.25 | clean / Match |
+| full_add | 19 | 9135 | 4680 | 48.77% | 6.04 / 9.54 | clean / Match |
+| mac1 | 0 | 16947.5 | 7497 | 55.76% | 6.32 / 10.84 | clean / Match |
+| mac1 | 7 | 16947.5 | 6504.5 | 61.62% | 8.42 / 11.94 | clean / Match |
+| mac1 | 19 | 17703.5 | 9959 | 43.75% | 6.72 / 10.60 | clean / Match |
+| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 3.62 / 7.65 | clean / Match |
+| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 4.84 / 7.80 | clean / Match |
+| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 5.11 / 8.37 | clean / Match |
 
 Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.
 <!-- PNR_RESULTS_END -->

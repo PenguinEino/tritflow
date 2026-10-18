@@ -20,7 +20,7 @@ def file_hash(path):
     return sha256(Path(path).read_bytes()).hexdigest()
 
 
-def runtime_fingerprint(root, pdk):
+def source_fingerprint(root, pdk):
     """Hash consumed code/views/publication identity, using relative filenames.
 
     Pin access, obstructions and free tracks can change without changing a
@@ -36,7 +36,19 @@ def runtime_fingerprint(root, pdk):
              *root.glob("examples/*.tv"), *root.glob("examples/*.py")]
     pdk_files = [p for folder in ["libs.tech/klayout/tech/drc", "libs.tech/klayout/tech/lvs",
                                 "libs.tech/spice/models"] for p in (pdk/folder).rglob("*") if p.is_file()]
-    digest = sha256(sys.version.encode())
+    digest = sha256()
+    for origin, base, paths in (("source", root, files), ("pdk", pdk, pdk_files)):
+        for path in sorted(set(paths)):
+            digest.update(f"{origin}/{path.relative_to(base)}".encode()+b"\0")
+            raw = path.read_bytes()
+            digest.update(len(raw).to_bytes(8, "big"))
+            digest.update(raw)
+    return digest.hexdigest()
+
+
+def runtime_fingerprint(root, pdk):
+    """Local reuse additionally requires the same interpreter/packages/binaries."""
+    digest = sha256((source_fingerprint(root,pdk)+sys.version).encode())
     for package in ["numpy", "scipy", "klayout", "plotly", "lark"]:
         digest.update(f"{package}={importlib.metadata.version(package)}".encode())
     for binary in [shutil.which("ngspice"), os.environ.get("KLAYOUT_BINARY")
@@ -45,12 +57,6 @@ def runtime_fingerprint(root, pdk):
             digest.update(Path(binary).read_bytes())
             run = subprocess.run([str(binary), "-v"], capture_output=True, text=True, timeout=15)
             digest.update((run.stdout+run.stderr).encode())
-    for origin, base, paths in (("source", root, files), ("pdk", pdk, pdk_files)):
-        for path in sorted(set(paths)):
-            digest.update(f"{origin}/{path.relative_to(base)}".encode()+b"\0")
-            raw = path.read_bytes()
-            digest.update(len(raw).to_bytes(8, "big"))
-            digest.update(raw)
     return digest.hexdigest()
 
 
@@ -64,13 +70,13 @@ def _json(value):
     raise TypeError(f"cannot cache {type(value).__name__}")
 
 
-def _restore(value):
+def restore_result(value):
     """Restore native simulation arrays even inside a pre/post experiment pair."""
     if isinstance(value, list):
-        return [_restore(item) for item in value]
+        return [restore_result(item) for item in value]
     if not isinstance(value, dict):
         return value
-    result = {key: _restore(item) for key, item in value.items()}
+    result = {key: restore_result(item) for key, item in value.items()}
     for key in ("waveforms", "data"):
         if key in result and isinstance(result[key], dict):
             result[key] = {name: np.asarray(array) for name, array in result[key].items()}
@@ -103,7 +109,7 @@ class Cache:
                 self.events.append((name, "hit"))
                 self.timings.append({"stage":name, "state":"hit", "elapsed_s":time.perf_counter()-started})
                 print(f"Cache hit: {name}")
-                return _restore(saved["result"])
+                return restore_result(saved["result"])
         print(f"Running: {name}")
         result = producer()
         paths = artifacts(result) if callable(artifacts) else artifacts
@@ -111,7 +117,8 @@ class Cache:
         self.directory.mkdir(parents=True, exist_ok=True)
         temporary = path.with_suffix(".tmp")
         with gzip.open(temporary, "wt") as stream:
-            json.dump({"key": key, "result": result, "artifacts": hashes}, stream, default=_json, allow_nan=False)
+            json.dump({"key": key, "fingerprint":self.fingerprint, "options":options,
+                       "result": result, "artifacts": hashes}, stream, default=_json, allow_nan=False)
         temporary.replace(path)
         self.events.append((name, "run"))
         self.timings.append({"stage":name, "state":"run", "elapsed_s":time.perf_counter()-started})

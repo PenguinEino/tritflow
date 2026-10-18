@@ -44,7 +44,7 @@ def input_state(build_root, cells_root, designs, seeds, anneal_steps, views):
               if directory.is_dir() and (directory/f"{directory.name}.abstract.json").exists()
               for p in directory.rglob("*") if p.is_file()]
     files += [Path(build_root)/name/f"{name}.json" for name in designs]
-    files += [p for p in (ROOT/"tritflow/pnr").glob("*.py") if not p.name.startswith("chip")]
+    files += [p for p in (ROOT/"tritflow/pnr").glob("*.py") if not p.name.startswith(("chip","signoff"))]
     files += [ROOT/"tritflow/viz/layout.py", ROOT/"tritflow/extract/lvs.py", ROOT/"examples/pnr_all.py"]
     files += [p for group in ("drc", "lvs")
               for p in (PDK_ROOT/"libs.tech/klayout/tech"/group).rglob("*") if p.is_file()]

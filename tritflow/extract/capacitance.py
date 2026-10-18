@@ -132,9 +132,15 @@ def reference_net_map(lvs_report, top: str) -> dict:
                     end=next((i for i,t in enumerate(fields) if '=' in t),len(fields))
                     names.extend(fields[1:end-1])
             logical={name.upper():decoded.get(name,name) for name in names}
-    return {logical.get(p.second().expanded_name().upper(),p.second().expanded_name()): p.first().expanded_name()
+    mapped = {logical.get(p.second().expanded_name().upper(),p.second().expanded_name()): p.first().expanded_name()
             for p in result.xref().each_net_pair(circuit) if p.first() and p.second()
             and p.status() == db.NetlistCrossReference.Match}
+    # Preserve the earlier KLayout-uppercase lookup for unambiguous names.
+    # Never add an alias that collapses distinct logical HDL names a and A.
+    counts={name.lower():sum(other.lower()==name.lower() for other in mapped) for name in mapped}
+    for name,node in list(mapped.items()):
+        if counts[name.lower()]==1:mapped.setdefault(name.upper(),node)
+    return mapped
 
 
 def append_wire_capacitance(spice: str, top: str, capacitances: dict, *, net_map=None) -> str:

@@ -138,9 +138,14 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
     placed_at = time.perf_counter()
     compact_metal = any(cell.obstructions.get("M2") or cell.obstructions.get("V1") or cell.free_tracks
                         for cell in library.cells.values())
-    bypass_tracks = 0
+    # Large macros predictably need extra channel/corridor capacity. Preserve
+    # the original placement cost/seed, but skip the two undersized routing
+    # trials. Seed offsets match those skipped trials for reproducibility.
+    warm_start = min(2,max_expansions) if len(netlist.instances)>100 and compact_metal and channel_tracks is None else 0
+    bypass_tracks = warm_start
+    tracks += 2*warm_start
     attempts = []
-    for expansion in range(max_expansions+1):
+    for expansion in range(warm_start,max_expansions+1):
         data, terminals = floorplan(netlist, library, relative, row_count,
                                     plan["margin"]+bypass_tracks*library.template["grid"], tracks,
                                     core_width=core_width)
