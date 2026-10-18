@@ -28,16 +28,27 @@ def source_fingerprint(root, pdk):
     participate explicitly. Relocating an identical checkout/PDK is harmless.
     """
     root, pdk = Path(root), Path(pdk)
-    # STA is an independent stream, never imported or called by this notebook.
-    # Its edits must not invalidate a recorded macro physical/analog experiment.
-    code = [p for p in root.glob("tritflow/**/*.py")
-            if not p.is_relative_to(root/"tritflow/sta")]
+    # Scope is the notebook's runtime API, not independent library generators,
+    # STA, chip packaging or campaign publication tools. Their published data
+    # is still hashed below. Optional signoff has its own PNR fingerprint.
+    def consumed(path):
+        relative = path.relative_to(root/"tritflow")
+        package, name = relative.parts[0], relative.name
+        if package == "sta" or name == "__main__.py":
+            return False
+        if package == "cells":
+            return name in {"__init__.py", "circuits.py"}  # sizing ID/dimension table
+        if package == "pnr" and (name.startswith(("chip", "signoff")) or name == "batch.py"):
+            return False
+        return not (package == "sim" and name in {"diagnose.py", "publication.py", "corners.py"})
+    code = [p for p in root.glob("tritflow/**/*.py") if consumed(p)]
     files = [*code, *root.glob("cells/out/**/*.gds"),
              *root.glob("cells/out/**/*.spice"), *root.glob("cells/out/**/*.char.json"),
              *root.glob("cells/out/**/*.abstract.json"), *root.glob("cells/out/*.json"),
+             *root.glob("cells/out/**/*.pcells.json"),
              root/"cells/template.json", root/"notebook/setup_pins.json",
              root/"notebook/tritflow_tr1um.ipynb", *root.glob("notebook/*.py"),
-             *root.glob("examples/*.tv"), *root.glob("examples/*.py")]
+             *root.glob("examples/*.tv"), *root.glob("examples/curated.py")]
     pdk_files = [p for folder in ["libs.tech/klayout/tech/drc", "libs.tech/klayout/tech/lvs",
                                 "libs.tech/spice/models"] for p in (pdk/folder).rglob("*") if p.is_file()]
     digest = sha256()

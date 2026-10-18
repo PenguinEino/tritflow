@@ -26,6 +26,7 @@ import math
 from pathlib import Path
 import re
 import time
+from dataclasses import replace
 
 from tritflow.netlist import GateNetlist
 from tritflow.synth.simulate import CELL_INPUTS, ordered_instances
@@ -57,7 +58,6 @@ def _worst(target, choices, upper, conditions, dd, allowed, budget):
             if region:
                 stages = []
                 arrival = 0.
-                from dataclasses import replace
                 for stage in reversed(path):
                     arrival += stage.delay_s
                     stages.append(replace(stage, arrival_s=arrival))
@@ -103,7 +103,8 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
     With None, all endpoint pairs are considered symbolically, without sampling.
     Load extension is explicit in report warnings and limited to [0,2*Cmax];
     choose ``load_policy='error'`` to forbid it. Ramps never extrapolate.
-    Resource limits raise; no path sampling, beam truncation or partial success.
+    ``max_nodes`` bounds live symbolic nodes and ``max_labels`` bounds search
+    expansions per output transition. Limits raise, without partial success.
     """
     started = time.perf_counter()
     if isinstance(netlist, (str, Path)): netlist = GateNetlist.load(netlist)

@@ -44,7 +44,10 @@ class CellTiming:
 
     def capacitance(self, pin):
         """Maximum biased AC input C; cell metal is excluded by the producer."""
-        return float(self.data["input_capacitance"]["per_pin"][pin]["max_f"])
+        value = float(self.data["input_capacitance"]["per_pin"][pin]["max_f"])
+        if not math.isfinite(value) or value < 0:
+            raise ValueError(f"Invalid input capacitance: {self.data['cell']}.{pin}")
+        return value
 
     def sample(self, arc, load_f, ramp_s=1e-9, *, load_policy="error", field="settling_s"):
         """Bilinear interpolation; optional, explicit endpoint load extension.
@@ -108,6 +111,10 @@ class TimingLibrary:
         if len(generations) > 1:
             raise ValueError("Timing tables mix cell generations")
         self.generation = json.loads(next(iter(generations))) if generations else None
+        if before is not None and self.cells:
+            marker_generation = json.loads(before)
+            if self.generation != marker_generation:
+                raise ValueError("Timing tables do not match the published generation marker")
 
     def __getitem__(self, cell):
         return self.cells[cell]

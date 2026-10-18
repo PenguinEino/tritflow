@@ -1,87 +1,140 @@
-# PNR stream — pinned PDK / phase 6
+# PNR — phase 6 complete, public pinned PDK
 
-Only qualification against public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c**
-at `~/pdk/TR-1um-pinned` is current. Native KLayout is 0.30.9; Python API is
-0.30.6. Earlier dev-PDK results below are historical, not current qualification.
+Qualified only against public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c** at `~/pdk/TR-1um-pinned`.
+CELLS generation: `2026-10-18T10:26:47.211617+00:00`. Native KLayout **0.30.9**, Python API **0.30.6**, Python **3.12** on this machine.
+The earlier dev-PDK phase notes below are historical and superseded by this section. No reference/PDK/submission tree was edited.
 
-## In progress
+## Done
 
-Waiting for CELLS Phase 7 atomic publication before the final complete rerun.
-Provisional pinned-deck campaigns already pass all 100 deterministic random
-circuits, the four examples, and adders 1–6/8. The pinned strict-port mismatch
-was resolved by SIM's label-only normalization using synthesis annotations;
-PNR's isolated-input restoration now decodes/restores the same mapping, including
-bracketed unused input names. No physical label is invented and no PDK rule or
-strict-port setting is weakened.
+- Four canonical examples: every seed 0/7/19, drawing DRC 0 and strict LVS Match. Selected outputs, HPWL histories and all notebook figures are in `build/<design>/`.
+- **100 deterministic random circuits + adders N=1…8 + mul2: 109/109 PASS**, stable input hashes, independent drawn connectivity, PDK drawing DRC and strict LVS.
+- Optional full-chip API **`tritflow.pnr.chip(result, ...)` / `PnrResult.to_chip()`**: adder4 and full_add both pass actual drawing DRC, strict LVS, MDP, mask IP62 DRC and MPW precheck with **zero report items**, no waivers.
+- DC sizing uses the distinct published M1/M2/TC limits with a **20% reserve**, independently solves the resulting network, and tightens row capacity before signal routing when necessary.
+- Final regression: **42 passed in 105.11 s** (`python3 -m pytest tests/pnr tests/viz/test_layout.py -q`). No background PNR processes or watchers remain.
 
-The optional **`tritflow.pnr.chip(result, ...)` / `PnrResult.to_chip()`** builds
-separate `build/<design>/chip/` artifacts. Provisional adder4 and full_add both
-have **zero drawing DRC, strict LVS Match, MDP, zero mask DRC, and passing MPW
-precheck**. Original macro GDS/PNR JSON are unchanged. The copied pinned
-`OSS_FRAME_TEG` retains its exact seal ring and prohibited regions; its stock
-pad bank is replaced by peripheral **real `OSS_PAD_TEG` masters**. Pins align
-with macro ports to avoid detours. Adder4 has 23 pads (four each for VDD/VSS,
-one VMID, fourteen signals); full_add has eight. All same-domain supply pads
-must be bonded/probed. VMID has a separate bottom terminal; substrate/common
-VSS remains −5 V. No 5 V two-rail ESD network is silently attached to the
-accepted +5/0/−5 V domains.
+## Four examples: previous / current
 
-Generator-side fixes found by full-chip verification: preserve the copied
-63/1 prohibited side strips; honor 64 µm pad-opening separation; add real
-40 µm × 14 µm lead-outs; keep ordinary TC outside pad enclosure regions;
-apply 14 µm pad-to-metal spacing even to disjoint metal of the same net;
-avoid large-pad centerline artifacts with distributed pad taps; use multiple
-supply pads and 2.9 µm-pitch TC arrays to retain the DC reserve. No cell-internal
-mask defect has been found. All native report items count, including warnings;
-there are no waiver polygons or marker tricks.
+Previous metrics are the final phase-5 dev-PDK macros; current results include the pinned library and DC reserve. Utilization is placed cell area / macro area. Wires/vias below exclude separately counted power geometry.
 
-Sizing reserves **20%** of OS00 p17 Tables I-3-1/I-3-3: stepped M1 500 µA/2 µm,
-field M2 3.7 mA/3 µm, TC 780 µA/cut. Width scaling is an engineering
-interpretation, not foundry lifetime EM signoff. Every real PNR result is
-independently solved using SIM's characterized per-rail envelope and resistor
-network. If any solved branch misses the reserve, row capacity tightens and
-PNR reruns before publishing. The original `power` schema is retained; new
-`assumptions` fields and `dc_current_check` are additive. SIM continues reading
-`build/<design>/<top>.pnr.json`; chip metadata is a separate `.chip.json`.
-Provisional chip worst utilizations: adder4 **79.01%** (M1), full_add **63.99%**.
+| Design | Previous die / util | Current die / util | HPWL before → after (µm) | M1 / M2 wire (µm) | Signal / power TC | PNR / +LVS (s) | DRC / LVS |
+|---|---:|---:|---:|---:|---:|---:|---|
+| adder4 | 1740 × 1590 / 45.57% | 1692 × 1590 / 46.87% | 72040.5 → 48070.5 | 47274 / 43333 | 551 / 800 | 6.59 / 8.01 | 0 / Match |
+| full_add | 792 × 702 / 56.70% | 876 × 702 / 51.26% | 9135 → 4680 | 6300 / 6200.5 | 125 / 240 | 2.12 / 3.72 | 0 / Match |
+| mac1 | 804 × 1038 / 51.44% | 876 × 1038 / 47.21% | 16659.5 → 7353 | 7782 / 9195.5 | 167 / 360 | 2.17 / 3.51 | 0 / Match |
+| mul1 | 372 × 366 / 52.35% | 420 × 366 / 46.37% | 1420.5 → 494.5 | 822 / 1022.5 | 25 / 80 | 2.04 / 3.60 | 0 / Match |
 
-The N=7 routing stress case exposed poor floorplan/seed combinations. A measured
-passing run uses seed 19, `anneal_steps=3000`, `channel_tracks=16`, reaching
-18 tracks automatically; 65.47 s with concurrent jobs, 2904 × 2634 µm. The
-scale producer records these explicit options. For macros above 100 cells,
-default adaptive routing now skips the two predictably undersized channel
-trials while retaining their placement and seed offsets. N=6 remains below
-60 s in the provisional pinned runs (26.96 s, including strict LVS).
+All four current macros exceed 45% utilization and have aspect ≤1.5. Adder4 is comfortably below 30 s. Seed selection and the complete three-seed tables are retained in the generated result section below and each `<design>.seed_comparison.json`. Public `rows`, `anneal_steps`, `seed` and `channel_tracks` remain available. Canonical adder4 uses **seed 7 / 600 steps**; seed 0 needs more routing channels and its taller macro does not fit this optional TEG wrapper.
 
-## Real shuttle submission work
+## Scale and measured memory
 
-This wrapper requires a **full centered 2500 × 2500 µm allocation**; the prior
-balanced-ternary macro's 1800 × 1000 µm shared slot cannot hold adder4. Obtain
-organizer approval for the custom TEG pad map and allocation, complete the bond
-map/package/probe plan (including every supply pad), agree VSS/common substrate
-and die attach, and obtain the process/ESD decision for the accepted rail
-span. Passive TEG pads provide no ESD network. Simulate package/probe loading
-and supply impedance; the DC envelope does not qualify current crowding,
-transients, temperature/lifetime derating or pad/bond reliability. Complete the
-shuttle `info.yaml`, schematic/reference, licence and project metadata and run
-its final CI on the final frozen revision. The code does not upload or submit.
-The inspected MPW flow defines drawing LVS before MDP and no post-MDP LVS;
-`mask_lvs` is explicitly undefined, not reported as a pass.
+End-to-end time includes HDL synthesis/equivalence, all power-sizing/routing attempts, export, DRC and strict LVS. RSS is the observed sum over each worker and its native descendants. N=1…4 use seed 7 / 600 steps; N=5…8 use explicit seed 19 / 3000 steps / 16 initial channel tracks. The separate N=4 scaling evidence stays in `build/adder4/scale/`, leaving the canonical seed-comparison result independent.
 
-## Interface requests
+| Design | Cells | Die (µm) | End-to-end (s) | Peak RSS (MiB) | DRC / strict LVS |
+|---|---:|---:|---:|---:|---|
+| N=1 | 16 | 900 × 822 | 3.43 | 575.0 | 0 / Match |
+| N=2 | 32 | 1296 × 1122 | 4.48 | 585.6 | 0 / Match |
+| N=3 | 48 | 1692 × 1206 | 3.87 | 584.4 | 0 / Match |
+| N=4 | 64 | 1692 × 1590 | 6.63 | 594.0 | 0 / Match |
+| N=5 | 80 | 1692 × 2502 | 8.26 | 599.2 | 0 / Match |
+| N=6 | 96 | 2508 × 2022 | 11.97 | 611.7 | 0 / Match |
+| N=7 | 112 | 2916 × 2022 | 9.09 | 611.7 | 0 / Match |
+| N=8 | 128 | 2508 × 2742 | 10.96 | 626.2 | 0 / Match |
+| mul2 | 49 | 1596 × 1398 | 4.12 | 583.3 | 0 / Match |
 
-- CELLS: publish the Phase 7 pinned generation journal; PNR will then rerun all
-  final examples, fuzz/scaling, and full-chip evidence automatically.
-- FRONTEND: optional notebook delegate `Layout.to_chip(**opts)` can forward to
-  `self.result.to_chip(**opts)` and show `chip.report`, its pad map and GDS PNG.
-  `ChipResult.signoff()` caches verified artifacts; `submission_ready` remains
-  false until the external allocation/package/ESD approvals described above.
-- SIM: encoded-port handoff is adopted. Power JSON keys are stable with the
-  additive current-reserve fields above; no chip operation changes macro JSON.
+**N=6 is under 60 s.** Moving the independent power assessment before maze routing reduced N=8 from 144.18 s to the current measured run, because a power-infeasible trial is discarded before its expensive routes. No DRC or connectivity check was removed.
 
-Development tooling installed with the permitted user-pip flags: Black (and
-its pip dependencies), used only to format PNR-owned new code; no runtime
-package dependency or reference tree was changed.
+## DC current margins for every design
+
+OS00 rev1.1 **p17, Tables I-3-1/I-3-3**: stepped M1 **500 µA at 2 µm** (the conservative rating used on all M1), field M2 **3.7 mA at 3 µm**, TC **780 µA per 1.4 µm cut**. Metal width scaling is an engineering interpretation. Nominal characterized per-rail worst-magnitude envelopes, assumed sheet/via resistance and ideal supply terminals are used; this is not transient/current-crowding/contact/internal-cell, temperature/lifetime or foundry EM qualification.
+
+Reserve = 1 − highest solved branch current / its width/cut limit. Each kind below reports its worst branch, never an average. Every result meets the requested 20% reserve. M2 trunks use their own field rating, with at least 16 µm for five TC columns at narrow M1 row taps. The `power` JSON schema is retained; `assumptions` has additive separate M1/M2 densities and `dc_current_check` records the full assessment.
+
+| Design | M1 reserve | M2 reserve | TC reserve |
+|---|---:|---:|---:|
+| adder4 | 32.42% | 70.78% | 40.58% |
+| full_add | 44.70% | 86.65% | 60.05% |
+| mac1 | 41.53% | 81.92% | 57.77% |
+| mul1 | 53.27% | 95.31% | 66.25% |
+| N=1 | 45.19% | 86.79% | 60.41% |
+| N=2 | 41.11% | 80.70% | 56.85% |
+| N=3 | 34.93% | 77.68% | 52.55% |
+| N=4 | 32.42% | 70.78% | 40.58% |
+| N=5 | 31.09% | 64.23% | 30.36% |
+| N=6 | 27.53% | 69.00% | 37.91% |
+| N=7 | 27.76% | 68.37% | 36.16% |
+| N=8 | 26.72% | 58.86% | 21.78% |
+| mul2 | 34.91% | 76.89% | 50.27% |
+
+The 100 random circuits have a minimum solved reserve of **20.12%**. Every per-design/per-kind margin, exact peak current and limit is in `build/pnr_pinned_qualification.json` and each `.pnr.json`; the raw native evidence and measured run records are retained in `build/pnr_fuzz_pinned/`.
+
+## Full-chip sign-off and artifacts
+
+The actual prior flow was read from `~/balanced-ternary-logic/submission/SPEC.md`, the matching previous MPW member submission and `~/TR-1um_MPW_Sanken/{.github/workflows/check.yml,scripts/pre_check.py,src/tr_1um_sanken.cir}`. It requires a single top, DBU 0.001 µm, a centered **[-1250,-1250,1250,1250] µm** allocation, an accepted frame, drawing DRC/LVS, MDP then mask DRC. The unmodified pinned rule trees and the template precheck execute on project-local copies; every consumed rule/binary/reference and produced artifact is hashed.
+
+The pinned `OSS_FRAME_TEG` is copied with its exact seal ring and prohibited regions. Its stock 16-pad bank is replaced in the copy by peripheral genuine **`OSS_PAD_TEG`** masters. The stock 16-terminal ESD frame cannot expose adder4’s fourteen signals plus three separate supplies. This custom TEG map uses additional supply pads to distribute its 26.7 mA envelope; it adds no two-rail 5 V ESD network. Every macro port reaches a real pad, and all same-domain supply pads must be powered. VMID has a separate bottom terminal; VSS/common substrate remains −5 V.
+
+| Wrapper | Real pads (VDD / VMID / VSS / signal) | Drawing DRC / strict LVS | MDP / mask DRC | MPW precheck | Worst DC reserve | Build + sign-off (s) |
+|---|---:|---|---|---|---:|---:|
+| adder4 | 23 (4 / 1 / 4 / 14) | 0 / Match | Generated / 0 | Pass | 21.85% | 11.65 |
+| full_add | 8 (1 / 1 / 1 / 5) | 0 / Match | Generated / 0 | Pass | 36.01% | 6.57 |
+
+Canonical chip artifacts are `build/<design>/chip/tr_1um_<design>.gds`, `.cir`, `.chip.json`, a KLayout-rendered `.png` with layer legend, `README.md` with the actual pad map, and `signoff/signoff.summary.json`. Immutable run directories retain drawing/mask GDS, all reports/logs, the reference and copied rules. `ChipResult.signoff()` validates its input/output cache (roughly 15 ms adder4 / 7 ms full_add here). Failed qualification raises and preserves the preceding canonical GDS/JSON/reference. Exact flattened CO/M1/V1/M2 XOR before/after MDP is zero; drawing and mask waiver counts are zero.
+
+Standalone macro sign-off still correctly reports 46 adder4 / 16 full_add `WAR06: Floating SG Detected` items and a missing full-chip frame. The wrapped GDS resolves these with real terminals, not fixed-bias input ties or warning filters. The inspected template defines no post-MDP LVS stage: `mask_lvs.defined=false`, `matched=null`; drawing LVS is a real strict Match.
+
+### Generator failure classes fixed
+
+| Failure class | Fix / retained behavior |
+|---|---|
+| Pinned strict port spelling, including bracketed unused inputs | SIM normalizes only existing GDS labels using synthesis annotations; PNR’s physical isolated-input proof decodes/restores the same mapping. No invented labels or relaxed native comparison. |
+| Nearly exhausted M1 DC limit (old N=6 ≈99%) | Separate published M1/M2/TC limits, 20% reserve, characterized branch-current feedback, enough via columns, and power feasibility before signal routing. |
+| Dense larger-circuit routing / wasted power-invalid routes | Recorded scale seed/effort/channel choices, adaptive channels and large-macro warm start; power-invalid floorplans never enter the maze. Genuine route failures name nets, region and blockers and suggest rows/channels. No failed candidate is published. |
+| `ERR00` prohibited M1/V1/M2/PO | Preserve pinned 63/1 frame strips and constrain routing inside them. |
+| `PP.S1` / IP62 `ERR09: PRO space <64` | At least 150 µm pad-center pitch for the real 80 µm opening. |
+| `M1P.PE` / `M2P.PE` lead-outs | Real 40 µm-wide necks extend beyond the required 14 µm lead-out region. |
+| `M1P.M1` / `M2P.M2`, `ER0047`, `M2.S1`, IP62 `ERR01` / `ERR08` metal spacing | Include pad keep-outs even for disjoint metal of the same net; place signals at their macro access heights; separate supply bars and collectors by the actual wide-wire extents. |
+| `ER1811/1812`, `V1.WP`, `V1.S1`, `M1.V1P`/`M2.V1P`, IP62 TC width/PRO enclosure | Ordinary cuts stay outside the pad recognition/enclosure area; retain the genuine PDK pad array, use legal 2.9 µm-pitch header cuts and distributed current-carrying fingers. |
+| Upper header current crowding / supply crossing | Aligned tall source-contact arrays feed four parallel M1 fingers; explicitly bounded M1 collector rectangles retain VMID clearance. Separate VDD/VMID/VSS are verified from actual flattened metal and strict devices. |
+| Naked input gates / missing frame | Optional real-pad full-chip wrapper. Both final native reports have zero items, including warnings and visited items; no waivers. |
+
+No cell-internal drawing/mask defect was found; no CELLS generator changes were requested.
+
+## What remains for a real shuttle
+
+This artifact needs a **full 2500 × 2500 µm allocation**; the prior balanced-ternary macro’s 1800 × 1000 µm shared slot cannot hold adder4. Obtain organizer approval for the custom TEG pad/probe map and full allocation, complete the package/bond diagram and power every supply pad, agree die attach/common substrate at VSS, and obtain the process/ESD decision for the accepted +5/0/−5 V condition. Passive TEG pads provide no ESD network. Simulate the complete package/probe load and supply impedances; the DC envelope is not lifetime EM or pad/bond reliability qualification. Complete shuttle metadata, licence/schematic/reference package and final organizer CI on a frozen revision, and review the final masks/electrical results with the shuttle owner. `submission_ready=false` records these external steps. No upload or submission was performed.
+
+## Reproduce / notebook use
+
+```sh
+python3 examples/build_all.py
+python3 examples/pnr_all.py --force
+python3 examples/fuzz_pnr.py --count 100 --all-adders --jobs 2
+python3 -m pytest tests/pnr tests/viz/test_layout.py -q
+```
+
+`examples/pnr_all.py --watch` is an opt-in foreground script the integrator may start; no watcher is launched by an API call. Changed cell publications invalidate cached examples automatically. `fuzz_pnr.py --resume` checks consumed inputs and all native artifacts before reusing a case; cached replay retains the original measured runtime/RSS.
+
+```python
+from tritflow.pnr import place_and_route
+macro = place_and_route("build/adder4/adder4.json", seed=7)
+full = macro.to_chip()
+assert full.report["clean"]
+full.gds_path, full.report["mask_drc"]["violations"]
+full.signoff()  # verified artifact cache
+```
+
+Machine-readable complete evidence: `build/pnr_pinned_qualification.json`; the uncached 109-case campaign is preserved as `build/pnr_fuzz_pinned/certified_campaign.summary.json`.
+
+## Interface requests / decisions
+
+- **SIM:** original `build/<design>/<top>.pnr.json` power keys are retained, with additive per-layer current-limit/reserve fields and `dc_current_check`. Chip creation never modifies that JSON or macro GDS. Re-extract the new canonical geometries using their current hashes; older timing/IR results should remain invalidated until refreshed. Strict encoded-port handoff is adopted.
+- **FRONTEND:** `Layout.signoff()` and strict LVS delegation are already adopted. An optional `Layout.to_chip(**kwargs)` may delegate to `self.result.to_chip(library=Library.load(self.settings.cells), pdk_root=self.settings.pdk, klayout_binary=self.settings.klayout, **kwargs)`. For the canonical adder4/chip demo use seed 7 or the selected cached result. Actual pad map/README and KLayout PNG are ready; no frontend/notebook/submission path was edited.
+- **CELLS:** pinned generation is consumed and qualified; no remaining cell interface request.
+- Only development formatting packages were installed using the permitted user-pip flags: Black 26.10.1, mypy-extensions 1.1.0, pathspec 1.1.1, pytokens 0.4.1. No runtime dependency was added.
+
+---
+
+# Historical phase-1…5 record (superseded dev-PDK evidence)
 
 # PNR stream — phase 5
 

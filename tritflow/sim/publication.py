@@ -85,7 +85,7 @@ def publish_audit(destination=ROOT/'results/pinned_requalification.json'):
         changes['load_boundary']=_changes(old.get('boundary',{}),load['boundary'],list(load['boundary']))
     for cell in ('INV','NANY','NAND','NOR','BUF','TIEP','TIEZ','TIEN'):
         path=CELLS_DIR/f'out/{cell}/{cell}.char.json';record=_read(path);consume(path)
-        if not record or not record.get('passed') or record.get('pdk_provenance',{}).get('qualified_commit')!=pdk['qualified_commit']:
+        if not record or not record.get('passed') or not qualified_pdk(record,pdk):
             errors.append(f'Unqualified characterization: {cell}');continue
         source=CELLS_DIR/f'out/{cell}/{cell}.ext.spice';consume(source)
         if file_hash(source)!=record['source_sha256']:errors.append(f'Stale characterization: {cell}')
@@ -100,6 +100,7 @@ def publish_audit(destination=ROOT/'results/pinned_requalification.json'):
     from .sizing import load_grid
     for cell in ('INV','NANY'):
         record=load_grid(cell);path=CELLS_DIR/f'out/sizing/{cell}.grid.json';consume(path)
+        if not qualified_pdk(record,pdk):errors.append(f'Unqualified PDK: {cell} sizing')
         old=_read(baseline/f'cells/out/sizing/{cell}.grid.json') or {}
         oldrows={json.dumps(r['dimensions'],sort_keys=True):r for r in old.get('rows',[])}
         changed=[]
