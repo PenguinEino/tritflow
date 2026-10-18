@@ -3,80 +3,105 @@
     {
       "n": 1,
       "gds_unchanged": false,
-      "die_area_delta_um2": 33696.0,
+      "die_area_delta_um2": 183816.0,
       "carry_delta_s": {
-        "pre": -9.11233829413655e-11,
-        "post": 6.269592204832119e-10
+        "pre": -9.112282106290697e-11,
+        "post": 8.713260002573124e-10
       },
       "static_power_delta_w": -5.551115123125783e-17,
-      "rail_deviation_delta_v": -0.002383352088166646,
-      "zero_shift_delta_v": -0.00048398946798977605
+      "rail_deviation_delta_v": -0.003026997723985403,
+      "zero_shift_delta_v": -0.0006549338449493014
     },
     {
       "n": 2,
       "gds_unchanged": false,
-      "die_area_delta_um2": 11412.0,
+      "die_area_delta_um2": 60588.0,
       "carry_delta_s": {
-        "pre": -3.307418391524091e-10,
-        "post": 1.7077493310598303e-09
+        "pre": -3.326998270098829e-10,
+        "post": -1.7056879171786093e-10
       },
-      "static_power_delta_w": 8.604228440844963e-16,
-      "rail_deviation_delta_v": -0.0006862028166931822,
-      "zero_shift_delta_v": -0.00037567739491084495
+      "static_power_delta_w": 3.608224830031759e-16,
+      "rail_deviation_delta_v": -0.0017247073836212934,
+      "zero_shift_delta_v": -0.0003892632617668035
+    },
+    {
+      "n": 3,
+      "gds_unchanged": false,
+      "die_area_delta_um2": -95688.0,
+      "carry_delta_s": {
+        "pre": -6.144853739256266e-10,
+        "post": 1.6624211000895977e-08
+      },
+      "static_power_delta_w": -4.440892098500626e-16,
+      "rail_deviation_delta_v": -0.0018262212363344688,
+      "zero_shift_delta_v": -0.0005583033052571906
+    },
+    {
+      "n": 4,
+      "gds_unchanged": false,
+      "die_area_delta_um2": -76320.0,
+      "carry_delta_s": {
+        "pre": -6.985769611797117e-10,
+        "post": 2.989895999449848e-08
+      },
+      "static_power_delta_w": 8.215650382226158e-15,
+      "rail_deviation_delta_v": 0.002190224070133695,
+      "zero_shift_delta_v": -0.00033956209138663596
     },
     {
       "n": 5,
       "gds_unchanged": false,
-      "die_area_delta_um2": -98424.0,
+      "die_area_delta_um2": -195048.0,
       "carry_delta_s": {
-        "pre": -9.615329292623519e-10,
-        "post": 2.8830324093162545e-08
+        "pre": -9.634295568232347e-10,
+        "post": 3.578320080925505e-08
       },
-      "static_power_delta_w": -7.216449660063518e-15,
-      "rail_deviation_delta_v": -0.002912739521704566,
-      "zero_shift_delta_v": -0.00012465946055995047
+      "static_power_delta_w": -7.882583474838611e-15,
+      "rail_deviation_delta_v": 0.005235470539968645,
+      "zero_shift_delta_v": 0.0001906605222581348
     },
     {
       "n": 6,
       "gds_unchanged": false,
-      "die_area_delta_um2": 797040.0,
+      "die_area_delta_um2": -99864.0,
       "carry_delta_s": {
-        "pre": -1.2067258100428337e-09,
-        "post": 5.2026042891515636e-08
+        "pre": -1.1641126333616127e-09,
+        "post": 4.507444101863021e-08
       },
-      "static_power_delta_w": -3.3306690738754696e-16,
-      "rail_deviation_delta_v": -0.0020248604726704755,
-      "zero_shift_delta_v": -0.000601381250477484
+      "static_power_delta_w": 3.2751579226442118e-15,
+      "rail_deviation_delta_v": 0.01959141495564687,
+      "zero_shift_delta_v": 0.0001137716925665444
     }
   ],
   "original_postlayout": [
     {
       "design": "adder4",
-      "passed": false,
-      "state": "stale",
-      "error": "No complete passing pair of post-layout summaries; producer may still be running"
+      "passed": true,
+      "post_settling_delta_s": {
+        "sum[3]": 2.9983413751967475e-08,
+        "sum[2]": 2.256589242518846e-08,
+        "sum[1]": 2.4051961092107236e-08,
+        "sum[0]": 1.8766870146549435e-08,
+        "cout": 2.8730827520250126e-08
+      },
+      "rail_deviation_delta_v": 0.002052292785985621,
+      "zero_shift_delta_v": -0.00037594074378821674
     },
     {
       "design": "full_add",
       "passed": true,
       "post_settling_delta_s": {
-        "sum": 1.7142296617268825e-10,
-        "cout": 1.4487242512568985e-09
+        "sum": -1.2107250164831868e-09,
+        "cout": 1.0057954819537267e-09
       },
-      "rail_deviation_delta_v": -0.002410866864714478,
-      "zero_shift_delta_v": -0.0005106027241192912
+      "rail_deviation_delta_v": -0.0035037745806487663,
+      "zero_shift_delta_v": -0.0006762124917822909
     },
     {
       "design": "mac1",
-      "passed": true,
-      "post_settling_delta_s": {
-        "sum": 1.4697702036150064e-09,
-        "cout": 9.482532738625676e-11,
-        "and_out": -1.4833926553585035e-09,
-        "or_out": 8.011080747187381e-10
-      },
-      "rail_deviation_delta_v": -0.003848924239903795,
-      "zero_shift_delta_v": -0.0005424633257375966
+      "passed": false,
+      "state": "running",
+      "error": "No complete passing pair of post-layout summaries; producer may still be running"
     },
     {
       "design": "mul1",

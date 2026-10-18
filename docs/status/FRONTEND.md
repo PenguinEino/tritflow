@@ -97,8 +97,10 @@ are pending the parallel publications.
 
 CELLS Phase 7 was published at generation `2026-10-18T10:26:47.211617+00:00`;
 the required pinned-deck and artifact checks pass. Both W/L grids now pass.
-Only SIM's width-scaling and load-boundary source hashes remain stale against
-the newly published library at this intermediate check. The final capture is
+Only SIM's width-scaling and load-boundary source hashes remain stale at this
+intermediate check. The new scaling file (19:38 JST) now matches the new cell
+views but still records an older `tritflow/sim/diagnose.py` hash; the load record
+still records the prior INV GDS. All declared source hashes remain enforced. The final capture is
 queued behind the real `notebook/tests/test_publications.py` checks, refreshed
 in a new interpreter on every poll. No stale flags are promoted to new results.
 

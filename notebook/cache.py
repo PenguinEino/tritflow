@@ -28,7 +28,11 @@ def source_fingerprint(root, pdk):
     participate explicitly. Relocating an identical checkout/PDK is harmless.
     """
     root, pdk = Path(root), Path(pdk)
-    files = [*root.glob("tritflow/**/*.py"), *root.glob("cells/out/**/*.gds"),
+    # STA is an independent stream, never imported or called by this notebook.
+    # Its edits must not invalidate a recorded macro physical/analog experiment.
+    code = [p for p in root.glob("tritflow/**/*.py")
+            if not p.is_relative_to(root/"tritflow/sta")]
+    files = [*code, *root.glob("cells/out/**/*.gds"),
              *root.glob("cells/out/**/*.spice"), *root.glob("cells/out/**/*.char.json"),
              *root.glob("cells/out/**/*.abstract.json"), *root.glob("cells/out/*.json"),
              root/"cells/template.json", root/"notebook/setup_pins.json",

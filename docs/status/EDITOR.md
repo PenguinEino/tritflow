@@ -1,6 +1,102 @@
-# EDITOR — complete narrative handoff
+# EDITOR — phase 2 static-figure handoff complete
 
 Updated: 2026-10-18.
+
+## Phase 2 — done
+
+- Read all eight paper-figure scripts and visually inspected every PNG in
+  `figures/out/`. No figure script/image was edited or regenerated.
+- Realigned chapters to the existing static heroes: fig_flow → 0/teaser,
+  fig_gates → 1, fig_sizing → 2, fig_cell → 3, fig_synth → 4/5 (reuse panels,
+  no duplicate required), fig_pnr → 6, fig_postlayout + fig_scaling → 7.
+  Chapter 8 retains the actual edited-design output; chapter 9 uses a static
+  measurement table. No unrelated adder image represents a custom circuit.
+- `figures.md` now leads with the static placement map and image/caption
+  consistency requirements. All earlier interactive specifications are retained
+  under an explicit optional-later section. Main prose no longer promises
+  unimplemented controls. Chapter 8's actual HDL editing remains part of the flow.
+- Tightened every affected What-this-shows box to its figure's quantities.
+  Fixed four-trit paper contexts are separate from the live two-trit example.
+  HPWL is identified separately from routed wire length; DC power is the
+  maximum over documented states; the timing endpoint includes carry/MSB sum.
+- Added `notebook/narrative/captions.md`: eight paper-style captions, each
+  with 1–3 sentences and numerical substitutions sourced in placeholders.md.
+- Added `readme_draft.md` for the public repository root and
+  `pr_description.md` for the official Code-a-Chip PR. Both reproduce the
+  author block in docs/author.md exactly. No phone, membership, attendance,
+  submission approval or actual PR action is inferred. README links are
+  written for their intended root destination, not the narrative directory.
+- Retained all prediction derivations. The static sizing comparison now chooses
+  the longest common resistor length at adopted MOS dimensions, so no selector
+  is required to identify its comparison. Appendix B now has a sizing
+  unavailable-results row.
+
+### Figure corrections for the owner before publication
+
+The prose/captions are complete; the following images/scripts remain outside
+EDITOR ownership and require their owner's update to match the final data:
+
+1. **fig_sizing:** the current grid has 18 NANY candidates but only **17 finite
+   plotted results**. The unavailable case rejects a nonphysical DC solver root.
+   The PNG/script title “18 sizes, all pass” is therefore incorrect. The new
+   caption counts finite points and Appendix B retains the missing case. Its
+   scatter x source is `max_static_current_a` over logical states, so “Static
+   current at the 0 level” is also too specific as a general axis definition.
+2. **fig_postlayout:** current native summaries explicitly compare identical
+   extracted devices without/with wire C; the old “schematic” baseline labels
+   must be replaced. The current paired sum-zoom numbers resolve to
+   **100.3353/108.6335 ns** on the selected post-wire-slowest sum step. Regenerate
+   the zoom, legend and annotations from the same native inputs as the caption.
+3. **fig_scaling:** the inspected PNG shows **49.2/47.3 ns/trit** and calls its
+   baseline schematic. The current complete corrected source gives
+   **48.9525/57.0342 ns/trit** for identical extracted devices ± wire C.
+   Regenerate the points/fits and baseline labels, identify the measured
+   carry/MSB-sum endpoint, and label static power “maximum over tested states.”
+
+These values are observations for the handoff, not frozen reader text. All
+caption numbers remain placeholders. `FIG_REF` affects only the scripts' reads
+through figures/data.py, not all native build/cell inputs; retain a consistent
+snapshot when regenerating. No automatic claim that an existing PNG matches
+today's JSON is made.
+
+FRONTEND/integrator should embed or rebase narrative image links in the notebook
+and include them in its static payload. Publish the new README/PR substitutions
+only against a matching release/source/capture. The current old payload has an
+incompatible launch tag and `colab_verified=false`; the drafts use truthful
+unavailable text until replaced by matching evidence. The PR draft expects
+LICENSE and NOTICE in the final project folder; confirm the final package
+contains both (the inspected legacy seven-file payload did not contain NOTICE).
+
+### Phase 2 validation
+
+- Ten chapter anchors/boxes; primary-image links; ≤80-word chapter openings
+  and ≤150-word intro; balanced math/details; no internal-process words in
+  chapters; no trailing whitespace — pass.
+- All **93 currently used substitutions** are covered by **129 unique
+  registrations**. The other registrations are retained for optional views.
+- Eight captions of 1–3 sentences, no copied numerical results; exact author
+  block in both public drafts; original 100-word abstract and two-sentence
+  teaser preserved — pass. Main chapter prose is **2,336 whitespace words**,
+  about **15.6 minutes at 150 words/minute** before figure study.
+- Independently resolved all new source paths/formulas. Fixed-adder counts
+  are NANY=44/INV=20, die 1692×1590 µm, HPWL 72.0405→48.0705 mm
+  (33.27295% reduction). NANY reference/adapted area ratio resolves to 1.30294.
+  Both illustrated arithmetic input vectors match actual mapped simulation.
+- Ran the exact public DC sweep used for the plotted INV zero-input point:
+  −0.0395366 V, |I(VDD)|=0.407165 mA, signed rail power 4.07165 mW.
+  This is the extracted-cell source, distinct from the source-level sizing
+  comparison in the earlier hand estimate.
+- Current width/load source fields resolve, including same-transition timing,
+  all 27 full-adder states and the 12.8125–12.96875 pF measured load bracket.
+  This is an editorial source audit, not a new PNR/all-width qualification.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m pytest notebook/tests/test_presentation.py -q -p no:cacheprovider`
+  — **1 passed in 0.31 s**. No notebook generator or .ipynb write was run.
+
+Only `notebook/narrative/` and this status file were written. No packages,
+git writes, commits, public README changes or PR submission. There are now
+21 narrative files. No EDITOR authoring work remains.
+
+## Phase 1 record
 
 ## Done
 
@@ -131,12 +227,13 @@ import json, re
 p = Path('notebook/narrative')
 chapters = sorted(p.glob('[0-9][0-9]_*.md'))
 assert len(chapters) == 10
-reader = chapters + [p/n for n in ('A_limits.md', 'B_evidence.md', 'pitch.md', 'teaser.md')]
+reader = chapters + [p/n for n in ('A_limits.md', 'B_evidence.md', 'pitch.md', 'teaser.md',
+                                  'captions.md', 'readme_draft.md', 'pr_description.md')]
 pattern = r'\{([a-z][a-z_]*\.[a-z][a-z_0-9]*)\}'
 used = set().union(*(set(re.findall(pattern, f.read_text())) for f in reader))
 registered = re.findall(r'^\| `\{([a-z][a-z_]*\.[a-z][a-z_0-9]*)\}` \|',
                         (p/'placeholders.md').read_text(), re.M)
-assert used == set(registered) and len(registered) == len(set(registered))
+assert used <= set(registered) and len(registered) == len(set(registered))
 for f in chapters:
     s = f.read_text()
     assert 'What this shows' in s and re.search(r'<!-- figure: ch\d -->', s)
@@ -174,5 +271,5 @@ Tone references inspected:
   — reviewed for scope; no claim that an unavailable accepted notebook was read.
 
 No packages installed; no git write commands; no code, notebook generator,
-.ipynb or foreign owned paths changed. Eighteen files are delivered under
+.ipynb or foreign owned paths changed. Eighteen files were delivered in phase 1 under
 `notebook/narrative/` plus this status file.

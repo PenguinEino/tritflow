@@ -12,6 +12,7 @@ saved report does not execute a new physical or electrical check.
 | Qualified PDK | {evidence.pdk_commit} |
 | Tools used in this session | {evidence.tools} |
 | Cell qualification | {evidence.cell_checks} |
+| Sizing candidates and unavailable results | {evidence.sizing_checks} |
 | Row abutment | {evidence.abutment_checks} |
 | Selected adder | {evidence.adder_checks} |
 | Width sweep | {evidence.width_checks} |

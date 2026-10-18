@@ -13,31 +13,29 @@ and taped them out in {history.tapeout_year}; silicon is expected in
 {history.delivery_month} and has not yet been measured. TritFlow adapts those
 designs into a reusable standard-cell library and a Colab design flow.
 
-<!-- figure: teaser; caption comes from teaser.md -->
+<!-- teaser caption: teaser.md; use the opening static hero once -->
 
 ## 0. From HDL to a checked adder layout
 
-The {adder.width}-trit ripple adder below starts from {adder.hdl_lines} lines
-of top-level HDL plus shared half-adder and full-adder modules. Run the cell to
-synthesize it, place and route real cells, compare layout connectivity with the
-schematic, and simulate the extracted circuit. Watch the carry and the most
-significant sum digit as the inputs change.
+The opening figure follows a {paper_adder.width}-trit ripple adder from
+{paper_adder.hdl_lines} lines of top-level HDL plus shared arithmetic modules
+to routed cells and extracted waveforms. Read the cell counts and layout
+checks, then follow the most significant sum digit and carry. The executable
+example below builds a {adder.width}-trit adder through the same steps.
 
 <!-- figure: ch0 -->
+<!-- hero: fig_flow; caption: captions.md#fig_flow -->
 
-*Choose an adder width to inspect its layout and results. The default width
-also runs through the flow in this session.*
+![TritVerilog, mapped cells, three-rail NANY, routed adder and extracted waveforms.](../../figures/out/fig_flow.png)
 
 A trit takes the values −1, 0 and +1. Here their voltages are
 {levels.negative_v}, {levels.zero_v} and {levels.positive_v} V. A trit is a
 signal type of its own; Verilog's `x` and `z` are not extra trit values.
 The waveform's shaded bands show the allowed error around each target level.
 
-> **What this shows.** The selected adder uses {adder.cells} cells in a
-> {adder.die_um} µm layout: {adder.drc_items} drawing-DRC markers and LVS
-> {adder.lvs_status}. Logic passes {adder.logic_mode} testing over
-> {adder.logic_vectors} input vectors;
-> {adder.analog_states} distinct states are visited in the analog sequence,
-> whose output checks {adder.analog_status} at {adder.load_ff} fF per output.
+> **What this shows.** The illustrated adder maps to {paper_adder.nany} NANY
+> and {paper_adder.inv} INV cells, with {paper_adder.equivalence_mode}
+> source-to-cell equivalence. Its {paper_adder.die_um} µm layout has
+> {paper_adder.drc_items} drawing-DRC markers and LVS {paper_adder.lvs_status}.
 
 Next, we open one of those cells and explain how it makes the middle voltage.

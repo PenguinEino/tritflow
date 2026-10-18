@@ -4,7 +4,8 @@ The middle output level comes from conducting transistor and resistor branches.
 At a zero input, the inverter connects its output toward both supply rails;
 the balance sets the voltage and draws current even with constant inputs.
 NANY adds paths to VMID that clamp the output for opposite input trits.
-Follow the selected schematic alongside its transfer curve.
+Read each transfer curve above its VDD current, with the other input held
+at each logical level.
 
 The gate functions are
 
@@ -32,14 +33,18 @@ uses device dimensions and the PDK's nominal model parameters; SPICE then
 includes the nonlinear devices.
 
 <!-- figure: ch1 -->
+<!-- hero: fig_gates; caption: captions.md#fig_gates -->
 
-*Move the input-voltage slider. The marker follows output voltage and supply
-current; the truth table identifies the nearby logical input state.*
+![Extracted-cell DC transfer curves and VDD currents for INV, NAND, NOR and NANY.](../../figures/out/fig_gates.png)
 
-> **What this shows.** At the middle input, the divider estimate gives
-> {divider.output_v} V and {divider.power_mw} mW; SPICE gives
-> {divider.spice_output_v} V and {divider.spice_power_mw} mW.
-> The static current is the cost of establishing this resistive midpoint.
+> **What this shows.** At a middle input, the extracted INV settles at
+> {paper_gates.inv_zero_v} V and draws {paper_gates.inv_current_ma} mA from
+> VDD at {paper_gates.temperature_c} °C. Its signed rail powers sum to
+> {paper_gates.inv_power_mw} mW with constant input.
+
+The schematic-dimension divider estimate gives {divider.output_v} V and
+{divider.power_mw} mW, compared with {divider.spice_output_v} V and
+{divider.spice_power_mw} mW in the matching schematic DC calculation.
 
 At \(a=0\), both \(\min(a,-a)\) and \(\max(a,-a)\) equal zero.
 That example is enough to reject Boolean complementation as a synthesis rule.

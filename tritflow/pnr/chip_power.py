@@ -53,8 +53,8 @@ def _power_header(data, macro_pins, core, margin):
         w = widths[rail]
         bars[rail] = cursor + w / 2
         cursor += w + 8.0
-    collector_y = max(cursor + 8.0, 1008.0)
-    if collector_y + 16 > 1050.0:
+    collector_y = max(cursor + 18.0, 1012.0)
+    if collector_y > 1018.0:
         raise ValueError(
             "Macro leaves insufficient top power-channel space; use fewer rows or more placement effort"
         )
@@ -119,6 +119,12 @@ def _power_header(data, macro_pins, core, margin):
                 "points": [
                     [min(x, min(column_xs)), y1 + 50.0],
                     [max(x, max(column_xs)), y1 + 50.0],
+                ],
+                "rect": [
+                    min(x - finger_w / 2, upper_x - 22.4),
+                    y1 + 50.0 - finger_w / 2,
+                    max(x + finger_w / 2, upper_x + 22.4),
+                    y1 + 50.0 + finger_w / 2,
                 ],
             }
         )

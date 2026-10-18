@@ -11,9 +11,9 @@ from tritflow import PASS_BAND, TRIT_VOLTS
 from tritflow.sim.spice import signal_waveform
 
 
-def _bands(fig, row=None):
+def _bands(fig, row=None, levels=None):
     axes = {'row': row, 'col': 1} if row is not None else {}
-    for trit, voltage in TRIT_VOLTS.items():
+    for voltage in (TRIT_VOLTS if levels is None else levels).values():
         fig.add_hrect(y0=voltage-PASS_BAND, y1=voltage+PASS_BAND,
                       fillcolor='#6eae89', opacity=.12, line_width=0, exclude_empty_subplots=False, **axes)
         fig.add_hline(y=voltage, line_width=.7, line_dash='dot', line_color='#89949b', exclude_empty_subplots=False, **axes)
@@ -40,8 +40,13 @@ def waveform_figure(result: dict, outputs=None, *, pre: dict | None = None,
     fig = make_subplots(rows=len(outputs), cols=1, shared_xaxes=True,
                         vertical_spacing=min(.08, .3/len(outputs)), subplot_titles=outputs)
     rows = result.get('measurements', {}).get('rows', [])
+    levels = result.get('measurements',{}).get('ideal_volts')
+    if levels is None:
+        supplies=result['stimulus'].get('supplies_v',{'VDD':5.,'VMID':0.,'VSS':-5.})
+        levels={-1:supplies['VSS'],0:supplies['VMID'],1:supplies['VDD']}
+    voltages=sorted(levels.values())
     for index, pin in enumerate(outputs, 1):
-        _bands(fig, index)
+        _bands(fig, index, levels)
         if pre is not None:
             fig.add_trace(go.Scatter(x=pre['waveforms']['time']*1e9,
                 y=signal_waveform(pre['waveforms'], pin), name=f'{pin}: {pre_label}',
@@ -74,12 +79,13 @@ def waveform_figure(result: dict, outputs=None, *, pre: dict | None = None,
                 axis = '' if index == 1 else str(index)
                 for k, measured in candidates:
                     start, delay = k*hold*1e9, measured['settling_s']*1e9
-                    fig.add_annotation(x=start+delay, y=measured['ideal_trit']*5,
-                        ax=start, ay=measured['ideal_trit']*5,
+                    target=measured.get('ideal_voltage_v',measured['ideal_trit']*5)
+                    fig.add_annotation(x=start+delay, y=target,
+                        ax=start, ay=target,
                         xref=f'x{axis}', yref=f'y{axis}', axref=f'x{axis}', ayref=f'y{axis}',
                         text=f'{delay:.2f} ns', showarrow=True, arrowhead=3,
                         bgcolor='rgba(255,255,255,.85)', font={'size':10})
-        fig.update_yaxes(title_text='Voltage (V)', range=[-5.85,5.85], tickvals=[-5,0,5], row=index, col=1)
+        fig.update_yaxes(title_text='Voltage (V)', range=[voltages[0]-.85,voltages[-1]+.85], tickvals=voltages, row=index, col=1)
     fig.update_xaxes(title_text='Time (ns)', row=len(outputs), col=1)
     fig.update_layout(title=title, template='plotly_white', height=max(330,250*len(outputs)),
                       hovermode='x unified', legend={'orientation':'h'}, margin={'t':95})

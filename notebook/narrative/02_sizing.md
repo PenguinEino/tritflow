@@ -3,8 +3,9 @@
 Sizing changes both sides of the divider. A stronger pull-down lowers the
 middle output; a stronger pull-up raises it. Increasing both series resistors
 reduces static current, while MOS asymmetry still affects the voltage.
-Use the inverter sweep to see level accuracy and current together, then inspect
-NANY with the same controls. The star marks the adopted reference dimensions.
+Compare inverter transfer curves at fixed MOS sizes, then read the error/current
+scatter plots for INV and NANY. The circled points mark the adopted reference
+dimensions.
 
 **Predict first.** For the conducting MOS devices, take on-resistance as
 inversely proportional to \(W/L\). Apply the divider from the previous chapter
@@ -21,17 +22,20 @@ I'=\frac{V_{DD}-V_{SS}}{R_u'+R_d'},
 \]
 
 <!-- figure: ch2 -->
+<!-- hero: fig_sizing; caption: captions.md#fig_sizing -->
 
-*Change MOS width, MOS length or resistor length across the measured grid.
-Compare the predicted middle-level shift with the SPICE marker, then look at
-the worst level error over the complete discrete input table.*
+![Resistor-length transfer curves and INV/NANY sizing error versus current.](../../figures/out/fig_sizing.png)
 
-> **What this shows.** For the selected INV dimensions, the predicted
-> middle-level shift is {sizing.predicted_shift_mv} mV and SPICE gives
-> {sizing.spice_shift_mv} mV. Across all logical inputs, worst error is
-> {sizing.max_error_mv} mV and maximum absolute rail current is
-> {sizing.current_ua} µA; the adopted point gives
-> {sizing.adopted_error_mv} mV and {sizing.adopted_current_ua} µA.
+> **What this shows.** The scatter plots contain {paper_sizing.inv_count}
+> finite INV results and {paper_sizing.nany_count} finite NANY results.
+> At the circled INV size, worst logical level error is
+> {sizing.adopted_error_mv} mV and maximum absolute rail current is
+> {sizing.adopted_current_ua} µA; the corresponding NANY values are
+> {paper_sizing.nany_error_mv} mV and {paper_sizing.nany_current_ua} µA.
+
+For the longest-resistor INV curve at the adopted MOS dimensions, the divider
+predicts a middle-level shift of {sizing.predicted_shift_mv} mV; the schematic
+DC result shifts by {sizing.spice_shift_mv} mV relative to the circled size.
 
 The sweep changes schematic dimensions; generating and checking a new physical
 cell is a separate step. Next we inspect the library built from the adopted sizes.

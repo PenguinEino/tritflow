@@ -178,3 +178,21 @@ def test_unused_input_and_no_cells(library, tmp_path):
     result = place_and_route(circuit, library, output_dir=tmp_path, run_pdk_drc=False)
     assert result.stats["routed_nets"] == 1
     assert result.data["checks"]["connectivity"]["clean"]
+
+
+def test_real_dc_reserve_is_checked_before_signal_routing(tmp_path, monkeypatch):
+    """An under-sized power plan must not consume a maze-routing attempt."""
+    if not (CELLS_DIR/"out/library.json").exists():
+        pytest.skip("Real library not published")
+    import importlib
+    module=importlib.import_module('tritflow.pnr.flow')
+    original=module.route
+    routed=[]
+    def qualified_route(data,*args,**kwargs):
+        check=data['power']['dc_current_check']
+        assert check['defined'] and check['reserved_margin_met']
+        routed.append(check['max_utilization'])
+        return original(data,*args,**kwargs)
+    monkeypatch.setattr(module,'route',qualified_route)
+    result=place_and_route(chain(6),Library.load(),output_dir=tmp_path)
+    assert routed and result.data['checks']['pdk_drc']['clean']
