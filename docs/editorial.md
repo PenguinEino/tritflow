@@ -99,3 +99,18 @@ unless the shuttle-ready top is shown; no silicon measurement yet.
 | 10-26/28 | Real-Colab verification loops; reader-focused review; user read-through |
 | 10-29 | Submission package final; user approval |
 | 10-30 | User opens the PR to the official repository (one day of buffer) |
+
+## Plan review 2026-10-19 (Code-a-Chip fit, second pass)
+
+Content fits the call; two drifts to fix before the freeze:
+1. **Code as method, not audit plumbing.** Each chapter's visible code shows the 3–12 lines of
+   public TritFlow API a reader would copy (`flow.load → synthesize → schematic → place_and_route →
+   drc/lvs → extract → simulate`). Guards, caching, hash checks and evidence tables live in helper
+   modules and Colab `#@title` (collapsed) helper cells; verification assertions are gathered in
+   Appendix B. Behaviour and checks stay the same.
+2. **Reuse story.** Add (a) ch7 "Predict with static timing, confirm with SPICE" using the validated
+   STA (matched transitions, ±20 %; bound is conservative but ~2× loose — say so in one line);
+   (b) ch9 "From your HDL to a shuttle-ready top" using `PnrResult.to_chip()` / `signoff()` cached
+   results (mask DRC 0) plus the honest remaining steps (allocation, bond map, ESD approval, shuttle
+   CI); (c) Appendix C "Use and extend TritFlow" (pip install, CLI, add a cell / an operator).
+Release discipline: figures are regenerated only by the release step, before hashes are captured.
