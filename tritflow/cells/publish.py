@@ -52,6 +52,20 @@ def publish(stage, *, reason):
     timestamp=datetime.now(timezone.utc).isoformat()
     generation={'id':timestamp,'reason':reason,'height_um':json.loads((stage/'template.json').read_text())['height']}
     (stage/'generation.json').write_text(json.dumps(generation,indent=2)+'\n')
+    evidence=stage/'equivalence_report.json'
+    if evidence.exists():
+        comparison=json.loads(evidence.read_text())
+        if not comparison['passed']:
+            raise ValueError('Refusing failed equivalence evidence')
+        for name,proof in comparison['schematic_equivalence'].items():
+            for suffix,key in [('gds','compact_gds_sha256'),('ext.spice','compact_extracted_sha256')]:
+                if hashlib.sha256((stage/name/f'{name}.{suffix}').read_bytes()).hexdigest()!=proof[key]:
+                    raise ValueError(f'Stale equivalence for {name}.{suffix}')
+        comparison.setdefault('verified_cell_generation',comparison.get('generation'))
+        comparison['generation']=generation
+        if 'parasitic_aware' in comparison:
+            comparison['parasitic_aware']['generation']=generation
+        evidence.write_text(json.dumps(comparison,indent=2,allow_nan=False)+'\n')
     # Prepare the old generation's template before replacing the outer template
     # with a link; both resolve to the tall template until the directory swap.
     public=CELLS_DIR/'template.json'

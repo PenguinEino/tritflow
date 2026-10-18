@@ -151,7 +151,8 @@ def _simulate_cached_unlocked(out, mode, circuit, top, inputs, outputs, vectors,
 
 
 def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e-9,
-                   load_f=10e-15, timeout=600, refresh_characterization=True, plots=True):
+                   load_f=10e-15, timeout=600, refresh_characterization=True, plots=True,
+                   vectors=None, labels=None, expected=None):
     """Validate current PNR files, snapshot sources, LVS, wire C, pre/post and IR.
 
     The build directory basename is the example name; JSON top is authoritative.
@@ -190,9 +191,16 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
     cell_text='\n'.join((snapshot/c/f'{c}.spice').read_text() for c in used)
     pre_text=gate_spice(net,cell_text);(out/'prelayout.spice').write_text(pre_text)
     inputs=[p.name for p in net.ports if p.dir=='input'];outputs=[p.name for p in net.ports if p.dir=='output']
-    vectors,labels=representative_vectors(design,inputs);expected=arithmetic_oracle(design,inputs)
+    custom_plan = vectors is not None
+    if custom_plan:
+        vectors = list(vectors)
+        if expected is None or labels is None or len(labels) != len(vectors):
+            raise ValueError('Custom vectors require matching labels and an independent expected function')
+    else:
+        vectors,labels=representative_vectors(design,inputs);expected=arithmetic_oracle(design,inputs)
     _save(out/'vectors.json',{'input_order':inputs,'labels':labels,'vectors':vectors,
-          'expected':[expected(v) for v in vectors], 'coverage':'all inputs' if design!='adder4' else '20 directed arithmetic cases; both four-digit ripple carries'})
+          'expected':[expected(v) for v in vectors], 'coverage':('documented directed arithmetic cases' if custom_plan
+              else 'all inputs' if design!='adder4' else '20 directed arithmetic cases; both four-digit ripple carries')})
     run_gds=inputs_snapshot/gds.name
     lvs=extract_layout(run_gds,net.top,out/'lvs',gate_netlist=net,cell_subckts=cell_text,timeout=timeout)
     _save(out/'lvs.json',lvs)
@@ -233,11 +241,13 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
 
 
 def run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e-9,
-                   load_f=10e-15, timeout=600, refresh_characterization=True, plots=True):
+                   load_f=10e-15, timeout=600, refresh_characterization=True, plots=True,
+                   vectors=None, labels=None, expected=None):
     """Serialize one design's extraction, snapshots, simulation and result publication."""
     import fcntl
     directory=Path(directory).resolve();out=directory/'postlayout';out.mkdir(parents=True,exist_ok=True)
     with (out/'.run.lock').open('w') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX)
         return _run_postlayout(directory,cells_root=cells_root,hold_s=hold_s,step_s=step_s,
-            load_f=load_f,timeout=timeout,refresh_characterization=refresh_characterization,plots=plots)
+            load_f=load_f,timeout=timeout,refresh_characterization=refresh_characterization,plots=plots,
+            vectors=vectors,labels=labels,expected=expected)

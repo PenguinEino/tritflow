@@ -4,6 +4,7 @@
 python3 -m tritflow.cells build
 python3 -m tritflow.cells verify
 python3 -m tritflow.cells equivalence
+python3 -m tritflow.cells parasitic
 python3 -m pytest tests/cells -q
 ```
 
@@ -57,7 +58,19 @@ Runnable decks, logs, raw reference extraction and compressed DC/cascade samples
 are retained under `out/equivalence/`. Historical TBs with stale RR20 values are
 not used as circuit definitions; their stimulus protocols are ported onto RR30.
 
-These checks include intrinsic device/junction parasitics. Interconnect R/C,
-process corners, mismatch, pads/packages and manufacturing qualification are
-outside their scope. Differences below the documented numerical tolerances are
-not evidence of routing-dependent silicon delay.
+The Phase 2 table proves device-level identity only: neither extraction contains
+interconnect parasitics, so identical results do not establish layout performance
+equivalence. `parasitic` separately annotates both original and compact extracts
+using SIM's public actual-GDS M1/M2 wire-C estimate, then repeats the same electrical
+protocols. It adds `parasitic_aware` to the report, including per-net capacitance,
+retained annotated decks and a geometric poly-resistance assessment. Both layouts
+must pass the original functional limits; timing differences need not vanish.
+The default command stages a complete snapshot and publishes atomically; use
+`--out DIR` to compare privately after `equivalence` has run there.
+
+Wire C uses explicit engineering coefficients, not a calibrated PDK PEX deck.
+Poly R/C, wire resistance, coupling, shielding, via C, process corners, mismatch,
+pads/packages and manufacturing qualification remain outside the simulation.
+Poly resistance estimates are documented separately; they are not included in
+the reported settling times. Source-level W/L experiments belong to SIM's
+`tritflow.sim.sizing.sweep_dimensions`, not physical cell generation.

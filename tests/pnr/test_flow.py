@@ -46,6 +46,9 @@ def test_deterministic_seed(library, tmp_path):
     circuit = random_dag(20)
     a = place_and_route(circuit, library, output_dir=tmp_path/"a", seed=71, anneal_steps=100, run_pdk_drc=False)
     b = place_and_route(circuit, library, output_dir=tmp_path/"b", seed=71, anneal_steps=100, run_pdk_drc=False)
+    # Wall-clock measurements vary; all physical/optimization records must agree.
+    a.data["stats"].pop("runtime_s")
+    b.data["stats"].pop("runtime_s")
     assert a.data == b.data
     assert a.gds_path.read_bytes() == b.gds_path.read_bytes()
     assert a.data["history"][-1]["hpwl"] <= a.data["history"][0]["hpwl"]
@@ -85,7 +88,8 @@ def test_drc_detects_missing_enclosure(library, tmp_path):
     layout = db.Layout()
     layout.read(str(result.gds_path))
     routing = layout.cell(f"{circuit.top}__routing")
-    routing.shapes(layout.layer(19, 0)).insert(db.DBox(10, 10, 11.4, 11.4))
+    x = result.data["die"][0]/2
+    routing.shapes(layout.layer(19, 0)).insert(db.DBox(x, .5, x+1.4, 1.9))
     broken = tmp_path/"unenclosed.gds"
     layout.write(str(broken))
     report = routing_drc(broken, result.data, library)
@@ -162,6 +166,9 @@ def test_real_four_trit_adder(tmp_path):
     assert result.stats["routed_nets"] == len(circuit.nets())
     assert result.stats["instance_count"] >= 40
     assert all(check["clean"] for check in result.data["checks"].values())
+    assert result.stats["aspect_ratio"] <= 1.5
+    assert result.stats["utilization"] >= .45
+    assert result.stats["runtime_s"]["total"] < 30
 
 
 def test_unused_input_and_no_cells(library, tmp_path):

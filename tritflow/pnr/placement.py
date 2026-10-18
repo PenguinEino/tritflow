@@ -79,8 +79,14 @@ class RowCapacityError(ValueError):
 
 
 def place(netlist, library, rows=None, seed=0, steps=600, history_every=25, *,
-          instance_currents=None, max_row_current_a=None):
-    """Pack row lists, preserving rail polarity under R0 or left/right mirror."""
+          instance_currents=None, max_row_current_a=None, spans=1,
+          span_width=None, span_gap=0., channel_tracks=6, span_current_limit_a=None):
+    """Pack independently fed row spans, preserving rail polarity with MY.
+
+    A span is the section of a horizontal rail between adjacent M2 feed banks.
+    Centering its cells shares its current between those feeds. Fixed span
+    boundaries keep annealing from moving a cell across a power feed.
+    """
     if rows is not None and rows < 1:
         raise ValueError("rows must be positive")
     if steps < 0 or history_every < 1:
@@ -93,11 +99,12 @@ def place(netlist, library, rows=None, seed=0, steps=600, history_every=25, *,
     total = sum(library.cells[i.cell].width for i in order)
     count = rows or max(1, round(math.sqrt(total / (h + 12 * p))))
     count = min(count, max(1, len(order)))
-    row_lists = [[] for _ in range(count)]
-    widths, row_currents = [0.] * count, [0.] * count
+    bins = count*spans
+    row_lists = [[] for _ in range(bins)]
+    widths, row_currents = [0.] * bins, [0.] * bins
     # Topological breadth first order naturally fills successive columns.
     for inst in order:
-        legal_rows = [r for r in range(count) if max_row_current_a is None or
+        legal_rows = [r for r in range(bins) if max_row_current_a is None or
                       row_currents[r]+currents.get(inst.name, 0.) <= max_row_current_a+1e-12]
         if not legal_rows:
             raise RowCapacityError(count)
@@ -106,16 +113,21 @@ def place(netlist, library, rows=None, seed=0, steps=600, history_every=25, *,
         widths[r] += library.cells[inst.cell].width
         row_currents[r] += currents.get(inst.name, 0.)
     by_name = {i.name: i for i in order}
-    orientations = {i.name: "R0" for i in order}
+    span_width = span_width or max(widths, default=p)
+    orientations = {name: ("MY" if index % count % 2 else "R0")
+                    for index, entries in enumerate(row_lists) for name in entries}
 
     def unpack():
         result = []
-        for row, entries in enumerate(row_lists):
-            x = 0.
+        for index, entries in enumerate(row_lists):
+            span, row = divmod(index, count)
+            width = sum(library.cells[by_name[name].cell].width for name in entries)
+            x = span*(span_width+span_gap)+math.floor((span_width-width)/(2*p))*p
             for name in entries:
                 inst = by_name[name]
                 result.append({"inst": name, "cell": inst.cell, "x": x,
-                               "y": row * (h + 12*p), "row": row, "orient": orientations[name],
+                               "y": row * (h + (channel_tracks+2)*p), "row": row,
+                               "span": span, "orient": orientations[name],
                                "width": library.cells[inst.cell].width, "height": h, "hier": inst.hier})
                 x += library.cells[inst.cell].width
         return result
@@ -125,6 +137,10 @@ def place(netlist, library, rows=None, seed=0, steps=600, history_every=25, *,
                 sum(currents.get(name, 0.) for name in row) > max_row_current_a+1e-12
                 for row in row_lists):
             return math.inf, math.inf
+        if span_current_limit_a is not None and any(
+                sum(currents.get(name, 0.) for rr in row_lists[s*count:(s+1)*count]
+                    for name in rr) > span_current_limit_a+1e-12 for s in range(spans)):
+            return math.inf, math.inf
         nets = defaultdict(list)
         for pl in placements:
             inst, cell = by_name[pl["inst"]], library.cells[pl["cell"]]
@@ -133,8 +149,10 @@ def place(netlist, library, rows=None, seed=0, steps=600, history_every=25, *,
         hpwl = sum(max(x for x, y in pts)-min(x for x, y in pts) +
                    max(y for x, y in pts)-min(y for x, y in pts) for pts in nets.values())
         # A weak width term prevents annealing from collapsing every cell into one row.
-        spans = [sum(library.cells[by_name[n].cell].width for n in rr) for rr in row_lists]
-        return hpwl + .5 * max(spans, default=0), hpwl
+        row_widths = [sum(library.cells[by_name[n].cell].width for n in rr) for rr in row_lists]
+        if max(row_widths, default=0) > span_width:
+            return math.inf, math.inf
+        return hpwl + .5 * max(row_widths, default=0), hpwl
 
     rng = random.Random(seed)
     current = unpack()
@@ -143,12 +161,12 @@ def place(netlist, library, rows=None, seed=0, steps=600, history_every=25, *,
     history = [{"step": 0, "hpwl": hpwl, "placements": current}]
     for step in range(1, steps + 1):
         old_rows, old_orient = list(map(list, row_lists)), dict(orientations)
-        nonempty = [r for r in range(count) if row_lists[r]]
+        nonempty = [r for r in range(bins) if row_lists[r]]
         if not nonempty:
             break
         r = rng.choice(nonempty)
         a = rng.randrange(len(row_lists[r]))
-        s = rng.randrange(count)
+        s = rng.randrange(bins)
         choice = rng.random()
         if choice < .6 and row_lists[s]:
             b = rng.randrange(len(row_lists[s]))

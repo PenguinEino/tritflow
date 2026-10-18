@@ -22,7 +22,7 @@ class RoutingFailure(RuntimeError):
         super().__init__(f"{net}: {reason}")
 
 
-def floorplan(netlist, library, relative, row_count, margin, tracks):
+def floorplan(netlist, library, relative, row_count, margin, tracks, *, core_width=None):
     """Place channels below, between, and above rows; put I/O outside power banks."""
     p, h = library.template["grid"], library.template["height"]
     channels, row_y, cursor = [], [], 0.
@@ -32,8 +32,9 @@ def floorplan(netlist, library, relative, row_count, margin, tracks):
         if row < row_count:
             row_y.append(cursor)
             cursor += h+p
-    width = math.ceil((max((pl["x"]+library.cells[pl["cell"]].width for pl in relative), default=6*p)
-                       + 2*margin)/p)*p
+    if core_width is None:
+        core_width = max((pl["x"]+library.cells[pl["cell"]].width for pl in relative), default=6*p)
+    width = math.ceil((core_width + 2*margin)/p)*p
     placements = [{**pl, "x": pl["x"]+margin, "y": row_y[pl["row"]]} for pl in relative]
     pins, terminals = [], defaultdict(list)
     for pl in placements:
