@@ -46,8 +46,8 @@ def display_value(value):
 
 
 def table(rows, *, details=None):
-    content = "<div style='overflow-x:auto'><table>"+"".join("<tr>"+"".join(
-        "<td style='padding:.3em .8em'>"+escape(display_value(v))+"</td>" for v in row)+"</tr>"
+    content = "<div style='max-width:100%;overflow-x:auto'><table style='width:100%;table-layout:fixed'>"+"".join("<tr>"+"".join(
+        "<td style='padding:.3em .8em;white-space:normal;overflow-wrap:anywhere;vertical-align:top'>"+escape(display_value(v))+"</td>" for v in row)+"</tr>"
         for row in rows)+"</table></div>"
     if details:
         content = "<details><summary>"+escape(details)+"</summary>"+content+"</details>"
@@ -56,7 +56,7 @@ def table(rows, *, details=None):
 
 def evidence(title, value):
     text=value if isinstance(value,str) else json.dumps(value,indent=2,default=str)
-    display(HTML("<details><summary>"+escape(title)+"</summary><pre>"+escape(text)+"</pre></details>"))
+    display(HTML("<details><summary>"+escape(title)+"</summary><pre style='white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%'>"+escape(text)+"</pre></details>"))
 
 
 def details_html(title, content):

@@ -9,6 +9,7 @@ from hashlib import sha256
 import ast
 import json
 from pathlib import Path
+import warnings
 
 
 NAMES = ('flow','gates','sizing','cell','synth','pnr','postlayout','scaling')
@@ -19,12 +20,46 @@ def digest(path):
 
 
 def load_paper(root):
-    """Reject changed figure/data inputs before displaying coupled captions."""
+    """Check measurements strictly; presentation changes only emit a warning.
+
+    SVG dates, encoders and plotting styles can change without changing a
+    circuit or measurement. Those assets never gate notebook computation.
+    Legacy records with mixed figure/data hashes follow the same policy.
+    """
     root = Path(root)
     record = json.loads((root/'notebook/assets/paper_evidence.json').read_text())
-    for name,expected in record['repository_sha256'].items():
-        if digest(root/name) != expected:
-            raise RuntimeError(f'Static figure evidence changed: {name}. Rebuild the paper evidence and notebook together.')
+    changed = []
+    for name,expected in {**record.get('presentation_sha256',{}),**record['repository_sha256']}.items():
+        matches = (root/name).is_file() and digest(root/name) == expected
+        if name.startswith('figures/'):
+            if not matches:
+                changed.append(name)
+        elif not matches:
+            raise RuntimeError(f'Recorded measurement inputs changed: {name}. Refresh the scientific evidence before displaying its results.')
+    if changed:
+        warnings.warn('Paper presentation assets differ from the saved illustrations; computation continues. '
+                      'Captions refer to the saved measurements. Changed or missing: '+', '.join(changed),
+                      UserWarning,stacklevel=2)
+    return record
+
+
+def refresh_presentation(root):
+    """Refresh illustration hashes without reading build/ or rerunning science.
+
+    Run after the integrator commits regenerated figures. Measurement records
+    and their exact input hashes remain untouched.
+    """
+    root = Path(root)
+    path = root/'notebook/assets/paper_evidence.json'
+    record = json.loads(path.read_text())
+    presentation = {name:value for name,value in record['repository_sha256'].items()
+                    if name.startswith('figures/')}
+    presentation.update(record.get('presentation_sha256',{}))
+    record['repository_sha256'] = {name:value for name,value in record['repository_sha256'].items()
+                                   if not name.startswith('figures/')}
+    record['presentation_sha256'] = {name:digest(root/name) for name in sorted(presentation)}
+    record['schema'] = 2
+    path.write_text(json.dumps(record,indent=2)+'\n')
     return record
 
 
@@ -99,8 +134,10 @@ def export(root):
     paths += list((root/'cells/out/sizing').glob('*.grid.json'))
     paths += list((root/'cells/out').glob('*/*.char.json'))
     paths += list((root/'figures').glob('*.py'))
-    result = {'schema':1,'scope':'Recorded figure inputs; not new physical checks at notebook runtime',
-              'repository_sha256':{str(p.relative_to(root)):digest(p) for p in sorted(paths)},
+    hashes = {str(p.relative_to(root)):digest(p) for p in sorted(paths)}
+    result = {'schema':2,'scope':'Recorded measurements; presentation changes warn and never gate computation',
+              'repository_sha256':{name:value for name,value in hashes.items() if not name.startswith('figures/')},
+              'presentation_sha256':{name:value for name,value in hashes.items() if name.startswith('figures/')},
               'native_sha256':native,'paper_net':net,'paper_report':report,
               'paper_pnr':{'die':physical['die'],'checks':physical['checks'],
                            'history':[{'hpwl':physical['history'][i]['hpwl']} for i in (0,-1)]},
@@ -116,5 +153,11 @@ def export(root):
 
 
 if __name__ == '__main__':
-    result = export(Path(__file__).resolve().parents[1])
-    print('Captured',len(result['repository_sha256']),'committed figure/data inputs')
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--refresh-presentation',action='store_true')
+    args = parser.parse_args()
+    root = Path(__file__).resolve().parents[1]
+    result = refresh_presentation(root) if args.refresh_presentation else export(root)
+    print('Captured',len(result['repository_sha256']),'measurement inputs and',
+          len(result.get('presentation_sha256',{})),'presentation assets')

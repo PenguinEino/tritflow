@@ -104,8 +104,7 @@ first cell to override the tag (branch names also work; their resolved commits
 are printed). An existing checkout is reused only when its origin and resolved
 ref match and it has no tracked edits; otherwise start a fresh Colab runtime.
 The notebook never silently falls back to `main`. The archive-URL bootstrap has
-been removed. Round 2 verified `colab-v0` at commit `842afe2`; source-selection
-and rerun details are in Appendix B of the notebook.
+been removed. Source-selection and rerun details are in Appendix B of the notebook.
 
 ```sh
 bash notebook/colab_setup.sh --source /content/tritflow
@@ -131,11 +130,9 @@ The official packages and their release mapping were checked against
 is the [OpenSUSI commit](https://github.com/OpenSUSI/TR-1um/commit/5d963db9d44e192d37a0489c208bfccf2e2f690c).
 The downloaded `.deb` hashes/package metadata and pinned archive contents were
 checked locally; pinned-deck LVS and post-layout simulation passed locally.
-Real free-Colab round 2 passed at commit `842afe2`: all 17 code cells in
-384.1 s including setup (about 6.5 min), with the labelled recorded experiments.
-The observed versions and scope are in `docs/status/COLAB.md`;
-`notebook/colab_verified.json` retains a small evidence record. Later
-presentation edits have separate local checks.
+A current Colab runtime note is withheld until the next successful real-Colab
+Run all. Historical evidence remains in `docs/status/COLAB.md` and
+`notebook/colab_verified.json`; `publish` is false for the historical record.
 
 Required SIM publications use `load_grid()` / `sizing_figure()` for
 `cells/out/sizing/`, `load_scaling()` / `scaling_figure()` for
@@ -165,10 +162,7 @@ python3 -m pytest tests/synth/test_curated.py -q
 TRITFLOW_CIRCUIT=mul2 python3 notebook/validate_notebook.py --execute
 ```
 
-Colab round 2 completed in one uninterrupted Run all, without dependency
-changes, manual reruns or restarts. Setup preserves the host scientific stack.
-The verified revision is `842afe2`; later presentation-only changes are checked
-locally and are not silently relabelled as the same Colab capture.
+
 
 The six taped-out source schematics are bundled under `assets/schematics/`,
 each with an opaque light and dark SVG. Chapter 1 expands one selected primitive in a theme-aware gallery
@@ -277,5 +271,20 @@ python3 notebook/make_notebook.py
 
 The static source notebook is output-free. Build the compact saved-output copy
 with `python3 submission/build_submission.py --workdir /tmp/tritflow-submission`.
-The real-Colab note remains explicitly scoped to the verified earlier revision;
-later editorial changes have their own local execution and regression evidence.
+Local execution and regression evidence accompany the capture. A real-Colab
+runtime note will be published after the next successful verification.
+
+Figure regeneration does not gate the flow. `load_paper` strictly checks the
+recorded measurement inputs, while changed or missing presentation assets only
+warn. After the integrator commits regenerated figures, refresh their hashes
+without repeating any simulations:
+
+```sh
+python3 notebook/paper_evidence.py --refresh-presentation
+python3 notebook/make_notebook.py
+```
+
+The generator uses dollar-delimited Markdown math with `\mathrm`, keeps equations
+outside HTML Details, bounds embedded images to the text column, and wraps prose
+tables. A new verified runtime note requires a successful real-Colab report and
+explicit promotion of that new evidence. Local notebook execution never promotes it.

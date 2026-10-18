@@ -32,7 +32,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0,str(ROOT))
 sys.path.insert(0,str(ROOT/"notebook"))
-from colab_evidence import EVIDENCE as COLAB_EVIDENCE, run_note
+from colab_evidence import CURRENT_EVIDENCE as COLAB_EVIDENCE, run_note
 SOURCE = ROOT/"notebook/tritflow_tr1um.ipynb"
 DESTINATION = HERE/"ISSCC27/submitted_notebooks/TritFlow"
 FILES = {"tritflow_tr1um.ipynb", "README.md", "LICENSE", "NOTICE", "ABSTRACT.md", "PITCH.md", "CHECKLIST.md", "build-info.json"}
@@ -107,8 +107,8 @@ def release_notice(info):
         return f'Default source tag `{info["default_ref"]}` matches the packaged notebook at `{info["commit"]}` (local git-object check).'
     return (f"The local source-ref check found `{info.get('default_ref','colab-v0')}` at "
             f"`{info.get('commit') or 'unavailable'}`. This capture includes later presentation edits. "
-            "The Colab run note identifies the tested revision; build-info.json records the "
-            "checked source-ref details. Source-selection and rerun instructions are in Appendix B.")
+            "Build-info.json records the checked source-ref details. "
+            "Source-selection and rerun instructions are in Appendix B.")
 
 
 def captured_commit(document):
@@ -388,10 +388,10 @@ def main(argv=None):
               "tools_observation":"packaging environment; the raw capture does not store a separate version snapshot",
               "official_rules_commit":"a502a6ba01260d3492df9137dddae0bb5fabeb3c",
               "release":release_status(args.source),
-              "colab_verified":COLAB_EVIDENCE["passed"],
-              "captured_revision_colab_verified":captured_commit(document)==COLAB_EVIDENCE["commit"] and digest(args.source)==COLAB_EVIDENCE["notebook_sha256"],
+              "colab_verified":COLAB_EVIDENCE is not None,
+              "captured_revision_colab_verified":bool(COLAB_EVIDENCE and captured_commit(document)==COLAB_EVIDENCE["commit"] and digest(args.source)==COLAB_EVIDENCE["notebook_sha256"]),
               "colab_verification":COLAB_EVIDENCE,
-              "colab_verification_scope":"colab_verified records the successful revision named in colab_verification (842afe2). captured_revision_colab_verified separately checks exact source identity; later presentation edits have local validation.",
+              "colab_verification_scope":"A current real-Colab pass is published only after successful verification and explicit promotion. Local execution is recorded separately; no historical pass is inherited.",
               "team_fields_completed":not has_placeholders(json.loads(args.team.read_text())),
               "identity_fields_completed":not has_placeholders(json.loads(args.team.read_text())["authors"]),
               "raw_execution_not_in_payload":str(raw.relative_to(ROOT)) if raw.is_relative_to(ROOT) else str(raw),
