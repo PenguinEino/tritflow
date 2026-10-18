@@ -32,8 +32,8 @@ def stage_axes(fig, i, n, top=0.84, bottom=0.30, gap=0.035):
 def caption(fig, ax, title, lines):
     pos = ax.get_position()
     x = pos.x0
-    fig.text(x, 0.95, title, fontsize=8, fontweight="bold", color=style.INK, va="top")
-    fig.text(x, 0.2, "\n".join(lines), fontsize=6.6, color=style.INK2, va="top",
+    fig.text(x, 0.95, title, fontsize=9, fontweight="bold", color=style.INK, va="top")
+    fig.text(x, 0.2, "\n".join(lines), fontsize=7.6, color=style.INK2, va="top",
              linespacing=1.35)
 
 
@@ -55,14 +55,14 @@ def make():
     template = json.loads((CELLS_DIR / "template.json").read_text())
     die = pnr["die"]
 
-    fig = plt.figure(figsize=(style.DOUBLE, 2.25))
+    fig = plt.figure(figsize=(style.DOUBLE, 2.45))
     axes = [stage_axes(fig, i, 5) for i in range(5)]
 
     ax = axes[0]
     ax.axis("off")
     ax.add_patch(plt.Rectangle((0, 0), 1, 1, transform=ax.transAxes, fc="#f6f5f1", ec=style.AXIS,
                                lw=0.6))
-    ax.text(0.05, 0.95, HDL, transform=ax.transAxes, family="monospace", fontsize=5.6, va="top",
+    ax.text(0.05, 0.95, HDL, transform=ax.transAxes, family="monospace", fontsize=6.3, va="top",
             color=style.INK, linespacing=1.3)
     caption(fig, ax, "TritVerilog", [f"adder #(N = 4): {len((ROOT / 'examples/adder.tv').read_text().splitlines())} lines",
                                      "+ full_add, half_add modules"])
@@ -73,7 +73,7 @@ def make():
     names = sorted(counts, key=lambda k: -counts[k])
     ax.barh(range(len(names)), [counts[k] for k in names], color=style.BLUE, height=0.38)
     for i, k in enumerate(names):
-        ax.text(counts[k] + 0.8, i, f"{k}  {counts[k]}", va="center", fontsize=7)
+        ax.text(counts[k] + 0.8, i, f"{k}  {counts[k]}", va="center", fontsize=8)
     ax.set_xlim(0, max(counts.values()) * 1.8)
     ax.set_ylim(-0.8, len(names) - 0.2)
     ax.invert_yaxis()
