@@ -46,3 +46,15 @@ def test_failure_does_not_publish_cache_and_names_are_bounded(tmp_path):
     with pytest.raises(RuntimeError, match="SPICE failed"):
         cache.run("post", {}, fail)
     assert not list(tmp_path.glob("*.gz"))
+
+
+def test_cached_pre_post_pair_keeps_native_waveform_arrays(tmp_path):
+    cache = module.Cache(tmp_path, "pair")
+    simulated = {"waveforms": {"time": np.arange(3)*1e-9},
+                 "stimulus": {"vectors": [(-1,), (0,)]}}
+    cache.run("pair", {}, lambda: {"pre": simulated, "post": simulated})
+    result = cache.run("pair", {}, lambda: pytest.fail("must reuse measured pair"))
+    for mode in ("pre", "post"):
+        assert isinstance(result[mode]["waveforms"]["time"], np.ndarray)
+        np.testing.assert_array_equal(result[mode]["waveforms"]["time"]*1e9, np.arange(3))
+        assert result[mode]["stimulus"]["vectors"] == [(-1,), (0,)]

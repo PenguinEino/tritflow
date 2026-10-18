@@ -1,4 +1,4 @@
-# PNR stream — phase 3
+# PNR stream — phase 4
 
 ## Done
 
@@ -25,13 +25,36 @@ Phase-1 `/tmp` artifacts are superseded by these project-local results.
   Plotly net/instance selection, placement + HPWL animation, and routing replay.
   Figures are normal notebook-ready Plotly Figures; exported HTML embeds Plotly.
 
-## In progress / blockers
+## Phase 4 — robustness (verification finishing)
 
-Phase-3 compact, near-square builds are complete. All four canonical designs
-and all twelve seed candidates pass drawn connectivity, routing DRC, official
-PDK DRC and strict LVS. All canonical aspect ratios are ≤1.5 and utilization
-is ≥45%. See the generated before/after and timing tables below.
-No blockers; no background PNR processes are left running.
+`examples/fuzz_pnr.py` now generates deterministic reader-style TritVerilog,
+runs the public HDL/synthesis APIs (including source-to-gate equivalence),
+then real-cell placement/routing, flattened-GDS connectivity, own metal DRC,
+unmodified PDK DRC and strict device LVS. Initial discovery and corrected
+100-design campaigns are complete; final implementation hashes and scale
+measurements are being refreshed. All output stays under `build/`.
+
+**Interface request for FRONTEND/integrator (files only):** notebook
+`tritflow.flow.Layout.lvs()` still calls raw `tritflow.extract.extract_layout`.
+To carry the unused-input correction into chapter 8, call the newly public
+`tritflow.pnr.strict_lvs` instead, preserving existing report caching:
+
+```python
+from tritflow.pnr import Library, strict_lvs
+report = strict_lvs(self.gds_path, self.data, self.netlist,
+                    Library.load(self.settings.cells),
+                    output_dir or self.gds_path.parent / "lvs",
+                    (self.settings.cells / "out/all.spice").read_text(),
+                    **{"pdk": self.settings.pdk,
+                       "executable": self.settings.klayout, **kwargs})
+```
+
+This helper proves every unloaded input is an actual isolated, labeled M2
+pad with no V1 before excluding that empty formal from device comparison;
+all active devices and loaded ports still undergo the unmodified strict PDK
+comparison. It then restores the physically proven unused formals in the
+extracted SPICE and checks the full port set. Raw extraction alone still
+rejects valid unused inputs. PNR does not modify the FRONTEND/SIM owned files.
 
 ## Decisions and physical scope
 
@@ -280,16 +303,16 @@ and test files, `examples/pnr_all.py`, and generated `build/` outputs.
 <!-- PNR_RESULTS_BEGIN -->
 ## Current verified build results
 
-Published template height: **132 µm**. Input content fingerprint: `d3a2eaa7dafec41abc1eacd0e0959d0f3b91611ae0957fc92cb9eae9324360cf`.
+Published template height: **132 µm**. Input content fingerprint: `2257fa4fd3520b1a4793cddbb64c5667ae958948fe53e2b8c6a3d5d9e30974b9`.
 
 All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
 
 | Design | Seed | Die (µm) | Aspect | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS | PNR / +LVS (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|---|---|---:|
-| adder4 | 0 | 1740 × 1590 | 1.094 | 45.57% | 35778 | 41737.5 | 528 / 1152 | 0 violations | Match | 5.38 / 8.18 |
-| full_add | 0 | 792 × 702 | 1.128 | 56.70% | 3924 | 6158.5 | 115 / 128 | 0 violations | Match | 2.11 / 4.15 |
-| mac1 | 7 | 804 × 1038 | 1.291 | 51.44% | 7218 | 9730 | 172 / 288 | 0 violations | Match | 3.45 / 5.26 |
-| mul1 | 0 | 372 × 366 | 1.016 | 52.35% | 750 | 1022.5 | 25 / 32 | 0 violations | Match | 1.30 / 2.54 |
+| adder4 | 0 | 1740 × 1590 | 1.094 | 45.57% | 35778 | 41737.5 | 528 / 1152 | 0 violations | Match | 3.27 / 4.24 |
+| full_add | 0 | 792 × 702 | 1.128 | 56.70% | 3924 | 6158.5 | 115 / 128 | 0 violations | Match | 1.30 / 2.05 |
+| mac1 | 7 | 804 × 1038 | 1.291 | 51.44% | 7218 | 9730 | 172 / 288 | 0 violations | Match | 1.54 / 2.32 |
+| mul1 | 0 | 372 × 366 | 1.016 | 52.35% | 750 | 1022.5 | 25 / 32 | 0 violations | Match | 0.99 / 1.75 |
 
 ## Phase 2 → phase 3
 
@@ -308,18 +331,18 @@ Cell-terminal HPWL excludes external ports. Each before/after pair uses the same
 
 | Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | PNR / +LVS (s) | DRC / LVS |
 |---|---:|---:|---:|---:|---:|---|
-| adder4 | 0 | 74515.5 | 50436 | 32.31% | 4.88 / 6.35 | clean / Match |
-| adder4 | 7 | 74515.5 | 47968.5 | 35.63% | 4.65 / 6.28 | clean / Match |
-| adder4 | 19 | 74515.5 | 41388 | 44.46% | 5.12 / 6.90 | clean / Match |
-| full_add | 0 | 6750 | 4752 | 29.60% | 6.12 / 8.36 | clean / Match |
-| full_add | 7 | 6750 | 4617 | 31.60% | 3.15 / 5.06 | clean / Match |
-| full_add | 19 | 6750 | 5115 | 24.22% | 3.34 / 5.04 | clean / Match |
-| mac1 | 0 | 14685.5 | 6631.5 | 54.84% | 2.24 / 3.85 | clean / Match |
-| mac1 | 7 | 14685.5 | 6723.5 | 54.22% | 2.40 / 4.75 | clean / Match |
-| mac1 | 19 | 15501.5 | 8573.5 | 44.69% | 2.97 / 5.87 | clean / Match |
-| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 1.70 / 3.04 | clean / Match |
-| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 1.82 / 3.27 | clean / Match |
-| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 1.38 / 3.03 | clean / Match |
+| adder4 | 0 | 74515.5 | 50436 | 32.31% | 3.57 / 4.87 | clean / Match |
+| adder4 | 7 | 74515.5 | 47968.5 | 35.63% | 3.32 / 4.30 | clean / Match |
+| adder4 | 19 | 74515.5 | 41388 | 44.46% | 3.38 / 4.27 | clean / Match |
+| full_add | 0 | 6750 | 4752 | 29.60% | 1.40 / 2.21 | clean / Match |
+| full_add | 7 | 6750 | 4617 | 31.60% | 1.32 / 2.07 | clean / Match |
+| full_add | 19 | 6750 | 5115 | 24.22% | 1.30 / 2.05 | clean / Match |
+| mac1 | 0 | 14685.5 | 6631.5 | 54.84% | 1.46 / 2.25 | clean / Match |
+| mac1 | 7 | 14685.5 | 6723.5 | 54.22% | 1.52 / 2.34 | clean / Match |
+| mac1 | 19 | 15501.5 | 8573.5 | 44.69% | 1.91 / 2.70 | clean / Match |
+| mul1 | 0 | 1420.5 | 494.5 | 65.19% | 0.97 / 1.73 | clean / Match |
+| mul1 | 7 | 1420.5 | 494.5 | 65.19% | 0.96 / 1.71 | clean / Match |
+| mul1 | 19 | 1420.5 | 588.5 | 58.57% | 0.96 / 1.72 | clean / Match |
 
 Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.
 <!-- PNR_RESULTS_END -->

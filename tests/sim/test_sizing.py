@@ -79,3 +79,14 @@ def test_dc_nodeset_callable_is_only_an_initial_guess():
     assert all(r['passed'] for r in rows)
     assert rows[0]['output_v']['Y']>4.5 and rows[2]['output_v']['Y']< -4.5
     assert abs(rows[1]['output_v']['Y'])<.5
+
+
+def test_bundled_grid_is_instant_without_local_row_cache(tmp_path,monkeypatch):
+    import shutil
+    monkeypatch.setattr(sizing,'CACHE',tmp_path)
+    grid=sizing.sweep_dimensions('INV',[])
+    sizing._save(tmp_path/'INV.grid.json',grid)
+    shutil.rmtree(tmp_path/'rows')
+    def reject(*a,**k): raise AssertionError('published grid must serve fresh-checkout sliders')
+    monkeypatch.setattr(sizing,'dc_transfer',reject)
+    assert sizing.sweep_dimensions('INV',[])['rows']==grid['rows']

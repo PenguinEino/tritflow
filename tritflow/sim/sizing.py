@@ -29,6 +29,11 @@ def _digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, allow_nan=False).encode()).hexdigest()
 
 
+def _analysis_hashes():
+    return {name:file_hash(Path(__file__).with_name(name))
+            for name in ('sizing.py','bench.py','runner.py','characterize.py','spice.py')}
+
+
 def _number(value, name):
     if isinstance(value, bool) or not isinstance(value, (int, float, np.number)):
         raise ValueError(f'{name} must be a finite number')
@@ -159,15 +164,26 @@ def sweep_dimensions(
     result = dict(cell=cell, source_sha256=hashlib.sha256(source.encode()).hexdigest(),
                   model_sha256=models, device_ids=list(baseline), adopted_index=0,
                   conditions=conditions, rows=[], scope=SCOPE)
-    code = {name: file_hash(Path(__file__).with_name(name))
-            for name in ('sizing.py', 'bench.py', 'runner.py', 'characterize.py', 'spice.py')}
+    code = _analysis_hashes()
+    result['analysis_sha256'] = code
+    # The published grid travels with the notebook; local per-row caches are
+    # disposable. Grid candidates must stay instant even in a fresh checkout.
+    published = {}
+    grid_path = CACHE/f'{cell}.grid.json'
+    if workdir is None and grid_path.is_file():
+        grid = json.loads(grid_path.read_text())
+        if all(grid.get(key)==result[key] for key in
+               ('source_sha256','model_sha256','analysis_sha256','conditions')):
+            published = {_digest(row['dimensions']):row for row in grid['rows']}
     cache = CACHE/'rows'/cell
     cache.mkdir(parents=True, exist_ok=True)
     for index, dimensions in enumerate(resolved):
         key = _digest(dict(source=result['source_sha256'], models=models, code=code,
                            dimensions=dimensions, conditions=conditions))
         path = cache/f'{key}.json'
-        if workdir is None and path.is_file():
+        if workdir is None and _digest(dimensions) in published:
+            row = published[_digest(dimensions)]
+        elif workdir is None and path.is_file():
             row = json.loads(path.read_text())
         else:
             folder = None if workdir is None else Path(workdir)/f'candidate_{index:03d}'
@@ -240,7 +256,8 @@ def load_grid(cell='INV'):
     result = json.loads((CACHE/f'{cell}.grid.json').read_text())
     source, _ = published_dimensions(cell)
     models = {p.name:file_hash(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}
-    if result['source_sha256'] != hashlib.sha256(source.encode()).hexdigest() or result['model_sha256'] != models:
+    if (result['source_sha256'] != hashlib.sha256(source.encode()).hexdigest()
+            or result['model_sha256'] != models or result.get('analysis_sha256') != _analysis_hashes()):
         raise RuntimeError('Sizing grid is stale; run python3 -m tritflow.sim.sizing')
     return result
 

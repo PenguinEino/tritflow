@@ -5,8 +5,10 @@
 `tritflow_tr1um.ipynb` follows chapters 0–9 of `docs/concept.md`. Chapter 0
 runs an actual two-trit adder from HDL through GDS, DRC, LVS and post-layout
 ngspice. Logical coverage is exhaustive; its six analog states are explicitly
-representative. The default run also includes NANY DC and an editable nine-state
-small-circuit experiment. Gate, layout, animation, DC and transient figures use
+representative. The default run also includes NANY DC, the compact published
+library/characterization tables, all four shared designs through matched
+pre/post-layout simulation, and one selected circuit from chapter 8.
+Gate, layout, animation, DC, sizing, scaling and transient figures use
 the streams' public `tritflow.viz.*` functions.
 
 The method chain is in `tritflow.flow`:
@@ -45,7 +47,14 @@ python3 -m pytest tests/hdl tests/synth tests/viz notebook/tests -q
 The executor compiles every code cell, checks chapters/IDs, and runs the same
 code with headless Plotly serialization. It does not install anything locally.
 `TRITFLOW_NOTEBOOK_BUILD` overrides `build/notebook`; `TRITFLOW_EXTENDED=1`
-enables optional N=4 routing, route animation and additional loads. Notebook
+enables routing replay and additional loads. `PNR_ROWS`/`PNR_ANNEAL_STEPS`
+control chapter 0. Chapter 6 has opt-in fixed-row/effort/seed controls, showing
+measured die dimensions, aspect, utilization and HPWL. Chapter 7 regenerates
+adder4/full_add/mac1/mul1 locally; it never consumes their existing build trees.
+Its small circuits visit all input states, while adder4 uses SIM's documented
+carry/overflow/cancellation plan. Expected values are independent radix
+arithmetic. Rail IR is a separate nominal-current/resistance estimate.
+Notebook
 caches include code/library/PDK hashes, package and tool versions, options and
 produced artifact hashes. Cache hits identify the original verified artifacts;
 they do not claim that checks ran again. Delete the cache to force a fresh run.
@@ -114,9 +123,33 @@ The actual apt/pip install, notebook display in Colab, Ubuntu ngspice package
 behavior, and install-inclusive cold runtime require a clean Colab test. Local
 validation cannot establish the ten-minute Colab budget.
 
-Remaining notebook TODOs are explicit: release-tag publication, public W/L
-sizing-sweep support, the final qualified N/load/IR result matrix,
-and final measurement hardware/schedule. No draft TODO is presented as a result.
+SIM publication slots use `load_grid()` / `sizing_figure()` for
+`cells/out/sizing/`, `load_scaling()` / `scaling_figure()` for
+`results/adder_scaling.json`, and `load_sweep_results()` / `load_sweep_figure()`
+for `results/full_add_load_sweep.json`. Missing/stale publications print a
+clearly marked TODO. Cached W/L candidates expose adopted dimensions and a
+selectable candidate's actual DC transfer/current curves; failed points retain
+their flags. Expensive sizing, width scaling and load-boundary producers are
+documented but not run by default. Published scaling/load records are checked
+against relocated code/library/PDK source hashes, without requiring their raw
+ignored build directories. They describe recorded runs rather than new checks.
+
+Chapter 8 selects `sign`, `compare2`, `mul2` or `minmax` using `CHOICE` or
+`TRITFLOW_CIRCUIT`. Each has an independent integer specification in
+`examples/curated.py`, exhaustive source/mapped checks and a real physical
+regression. Edited HDL and its includes are staged in the notebook build tree;
+committed examples stay intact. A deliberately broken signal-arithmetic
+expression prints its located HDL error and a repair hint. Every selected
+circuit also runs extracted ngspice with all input states in the chosen order.
+
+```sh
+python3 -m pytest tests/synth/test_curated.py -q
+TRITFLOW_CIRCUIT=mul2 python3 notebook/validate_notebook.py --execute
+```
+
+Final Colab verification is postponed by the integrator. Bootstrap behavior is
+unchanged in phase 6. Release-tag publication and final measurement
+hardware/schedule remain integrator tasks; no draft TODO is presented as a result.
 
 The six taped-out source schematics are bundled under `assets/schematics/`,
 each with an opaque light and dark SVG. Chapter 1 displays a theme-aware gallery

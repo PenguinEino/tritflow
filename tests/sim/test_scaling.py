@@ -45,3 +45,18 @@ def test_figures_preserve_failed_load_and_adopted_marker():
     figure=load_sweep_figure(result)
     assert figure.data[0].y[0] is None
     assert figure.data[1].y[0]==500
+
+
+def test_imported_code_provenance_is_frozen_but_model_inputs_are_live(monkeypatch):
+    from tritflow.sim import scaling
+    before=scaling.experiment_sources()
+    code_path=str(Path(scaling.__file__))
+    model_path=next(p for p in before if '/libs.tech/spice/models/' in p)
+    original=scaling.file_hash
+    def changed(path):
+        if str(path) in (code_path,model_path): return 'changed-on-disk'
+        return original(path)
+    monkeypatch.setattr(scaling,'file_hash',changed)
+    after=scaling.experiment_sources()
+    assert after[code_path]==before[code_path]  # running modules do not reload
+    assert after[model_path]=='changed-on-disk'  # solver reads the current models
