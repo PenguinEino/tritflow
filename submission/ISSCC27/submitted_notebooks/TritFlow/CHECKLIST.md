@@ -29,7 +29,7 @@ Conservative presentation guidance retained from the older application guide:
 
 | Guidance | Location | State |
 |---|---|---|
-| Identify team members at notebook top | Submission front matter + README use docs/author.md exactly | Included |
+| Identify team members at notebook top | Title-cell Author block + README use docs/author.md exactly | Included |
 | Cite reused work/notebooks | Notebook references + README provenance; no prior submission cells reused | Included |
 | State recommended/used tool versions | Bootstrap pins and generated notebook/build information | Included |
 

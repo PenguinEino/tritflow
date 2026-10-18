@@ -1,6 +1,130 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 10 complete: title/control spacing, verified Colab note, Appendix B and saved outputs refreshed.**
+Updated: 2026-10-18. **Phase 11 complete: editorial notebook, learning controls, edited-circuit outputs and submission rebuilt.**
+
+## Phase 11 — complete
+
+All 18 code cells pass. Fresh default local capture: **68.93 s**, with no
+pre-existing stage cache/build artifacts; the opening adder, INV DC and edited
+circuit are calculated, while the four shared designs read validated recorded
+native evidence. Full local native recomputation: **386.27 s**. These times
+include local setup checks/kernel/rendering, **exclude installing tools**, and
+are separate from the retained real-Colab **384.1 s at 842afe2** observation.
+No new real-Colab verification is claimed.
+
+The final submission is **8 files / 5,199,230 bytes**. Its saved notebook has
+**18 executed code cells, 68 outputs, 8 embedded paper PNG heroes, 7 live PNG
+outputs and 25 HTML tables**, with no errors. Native SVG schematics retain PNG
+fallbacks; optional collapsed schematics remain collapsed. LICENSE and NOTICE
+match the root files. Source notebook: 33 cells; all numerical substitutions
+are generated, and no required result has a TODO fallback.
+
+### REVIEW round 2 findings 1–5
+
+1. **Contribution first.** The first screen embeds the four-trit paper flow,
+   Japan/open-PDK/tapeout context, actual top-level HDL line count plus shared
+   modules, checked GDS results, the generated static-power headline, badge and
+   scoped Colab runtime. Author identity is exact in the title-cell Author
+   control and README. The separately executed example is explicitly two trits.
+2. **Teach the circuit.** The INV conducting path and divider equations precede
+   SPICE. Branch resistances/current/voltage/power derive from parsed nominal
+   MOS U0/TOX/VTH0, nominal offsets and the correct 2.8-µm RR geometry branch,
+   with assumed SiO2 permittivity. The hand estimate is not fitted to measured
+   current. Generated RR comparisons hold MOS sizes fixed. Chapter 7 compares
+   one-slice delay and a cell-DC power sum with matching SPICE; the measured
+   zero-state power is a distributed native-hash-checked DC row, never a maximum
+   relabelled as zero-state power.
+3. **Reading path.** Integrated EDITOR's chapter text/captions/predict-first
+   math/A/B, eight static paper heroes and the shared synthesis figure. Extra
+   schematics/truth tables and detailed characterization/four-design reports
+   are collapsed or in Appendix B. Appendix A consolidates limits. The main
+   Markdown, including equations/captions, is about 3,010 whitespace words.
+   Submission administrative capture details now follow the reading path.
+4. **Learning interaction.** A precomputed Plotly slider selects every INV
+   W/L/RR candidate; measured transfer, zero-input point, error/current point,
+   dimensions and independent prediction update together. The taped-out curve
+   and star remain fixed. Failed candidates stay visible, and unavailable NANY
+   cases remain in Appendix B. A second input selector recolors the mapped
+   half-adder. Inspected the actual static fallback after separating title,
+   legend, slider and readout. No widget framework or new SPICE sweep is needed.
+5. **Your circuit.** Chapter 8 exposes a visible HDL literal implementing min
+   through an equivalent De Morgan expression, then shows its public mapped
+   schematic, newly generated actual GDS and extracted waveform. Both source
+   and mapped logic pass the independent oracle. A wrong edit reports the
+   failing input/expected/HDL/mapped values before routing. All four catalog
+   choices and the unsupported-HDL diagnostic remain available.
+
+### Portable paper evidence and validation
+
+`notebook/assets/paper_evidence.json` captures the exact native figure inputs,
+DC/zero-state measurements, display settings parsed from the figure scripts,
+and **48** committed figure/data/script hashes. Runtime opens none of the
+recorded `build/` paths or historical reference files. Exact-token substitution
+preserves LaTeX and rejects missing quantities. Numeric caption identity uses
+the displayed four significant digits to tolerate harmless BLAS last-bit
+variation across Colab/local platforms; file/PDK/model/measurement identities
+retain exact SHA-256 checks. Regression proves last-bit tolerance and rejection
+of changed displayed claims. Figure inputs are checked again at the end.
+
+The shared-design archive was regenerated from the final qualified native run:
+**4,726,862 bytes**, four records, **54 native evidence members**, with current
+consumed-source/PDK/options/artifact hashes. No manual rekeying or replacement
+of scientific results was used.
+
+- `python3 -m pytest tests/hdl tests/synth tests/viz notebook/tests submission/tests -q -k 'not actual_payload'`
+  — **279 passed, 1 deselected in 28.59 s**.
+- `python3 -m pytest submission/tests/test_packaging.py::test_actual_payload_has_readable_embedded_evidence -q`
+  — **1 passed in 0.07 s** after final packaging (280 passing checks overall).
+- `python3 submission/build_submission.py --check` and `git diff --check` pass.
+- Inspected saved custom schematic/GDS/waveform PNGs, the sizing fallback,
+  and the embedded opening/post-layout paper panels.
+
+A second, independent clean-tree run passed with an **empty HOME**, a freshly
+unpacked checksum-verified public pinned PDK, relocated KLayout, no `.git` or
+initial `build/`, and Python/native access guards blocking the original
+checkout, HOME PDK, reference and tool directories: **93.59 s with strace**,
+return code zero, **zero forbidden file accesses**. This read-only export
+included tracked working files plus the explicitly listed uncommitted phase-11
+handoff (the integrator must commit them); Python dependencies were reused.
+It is an asset-portability check, not a clean Ubuntu installation. An initial
+run using the original HOME completed the notebook but its strict audit flagged
+one directory-existence probe, described below; it opened no HOME reference
+or PDK files. The empty-HOME rerun establishes their absence does not matter.
+
+Raw captures/logs:
+`/tmp/tritflow-submission-phase11/{qualified,default}/executed.raw.ipynb`,
+`/tmp/tritflow-phase11-{qualified,default,archive,qualified-tests}.log`,
+`/tmp/tritflow-portable-phase11-closed-home/{report.json,execution.log,files.strace}`.
+The portability wrapper is `/tmp/tritflow_phase11_closed_home.py`.
+
+No package installation, git write, PR or push. No edits to frozen
+`tritflow/hdl/`, `tritflow/synth/`, EDITOR narrative, figures, or other streams'
+owned source. `figures/make_all.py` was neither edited nor run.
+
+### Phase 11 reproduction
+
+```sh
+# Only after matching native results and figures have been published:
+PYTHONPATH=.:notebook python3 notebook/paper_evidence.py
+python3 notebook/make_notebook.py
+python3 -m pytest tests/hdl tests/synth tests/viz notebook/tests submission/tests -q
+python3 submission/build_submission.py --workdir /tmp/tritflow-submission --timeout 1800
+```
+
+### Phase 11 interface / release handoff
+
+- The existing `colab-v0` badge/bootstrap is preserved. The integrator must
+  release the final source, embedded figures, portable evidence and helpers at
+  a matching ref before launching this revision. The successful 842afe2 Colab
+  claim is explicitly historical; the new source has local verification.
+- Integrator-owned `tritflow/__init__.py` eagerly evaluates `_PINNED.is_dir()`
+  even when `TR1UM_PDK` is set, because it is inside `dict.get`'s default
+  expression. Please consider evaluating the HOME fallback only when the
+  environment override is absent. This caused the original-HOME strict trace's
+  sole `newfstatat`, not a file/data dependency; the empty-HOME run passes.
+  No foreign-owned fix was attempted, and this does not block the notebook.
+- No figure correction is pending: current sizing/post-layout/scaling labels
+  agree with the final data and generated captions.
 
 ## Phase 10 — complete
 

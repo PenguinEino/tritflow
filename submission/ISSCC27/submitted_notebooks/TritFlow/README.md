@@ -22,7 +22,7 @@ frames; rerun for interactive figures. [Abstract](ABSTRACT.md),
 [three-sentence pitch](PITCH.md), and [requirements checklist](CHECKLIST.md)
 are included. [build-info.json](build-info.json) records source hashes, tools,
 capture conditions and the automatically measured package size.
-Captured bootstrap source commit: [d5080349c4fa479dd7cd569a0f009fec6e7f3916](https://github.com/PenguinEino/tritflow/tree/d5080349c4fa479dd7cd569a0f009fec6e7f3916). Any tracked working-tree
+Captured bootstrap source commit: [fa08b8219d1703cee05010772f504e7afcc7e211](https://github.com/PenguinEino/tritflow/tree/fa08b8219d1703cee05010772f504e7afcc7e211). Any tracked working-tree
 changes observed at packaging are recorded separately; a commit ID alone is
 not an assertion that the whole working tree was clean.
 

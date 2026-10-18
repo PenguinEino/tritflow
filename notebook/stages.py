@@ -68,13 +68,13 @@ import numpy as np
 from IPython.display import display, HTML, Image
 from tritflow import flow, CELLS_DIR, PDK_ROOT, PASS_BAND, TRIT_VOLTS
 from tritflow.sim import dc_transfer, input_vectors, subcircuits
-from tritflow.viz.graph import color_nets, gate_graph, truth_table_html
-from tritflow.viz.waves import waveform_figure, transfer_figure
-from tritflow.viz.layout import render_gds, layout_figure, placement_animation, routing_progress
-from tritflow.viz.cell import cell_figure, device_mapping, row_abutment
+from tritflow.viz.graph import truth_table_html
+from tritflow.viz.waves import waveform_figure
+from tritflow.viz.layout import render_gds, placement_animation, routing_progress
+from tritflow.viz.cell import device_mapping
 from tritflow.sim.provenance import pdk_provenance
 from tritflow.sim.postlayout import logical_nodeset
-from cache import Cache, runtime_fingerprint, source_fingerprint, source_manifest
+from cache import Cache, runtime_fingerprint, source_manifest
 from campaign import RecordedCampaign
 from schematics import schematic_gallery
 from experiments import (complete_design, experiment_artifacts, assert_experiment,
@@ -90,6 +90,16 @@ recorded_campaign = RecordedCampaign(ROOT/"notebook/assets/four_designs.zip",ROO
                                      enabled=not cache.force)
 renderer_sha256 = hashlib.sha256((ROOT/"tritflow/viz/layout.py").read_bytes()).hexdigest()
 from presentation import show, table, evidence
+
+from IPython.display import Markdown, Code
+from editorial import context, context_identity, render as render_narrative, dimensions
+from paper_evidence import load_paper
+from learning import sizing_slider, value_selector
+from predictions import divider, zero_dc, rail_power
+from presentation import details_html, details_svg
+paper = load_paper(ROOT)
+narrative_values = context(ROOT)
+assert context_identity(narrative_values) == NARRATIVE_CONTEXT_SHA256, "Published figure measurements changed; regenerate the notebook before running."
 '''
 
 OPENING = r'''
@@ -142,32 +152,11 @@ assert demo["drc"]["clean"] and demo["lvs"]["matched"] and demo["measurements"][
 assert not lay.stats["library_mock"]
 assert all({row["outputs"][p]["ideal_trit"] for row in demo["measurements"]["rows"]} == {-1,0,1}
            and demo["measurements"]["max_settling_s"][p] > 0 for p in outputs)
-table([["Output", "Exercised trits", "Actual ideal-level transitions"]]+[
-    [p, sorted({r[p] for r in expected_sequence}),
-     sum(a[p] != b[p] for a,b in zip(expected_sequence,expected_sequence[1:]))] for p in outputs])
-evidence("Demo sequence labels and inputs", list(zip(vector_labels,vectors)))
-evidence("Full-precision demo acceptance and settling", demo["measurements"])
-evidence("Released Newton guesses, identical in both runs", demo["initial_nodeset_v"])
-table([["Logical input states (exhaustive)", len(logical[inputs[0]])],
-       ["Analog states / unique states", f"{len(vectors)} / {len(set(vectors))}"],
-       ["Analog transitions (selected / possible)", f"{len(vectors)-1} / {3**len(inputs)*(3**len(inputs)-1)}"],
-       ["Configured rails (trit: V)", TRIT_VOLTS], ["Level acceptance band (V)", PASS_BAND],
-       ["Nominal temperature (°C)", TEMP_C],
-       ["Output load (fF)", LOAD_F*1e15], ["Hold / ramp / max step (ns)",
-        [HOLD_S*1e9,EDGE_S*1e9,STEP_S*1e9]],
-       ["Cells", net.report()["cells"]], ["GDS", lay.gds_path],
-       ["Die dimensions (µm)", lay.stats["die_size_um"]],
-       ["Die aspect (long / short)", max(lay.stats["die_size_um"])/min(lay.stats["die_size_um"])],
-       ["Die area (µm²)", lay.stats["die_area_um2"]], ["DRC violations", demo["drc"]["violations"]],
-       ["LVS matched", demo["lvs"]["matched"]], ["Analog passed", demo["measurements"]["passed"]],
-       ["Max error (V)", demo["measurements"]["max_error_v"]]])
-show(color_nets(net, dict(zip(inputs, vectors[2]))))
-show(waveform_figure(demo, outputs, title="Extracted two-trit adder: representative vectors"))
-raster = cache.run("adder2-raster", {"gds":hashlib.sha256(lay.gds_path.read_bytes()).hexdigest(),"renderer":renderer_sha256},
-    lambda: {"png":str(render_gds(lay.gds_path, out/"adder2_demo.layout.png", top=net.top))},
-    artifacts=lambda r: [r["png"]])
-display(Image(filename=raster["png"], width=900))
-show(layout_figure(lay.data, highlight_net="sum[0]", show_power=True))
+
+table([["Live adder", "Cells", "Die (µm)", "DRC markers", "Strict LVS", "Analog"],
+       [net.top,net.report()["total_cells"],dimensions(lay.stats["die_size_um"]),
+        demo["drc"]["violations"],demo["lvs"]["matched"],demo["measurements"]["passed"]]])
+print(f"Independent integer oracle: {len(logical[inputs[0]])} exhaustive states; extracted sequence: {len(set(vectors))} selected states.")
 '''
 
 GATES = r'''
@@ -179,20 +168,20 @@ assert np.array_equal(t["inva"], -t["a"])
 assert np.array_equal(t["nandab"], -np.minimum(t["a"], t["b"]))
 assert np.array_equal(t["norab"], -np.maximum(t["a"], t["b"]))
 assert np.array_equal(t["nanyab"], -np.clip(t["a"]+t["b"],-1,1))
-display(HTML(truth_table_html(gates.design)))
+
+details_html("Gate truth tables", truth_table_html(gates.design))
 for name in ["INV","NAND","NOR","NANY"]:
     body = subcircuits((CELLS_DIR/f"out/{name}/{name}.spice").read_text())[name.lower()]["body"]
     assert ("VMID" in body.upper()) == (name == "NANY"), name
-SCHEMATIC = "NANY"  # INV | NAND | NOR | NANY; only this primitive expands
-display(HTML(schematic_gallery(ROOT/"notebook/assets/schematics",
-                               names=["INV","NAND","NOR","NANY"], selected=SCHEMATIC)))
-cell_spice = (CELLS_DIR/"out/NANY/NANY.ext.spice").read_text()
-DC_FIXED_B, DC_STEP_V = 0, .1
-curve = cache.run("nany-dc", {"fixed_B": DC_FIXED_B, "step_v": DC_STEP_V}, lambda:
-    dc_transfer(cell_spice, "NANY", ["A","B"], ["Y"], "A",
-                fixed_trits={"B":DC_FIXED_B}, step_v=DC_STEP_V))
-show(transfer_figure(curve, "A", ["Y"],
-                     title=f"NANY DC: B={DC_FIXED_B} trit ({TRIT_VOLTS[DC_FIXED_B]:g} V)"))
+# Same public DC call and zero-input sample as the static gate figure.
+curve = cache.run("inv-dc", {"step_v":.02},lambda:
+    dc_transfer((CELLS_DIR/"out/INV/INV.ext.spice").read_text(),"INV",["A"],["Y"],"A",
+                fixed_trits={},step_v=.02))
+i = int(np.argmin(abs(curve["data"]["v-sweep"])))
+assert abs(curve["data"]["v-sweep"][i]) < 1e-9
+assert abs(curve["data"]["v(y)"][i]-paper["inv_dc"]["output_v"]) < 1e-8
+details_html("Taped-out INV schematic and exported source",schematic_gallery(
+    ROOT/"notebook/assets/schematics",names=["INV"],selected="INV"))
 '''
 
 CHARACTERIZATION = r'''
@@ -209,7 +198,7 @@ for cell, char in characters.items():
     rows.append([cell, 1e3*max(abs(v) for row in char["dc"] for v in row["error_v"].values()),
                  max(abs(i) for row in char["dc"] for i in row["rail_current_a"].values())*1e6,
                  char["input_capacitance"]["max_f"]*1e15, char["fanout"]["suggested_max"]])
-table(rows)
+characterization_rows = rows
 evidence("Full-precision DC checkpoints", {cell:char["dc"] for cell,char in characters.items()})
 table([["Cell", "Recorded conditions", "Tested loads (fF)", "Fanout evidence"]]+
       [[cell, char["conditions"], [r["load_f"]*1e15 for r in char["transient"]], char["fanout"]]
@@ -228,27 +217,28 @@ for cell, char in characters.items():
     fanout_rows.append([cell, cascade["fanouts_tested"], cascade["chain_depth"],
                        max(chain_times)*1e9, max(loaded_times)*1e9,
                        max(c["max_error_v"] for c in cascade["cases"])*1e3])
-table(fanout_rows)
+
 '''
 
 SIZING = r'''
-from tritflow.sim.sizing import load_grid, sweep_dimensions
-from tritflow.viz.scaling import sizing_figure
-SIZING_INDEX = {"INV": None, "NANY": None}  # None selects adopted; set a candidate index to inspect it
-for cell in ["INV", "NANY"]:
-    grid = load_grid(cell)
-    adopted = grid["rows"][grid["adopted_index"]]
-    table([["Cell", "Candidates", "PASS", "Adopted dimensions (µm)", "Conditions"],
-           [cell, len(grid["rows"]), sum(r["passed"] for r in grid["rows"]),
-            adopted["dimensions"], grid["conditions"]]])
-    show(sizing_figure(grid))
-    index = grid["adopted_index"] if SIZING_INDEX[cell] is None else SIZING_INDEX[cell]
-    candidate = grid["rows"][index]
-    table([["Selected candidate",index], ["Dimensions (µm)",candidate["dimensions"]],
-           ["PASS / solver error",[candidate["passed"],candidate["error"]]]])
-    if candidate["transfer"] is not None:
-        show(transfer_figure(candidate["transfer"],grid["conditions"]["sweep_pin"],["Y"],
-                             title=f"{cell}: candidate {index}, adopted={candidate['is_adopted']}"))
+
+from tritflow.sim.sizing import load_grid
+sizing_grids = {cell:load_grid(cell) for cell in ("INV","NANY")}
+gi = sizing_grids["INV"]
+adopted = gi["rows"][gi["adopted_index"]]
+hand = divider(adopted["dimensions"],PDK_ROOT)
+table([["INV at zero input", "Hand", "Matching schematic SPICE"],
+       ["Output (V)",hand["output_v"],zero_dc(adopted)["output_v"]["Y"]],
+       ["Static power (mW)",hand["power_w"]*1e3,
+        rail_power(zero_dc(adopted),gi["conditions"]["supplies_v"])*1e3]])
+# Hold MOS sizes fixed: these are actual simulated RR candidates.
+rr_candidates = sorted((r for r in gi["rows"] if r["dc"] and
+    all(r["dimensions"][k] == adopted["dimensions"][k] for k in ("MP","MN"))),
+    key=lambda r:r["dimensions"]["RP"]["l_um"])
+table([["Common RR length (µm)","Worst level error (mV)","Max |rail I| (µA)","Reference"]]+[
+    [r["dimensions"]["RP"]["l_um"],r["max_error_v"]*1e3,r["max_static_current_a"]*1e6,
+     "taped out" if r["is_adopted"] else ""] for r in rr_candidates])
+show(sizing_slider(gi,PDK_ROOT))
 '''
 
 CELLS = r'''
@@ -258,15 +248,11 @@ abstracts = {item["name"]:json.loads((CELLS_DIR/"out"/item["abstract"]).read_tex
              for item in json.loads((CELLS_DIR/"out/library.json").read_text())}
 assert {a["height"] for a in abstracts.values()} == {template["height"]}
 assert generation["height_um"] == template["height"]
-print("Published library generation:", generation["id"])
-table([["Cell", "Width × common height (µm)", "Area (µm²)", "Free full-height M2 tracks"]]+
+
+cell_dimension_rows = ([["Cell", "Width × common height (µm)", "Area (µm²)", "Free full-height M2 tracks"]]+
       [[name, [a["width"],a["height"]], a["width"]*a["height"], a["free_M2_tracks"]["count"]]
        for name,a in abstracts.items()])
 abstract = json.loads((CELLS_DIR/"out/NANY/NANY.abstract.json").read_text())
-table([["Height (µm)", template["height"]], ["Grid (µm)", template["grid"]],
-       ["NANY width (µm)", abstract["width"]], ["Rails", template["rails"]],
-       ["Pin names", list(abstract["pins"])], ["Obstruction layers", list(abstract["obstructions"])]])
-show(cell_figure("NANY"))  # actual GDS, labelled rails/pins, layer/obstruction legend
 mapping = device_mapping("NANY", selected="XCN1")
 # Highlight both conducting devices of the zero-level clamp. These are device
 # outlines, not an invented extracted current-density or wire-current map.
@@ -286,8 +272,8 @@ for trace in mapping.figure.data:
 mapping.figure.update_layout(title="NANY: Y → XCP1/XM6 → c1 → XCN1/XM7 → VMID, A=−1 B=+1")
 assert clamp_devices <= {r["name"] for r in mapping.rows}
 show(mapping.figure)
-show(mapping.table)
-show(row_abutment())
+evidence("Device correspondence and W/L",mapping.rows)
+
 qualification = CELLS_DIR/"out/verify_report.json"
 if qualification.is_file():
     report = json.loads(qualification.read_text())
@@ -297,7 +283,7 @@ if qualification.is_file():
     for cell, artifacts in report["artifact_sha256"].items():
         for suffix, expected_hash in artifacts.items():
             assert hashlib.sha256((CELLS_DIR/f"out/{cell}/{cell}.{suffix}").read_bytes()).hexdigest() == expected_hash
-    table([["Cell", "Recorded DRC clean", "Recorded LVS qualification", "LVS method"]]+[
+    cell_qualification_rows = ([["Cell", "Recorded DRC clean", "Recorded LVS qualification", "LVS method"]]+[
         [name, result["drc"]["passed"], result["lvs"]["passed"],
          result["lvs"].get("method","strict device/port comparison")]
         for name,result in report["cells"].items()])
@@ -311,10 +297,8 @@ else:
 ARITHMETIC = r'''
 ha = flow.load(ROOT/"examples/half_add.tv", "half_add")
 fa = flow.load(ROOT/"examples/full_add.tv", "full_add")
-display(HTML(schematic_gallery(ROOT/"notebook/assets/schematics",
-                               names=["half_adder","full_adder"], selected="half_adder",max_width=650)))
-display(HTML(truth_table_html(ha.design)))
-display(HTML(truth_table_html(fa.design)))
+details_html("Half-adder exhaustive truth table",truth_table_html(ha.design))
+details_html("Full-adder exhaustive truth table",truth_table_html(fa.design))
 fa_table = fa.truth_table()
 ha_table = ha.truth_table()
 assert np.array_equal(ha_table["a"]+ha_table["b"], ha_table["sum"]+3*ha_table["carry"])
@@ -339,8 +323,8 @@ fa_table = fa.truth_table()
 fa_net = fa.synthesize()
 assert fa_net.report()["equivalence"]["passed"]
 assert fa_net.report()["equivalence"]["vectors"] == len(fa_table["sum"])
-show(gate_graph(fa_net))
-show(color_nets(fa_net, {"a": 1, "b": 1, "cin": -1}))
+half_net = flow.load(ROOT/"examples/half_add.tv","half_add").synthesize()
+show(value_selector(half_net))
 table([["Report field", "Value"]]+[[k,v] for k,v in fa_net.report().items()],details="Full synthesis report")
 from tritflow.synth import tritverilog
 evidence("Gate-level TritVerilog", tritverilog(fa_net))
@@ -352,7 +336,7 @@ for expr, expected_cells in mapping_cases:
     mapped = flow.loads(f"module mapping(input trit a,b,output trit y); assign y={expr}; endmodule").synthesize()
     assert sorted(inst.cell for inst in mapped.instances) == sorted(expected_cells)
     mapping_rows.append([expr, mapped.report()["cells"]])
-table(mapping_rows)
+table(mapping_rows,details="Expression-to-cell mapping checks")
 '''
 
 SCHEMATIC = r'''
@@ -363,23 +347,20 @@ sch = schematic_net.schematic(inputs=schematic_inputs,net_names=True,
 half_net = flow.load(ROOT/"examples/half_add.tv", "half_add").synthesize()
 half_sch = half_net.schematic(expand="*",inputs={"a":1,"b":1},net_names=True,
                               title="Half adder: flat mapped cells, a=b=+1")
-display(sch)
-display(half_sch)
+details_svg("Mapped adder hierarchy (settled trits)", sch.svg)
+details_svg("Flat mapped half adder (settled trits)", half_sch.svg)
 '''
 
 PNR = r'''
 table([["Metric", "Two-trit adder"]]+[[k,v] for k,v in lay.stats.items()],details="Full physical statistics")
-table([["Requested rows (None = automatic)",PNR_ROWS], ["Annealing steps",PNR_ANNEAL_STEPS],
-       ["Actual physical rows",len(lay.data["rows"])], ["Utilization",lay.stats["utilization"]]])
-print("Placement snapshots:", len(lay.data["history"]))
-evidence("Routing attempts", lay.data["routing_attempts"])
 assert all(check["clean"] for check in lay.data["checks"].values())
 assert lay.stats["routed_nets"] == len(net.nets())
 assert {p["orient"] for p in lay.data["placements"]} <= {"R0","MY"}
-table([["Check", "Clean"]]+[[name,check["clean"]] for name,check in lay.data["checks"].items()])
+evidence("Live adder physical checks",lay.data["checks"])
 table([["Initial / final cell-terminal HPWL (µm)",
         [lay.data["history"][i]["hpwl"] for i in (0,-1)]]])
-show(placement_animation(lay.data))
+if EXTENDED:
+    show(placement_animation(lay.data))
 if EXTENDED:
     show(routing_progress(lay.data))
 RUN_FLOORPLAN_EXPERIMENT = False  # opt in after changing the controls below
@@ -411,18 +392,12 @@ assert pre["measurements"]["passed"]
 assert pre["stimulus"]["vectors"] == demo["stimulus"]["vectors"]
 assert pre["stimulus"]["hold_s"] == demo["stimulus"]["hold_s"]
 assert pre["stimulus"]["step_s"] == demo["stimulus"]["step_s"]
-show(waveform_figure(demo, outputs, pre=pre, title=f"Same extracted devices ± wire C: {LOAD_F*1e15:g} fF/output",
-                     pre_label="device-only",post_label="device + wire C"))
-table([["Output", "Device-only max settling (ns)", "+ wire-C max settling (ns)"]]+[
-    [p, pre["measurements"]["max_settling_s"][p]*1e9,
-     demo["measurements"]["max_settling_s"][p]*1e9] for p in outputs])
-evidence("Wire-C assumptions", demo["capacitance"]["assumptions"])
 assert schematic_net.to_json() == net.to_json(), "schematic and routed references must be identical"
 wire_report = lay.result.net_parasitics()
 routed_sch = sch.annotate(parasitics=wire_report,
                          title="Same adder schematic: settled trits and routed wire C (fF)")
 assert routed_sch.scene is sch.scene
-display(routed_sch)
+details_svg("Same adder scene with measured routed wire-C overlay",routed_sch.svg)
 evidence("Schematic wire-C scope (excludes receiving-pin C)",wire_report["assumptions"])
 if EXTENDED:
     for load in [10e-15,1e-12]:
@@ -457,7 +432,7 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
         cache.events.append((f"four-{name}","recorded"))
         cache.timings.append({"stage":f"four-{name}","state":"recorded",
                               "elapsed_s":time.monotonic()-lookup_started})
-        print(f"Recorded campaign: {name}; native evidence hashes verified (not new checks)")
+        print(f"Recorded {name}: retained native checks; see Appendix B")
     else:
         result = cache.run(f"four-{name}",options,
             lambda: complete_design(mapped,directory,planned,oracle,load_f=FOUR_DESIGN_LOAD_F,
@@ -479,8 +454,8 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
         timing_rows.append([name,pin,before["max_settling_s"][pin]*1e9,after["max_settling_s"][pin]*1e9,
                             max(changes)*1e9])
     four_results[name] = result
-table(physical_rows)
-table(timing_rows)
+
+
 if recorded_campaign.manifest:
     evidence("Recorded four-design producer tools (not local requalification)",
              recorded_campaign.manifest["tools"])
@@ -488,12 +463,6 @@ table([["Shared load (fF)",FOUR_DESIGN_LOAD_F*1e15], ["Hold / max step (ns)",
        [FOUR_DESIGN_HOLD_S*1e9,FOUR_DESIGN_STEP_S*1e9]],
        ["Input plan labels", {name:representative_vectors(name,
           r["post"]["stimulus"]["inputs"])[1] for name,r in four_results.items()}]],details="Four-design stimulus conditions and labels")
-FOUR_DESIGN_VIEW = "full_add"  # switch to adder4, mac1 or mul1
-viewed = four_results[FOUR_DESIGN_VIEW]
-show(waveform_figure(viewed["post"],pre=viewed["pre"],title=f"{FOUR_DESIGN_VIEW}: same extracted devices ± wire C",
-                     pre_label="device-only",post_label="device + wire C"))
-evidence("Wire-C assumptions", viewed["capacitance"]["assumptions"])
-evidence("IR assumptions (separate from ideal-rail SPICE)", viewed["ir"]["assumptions"])
 '''
 
 PUBLISHED = r'''
@@ -518,9 +487,11 @@ for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figu
     else:
         table([["Measured boundary (F)",result["boundary"]], ["Boundary found",result["boundary_found"]],
                ["Outputs / input-state count",[result["outputs"],len(result["vectors"])]]])
-    show(figure(result))
+    if EXTENDED:
+        show(figure(result))
     if filename == "adder_scaling.json":
-        show(scaling_fit_figure(result))
+        if EXTENDED:
+            show(scaling_fit_figure(result))
 '''
 
 BROKEN = r'''
@@ -538,13 +509,6 @@ else:
 '''
 
 CUSTOM = r'''
-from examples.curated import DESIGNS
-from tritflow.synth import evaluate_netlist
-CHOICE = os.environ.get("TRITFLOW_CIRCUIT", "minmax")  # sign | compare2 | mul2 | minmax
-table([["Choice", "Specification"]]+[[key,item.description] for key,item in DESIGNS.items()])
-example = DESIGNS[CHOICE]
-source = example.path.read_text()  # edit this string, or choose another catalog entry
-evidence("Editable HDL source", source)
 # Stage includes beside the edited text, preserving the committed source files.
 custom_circuit = load_edited(example,source,BUILD/"your_circuit"/"source"/example.top)
 custom = custom_circuit.synthesize()
@@ -555,10 +519,14 @@ oracle = example.oracle(pins)
 mapped_truth = evaluate_netlist(custom,{p:truth[p] for p in pins})
 for i, vector in enumerate(planned):
     expected = oracle(vector)
-    assert {p:int(truth[p][i]) for p in expected} == expected
-    assert {p:int(mapped_truth[p][i]) for p in expected} == expected
-display(HTML(truth_table_html(custom,max_rows=len(planned))))
-show(color_nets(custom,dict(zip(pins,planned[-1]))))
+    source_actual = {p:int(truth[p][i]) for p in expected}
+    mapped_actual = {p:int(mapped_truth[p][i]) for p in expected}
+    if source_actual != expected or mapped_actual != expected:
+        raise AssertionError(f"Independent reference disagreement at {dict(zip(pins,vector))}: "
+                             f"expected {expected}, HDL {source_actual}, cells {mapped_actual}. "
+                             "Check your edit; change the arithmetic reference only if you intend a different function.")
+details_html("Edited-circuit exhaustive truth table",truth_table_html(custom,max_rows=len(planned)))
+
 custom_out = BUILD/"your_circuit"/example.top
 custom_result = cache.run(f"your-{CHOICE}", {"source":source,"net":custom.to_json(),"vectors":planned,
                          "expected":[oracle(v) for v in planned],"load_f":10e-15,"hold_s":1e-6,
@@ -570,12 +538,48 @@ assert {tuple(row["input_trits"]) for row in custom_result["post"]["measurements
 table([["Independent arithmetic input states",len(planned)], ["Physical results",custom_result["stats"]],
        ["DRC clean / LVS matched",[custom_result["drc"]["clean"],custom_result["lvs"]["matched"]]],
        ["Initial Newton guesses (V)",custom_result["initial_nodeset_v"]]],details="Selected circuit physical evidence and Newton guesses")
+
+# Both drawings below are regenerated from the edited source and its new route.
+custom_inputs = dict(zip(pins,planned[-1],strict=True))
+display(custom.schematic(inputs=custom_inputs,net_names=True,
+                         title=f"{custom.top}: schematic of the edited HDL"))
+custom_layout = flow.load_layout(custom,custom_out)
+custom_raster = cache.run(f"your-{CHOICE}-raster",{
+    "gds":hashlib.sha256(custom_layout.gds_path.read_bytes()).hexdigest(),"renderer":renderer_sha256},
+    lambda:{"png":str(render_gds(custom_layout.gds_path,custom_out/f"{custom.top}.layout.png",top=custom.top))},
+    artifacts=lambda r:[r["png"]])
+display(Markdown(f"**Edited `{custom.top}`: actual GDS, DRC-clean and strict-LVS matched.** Axes are in µm."))
+display(Image(filename=custom_raster["png"],width=900))
 show(waveform_figure(custom_result["post"],title=f"{CHOICE}: all input states, selected sequence"))
+custom_values = {"custom.name":custom.top,"custom.logic_states":len(planned),
+    "custom.cells":custom.report()["total_cells"],"custom.die_um":dimensions(custom_result["stats"]["die_size_um"]),
+    "custom.drc_items":custom_result["drc"]["violations"],"custom.lvs_status":"Match",
+    "custom.analog_states":len(set(planned)),"custom.analog_status":"PASS"}
+custom_takeaway = (ROOT/"notebook/narrative/08_your_circuit.md").read_text().split("> **What this shows.**",1)[1]
+display(Markdown(render_narrative("> **What this shows.**"+custom_takeaway,{**narrative_values,**custom_values})))
 '''
 
 FINAL = r'''
+
+table(characterization_rows,details="Cell DC / capacitance / fanout summary")
+table(fanout_rows,details="Transistor-level cascade and fanout tests")
+table(cell_dimension_rows,details="All standard-cell dimensions and pin-access tracks")
+table(cell_qualification_rows,details="Cell drawing-DRC and LVS qualification")
+table(physical_rows,details="Four-design physical and arithmetic checks (retained or fresh as below)")
+table(timing_rows,details="Four-design identical-device timing comparison")
+evidence("Cell ordered-pair/orientation abutments",report["abutment"])
+for name,grid in sizing_grids.items():
+    evidence(name+" sizing status including unavailable points",[
+        {"index":i,"dimensions":r["dimensions"],"passed":r["passed"],"error":r["error"]}
+        for i,r in enumerate(grid["rows"]) if not r["passed"]])
+evidence("Live adder acceptance, sequence and initialized Newton guesses",{
+    "logic":net.report()["equivalence"],"labels":vector_labels,"vectors":vectors,
+    "measurements":demo["measurements"],"nodeset":demo["initial_nodeset_v"],
+    "conditions":{"load_f":LOAD_F,"hold_s":HOLD_S,"edge_s":EDGE_S,"step_s":STEP_S,"temperature_c":TEMP_C}})
+evidence("Native paper-figure inputs and committed image/data hashes",paper)
 assert (runtime_fingerprint(ROOT,PDK_ROOT,names=native_sources) == cache.fingerprint and
         source_manifest(ROOT,PDK_ROOT,names=native_sources) == native_sources), "consumed sources changed during Run all; rerun after publication settles"
+assert load_paper(ROOT) == paper, "Paper figure inputs changed during Run all; rebuild before capture"
 table([["Stage", "Fresh / local cache / recorded", "Wall time this run (s)"]]+[
     [r["stage"],r["state"],round(r["elapsed_s"],3)] for r in sorted(cache.timings,key=lambda r:r["elapsed_s"],reverse=True)])
 table([["Design", "Measured producer phase", "Wall time (s)", "Process + child CPU time (s)"]]+[
@@ -584,5 +588,22 @@ table([["Design", "Measured producer phase", "Wall time (s)", "Process + child C
 print("Cache stages:", cache.events)
 print(f"Run time including setup: {time.monotonic()-started:.1f} s")
 print("Artifacts:", BUILD)
+'''
+
+EDIT = r'''
+
+from examples.curated import DESIGNS
+from tritflow.synth import evaluate_netlist
+CHOICE = os.environ.get("TRITFLOW_CIRCUIT", "minmax")  # sign | compare2 | mul2 | minmax
+example = DESIGNS[CHOICE]
+# Edit this HDL literal, then run the next cell. This successful first edit
+# replaces min(a,b) with its equivalent De Morgan expression on trits.
+source = """module minmax(input trit a, b, output trit lo, hi);
+  assign lo = ~((~a) | (~b));
+  assign hi = a | b;
+endmodule
+""" if CHOICE == "minmax" else example.path.read_text()
+print(example.description)
+display(Code(source,language="verilog"))
 '''
 

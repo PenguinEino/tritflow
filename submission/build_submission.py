@@ -216,6 +216,15 @@ def portable_outputs(document, replacements):
             if "data:image/svg+xml;base64," in html:
                 outputs.extend(gallery_outputs(html))
                 continue
+            if '<svg' in html:
+                # Optional mapped schematics stay inside their Details block.
+                # GitHub's HTML sanitizer may omit inline SVG, so embed a PNG
+                # in that same block without unfolding duplicate main views.
+                import cairosvg
+                def svg_fallback(match):
+                    png = cairosvg.svg2png(bytestring=match[0].encode(),output_width=1100)
+                    return '<img alt="Mapped schematic" src="data:image/png;base64,'+b64encode(png).decode()+'">'
+                data['text/html'] = re.sub(r'<svg\b.*?</svg>',svg_fallback,html,flags=re.S)
             for key in ("text/plain","text/html"):
                 if key in data:
                     for old,new in replacements.items():
@@ -262,10 +271,12 @@ def validate(document, source):
     if any(o.output_type=="error" for o in outputs):
         raise ValueError("error output in submission")
     images = sum("image/png" in o.get("data",{}) for o in outputs)
+    embedded = sum(c.source.count('data:image/png;base64,') for c in document.cells if c.cell_type=='markdown')
     tables = sum("<table" in o.get("data",{}).get("text/html","") for o in outputs)
-    if images < 8 or tables < 8:
+    if images+embedded < 8 or tables < 8:
         raise ValueError("saved figures/tables are incomplete")
-    return {"code_cells":len(code),"saved_outputs":len(outputs),"png_outputs":images,"html_tables":tables}
+    return {"code_cells":len(code),"saved_outputs":len(outputs),"png_outputs":images,
+            "embedded_paper_figures":embedded,"html_tables":tables}
 
 
 def package(document, source, destination, team, info):
@@ -286,7 +297,12 @@ def package(document, source, destination, team, info):
     front += run_note()+"\n\n"
     front += "<details><summary>Tool versions observed at packaging (runtime pins are in the bootstrap)</summary>\n\n"
     front += "```json\n"+json.dumps(info["tools"],indent=2)+"\n```\n</details>\n"
-    document.cells.insert(0,nbformat.v4.new_markdown_cell(front,id="submission-identity"))
+    # Preserve the contribution/figure on the first screen. Administrative
+    # capture details belong with Appendix B; identity is also in the README
+    # and the source notebook's exact author block.
+    document.cells.append(nbformat.v4.new_markdown_cell(
+        '<details><summary>Submission identity and capture details</summary>\n\n'+front+'\n\n</details>',
+        id="submission-identity"))
     info.update(validate(document,source))
     document.metadata["license"] = {"name":"Apache-2.0","url":"https://www.apache.org/licenses/LICENSE-2.0"}
     nbformat.write(document,destination/"tritflow_tr1um.ipynb")
