@@ -22,13 +22,19 @@ frames; rerun for interactive figures. [Abstract](ABSTRACT.md),
 [three-sentence pitch](PITCH.md), and [requirements checklist](CHECKLIST.md)
 are included. [build-info.json](build-info.json) records source hashes, tools,
 capture conditions and the automatically measured package size.
-Captured bootstrap source commit: [ce951bc31f2b867eff49edf22eb13456bd20975c](https://github.com/PenguinEino/tritflow/tree/ce951bc31f2b867eff49edf22eb13456bd20975c). Any tracked working-tree
+Captured bootstrap source commit: [d5080349c4fa479dd7cd569a0f009fec6e7f3916](https://github.com/PenguinEino/tritflow/tree/d5080349c4fa479dd7cd569a0f009fec6e7f3916). Any tracked working-tree
 changes observed at packaging are recorded separately; a commit ID alone is
 not an assertion that the whole working tree was clean.
 
 ## Reproduce
 
-**Release TODO before filing:** the default `colab-v0` release does not match this submitted notebook or could not be verified. The integrator must publish a corresponding immutable source tag and configure `TRITFLOW_REF` before the bootstrap. See `build-info.json` for the checked commit/missing helpers. Saved outputs remain readable offline; the existing badge is not a verified reproducer of this captured version.
+Run all ≈ 6.5 min on free Colab including setup (384.1 s; all 17 code cells), verified at commit [842afe2](https://github.com/PenguinEino/tritflow/commit/842afe27bead953c9ffd48a7ddceadb57fe0d39d).
+
+<details><summary>Source reference for this saved notebook</summary>
+
+The local source-ref check found `colab-v0` at `842afe27bead953c9ffd48a7ddceadb57fe0d39d`. This capture includes later presentation edits. The Colab run note identifies the tested revision; build-info.json records the checked source-ref details. Source-selection and rerun instructions are in Appendix B.
+
+</details>
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
 
@@ -39,15 +45,14 @@ into `/content/tritflow`, prints the resolved commit and installs it editably.
 using that badge. The bootstrap installs ngspice, the pinned official KLayout
 binary/Python dependencies and a checksum-verified PDK archive at commit
 `5d963db9d44e192d37a0489c208bfccf2e2f690c`.
-Clean Colab installation and its total runtime remain **unverified/postponed**;
-saved outputs were executed locally, as recorded in the build information.
-The older `colab-v0` was separately tested and failed in NumPy/SciPy import.
+The run note identifies the verified revision. The saved outputs in this
+package were executed locally; later presentation edits have local checks.
 This setup preserves Colab's scientific packages, checks minimum versions and
 live/disk consistency, and prints actual KLayout/ngspice versions. Only KLayout
 and Lark wheels are pinned; pip uses `--no-deps`. If an earlier installation
 left mixed versions loaded, follow the explicit restart-once message, then
-rerun setup/imports. Local tests do not establish a successful latest-release
-Colab run. Chapter cells report missing/failed prerequisites before using results.
+rerun setup/imports. Chapter cells report missing/failed prerequisites before
+using results. Appendix B records setup and rerun details.
 
 For a local run, use the complete TritFlow checkout and its documented PDK and
 EDA tools. Open `notebook/tritflow_tr1um.ipynb`, or set `TRITFLOW_ROOT` to that

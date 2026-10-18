@@ -1,8 +1,34 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 10 presentation fixes implemented; saved-output refresh in progress.**
+Updated: 2026-10-18. **Phase 10 complete: title/control spacing, verified Colab note, Appendix B and saved outputs refreshed.**
 
-## Phase 10 — in progress
+## Phase 10 — complete
+
+All requested presentation changes are complete. The SIM-owned load plot was
+requested through the interface note below, fixed by SIM during this task, and
+consumed through its public API in the final fresh default capture.
+
+Validation: **274 regression tests passed in 28.03 s**, followed by the saved-
+package test (**1 passed in 0.06 s**), giving 275 passing checks. The notebook
+also completed all 17 code cells in both captures: local full native **415.52 s**,
+fresh default **82.66 s**, excluding tool installation. These local numbers are
+separate from the factual **384.1 s including setup on free Colab at 842afe2**.
+The source notebook has 34 cells, with process detail in Appendix B.
+
+The final reviewer folder contains **8 files / 2,649,509 bytes**, with **17
+executed code cells, 93 saved outputs, 28 PNGs and 33 HTML tables**, no errors.
+`python3 submission/build_submission.py --check` and `git diff --check` pass.
+Inspected the actual saved routing, placement and load-boundary PNGs: control
+rows and titles are separated; the measured load range and two captions are
+readable. Root NOTICE is byte-identical. Updated four-design evidence is
+4,726,801 bytes / 54 native members, and its consumed-source hashes still match.
+
+The package metadata sets `colab_verified=true` for the observed revision in
+`colab_verification`; `captured_revision_colab_verified=false` explicitly marks
+these later, locally checked presentation edits. No new Colab run is claimed.
+No package installs, git writes, PR or push. Raw captures/logs are retained at
+`/tmp/tritflow-submission-phase10/{native,default}/` and
+`/tmp/tritflow-phase10-{native,default,archive,regression}.log`.
 
 - `notebook/presentation.py` reserves separate title/control/subplot bands on
   copied Plotly figures. Routing dropdowns and Play/Pause use that wrapper.
@@ -23,7 +49,7 @@ Updated: 2026-10-18. **Phase 10 presentation fixes implemented; saved-output ref
 - Targeted presentation/document/packaging tests: 16 passed (0.64 s; old saved
   payload excluded); required-publication tests: 5 passed (0.25 s).
 - Notebook/source fingerprints conservatively include display files. The
-  four-design record will be regenerated once so a published default session
+  four-design record was regenerated once so a published default session
   retains its recorded-data reuse after these text/display edits. Scientific
   models, stimuli, acceptance and PNR options are unchanged.
 
