@@ -48,7 +48,7 @@ def _power_header(data, macro_pins, core, margin):
         raise ValueError(
             "Chip supply needs parallel M2 bars; reduce the macro size or split the allocation"
         )
-    bars, cursor = {}, y1 + 33.4
+    bars, cursor = {}, y1 + 80.0
     for rail in RAILS:
         w = widths[rail]
         bars[rail] = cursor + w / 2
@@ -64,22 +64,7 @@ def _power_header(data, macro_pins, core, margin):
         rail = pin["name"]
         a, b, c, d = pin["rect"]
         x, w = (a + c) / 2, c - a
-        # The reference finger is narrow; VDD/VSS occupy the remaining
-        # bank pitch with at least 2.05 um M1 spacing to that finger.
         finger_w = 3.4 if rail == "VMID" else min(44.0, 2 * (w + 2.4 - 3.75))
-        low, high = y1 - 4.7, bars[rail] + widths[rail] / 2
-        power["rails"].append(
-            {
-                "net": rail,
-                "layer": "M1",
-                "width": finger_w,
-                "points": [[x, y1 - 3], [x, high - 1.7]],
-                "rect": [x - finger_w / 2, low, x + finger_w / 2, high],
-            }
-        )
-        # A tall array shares current between several rows of TC. Keep M1
-        # and M2 centerlines aligned; both model and geometry then describe
-        # parallel cuts, without off-axis projection into one favored cut.
         contact_h = 9.4 if rail == "VMID" else 32.7
         contact_y = y1 + 1 if rail == "VMID" else y1 + 12.65
         extension = 7.0 if rail == "VMID" else 29.0
@@ -93,8 +78,70 @@ def _power_header(data, macro_pins, core, margin):
             }
         )
         _via_array(power["vias"], rail, x, contact_y, min(w, finger_w), contact_h)
-        _via_array(power["vias"], rail, x, bars[rail], finger_w, widths[rail])
-        fingers.append((x - finger_w / 2, x + finger_w / 2))
+        if rail == "VMID":
+            power["rails"].append(
+                {
+                    "net": rail,
+                    "layer": "M1",
+                    "width": 3.4,
+                    "points": [[x, y1 - 3], [x, bars[rail] + widths[rail] / 2 - 1.7]],
+                    "rect": [x - 1.7, y1 - 4.7, x + 1.7, bars[rail] + widths[rail] / 2],
+                }
+            )
+            _via_array(power["vias"], rail, x, bars[rail], 3.4, widths[rail])
+            fingers.append((x - 1.7, x + 1.7))
+            continue
+        # A wide aligned input contact feeds four parallel M1 fingers. Their
+        # finite metal resistance shares current across the upper TC arrays;
+        # no individual cut or narrow common neck carries the entire bank.
+        upper_x = x + (-14.0 if rail == "VDD" else 14.0)
+        column_w = (44.0 - 3 * 2.4) / 4
+        column_xs = [upper_x + (i - 1.5) * (column_w + 2.4) for i in range(4)]
+        power["rails"].append(
+            {
+                "net": rail,
+                "layer": "M1",
+                "width": finger_w,
+                "points": [[x, y1 - 3], [x, y1 + 50.0]],
+                "rect": [
+                    x - finger_w / 2,
+                    y1 - 4.7,
+                    x + finger_w / 2,
+                    y1 + 50.0 + finger_w / 2,
+                ],
+            }
+        )
+        power["rails"].append(
+            {
+                "net": rail,
+                "layer": "M1",
+                "width": finger_w,
+                "points": [
+                    [min(x, min(column_xs)), y1 + 50.0],
+                    [max(x, max(column_xs)), y1 + 50.0],
+                ],
+            }
+        )
+        for cx in column_xs:
+            high = bars[rail] + widths[rail] / 2
+            power["rails"].append(
+                {
+                    "net": rail,
+                    "layer": "M1",
+                    "width": column_w,
+                    "points": [[cx, y1 + 50.0], [cx, high - 1.7]],
+                    "rect": [
+                        cx - column_w / 2,
+                        y1 + 50.0 - column_w / 2,
+                        cx + column_w / 2,
+                        high,
+                    ],
+                }
+            )
+            _via_array(power["vias"], rail, cx, bars[rail], column_w, widths[rail])
+        fingers.append(
+            (min(x - finger_w / 2, upper_x - 22), max(x + finger_w / 2, upper_x + 22))
+        )
     # Find three genuinely empty M1 corridors, also disjoint from each other.
     used, pads = list(fingers), []
     left = min(
@@ -213,13 +260,13 @@ def _power_header(data, macro_pins, core, margin):
             }
         )
     # Keep the VMID crossover outside every supply feeder and pad keep-out.
-    main_bars["VMID"]["points"][0][0] = -948.0
+    main_bars["VMID"]["points"][0][0] = -960.0
     return pads, {
         "rail_current_envelope_a": totals,
         "M2_width_um": widths,
         "reserve": margin,
         "collector_y_um": collector_y,
-        "vmid_escape_um": [-948.0, bars["VMID"]],
+        "vmid_escape_um": [-960.0, bars["VMID"]],
         "M1_step_limit_a_per_um": 0.00025,
         "M2_field_limit_a_per_um": 3.7e-3 / 3,
     }

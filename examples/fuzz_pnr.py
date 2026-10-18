@@ -254,8 +254,8 @@ def main(argv=None):
         source, parameters = random_source(seed)
         sources.append((f"fuzz_{seed:05d}", source, parameters, args.output_root, seed))
     if args.scale or args.all_adders:
-        sources += [(name, source, {"scale": True, **({'pnr_options':{'channel_tracks':16}} if name=='adder7' else {})},
-                     ROOT/"build", 19 if name=='adder7' else 7)
+        sources += [(name, source, {"scale": True, **({'pnr_options':{'channel_tracks':16}} if name in ('adder5','adder6','adder7','adder8') else {})},
+                     ROOT/"build", 19 if name in ('adder5','adder6','adder7','adder8') else 7)
                     for name, source in scale_sources(range(1, 9) if args.all_adders else (6, 8)).items()]
     for name, source, parameters, root, seed in sources:
         out = (root/name).resolve(); out.mkdir(parents=True, exist_ok=True)
@@ -265,7 +265,7 @@ def main(argv=None):
             out=out/'scale';out.mkdir(parents=True,exist_ok=True)
         (out/f"{name}.tv").write_text(source)
         jobs.append(dict(name=name, directory=str(out), parameters=parameters, seed=seed,
-            anneal_steps=max(args.anneal_steps,3000) if name=='adder7' else args.anneal_steps, fingerprint=stamp,
+            anneal_steps=max(args.anneal_steps,3000) if name in ('adder5','adder6','adder7','adder8') else args.anneal_steps, fingerprint=stamp,
             source_sha256=hashlib.sha256(source.encode()).hexdigest()))
     args.output_root.mkdir(parents=True, exist_ok=True)
     results = []

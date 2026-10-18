@@ -93,17 +93,25 @@ path edits. The latest targeted cache/publication/presentation suite passed 15 t
 3 tests (0.57 s). Final notebook timings/publication coverage/package checks
 are pending the parallel publications.
 
-### Interface requests
+### Interface requests / current publication gate
 
-SIM/CELLS/PNR: final capture requires republished pinned-PDK sizing, cell
-qualification, width-scaling and load-boundary records with current consumed
-hashes. The readers now require these records; they do not weaken provenance
-or turn stale data into a result. The current live cell `verify_report.json`
-still names the dev PDK and differs from pinned decks as of this intermediate
-check. The new required-publication regression currently reports sizing ready,
-scaling/load stale and cell qualification still on the dev decks (2 pass / 3
-expected failures while republishing). The release-ref mismatch from phase 7 remains an integrator action;
-no tag or bootstrap write was performed here.
+CELLS Phase 7 was published at generation `2026-10-18T10:26:47.211617+00:00`;
+the required pinned-deck and artifact checks pass. Both W/L grids now pass.
+Only SIM's width-scaling and load-boundary source hashes remain stale against
+the newly published library at this intermediate check. The final capture is
+queued behind the real `notebook/tests/test_publications.py` checks, refreshed
+in a new interpreter on every poll. No stale flags are promoted to new results.
+
+SIM's new public `postlayout.logical_nodeset(net, lvs_report, inputs, vector)`
+is consumed for the opening flow and both runs of all four designs, as well as
+the editable circuit. The notebook no longer duplicates the net-name mapping.
+Shared-initialization/document/campaign tests passed (6 tests, 3.35 s). SPICE
+wall timeout is 600 s for shared-host load, with unchanged electrical vectors,
+window, step and acceptance. This addresses SIM's unseeded off-rail root control.
+
+The release-ref mismatch from phase 7 remains an integrator action; no tag or
+bootstrap write was performed here. The older colab-v0 failed the separate
+COLAB run; latest-source clean Colab qualification remains pending.
 
 ## Phase 7 handoff
 

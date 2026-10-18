@@ -56,8 +56,8 @@ Composite: selected primitive schematic and truth table at left; two aligned
 transfer panels at right. Axes: input voltage (V) against output voltage (V)
 and input voltage (V) against signed rail current (µA). Use
 `dc_transfer`/the recorded grid arrays; `sweep_pin` and fixed other-input trit
-are in the title. Gate dropdown INV/NAND/NOR/NANY; initial gate NANY, with an
-explicit INV selection for the divider prediction. Slider chooses a measured
+are in the title. Gate dropdown INV/NAND/NOR/NANY; initial gate INV at its
+middle input for the divider prediction. Slider chooses a measured
 voltage sample and updates an operating-point marker and numeric readout.
 Highlight branch topology only: if no device-current probes were measured,
 say “possible conducting path” and never imply measured current density.
