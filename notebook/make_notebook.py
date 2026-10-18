@@ -17,6 +17,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from colab_evidence import run_note
 from editorial import context, context_identity, render
 from markdown_support import colab_markdown, responsive_image
+import methods
 import stages
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,11 +29,12 @@ def build():
     context_sha = context_identity(values)
     cells, code_ids = [], {}
     chapter_title = 'Setup'
-    def cell(kind,source,key=None,requires=(),hidden=False):
+    def cell(kind,source,key=None,requires=(),hidden=False,title=None):
         item = {'cell_type':kind,'id':key or f'tritflow-{len(cells):02d}',
                 'metadata':{},'source':textwrap.dedent(source).strip()+'\n'}
         if kind == 'code':
-            if key not in ('setup','imports'):
+            tracked = key not in ('setup','imports') and not key.startswith('method-')
+            if tracked:
                 dependency_ids = [code_ids[k] for k in requires]
                 item['source'] = ('if "_tf_cells" not in globals():\n'
                     '    raise RuntimeError("Run setup and imports successfully before this chapter; rerun them after any requested runtime restart.")\n'
@@ -40,13 +42,22 @@ def build():
                     +textwrap.indent(item['source'],'    '))
                 item['metadata']['tritflow'] = {'title':chapter_title,'requires':dependency_ids}
             item.update(execution_count=None,outputs=[])
+            if title:
+                # Colab shows only the title of a form cell; its code stays one click away.
+                item['source'] = f'#@title {title} {{ display-mode: "form" }}\n'+item['source']
+                item['metadata']['cellView'] = 'form'
+                hidden = True
             if hidden: item['metadata']['jupyter'] = {'source_hidden':True}
-            code_ids[key] = item['id']
+            if not key.startswith('method-'):
+                code_ids[key] = item['id']
         cells.append(item)
         return item
     def md(source): return cell('markdown',colab_markdown(source))
-    def code(key,requires=(),hidden=True):
-        return cell('code',getattr(stages,key.upper()),key,requires,hidden)
+    def code(key,title,requires=()):
+        return cell('code',getattr(stages,key.upper()),key,requires,title=title)
+    def method(key):
+        # Visible, untracked: the public API calls this chapter teaches.
+        return cell('code',getattr(methods,key.upper()),f'method-{key}')
     captions = (NARRATIVE/'captions.md').read_text()
     def caption(name):
         return render(captions.split(f'## fig_{name}\n\n',1)[1].split('\n## ',1)[0].strip(),values)
@@ -107,41 +118,69 @@ $$''',text,count=1)
        '\n\n'+headline+'\n\n'+power+'\n\n'+badge+('\n\n'+run_note() if run_note() else '')+
        '\n\n<details><summary>Author and license</summary>\n\n'+author_block+
        '\n\n'+attendance+'\n\nApache-2.0, including historical schematic assets released by their author.\n\n</details>')
-    cell('code',stages.SETUP,'setup')
-    imports = cell('code',f'NARRATIVE_CONTEXT_SHA256 = {context_sha!r}\n'+stages.IMPORTS,'imports')
+    cell('code',stages.SETUP,'setup',title='Setup: clone TritFlow at the release tag, install KLayout and ngspice, fetch the pinned TR-1um PDK')
+    imports = cell('code',f'NARRATIVE_CONTEXT_SHA256 = {context_sha!r}\n'+stages.IMPORTS,'imports',
+                   title='Imports and run bookkeeping')
     chapter_title = 'Chapter 0: From HDL to a checked adder layout'
-    md(render('## 0.'+chapter0,values)+'\n\n'+'''```python
-    d = flow.load("examples/adder.tv", "adder", {"N": 2})
-    net = d.synthesize()
-    lay = net.place_and_route()
-    assert lay.drc()["clean"] and lay.lvs()["matched"]
-    post = lay.extract().simulate(vectors, load=LOAD_F)
-    ```'''.replace('    ',''))
-    code('opening',hidden=False)
-    chapter('01_gates.md','gates'); code('gates')
-    chapter('02_sizing.md','sizing'); code('sizing')
-    chapter('03_cells.md','cell'); code('cells')
-    chapter('04_hdl.md','synth'); code('arithmetic')
-    chapter('05_synthesis.md'); code('synthesis'); code('schematic')
-    chapter('06_pnr.md','pnr'); code('pnr',requires=('opening',))
-    # The two result panels are distinct questions, not duplicate schematics.
+    md(render('## 0.'+chapter0,values))
+    code('opening_inputs','Chapter 0 inputs: test conditions and an independent integer oracle')
+    method('opening')
+    code('opening','Chapter 0 checks')
+    chapter('01_gates.md','gates'); method('gates')
+    code('gates','Chapter 1 checks and the taped-out INV schematic')
+    chapter('02_sizing.md','sizing'); method('sizing')
+    code('sizing','Chapter 2 details: resistor-length candidates at the taped-out MOS sizes')
+    chapter('03_cells.md','cell'); method('cells')
+    code('cells','Chapter 3 checks: template, clamp devices and cell qualification')
+    chapter('04_hdl.md','synth'); method('arithmetic')
+    code('arithmetic','Chapter 4 checks: cell counts against the taped-out schematics')
+    chapter('05_synthesis.md'); method('synthesis')
+    code('synthesis','Chapter 5 checks: mapping rules and gate-level TritVerilog')
+    method('schematic')
+    chapter('06_pnr.md','pnr'); method('pnr')
+    code('pnr','Chapter 6 details and an optional floorplan experiment',requires=('opening',))
+    # Chapter 7: post-layout comparison, recorded campaigns, then the static-timing prediction.
     text = prose('07_results.md')
+    text,sta_text = text.split('### Predict with static timing, confirm with SPICE',1)
     before,after = text.split('> **What this shows.**',1)
     chapter_title = 'Chapter 7: Does the layout still work?'
     md(render(before,values)+'\n\n'+image('postlayout','Identical extracted devices without and with wire C; observed load failure'))
-    code('pre',requires=('opening','schematic'))
+    method('pre')
+    code('pre','Chapter 7 checks: identical devices with and without wire C',requires=('opening',))
     md(power+'\n\n'+image('scaling','Ripple width, carry/MSB settling, tested-state static power and die area')+
        '\n\n'+render('> **What this shows.**'+after,values))
-    code('published')
+    code('published','Chapter 7 recorded width and load campaigns')
+    # The live cell below replaces the narrative's illustrative snippet.
+    sta_text = re.sub(r'```python[\s\S]*?```\n\n','',sta_text)
+    sta_text = re.sub(r'Here `vectors`[^\n]*\n[^\n]*\n\n','',sta_text)
+    sta_before,sta_after = sta_text.split('> **What this shows.**',1)
+    md(render('### Predict with static timing, confirm with SPICE'+sta_before,values)+
+       '\n\nThe cell below runs STA on the live adder with its routed wire capacitances and compares it with the SPICE run above.')
+    method('sta')
+    code('sta','Chapter 7 STA comparison table and critical path',requires=('opening',))
+    md(image('sta','Ternary static timing versus post-layout SPICE for matched input-transition sets')+
+       '\n\n'+render('> **What this shows.**'+sta_after,values))
     text = prose('08_your_circuit.md').split('> **What this shows.**',1)[0]
     chapter_title = 'Chapter 8: Change the circuit and close the loop'
     md(text+'\n\n**Successful first edit:** the visible sorter below implements its minimum as '
        '`~((~a) | (~b))`. Run it to obtain a new mapped schematic and GDS while keeping the independent sorting reference.')
-    code('edit',hidden=False)
-    code('custom',requires=('edit',),hidden=False)
+    method('edit')
+    method('custom')
+    code('custom_check','Chapter 8 check: every input state against the independent arithmetic reference',requires=())
+    method('custom_layout')
+    code('custom','Chapter 8: extracted SPICE of your layout and its waveform',requires=('custom_check',))
     md('A deliberately unsupported expression produces a located, readable error before synthesis:')
-    code('broken')
-    chapter('09_next.md')
+    method('broken')
+    # Chapter 9: outlook, then the recorded shuttle-ready top.
+    text = prose('09_next.md')
+    outlook,shuttle = text.split('### From your HDL to a shuttle-ready top',1)
+    chapter_title = text.splitlines()[0].removeprefix('## ')
+    md(render(outlook,values))
+    shuttle_before,shuttle_after = shuttle.split('> **What this shows.**',1)
+    md(render('### From your HDL to a shuttle-ready top'+shuttle_before,values))
+    method('shuttle')
+    code('shuttle','Chapter 9 checks: recorded signoff snapshot and pad map')
+    md(render('> **What this shows.**'+shuttle_after,values))
     chapter('A_limits.md')
     chapter_title = 'Appendix B: Verification evidence and how to rerun'
     appendix = prose('B_evidence.md')
@@ -163,9 +202,10 @@ $$''',text,count=1)
 
     </details>
     '''))
-    code('characterization')
-    code('four')
-    code('final',requires=tuple(code_ids)[2:])
+    code('characterization','Appendix B: cell characterization and fanout evidence')
+    code('four','Appendix B: four-design physical and timing campaign')
+    code('final','Appendix B: evidence tables, provenance and run time',requires=tuple(code_ids)[2:])
+    chapter('C_reuse.md')
     titles = {item['id']:item['metadata'].get('tritflow',{}).get('title',item['id'])
               for item in cells if item['cell_type'] == 'code'}
     imports['source'] += '\n_tf_cells = CellState('+repr(titles)+')\n'

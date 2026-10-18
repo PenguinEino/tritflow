@@ -84,9 +84,10 @@ def test_chapter_math_is_outside_html_and_paper_images_are_responsive():
         if text.startswith(('## 1.','## 2.','## 7.')):
             assert text.count('$$') >= 4
         if text.startswith('## Appendix A.'):
-            assert 'table-layout:fixed' in text and 'overflow-wrap:anywhere' in text
-            assert 'contain:inline-size' in text and 'overflow-x:auto' in text
-            assert '<table width="100%"' in text
+            # Colab drops inline styles and truncates long table cells, so the
+            # scope list is rendered as bold-labelled Markdown paragraphs.
+            assert '<table' not in text
+            assert '**Silicon.**' in text and '**Manufacturing.**' in text
 
 
 def test_scoped_real_pass_and_missing_verification_note(monkeypatch):
@@ -100,3 +101,11 @@ def test_scoped_real_pass_and_missing_verification_note(monkeypatch):
     monkeypatch.setattr(colab_evidence,'CURRENT_EVIDENCE',{
         'commit':'a'*40,'passed_code_cells':18,'run_all_seconds_including_setup':120})
     assert 'aaaaaaaa' in colab_evidence.run_note()
+
+
+def test_long_label_description_tables_become_paragraphs_short_tables_stay():
+    from markdown_support import colab_markdown
+    prose = "| Topic | Scope |\n|---|---|\n| Silicon | " + "word "*40 + "|\n"
+    assert '<table' not in colab_markdown(prose) and '**Silicon.**' in colab_markdown(prose)
+    short = "| Quantity | Hand | SPICE |\n|---|---|---|\n| I | 1 | 2 |\n"
+    assert '<table' in colab_markdown(short)
