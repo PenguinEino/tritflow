@@ -83,6 +83,36 @@ The actual apt/pip install, notebook display in Colab, Ubuntu ngspice package
 behavior, and install-inclusive cold runtime require a clean Colab test. Local
 validation cannot establish the ten-minute Colab budget.
 
-Remaining notebook TODOs are explicit: source publication, Xschem SVG assets,
-public W/L sizing-sweep support, the final qualified N/load/IR result matrix,
+Remaining notebook TODOs are explicit: source publication, public W/L
+sizing-sweep support, the final qualified N/load/IR result matrix,
 and final measurement hardware/schedule. No draft TODO is presented as a result.
+
+The six taped-out source schematics are bundled under `assets/schematics/`,
+each with an opaque light and dark SVG. Chapter 1 displays a theme-aware gallery
+using embedded data URLs, so no Xschem installation is needed in Colab. The
+manifest records source/dependency/exporter/output hashes and actual symbol
+counts. The gallery checks output hashes; the arithmetic chapter checks mapped
+HA/FA counts against the source hierarchy counts.
+
+```sh
+python3 notebook/export_schematics.py
+python3 -m pytest notebook/tests/test_schematics.py -q
+```
+
+Export uses batch Xschem on temporary copies of the six `.sch` files and every
+referenced local/PDK/device symbol. Only absolute paths in those copies are
+relocated. Source files and PDK symbols are never opened for writing. Primitive
+crops omit stale free-text sizing sidebars while retaining actual instance
+properties; color/stroke normalization changes presentation only. Source inputs
+are hash-checked after export. The standalone light/dark variants and native
+SVG text remain readable without host-page CSS.
+
+The review pass removes hand-entered result counts from prose, derives coverage
+and conditions in tables, and asserts cached/fresh pass flags equally. Published
+characterization and qualification files are checked against their referenced
+artifacts before their numbers are displayed. FILL's probe-based qualification
+is labeled explicitly; it is not called a standalone strict LVS match. Both
+the nominal fanout method and measurement scope come from the SIM JSON. Band
+settling, finite-step resolution, sampled analog coverage and omitted RC/PVT/IR
+effects remain explicit limitations. The exact requested SIM sizing API and
+return schema are in `docs/status/FRONTEND.md`.

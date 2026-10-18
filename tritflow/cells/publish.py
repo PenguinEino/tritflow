@@ -10,6 +10,7 @@ from datetime import datetime,timezone
 import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 import tempfile
 
@@ -81,4 +82,6 @@ def qualified_build(out, names=None):
     build(stage)
     if not verify(stage)['passed']:raise RuntimeError(f'Qualification failed: {stage}')
     characterize(stage)
-    return publish(stage,reason='Compact complete-library rebuild')
+    result=publish(stage,reason='Compact complete-library rebuild')
+    shutil.rmtree(stage)  # old generation; the exchange already made the new one live
+    return result

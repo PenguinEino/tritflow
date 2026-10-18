@@ -27,8 +27,9 @@ Phase-1 `/tmp` artifacts are superseded by these project-local results.
 
 ## In progress / blockers
 
-Final content-hash verification and status publication are running. No circuit
-or routing blocker remains; all four designs and all twelve seeds have passed.
+None. Phase 2 is complete: all four canonical designs and all twelve seed
+candidates pass connectivity, own routing DRC, official PDK DRC and strict LVS.
+The content-aware cache also verified that every checked artifact is current.
 
 ## Decisions and physical scope
 
@@ -70,6 +71,11 @@ seed minimizes final HPWL among candidates that pass complete routing, own
 checks, PDK DRC and strict LVS; total signal wirelength and seed break ties.
 Different seeds can require different row counts or channel widths, so their
 initial HPWL values need not be identical. The tables retain those differences.
+Initial row packing and every annealing candidate must satisfy the worst-case
+row-current capacity; overloaded swaps/moves are rejected. This replaced the
+late-overload retry behavior and reduced the selected four-trit adder from
+25 to 16 rows (6.442 to 4.156 mm²), while keeping all saved snapshots within
+the same current limit. Its final HPWL is 49743 µm versus 96081 µm initially.
 
 **Power.** Missing characterization uses 100 µA per logic cell and zero intrinsic
 current for FILL/TIE. SIM's `max_static_current_a` and `dc[*].rail_current_a`
@@ -121,8 +127,16 @@ root report does invalidate the cache. Watch mode polls every five seconds,
 debounces changes, and reloads a changed publication. Every active build also
 compares before/after fingerprints and restarts all designs if they differ.
 Canonical results and seed evidence are hashed; missing/altered artifacts never
-count as a cached pass. The runner refreshes only the result-table block in this
+count as a cached pass. The actual batch observed publication changes and
+restarted all four designs; the final run completed on a stable publication. The runner refreshes only the result-table block in this
 status file for full canonical project builds. Custom/test builds leave it alone.
+
+A live `python3 examples/pnr_all.py --watch` process is running: **PID 171041**,
+also recorded in `build/pnr_watch.pid`. It has confirmed the unchanged-input
+cache path and will rebuild/refresh the result tables for new published views.
+Stop this watcher with `kill -INT 171041`. Restart it after changing PNR Python
+implementation code; cell/template/characterization publications reload without
+restarting the process.
 
 Each `build/<design>/` contains:
 
@@ -171,13 +185,16 @@ python3 -m pytest tests/pnr tests/viz/test_layout.py -q
 python3 -m compileall -q tritflow/pnr tritflow/viz/layout.py examples/pnr_all.py
 ```
 
-Latest combined run: **25 passed in 48.51 s**. This includes the original
+Final combined run: **26 passed in 50.42 s**. This includes the original
 synthetic suite and real four-trit adder, actual obstructed/mirrored mock GDS
 through the full PDK deck, V1-implied metal, free-column metadata, alternative
 pin access, portable raster/HTML, net/hierarchy selection, linked animation
 frames, content changes with preserved mtimes, mid-build publication restart,
-cache reuse and rebuilding a deleted checked GDS. A final rerun after the batch
-reporting adjustment is in progress. `git diff --check` on owned paths passes.
+cache reuse, rebuilding a deleted checked GDS, and row-current compliance of
+every saved placement snapshot. A subsequent unchanged-input batch invocation
+returned immediately with all checked artifacts current. `git diff --check`
+and `compileall` on owned paths pass. The final actual GDS PNGs were visually
+inspected, including the compact adder and mixed NAND/NOR/INV multiplier.
 
 Extra packages installed: **none**. Uses existing klayout.db/lay 0.30.6, Plotly,
 Pillow, numpy, matplotlib, the KLayout executable and the local PDK.
@@ -191,5 +208,37 @@ Own changes are confined to PNR paths, the explicitly assigned visualization
 and test files, `examples/pnr_all.py`, and generated `build/` outputs.
 
 <!-- PNR_RESULTS_BEGIN -->
-Current tables are being published by the final content-aware batch run.
+## Current verified build results
+
+Published template height: **132 µm**. Input content fingerprint: `227905d83a00465d8ffce3eba1581ace3b338aba0ab100647626a88539d9d2fd`.
+
+All outputs and reports are under `build/<design>/`. Utilization is placed cell area / die area; wirelength and signal via counts exclude the separately reported power geometry.
+
+| Design | Seed | Die (µm) | Utilization | M1 (µm) | M2 (µm) | Signal / power vias | PDK DRC | Strict LVS |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+| adder4 | 7 | 1176 × 3534 | 30.34% | 27912 | 63342 | 562 / 2304 | 0 violations | Match |
+| full_add | 0 | 924 × 942 | 36.21% | 4494 | 7323.5 | 111 / 128 | 0 violations | Match |
+| mac1 | 19 | 912 × 1374 | 34.26% | 6150 | 11749.5 | 168 / 288 | 0 violations | Match |
+| mul1 | 7 | 612 × 510 | 22.84% | 468 | 1638.5 | 29 / 16 | 0 violations | Match |
+
+## Placement seed comparison
+
+Cell-terminal HPWL excludes external ports. Each before/after pair uses the same final floorplan. Seeds can select different row counts/channel widths; select the lowest final HPWL among fully routed, DRC/LVS-passing candidates, then wirelength and seed as tie-breaks.
+
+| Design | Seed | HPWL before (µm) | HPWL after (µm) | Reduction | DRC / LVS |
+|---|---:|---:|---:|---:|---|
+| adder4 | 0 | 125457 | 79987.5 | 36.24% | clean / Match |
+| adder4 | 7 | 96081 | 49743 | 48.23% | clean / Match |
+| adder4 | 19 | 96081 | 52189.5 | 45.68% | clean / Match |
+| full_add | 0 | 7824 | 4956 | 36.66% | clean / Match |
+| full_add | 7 | 7824 | 5100 | 34.82% | clean / Match |
+| full_add | 19 | 7824 | 5712 | 26.99% | clean / Match |
+| mac1 | 0 | 17019.5 | 9742 | 42.76% | clean / Match |
+| mac1 | 7 | 17019.5 | 8712 | 48.81% | clean / Match |
+| mac1 | 19 | 17019.5 | 7719 | 54.65% | clean / Match |
+| mul1 | 0 | 1228.5 | 795.5 | 35.25% | clean / Match |
+| mul1 | 7 | 1228.5 | 766.5 | 37.61% | clean / Match |
+| mul1 | 19 | 1228.5 | 766.5 | 37.61% | clean / Match |
+
+Machine-readable results: `build/pnr_summary.json`, `build/pnr_manifest.json`, and each design's `.pnr.summary.json` / `.seed_comparison.json`.
 <!-- PNR_RESULTS_END -->

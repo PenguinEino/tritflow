@@ -191,7 +191,8 @@ def layout_figure(pnr, *, highlight_net=None, highlight_instance=None, show_powe
     for pin in data["pins"]:
         x0, y0, x1, y1 = pin["rect"]
         fig.add_trace(go.Scatter(x=[(x0+x1)/2], y=[(y0+y1)/2], mode="markers", name=pin["name"],
-            marker={"size": 7, "symbol": "diamond", "color": "#273d57"}, showlegend=False,
+            marker={"size": 7, "symbol": "diamond", "color": "#e47712" if pin["name"] == highlight_net else "#273d57"},
+            opacity=.12 if highlight_net is not None and pin["name"] != highlight_net else 1., showlegend=False,
             hovertemplate=f"Port {pin['name']}<extra></extra>", meta={"kind": "port", "net": pin["name"]}))
     # Legend has one entry per physical routing layer rather than hundreds of nets.
     for layer, color in METAL_COLORS.items():
@@ -227,8 +228,12 @@ def layout_figure(pnr, *, highlight_net=None, highlight_instance=None, show_powe
             cell_buttons.append({"label": label, "method": "restyle",
                 "args": [{"fillcolor": fills, "line.color": colors, "line.width": widths}, list(range(len(fills)))]})
         fig.update_layout(updatemenus=[
-            {"buttons": net_buttons, "x": 0., "y": 1.12, "xanchor": "left", "active": 0},
-            {"buttons": cell_buttons, "x": .45, "y": 1.12, "xanchor": "left", "active": 0}])
+            {"buttons": net_buttons, "x": 0., "y": 1.12, "xanchor": "left",
+             "active": nets.index(highlight_net)+1 if highlight_net is not None else 0},
+            {"buttons": cell_buttons, "x": .45, "y": 1.12, "xanchor": "left",
+             "active": next((i+1 for i, p in enumerate(data["placements"])
+                             if highlight_instance in (p["inst"], p.get("hier"))), 0)
+                       if highlight_instance is not None else 0}])
     return fig
 
 

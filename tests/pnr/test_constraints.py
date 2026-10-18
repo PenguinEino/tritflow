@@ -89,3 +89,17 @@ def test_loads_compact_cell_free_m2_metadata(tmp_path):
         "free_M2_tracks":{"x":[9.,27.],"wire_width":3.4,"clearance":2.}}))
     loaded = Library.load(tmp_path).cells["INV"]
     assert loaded.free_tracks["M2"]["x"] == [9.,27.]
+
+
+def test_every_saved_placement_respects_row_current_capacity(tmp_path):
+    library = mock_library()
+    library.cells["INV"].characterization = {"max_static_current_a": .0008}
+    result = place_and_route(chain(20), library, output_dir=tmp_path,
+                             anneal_steps=100, history_every=10, seed=19, run_pdk_drc=False)
+    limit = 2*.00025*min(y1-y0 for y0, y1 in library.template["rails"].values())
+    currents = result.data["power"]["currents_a"]
+    assert result.stats["row_count"] == 4
+    for snapshot in result.data["history"]:
+        for row in {p["row"] for p in snapshot["placements"]}:
+            load = sum(currents[p["inst"]] for p in snapshot["placements"] if p["row"] == row)
+            assert load <= limit+1e-12
