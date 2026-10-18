@@ -200,9 +200,11 @@ def validate(*, output_dir=None, retries=3):
             'accuracy_passed':len(rows)==39 and len(accurate)==39,
             'accuracy_target_percent':20.,'outputs_within_target':len(accurate),
             'scope': 'Midpoint propagation plus endpoint-only tail; nominal finite-vector validation with a ±20% empirical target, not a certified bound.',
-            'limitations': ['Full graph considers all settled input endpoint pairs; SPICE maxima cover only consecutive documented vectors.',
+            'outside_accuracy_target':[{'design':r['design'],'output':r['output'],'error_percent':r['tested_error_percent']}
+                for r in rows if r.get('tested_error_percent') is not None and abs(r['tested_error_percent'])>20],
+            'limitations': ['Full fixed-ramp graph and tested-pattern event analysis have different waveform assumptions; neither is a global analog bound.',
                 'Tested-pair comparison removes endpoint coverage differences, but does not reproduce analog slew/skew/history or propagated glitches.',
-                'Input slew is reduced to an equivalent linear ramp; unequal multi-input midpoints use synchronous surfaces. Intermediate endpoint-stable glitches are not propagated.',
+                'Slew becomes an equivalent linear ramp. Ordered ideal trit events propagate logical pulses, but partial-voltage pulses and analog hazards on unchanged outputs lack a waveform model.',
                 'Wire coefficients are assumed, not calibrated PEX; signal/poly RC, PVT and package are outside the model.',
                 'Explicit bounded load extensions are uncharacterized estimates, not measured table points.'],
             'designs': records, 'cell_generation': models.generation,

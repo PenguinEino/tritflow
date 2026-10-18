@@ -32,7 +32,7 @@ class Edge:
 
 
 def analyze_events(netlist,pairs,*,library,wire_caps=None,output_load_f=10e-15,
-                   input_transition_s=1e-9,load_policy='linear'):
+                   input_transition_s=1e-9,load_policy='linear',max_events=100000):
     """Propagate midpoint events for the supplied complete endpoint vector pairs."""
     from .analyze import _settling_analyze
     started=time.perf_counter();pairs=list(pairs)
@@ -44,6 +44,7 @@ def analyze_events(netlist,pairs,*,library,wire_caps=None,output_load_f=10e-15,
     outputs=list(report.arrival);warnings=set(report.warnings)
     counters={'cancelled_pulses':0,'overlapping_ramps':0,'unpropagated_local_hazards':0,'time_order_clamps':0}
     for before,after in pairs:
+        event_count=0
         old={n:int(v) for n,v in evaluate_netlist(netlist,before,return_all=True).items()}
         new={n:int(v) for n,v in evaluate_netlist(netlist,after,return_all=True).items()}
         edges={p:[Edge(input_transition_s/2,old[p],new[p],.8*input_transition_s,0.,[])]
@@ -53,6 +54,8 @@ def analyze_events(netlist,pairs,*,library,wire_caps=None,output_load_f=10e-15,
             pins=CELL_INPUTS[inst.cell];name=inst.pins['Y'];model=library[inst.cell]
             pin_values={p:old[inst.pins[p]] for p in pins}
             incoming=sorted([(e.time,p,e) for p in pins for e in edges.get(inst.pins[p],[])],key=lambda x:x[0])
+            event_count+=len(incoming)
+            if event_count>max_events:raise RuntimeError('Pattern event budget exceeded; no partial timing report')
             generated=[];recovery=[]
             for _,group in groupby(incoming,key=lambda x:round(x[0],15)):
                 changes=list(group);first=pin_values.copy()

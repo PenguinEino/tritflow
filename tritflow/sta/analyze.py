@@ -7,14 +7,12 @@ Reduced ternary decision diagrams encode those conditions. Empty intersections
 are false paths; the first feasible primary-input leaf is the largest modeled
 arrival. Keeping every predecessor avoids losing alternate paths at reconvergence.
 
-The electrical approximation is intentionally simpler: add the cell's measured
-settling to the latest changing-input arrival. Every stage uses the requested
-full ramp (default 1 ns). This counts finite ramp time at each stage and does
-not propagate waveform shape/slew. Simultaneous tables assume synchronous equal
-ramps although a real circuit develops skew. Local unchanged-output recovery is
-reported, but a glitch on an endpoint-stable intermediate net cannot be carried
-to the next gate without waveform information. These are nominal analytical
-estimates, not guaranteed upper bounds. Validation quantifies those limitations.
+The graph engine supports historical additive settling and measured midpoint
+propagation with one endpoint settling tail. Its global search uses a fixed
+input ramp. The public entry point uses ordered pin-event timing with propagated
+slew when complete vector pairs are provided; that mode can carry logical
+pulses through endpoint-stable nets. Neither mode represents arbitrary analog
+waveforms, and neither is a guaranteed upper bound.
 """
 from __future__ import annotations
 
@@ -252,7 +250,7 @@ def _settling_analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
     return report
 
 
-def analyze(netlist,pnr=None,**kwargs):
+def analyze(netlist,pnr=None,**kwargs) -> TimingReport:
     """Analyze ternary timing; STA-owned midpoint tables are the default model.
 
     Passing a legacy TimingLibrary explicitly retains the historical additive

@@ -27,10 +27,13 @@ def route(nodes,driver,loads,width,height,frames=()):
                        for y in range(y0,y0+32,8))
     for node in nodes.values():
         blocked.difference_update(node.pins.values())
-    terminals={}
+    terminals={};reserved={}
     for node in nodes.values():
         for pin,point in node.pins.items():
-            terminals[point]=({**node.inputs,**node.outputs})[pin]
+            signal=({**node.inputs,**node.outputs})[pin]
+            terminals[point]=signal
+            dx,dy=NORMAL[node.sides[pin]]
+            for k in (1,2):reserved[(point[0]+k*dx,point[1]+k*dy)]=signal
     edges={};at=defaultdict(dict);segments=[]
 
     def axis(a,b):return 0 if a[1]==b[1] else 1
@@ -64,6 +67,7 @@ def route(nodes,driver,loads,width,height,frames=()):
                 if not (8<=nxt[0]<=width-8 and 80<=nxt[1]<=height-48):continue
                 if nxt in blocked and nxt not in tree:continue
                 if nxt in terminals and terminals[nxt]!=signal:continue
+                if nxt in reserved and reserved[nxt]!=signal:continue
                 used=edges.get(edge(p,nxt))
                 if used is not None and used!=signal:continue
                 new_axis=0 if dy==0 else 1
@@ -81,7 +85,7 @@ def route(nodes,driver,loads,width,height,frames=()):
                     best[new_state]=new_cost;previous[new_state]=state
                     heapq.heappush(q,(new_cost+heuristic(nxt),new_cost,next(serial),new_state))
         if finish is None:
-            raise ValueError(f'No schematic route for {signal!r} at {start}; enlarge drawing channels')
+            raise ValueError(f'No schematic route for {signal!r} at {start}; tree={sorted(tree)[:5]}, start wires={at[start]}, source wires={at[next(iter(tree))]}, visited={len(best)}')
         path=[];state=finish
         while True:
             path.append(state[0])

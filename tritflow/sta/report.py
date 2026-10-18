@@ -1,4 +1,4 @@
-"""Portable timing reports; every listed path has a realizable endpoint pattern."""
+"""Portable timing reports with primary-input patterns and stage measurements."""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
@@ -36,9 +36,10 @@ class PathStage:
 class TimingReport:
     """Seconds throughout. Arrival is the maximum modeled settling per output.
 
-    ``patterns[output]`` gives complete before/after primary-input assignments
-    that satisfy every cell condition along ``paths[output]``. This proves
-    settled logical sensitization, not freedom from analog/skew hazards.
+    ``patterns[output]`` gives complete before/after primary-input assignments.
+    The global graph proves joint settled endpoint sensitization. Ordered event
+    paths instead list timed intermediate pin states in the event approximation;
+    those states need not equal the whole-vector endpoints at each internal net.
     ``transition_arrival`` includes local unchanged-output hazard recovery.
     """
 
@@ -80,7 +81,7 @@ class TimingReport:
         result = (f"<h3>{escape(self.top)}: ternary settling estimate</h3>"
                   "<table><tr><th>Output</th><th>Settling (ns)</th></tr>" + rows + "</table>"
                   + timing_figure(self).to_html(full_html=False, include_plotlyjs=include_plotlyjs)
-                  + "<p>Sensitizing primary-input endpoints:</p><pre>"
+                  + "<p>Sensitizing primary-input endpoints (event paths may use intermediate states):</p><pre>"
                   + escape(json.dumps(self.sensitizing_pattern, indent=2)) + "</pre><ul>" + notes + "</ul>")
         if path is not None: Path(path).write_text(result)
         return result
