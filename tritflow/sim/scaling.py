@@ -229,7 +229,9 @@ def run_size(n, *, build_root=None, seeds=(7,0,19), hold_s=1e-6, step_s=2e-9,
             raise RuntimeError('Inputs/code changed during scaling run; rerun to qualify the new revision')
         artifacts = [directory/f'{net.top}{suffix}' for suffix in ('.json','.gds','.pnr.json')]
         artifacts += [out/name for name in ('summary.json','lvs.json','schematic.spice','prelayout.spice','postlayout.spice',
-            'capacitance.json','ir_drop.json','pdk_parameters.json','vectors.json','static.json','static_cache.json','pre/measurements.json','post/measurements.json',
+            'capacitance.json','ir_drop.json','pdk_parameters.json','vectors.json','initialization.json',
+            'static.json','static_cache.json','pre/measurements.json','post/measurements.json',
+            'pre/simulation.json','post/simulation.json','pre/tb.spice','post/tb.spice',
             'pre/waveforms.npz','post/waveforms.npz')]
         artifacts += [Path(lvs['extracted']),Path(lvs['report'])]
         record.update(state='complete',passed=summary['passed'] and all(r['passed'] for r in dc),

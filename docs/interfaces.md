@@ -12,7 +12,7 @@ Constants live in `tritflow/__init__.py`.
 
 | Path | Owner stream |
 |---|---|
-| `tritflow/__init__.py`, `tritflow/netlist.py`, `docs/interfaces.md`, `pyproject.toml`, `AGENTS.md` | integrator |
+| `tritflow/__init__.py`, `tritflow/netlist.py`, `docs/interfaces.md`, `docs/editorial.md`, `docs/concept.md`, `pyproject.toml`, `AGENTS.md`, `README.md`, `NOTICE` | integrator |
 | `tritflow/cells/`, `cells/`, `tests/cells/` | CELLS |
 | `tritflow/hdl/`, `tritflow/synth/`, `examples/`, `tests/hdl/`, `tests/synth/` | FRONTEND |
 | `tritflow/pnr/`, `tests/pnr/` | PNR |
@@ -22,7 +22,8 @@ Constants live in `tritflow/__init__.py`.
 | `tritflow/viz/cell.py`, `tests/viz/test_cell*.py` | CELLS |
 | `tritflow/viz/layout.py`, `tests/viz/test_layout*.py`, `examples/fuzz_pnr.py`, `examples/pnr_all.py` | PNR |
 | `tritflow/flow.py` | FRONTEND |
-| `notebook/`, `submission/` | FRONTEND |
+| `notebook/` (except narrative/), `submission/` | FRONTEND |
+| `notebook/narrative/` | EDITOR |
 | other `tritflow/viz/` | later |
 | `tritflow/sta/`, `tests/sta/`, `results/sta/` | STA |
 | `docs/status/<stream>.md` | that stream |

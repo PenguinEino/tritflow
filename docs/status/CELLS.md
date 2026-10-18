@@ -1,4 +1,6 @@
-# CELLS — Phase 6 complete; compact cells, visuals and STA timing tables qualified
+# CELLS — Phase 7 pinned-PDK requalification in progress
+
+Phase 7 target: public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c** at `~/pdk/TR-1um-pinned`. The live Phase 6 physical qualification below is historical dev-snapshot evidence until the Phase 7 atomic publish. PNR/SIM should wait for the Phase 7 publish journal before their final reruns. All new generation, extraction and verification use the pinned PDK only.
 
 ## Published generation
 
@@ -649,3 +651,17 @@ requests remain.
 Publish 2026-10-18T09:49:34.717678+00:00: Phase 6 PASS: nine STA timing tables, 160 load/ramp profiles and 7296 directed observations; 30 poly-R proxy profiles with matched baselines; physical cell views unchanged; latest SIM characterization/sizing preserved. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.
 
 Post-publish validation: all nine timing/poly tables have matching generation, source and annotated-model hashes; timing-summary hashes match the stamped files, all 4×8 matrices are complete, and all physical verification/characterization hashes still pass. Template resolves through the published generation. Phase 6 complete.
+
+## Phase 7 — pinned public PDK requalification (in progress)
+
+Fresh complete-library stage: `cells/.cells-pinned-kdw8spcg`. The previous published generation and its physical/electrical tables are preserved privately under `requalification/baseline/` for an explicit machine-readable difference report. No live output has changed. Generation now records actual PCell-source, model, drawing/LVS-deck and setup-pin hashes.
+
+Review finding 2: CELLS now calls SIM's fixed public `extract_layout` for strict LVS, including physical metal/label/edge-continuity proof before an unloaded power formal can be restored. Raw extraction and LVS databases remain available at the established cell paths. New cell-level regressions remove all INV VMID rail metal, sever it in the middle, or remove its physical label; each must fail cell LVS. FILL keeps its empty-device proof and strict three-rail probe fixture.
+
+Pinned physical result: all nine cells pass drawing DRC, strict LVS and DC (FILL uses its documented probe), and all 324 ordered-pair/orientation abutment cases pass with zero findings. Every regenerated GDS matches the prior GDS after only BGNLIB/BGNSTR timestamps are zeroed; every public `.ext.spice` is byte-identical. Untouched original INV/NAND/NOR/NANY GDS was separately re-extracted using the pinned deck and all four native raw SPICE files are byte-identical to their dev-deck counterparts. Thus the changed extraction decks do not change these specific device networks.
+
+Strict public port checking initially exposed original NAND/NOR `V-` versus KLayout-escaped `V\x2d` spelling. Existing labels and source terminals are now renamed together to A/B/Y/VDD/VSS in private GDS/source copies; no conductor, device, dimension or port is added. Original native extraction remains separately retained under `requalification/native_reference/`; the aliased copies receive strict independent-source LVS. All four original/compact schematic comparisons pass.
+
+Deleted, severed and unlabelled INV VMID fixtures are each rejected with missing physical metal/label/continuity evidence, despite the schematic having no VMID device load. Their retained results are under `requalification/rail_negatives/`. Full electrical, timing and CELLS/viz regression runs continue in the private stage; no Phase 7 publish yet.
+
+Phase 7 regression: `python3 -m pytest tests/cells tests/viz/test_cell*.py -q` completed with **66 passed, zero skips, in 1044.28 s**. All eight electrical-cell SIM characterizations pass with current pinned-PDK provenance. Local tools are Python 3.12, KLayout Python 0.30.6 / native executable 0.30.9, and ngspice 46+ on aarch64; exact versions and consumed hashes are in `requalification/environment.json`. This is the local pinned-PDK qualification, not a new amd64 Colab installation run.

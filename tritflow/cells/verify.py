@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 
 import klayout.db as db
@@ -53,19 +54,36 @@ def normalize_extracted(raw, target, circuit):
 
 
 def lvs(gds, circuit, folder, normalize=True):
-    report, raw = folder/'lvs.lvsdb',folder/'extracted.raw.spice'
-    report.unlink(missing_ok=True); raw.unlink(missing_ok=True)
-    code,log = run([BINARY,'-b','-r',TECH/'lvs/run.lvs','-rd',f'input={gds}',
-                   '-rd',f'top_cell={circuit.name}','-rd',f'report={report}',
-                   '-rd',f'circuit={folder}/{circuit.name}.lvs.spice','-rd',f'extracted={raw}'],folder,'lvs.log')
-    result = {'passed':False,'strict_ports':True}
-    if code or not report.exists():
-        result['error']=log[-2000:]; return result
-    l = db.LayoutVsSchematic(); l.read(str(report))
-    pairs=list(l.xref().each_circuit_pair())
-    result.update(circuits=[str(p.status()) for p in pairs],errors=[e.message for e in l.each_error()])
-    result['passed']=bool(pairs) and all(p.status()==db.NetlistCrossReference.Match for p in pairs) and not result['errors'] and 'Congratulations! Netlists match.' in log
-    if raw.exists() and normalize:
+    """Use SIM's fixed strict-port check before restoring any public formal.
+
+    An unused schematic pin is insufficient evidence: the public extractor now
+    requires labelled, connected physical power metal across abutment edges.
+    Preserve its raw device extraction and LVS database in our established paths.
+    """
+    from tritflow.extract import extract_layout
+    from tritflow.extract.lvs import ExtractionError
+    folder=Path(folder);folder.mkdir(parents=True,exist_ok=True)
+    report,raw=folder/'lvs.lvsdb',folder/'extracted.raw.spice'
+    report.unlink(missing_ok=True);raw.unlink(missing_ok=True)
+    (folder/'strict_lvs'/f'{circuit.name}.raw.ext.spice').unlink(missing_ok=True)
+    try:
+        check=extract_layout(gds,circuit.name,folder/'strict_lvs',
+            reference=folder/f'{circuit.name}.lvs.spice',pdk=PDK_ROOT,
+            executable=BINARY,timeout=240)
+    except ExtractionError as exc:
+        return {'passed':False,'strict_ports':True,'error':str(exc)}
+    shutil.copyfile(check['report'],report)
+    extracted=Path(check['extracted'])
+    original=extracted.with_name(f'{circuit.name}.raw.ext.spice')
+    shutil.copyfile(original if original.exists() else extracted,raw)
+    (folder/'lvs.log').write_text(check['log'])
+    result={'passed':check['matched'],'strict_ports':check['strict_ports'],
+            'circuits':check['circuits'],'errors':check['errors'],
+            'unused_power_formals_restored':check.get('unused_power_formals_restored',[]),
+            'unused_power_physical_evidence':check.get('unused_power_physical_evidence',{}),
+            'checker':'tritflow.extract.extract_layout; physical unloaded-rail proof required',
+            'checker_sha256':hashlib.sha256((Path(__file__).parents[1]/'extract/lvs.py').read_bytes()).hexdigest()}
+    if result['passed'] and normalize:
         try: normalize_extracted(raw,folder/f'{circuit.name}.ext.spice',circuit)
         except ValueError as e:
             result['normalization_error']=str(e)
@@ -181,19 +199,21 @@ def dc(circuit,folder):
 
 
 def verify(out=CELLS_DIR/'out',names=None):
+    from tritflow.sim.provenance import pdk_provenance
     out=Path(out).resolve()
     selected={n:c for n,c in circuits().items() if not names or n in names}
-    report={'cells':{},'pdk':str(PDK_ROOT),
+    report={'cells':{},'pdk':str(PDK_ROOT),'pdk_provenance':pdk_provenance(),
             'deck_sha256':{str(p.relative_to(PDK_ROOT)):hashlib.sha256(p.read_bytes()).hexdigest()
                            for area in ['drc','lvs'] for p in sorted((TECH/area).rglob('*')) if p.is_file()},
             'scope':'nominal device/connectivity extraction, no interconnect RC'}
     for n,c in selected.items():
         folder=out/n;gds=folder/f'{n}.gds'
         result={'drc':drc(gds,n,folder),'lvs':lvs(gds,c,folder)}
-        report.setdefault('artifact_sha256',{})[n]={suffix:hashlib.sha256((folder/f'{n}.{suffix}').read_bytes()).hexdigest()
-                                                   for suffix in ['gds','spice','abstract.json']}
         if c.name!='FILL':result['dc']=dc(c,folder)
         else: result['lvs']=fill_lvs(out,result['lvs'])
+        report.setdefault('artifact_sha256',{})[n]={suffix:hashlib.sha256((folder/f'{n}.{suffix}').read_bytes()).hexdigest()
+            for suffix in ['gds','spice','ext.spice','abstract.json','truth.json','png','pcells.json']
+            if (folder/f'{n}.{suffix}').exists()}
         report['cells'][n]=result
         summary={k:v['passed'] for k,v in result.items()}
         print(n,json.dumps(summary),flush=True)

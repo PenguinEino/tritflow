@@ -6,6 +6,7 @@ python3 -m tritflow.cells verify
 python3 -m tritflow.cells equivalence
 python3 -m tritflow.cells parasitic
 python3 -m tritflow.cells timing --jobs 3
+python3 -m tritflow.cells requalify --jobs 3
 python3 -m pytest tests/cells -q
 ```
 
@@ -22,6 +23,25 @@ builds all nine cells privately, runs official DRC/LVS/DC, regenerates full SIM
 characterization and timing tables, then atomically exchanges the whole output directory. A focused
 build must use a private output directory. Existing consumers should read
 `generation.json` before/after a multi-file load if they need a snapshot check.
+
+Qualification accepts only the public PDK pin in `notebook/setup_pins.json`
+(commit `5d963db`). Generation records actual PCell-source, model and DRC/LVS
+hashes in `out/pdk_provenance.json`; publication checks that the build and
+verification consumed the current pin. Cell LVS uses SIM's public extractor,
+including physical metal/label/continuity proof for an unloaded power formal.
+Deleting, severing or unlabelling INV's VMID rail is rejected.
+
+`requalify` performs a fresh complete build, drawing DRC/strict LVS/DC and all
+324 abutment cases, fresh independent taped-out equivalence, the actual-GDS
+wire-C comparison, SIM characterization and all timing/poly-R sweeps, then
+publishes atomically. It preserves prior tables/views under
+`requalification/baseline/`. `requalification/report.json` summarizes every
+physical/electrical difference; compressed JSON ledgers retain all exact result
+and metadata changes. GDS comparison separates timestamps from geometry/labels.
+Untouched original GDS is also freshly extracted, while strict LVS uses copies
+with existing legacy signal/rail labels renamed consistently with the source.
+No reference geometry or physical port is added. Run the CELLS tests before
+release; the full producer is intentionally separate from quick notebook reads.
 
 `cells/template.json` points to `out/template.json`, so template and cell views
 switch as one generation. `out/library.json` lists relative paths. Each electrical

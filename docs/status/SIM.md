@@ -15,7 +15,45 @@ The pinned deck's strict name comparison needs the physical labels and reference
 
 The old `subcircuits()` parser unfolded SPICE continuation lines before returning a subcircuit's text. The capacitance annotator then tried to replace that altered text in the original source, silently doing nothing when the source contained continuations. Saved evidence `results/delay_annotation_bug.json` records nonzero computed C but **zero Ctfwire devices** (and identical pre/post text hashes) for affected adders. This explains why an extracted device-only network could be labelled post-layout and appear faster than the schematic. A second difference is RN terminal orientation: the PDK F_RR model attaches 25.95 fF only to PLUS for W=2.8/L=30; extraction swaps RN PLUS/MINUS relative to the schematic. MOS AD/AS/PD/PS equal the active wrapper defaults, so those are not the cause.
 
-The parser now preserves exact original source slices, the annotator rejects a no-op, and a regression covers both continued top declarations and continued MOS junction parameters. A real adder2 now receives all 40 calculated net capacitors. Affected SIM producer processes were stopped and are being rerun. Final wire comparisons use identical extracted intrinsic devices, with the original schematic retained as the independent LVS reference. Earlier numeric fits are invalid until the corrected runs finish.
+The parser now preserves exact original source slices, the annotator rejects a no-op, and a regression covers both continued top declarations and continued MOS junction parameters. A real adder2 now receives all 40 calculated net capacitors. Affected SIM producer processes were stopped and are being rerun. Final wire comparisons use identical extracted intrinsic devices, with the original schematic retained as the independent LVS reference. Earlier numeric fits are invalid. The corrected, already measured device-only/+C endpoint pairs (ns) are N=1 **54.951/60.425**, N=2 **103.941/117.268**, N=3 **152.835/170.962**, N=4 **201.908/232.934**, N=5 **250.764/279.594**, N=6 **299.670/351.696**. Every top now contains its calculated 22/40/58/76/94/112 Ctfwire elements. Their provisional free-intercept slopes are **48.947 / 57.295 ns/trit**, so the wire effect has the expected sign. Publication waits for final cell/source freshness and the shared Newton-initialization policy; the final table/fit below will supersede these provisional numbers.
+
+## Rail-current audit
+
+The saved old scaling N=6 rail network used 250 uA/um without a reserve: solved M1 utilization 98.9993% nominal and **118.155%** under the measured cold/+10% current envelope. It is not robust at that corner. PNR's new public API uses 200 uA/um (20% reserve against the OS00 p17 stepped-M1 limit), records the source and reserve in `power.assumptions`, and checks actual solved branch currents after routing. Its rebuilt `build/adder6` is 49.8640% nominal / 59.3657% worst sampled T/V. Scaling is now rebuilding the same margin-aware geometry. These values are current-envelope sensitivity, without foundry lifetime/temperature derating; no EM sign-off claim. Evidence: `results/rail_margin_change.json`, `results/rail_current_audit.json`.
+
+## Validation progress
+
+Current focused regressions pass (continuation annotation, missing/severed rails, encoded physical labels, case-sensitive transient/DC, band criteria and corner figure null handling). The first full suite completed **67 passed / 1 timeout**, with no assertion failures: the now-real wire-C simulation of the large taped-out reference exceeded its old 120 s wall timeout while streams shared the host. That integration case retains the same 27 vectors, 500 ns window and 0.5 ns timestep, with a 600 s execution timeout; its complete three-test integration rerun passed in 379.70 s under concurrent host load. The final combined suite subsequently passed **69 tests in 265.92 s**; JUnit evidence is under `build/sim_verification/pytest.xml`. This changes no electrical acceptance criterion.
+
+## Reproduction / cache entry points
+
+Use the pinned environment (`TR1UM_PDK=~/pdk/TR-1um-pinned`):
+
+```sh
+python3 examples/postlayout_all.py --watch --watch-seconds 600
+python3 examples/adder_scaling.py --jobs 2
+python3 -m tritflow.sim.sizing
+python3 -m tritflow.sim.corners --jobs 2
+python3 -m tritflow.sim.diagnose
+python3 -m tritflow.sim.diagnose --refine
+python3 -m tritflow.sim.diagnose --rail-audit
+python3 -m tritflow.sim.publication
+python3 -m pytest tests/sim tests/extract -q
+```
+
+Post-layout/scaling/load producers retain real decks, logs and waveforms under `build/`; portable numerical publications live in `results/` and sizing grids in `cells/out/sizing/`. New `pdk_provenance` records the exact setup pin, actual checkout and consumed model/deck SHA-256 values. `results/pinned_requalification.json` checks current inputs/outputs, positive-C element counts and pinned provenance and reports numeric changes against the preserved dev baseline. A stale or missing artifact is an error. `load_corners`, `load_scaling`, and `load_grid` only read cached data; measured warm reads are about 6–13 ms for the result JSONs, 12 ms for the NANY grid, and 69 ms for an INV cached slider call on this host (first INV grid read 125 ms including initialization). No ngspice runs in those cached reads.
+
+## Refined carry control
+
+For one isolated N=6 negative-carry setup/assert pair, identical extracted devices give (device-only / +wire C / delta, ns): maximum step 2 ns **303.8465 / 356.8051 / 52.9586**; 0.25 ns **303.9142 / 356.8203 / 52.9062**; 0.1 ns **303.9203 / 356.8328 / 52.9125**. The fine-step penalty differs by only 0.00634 ns; every run has the same device fingerprint and documented source hashes in `results/delay_refined.json`. This corroborates the wire effect independently of the larger scaling sequence. The isolated pair starts from its own DC setup and is not the same history as the 11-vector scaling sequence; its absolute delay is several ns larger. “Worst” in the scaling figures means the maximum over the documented measured cases, not a bound over all analog histories. A 2 ns sample step is not a general integration-error bound.
+
+## Operating-point control
+
+Mul1's unseeded initial solve returned internal nodes at **+525.862 / −505.185 V**, outside the resistor model's meaningful range. Its device-only first vector failed; wire-C happened to aid recovery. This is a solver root, not an acceptable physical speed/logic comparison. Both runs now use the **same LVS-mapped internal ideal-logic `.nodeset` guesses**. These are Newton initial guesses only (no `.ic`, `uic`, or transient voltage constraints), and every output is still checked against the independent arithmetic oracle. The same initialization policy applies to all four designs and the scaling series; `postlayout/initialization.json` records every guess. Unseeded failure evidence is preserved under `results/dev_before_pinned/mul1_unseeded/`.
+
+## Dependency handoff now pending
+
+CELLS Phase 7 is regenerating/qualifying the complete pinned-PDK library and timing tables in a private stage. Its new INV/NAND/NOR device views match the live device SPICE bytes (GDS files differ), with fresh pinned metadata. To avoid competing with that prerequisite and producing another stale publication, redundant interim layout/scaling producers have been stopped after retaining their completed electrical caches. Final four-design, scaling, corners and rail-audit publications will rerun after the Phase 7 atomic exchange and PNR rebuilds. The refined carry control is complete and the full suite passed **69 tests in 265.92 s**, with JUnit under `build/sim_verification/pytest.xml`. Final pinned publication freshness remains pending the CELLS/PNR exchange. No foreign process was stopped.
 
 ## In progress
 

@@ -35,6 +35,17 @@ def publish(stage, *, reason):
     stage=Path(stage).resolve();live=CELLS_DIR/'out'
     report=json.loads((stage/'verify_report.json').read_text())
     if not report['passed']:raise ValueError('Refusing an unqualified library')
+    from .layout import pinned_sources
+    current=pinned_sources()
+    verified=report.get('pdk_provenance',{})
+    generated=json.loads((stage/'pdk_provenance.json').read_text()) if (stage/'pdk_provenance.json').exists() else {}
+    for evidence in (verified,generated):
+        if (evidence.get('qualified_commit')!=current['qualified_commit']
+            or evidence.get('consumed_sha256')!=current['consumed_sha256']):
+            raise ValueError('Publication requires fresh qualification against the current public pinned PDK')
+    if not generated.get('pcell_sha256') or any(hashlib.sha256((Path(current['root'])/name).read_bytes()).hexdigest()!=digest
+            for name,digest in generated['pcell_sha256'].items()):
+        raise ValueError('PCell sources differ from the recorded pinned build')
     entries=json.loads((stage/'library.json').read_text())
     if len(entries)!=9:raise ValueError('A publish must contain all nine cells')
     for entry in entries:
@@ -49,6 +60,8 @@ def publish(stage, *, reason):
             source=hashlib.sha256((folder/f'{name}.ext.spice').read_bytes()).hexdigest()
             if not char['passed'] or char['source_sha256']!=source:
                 raise ValueError(f'Stale characterization for {name}')
+            if char.get('pdk_provenance',{}).get('consumed_sha256')!=current['consumed_sha256']:
+                raise ValueError(f'Characterization is not qualified against the pinned PDK: {name}')
     timestamp=datetime.now(timezone.utc).isoformat()
     generation={'id':timestamp,'reason':reason,'height_um':json.loads((stage/'template.json').read_text())['height']}
     timings=[stage/e['name']/f'{e["name"]}.timing.json' for e in entries]
@@ -59,6 +72,8 @@ def publish(stage, *, reason):
             digest=hashlib.sha256((stage/name/f'{name}.ext.spice').read_bytes()).hexdigest()
             if not timing['complete'] or timing['source_sha256']!=digest:
                 raise ValueError(f'Incomplete/stale timing table for {name}')
+            if timing.get('pdk_provenance',{}).get('consumed_sha256')!=current['consumed_sha256']:
+                raise ValueError(f'Timing is not qualified against the pinned PDK: {name}')
             timing['generation']=generation
             path.write_text(json.dumps(timing,indent=2,allow_nan=False)+'\n')
             entry['timing']=str(path.relative_to(stage))
@@ -101,6 +116,10 @@ def publish(stage, *, reason):
         if 'parasitic_aware' in comparison:
             comparison['parasitic_aware']['generation']=generation
         evidence.write_text(json.dumps(comparison,indent=2,allow_nan=False)+'\n')
+    if (stage/'requalification/baseline/generation.json').exists():
+        from .requalify import compare_results
+        comparison=compare_results(stage);comparison['generation']=generation
+        (stage/'requalification/report.json').write_text(json.dumps(comparison,indent=2,allow_nan=False)+'\n')
     # Prepare the old generation's template before replacing the outer template
     # with a link; both resolve to the tall template until the directory swap.
     public=CELLS_DIR/'template.json'

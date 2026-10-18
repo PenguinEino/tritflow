@@ -80,7 +80,8 @@ def equivalence(out=CELLS_DIR/'out',reference=Path.home()/'balanced-ternary-logi
     original={c:(work/'reference'/c/'original.ext.spice').read_text() for c in ORIGINALS}
     original['BUF'],proof['BUF']=prepare_buf(original['INV'],work/'reference',out)
     compact={c:(out/c/f'{c}.ext.spice').read_text() for c in original}
-    report={'created_utc':datetime.now(timezone.utc).isoformat(),'generation':generation,
+    from tritflow.sim.provenance import pdk_provenance
+    report={'created_utc':datetime.now(timezone.utc).isoformat(),'generation':generation,'pdk_provenance':pdk_provenance(),
             'reference_root':str(Path(reference).expanduser().resolve()),'schematic_equivalence':proof,
             'conditions':{'temperature_c':27,'rails_v':[5,0,-5],'dc_grid_step_v':.125,
                           'transition_hold_s':100e-9,'transition_edge_s':1e-9,'transition_max_step_s':.1e-9,

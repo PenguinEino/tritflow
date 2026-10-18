@@ -19,7 +19,7 @@ Kaleido 1.1.0 was incompatible with Choreographer 1.4.0 and is not the build pin
 
 `team.json` follows the integrator-owned `docs/author.md` exactly. Name,
 affiliation, student status, email and GitHub are included; no telephone field
-is accepted. The user has explicitly released their derived historical
+is rendered. The user has explicitly released their derived historical
 schematic assets under Apache-2.0. Confirm the selected representative's
 attendance/poster arrangements before filing.
 
@@ -36,6 +36,14 @@ assets. PNG optimization is lossless. Numerical outputs are unchanged; known
 machine paths are replaced with `$TRITFLOW_ROOT`, `$TR1UM_PDK`, `$OUTPUTDIR`.
 The original notebook cells and bootstrap stay identical. Interactive figures
 return on normal re-execution; animation stills show the initial recorded frame.
+
+The repeated four-design campaign is committed in the source repository as
+`notebook/assets/four_designs.zip`, never copied into the seven-file payload.
+Its reader checks source/PDK/abstract/manifest/publication identity, experiment
+options and all native evidence bytes before displaying recorded outcomes.
+It does not turn the producer's tool version into a local cache key. A fresh
+session still executes the opening adder and selected editable circuit;
+`TRITFLOW_FORCE_RUN=1` recomputes the four-design campaign too.
 
 The raw executed notebook and flow outputs stay under
 `build/submission_capture/`. An error leaves diagnostics there and aborts

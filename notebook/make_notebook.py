@@ -38,7 +38,8 @@ Apache-2.0, including the derived historical schematic assets released by their 
 Draft for IEEE SSCS Code-a-Chip, ISSCC 2027. Audience: designers familiar with
 CMOS, synthesis, P&R and SPICE. We follow a real three-rail circuit through the
 flow, separating logical equivalence, physical connectivity and nominal analog
-settling. Coverage and conditions are generated beside each result.
+settling. Coverage and conditions are generated beside each result. Tables show
+four significant digits; assertions and native JSON data retain full precision.
 
 Colab shallow-clones [TritFlow](https://github.com/PenguinEino/tritflow) at
 `colab-v0` into `/content/tritflow`, prints the resolved commit and installs
@@ -46,8 +47,9 @@ the package editably beside its committed cell/example/figure assets. Set
 `TRITFLOW_REF` before the first cell to select another tag or branch. An existing
 Colab checkout must match the requested ref and have no tracked edits.
 **Release TODO — integrator:** the existing `colab-v0` tag predates this
-notebook; publish a matching immutable release and update the selected ref/badge. Fresh Colab execution and the install-inclusive ten-minute budget
-remain unverified.
+notebook; publish a matching immutable release and update the selected ref/badge. This latest notebook and its install-inclusive ten-minute budget remain
+unverified in Colab. A separate test of the older tag failed in NumPy/SciPy
+import; publishing main alone does not validate the badge.
 
 The default run starts with a small adder, then closes the loop on every shared
 example and one selected circuit. Coverage is reported beside each experiment.
@@ -56,9 +58,11 @@ load/routing views. Cached reports are identified as cache hits and their
 artifact hashes are checked. A cache is evidence of the recorded run, not a new
 DRC/LVS execution. Set `TRITFLOW_FORCE_RUN=1` before Run all (or delete the
 cache at `$TRITFLOW_NOTEBOOK_BUILD/cache`, default `build/notebook/cache`) to
-force every expensive stage. A cold run recomputes routed examples, checks,
-DC and matched pre/post transients; only committed cell qualification, sizing
-and scaling/load campaigns are read as precomputed evidence. Those campaigns
+force every expensive local stage, including the four-design campaign. A fresh
+session recomputes the opening adder, NANY DC and selected editable circuit.
+The repeated four-design loop uses a committed record when all input hashes and
+options match; cell qualification, sizing and scaling/load campaigns are also
+precomputed evidence. Those campaigns
 check consumed source/PDK hashes and never count as a fresh local PASS.
 The last cell measures each cached/fresh stage; detailed PNR/LVS/SPICE times
 identify the runtime cost. Extended load, floorplan and signoff experiments
@@ -118,7 +122,8 @@ from tritflow.viz.waves import waveform_figure, transfer_figure
 from tritflow.viz.layout import render_gds, layout_figure, placement_animation, routing_progress
 from tritflow.viz.cell import cell_figure, device_mapping, row_abutment
 from tritflow.sim.provenance import pdk_provenance
-from cache import Cache, runtime_fingerprint
+from cache import Cache, runtime_fingerprint, source_fingerprint
+from campaign import RecordedCampaign
 from schematics import schematic_gallery
 from experiments import (complete_design, experiment_artifacts, assert_experiment,
                          load_edited, verify_publication_sources, adder_demo_vectors)
@@ -128,22 +133,10 @@ qualified_pdk = pdk_provenance(PDK_ROOT)
 assert qualified_pdk["qualified_commit"] == json.loads((ROOT/"notebook/setup_pins.json").read_text())["pdk_commit"]
 cache = Cache(BUILD/"cache", runtime_fingerprint(ROOT, PDK_ROOT),
               force=os.environ.get("TRITFLOW_FORCE_RUN", "0") == "1")
-def show(figure):
-    if os.environ.get("TRITFLOW_NOTEBOOK_HEADLESS") == "1":
-        figure.to_json()  # still validate every figure during local execution
-    else:
-        display(figure)
-def table(rows, *, details=None):
-    from html import escape
-    content = "<div style='overflow-x:auto'><table>"+"".join("<tr>"+"".join("<td style='padding:.3em .8em'>"+
-        escape(str(v))+"</td>" for v in row)+"</tr>" for row in rows)+"</table></div>"
-    if details:
-        content = "<details><summary>"+escape(details)+"</summary>"+content+"</details>"
-    display(HTML(content))
-def evidence(title, value):
-    from html import escape
-    display(HTML("<details><summary>"+escape(title)+"</summary><pre>"+
-                 escape(value if isinstance(value,str) else json.dumps(value,indent=2,default=str))+"</pre></details>"))
+campaign_sources = source_fingerprint(ROOT,PDK_ROOT)
+recorded_campaign = RecordedCampaign(ROOT/"notebook/assets/four_designs.zip",campaign_sources,
+                                     enabled=not cache.force)
+from presentation import show, table, evidence
 ''')
 md('''
 ## 0. Start with the complete adder flow
@@ -152,6 +145,16 @@ A trit is −1, 0 or +1, represented by −5, 0 or +5 V. It is distinct from
 Verilog's four-state logic. We first build a two-trit ripple adder from HDL,
 route real cells into GDS, check DRC/LVS, and simulate extracted devices plus
 estimated wire capacitance. Integer arithmetic supplies an independent oracle.
+The calls inside the content-keyed stage are the public notebook API:
+
+```python
+d = flow.load("examples/adder.tv", "adder", {"N": 2})
+net = d.synthesize()
+lay = net.place_and_route()
+assert lay.drc()["clean"] and lay.lvs()["matched"]
+post = lay.extract().simulate(vectors, load=LOAD_F)
+```
+
 The logical test is exhaustive. The generated coverage table distinguishes it
 from the representative analog sequence, which includes initialization and
 return. The analog sequence covers neither all directed transitions nor PVT.
@@ -207,6 +210,7 @@ table([["Output", "Exercised trits", "Actual ideal-level transitions"]]+[
     [p, sorted({r[p] for r in expected_sequence}),
      sum(a[p] != b[p] for a,b in zip(expected_sequence,expected_sequence[1:]))] for p in outputs])
 evidence("Demo sequence labels and inputs", list(zip(vector_labels,vectors)))
+evidence("Full-precision demo acceptance and settling", demo["measurements"])
 table([["Logical input states (exhaustive)", len(logical[inputs[0]])],
        ["Analog states / unique states", f"{len(vectors)} / {len(set(vectors))}"],
        ["Analog transitions (selected / possible)", f"{len(vectors)-1} / {3**len(inputs)*(3**len(inputs)-1)}"],
@@ -252,7 +256,7 @@ assert np.array_equal(t["inva"], -t["a"])
 assert np.array_equal(t["nandab"], -np.minimum(t["a"], t["b"]))
 assert np.array_equal(t["norab"], -np.maximum(t["a"], t["b"]))
 assert np.array_equal(t["nanyab"], -np.clip(t["a"]+t["b"],-1,1))
-display(truth_table_html(gates.design))
+display(HTML(truth_table_html(gates.design)))
 for name in ["INV","NAND","NOR","NANY"]:
     body = subcircuits((CELLS_DIR/f"out/{name}/{name}.spice").read_text())[name.lower()]["body"]
     assert ("VMID" in body.upper()) == (name == "NANY"), name
@@ -297,6 +301,7 @@ for cell, char in characters.items():
                  max(abs(i) for row in char["dc"] for i in row["rail_current_a"].values())*1e6,
                  char["input_capacitance"]["max_f"]*1e15, char["fanout"]["suggested_max"]])
 table(rows)
+evidence("Full-precision DC checkpoints", {cell:char["dc"] for cell,char in characters.items()})
 table([["Cell", "Recorded conditions", "Tested loads (fF)", "Fanout evidence"]]+
       [[cell, char["conditions"], [r["load_f"]*1e15 for r in char["transient"]], char["fanout"]]
        for cell,char in characters.items()], details="Characterization conditions and complete fanout evidence")
@@ -438,8 +443,8 @@ ha = flow.load(ROOT/"examples/half_add.tv", "half_add")
 fa = flow.load(ROOT/"examples/full_add.tv", "full_add")
 display(HTML(schematic_gallery(ROOT/"notebook/assets/schematics",
                                names=["half_adder","full_adder"], selected="half_adder",max_width=650)))
-display(truth_table_html(ha.design))
-display(truth_table_html(fa.design))
+display(HTML(truth_table_html(ha.design)))
+display(HTML(truth_table_html(fa.design)))
 fa_table = fa.truth_table()
 ha_table = ha.truth_table()
 assert np.array_equal(ha_table["a"]+ha_table["b"], ha_table["sum"]+3*ha_table["carry"])
@@ -572,7 +577,7 @@ assert pre["stimulus"]["hold_s"] == demo["stimulus"]["hold_s"]
 assert pre["stimulus"]["step_s"] == demo["stimulus"]["step_s"]
 show(waveform_figure(demo, outputs, pre=pre, title=f"Same extracted devices ± wire C: {LOAD_F*1e15:g} fF/output",
                      pre_label="device-only",post_label="device + wire C"))
-table([["Output", "Pre max settling (ns)", "Post max settling (ns)"]]+[
+table([["Output", "Device-only max settling (ns)", "+ wire-C max settling (ns)"]]+[
     [p, pre["measurements"]["max_settling_s"][p]*1e9,
      demo["measurements"]["max_settling_s"][p]*1e9] for p in outputs])
 evidence("Wire-C assumptions", demo["capacitance"]["assumptions"])
@@ -585,8 +590,13 @@ if EXTENDED:
         print(load, loaded["measurements"]["passed"], loaded["measurements"]["max_settling_s"])
 ''')
 md('''
-The next loop regenerates all shared designs from committed HDL and cell views;
-it consumes no pre-existing `build/` results. SIM supplies the vector plans and
+The next loop checks all shared designs against committed HDL and cell views.
+Its compressed published campaign includes waveform/measurement JSON and native
+GDS, PNR, DRC and strict-LVS evidence. Every member hash, consumed abstract,
+manifest/publication identity, source/PDK fingerprint and experiment option is
+checked before reuse. A recorded result is labelled with its producer's tools;
+it is not a fresh local check. Missing/stale records fall back to computation.
+`TRITFLOW_FORCE_RUN=1` bypasses them. No pre-existing `build/` tree is consumed. SIM supplies the vector plans and
 independent radix-arithmetic oracles. Small circuits visit every input state;
 the larger adder uses labeled carry assertion/release, overflow and cancellation
 cases. Neither sequence exhausts directed transitions. Each physical result is
@@ -612,13 +622,22 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
     planned, labels = representative_vectors(name, pins)
     oracle = arithmetic_oracle(name, pins)
     directory = BUILD/"four_designs"/name
-    result = cache.run(f"four-{name}", {"net":mapped.to_json(),"vectors":planned,"labels":labels,
-                       "expected":[oracle(v) for v in planned],"load_f":FOUR_DESIGN_LOAD_F,
-                       "hold_s":FOUR_DESIGN_HOLD_S,"step_s":FOUR_DESIGN_STEP_S,
-                       "rows":None,"anneal_steps":600,"seed":0},
-        lambda: complete_design(mapped,directory,planned,oracle,load_f=FOUR_DESIGN_LOAD_F,
-                   hold_s=FOUR_DESIGN_HOLD_S,step_s=FOUR_DESIGN_STEP_S),
-        artifacts=lambda r: experiment_artifacts(r,directory,name))
+    options = {"net":mapped.to_json(),"vectors":planned,"labels":labels,
+               "expected":[oracle(v) for v in planned],"load_f":FOUR_DESIGN_LOAD_F,
+               "hold_s":FOUR_DESIGN_HOLD_S,"step_s":FOUR_DESIGN_STEP_S,
+               "rows":None,"anneal_steps":600,"seed":0}
+    lookup_started = time.monotonic()
+    result = None if cache.force else recorded_campaign.get(name,options)
+    if result is not None:
+        cache.events.append((f"four-{name}","recorded"))
+        cache.timings.append({"stage":f"four-{name}","state":"recorded",
+                              "elapsed_s":time.monotonic()-lookup_started})
+        print(f"Recorded campaign: {name}; native evidence hashes verified (not new checks)")
+    else:
+        result = cache.run(f"four-{name}",options,
+            lambda: complete_design(mapped,directory,planned,oracle,load_f=FOUR_DESIGN_LOAD_F,
+                       hold_s=FOUR_DESIGN_HOLD_S,step_s=FOUR_DESIGN_STEP_S),
+            artifacts=lambda r: experiment_artifacts(r,directory,name))
     assert_experiment(result)
     assert result["post"]["stimulus"]["vectors"] == list(map(tuple,planned))
     stats, ir = result["stats"], result["ir"]
@@ -637,6 +656,9 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
     four_results[name] = result
 table(physical_rows)
 table(timing_rows)
+if recorded_campaign.manifest:
+    evidence("Recorded four-design producer tools (not local requalification)",
+             recorded_campaign.manifest["tools"])
 table([["Shared load (fF)",FOUR_DESIGN_LOAD_F*1e15], ["Hold / max step (ns)",
        [FOUR_DESIGN_HOLD_S*1e9,FOUR_DESIGN_STEP_S*1e9]],
        ["Input plan labels", {name:representative_vectors(name,
@@ -664,7 +686,7 @@ points retain their flags and null delays.
 code('''
 from tritflow.sim.scaling import load_scaling
 from tritflow.sim.load_sweep import load_sweep_results
-from tritflow.viz.scaling import scaling_figure, load_sweep_figure
+from tritflow.viz.scaling import scaling_figure, load_sweep_figure, scaling_fit_figure
 for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figure),
                                   ("full_add_load_sweep.json",load_sweep_results,load_sweep_figure)]:
     published = ROOT/"results"/filename
@@ -672,8 +694,8 @@ for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figu
     records = result["rows"] if filename == "adder_scaling.json" else [result]
     for record in records:
         verify_publication_sources(record,ROOT,PDK_ROOT)
-    print("Published experiment:", filename, result.get("coverage",result.get("scope")))
-    print("Limits / conditions:",result.get("limits",result.get("conditions")))
+    evidence("Published experiment scope: "+filename,result.get("coverage",result.get("scope")))
+    evidence("Published limits / conditions",result.get("limits",result.get("conditions")))
     if filename == "adder_scaling.json":
         table([["Width", "Recorded state", "PASS", "Error"]]+
               [[r["n"],r["state"],r["passed"],r["error"]] for r in result["rows"]])
@@ -681,6 +703,8 @@ for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figu
         table([["Measured boundary (F)",result["boundary"]], ["Boundary found",result["boundary_found"]],
                ["Outputs / input-state count",[result["outputs"],len(result["vectors"])]]])
     show(figure(result))
+    if filename == "adder_scaling.json":
+        show(scaling_fit_figure(result))
 ''')
 md('''
 ## 8. Your circuit: choose, edit and check
@@ -734,7 +758,7 @@ for i, vector in enumerate(planned):
     expected = oracle(vector)
     assert {p:int(truth[p][i]) for p in expected} == expected
     assert {p:int(mapped_truth[p][i]) for p in expected} == expected
-display(truth_table_html(custom,max_rows=len(planned)))
+display(HTML(truth_table_html(custom,max_rows=len(planned))))
 show(color_nets(custom,dict(zip(pins,planned[-1]))))
 custom_out = BUILD/"your_circuit"/example.top
 custom_result = cache.run(f"your-{CHOICE}", {"source":source,"net":custom.to_json(),"vectors":planned,
@@ -771,11 +795,12 @@ Sources: [OpenSUSI TR-1um](https://github.com/OpenSUSI/TR-1um),
 The setup pins the PDK commit and verifies SHA-256 archive/package downloads.
 ''')
 code('''
-assert runtime_fingerprint(ROOT,PDK_ROOT) == cache.fingerprint, "consumed sources changed during Run all; rerun after publication settles"
-table([["Stage", "Fresh / cache hit", "Wall time this run (s)"]]+[
+assert (runtime_fingerprint(ROOT,PDK_ROOT) == cache.fingerprint and
+        source_fingerprint(ROOT,PDK_ROOT) == campaign_sources), "consumed sources changed during Run all; rerun after publication settles"
+table([["Stage", "Fresh / local cache / recorded", "Wall time this run (s)"]]+[
     [r["stage"],r["state"],round(r["elapsed_s"],3)] for r in sorted(cache.timings,key=lambda r:r["elapsed_s"],reverse=True)])
-table([["Design", "Measured producer phase", "Wall time in recorded producer (s)"]]+[
-    [name,stage,round(seconds,3)] for name,result in four_results.items()
+table([["Design", "Measured producer phase", "Wall time (s)", "Process + child CPU time (s)"]]+[
+    [name,stage,round(seconds,3),round(result["cpu_times_s"][stage],3)] for name,result in four_results.items()
     for stage,seconds in result["timings_s"].items()],details="Physical and pre/post-SPICE runtime breakdown (producer evidence)")
 print("Cache stages:", cache.events)
 print(f"Run time including setup: {time.monotonic()-started:.1f} s")

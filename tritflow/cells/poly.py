@@ -99,6 +99,8 @@ def annotate(out,cell,*,sheet_ohm=None,pitch_um=.25):
             'source_sha256':sha(folder/f'{cell}.ext.spice'),'gds_sha256':sha(folder/f'{cell}.gds'),
             'scope':'GC gate-interconnect sheet R only. No poly C/contact R; MOS gate-channel regions are equipotential. RR device models and all W/L/junction parameters are unchanged. Structural LVS extraction is preserved.',
             'components':[],'gates':{},'resistors':[]}
+    from tritflow.sim.provenance import pdk_provenance
+    report['pdk_provenance']=pdk_provenance()
     if circuit is None:
         if cell!='FILL':raise ValueError('Missing extracted circuit')
         report['annotated_sha256']=report['source_sha256']

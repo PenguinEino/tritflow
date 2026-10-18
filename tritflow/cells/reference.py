@@ -2,6 +2,7 @@
 from pathlib import Path
 import hashlib
 import re
+import klayout.db as db
 
 from tritflow import PDK_ROOT
 from tritflow.sim.spice import lvs_netlist
@@ -9,6 +10,7 @@ from .circuits import Circuit, circuits
 from .verify import lvs, run
 
 ORIGINALS={'INV':'inverter','NAND':'mul_nand','NOR':'mul_nor','NANY':'nany'}
+PORT_ALIASES={'vin':'A','a':'A','b':'B','vout':'Y','V+':'VDD','V-':'VSS',r'V\x2d':'VSS'}
 
 
 def sha(path):
@@ -21,10 +23,29 @@ def canonical(text, cell):
     end=re.search(r'(?im)^\.ends\b',text)
     if declaration is None or end is None:raise ValueError('Missing subcircuit')
     body=text[declaration.end():end.start()]
-    mapping={'vin':'A','a':'A','b':'B','vout':'Y','V+':'VDD','V-':'VSS',r'V\x2d':'VSS'}
-    body=re.sub(r'\S+',lambda m:mapping.get(m[0],m[0]),body)
+    body=re.sub(r'\S+',lambda m:PORT_ALIASES.get(m[0],m[0]),body)
     return '* Public ports renamed from independent taped-out reference\n.subckt '+cell+' '+\
            ' '.join(circuits()[cell].ports)+'\n'+body+'.ends '+cell+'\n'
+
+
+def original_port_names(gds,source,folder):
+    """Rename existing legacy signal/rail labels in a scratch reference copy.
+
+    KLayout escapes the '-' in V- as V\\x2d in extracted SPICE. Public strict
+    port checking compares spelling too. Use the same unambiguous A/B/Y and
+    VDD/VSS aliases in the existing labels and fresh source, without adding any
+    port, conductor, device or changing a dimension. Keep the original top name.
+    """
+    layout=db.Layout();layout.read(str(gds));changes=0
+    for cell in layout.each_cell():
+        for layer in ((48,0),(49,0),(48,1),(49,1)):
+            for shape in cell.shapes(layout.layer(*layer)).each():
+                if shape.is_text() and shape.text.string in PORT_ALIASES:
+                    label=shape.text;label.string=PORT_ALIASES[label.string];shape.text=label;changes+=1
+    target=folder/'public_labels.gds';layout.write(str(target))
+    renamed=re.sub(r'\S+',lambda m:PORT_ALIASES.get(m[0],m[0]),source)
+    return target,renamed,{'method':'Existing legacy labels and source nodes renamed together; no geometry or port added.',
+                          'labels_renamed':changes,'aliases':PORT_ALIASES,'gds_sha256':sha(target)}
 
 
 def prepare(reference, out, compact):
@@ -42,8 +63,10 @@ def prepare(reference, out, compact):
                       '-o',folder,sch],folder,'netlist.log')
         if code or re.search(r'Error:|SKIPPING|IS MISSING',log):raise RuntimeError(log[-2000:])
         source=lvs_netlist((folder/f'{old}.spice').read_text())
-        (folder/f'{old}.lvs.spice').write_text(source)
-        original=lvs(gds,Circuit(old,()),folder,normalize=False)
+        (folder/f'{old}.source.lvs.spice').write_text(source)
+        named_gds,named_source,normalization=original_port_names(gds,source,folder)
+        (folder/f'{old}.lvs.spice').write_text(named_source)
+        original=lvs(named_gds,Circuit(old,()),folder,normalize=False)
         # Match the compact GDS against this independently generated schematic,
         # not the generator's Circuit tuples or its .lvs.spice output.
         check=folder/'compact_lvs';check.mkdir(exist_ok=True)
@@ -56,6 +79,7 @@ def prepare(reference, out, compact):
                       'original_extracted_sha256':sha(raw),'compact_gds_sha256':sha(compact/cell/f'{cell}.gds'),
                       'compact_extracted_sha256':sha(compact/cell/f'{cell}.ext.spice'),
                       'original_lvs':original,'compact_lvs':updated,
+                      'original_label_normalization':normalization,
                       'passed':original['passed'] and updated['passed']}
         print(cell,'independent schematic LVS',report[cell]['passed'],flush=True)
     return report

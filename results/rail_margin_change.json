@@ -1,0 +1,1370 @@
+{
+  "old": {
+    "design": "adder6",
+    "pnr": "build/adder_scaling/adder6/adder6.pnr.json",
+    "pnr_sha256": "88c04772c723fd2d600d43982f8e87a126800f6070aa028dac88d2f84b89985f",
+    "sizing_assumptions": {
+      "default_cell_current_a": 0.0001,
+      "allowed_current_a_per_um": 0.00025,
+      "sheet_resistance_ohm_per_square": 0.05,
+      "qualification": "linear width scaling, centered load spans and constant-current assumptions; not EM sign-off",
+      "current_reference": "OS00 rev1.1 I.3.1/I.3.2: M1(2um) 900uA flat / 500uA stepped; M2(3um) 3.7mA; V1 780uA/cut"
+    },
+    "uses_published_M1_step_limit": true,
+    "current_sources": [
+      "max_static_current_a"
+    ],
+    "worst_row_span_centered_feed_utilization": 0.8356247790223655,
+    "feed_banks": [
+      {
+        "index": 0,
+        "width": 29.1,
+        "count": 1,
+        "bank_width": 92.10000000000001,
+        "current_a": 0.007274455315861674,
+        "published_limit_a": 0.007275,
+        "utilization": 0.9999251293280651
+      },
+      {
+        "index": 1,
+        "width": 29.1,
+        "count": 2,
+        "bank_width": 186.60000000000002,
+        "current_a": 0.014548910631723347,
+        "published_limit_a": 0.01455,
+        "utilization": 0.9999251293280651
+      },
+      {
+        "index": 2,
+        "width": 29.1,
+        "count": 2,
+        "bank_width": 186.60000000000002,
+        "current_a": 0.014548910631723347,
+        "published_limit_a": 0.01455,
+        "utilization": 0.9999251293280651
+      },
+      {
+        "index": 3,
+        "width": 29.1,
+        "count": 1,
+        "bank_width": 92.10000000000001,
+        "current_a": 0.007274455315861674,
+        "published_limit_a": 0.007275,
+        "utilization": 0.9999251293280651
+      }
+    ],
+    "nominal_solved_em_check": {
+      "passed": true,
+      "max_utilization": 0.9899932819735289,
+      "worst_by_kind": {
+        "M1_step": {
+          "kind": "M1_step",
+          "net": "VSS",
+          "width_um": 4.0,
+          "limit_a": 0.001,
+          "current_a": 0.000989993281973529,
+          "utilization": 0.9899932819735289
+        },
+        "M2_field": {
+          "kind": "M2_field",
+          "net": "VDD",
+          "width_um": 29.1,
+          "limit_a": 0.035890000000000005,
+          "current_a": 0.007137425284916009,
+          "utilization": 0.19886947018434128
+        },
+        "TC": {
+          "kind": "TC",
+          "net": "VSS",
+          "x_um": 912.35,
+          "y_um": 1208.0,
+          "limit_a": 0.00078,
+          "current_a": 0.000557075794169748,
+          "utilization": 0.7141997361150615
+        }
+      },
+      "limits": {
+        "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+        "page": 17,
+        "tables": [
+          "I-3-1",
+          "I-3-3"
+        ],
+        "M1_field": {
+          "width_um": 2.0,
+          "current_a": 0.0009
+        },
+        "M2_field": {
+          "width_um": 3.0,
+          "current_a": 0.0037
+        },
+        "M1_step": {
+          "width_um": 2.0,
+          "current_a": 0.0005
+        },
+        "TC": {
+          "cut_um": 1.4,
+          "current_a": 0.00078,
+          "instantaneous_current_a": 0.0078
+        },
+        "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+      },
+      "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+    },
+    "pvt": [
+      {
+        "temperature_c": -40.0,
+        "supply_scale": 0.9,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.9555091417206643,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0009555091417206643,
+              "utilization": 0.9555091417206643
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.0068872153644680125,
+              "utilization": 0.191897892573642
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.0005376716309868357,
+              "utilization": 0.6893226038292766
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": -40.0,
+        "supply_scale": 1.0,
+        "em_check": {
+          "passed": false,
+          "max_utilization": 1.0687303201886509,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.001068730320188651,
+              "utilization": 1.0687303201886509
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.007701986349834654,
+              "utilization": 0.21459978684409733
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.0006013822152262094,
+              "utilization": 0.7710028400336018
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": -40.0,
+        "supply_scale": 1.1,
+        "em_check": {
+          "passed": false,
+          "max_utilization": 1.1815511037284576,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0011815511037284575,
+              "utilization": 1.1815511037284576
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.0085139907707501,
+              "utilization": 0.23722459656589853
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.0006648674726328352,
+              "utilization": 0.852394195683122
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 27.0,
+        "supply_scale": 0.9,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.8829994249370822,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0008829994249370821,
+              "utilization": 0.8829994249370822
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.006367538544952866,
+              "utilization": 0.17741818180420352
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.0004968693672502411,
+              "utilization": 0.6370120092951809
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 27.0,
+        "supply_scale": 1.0,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.9899932819735289,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.000989993281973529,
+              "utilization": 0.9899932819735289
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.007137425284916009,
+              "utilization": 0.19886947018434128
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.000557075794169748,
+              "utilization": 0.7141997361150615
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 27.0,
+        "supply_scale": 1.1,
+        "em_check": {
+          "passed": false,
+          "max_utilization": 1.0966948352639716,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0010966948352639715,
+              "utilization": 1.0966948352639716
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.007905297467151627,
+              "utilization": 0.2202646271148405
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.0006171177228608826,
+              "utilization": 0.7911765677703624
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 85.0,
+        "supply_scale": 0.9,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.8137584085625645,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0008137584085625646,
+              "utilization": 0.8137584085625645
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.0058701881149348925,
+              "utilization": 0.16356054931554448
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.00045790664959355354,
+              "utilization": 0.5870598071712225
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 85.0,
+        "supply_scale": 1.0,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.9141175362463466,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0009141175362463467,
+              "utilization": 0.9141175362463466
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.006592272818356392,
+              "utilization": 0.18367993364046784
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.0005143796644979659,
+              "utilization": 0.6594611083307256
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 85.0,
+        "supply_scale": 1.1,
+        "em_check": {
+          "passed": false,
+          "max_utilization": 1.014349034315238,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.001014349034315238,
+              "utilization": 1.014349034315238
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VDD",
+              "width_um": 29.1,
+              "limit_a": 0.035890000000000005,
+              "current_a": 0.007313491500069657,
+              "utilization": 0.20377518807661343
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VSS",
+              "x_um": 912.35,
+              "y_um": 1208.0,
+              "limit_a": 0.00078,
+              "current_a": 0.0005707808514543444,
+              "utilization": 0.7317703223773646
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      }
+    ]
+  },
+  "new": {
+    "design": "adder6",
+    "pnr": "build/adder6/adder6.pnr.json",
+    "pnr_sha256": "14b6622eed428692925457613057d4e1c9686e13283c7ccea5132abc2348a70c",
+    "sizing_assumptions": {
+      "default_cell_current_a": 0.0001,
+      "allowed_current_a_per_um": 0.0002,
+      "requested_current_a_per_um": 0.00025,
+      "published_M1_step_a_per_um": 0.00025,
+      "reserved_current_margin": 0.2,
+      "sheet_resistance_ohm_per_square": 0.05,
+      "qualification": "linear width scaling, centered load spans and constant-current assumptions; not EM sign-off",
+      "current_reference": "OS00 rev1.1 p17 Tables I-3-1/I-3-3: M1(2um) 900uA flat / 500uA stepped; M2(3um) 3.7mA; V1 780uA/cut"
+    },
+    "uses_published_M1_step_limit": true,
+    "current_sources": [
+      "max_static_current_a"
+    ],
+    "worst_row_span_centered_feed_utilization": 0.42136110385251857,
+    "feed_banks": [
+      {
+        "index": 0,
+        "width": 21.0,
+        "count": 1,
+        "bank_width": 67.8,
+        "current_a": 0.004199416181159842,
+        "published_limit_a": 0.00525,
+        "utilization": 0.7998887964113985
+      },
+      {
+        "index": 1,
+        "width": 42.0,
+        "count": 1,
+        "bank_width": 130.8,
+        "current_a": 0.008398832362319685,
+        "published_limit_a": 0.0105,
+        "utilization": 0.7998887964113985
+      },
+      {
+        "index": 2,
+        "width": 42.0,
+        "count": 1,
+        "bank_width": 130.8,
+        "current_a": 0.008398832362319685,
+        "published_limit_a": 0.0105,
+        "utilization": 0.7998887964113985
+      },
+      {
+        "index": 3,
+        "width": 42.0,
+        "count": 1,
+        "bank_width": 130.8,
+        "current_a": 0.008398832362319685,
+        "published_limit_a": 0.0105,
+        "utilization": 0.7998887964113985
+      },
+      {
+        "index": 4,
+        "width": 42.0,
+        "count": 1,
+        "bank_width": 130.8,
+        "current_a": 0.008398832362319685,
+        "published_limit_a": 0.0105,
+        "utilization": 0.7998887964113985
+      },
+      {
+        "index": 5,
+        "width": 21.0,
+        "count": 1,
+        "bank_width": 67.8,
+        "current_a": 0.004199416181159842,
+        "published_limit_a": 0.00525,
+        "utilization": 0.7998887964113985
+      }
+    ],
+    "nominal_solved_em_check": {
+      "passed": true,
+      "max_utilization": 0.49864011093091903,
+      "worst_by_kind": {
+        "M1_step": {
+          "kind": "M1_step",
+          "net": "VSS",
+          "width_um": 4.0,
+          "limit_a": 0.001,
+          "current_a": 0.000498640110930919,
+          "utilization": 0.49864011093091903
+        },
+        "M2_field": {
+          "kind": "M2_field",
+          "net": "VSS",
+          "width_um": 21.0,
+          "limit_a": 0.025900000000000003,
+          "current_a": 0.004303885895934458,
+          "utilization": 0.16617320061523003
+        },
+        "TC": {
+          "kind": "TC",
+          "net": "VDD",
+          "x_um": 1895.75,
+          "y_um": 2031.45,
+          "limit_a": 0.00078,
+          "current_a": 0.00032308273926417996,
+          "utilization": 0.41420864008228203
+        }
+      },
+      "limits": {
+        "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+        "page": 17,
+        "tables": [
+          "I-3-1",
+          "I-3-3"
+        ],
+        "M1_field": {
+          "width_um": 2.0,
+          "current_a": 0.0009
+        },
+        "M2_field": {
+          "width_um": 3.0,
+          "current_a": 0.0037
+        },
+        "M1_step": {
+          "width_um": 2.0,
+          "current_a": 0.0005
+        },
+        "TC": {
+          "cut_um": 1.4,
+          "current_a": 0.00078,
+          "instantaneous_current_a": 0.0078
+        },
+        "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+      },
+      "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+    },
+    "pvt": [
+      {
+        "temperature_c": -40.0,
+        "supply_scale": 0.9,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.4807494503224037,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0004807494503224037,
+              "utilization": 0.4807494503224037
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.004153331783538152,
+              "utilization": 0.16036030052270853
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.00031168359901911913,
+              "utilization": 0.3995943577168194
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": -40.0,
+        "supply_scale": 1.0,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.5372842276361486,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0005372842276361486,
+              "utilization": 0.5372842276361486
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.004644945840639423,
+              "utilization": 0.17934153824862634
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.000348495982134267,
+              "utilization": 0.44678972068495776
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": -40.0,
+        "supply_scale": 1.1,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.5936566402111001,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0005936566402111001,
+              "utilization": 0.5936566402111001
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.005134867306470698,
+              "utilization": 0.19825742496025858
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.00038518864441172695,
+              "utilization": 0.49383159539964994
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 27.0,
+        "supply_scale": 0.9,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.4452379655590127,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0004452379655590127,
+              "utilization": 0.4452379655590127
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.0038393395991051737,
+              "utilization": 0.1482370501585009
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.00028830153331327324,
+              "utilization": 0.36961735040163235
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 27.0,
+        "supply_scale": 1.0,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.49864011093091903,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.000498640110930919,
+              "utilization": 0.49864011093091903
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.004303885895934458,
+              "utilization": 0.16617320061523003
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.00032308273926417996,
+              "utilization": 0.41420864008228203
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 27.0,
+        "supply_scale": 1.1,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.5519254061941473,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0005519254061941473,
+              "utilization": 0.5519254061941473
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.00476719859383407,
+              "utilization": 0.18406172176965518
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.00035777701294037456,
+              "utilization": 0.45868847812868535
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 85.0,
+        "supply_scale": 0.9,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.41096727138573275,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.00041096727138573277,
+              "utilization": 0.41096727138573275
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.0035390615916236472,
+              "utilization": 0.1366433046958937
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.00026587323208815405,
+              "utilization": 0.34086311806173597
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 85.0,
+        "supply_scale": 1.0,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.4610379442851511,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.00046103794428515113,
+              "utilization": 0.4610379442851511
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.003974776750744255,
+              "utilization": 0.15346628381251948
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.00029849207610510575,
+              "utilization": 0.3826821488526997
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      },
+      {
+        "temperature_c": 85.0,
+        "supply_scale": 1.1,
+        "em_check": {
+          "passed": true,
+          "max_utilization": 0.5110620476281656,
+          "worst_by_kind": {
+            "M1_step": {
+              "kind": "M1_step",
+              "net": "VSS",
+              "width_um": 4.0,
+              "limit_a": 0.001,
+              "current_a": 0.0005110620476281657,
+              "utilization": 0.5110620476281656
+            },
+            "M2_field": {
+              "kind": "M2_field",
+              "net": "VSS",
+              "width_um": 21.0,
+              "limit_a": 0.025900000000000003,
+              "current_a": 0.004409958724033364,
+              "utilization": 0.17026867660360476
+            },
+            "TC": {
+              "kind": "TC",
+              "net": "VDD",
+              "x_um": 1895.75,
+              "y_um": 2031.45,
+              "limit_a": 0.00078,
+              "current_a": 0.00033107420232880713,
+              "utilization": 0.4244541055497527
+            }
+          },
+          "limits": {
+            "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+            "page": 17,
+            "tables": [
+              "I-3-1",
+              "I-3-3"
+            ],
+            "M1_field": {
+              "width_um": 2.0,
+              "current_a": 0.0009
+            },
+            "M2_field": {
+              "width_um": 3.0,
+              "current_a": 0.0037
+            },
+            "M1_step": {
+              "width_um": 2.0,
+              "current_a": 0.0005
+            },
+            "TC": {
+              "cut_um": 1.4,
+              "current_a": 0.00078,
+              "instantaneous_current_a": 0.0078
+            },
+            "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+          },
+          "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off."
+        }
+      }
+    ]
+  },
+  "interpretation": "Old 99% nominal rail envelope exceeds the DC limit under cold/+10% cell currents; PNR now reserves 20% of the published width-scaled M1 step rating and independently checks solved branch currents. Geometric rail-network repartitioning adds further margin. No lifetime or temperature derating model is distributed."
+}

@@ -40,17 +40,52 @@ Updated: 2026-10-18. **Phase 8 review fixes implemented; pinned-publication inte
   loop; recorded PNR time was only a few seconds/design. New cache/stage and
   PNR/LVS/pre/post-SPICE timers will resolve the dominant analog work. The
   experiment helper reuses the official DRC report just produced by PNR,
-  avoiding an identical second invocation. Cached reports remain labelled
+  avoiding an identical second invocation. A real MAC1 profile measured
+  PNR/DRC 2.83 s, LVS 2.77 s, wire C 0.18 s and the two transients
+  165.96/185.77 s on the busy host (retained profile log under `/tmp`). Cached reports remain labelled
   recorded evidence; `TRITFLOW_FORCE_RUN=1` or deleting the documented cache
-  forces recomputation. No state coverage or SPICE accuracy was reduced.
+  forces recomputation. No state coverage or SPICE accuracy was reduced. The opening demo passed
+  actual pinned-PDK extracted simulation in 87.24 s on the busy shared host.
+- SIM's subsequent wire-annotation correction is consumed. Controlled chapter-7
+  comparisons now use identical extracted devices/terminal orientation, with
+  wire C added only in the post-wire run. The helper asserts a nonzero matching
+  number of Ctfwire elements and unchanged intrinsic device content; the original
+  authored schematic remains the independent LVS reference. Public
+  `lay.extract(wire_c=False)`/`.simulate()` suffice; no SIM private helper is used.
+- The primitive exporter now moves only overlapping RR property/model text into
+  empty space; every label/value and circuit path remains unchanged. Re-export
+  used pinned-PDK symbols and temporary source copies; deterministic/source-
+  immutability regressions pass. Visual inspection confirmed the clear RR labels
+  and labelled layout/device overlay.
+- COLAB reports its old colab-v0 test failed in NumPy/SciPy imports, so that old
+  tag is not a verified runtime. Latest notebook truth tables now explicitly wrap
+  `truth_table_html` in `HTML`, fixing its observed raw-string display. The
+  bootstrap remains unchanged per prior instruction; the latest release still
+  needs compatible Colab dependency/restart qualification.
+- To make a fresh notebook session practical, the repeated four-design campaign
+  is now a separate, explicitly recorded publication in one ZIP, with native
+  GDS/PNR/DRC/LVS files and compressed waveform/measurement JSON. Its source
+  fingerprint includes the same abstracts/manifests/publication identity and
+  code/PDK content as local caching. Every native member hash and experiment
+  option is verified before reading recorded flags; recorded producer tools
+  remain visible, not adopted as the current runtime. Stale/absent publications
+  fall back to execution. `TRITFLOW_FORCE_RUN=1` bypasses both kinds of reuse,
+  including a corrupt archive. `notebook/campaign.py <successful-cache-dir>`
+  refuses changed contexts/native artifacts before publishing. This avoids
+  counting old reports as new local checks and preserves full recomputation.
+  The default fresh session still runs the opening adder and edited circuit.
+  Real INV campaign export/reload, waveform equality, native-file retention,
+  option/source rejection, corruption rejection and cache tests passed (8 tests,
+  12.32 s). Final four-design archive will be generated only from the final run.
 - Required sizing/width/load publication slots now fail on missing/stale data
   instead of printing TODOs. Pinned cell-qualification deck hashes are also
   checked. Final Run all verifies that consumed inputs did not change during
   execution. Only public PDK `5d963db` at `$TR1UM_PDK` is used for qualification;
   reference SVG export tests now use `~/pdk/TR-1um-pinned` too.
 
-Focused regression so far: 30 tests passed (31.61 s), before the added
-presentation/demo tests. No extra packages, git-writing commands or foreign
+Full owned frontend/notebook/viz regression: 235 tests passed (74.40 s).
+After the schematic/text/API follow-up, 14 targeted tests passed (20.10 s),
+and 14 packaging/presentation tests passed (1.56 s; stale old payload excluded). No extra packages, git-writing commands or foreign
 path edits. Final notebook timings/publication coverage/package checks pending.
 
 ### Interface requests
@@ -60,7 +95,9 @@ qualification, width-scaling and load-boundary records with current consumed
 hashes. The readers now require these records; they do not weaken provenance
 or turn stale data into a result. The current live cell `verify_report.json`
 still names the dev PDK and differs from pinned decks as of this intermediate
-check. The release-ref mismatch from phase 7 remains an integrator action;
+check. The new required-publication regression currently reports sizing ready,
+scaling/load stale and cell qualification still on the dev decks (2 pass / 3
+expected failures while republishing). The release-ref mismatch from phase 7 remains an integrator action;
 no tag or bootstrap write was performed here.
 
 ## Phase 7 handoff

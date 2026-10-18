@@ -13,6 +13,16 @@ def test_only_distributed_process_is_advertised():
     assert inventory['pdk_provenance']['qualified_commit'].startswith('5d963db')
 
 
+def test_publication_rejects_dev_deck_even_with_a_pinned_commit_label():
+    from tritflow.sim.publication import qualified_pdk
+    expected=available_corners()['pdk_provenance']
+    assert qualified_pdk({'pdk_provenance':expected},expected)
+    modified={**expected,'consumed_sha256':{**expected['consumed_sha256'],
+        'libs.tech/klayout/tech/lvs/01_Extract.lvs':'old-dev-deck'}}
+    assert not qualified_pdk({'pdk_provenance':modified},expected)
+    assert not qualified_pdk({},expected)
+
+
 def test_supply_tracking_and_project_bands_are_separate():
     text=(CELLS_DIR/'out/INV/INV.ext.spice').read_text()
     run=simulate(text,'INV',['A'],['Y'],input_vectors(1),lambda v:{'Y':-v[0]},

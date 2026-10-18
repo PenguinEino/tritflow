@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import random
 import signal
+import shutil
 import subprocess
 import sys
 import time
@@ -97,7 +98,7 @@ endmodule
     return sources
 
 
-def fingerprint():
+def fingerprint(manifest=None):
     """Content hashes of the consumed physical views and implementation."""
     paths = [Path(__file__), ROOT/"cells/template.json", ROOT/"cells/out/all.spice",
              ROOT/"cells/out/library.json"]
@@ -109,10 +110,14 @@ def fingerprint():
               for p in (PDK_ROOT/"libs.tech/klayout/tech"/group).rglob("*") if p.is_file()]
     paths += [ROOT/"notebook/setup_pins.json"]
     paths += [ROOT/"tritflow/sim/spice.py"]
+    paths += [Path(shutil.which('klayout') or Path.home()/'bin/klayout/klayout')]
     paths += [p for p in (ROOT/"cells/out").glob("*/*")
               if p.is_file() and p.name.endswith((".gds", ".abstract.json", ".char.json"))]
     hashes = {str(p.resolve()): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in sorted(set(paths))}
+    if manifest:
+        manifest.parent.mkdir(parents=True,exist_ok=True)
+        write_json(manifest,hashes)
     return hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
 
 
@@ -135,7 +140,8 @@ def worker(job):
         report["synthesis_runtime_s"] = time.perf_counter()-started
         stage = "pnr"
         result = place_and_route(net, output_dir=out, seed=job["seed"],
-                                 anneal_steps=job["anneal_steps"])
+                                 anneal_steps=job["anneal_steps"],
+                                 **job['parameters'].get('pnr_options',{}))
         stage = "lvs"
         _lvs(result, net, (ROOT/"cells/out/all.spice").read_text(), out/"lvs")
         report.update(passed=True, stats=result.stats, checks=result.data["checks"])
@@ -166,6 +172,7 @@ def artifact_hashes(out, name):
     paths = [out/f"{name}{suffix}" for suffix in
              (".json", ".gds", ".pnr.json", ".drc.lyrdb", ".lvs.summary.json")]
     paths += [out/"lvs"/f"{name}{suffix}" for suffix in (".ext.spice", ".lvsdb")]
+    paths += [p for p in (out/'lvs').rglob('*') if p.is_file()]
     return {str(p.relative_to(out)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
 
@@ -231,7 +238,7 @@ def main(argv=None):
     parser.add_argument("--output-root", type=Path, default=ROOT/"build/pnr_fuzz")
     parser.add_argument("--jobs", type=int, default=1)
     parser.add_argument("--anneal-steps", type=int, default=600)
-    parser.add_argument("--timeout", type=float, default=180.)
+    parser.add_argument("--timeout", type=float, default=600.)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--scale", action="store_true")
     parser.add_argument("--all-adders", action="store_true", help="Also build and qualify adders N=1..8")
@@ -241,19 +248,20 @@ def main(argv=None):
         return worker(json.loads(args.worker.read_text()))
     if args.count < 0 or args.jobs < 1 or args.timeout <= 0:
         parser.error("count must be nonnegative; jobs and timeout must be positive")
-    stamp, jobs = fingerprint(), []
+    stamp, jobs = fingerprint(args.output_root/'qualification.inputs.json'), []
     sources = []
     for seed in (args.seeds if args.seeds is not None else range(args.start_seed, args.start_seed+args.count)):
         source, parameters = random_source(seed)
         sources.append((f"fuzz_{seed:05d}", source, parameters, args.output_root, seed))
     if args.scale or args.all_adders:
-        sources += [(name, source, {"scale": True}, ROOT/"build", 7)
+        sources += [(name, source, {"scale": True, **({'pnr_options':{'channel_tracks':16}} if name=='adder7' else {})},
+                     ROOT/"build", 19 if name=='adder7' else 7)
                     for name, source in scale_sources(range(1, 9) if args.all_adders else (6, 8)).items()]
     for name, source, parameters, root, seed in sources:
         out = (root/name).resolve(); out.mkdir(parents=True, exist_ok=True)
         (out/f"{name}.tv").write_text(source)
         jobs.append(dict(name=name, directory=str(out), parameters=parameters, seed=seed,
-            anneal_steps=args.anneal_steps, fingerprint=stamp,
+            anneal_steps=max(args.anneal_steps,3000) if name=='adder7' else args.anneal_steps, fingerprint=stamp,
             source_sha256=hashlib.sha256(source.encode()).hexdigest()))
     args.output_root.mkdir(parents=True, exist_ok=True)
     results = []

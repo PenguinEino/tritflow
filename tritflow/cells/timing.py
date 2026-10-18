@@ -20,6 +20,7 @@ import numpy as np
 from tritflow import CELLS_DIR, PDK_ROOT, PASS_BAND
 from tritflow.sim import build_testbench, input_vectors, run_ngspice, measure_sequence, SimulationError
 from tritflow.sim.characterize import input_capacitance
+from tritflow.sim.provenance import pdk_provenance
 from .circuits import circuits, ideal
 from .reference import sha
 from .regression import guesses
@@ -32,6 +33,7 @@ _CODE_PATHS += [Path(__file__).parents[1]/'sim'/name for name in
                 ('bench.py','runner.py','measure.py','spice.py','characterize.py')]
 CODE_SHA256 = {str(p.relative_to(Path(__file__).parents[1])): sha(p) for p in _CODE_PATHS}
 MODEL_SHA256 = {p.name:sha(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}
+PDK_PROVENANCE = pdk_provenance()
 
 
 def _measurement_code():
@@ -72,7 +74,7 @@ def _slew(time, voltage, before, after, start, end):
     return times[1]-times[0] if times[1]>=times[0] else None
 
 
-def point(cell, text, load_f, ramp_s, folder, *, timeout=240., max_step_s=None):
+def point(cell, text, load_f, ramp_s, folder, *, timeout=600., max_step_s=None):
     """One Euler-tour transient covers every directed input vector change once.
 
     A >=300 ns plateau after each ramp allows 1 pF loading to restore. A failure
@@ -89,6 +91,7 @@ def point(cell, text, load_f, ramp_s, folder, *, timeout=240., max_step_s=None):
     result={'cell':cell,'load_f':load_f,'input_transition_s':ramp_s,'hold_s':hold,
             'max_step_s':step,'source_sha256':hashlib.sha256(text.encode()).hexdigest(),
             'code_sha256':CODE_SHA256,'measurement_code':_measurement_code(),'model_sha256':MODEL_SHA256,
+            'pdk_provenance':PDK_PROVENANCE,
             'complete':False,'rows':[]}
     try:
         run=run_ngspice(bench['netlist'],bench['commands'],bench['probes'],workdir=folder,timeout=timeout)
@@ -150,7 +153,7 @@ def assemble(cell,text,points,loads_f,ramps_s,capacitance,*,source_generation=No
                 'max_step_s_by_ramp':[_grid_step(r,cell) for r in ramps_s],
                 'output_slew_definition':'Last directional 10% to 90% crossings of the ideal output step; null for unchanged output or missing crossings.'},
             'scope':'Nominal device-only PDK extraction; no cell wire C or poly R in the primary timing model. Add PNR net wire C separately; do not double count cell-pin metal.',
-            'model_sha256':model_sha256 or {},'code_sha256':CODE_SHA256,
+            'model_sha256':model_sha256 or {},'code_sha256':CODE_SHA256,'pdk_provenance':PDK_PROVENANCE,
             'input_capacitance':capacitance,'arcs':[],'simultaneous':[],
             'interpolation':'Only within both measured axes and through passing/non-null samples. No implicit extrapolation.',
             'complete':True,'passed':True}
@@ -211,6 +214,7 @@ def characterize_library(out,*,loads_f=LOADS_F,ramps_s=RAMPS_S,jobs=3):
                     p=json.loads(cached.read_text())
                     if (p['source_sha256']==hashlib.sha256(texts[cell].encode()).hexdigest()
                         and p.get('compatible_measurement_code',p.get('measurement_code'))==_measurement_code() and p.get('model_sha256')==models
+                        and p.get('pdk_provenance',{}).get('consumed_sha256')==PDK_PROVENANCE['consumed_sha256']
                         and p['load_f']==load and p['input_transition_s']==ramp
                         and p['max_step_s']<=_grid_step(ramp,cell) and p['hold_s']==ramp+300e-9 and p['complete']):
                         points[cell].append(p);continue

@@ -365,6 +365,7 @@ def main(argv=None):
               "official_rules_commit":"a502a6ba01260d3492df9137dddae0bb5fabeb3c",
               "release":release_status(args.source),
               "colab_verified":False,"team_fields_completed":not has_placeholders(json.loads(args.team.read_text())),
+              "identity_fields_completed":not has_placeholders(json.loads(args.team.read_text())["authors"]),
               "raw_execution_not_in_payload":str(raw.relative_to(ROOT)) if raw.is_relative_to(ROOT) else str(raw),
               "manifest_scope":"files excludes build-info.json itself; total_bytes includes it"}
         args.output.parent.mkdir(parents=True,exist_ok=True)

@@ -141,10 +141,10 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
     deck_top = safe_top if text and safe_top.lower() in subcircuits(text) else top
     decoded = logical_spice_names(text or '')
     normalized_gds = gds
+    changes = 0
     if decoded or deck_top != top:
         layout = db.Layout(); layout.read(str(gds))
         encode = {logical: encoded for encoded, logical in decoded.items()}
-        changes = 0
         for cell in layout.each_cell():
             for layer in ((48,0),(48,1),(49,0),(49,1)):
                 for shape in cell.shapes(layout.layer(*layer)).each():
@@ -217,4 +217,5 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
                 unused_power_physical_evidence=physical_evidence,
                 spice_name_map={logical:encoded for encoded,logical in decoded.items()},
                 label_normalization_gds=str(normalized_gds) if normalized_gds!=gds else None,
+                normalized_label_count=changes,
                 scope='PDK device extraction; intrinsic device parasitics; no signal-wire resistance')

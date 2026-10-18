@@ -36,6 +36,28 @@ def _device_fingerprint(text):
     return hashlib.sha256('\n'.join(rows).encode()).hexdigest()
 
 
+def logical_nodeset(net, lvs_report, inputs, vector):
+    """Seed Newton's initial solve with ideal internal logic, without .ic/uic.
+
+    The empirical resistor model has nonphysical off-rail roots. The LVS xref
+    maps each logical gate net to its extracted node; guesses do not constrain
+    any node during transient analysis or replace the independent output oracle.
+    """
+    from tritflow.extract import reference_net_map
+    from tritflow.synth import evaluate_netlist
+    from .spice import simulation_netlist
+    values=evaluate_netlist(net,dict(zip(inputs,vector)),return_all=True)
+    mapping=reference_net_map(lvs_report,net.top);ports={p.name for p in net.ports}
+    guesses={}
+    for name,value in values.items():
+        if name in ports:continue
+        if name not in mapping:raise ValueError(f'LVS does not map initial logic node {name}')
+        node=mapping[name]
+        node=simulation_netlist('\\'+node if node.startswith('$') else node)
+        guesses['xdut.'+node]=5*int(value)
+    return guesses
+
+
 def representative_vectors(design, inputs):
     """Independent arithmetic cases; adder4 includes both four-digit carry chains."""
     if design in ('full_add','mul1','mac1'):
@@ -243,9 +265,12 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
         raise RuntimeError('Wire-C annotation changed intrinsic device content')
     (out/'postlayout.spice').write_text(post_text)
     results={}
+    guesses=logical_nodeset(net,lvs['report'],inputs,vectors[0])
+    _save(out/'initialization.json',{'method':'Identical LVS-mapped ideal-logic .nodeset Newton guesses in both runs; no .ic/uic or transient forcing',
+                                   'input_trits':vectors[0],'internal_nodes_v':guesses})
     for mode,text in [('pre',pre_text),('post',post_text)]:
         results[mode]=_simulate_cached(out,mode,text,net.top,inputs,outputs,vectors,expected,
-            hold_s=hold_s,step_s=step_s,load_f=load_f,timeout=timeout)
+            hold_s=hold_s,step_s=step_s,load_f=load_f,timeout=timeout,nodeset=guesses)
     chars={c:json.loads((snapshot/c/f'{c}.char.json').read_text()) for c in used}
     abstracts={c:json.loads((snapshot/c/f'{c}.abstract.json').read_text()) for c in used}
     pnr=json.loads((inputs_snapshot/pnrfile.name).read_text());template=json.loads((snapshot/'template.json').read_text())
