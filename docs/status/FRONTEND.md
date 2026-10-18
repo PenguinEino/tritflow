@@ -93,6 +93,16 @@ path edits. The latest targeted cache/publication/presentation suite passed 15 t
 3 tests (0.57 s). Final notebook timings/publication coverage/package checks
 are pending the parallel publications.
 
+The first native capture reached ADDER4/FULL_ADD and MAC1, but its consumed
+PNR `flow.py` changed at 10:46 UTC while it was running. It was intentionally
+stopped (only its private ngspice child), retaining incomplete evidence, and
+will be repeated against the updated core. Independent STA file edits also
+changed the broad fingerprint; STA is now explicitly excluded because this
+notebook never imports/calls it. Every actually consumed physical/electrical
+view, abstract, manifest and publication identity remains hashed. The real
+pin/obstruction invalidation test now also verifies isolation from STA edits;
+5 cache tests pass (0.85 s). No obsolete native run is published as current.
+
 ### Interface requests / current publication gate
 
 CELLS Phase 7 was published at generation `2026-10-18T10:26:47.211617+00:00`;

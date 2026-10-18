@@ -194,21 +194,25 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
                 total_choices += 1
     arrival, transitions, paths, patterns = {}, {}, {}, {}
     total_expanded = 0
+    graph_nodes = len(dd.nodes)
+    peak_nodes = graph_nodes
     for name in outputs:
         transitions[name] = {}
         best = None
         for a,b in product(TRITS, repeat=2):
             key = name,a,b
             if key not in upper: continue
+            dd.rollback(graph_nodes)
             value, region, path, expanded = _worst(key, choices, upper, conditions, dd, allowed, max_labels)
+            peak_nodes = max(peak_nodes, len(dd.nodes))
             total_expanded += expanded
             if region:
                 transitions[name][f"{a}->{b}"] = value
-                if best is None or value > best[0]: best = value,region,path
+                if best is None or value > best[0]: best = value,dd.witness(region),path
         arrival[name] = best[0] if best else 0.
         paths[name] = best[2] if best else []
         if best:
-            witness = dd.witness(best[1])
+            witness = best[1]
             patterns[name] = {phase: {p: witness[phase,p] for p in inputs} for phase in ("before", "after")}
         else:
             patterns[name] = {"before": None, "after": None}
@@ -222,5 +226,6 @@ def analyze(netlist, pnr=None, *, library=None, output_load_f=10e-15,
          "Linear load extension, when enabled, is limited to zero through twice maximum measured load; input ramps never extrapolate."],
         warnings, {"cell_generation": models.generation, "timing_sha256": models.hashes,
                    "load_policy": load_policy, "input_transition_s": input_transition_s},
-        {"decision_nodes": len(dd.nodes), "graph_choices": total_choices, "search_expansions": total_expanded,
+        {"decision_nodes": peak_nodes, "graph_nodes": graph_nodes,
+         "graph_choices": total_choices, "search_expansions": total_expanded,
          "runtime_s": time.perf_counter()-started, "all_endpoint_pairs": vector_pairs is None})

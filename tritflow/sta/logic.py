@@ -86,6 +86,12 @@ class Diagram:
             node = children[branch]
         return values
 
+    def rollback(self, size):
+        """Release search-only nodes; persistent graph conditions precede size."""
+        self.nodes = self.nodes[:size]
+        self.unique = {key: index for index, key in enumerate(self.nodes[2:], 2)}
+        self.cache.clear()
+
     def gate(self, cell, inputs):
         result = dict.fromkeys(TRITS, 0)
         for values in product(TRITS, repeat=len(inputs)):

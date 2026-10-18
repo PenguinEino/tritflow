@@ -49,7 +49,7 @@ def scatter(ax, cell, floor_mv=None, limit=True):
         ax.text(0.02, 540, "±0.5 V limit", transform=ax.get_yaxis_transform(),
                 fontsize=6.5, color=style.INK2, va="bottom", ha="left")
         ax.set_yscale("log")
-    ax.set_xlabel("Static current at the 0 level (mA)")
+    ax.set_xlabel("Max static current over input states (mA)")
     return d
 
 
@@ -87,9 +87,10 @@ def make():
     keys = [Line2D([], [], ls="", marker="o", ms=3.6, mfc=style.INK2, mec=style.INK2, label="passes"),
             Line2D([], [], ls="", marker="o", ms=3.6, mfc="white", mec=style.INK2, label="fails ±0.5 V"),
             Line2D([], [], ls="", marker="v", ms=3.6, mfc=style.INK2, mec=style.INK2, label="< 3 mV")]
+    nany_n = sum(r["max_error_v"] is not None for r in grid("NANY")["rows"])
     scatter(axes[2], "NANY", limit=False)
     axes[2].set_ylim(bottom=0)
-    axes[2].set_title("NANY: 18 sizes, all pass", loc="left", pad=11)
+    axes[2].set_title(f"NANY: {nany_n} solved sizes, all pass", loc="left", pad=11)
     for ax, l in zip(axes, "abc"):
         style.panel(ax, l, x=-0.3)
     return style.save(fig, "fig_sizing")
