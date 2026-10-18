@@ -60,6 +60,7 @@ def use():
         "savefig.pad_inches": 0.02,
         "pdf.fonttype": 42,
         "svg.fonttype": "none",
+        "svg.hashsalt": "tritflow",
     })
 
 
@@ -79,7 +80,8 @@ def bands(ax, levels=(-5, 0, 5), half=0.5, horizontal=True):
 
 def save(fig, name):
     OUT.mkdir(parents=True, exist_ok=True)
+    meta = {"pdf": {"CreationDate": None, "ModDate": None}, "svg": {"Date": None}, "png": {}}
     for ext in ("pdf", "png", "svg"):
-        fig.savefig(OUT / f"{name}.{ext}")
+        fig.savefig(OUT / f"{name}.{ext}", metadata=meta[ext])
     plt.close(fig)
     return OUT / f"{name}.png"
