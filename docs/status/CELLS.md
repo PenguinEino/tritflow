@@ -647,3 +647,5 @@ were modified. No extra dependencies were installed. No blockers/interface
 requests remain.
 
 Publish 2026-10-18T09:49:34.717678+00:00: Phase 6 PASS: nine STA timing tables, 160 load/ramp profiles and 7296 directed observations; 30 poly-R proxy profiles with matched baselines; physical cell views unchanged; latest SIM characterization/sizing preserved. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.
+
+Post-publish validation: all nine timing/poly tables have matching generation, source and annotated-model hashes; timing-summary hashes match the stamped files, all 4×8 matrices are complete, and all physical verification/characterization hashes still pass. Template resolves through the published generation. Phase 6 complete.

@@ -18,11 +18,11 @@ from .router import RoutingFailure
 class ChipRouter:
     """A physical-width-aware two-layer maze with immutable terminal escapes."""
 
-    def __init__(self, shapes, terminals, core, pads, widths, bound=1152., pitch=6.):
+    def __init__(self, shapes, terminals, core, pads, widths, bound=1152., pitch=6., x_bound=1074.):
         self.shapes = shapes
         self.terminals, self.widths = terminals, widths
         self.core, self.pads = core, pads
-        self.xs = sorted({round(x, 3) for x in np.arange(-bound, bound+.01, pitch)} |
+        self.xs = sorted({round(x, 3) for x in np.arange(-x_bound, x_bound+.01, pitch)} |
                          {round(t[1], 3) for pair in terminals.values() for t in pair})
         self.ys = sorted({round(y, 3) for y in np.arange(-bound, bound+.01, pitch)} |
                          {round(t[2], 3) for pair in terminals.values() for t in pair})
@@ -46,6 +46,10 @@ class ChipRouter:
         for layer, owner, rect in self.shapes:
             if owner != net:
                 self._fill(blocked[layer], rect, width/2+2.05)
+        for owner, x, y in self.pads:
+            if owner != net:
+                for layer in range(2):
+                    self._fill(blocked[layer], [x-50,y-50,x+50,y+50],width/2+14.05)
         for layer in range(2):
             self._fill(blocked[layer], self.core, width/2+2.05)
         # No new via may infringe the 15 um metal enclosure of a pad via.
