@@ -51,6 +51,9 @@ def wrap_tables(text):
                 rows.append([part.strip() for part in re.split(r'(?<!\\)\|',line.strip().strip('|'))])
             index += 1
         columns = len(rows[0])
+        if _is_prose_table(rows):
+            output.extend(_prose_list(rows))
+            continue
         # A percentage-width table can otherwise contribute its intrinsic width
         # to Colab's surrounding flex item before the column width is resolved.
         output.append('<div style="display:block;width:100%;min-width:0;max-width:100%;overflow-x:auto;contain:inline-size;box-sizing:border-box;">\n'
@@ -66,6 +69,26 @@ def wrap_tables(text):
             output.append('<tr>'+''.join(cells)+'</tr>')
         output.append('</table>\n</div>')
     return '\n'.join(output)
+
+
+def _is_prose_table(rows):
+    """Two-column label/description tables with sentence-length cells.
+
+    Colab drops inline styles in Markdown cells and truncates long table cells
+    with an ellipsis, so such tables read better as labelled paragraphs.
+    """
+    body = rows[1:]
+    return (len(rows[0]) == 2 and bool(body)
+            and max(len(row[1]) for row in body if len(row) == 2) > 120)
+
+
+def _prose_list(rows):
+    """Render label/description rows as Markdown paragraphs that always wrap."""
+    lines = []
+    for row in rows[1:]:
+        label, description = row[0].rstrip('.'), row[1]
+        lines += [f'**{label}.** {description}', '']
+    return lines
 
 
 def colab_markdown(text):

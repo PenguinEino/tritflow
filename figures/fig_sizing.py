@@ -10,7 +10,7 @@ from tritflow import ROOT
 
 import style
 
-RR_SHADE = {20.0: "#9ec5f4", 30.0: "#2a78d6", 45.0: "#104281"}
+RR_SHADE = {20.0: "#6da7ec", 30.0: "#2a78d6", 45.0: "#104281"}
 
 
 def grid(cell):
