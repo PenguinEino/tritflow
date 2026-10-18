@@ -7,7 +7,7 @@ from .vector import SECONDARY, TRIT_COLOR, Vector
 class SymbolLegend:
     """A dependency-free SVG legend with the same gate paths as draw()."""
     def _vector(self):
-        v = Vector(1088,624,font_min=12*1088/1000)
+        v = Vector(1088,624,font_min=(44/3)*1088/1000)
         v.text(32,34,'Balanced-ternary symbol legend',size=20,weight='bold')
         v.text(32,57,'A bubble reverses the sign of a trit. Inputs and outputs are −1, 0, +1.',size=12,color=SECONDARY)
         entries = [('INV','−a','Triangle: inversion'),('BUF','a','Triangle: level-preserving buffer'),

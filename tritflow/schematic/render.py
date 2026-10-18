@@ -55,7 +55,7 @@ def _symbol(v,node):
         _rect(v,x,y,node.width,node.height,fill='white',width=.8)
         full=node.module=='full_add'
         v.text(cx,y+(56 if full else 28),node.label,size=11,weight='bold',anchor='middle')
-        v.text(cx,y+(74 if full else 46),node.module or f'{len(node.members)} cells',size=10,color=SECONDARY,anchor='middle')
+        v.text(cx,y+(74 if full else 46)+max(0,v.font_min-16),node.module or f'{len(node.members)} cells',size=10,color=SECONDARY,anchor='middle')
         for pin,signal in {**node.inputs,**node.outputs}.items():
             px,py=node.pins[pin];side=node.sides[pin]
             label=node.pin_labels.get(pin,signal)
@@ -123,17 +123,21 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
     visible=sorted(ports&{s.net for s in scene.segments},key=natural)
     visible=[n for n in visible if values is not None or n in caps]
     annotated=bool(visible)
-    font=12*scene.width/1000
+    # Native 11 pt text prevents small notebook figures from inheriting the
+    # tiny legend font used by the old, wide publication canvases.
+    small=sum(n.kind not in {'input','output'} for n in scene.symbols)<=10
+    font=max(44/3,(44/3 if small else 12)*scene.width/1000)
     row_pitch=max(18,math.ceil(font*1.5))
-    columns=max(1,min(len(visible),int(scene.width/max(192,font*15))))
+    beside=annotated and scene.width+208<=1000
+    columns=1 if beside else max(1,min(len(visible),int(scene.width/max(192,font*15))))
     rows=math.ceil(len(visible)/columns) if annotated else 0
-    extra=row_pitch*(2+rows+(1 if caps else 0)) if annotated else 0
-    v = Vector(scene.width,scene.height+extra,font_min=font,stroke_min=.8*scene.width/1000)
+    extra=row_pitch*(2+rows+(1 if caps else 0)) if annotated and not beside else 0
+    v = Vector(scene.width+(208 if beside else 0),scene.height+extra,font_min=font,stroke_min=.8*scene.width/1000)
     v.net_labels={signal:_wire_name(n,p,signal,ports)
                   for n in scene.symbols for p,signal in n.outputs.items()}
     v.text(24,max(20,v.font_min+4),title,size=12,weight='bold')
     gates=sum(len(n.members) for n in scene.symbols)
-    v.text(scene.width-24,max(20,v.font_min+4),f'{gates} cells',size=9,color=SECONDARY,anchor='end')
+    v.text(v.width-24,max(20,v.font_min+4),f'{gates} cells',size=9,color=SECONDARY,anchor='end')
     for frame in scene.frames:
         x0,y0,x1,y1=frame.box
         _rect(v,x0,y0,x1-x0,y1-y0,stroke='#c3c2b7',fill='#fafaf8',width=.8)
@@ -182,21 +186,27 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
         v.line((offset,footer-3),(offset+24,footer-3),width=1.2)
         v.text(offset+32,footer,'Crossing: no connection',size=9,color=SECONDARY)
     if annotated:
-        baseline=scene.height+row_pitch
+        baseline=64 if beside else scene.height+row_pitch
+        legend_x=scene.width+8 if beside else 24
         heading='Port values' if values is not None else 'Port wire C'
         if values is not None and caps:heading+=' / wire C'
-        v.text(24,baseline,heading,size=10,weight='bold')
+        v.text(legend_x,baseline,heading,size=10,weight='bold')
         cell_width=(scene.width-48)/columns
         for k,signal in enumerate(visible):
             col=k//max(1,rows);row=k%max(1,rows)
-            x=24+col*cell_width;y=baseline+row_pitch+row*row_pitch
+            x=legend_x+col*cell_width;y=baseline+row_pitch+row*row_pitch
             parts=[signal]
             if values is not None:parts.append({-1:'−1',0:'0',1:'+1'}[values[signal]])
             if signal in caps:parts.append(f'{caps[signal]*1e15:.1f} fF')
             color,width=styles[signal]
             v.line((x,y-4),(x+16,y-4),stroke=color,width=width)
             v.text(x+24,y,'   '.join(parts),size=10,color=color)
-        if caps:v.text(24,v.height-max(8,font*.3),'Estimated wire C (fF); darker / thicker = more C.',size=9,color=SECONDARY)
+        if caps:
+            if beside:
+                y=baseline+(rows+2)*row_pitch
+                v.text(legend_x,y,'Estimated wire C (fF).',size=9,color=SECONDARY)
+                v.text(legend_x,y+row_pitch,'Darker / thicker = more C.',size=9,color=SECONDARY)
+            else:v.text(24,v.height-max(8,font*.3),'Estimated wire C (fF); darker / thicker = more C.',size=9,color=SECONDARY)
     return v
 
 

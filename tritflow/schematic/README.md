@@ -41,8 +41,9 @@ sources and print +1, 0 or −1. Directional flags identify external ports.
 
 Colours, serif font preferences and nominal line weights follow
 `figures/style.py`: −1 blue `#2a78d6`, 0 grey `#6f6e69`, +1 red `#e34948`;
-Nimbus Roman / Liberation Serif / DejaVu Serif. Labels are at least 9 pt
-when the drawing is displayed at 1000 px wide; symbol strokes are at least
+Nimbus Roman / Liberation Serif / DejaVu Serif. Notebook circuits (up to ten
+visible gates/blocks) use at least 11 pt at both their natural size and 1000 px
+wide. Larger expanded circuits retain the 9 pt minimum at 1000 px; symbol strokes are at least
 0.8 display pixels. Gate name strips and port flags reserve room for this type. The package copies these
 small constants instead of depending on repository figure scripts.
 
@@ -63,7 +64,7 @@ There is one template, not a separate folded placement for framed copies.
 Full adders place their two halves side by side; larger flat adders use one
 digit per row to preserve type size. A/b enter beside ha1, cin sits between
 frames, sum leaves ha2, and the carry combiner uses a channel above ha2.
-The full-adder flat aspect is about 3.7:1, accepting the width of the two
+The full-adder flat aspect is about 3.6:1, accepting the width of the two
 unaltered standalone templates instead of folding their cells to reach 2:1.
 
 Each frame has named boundary pins and is a solid keep-out to the parent
@@ -138,7 +139,8 @@ are ignored; invalid, negative or nonfinite C raises `ValueError`. Pin C and
 
 Width and darkness increase monotonically with sqrt(C / maximum C). With
 values enabled, the hue retains the trit encoding. A compact keyed table
-below the circuit prints **port nets only**, settled trits and C in fF.
+beside the circuit when space permits, otherwise below it, prints **port nets
+only**, settled trits and C in fF.
 It appears only with values or C; `net_names=True` alone adds no empty table.
 Internal wire hover captions derive from the producing gate/module pin
 (e.g. `g_t.Y`), while metadata and `data-net` retain exact logical names.
@@ -154,7 +156,9 @@ uncalibrated lumped wire estimate.
 
 `sch.metrics` reports total unique wire length in drawing pixels, total and
 mean/maximum bends per net, nets over two bends, crossings and canvas aspect,
-plus per-net details and `min_font_pt_at_1000px`. It also reports `short_jogs`, `rotated_gates` and
+plus per-net details, `min_font_pt_at_1000px` and `min_font_pt_native`.
+`width_px` / `height_px` describe the routing viewBox; `rendered_width_px` /
+`rendered_height_px` describe the natural export size. It also reports `short_jogs`, `rotated_gates` and
 `symbol_edge_runs`, plus `clearance_violations` from an independent geometric
 auditor: parallel tracks, rails, pin stubs, pin turns/approaches, symbol
 outlines, branch dots, missing/duplicate fanout rails and parent wires inside
@@ -171,6 +175,12 @@ accepts `.svg`, `.pdf` or `.png`; `png(scale=2)` returns a larger preview.
 SVG uses the standard library; PDF/PNG lazily use existing Matplotlib. No
 Graphviz, Cairo, Xschem, browser, TeX, extra pip or system package is required.
 PDF timestamps are disabled for byte-identical exports.
+Natural exports are at most 1000 px wide, with the routing grid preserved in
+the SVG viewBox. The flat half-adder with values is 1000×460 px; both two-trit
+adder overlays are 848×424 px, including their right-hand keys. All four
+notebook views fit within 1000×700 px. This bound is checked on the SVG's
+intrinsic dimensions and on the unresized public PNG export, so a resized
+review preview cannot hide scrolling.
 
 SVG metadata accounts for every original terminal exactly once, including
 terminals inside closed blocks. It records block membership, formal labels
@@ -190,8 +200,8 @@ The gallery does not rerun DRC/LVS or claim new signoff evidence.
 
 `index.html` displays the figures and before/after results. `metrics.md`
 compares **every item** with the frozen reviewed gallery in
-`assets/phase4_metrics.json`; `manifest.json` includes per-net details,
-real-C provenance, the phase-4 `previous` metrics and the original `before`
+`assets/phase5_metrics.json`; `manifest.json` includes per-net details,
+real-C provenance, the phase-5 `previous` metrics and the original `before`
 metrics from `assets/baseline_metrics.json`. Tests enforce wire/bend budgets,
 zero short jogs, right-facing gates, zero symbol-edge runs, a straight ripple chain,
 formal/local digit ports, ≤2 bends/net in the standalone half adder, exact
@@ -203,8 +213,10 @@ For a browser-faithful review of all 22 gallery figures and the four notebook
 views, use the installed CairoSVG review helper (not a runtime dependency):
 
 ```bash
-python3 -m tritflow.schematic.review --output build/schematic-review/round5/after
+python3 -m tritflow.schematic.review --output build/schematic-review/round6/after
 ```
 
-Each resulting PNG comes from its SVG at exactly 1000 px wide. Notebook views use
-`net.schematic()` and `.annotate()` with actual cell-library PNR wire C.
+Each resulting PNG comes from its SVG at exactly 1000 px wide. Notebook views
+also have `*-native.png` exports with no resize, and use `net.schematic()` and
+`.annotate()` with actual cell-library PNR wire C. The review helper enforces
+the 1000×700 px envelope and 11 pt type minimum on all four notebook views.

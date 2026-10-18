@@ -89,7 +89,7 @@ def route(nodes,driver,loads,width,height,frames=(),*,fanout_first=False):
             lo=min(p[0] for p in ends+[stubs[key,pin][-1]])
             hi=max(p[0] for p in ends+[stubs[key,pin][-1]])
         if lo==hi:hi+=PITCH
-        for offset in [0]+[sign*d for d in range(TRUNK_PITCH,max(width,height),TRUNK_PITCH) for sign in (1,-1)]:
+        for offset in [0,-16,16]+[sign*d for d in range(TRUNK_PITCH,max(width,height),TRUNK_PITCH) for sign in (1,-1)]:
             fixed=base+offset
             if not vertical and any(0<abs(fixed-nodes[k].pins[p][1])<PITCH for k,p in local):continue
             path=[(fixed,v) if vertical else (v,fixed) for v in range(lo,hi+1,STEP)]

@@ -97,9 +97,12 @@ class Schematic:
         from .metrics import measure
         result=measure(self.scene)
         vector=self._vector()
+        minimum=min(i['size'] for i in vector.items if i['kind']=='text')*.75
         result.update(width_px=vector.width,height_px=vector.height,
+                      rendered_width_px=vector.display_size[0],rendered_height_px=vector.display_size[1],
                       aspect_ratio=vector.width/vector.height,
-                      min_font_pt_at_1000px=min(i['size'] for i in vector.items if i['kind']=='text')*.75*1000/vector.width)
+                      min_font_pt_at_1000px=minimum*1000/vector.width,
+                      min_font_pt_native=minimum*vector.display_size[0]/vector.width)
         return result
 
     def png(self, *, scale=1):

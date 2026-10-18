@@ -84,21 +84,47 @@ def sizing_slider(grid, pdk):
     return fig
 
 
-def value_selector(net):
-    """A small half-adder input selector recolors real mapped nets and hover."""
+def value_selector(net, *, title='Mapped half adder: choose the input trits'):
+    """Choose input trits; the routed schematic shows every settled net value.
+
+    All 3^n views are rendered once from the same routed scene, so buttons only
+    swap images: no kernel callback, and nothing moves between selections.
+    """
+    import base64, html, uuid
     from itertools import product
-    from tritflow.viz.graph import color_nets
+    from IPython.display import HTML
+    from tritflow.synth import evaluate_netlist
     pins = [p.name for p in net.ports if p.dir == 'input']
-    choices = list(product((-1,0,1),repeat=len(pins)))
-    figures = [color_nets(net,dict(zip(pins,v,strict=True))) for v in choices]
-    figure = go.Figure(figures[0])
-    figure.frames = [go.Frame(name=str(i),data=f.data) for i,f in enumerate(figures)]
-    figure.update_layout(title='Mapped half adder: choose settled input trits',
-                          updatemenus=[{'buttons':[{'label':str(dict(zip(pins,v))),
-                              'method':'animate','args':[[str(i)],{'mode':'immediate',
-                                  'frame':{'duration':0,'redraw':True},'transition':{'duration':0}}]}
-                              for i,v in enumerate(choices)],'x':0,'y':1.08}])
-    return figure
+    outs = [p.name for p in net.ports if p.dir == 'output']
+    base = net.schematic(expand='*', net_names=True, title=title)
+    trit = {-1: '−1', 0: '0', 1: '+1'}
+    uid = 'tv' + uuid.uuid4().hex[:8]
+    views = []
+    for combo in product((-1, 0, 1), repeat=len(pins)):
+        state = dict(zip(pins, combo, strict=True))
+        result = evaluate_netlist(net, state)
+        svg = base.annotate(inputs=state).svg
+        reading = ' · '.join(f'{name} = {trit[int(result[name])]}' for name in outs)
+        key = '_'.join(str(v) for v in combo)
+        views.append(f'<div data-key="{key}" style="display:{"block" if all(v == 1 for v in combo) else "none"}">'
+                     f'<div style="font:15px serif;margin:4px 0">outputs: {html.escape(reading)}</div>'
+                     f'<img style="max-width:100%;height:auto" src="data:image/svg+xml;base64,'
+                     f'{base64.b64encode(svg.encode()).decode()}"></div>')
+    buttons = []
+    for i, pin in enumerate(pins):
+        group = ''.join(f'<button type="button" data-pin="{i}" data-v="{v}" onclick="{uid}(this)" '
+                        f'style="font:14px serif;padding:3px 10px;margin:0 2px;border:1px solid #888;'
+                        f'background:{"#333" if v == 1 else "#fff"};color:{"#fff" if v == 1 else "#000"}">'
+                        f'{trit[v]}</button>' for v in (-1, 0, 1))
+        buttons.append(f'<span style="margin-right:18px;font:15px serif">{html.escape(pin)}: {group}</span>')
+    script = (f'<script>function {uid}(b){{var r=document.getElementById("{uid}");'
+              f'r.querySelectorAll("button[data-pin=\'"+b.dataset.pin+"\']").forEach(function(x){{'
+              f'x.style.background="#fff";x.style.color="#000";x.dataset.on=""}});'
+              f'b.style.background="#333";b.style.color="#fff";b.dataset.on="1";'
+              f'var k=[];for(var i=0;i<{len(pins)};i++){{var on=r.querySelector("button[data-pin=\'"+i+"\'][data-on=\'1\']");'
+              f'k.push(on?on.dataset.v:"1")}}'
+              f'r.querySelectorAll("div[data-key]").forEach(function(d){{d.style.display=d.dataset.key==k.join("_")?"block":"none"}})}}</script>')
+    return HTML(f'<div id="{uid}" data-trit-selector="1"><div style="margin:6px 0">{"".join(buttons)}</div>{"".join(views)}</div>{script}')
 
 
 def highlight_devices(mapping, devices, *, title):

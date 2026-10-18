@@ -3,7 +3,7 @@
     python3 -m tritflow.schematic.gallery --output build/schematic-review
 
 The overlay routes the real half-adder cell library and calls the public PNR
-net_parasitics() method. The geometry comparison uses the frozen phase-4
+net_parasitics() method. The geometry comparison uses the frozen phase-5
 gallery; the original baseline remains in the JSON manifest.
 """
 from __future__ import annotations
@@ -35,7 +35,7 @@ def generate(root,output):
     output.mkdir(parents=True,exist_ok=True)
     baseline=json.loads((Path(__file__).parent/'assets/baseline_metrics.json').read_text())['items']
     previous={item['name']:item['metrics'] for item in json.loads(
-        (Path(__file__).parent/'assets/phase4_metrics.json').read_text())}
+        (Path(__file__).parent/'assets/phase5_metrics.json').read_text())}
     cases=[('half_add','half_add',None),('full_add','full_add',None),('adder2','adder',2),
            ('adder4','adder',4),('mul1','mul1',None),('mac1','mac1',None)]
     cases += [(name,item.top,None) for name,item in DESIGNS.items()]
@@ -69,7 +69,7 @@ def generate(root,output):
     manifest.append({'name':'legend','metrics':empty,'before':baseline['legend']})
     for item in manifest:item['previous']=previous[item['name']]
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-    rows=['# Schematic geometry: phase 4 → phase 5','',
+    rows=['# Schematic geometry: phase 5 → phase 6','',
           'Wire length is in drawing pixels, not chip micrometres. A bend is a unique same-net '
           'degree-two orthogonal corner; T joins are excluded. Crossings count distinct '
           'different-net perpendicular intersections. Aspect is full canvas width / height; '
