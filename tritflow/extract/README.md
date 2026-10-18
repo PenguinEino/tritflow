@@ -84,3 +84,21 @@ layer wholly contained in that metal and reports excluded area in
 `excluded_unconnected_metal_um2`. Only nets retained by the device extractor
 receive capacitors; this does not invent capacitance connections for floating
 rails. Signal/connected rail metal remains measured from actual geometry.
+
+### Reviewed IP62 data (Phase 4)
+
+`parameter_audit()` / `results/pdk_parameters.json` distinguish published facts
+from assumptions, including document pages and hashes. OS00 rev1.1 p17 supplies
+M1/M2/stepped-M1 width-specific current limits and 780 µA per TC cut (7.8 mA
+instantaneous ceiling). The IR result's `em_check` compares estimated DC branch
+currents to linear width scaling of those limits, using conservative stepped-M1
+for all M1. This is a power-network estimate, not sign-off EM; contacts, signals,
+internal-cell metal and transient/temperature/lifetime effects remain outside it.
+
+No metal sheet R, generic contact/via R or metal-to-substrate area/fringe C was
+found in all seven open PDFs/model libraries. Existing numerical R/C assumptions
+remain labelled. OS00 p9's RS=120 Ω/square and RR=1000 Ω/square are resistor-device
+specifications; their nonlinear models remain in SPICE. OS04 p7's M1/M2 ESD
+2 pF / 64000 um² overlap rule and OS00 p10's CSIO density are recorded with their
+scopes and are not substituted into the metal-to-substrate model. See SIM status
+for the full search and before/after comparison.

@@ -1,4 +1,4 @@
-# PNR stream — phase 4
+# PNR stream — phase 5
 
 ## Done
 
@@ -24,6 +24,55 @@ Phase-1 `/tmp` artifacts are superseded by these project-local results.
 - `tritflow.viz.layout` provides the KLayout raster with embedded layer legend,
   Plotly net/instance selection, placement + HPWL animation, and routing replay.
   Figures are normal notebook-ready Plotly Figures; exported HTML embeds Plotly.
+
+## Phase 5 — manufacturing qualification (in progress)
+
+The real local MPW flow was read from
+`~/TR-1um_MPW_Sanken/.github/workflows/check.yml`,
+`~/TR-1um_MPW_Sanken/scripts/pre_check.py`, and the user's previous
+`~/balanced-ternary-logic/scripts/verify_half_adder_layout.py` /
+`verify_full_adder_layout.py`. It runs drawing DRC, drawing LVS, MDP via
+`run_mdp.drc`, then `run_IP62.drc`. The PDK's Python MDP wrapper and prior
+submission pass `cellname` to the MDP deck; the template passes `top_cell`,
+which that particular deck does not read. Both current PNR GDSs have one top;
+our call explicitly uses the supported `cellname` argument.
+
+Initial actual results: adder4 46 and full_add 16 `WAR06: Floating SG Detected`
+mask items, all traced through actual mask SG/CO/M1/V1/M2 to their external
+input nets. No other mask violation class appears. These are counted as
+failures. Drawing DRC and strict drawing LVS remain clean. The previous full
+adder's `FULL_ADDER_POST_LAYOUT.md` records the same 16 external-input warnings.
+The full-chip precheck rejects these unframed core macros: their boundaries
+are not [-1250,-1250,1250,1250] µm and no OSS_FRAME/OSS_FRAME_TEG exists.
+The final reports, provenance and regressions are being completed.
+
+**Interface requests for FRONTEND/integrator:** the owned public
+`PnrResult.signoff()` and `tritflow.pnr.signoff(result, ...)` are implemented.
+To expose the requested method on FRONTEND's `tritflow.flow.Layout` wrapper,
+add this delegate in that owned file (PNR does not edit it):
+
+```python
+def signoff(self, *, output_dir=None, **kwargs):
+    from tritflow.pnr import Library
+    return self.result.signoff(
+        netlist=self.netlist, library=Library.load(self.settings.cells),
+        output_dir=output_dir,
+        **{"pdk_root": self.settings.pdk,
+           "klayout_binary": self.settings.klayout, **kwargs})
+```
+
+The helper caches on disk, including failed physical-check results, only while
+all consumed inputs and every generated report/GDS/rule snapshot hash agree.
+Report fields are `clean` (macro qualification) and `submission_ready`
+(additionally requires a successful supplied MPW-template precheck). Both
+are false for the current macros. No successful mask-LVS result is claimed:
+the inspected workflow does not define that step.
+
+**Interface requests for CELLS:** none from current evidence. Every floating
+SG marker is electrically attributed to an external input; none is an
+unmapped internal cell gate. Frame/real I/O integration must preserve the
+three supply domains and resolve those exposed-input connections before a
+full-chip re-run. Current PNR outputs and power JSON are unchanged.
 
 ## Phase 4 — robustness
 

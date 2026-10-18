@@ -364,3 +364,119 @@ key tables on OS00 pages 9/17 and OS04 page 7 were rendered and visually checked
 No packages installed. Text and page images are under `build/pdk_data/`.
 The prior measured datasets/summaries are preserved in `results/phase3_assumed/`
 for direct numerical comparison after the rerun.
+
+### Phase 4 PDK-document audit — findings
+
+Reviewed all **109 pages in seven PDFs** under
+`~/pdk/TR-1um/openIP62/IP62/Technology/doc/` with `pdftotext -layout`, searched
+Japanese/English resistance, capacitance, contact/via and current-limit terms,
+and rendered the key embedded/text tables with `pdftoppm`. PDF and printed page
+numbers agree for the cited OS00/OS04 pages. Source hashes are published in
+`results/pdk_parameters.json`; the same manifest accompanies every post-layout
+run as `postlayout/pdk_parameters.json`. No PDK/reference files were edited.
+
+| Quantity | Primary evidence | Finding / action |
+|---|---|---|
+| M1/M2 sheet resistance | Seven open PDFs and installed model libraries searched; OS00 rev1.1 p5 Table I-1-2 lists parasitic extraction unavailable | **Not found.** Retain **0.05 Ω/□** on both metals as an assumption. |
+| Poly resistor sheet resistance | `OS00_リファレンスマニュアル_rev1.1.pdf`, **p9**, Table I-2-4 | RS **120 Ω/□**, RR diffusion **1000 Ω/□**, both specified at **W=6 µm**, absolute tolerance ±15%. These describe resistor devices; TritFlow routes M1/M2. Existing nonlinear PDK resistor models stay in SPICE. |
+| Resistor-model coefficients | `models_IP62_res_v5.lib`, `F_RS` / `F_RR` | RS uses **95.0** in its empirical L/W term; some RR width branches use **834.54** with effective dimensions/end/bias/temperature corrections. The actual **W=2.8 µm RR** branch uses a length polynomial and bias/temperature corrections. These constants do not define metal or generic contact resistance. |
+| MOS `rsh` | `models_IP62_mos_v2.lib`, `PMOS_mst` | **44.9607** is inside the MOS device model. It is not an M1/M2 sheet parameter. |
+| Contact / TC via resistance | PDFs and all four model libraries searched | **Not found.** Contact resistance remains unmodeled separately; TC resistance remains an explicit **0.05 Ω per cut** assumption. The resistor model's `2.79` end-correction term is not documented as a generic contact resistance. |
+| Metal-to-substrate area/fringe C | PDFs and model libraries searched; OS00 **p5** Table I-1-2 | **Not found.** Retain assumed M1/M2 area **0.03453/0.01727 fF/µm²**, fringe **0.02 fF/µm perimeter**. No new substrate coefficient is claimed. |
+| M1–M2 overlap C for ESD | `OS04_ESD保護素子ガイドライン_rev1.pdf`, **p7**, §2.1 item ⑥ and note | At least **64,000 µm² overlap** for at least **2 pF**. The derived ratio is **0.03125 fF/µm²**. This is an ESD intermetal-overlap sizing rule, not a characterized metal-to-substrate/fringe extraction coefficient. It is recorded without substituting it into the substrate model or adding generic coupling. |
+| Capacitor-device density | OS00 **p10**, Table I-2-5; `models_IP62_cap_v5p1.lib` | **CSIO 0.6 fF/µm²** and its device-specific body model. These are already handled by PDK capacitor models where present; no interconnect substitution. |
+| Current / EM limits | OS00 **p17**, Tables I-3-1 and I-3-3 | **M1 900 µA at 2 µm; M2 3.7 mA at 3 µm; stepped M1 500 µA at 2 µm; TC 780 µA per 1.4 µm square, instantaneous ceiling 7.8 mA/cut.** Forwarded under Interface requests above. |
+
+Search coverage: `OS00_リファレンスマニュアル_rev1.1.pdf` (42 pages),
+`OS01_インストールマニュアル_rev1.pdf` (12),
+`OS02_回路simガイドライン_rev1.pdf` (16),
+`OS03_レイアウト検証ガイドライン_rev1.pdf` (17),
+`OS04_ESD保護素子ガイドライン_rev1.pdf` (10),
+`OS05_スタンダードセルラインナップ_rev1.pdf` (3), and
+`OS06_素子接続ガイドライン_rev1.pdf` (9).
+Models searched: `ip62_models`, `models_IP62_{mos_v2,res_v5,diode_v2,cap_v5p1}.lib`
+in the active `libs.tech/spice/models` directory, plus the upstream copies under
+`openIP62/IP62/Technology/tech/models/ngspice`. Active MOS/diode wrappers differ
+from upstream copies; their actual source hashes are recorded. No models were
+changed. Existing `pdftotext`/`pdftoppm` sufficed; no packages installed.
+
+### Applied parameters and rerun comparison
+
+`tritflow.extract.technology` now centralizes documented current limits and
+explicit R/C fallbacks. `parameter_audit()` exposes the reviewed facts, scopes,
+absent-data decisions and source hashes. Capacitance/IR reports distinguish
+assumptions from caller overrides. There is **no supported numerical replacement
+for the metal R, TC R or substrate/fringe C** in this open PDK, so those numbers
+remain unchanged rather than assigning device/ESD quantities to the wrong model.
+
+The IR solver additionally assesses each solved power-network branch against
+PDK limits: all M1 uses the conservative stepped-M1 rating, M2 uses its field
+rating, and each TC cut uses 780 µA. Metal-width scaling is an **engineering
+interpretation of the published width-specific limits**. This DC envelope
+assessment excludes contacts, internal cell/signal conductors, transients,
+current crowding, PVT/lifetime derating and sign-off EM qualification. It does
+not clamp or change currents/voltages and does not feed back into ngspice.
+
+All four original designs and **N=1…6** were re-extracted with strict LVS,
+rechecked pre/post with actual-GDS C, solved for IR and independent static power.
+Every analog/DRC/LVS check still passes. All six scaling GDS hashes are identical
+to their saved Phase 3 counterparts. `results/phase4_comparison.json` records:
+
+- Scaling **Δarea=0, Δcarry=0, Δstatic power=0, Δrail deviation=0, Δzero shift=0**
+  for every width. Reusing hash-identical electrical waveforms preserves measured
+  evidence; measurements and physical verification were rerun.
+- The original adder4/mac1/mul1 metrics are unchanged. Full_add settling differs
+  only by floating-point rounding (~8.5e−22 s); its IR/zero shift is unchanged.
+- The load sweep was revalidated with the same coefficients. The measured
+  **12.8125 pF PASS / 12.96875 pF FAIL** boundary is unchanged.
+
+All ten DC power-network checks pass their width-scaled interpretation. Maximum
+utilizations for scaling N=1…6 are **89.73%, 68.63%, 93.37%, 93.66%, 48.88%,
+99.00%**. N=6's worst estimated M1 branch is **0.990 mA / 1.000 mA** at 4 µm;
+its worst TC is **0.557 mA / 0.780 mA**. The small nominal M1 margin does not
+establish PVT or lifetime margin. Full per-kind results and exact assumptions
+are retained in each `ir_drop.json` and the scaling matrix's `em_check`.
+
+Baseline records are preserved in `results/phase3_assumed/`; current measurements
+remain in `results/adder_scaling.json` and `build/<design>/postlayout/`.
+`examples/adder_scaling.py` regenerates the matrix, fit figure, load boundary and
+comparison (unavailable/running original-design summaries remain explicit until
+`examples/postlayout_all.py` completes).
+
+### Chapter 7 fits and static-power implication
+
+`fit_scaling(result)` and `result['fits']` contain free-intercept ordinary least
+squares over **all six passing measured widths**, with source points,
+predictions, residuals, R², RMS and maximum residual. No unmeasured widths are
+extrapolated. `tritflow.viz.scaling.scaling_fit_figure(result)` returns a Plotly
+figure; the ready artifact is **`results/adder_scaling_fit.html`**. Existing
+`scaling_figure()` continues to show area/cells, delay, power and IR panels.
+
+Fits (N in trits, delay in ns, C = mapped cell count):
+
+- **Pre-layout:** `t = 5.925 + 49.162 N`, R²=0.999999885,
+  RMS residual **0.0285 ns**.
+- **Post-layout:** `t = 14.685 + 47.258 N`, R²=0.998376581,
+  RMS residual **3.255 ns**. Small-width routing/loading overhead affects this
+  all-width slope; it is not replaced by a selectively fitted tail slope.
+- **Static:** `P_max[mW] = 0.000141 + 4.169084 C`, R² rounds to 1.000000.
+  With **16 cells per trit**, this is about **66.705 mW per added trit** for
+  this adder cell mix and the documented-state maximum.
+
+These fits describe deterministic nominal samples, not PVT confidence limits.
+The 2 ns transient timestep still limits interpretation of tiny delay changes.
+The effective **4.169 mW/cell** is an average for this mapped adder mix/bias,
+not a universal current/power rating for every cell.
+
+**The static cost persists without switching.** At N=6, the all-zero input DC
+operating point draws about **40.023 mA** from each end of the **10 V** supply
+span, yielding **0.400232 W** with constant inputs. The resistive-divider
+ternary cells establish their midpoint through conducting pull-up/resistor/
+pull-down paths. Lower clock frequency alone does not remove this bias current.
+The measured DC dissipation is a substantial cost of this implementation;
+these results do not demonstrate a low-static-power alternative to CMOS.
+The reported maximum covers all 27 states for N=1 and nine documented states
+for larger N, not an exhaustive N=6 maximum. Dynamic power, regulator losses,
+and energy/operation are not measured by this DC fit.
+
+Phase 4 final regression is running; the completed result will be recorded here.

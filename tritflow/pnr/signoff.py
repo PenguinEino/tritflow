@@ -159,7 +159,10 @@ def signoff(result, netlist=None, library=None, *, output_dir=None, pdk_root=PDK
     if netlist is None:
         netlist = getattr(result, "netlist", None)
     if netlist is None:
-        netlist = GateNetlist.load(source.with_name(f"{top}.json"))
+        reference_path = source.with_name(f"{top}.json")
+        if not reference_path.exists():
+            raise ValueError("Sign-off needs the gate reference: pass netlist=... or retain <top>.json beside the GDS")
+        netlist = GateNetlist.load(reference_path)
     if isinstance(netlist, (str, Path)):
         netlist = GateNetlist.load(netlist)
     if netlist.top != top:
@@ -189,8 +192,11 @@ def signoff(result, netlist=None, library=None, *, output_dir=None, pdk_root=PDK
     out = Path(output_dir or source.parent/"signoff").resolve(); out.mkdir(parents=True, exist_ok=True)
     summary_path = out/"signoff.summary.json"
     if not force and summary_path.exists():
-        previous = json.loads(summary_path.read_text())
-        if previous.get("fingerprint") == fingerprint:
+        try:
+            previous = json.loads(summary_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            previous = {}
+        if previous.get("fingerprint") == fingerprint and previous.get("artifacts"):
             try:
                 if all(_hash(path) == digest for path, digest in previous["artifacts"].items()):
                     return {**previous, "cache_hit": True}
