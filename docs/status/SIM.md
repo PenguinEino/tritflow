@@ -2,7 +2,19 @@
 
 2026-10-18. Qualification target: **5d963db9d44e192d37a0489c208bfccf2e2f690c**, installed at `$TR1UM_PDK` / `~/pdk/TR-1um-pinned`. CELLS generation **2026-10-18T10:26:47.211617+00:00** and the final PNR Phase 7 outputs are consumed. Phase 7 adds per-net reporting; all four canonical GDS files and complete rail networks are unchanged. No blockers or extra installed packages. No PDK/reference files or foreign source paths were edited; no git-writing commands ran.
 
-The completed pinned Phase 7 campaign covers all four canonical post-layout loops, N=1…6 scaling, load sweep, sizing grids, eight electrical `.char.json` files, robustness matrix and derived figures. Subsequent source-freshness findings are recorded below. `results/pinned_requalification.json` checks consumed hashes, native PDK identity, actual C-element counts and retained artifacts, and records every reported numeric change against the preserved dev baseline. `results/environment.json` records local Python 3.12 / native KLayout 0.30.9 / Python KLayout 0.30.6 / ngspice 46+ and executable hashes on aarch64. This is local qualification, not a new clean amd64 Colab run.
+The pinned publication campaign is current with frozen synthesis source `mapping.py` SHA-256 **f9f51ffa90ddcbd15e8d14004becbc4ec799228cc5d0d9642246c9ee38ad5cd1**. It covers all four canonical post-layout loops, N=1…6 scaling, load sweep, sizing grids, eight electrical `.char.json` files, robustness matrix and derived figures. `results/pinned_requalification.json` reports **passed=true, errors=[]** and checks consumed hashes, native PDK identity, actual C-element counts and retained artifacts. `results/environment.json` records local Python 3.12 / native KLayout 0.30.9 / Python KLayout 0.30.6 / ngspice 46+ and executable hashes on aarch64. This is local qualification, not a new clean amd64 Colab run.
+
+## Frozen-synthesis republication — complete
+
+Regenerated all ten designs against the final synthesis source: the four canonical examples and scaling adders N=1…6. Their **50 JSON netlist / gate HDL / SPICE / JSON-report / text-report artifacts are byte-identical** to the earlier campaign, including equivalence results. `mapping.py` was the sole changed consumed campaign source, from `5e208b86…` to `f9f51ffa…`.
+
+Reran the standard scaling producer (including six public PNR builds), all four canonical native LVS/post-layout producers, the load producer and derived diagnostic/rail reports. Fresh producers computed their current configuration/source hashes. Exact matching circuit/stimulus/models/options reused validated electrical caches and remeasured waveforms; results were not relabelled in place. The 54-case robustness matrix and cell/sizing data retain identical consumed inputs.
+
+**No scientific number changed.** An exact comparison of **22,438 numerical values**, excluding fields named `runtime_s`, found zero differences. All **10 GDS files, 52 SPICE files, 33 waveform NPZ files and six static-result JSON files** are byte-identical. Six PNR JSON runtime records, source/configuration/artifact hashes and execution timings changed. Carry fits remain **48.952465 / 56.881393 ns/trit**, static power remains **4.169084 mW/cell** and **0.400232 W at N=6**, and the load bracket remains **12.81250 pF PASS / 12.96875 pF FAIL**.
+
+Machine-readable evidence: `results/frozen_synth_requalification.json`; before-state records: `results/frozen_synth_before/`. The notebook's actual `verify_publication_sources` accepts **all six scaling rows and the load record with zero compatibility proofs**, so no old-source exception is needed. `results/pinned_requalification.json` passes after consuming the new evidence report. Full `python3 -m pytest tests/sim tests/extract -q`: **71 passed in 124.64 s**, JUnit `build/sim_verification/pytest_frozen_synthesis.xml`. No production source, notebook source, PDK/reference file or dependency changed during this republication.
+
+Reproduce the producers with `python3 examples/adder_scaling.py --jobs 2 --skip-load`, `python3 examples/postlayout_all.py --timeout 1200`, then `python3 examples/adder_scaling.py --load-only`; run the corner/diagnostic/audit commands below afterward. Retained collector `python3 build/report_frozen_synth.py` verifies the before-state files, byte identities, every numeric delta, the actual notebook verifier and final audit. Logs: `build/sim_frozen_{synthesis_proof,scaling,postlayout,load,corners,diagnosis,refined,rails,comparison,tests}.log`.
 
 ## Colab round2-15b — load-boundary presentation repair
 
@@ -10,7 +22,7 @@ The completed pinned Phase 7 campaign covers all four canonical post-layout loop
 
 The regression checks the exponent-to-pF range against the actual loads, including unsorted input, and verifies that the two captions occupy separate regions. `python3 -m pytest tests/sim/test_scaling.py -q`: **8 passed**. Full `python3 -m pytest tests/sim tests/extract -q`: **71 passed in 123.89 s**; JUnit `build/sim_verification/pytest_load_plot.xml`. Refreshed `results/full_add_load_sweep.html`; the local Kaleido rendering at `build/sim_verification/load_boundary_fixed.png` was visually checked. No simulation data, electrical conditions, notebook source or dependency changed; no new Colab run is claimed.
 
-The follow-up publication audit detects one pre-existing source mismatch: `tritflow/synth/mapping.py` is now `f9f51ffa…`, while the electrical publications consumed `5e208b86…`. `results/pinned_requalification.json` correctly reports this stale source. This presentation repair does not refresh the independent synthesis/electrical campaign; the completed pinned-PDK campaign and passing source audit described below refer to the earlier handoff.
+The presentation-only follow-up initially detected a source mismatch: `mapping.py` was `f9f51ffa…` while the electrical publications consumed `5e208b86…`. The frozen-synthesis republication above resolves it; the final manifest and notebook checks now pass.
 
 ## REVIEW 2 and 6 — physical ports and naming
 
@@ -165,7 +177,7 @@ Notebook reads are cached: `load_scaling`, `load_corners`, `load_grid`, `load_sw
 
 ## Interface requests
 
-Colab presentation follow-up: integrator/FRONTEND should refresh the scaling/load publications against the final `synth/mapping.py` revision before claiming they match current synthesis sources. The plot repair is complete and its measured electrical data are unchanged.
+No outstanding interface request. The frozen-source publication follow-up is complete; scaling/load records carry current strict source hashes, and the notebook verifier requires no compatibility exception. The load-plot repair remains in the republished figures.
 
 PNR adopted physical-rail/encoded-port evidence and the published EM ratings. The source writer was not edited. Fixed-band low-supply failures, unavailable process corners, cold extrapolation, assumed interconnect R/C and 0.4 W static power must remain explicit in notebook claims.
 
