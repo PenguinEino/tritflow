@@ -38,7 +38,7 @@ The original notebook cells and bootstrap stay identical. Interactive figures
 return on normal re-execution; animation stills show the initial recorded frame.
 
 The repeated four-design campaign is committed in the source repository as
-`notebook/assets/four_designs.zip`, never copied into the seven-file payload.
+`notebook/assets/four_designs.zip`, never copied into the eight-file payload.
 Its reader checks source/PDK/abstract/manifest/publication identity, experiment
 options and all native evidence bytes before displaying recorded outcomes.
 It does not turn the producer's tool version into a local cache key. A fresh

@@ -68,6 +68,7 @@ campaigns remain recorded evidence, validated by consumed-source/PDK hashes.
 
 The TritFlow notebook/code is offered under **Apache-2.0**; the full license is
 included as [LICENSE](LICENSE), matching the source project's license.
+[NOTICE](NOTICE) preserves the source project's attribution notices.
 External tools and the OpenSUSI PDK retain their own licenses; this folder does
 not relicense or bundle their distributions. OpenSUSI TR-1um is Apache-2.0.
 The schematic images derive from the linked historical reference project.

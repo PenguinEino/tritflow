@@ -91,6 +91,16 @@ class Schematic:
     def pdf(self):
         return self._vector().export('pdf')
 
+    @property
+    def metrics(self):
+        """Drawing wire length, bends, crossings and rendered canvas aspect."""
+        from .metrics import measure
+        result=measure(self.scene)
+        vector=self._vector()
+        result.update(width_px=vector.width,height_px=vector.height,
+                      aspect_ratio=vector.width/vector.height)
+        return result
+
     def png(self, *, scale=1):
         """Raster preview for review; the default publication artifact is SVG."""
         if not math.isfinite(scale) or scale <= 0:

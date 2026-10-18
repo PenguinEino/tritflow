@@ -171,10 +171,11 @@ def place(nodes,driver,loads,arithmetic):
         column=0;fold=0
         for level in unique:
             group=sorted(levels[level],key=lambda n:natural(n.key))
-            across=math.ceil(len(group)/3)
+            percol=2 if len(group)>=4 and all(n.kind=='block' for n in group) else 3
+            across=math.ceil(len(group)/percol)
             if column+across>4:column=0;fold+=1
             for row,node in enumerate(group):
-                put(node,160+(column+row//3)*208,offset_y+fold*fold_span+(row%3)*208)
+                put(node,160+(column+row//percol)*208,offset_y+fold*fold_span+(row%percol)*208)
             column+=across
 
     # External terminals follow their consumers/producers, not a bus-name sort

@@ -33,7 +33,7 @@ ROOT = HERE.parent
 sys.path.insert(0,str(ROOT))
 SOURCE = ROOT/"notebook/tritflow_tr1um.ipynb"
 DESTINATION = HERE/"ISSCC27/submitted_notebooks/TritFlow"
-FILES = {"tritflow_tr1um.ipynb", "README.md", "LICENSE", "ABSTRACT.md", "PITCH.md", "CHECKLIST.md", "build-info.json"}
+FILES = {"tritflow_tr1um.ipynb", "README.md", "LICENSE", "NOTICE", "ABSTRACT.md", "PITCH.md", "CHECKLIST.md", "build-info.json"}
 LIMIT_BYTES = 8*1024*1024  # own packaging budget, not an official limit
 
 
@@ -287,7 +287,8 @@ def package(document, source, destination, team, info):
                                                     info.get("source_commit_at_bootstrap")))
     for name in ("ABSTRACT.md","PITCH.md","CHECKLIST.md"):
         (destination/name).write_text(read_template(name))
-    shutil.copyfile(ROOT/"LICENSE",destination/"LICENSE")
+    for name in ("LICENSE", "NOTICE"):
+        shutil.copyfile(ROOT/name,destination/name)
     info["files"] = {p.name:{"bytes":p.stat().st_size,"sha256":digest(p)} for p in destination.iterdir()
                      if p.name != "build-info.json"}
     info["file_count"] = len(FILES)
