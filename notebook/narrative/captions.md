@@ -88,3 +88,18 @@ per output under nominal models (run family {paper_scaling.run_id}).
 (b) The tested-state DC-power maxima give an effective
 {scaling.power_per_cell_mw} mW per mapped cell for this adder mix;
 (c) die area and cell count show the physical cost of increasing width.
+
+## fig_sta
+
+**Ternary static timing compared with extracted-circuit SPICE** Each point
+compares an output's maximum over the same input-transition set, using
+transition-class midpoint delays, propagated slew and one endpoint settling
+tail; the line denotes equality and shading marks ±{sta.target_pct}%.
+Across the example designs and adders of width
+{paper_scaling.width_min}–{paper_scaling.width_max}, {sta.within_target} of
+{sta.output_count} output maxima fall within this band, with
+{sta.mape_pct}% mean absolute percentage error (routing realizations:
+{sta.run_ids}).
+The separate conservative envelope, not plotted here, averages
+{sta.bound_mean_factor}× the measured maxima and is conservative on the saved
+nominal cases, without constituting a certified analog bound.

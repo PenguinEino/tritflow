@@ -50,5 +50,46 @@ the power comparison uses a separate all-zero DC state.
 The current flows with the inputs held still; reducing switching frequency
 alone does not remove it. The separate rail-network results appear in Appendix B.
 
-These results cover the displayed input sequences and model conditions;
-Appendix A collects their scope.
+### Predict with static timing, confirm with SPICE
+
+The single-slice estimate explains the width trend. Ternary static timing
+analysis (STA) resolves the actual cell path: each arc is characterized for
+its directed input/output trit transition and side-input state, using the
+midpoint between that transition's old and new voltages. A step involving
+the middle level therefore has a different threshold from a full-rail step.
+
+STA composes midpoint-to-midpoint delays and passes each output's measured
+slew to the next cell. It adds the time from the final output midpoint to
+permanent entry into the ±{levels.band_v} V band once, at the endpoint;
+adding full settling at every gate would count intermediate tails repeatedly.
+For the matched comparison, ordered pin events represent reconvergent paths
+and use the same input-transition set, wire capacitances, load and ramp as
+SPICE. Pass complete before/after input dictionaries to `vector_pairs`:
+
+```python
+from tritflow.sta import analyze
+names = [p.name for p in net.ports if p.dir == "input"]
+states = [dict(zip(names, v)) for v in vectors]
+timing = analyze(net, vector_pairs=list(zip(states, states[1:])), wire_caps=wire_caps,
+                 output_load_f=load_f, input_transition_s=ramp_s)
+timing.arrival
+```
+
+Here `vectors`, `load_f` and `ramp_s` are the actual SPICE stimulus and settings;
+`wire_caps` maps logical net names to the same extracted-GDS wire estimates.
+
+<!-- figure: ch7-sta -->
+<!-- hero: fig_sta; caption: captions.md -->
+
+![Ternary static timing versus post-layout SPICE for matched input-transition sets.](../../figures/out/fig_sta.png)
+
+> **What this shows.** In the recorded validation, {sta.within_target} of
+> {sta.output_count} output maxima for matched input-transition sets lie
+> within ±{sta.target_pct}% of SPICE, with {sta.mape_pct}% mean absolute
+> percentage error. The exception is `{sta.outlier_endpoint}`, overpredicted
+> by {sta.outlier_error_pct}%; partial-pulse amplitude and history are not
+> represented by the event model.
+
+The separate conservative bound averages {sta.bound_mean_factor}× the measured
+output maxima—about twice as loose—and covers the saved nominal cases,
+without certifying untested waveforms or process/voltage/temperature corners.

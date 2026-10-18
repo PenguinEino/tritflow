@@ -1,6 +1,136 @@
-# EDITOR — phase 3 review revisions complete
+# EDITOR — phase 4 authoring complete
 
-Updated: 2026-10-18.
+Updated: 2026-10-19.
+
+## Phase 4 — plan review, reuse and public README
+
+### Done
+
+- Read the new **Plan review 2026-10-19**, binding interfaces, brief, concept,
+  author information and current STA/PNR reports. Inspected the actual package,
+  flow, schematic, STA, chip, cell-generation and HDL/synthesis entry points.
+- Added chapter 7 **Predict with static timing, confirm with SPICE**: directed
+  trit-transition midpoint thresholds, side-input classes, propagated slew,
+  one endpoint settling tail, ordered events and the matched-set accuracy.
+  The one outlier stays visible. The conservative estimate gets one honest
+  line about its roughly twofold looseness and finite nominal scope.
+- Added `fig_sta.png` as the subsection hero, visually inspected it and added
+  its three-sentence paper caption. The caption compares output maxima over
+  matched input-transition sets; it does not assert that the two maxima occur
+  on one identical transition. The conservative estimate is not the scatter.
+- Added chapter 9 **From your HDL to a shuttle-ready top**, with the real
+  `layout.result.to_chip()` → `ChipResult.signoff()` calls, MPW frame/passive
+  pads, drawing DRC/strict LVS, MDP/mask DRC and MPW precheck. The recorded
+  physical checks are separate from `submission_ready=false`. The remaining
+  allocation, custom pad map, bonds/supplies/substrate, process/ESD, package/load,
+  metadata and organizer-CI steps are explicit. No post-mask LVS is implied.
+- Added **Appendix C. Use and extend TritFlow** (`C_reuse.md`): editable pip
+  installation from GitHub, native setup, the seven-line API, real module
+  CLIs, and concrete cell/operator extension files and checks. New cells need
+  evaluator/pin-order/characterization/STA/rendering support in addition to
+  geometry; new operators need explicit IR, optimization and mapping behavior.
+- Added `readme_final.md`, superseding `readme_draft.md` for publication at
+  the source repository root: pitch/figure, Colab and local quickstarts,
+  verification scope, optional framed top, Apache-2.0/NOTICE and PDK/original
+  design references. The author block exactly matches docs/author.md.
+- Updated Appendix A/B, figure placement and the placeholder registry for
+  these additions. All new result numbers remain sourced substitutions.
+  Kept the earlier interactive specifications optional. No figure was
+  regenerated; release alone redraws images before capturing their hashes.
+
+### Decisions recorded
+
+- Use an **editable VCS source install**: setuptools discovers `tritflow*`,
+  while the complete flow also requires repository cell/example/notebook
+  assets. A plain package-only installation is not a complete-flow quickstart.
+- The exactly seven-line example performs one all-zero steady-state smoke
+  simulation. The prose says this plainly and points to independent integer
+  oracles/transition plans for arithmetic verification. No fabricated coverage
+  claim is attached to that short example.
+- The STA example takes the actual logical-net `wire_caps` dictionary used
+  by SPICE, along with its stimulus/load/ramp. Passing PNR data alone selects
+  a different wire estimate. Mapping the native extraction report belongs in
+  a collapsed helper, not the visible method code.
+- Keep the named successful Colab record historical and source-specific:
+  **2c81d2c**, **18 cells**, **405 s**, successful **second** Run all, excluding
+  the initial setup attempt and retry gap. It proves neither an uninterrupted
+  cold install nor completion of the new phase-4 notebook. The final README
+  uses placeholders for those observations and preserves the compatible-badge
+  guard separately from the install revision.
+- New STA routing labels derive from its own consumed native artifacts.
+  Its examples are adder4 seed 7, full_add seed 19, mac1/mul1 seed 0; the
+  six scaling adders use seed 7. Do not replace this set with the four-design
+  ZIP's all-seed-zero identities.
+
+### Validation
+
+- Editorial checks pass: **123 used tokens**, **161 unique registrations**,
+  ten chapter anchors/takeaways, **nine** captions of 1–3 sentences, balanced
+  math/details, opening-word limits, exact author block, intact 100-word
+  abstract/two-sentence teaser, no trailing whitespace or internal-process
+  words in the main chapters. All new Python snippets compile. Main chapters
+  are **2,884 whitespace words**, within the reading target;
+  Appendix C and README are approximately **810** and **760** words.
+- Both API examples are identical and exactly seven lines. Executed their
+  source/synthesis prefix in memory: `adder2`, **32 cells**, **243** independent
+  integer-arithmetic checks pass; the public schematic API returns valid SVG.
+  No physical/extraction/simulation stage was invoked for this prose check.
+- Exercised `--help` for synth, PNR, cells, SIM characterization and STA
+  characterization. All documented options and private-library paths exist.
+- Recomputed STA statistics from all **39** output rows: **38** within
+  **±20%**, **6.782062812%** MAPE, **10.4786204 ns** MAE; the exception
+  `scaling/adder2/cout` is **+36.4789118%**. The separate bound averages
+  **2.1815589945×**; **838** saved output observations (**799** transitions)
+  have zero underpredictions. `accuracy_passed=false` and
+  `certified_analog_bound=false` remain explicit in the registry/evidence scope.
+- Verified all **16** STA code fingerprints, all ten consumed design GDS
+  hashes and all ten native post-layout measurement hashes. Their simulated
+  maxima still equal the validation's values. **However, 27 of the 622 broad
+  source-fingerprint entries no longer match**, including six scaling PNR
+  records, their copied input PNR/summary records, and nine results JSON/HTML
+  files. The stored `qualified_current=true` is not a live freshness check.
+  No current full-source requalification is claimed; the prose labels the
+  comparison recorded. Release handling is requested below.
+- Inspected the canonical adder chip data: **2500 × 2500 µm**, **23 pads**,
+  drawing/mask DRC **0**, strict drawing LVS **Match**, MPW precheck **Pass**,
+  `submission_ready=false`, no post-mask LVS stage. All **49** retained
+  signoff artifact hashes match. This checks saved evidence, not a fresh
+  full-top signoff replay against every current code/input fingerprint.
+- Verified the named Colab record's referenced evidence hashes and its retry
+  timing scope. The current notebook is a later source; no new Colab claim.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m pytest notebook/tests/test_presentation.py -q -p no:cacheprovider`
+  — **5 passed in 0.42 s**. No notebook-generation test was run because it
+  writes FRONTEND's .ipynb. There is no `tests/editor/` suite.
+
+### Interface requests / integration
+
+1. **FRONTEND:** insert `C_reuse.md` after Appendix B; render the new ch7/ch9
+   sections and `fig_sta` caption/bytes. Populate the **21** new registered
+   context fields in placeholders.md and render both appendices' substitutions
+   before insertion. Keep accuracy and conservative-estimate columns separate
+   and retain all outliers/routing identities in detailed output rows. Supply
+   the STA example's logical-net wire-C mapping in its collapsed helper.
+2. **FRONTEND/PNR:** preserve a verified portable subset of the canonical
+   framed-top reports/pad map/identities. The new chapter must not require the
+   author's ignored `build/`. Select the compatible paper adder result for
+   the chip demo, not the archived seed-zero adder or an unrelated live layout.
+   Use explicit low-level library/PDK/binary options for nondefault settings.
+3. **STA/integrator:** before publication, refresh the broad validation
+   fingerprint against the updated sources, or retain a verified matching
+   historical snapshot for the recorded result. The unchanged GDS/waveforms
+   support the quoted saved measurements, but do not waive the changed-input
+   guard. Do not silently display the saved `qualified_current` as a fresh
+   check. No STA/result paths were changed by EDITOR.
+4. **Integrator:** render `readme_final.md` to the public root README only
+   with a public immutable install commit and compatible notebook badge.
+   Preserve the named Colab record's retry/revision qualification and perform
+   a new real-Colab run for the final integrated source. Final figures are
+   regenerated only in the release step before image hashes are captured.
+
+No EDITOR authoring remains; these integration/release actions are outside
+EDITOR ownership. Wrote only `notebook/narrative/` and this status file. No
+package installations, git writes, code/notebook edits, scientific-data writes,
+figure regeneration, public README replacement or PR/submission action.
 
 ## Phase 3 — REVIEW round 3 findings 3, 4 and 5
 
@@ -320,8 +450,9 @@ import json, re
 p = Path('notebook/narrative')
 chapters = sorted(p.glob('[0-9][0-9]_*.md'))
 assert len(chapters) == 10
-reader = chapters + [p/n for n in ('A_limits.md', 'B_evidence.md', 'pitch.md', 'teaser.md',
-                                  'captions.md', 'readme_draft.md', 'pr_description.md')]
+reader = chapters + [p/n for n in ('A_limits.md', 'B_evidence.md', 'C_reuse.md', 'pitch.md',
+                                  'teaser.md', 'captions.md', 'readme_draft.md',
+                                  'readme_final.md', 'pr_description.md')]
 pattern = r'\{([a-z][a-z_]*\.[a-z][a-z_0-9]*)\}'
 used = set().union(*(set(re.findall(pattern, f.read_text())) for f in reader))
 registered = re.findall(r'^\| `\{([a-z][a-z_]*\.[a-z][a-z_0-9]*)\}` \|',
