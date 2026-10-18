@@ -7,7 +7,7 @@ import re
 Point = tuple[int, int]
 # Gate input spacing is also the minimum useful leg between routing corners.
 # Pin escape uses the finer eight-pixel raster.
-JOG_PITCH = 32
+from .rules import PITCH as JOG_PITCH
 
 
 def natural(name):
@@ -79,3 +79,4 @@ class Scene:
     hidden_nets: tuple[str, ...] = ()
     notes: tuple[str, ...] = ()
     frames: tuple[Frame, ...] = ()
+    trunks: tuple[Segment, ...] = ()

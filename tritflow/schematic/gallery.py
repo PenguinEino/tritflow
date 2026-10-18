@@ -3,7 +3,7 @@
     python3 -m tritflow.schematic.gallery --output build/schematic-review
 
 The overlay routes the real half-adder cell library and calls the public PNR
-net_parasitics() method. The geometry comparison uses the frozen phase-2
+net_parasitics() method. The geometry comparison uses the frozen phase-3
 gallery; the original baseline remains in the JSON manifest.
 """
 from __future__ import annotations
@@ -34,7 +34,7 @@ def generate(root,output):
     output.mkdir(parents=True,exist_ok=True)
     baseline=json.loads((Path(__file__).parent/'assets/baseline_metrics.json').read_text())['items']
     previous={item['name']:item['metrics'] for item in json.loads(
-        (Path(__file__).parent/'assets/phase2_metrics.json').read_text())}
+        (Path(__file__).parent/'assets/phase3_metrics.json').read_text())}
     cases=[('half_add','half_add',None),('full_add','full_add',None),('adder2','adder',2),
            ('adder4','adder',4),('mul1','mul1',None),('mac1','mac1',None)]
     cases += [(name,item.top,None) for name,item in DESIGNS.items()]
@@ -66,7 +66,7 @@ def generate(root,output):
     manifest.append({'name':'legend','metrics':empty,'before':baseline['legend']})
     for item in manifest:item['previous']=previous[item['name']]
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-    rows=['# Schematic geometry: phase 2 → phase 3','',
+    rows=['# Schematic geometry: phase 3 → phase 4','',
           'Wire length is in drawing pixels, not chip micrometres. A bend is a unique same-net '
           'degree-two orthogonal corner; T joins are excluded. Crossings count distinct '
           'different-net perpendicular intersections. Aspect is full canvas width / height; '
@@ -78,13 +78,14 @@ def generate(root,output):
              'degree-two corners. Terminal stubs and T joins are excluded; pin access uses the '
              'finer 8 px raster. Edge runs count positive overlap along any symbol/label '
              'keep-out boundary; perpendicular pin contact is allowed.', '',
-             '| Figure | Short jogs | Rotated gates | Symbol-edge runs |',
-             '|---|---:|---:|---:|']
+             '| Figure | Short jogs | Rotated gates | Symbol-edge runs | Clearance violations |',
+             '|---|---:|---:|---:|---:|']
     for item in manifest:
         old,new=item['previous'],item['metrics']
         rows.append(f'| {item["name"]} | {old["short_jogs"]} → {new["short_jogs"]} | '
                     f'{old["rotated_gates"]} → {new["rotated_gates"]} | '
-                    f'{old["symbol_edge_runs"]} → {new["symbol_edge_runs"]} |')
+                    f'{old["symbol_edge_runs"]} → {new["symbol_edge_runs"]} | '
+                    f'{sum(old.get("clearance_violations",{}).values())} → {sum(new["clearance_violations"].values())} |')
     (output/'metrics.md').write_text('\n'.join(rows)+'\n')
     cards=[]
     for entry in manifest:

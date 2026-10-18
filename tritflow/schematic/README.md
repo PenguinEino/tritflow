@@ -92,9 +92,17 @@ terminal access, forbids wire-through-symbol and shared edges between nets,
 and permits only straight unconnected crossings. Collinear same-net segments
 merge; T joins get dots and different-net crossings get gaps. Placement and
 wire coordinates use an eight-pixel grid.
-Between two corners, a routing leg spans at least one gate input pitch
-(32 pixels). Short terminal stubs remain possible. Tracking direction and
-run length prevents a backtracking walk from disguising a short stair.
+The routing pitch is 32 pixels, distinct from the 8-pixel raster. Different
+parallel nets are at least a pitch apart. Every pin reserves a straight
+32-pixel approach, with no turn or branch inside it. Foreign wires stay at
+least 16 pixels from pin stubs, symbol/label keep-outs and branch dots.
+Each fanout net has one explicit rail; parallel rails of different nets are
+at least 48 pixels apart. Local taps attach to that rail; external module
+consumers and output flags can branch at the producer. Unused rail tails
+are pruned. Straight crossings remain allowed away from pins and dots.
+Direction and run length prevent a short stair at a pin's escape tip or
+between corners. The final scene is cropped to a 48-pixel header and
+24-pixel side margins, with a modest 12-pixel title.
 
 ## Reuse after P&R
 
@@ -115,8 +123,12 @@ are ignored; invalid, negative or nonfinite C raises `ValueError`. Pin C and
 
 Width and darkness increase monotonically with sqrt(C / maximum C). With
 values enabled, the hue retains the trit encoding. A compact keyed table
-below the circuit prints net names, settled trits and C in fF; SVG wire
-hover titles identify each net. This keeps labels away from wires and symbol
+below the circuit prints **port nets only**, settled trits and C in fF.
+It appears only with values or C; `net_names=True` alone adds no empty table.
+Internal wire hover captions derive from the producing gate/module pin
+(e.g. `g_t.Y`), while metadata and `data-net` retain exact logical names.
+Separate graphical branch/crossing keys avoid SVG whitespace ambiguity.
+This keeps labels away from wires and symbol
 names without reserving large blank routing gutters. Annotations extend the
 canvas but keep the exact same symbol and wire coordinates. Omitted arguments
 to `annotate()` preserve existing overlays; explicit `None` removes values/C.
@@ -128,7 +140,9 @@ uncalibrated lumped wire estimate.
 `sch.metrics` reports total unique wire length in drawing pixels, total and
 mean/maximum bends per net, nets over two bends, crossings and canvas aspect,
 plus per-net details. It also reports `short_jogs`, `rotated_gates` and
-`symbol_edge_runs`. A short jog is a leg shorter than 32 pixels between two
+`symbol_edge_runs`, plus `clearance_violations` from an independent geometric
+auditor: parallel tracks, rails, pin stubs, pin turns/approaches, symbol
+outlines, branch dots and missing/duplicate fanout rails. A short jog is a leg shorter than 32 pixels between two
 degree-two corners, excluding terminal stubs and T joins. An edge run is
 positive wire overlap along a symbol/label keep-out boundary; perpendicular
 pin contact is allowed. A bend is a degree-two orthogonal corner; T junctions
@@ -160,10 +174,20 @@ The gallery does not rerun DRC/LVS or claim new signoff evidence.
 
 `index.html` displays the figures and before/after results. `metrics.md`
 compares **every item** with the frozen reviewed gallery in
-`assets/phase2_metrics.json`; `manifest.json` includes per-net details,
-real-C provenance, the phase-2 `previous` metrics and the original `before`
+`assets/phase3_metrics.json`; `manifest.json` includes per-net details,
+real-C provenance, the phase-3 `previous` metrics and the original `before`
 metrics from `assets/baseline_metrics.json`. Tests enforce wire/bend budgets,
 zero short jogs, right-facing gates, zero symbol-edge runs, a straight ripple chain,
 formal/local digit ports, ≤2 bends/net in the standalone half adder, a near
 2:1 full-adder flat view, exact connectivity, no symbol overlap, clear pin
 access, no wire-through-symbol, and no text overlap/clipping.
+
+For a browser-faithful review of all 22 gallery figures and the four notebook
+views, use the installed CairoSVG review helper (not a runtime dependency):
+
+```bash
+python3 -m tritflow.schematic.review --output build/schematic-review/round4/after
+```
+
+Each resulting PNG comes from its SVG at scale 1.25. Notebook views use
+`net.schematic()` and `.annotate()` with actual cell-library PNR wire C.

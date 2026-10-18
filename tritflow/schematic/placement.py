@@ -58,14 +58,14 @@ def place(nodes,driver,loads,arithmetic):
         anchors(node);placed.add(node.key)
 
     def half(pattern,x,y,fold):
-        positions=({'g_na':(0,0),'g_t':(0,112),'g_u':(112,96),'g_c':(224,16),
-                    'g_d':(112,288),'g_nd':(224,288),'g_s':(336,304)} if fold else
-                   {'g_t':(0,128),'g_u':(128,16),'g_na':(128,256),'g_c':(256,0),
-                    'g_d':(384,144),'g_nd':(512,144),'g_s':(640,192)})
+        positions=({'g_na':(0,0),'g_t':(0,160),'g_u':(192,96),'g_c':(384,272),
+                    'g_d':(192,496),'g_nd':(384,496),'g_s':(576,544)} if fold else
+                   {'g_t':(0,160),'g_u':(192,16),'g_na':(192,352),'g_c':(384,0),
+                    'g_d':(576,176),'g_nd':(768,176),'g_s':(960,224)})
         for role,(dx,dy) in positions.items():
             node=nodes['cell:'+pattern.cells[role]]
             put(node,x+dx,y+dy)
-        return (416,400) if fold else (720,352)
+        return (656,640) if fold else (1040,448)
 
     def full(pattern,x,y):
         cursor=x;children=[]
@@ -78,9 +78,9 @@ def place(nodes,driver,loads,arithmetic):
                 sub=arithmetic.get(scope)
                 if sub is None:return None
                 w0,h0=half(sub,cursor+24,y+40,True)
-                w,h=w0+48,h0+64
+                w,h=w0+48,h0+112
                 frames.append(Frame(scope,(cursor,y,cursor+w,y+h),tuple(sub.cells.values())))
-            children.append((cursor,w,block));cursor+=w+64
+            children.append((cursor,w,block));cursor+=w+(224 if block else 128)
         x2,w2,second_block=children[1]
         # Carry combining gates sit alongside the upper half-adder row, so the
         # sum output can leave the lower row next to its actual producer.
@@ -112,7 +112,7 @@ def place(nodes,driver,loads,arithmetic):
     if any(m.scope=='' for m in candidates):external_core=False
     # Keep external multiplier/min/max producers to the left of their full
     # adder load, including when the latter is a single collapsed block.
-    base_x=960 if external_core else 160
+    base_x=1408 if external_core else 160
     if candidates:
         closed=all('block:'+m.scope in nodes for m in candidates)
         if closed:
@@ -124,15 +124,15 @@ def place(nodes,driver,loads,arithmetic):
             # to avoid recreating the original very wide ripple diagram.
             columns=2 if len(candidates)>=3 else 1
             for k,m in enumerate(candidates):
-                x=base_x+(k%columns)*1392
-                y=(320 if external_core else 176)+(k//columns)*640
+                x=base_x+(k%columns)*2080
+                y=(320 if external_core else 176)+(k//columns)*896
                 if 'block:'+m.scope in nodes:
                     node=nodes['block:'+m.scope];put(node,x,y)
                 else:full(m,x,y)
     if not placed:
         root=arithmetic.get('')
         if root and root.module=='half_add' and all('cell:'+n in nodes for n in root.cells.values()):
-            half(root,160,160,False)
+            half(root,288,128,False)
 
     # Other recognized module instances also remain visually grouped when
     # flattened (e.g. four one-trit multipliers and two half adders in mul2).
@@ -146,14 +146,24 @@ def place(nodes,driver,loads,arithmetic):
         units.sort(key=lambda m:(min(nodes['cell:'+n].level for n in m.cells.values()),natural(m.scope)))
         columns=3 if len(units)>=5 else 2
         base_y=max((n.y+n.height for n in nodes.values() if n.key in placed),default=64)+112
+        multipliers=[m for m in units if m.module=='mul1']
+        halves=[m for m in units if m.module=='half_add']
+        product_array=len(multipliers)==4 and len(halves)==2 and len(units)==6
         for k,m in enumerate(units):
-            x=160+(k%columns)*560;y=base_y+(k//columns)*560
+            x=288+(k%columns)*800;y=base_y+(k//columns)*720
+            if product_array:
+                # Keep the 2x2 partial products in their operand matrix. This
+                # lets each operand bus serve one row/column without wrapping
+                # around all four products. Accumulating halves sit at right.
+                if m.module=='mul1':
+                    i=multipliers.index(m);x=288+(i%2)*800;y=base_y+(i//2)*480
+                else:x=1888;y=base_y+halves.index(m)*880
             if m.module=='half_add':w,h=half(m,x+24,y+40,True)
             else:
-                coords={'g_t1':(0,0),'g_t2':(0,128),'g_t3':(128,128),'g_p':(256,64)}
+                coords={'g_t1':(0,0),'g_t2':(0,160),'g_t3':(192,160),'g_p':(384,64)}
                 for role,(dx,dy) in coords.items():put(nodes['cell:'+m.cells[role]],x+24+dx,y+40+dy)
-                w,h=336,224
-            frames.append(Frame(m.scope,(x,y,x+w+48,y+h+64),tuple(m.cells.values())))
+                w,h=464,256
+            frames.append(Frame(m.scope,(x,y,x+w+48,y+h+112),tuple(m.cells.values())))
 
     core=[n for n in nodes.values() if n.kind not in {'input','output'} and n.key not in placed]
     if core:
@@ -161,7 +171,9 @@ def place(nodes,driver,loads,arithmetic):
         for n in core:levels[n.level].append(n)
         bottom=max((n.y+n.height for n in nodes.values() if n.key in placed),default=48)
         offset_y=160 if external_core or not placed else bottom+112
-        row_pitch=208 if any(n.kind=='block' for n in core) else 128
+        blocks=any(n.kind=='block' for n in core)
+        row_pitch=288 if blocks else 160
+        column_pitch=320 if blocks else 256
         fold_span=max(min(3,len(v)) for v in levels.values())*row_pitch+112
         unique=sorted(levels)
         column=0;fold=0
@@ -187,7 +199,7 @@ def place(nodes,driver,loads,arithmetic):
                 minimum=bottom_by_column.get(col,base if col==0 else base-32)
                 desired=8*round(aligned_y(node)/8)
                 y=max(minimum,desired)
-                put(node,160+col*208,y)
+                put(node,384+col*column_pitch,y)
                 bottom_by_column[col]=y+max(row_pitch,node.height+32)
             column+=across
 
@@ -195,10 +207,19 @@ def place(nodes,driver,loads,arithmetic):
     # at opposite edges of the entire sheet. Preserve bit order within ties.
     occupied=[n.box for n in nodes.values() if n.key in placed]
     core_boxes=tuple(occupied)
+    pin_access=[]
+    normals={'left':(-1,0),'right':(1,0),'top':(0,-1),'bottom':(0,1)}
+    for node in nodes.values():
+        if node.key not in placed:continue
+        for pin,(x,y) in node.pins.items():
+            dx,dy=normals[node.sides[pin]]
+            ex,ey=x+32*dx,y+32*dy
+            pin_access.append((min(x,ex)-16,min(y,ey)-16,max(x,ex)+16,max(y,ey)+16))
     def free(box):
         # Labels may sit close to other port labels, while gate terminals need
         # their outward access segment clear even beyond the symbol keep-out.
         return (not any(_overlap(box,b,16) for b in core_boxes)
+                and not any(_overlap(box,b) for b in pin_access)
                 and not any(_overlap(box,b) for b in occupied))
     def port(node,preferred,orient):
         px,py=preferred
@@ -215,6 +236,10 @@ def place(nodes,driver,loads,arithmetic):
         put(node,max(32,px),py,orient);occupied.append(node.box)
     ports=sorted((n for n in nodes.values() if n.kind=='input'),key=lambda n:(
         min((nodes[k].x for k,_ in loads[n.label]),default=1e9),natural(n.label)))
+    bus_count=defaultdict(int)
+    for node in ports:
+        if len(loads[node.label])>1:
+            bus_count[min(nodes[k].x for k,_ in loads[node.label])]+=1
     top_slots=defaultdict(int)
     for node in ports:
         sinks=loads[node.label]
@@ -233,12 +258,18 @@ def place(nodes,driver,loads,arithmetic):
             else:
                 ys=[nodes[k].pins[p][1] for k,p in sinks if nodes[k].x==target.x]
                 cy=8*round(sum(ys)/len(ys)/8)
-                port(node,(tx-96,cy-16),'right')
+                offset=224+48*max(0,bus_count[target.x]-2) if len(sinks)>1 else 96
+                port(node,(tx-offset,cy-16),'right')
     for node in sorted((n for n in nodes.values() if n.kind=='output'),key=lambda n:natural(n.label)):
         key,pin=driver[node.label];producer=nodes[key];x,y=producer.pins[pin]
         side=producer.sides[pin]
-        if side=='bottom':port(node,(x-node.width//2,y+48),'down')
-        else:port(node,(x+48,y-16),'right')
+        gap=96 if len(loads[node.label])>1 else 64
+        if producer.kind=='block' and producer.module=='mul1':
+            # A multiplier's low product flag stays above its block, leaving
+            # the inter-column operand buses an uninterrupted vertical lane.
+            port(node,(x+64,producer.y-64),'right');continue
+        if side=='bottom':port(node,(x-node.width//2,y+gap),'down')
+        else:port(node,(x+gap,y-16),'right')
     width=max(400,max((n.x+n.width for n in nodes.values()),default=0)+48)
     height=max((n.y+n.height for n in nodes.values()),default=112)+96
     return tuple(frames),width,height

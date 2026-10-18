@@ -22,6 +22,7 @@ class Vector:
     width: int
     height: int
     items: list[dict] = field(default_factory=list)
+    net_labels: dict[str,str] = field(default_factory=dict)
 
     def path(self, commands, *, stroke=INK, fill='none', width=0.8, net=None):
         self.items.append(dict(kind='path',commands=commands,stroke=stroke,fill=fill,width=width,net=net))
@@ -37,7 +38,7 @@ class Vector:
 
     def svg(self, title, metadata=None):
         parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.width}" height="{self.height}" '
-                 f'viewBox="0 0 {self.width} {self.height}" role="img" aria-label="{escape(title,quote=True)}">',
+                 f'viewBox="0 0 {self.width} {self.height}" xml:space="preserve" role="img" aria-label="{escape(title,quote=True)}">',
                  f'<title>{escape(title)}</title>',
                  '<desc>Left-to-right balanced-ternary logic. Dots mark connected branches; '
                  'gaps at crossings mean no connection. All values are settled ideal trits.</desc>',
@@ -55,7 +56,7 @@ class Vector:
                      'stroke-linecap="round" stroke-linejoin="round"')
             signal = item.get('net')
             attr = f' data-net="{escape(signal,quote=True)}"' if signal is not None else ''
-            tooltip = f'<title>{escape(signal)}</title>' if signal is not None else ''
+            tooltip = f'<title>{escape(self.net_labels.get(signal,signal))}</title>' if signal is not None else ''
             if kind == 'path':
                 data = ' '.join(c[0]+' '.join(str(v) for v in c[1:]) for c in item['commands'])
                 parts.append(f'<path d="{data}" {style}{attr}>{tooltip}</path>')

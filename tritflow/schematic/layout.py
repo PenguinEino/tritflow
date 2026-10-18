@@ -225,7 +225,27 @@ def layout(net, expand=None, hierarchy=None):
         reverse={signal:name for name,signal in aliases.items()}
         node.pin_labels={p:reverse.get(signal,signal) for p,signal in {**node.inputs,**node.outputs}.items()}
     frames,width,height=place(nodes,driver,loads,arithmetic)
-    segments=_merge(route(nodes,driver,loads,width,height,frames))
+    try:routed,trunks=route(nodes,driver,loads,width,height,frames)
+    except ValueError:
+        # Dense block fanout can need its branches before the local nets.
+        # Retry from an empty routing state, preserving the same clearances.
+        routed,trunks=route(nodes,driver,loads,width,height,frames,fanout_first=True)
+    segments=_merge(routed)
+    # Crop the drawing, rather than leaving placement's routing workspace as
+    # a large empty margin. Translation keeps pins and every wire unchanged.
+    bounds=[n.box for n in nodes.values()]+[f.box for f in frames]
+    bounds += [(s.a[0],s.a[1],s.b[0],s.b[1]) for s in segments]
+    min_x=min((b[0] for b in bounds),default=0);min_y=min((b[1] for b in bounds),default=0)
+    dx,dy=24-min_x,48-min_y
+    for node in nodes.values():
+        node.x+=dx;node.y+=dy
+        node.pins={p:(x+dx,y+dy) for p,(x,y) in node.pins.items()}
+    segments=tuple(Segment(s.net,(s.a[0]+dx,s.a[1]+dy),(s.b[0]+dx,s.b[1]+dy)) for s in segments)
+    trunks=tuple(Segment(s.net,(s.a[0]+dx,s.a[1]+dy),(s.b[0]+dx,s.b[1]+dy)) for s in trunks)
+    from .model import Frame
+    frames=tuple(Frame(f.label,(f.box[0]+dx,f.box[1]+dy,f.box[2]+dx,f.box[3]+dy),f.members) for f in frames)
+    width=max(400,max((b[2] for b in bounds),default=0)+dx+24)
+    height=max((b[3] for b in bounds),default=0)+dy+40
     visible={s.net for s in segments}
     return Scene(net.top,tuple(nodes.values()),segments,_junctions(segments),tuple(connections),{},width,height,
-                 tuple(sorted(net.nets()-visible,key=natural)),tuple(notes),frames)
+                 tuple(sorted(net.nets()-visible,key=natural)),tuple(notes),frames,trunks)
