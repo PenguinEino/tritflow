@@ -2,7 +2,15 @@
 
 2026-10-18. Qualification target: **5d963db9d44e192d37a0489c208bfccf2e2f690c**, installed at `$TR1UM_PDK` / `~/pdk/TR-1um-pinned`. CELLS generation **2026-10-18T10:26:47.211617+00:00** and the final PNR Phase 7 outputs are consumed. Phase 7 adds per-net reporting; all four canonical GDS files and complete rail networks are unchanged. No blockers or extra installed packages. No PDK/reference files or foreign source paths were edited; no git-writing commands ran.
 
-All four canonical post-layout loops, N=1…6 scaling, load sweep, sizing grids, eight electrical `.char.json` files, robustness matrix and derived figures are current. `results/pinned_requalification.json` checks their consumed hashes, native PDK identity, actual C-element counts and retained artifacts, and records every reported numeric change against the preserved dev baseline. `results/environment.json` records local Python 3.12 / native KLayout 0.30.9 / Python KLayout 0.30.6 / ngspice 46+ and executable hashes on aarch64. This is local qualification, not a new clean amd64 Colab run.
+The completed pinned Phase 7 campaign covers all four canonical post-layout loops, N=1…6 scaling, load sweep, sizing grids, eight electrical `.char.json` files, robustness matrix and derived figures. Subsequent source-freshness findings are recorded below. `results/pinned_requalification.json` checks consumed hashes, native PDK identity, actual C-element counts and retained artifacts, and records every reported numeric change against the preserved dev baseline. `results/environment.json` records local Python 3.12 / native KLayout 0.30.9 / Python KLayout 0.30.6 / ngspice 46+ and executable hashes on aarch64. This is local qualification, not a new clean amd64 Colab run.
+
+## Colab round2-15b — load-boundary presentation repair
+
+`tritflow.viz.scaling.load_sweep_figure` produced the reported figure. Plotly's automatic vrect annotation used `x=12.96875` with `xref='x'`: a log-axis annotation interprets that as an exponent, stretching autorange towards 10¹³ pF. The boundary caption now uses paper coordinates above the plot, and the 500 ns window label sits below its dashed line at the left. An explicit log10 range matches the measured minimum/maximum, **0.01…30 pF** for the published sweep. Single-point diagnostics receive a small nonzero log span.
+
+The regression checks the exponent-to-pF range against the actual loads, including unsorted input, and verifies that the two captions occupy separate regions. `python3 -m pytest tests/sim/test_scaling.py -q`: **8 passed**. Full `python3 -m pytest tests/sim tests/extract -q`: **71 passed in 123.89 s**; JUnit `build/sim_verification/pytest_load_plot.xml`. Refreshed `results/full_add_load_sweep.html`; the local Kaleido rendering at `build/sim_verification/load_boundary_fixed.png` was visually checked. No simulation data, electrical conditions, notebook source or dependency changed; no new Colab run is claimed.
+
+The follow-up publication audit detects one pre-existing source mismatch: `tritflow/synth/mapping.py` is now `f9f51ffa…`, while the electrical publications consumed `5e208b86…`. `results/pinned_requalification.json` correctly reports this stale source. This presentation repair does not refresh the independent synthesis/electrical campaign; the completed pinned-PDK campaign and passing source audit described below refer to the earlier handoff.
 
 ## REVIEW 2 and 6 — physical ports and naming
 
@@ -157,7 +165,9 @@ Notebook reads are cached: `load_scaling`, `load_corners`, `load_grid`, `load_sw
 
 ## Interface requests
 
-No outstanding request blocks SIM. PNR adopted physical-rail/encoded-port evidence and the published EM ratings. FRONTEND can consume the current scaling/load records with its source-hash verifier; the source writer was not edited. Fixed-band low-supply failures, unavailable process corners, cold extrapolation, assumed interconnect R/C and 0.4 W static power must remain explicit in notebook claims.
+Colab presentation follow-up: integrator/FRONTEND should refresh the scaling/load publications against the final `synth/mapping.py` revision before claiming they match current synthesis sources. The plot repair is complete and its measured electrical data are unchanged.
+
+PNR adopted physical-rail/encoded-port evidence and the published EM ratings. The source writer was not edited. Fixed-band low-supply failures, unavailable process corners, cold extrapolation, assumed interconnect R/C and 0.4 W static power must remain explicit in notebook claims.
 
 ---
 

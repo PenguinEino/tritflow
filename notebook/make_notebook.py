@@ -4,6 +4,7 @@ import json
 import re
 from pathlib import Path
 import textwrap
+from colab_evidence import run_note
 
 
 author_text = (Path(__file__).resolve().parents[1]/"docs/author.md").read_text()
@@ -36,43 +37,15 @@ AUTHOR_BLOCK
 
 Apache-2.0, including the derived historical schematic assets released by their author.
 
-Draft for IEEE SSCS Code-a-Chip, ISSCC 2027. Audience: designers familiar with
-CMOS, synthesis, P&R and SPICE. We follow a real three-rail circuit through the
-flow, separating logical equivalence, physical connectivity and nominal analog
-settling. Coverage and conditions are generated beside each result. Tables show
-four significant digits; assertions and native JSON data retain full precision.
+Build a balanced-ternary adder from HDL to a DRC-clean, LVS-matched GDS layout,
+then inspect its post-layout waveforms. Follow the cells and arithmetic, or
+edit one of the example circuits and run the same flow. Coverage and conditions
+appear beside each result.
 
-Colab shallow-clones [TritFlow](https://github.com/PenguinEino/tritflow) at
-`colab-v0` into `/content/tritflow`, prints the resolved commit and installs
-the package editably beside its committed cell/example/figure assets. Set
-`TRITFLOW_REF` before the first cell to select another tag or branch. An existing
-Colab checkout must match the requested ref and have no tracked edits.
-**Release TODO — integrator:** the existing `colab-v0` tag predates this
-notebook; publish a matching immutable release and update the selected ref/badge. This latest notebook and its install-inclusive ten-minute budget remain
-unverified in Colab. Setup preserves Colab's NumPy/SciPy/Matplotlib/Plotly,
-checks minimum versions and imports, and prints native tool versions. If a
-previous install left mixed versions in memory, follow the explicit one-time
-restart instruction, then rerun setup/imports. Publishing main alone does not
-validate the badge. Each chapter checks successful prerequisites before using
-their results; after a failure, repair and rerun the named prerequisite first.
-
-The default run starts with a small adder, then closes the loop on every shared
-example and one selected circuit. Coverage is reported beside each experiment.
-Heavy stages use content-keyed JSON caches; `TRITFLOW_EXTENDED=1` enables extra
-load/routing views. Cached reports are identified as cache hits and their
-artifact hashes are checked. A cache is evidence of the recorded run, not a new
-DRC/LVS execution. Set `TRITFLOW_FORCE_RUN=1` before Run all (or delete the
-cache at `$TRITFLOW_NOTEBOOK_BUILD/cache`, default `build/notebook/cache`) to
-force every expensive local stage, including the four-design campaign. A fresh
-session recomputes the opening adder, NANY DC and selected editable circuit.
-The repeated four-design loop uses a committed record when all input hashes and
-options match; cell qualification, sizing and scaling/load campaigns are also
-precomputed evidence. Those campaigns
-check consumed source/PDK hashes and never count as a fresh local PASS.
-The last cell measures each cached/fresh stage; detailed PNR/LVS/SPICE times
-identify the runtime cost. Extended load, floorplan and signoff experiments
-are opt-in. Colab cold runtime remains to be measured.
-""".replace("AUTHOR_BLOCK", author_block))
+**COLAB_RUN_NOTE** The default session runs the opening adder and selected
+editable circuit and reads the labelled larger experiments. Setup and rerun
+details are in Appendix B.
+""".replace("AUTHOR_BLOCK", author_block).replace("COLAB_RUN_NOTE",run_note()))
 code(r'''
 _TRITFLOW_SETUP_READY = False
 globals().pop("_tf_cells", None)
@@ -849,16 +822,55 @@ Repeat with supply/temperature variation, then revise model assumptions from
 measured discrepancies. The generated core is not a padframe or ESD-qualified
 top, and nominal device simulation is not a lifetime qualification.
 
-**TODO — integrator:** confirm the measurement schedule and hardware details;
-publish a matching immutable release tag and run this exact
-notebook in a clean Colab runtime before submission. Record cold/warm runtimes
-and keep total default Run all near ten minutes.
+Record hardware identity and the measurement schedule with the first silicon
+results.
 
 Sources: [OpenSUSI TR-1um](https://github.com/OpenSUSI/TR-1um),
 [reference cells and arithmetic](https://github.com/PenguinEino/opensusi-tr10-balanced-ternary-logic),
 [official KLayout packages](https://www.klayout.de/build.html).
 The setup pins the PDK commit and verifies SHA-256 archive/package downloads.
 ''')
+md('''
+## Appendix B. Verification and rerunning
+
+COLAB_RUN_NOTE This measurement applies to that commit's default options,
+including the explicitly labelled recorded experiments. It is not a fresh
+recomputation of every experiment. Later presentation edits have local checks;
+the setup always prints the source commit and actual tool versions.
+
+<details><summary>Setup, recovery and source selection</summary>
+
+Colab shallow-clones TritFlow at `colab-v0` into `/content/tritflow` and installs
+the package beside its cell/example/figure assets. `TRITFLOW_REF` selects another
+tag or branch. The selected source should match the notebook being executed;
+an existing checkout must match that ref and have no tracked edits.
+Setup preserves Colab's NumPy/SciPy/Matplotlib/Plotly, checks minimum versions
+and imports, and prints native tool versions. If an earlier installation left
+mixed versions in memory, follow the restart-once instruction, then rerun setup
+and imports. After a chapter failure, repair and rerun its named prerequisite.
+
+</details>
+
+<details><summary>Recorded evidence and forcing a new calculation</summary>
+
+A fresh default session recomputes the opening adder, NANY DC and selected
+editable circuit. The four-design loop reads a committed record when input,
+option and native-artifact hashes match. Cell qualification, sizing, scaling
+and load sweeps also read recorded evidence. Reading a saved report does not
+execute a new DRC/LVS check. The source/PDK checks retain those records' scope.
+
+Set `TRITFLOW_FORCE_RUN=1` before Run all to bypass local stage caches and the
+four-design record. Deleting `$TRITFLOW_NOTEBOOK_BUILD/cache` (default
+`build/notebook/cache`) removes local reuse but leaves committed evidence.
+The separate characterization/sizing/scaling/load producers are documented in
+their chapters. `TRITFLOW_EXTENDED=1` enables optional load/routing views;
+floorplan and signoff controls are opt-in. The following tables separate fresh
+work, local reuse and recorded lookup, with per-design PNR/LVS/SPICE times.
+Tables show four significant digits; assertions and native JSON retain full
+precision.
+
+</details>
+'''.replace("COLAB_RUN_NOTE",run_note()))
 code('''
 assert (runtime_fingerprint(ROOT,PDK_ROOT,names=native_sources) == cache.fingerprint and
         source_manifest(ROOT,PDK_ROOT,names=native_sources) == native_sources), "consumed sources changed during Run all; rerun after publication settles"
@@ -882,9 +894,9 @@ if __name__ == "__main__":
     titles, chapter = {}, "setup"
     for item in cells:
         if item["cell_type"] == "markdown":
-            match = re.search(r"(?m)^## (\d+)\. (.+)",item["source"])
+            match = re.search(r"(?m)^## (\d+|Appendix [A-Z])\. (.+)",item["source"])
             if match:
-                chapter = f"Chapter {match[1]}: {match[2]}"
+                chapter = f"{'Chapter ' if match[1].isdigit() else ''}{match[1]}: {match[2]}"
         else:
             titles[item["id"]] = f"{chapter} ({item['id']})"
     for item in code_items[2:]:

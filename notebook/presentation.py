@@ -8,7 +8,26 @@ import numpy as np
 from IPython.display import HTML, display
 
 
+def title_controls(figure):
+    """Reserve separate title, controls and subplot-label bands in notebook views.
+
+    Keep native traces, frames, slider steps and button actions unchanged.
+    This copy only changes paper-coordinate UI placement; PNR owns the figure
+    functions themselves.
+    """
+    if not figure.layout.updatemenus:
+        return figure
+    import plotly.graph_objects as go
+    result = go.Figure(figure)
+    for menu in result.layout.updatemenus:
+        menu.update(y=1.06,yanchor="bottom",pad={"t":0,"b":0})
+    result.update_layout(title={"y":.99,"yanchor":"top"},
+                         margin={"t":max(140,result.layout.margin.t or 0)})
+    return result
+
+
 def show(figure):
+    figure = title_controls(figure)
     if os.environ.get("TRITFLOW_NOTEBOOK_HEADLESS") == "1":
         figure.to_json()
     else:

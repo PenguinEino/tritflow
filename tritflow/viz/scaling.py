@@ -1,6 +1,8 @@
 """Plotly figures for cached real-layout scaling, loading and DC sizing."""
 from __future__ import annotations
 
+from math import log10
+
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -52,17 +54,30 @@ def load_sweep_figure(result, *, title='Full adder: post-layout output-load boun
         mode='markers',name='FAIL within window',marker={'symbol':'x','color':'#bd3535','size':12}),secondary_y=False)
     fig.add_trace(go.Scatter(x=[r['load_f']*1e12 for r in rows],y=[r['max_error_v'] for r in rows],
         mode='lines+markers',name='Worst check error',line={'dash':'dot'}),secondary_y=True)
-    fig.add_hline(y=window,line_dash='dash',annotation_text=f'{window:g} ns window',secondary_y=False)
+    fig.add_hline(y=window,line_dash='dash',annotation_text=f'{window:g} ns window',
+                  annotation_position='bottom left',secondary_y=False)
     fig.add_hline(y=.5,line_dash='dot',secondary_y=True)
     bound = result['boundary']
     if result['boundary_found']:
         fig.add_vrect(x0=bound['last_pass_f']*1e12,x1=bound['first_fail_f']*1e12,
-                      fillcolor='#c77e3c',opacity=.2,line_width=0,
-                      annotation_text=f'Measured PASS at {bound["last_pass_f"]*1e12:.3g} / FAIL at {bound["first_fail_f"]*1e12:.3g} pF')
+                      fillcolor='#c77e3c',opacity=.2,line_width=0)
+        # Shape coordinates use pF, but data-referenced annotations on a log
+        # axis use log10(pF). A paper caption avoids expanding the data range
+        # and stays above the window label even in a narrow notebook output.
+        fig.add_annotation(x=0,y=1.06,xref='paper',yref='paper',showarrow=False,
+            xanchor='left',yanchor='bottom',
+            text=f'Measured PASS at {bound["last_pass_f"]*1e12:.3g} / FAIL at {bound["first_fail_f"]*1e12:.3g} pF')
     fig.update_xaxes(type='log',title_text='External load on each output (pF)')
+    loads=[r['load_f']*1e12 for r in rows]
+    if loads:
+        lower,upper=log10(min(loads)),log10(max(loads))
+        # One-point diagnostic figures still need a nonzero viewing span.
+        if lower==upper:lower,upper=lower-.1,upper+.1
+        fig.update_xaxes(range=[lower,upper],autorange=False)
     fig.update_yaxes(title_text='Settling (ns); missing when unsettled',secondary_y=False)
     fig.update_yaxes(title_text='Worst absolute check error (V)',secondary_y=True)
-    fig.update_layout(title=title,template='plotly_white',height=460,legend={'orientation':'h','y':-.25})
+    fig.update_layout(title=title,template='plotly_white',height=460,
+                      margin={'t':110,'b':100},legend={'orientation':'h','y':-.25})
     return fig
 
 

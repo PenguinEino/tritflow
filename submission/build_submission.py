@@ -31,6 +31,8 @@ import time
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0,str(ROOT))
+sys.path.insert(0,str(ROOT/"notebook"))
+from colab_evidence import EVIDENCE as COLAB_EVIDENCE, run_note
 SOURCE = ROOT/"notebook/tritflow_tr1um.ipynb"
 DESTINATION = HERE/"ISSCC27/submitted_notebooks/TritFlow"
 FILES = {"tritflow_tr1um.ipynb", "README.md", "LICENSE", "NOTICE", "ABSTRACT.md", "PITCH.md", "CHECKLIST.md", "build-info.json"}
@@ -102,11 +104,10 @@ def release_status(source):
 def release_notice(info):
     if info.get("compatible"):
         return f'Default source tag `{info["default_ref"]}` matches the packaged notebook at `{info["commit"]}` (local git-object check).'
-    return ("**Release TODO before filing:** the default `colab-v0` release does not match this submitted notebook "
-            "or could not be verified. The integrator must publish a corresponding immutable source tag and "
-            "configure `TRITFLOW_REF` before the bootstrap. "
-            "See `build-info.json` for the checked commit/missing helpers. Saved outputs remain readable offline; "
-            "the existing badge is not a verified reproducer of this captured version.")
+    return (f"The local source-ref check found `{info.get('default_ref','colab-v0')}` at "
+            f"`{info.get('commit') or 'unavailable'}`. This capture includes later presentation edits. "
+            "The Colab run note identifies the tested revision; build-info.json records the "
+            "checked source-ref details. Source-selection and rerun instructions are in Appendix B.")
 
 
 def captured_commit(document):
@@ -281,8 +282,7 @@ def package(document, source, destination, team, info):
     front += "Animation stills show their initial frame. Machine paths are normalized; numerical results are unchanged. "
     front += "Schematic captures show the selected drawing; rerun to expand alternatives. "
     front += "The original source cells and bootstrap are preserved; rerun them for interactive figures. "
-    front += "Clean Colab installation remains unverified/postponed.\n\n"
-    front += release_notice(info.get("release",{}))+"\n\n"
+    front += run_note()+"\n\n"
     front += "<details><summary>Tool versions observed at packaging (runtime pins are in the bootstrap)</summary>\n\n"
     front += "```json\n"+json.dumps(info["tools"],indent=2)+"\n```\n</details>\n"
     document.cells.insert(0,nbformat.v4.new_markdown_cell(front,id="submission-identity"))
@@ -371,7 +371,10 @@ def main(argv=None):
               "tools_observation":"packaging environment; the raw capture does not store a separate version snapshot",
               "official_rules_commit":"a502a6ba01260d3492df9137dddae0bb5fabeb3c",
               "release":release_status(args.source),
-              "colab_verified":False,"team_fields_completed":not has_placeholders(json.loads(args.team.read_text())),
+              "colab_verified":captured_commit(document)==COLAB_EVIDENCE["commit"] and digest(args.source)==COLAB_EVIDENCE["notebook_sha256"],
+              "colab_verification":COLAB_EVIDENCE,
+              "colab_verification_scope":"colab_verified applies to this exact captured revision; colab_verification separately records the successful 842afe2 default run. Presentation edits have local validation.",
+              "team_fields_completed":not has_placeholders(json.loads(args.team.read_text())),
               "identity_fields_completed":not has_placeholders(json.loads(args.team.read_text())["authors"]),
               "raw_execution_not_in_payload":str(raw.relative_to(ROOT)) if raw.is_relative_to(ROOT) else str(raw),
               "manifest_scope":"files excludes build-info.json itself; total_bytes includes it"}
