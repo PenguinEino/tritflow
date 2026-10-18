@@ -1,9 +1,13 @@
-# REVIEW round 3, finding 7 — test collection fix in progress
+# REVIEW round 3, finding 7 — fixed; full default suite passes
 
 Renamed `tests/sta/test_timing.py` to the unique basename
-`tests/sta/test_sta_timing.py`. No code imports refer to the old name, so no
-import edits were needed. Running `python3 -m pytest tests -q` from the repo
-root; output is retained at `results/sta/review3_full_tests.log`.
+`tests/sta/test_sta_timing.py`, avoiding the collision with CELLS' module.
+No imports referenced the old name, so no import edits were needed. Test
+contents and pytest configuration are unchanged.
+
+From the repo root, `python3 -m pytest tests -q` completed successfully:
+**496 passed in 733.99 s (12 min 13 s)**, with default collection and no special
+import-mode flags. Full output: `results/sta/review3_full_tests.log`.
 
 ---
 

@@ -63,6 +63,40 @@ def refresh_presentation(root):
     return record
 
 
+def capture_routing(root, record):
+    """Verify native paper identities once; notebook runtime needs no build tree."""
+    from routing_identity import routing_files
+    root = Path(root)
+    adder = routing_files(root/'build/adder4/adder4.pnr.json',root/'build/adder4/adder4.gds','paper')
+    for suffix,key in (('pnr.json','pnr_sha256'),('gds','gds_sha256')):
+        assert adder[key] == record['native_sha256'][f'build/adder4/adder4.{suffix}']
+    summary_path = root/'build/full_add/postlayout/summary.json'
+    assert digest(summary_path) == record['native_sha256']['build/full_add/postlayout/summary.json']
+    summary = json.loads(summary_path.read_text())
+    full = routing_files(root/'build/full_add/full_add.pnr.json',root/'build/full_add/full_add.gds','paper')
+    load = json.loads((root/'results/full_add_load_sweep.json').read_text())
+    for suffix,key in (('pnr.json','pnr_sha256'),('gds','gds_sha256')):
+        path = f'build/full_add/full_add.{suffix}'
+        assert full[key] == summary['input_sha256'][str(root/path)]
+        assert full[key] == next(value for name,value in load['sources_sha256'].items()
+                                 if name.endswith('/full_add.'+suffix))
+        record['native_sha256'][path] = full[key]
+    scale = json.loads((root/'results/adder_scaling.json').read_text())
+    four = next(row for row in scale['rows'] if row['n'] == 4)
+    assert adder['gds_sha256'] == next(value for name,value in four['artifacts_sha256'].items()
+                                     if name.endswith('/adder4.gds'))
+    assert adder['seed'] == four['seed']
+    record['paper_pnr']['routing'] = adder
+    record['paper_post']['routing'] = full
+    return record
+
+
+def refresh_routing(root):
+    record = capture_routing(root,load_paper(root))
+    (Path(root)/'notebook/assets/paper_evidence.json').write_text(json.dumps(record,indent=2)+'\n')
+    return record
+
+
 def export(root):
     """Capture current figure measurements; never regenerate or edit figures."""
     import numpy as np
@@ -148,6 +182,7 @@ def export(root):
                   'post_sum_s':post['rows'][k]['outputs']['sum']['settling_s']},
               'inv_dc':gate_point,'zero_dc':static,
               'display_settings':{'row_cells':row_cells,'sizing_floor_mv':floor}}
+    capture_routing(root,result)
     (root/'notebook/assets/paper_evidence.json').write_text(json.dumps(result,indent=2)+'\n')
     return result
 
@@ -156,8 +191,10 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--refresh-presentation',action='store_true')
+    parser.add_argument('--refresh-routing',action='store_true')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    result = refresh_presentation(root) if args.refresh_presentation else export(root)
+    result = (refresh_presentation(root) if args.refresh_presentation else
+              refresh_routing(root) if args.refresh_routing else export(root))
     print('Captured',len(result['repository_sha256']),'measurement inputs and',
           len(result.get('presentation_sha256',{})),'presentation assets')

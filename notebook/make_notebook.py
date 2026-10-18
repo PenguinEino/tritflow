@@ -93,6 +93,7 @@ $$''',text,count=1)
         'cells, DRC-clean and LVS-matched GDS, and transistor-level waveforms.')
     author = (ROOT/'docs/author.md').read_text()
     author_block = author[author.index('- Name:'):].split('\n\n',1)[0]
+    attendance = ' '.join(re.search(r'^- Representative: (.*(?:\n  .*)*)',author,re.M)[1].split())
     power = (f"The middle level has a standing cost: {values['scaling.power_per_cell_mw']:.3g} mW "
              f"per mapped cell for this adder mix, reaching {values['scaling.max_power_mw']/1e3:.3g} W "
              f"at {values['scaling.selected_n']} trits. Sizing trades current against voltage accuracy.")
@@ -105,7 +106,7 @@ $$''',text,count=1)
     md(render(intro,values)+'\n\n'+image('flow','HDL → cells → checked GDS → extracted SPICE, four-trit paper example',False)+
        '\n\n'+headline+'\n\n'+power+'\n\n'+badge+('\n\n'+run_note() if run_note() else '')+
        '\n\n<details><summary>Author and license</summary>\n\n'+author_block+
-       '\n\nApache-2.0, including historical schematic assets released by their author.\n\n</details>')
+       '\n\n'+attendance+'\n\nApache-2.0, including historical schematic assets released by their author.\n\n</details>')
     cell('code',stages.SETUP,'setup')
     imports = cell('code',f'NARRATIVE_CONTEXT_SHA256 = {context_sha!r}\n'+stages.IMPORTS,'imports')
     chapter_title = 'Chapter 0: From HDL to a checked adder layout'
@@ -150,7 +151,7 @@ $$''',text,count=1)
     appendix = appendix.replace('The measured runtime for this session is\nprinted in the closing cell s including setup.',
                                 'The closing cell prints the measured runtime for this session, including setup.')
     appendix = appendix.replace(' The clean-Colab result above\nstates whether an installation-inclusive Run all has completed successfully.','')
-    md(appendix+('\n\n'+run_note() if run_note() else '')+'\n\n'+textwrap.dedent('''
+    md(render(appendix,values)+('\n\n'+run_note() if run_note() else '')+'\n\n'+textwrap.dedent('''
     <details><summary>Setup, recovery and source selection</summary>
 
     Colab shallow-clones `colab-v0` into `/content/tritflow`; `TRITFLOW_REF` selects another release.

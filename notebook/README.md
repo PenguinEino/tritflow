@@ -288,3 +288,14 @@ The generator uses dollar-delimited Markdown math with `\mathrm`, keeps equation
 outside HTML Details, bounds embedded images to the text column, and wraps prose
 tables. A new verified runtime note requires a successful real-Colab report and
 explicit promotion of that new evidence. Local notebook execution never promotes it.
+
+Release-candidate run labels distinguish the paper adder (native seed from its
+PNR), paper full adder/load experiment, width sweep and four-design archive.
+`paper_evidence.json` retains checked PNR/GDS hashes and seeds, so runtime needs
+no native `build/` tree. Every four-design physical, per-output timing and
+producer-runtime row repeats its routing realization, geometry digest and
+fresh/recorded/reused state. To add native paper routing identities without
+rerunning measurements, use `python3 notebook/paper_evidence.py --refresh-routing`
+on the publisher's matching native artifacts. Archive identities are read
+from manifest-checked PNR/GDS members. A fresh experiment records its actual
+PNR seed and geometry rather than borrowing a prior archive label.

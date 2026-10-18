@@ -19,7 +19,7 @@ Primary sources: [current root rules](https://github.com/sscs-ose/sscs-ose-code-
 | Deadline: 2026-10-31 at 11:59 AM Pacific | Submitter schedules and files PR before that time | Pending |
 | Monitor review questions | Submitter watches the eventual PR | Pending |
 | Teams name one award/travel representative | README and top notebook fields use docs/author.md; sole author named representative | Included |
-| Attend ISSCC 2027 and present a poster if selected | Representative confirmation in README; conference dates February 14–18, 2027 | Pending selection/confirmation |
+| Attend ISSCC 2027 and present a poster if selected | Author-confirmed in-person attendance/poster commitment from docs/author.md, reproduced in README | Commitment confirmed; selection pending |
 | Follow travel policy; keep eligible-expense receipts | Representative's post-award responsibility; reimbursement is after attendance/document review | Pending selection |
 | Membership is encouraged, not an eligibility restriction | No membership assertion or invented applicant category | Informational |
 | Final layout is encouraged, optional | Saved real GDS raster, generated DRC/LVS evidence, chapters 0/3/6/7 | Included (optional) |
@@ -48,7 +48,7 @@ Accepted structure examples inspected (not templates copied):
 - [ISSCC26 CircuitsDNA](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/tree/a502a6ba01260d3492df9137dddae0bb5fabeb3c/ISSCC26/submitted_notebooks/CircuitsDNA): notebook with supporting code; listed in the accepted table.
 - [VLSI26 IMC side-channel](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/tree/a502a6ba01260d3492df9137dddae0bb5fabeb3c/VLSI26/accepted_notebooks/IMC_Side_Channel_Analysis): compact notebook/README folder; listed among VLSI26 winners.
 
-Before filing: confirm attendance/poster arrangements, check the release
+Before filing: check travel/poster logistics, the release
 tag and external links, inspect saved outputs, and re-check live official rules.
 The current saved outputs have local execution evidence. A new successful
 real-Colab pass is required before publishing an installation-inclusive runtime.

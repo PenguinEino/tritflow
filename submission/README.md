@@ -20,8 +20,9 @@ Kaleido 1.1.0 was incompatible with Choreographer 1.4.0 and is not the build pin
 `team.json` follows the integrator-owned `docs/author.md` exactly. Name,
 affiliation, student status, email and GitHub are included; no telephone field
 is rendered. The user has explicitly released their derived historical
-schematic assets under Apache-2.0. Confirm the selected representative's
-attendance/poster arrangements before filing.
+schematic assets under Apache-2.0. The author has confirmed in-person
+attendance and poster presentation if selected; the exact statement from
+`docs/author.md` is in `team.json` and the reviewer README.
 
 Default payload: `submission/ISSCC27/submitted_notebooks/TritFlow/`.
 **Only that folder** belongs in the eventual official-repository PR. It contains

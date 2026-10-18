@@ -1,6 +1,93 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 12 complete: Colab round-3 fixes, fresh native/default captures and submission rebuild.**
+Updated: 2026-10-18. **Phase 13 release candidate complete: EDITOR integration, labelled native identities, confirmed attendance, full tests and submission rebuilt.**
+
+## Phase 13 — release candidate complete
+
+- Integrated EDITOR phase 3 without editing its narrative files: trimmed
+  introduction, generated sizing endpoints and explicit positive hand / negative
+  SPICE zero-level shift lesson, run identifiers in captions and Appendix B.
+  Appendix B now passes through the token renderer before Markdown/table
+  conversion; no literal run/endpoint placeholders remain.
+- Portable paper evidence now retains actual PNR/GDS identities for the paper
+  adder and full adder: verified against the prior native paper hashes,
+  full-adder consumed-input hashes, the load sweep's consumed GDS/PNR, and
+  matching N=4 scaling GDS. Seeds come from those native files (paper adder 7,
+  paper full adder 19). Runtime does not open `build/` to recover those identities.
+- Added manifest-checked archive routing identities. Four-design physical,
+  per-output timing and producer-runtime rows now carry a Routing realization
+  column: dataset/circuit, actual seed, short GDS hash and recorded/fresh/reuse
+  state. Expanded evidence retains full PNR/GDS digests. All archive circuits
+  use seed 0; that is distinct from the paper routes. Fresh replacement runs
+  record actual geometry/options, never an inherited archive identity.
+- Exact attendance/poster commitment from `docs/author.md` is in team.json,
+  the notebook Author block, README/checklist templates. Confirmation placeholder
+  removed; rebuilt package metadata will mark the completed team fields.
+- New tests reject edited native archive metadata, verify the portable paper/
+  archive distinction and sizing signs, and run an actual min/max native flow
+  at nondefault seed 23 to prove fresh labels follow the resulting PNR/GDS.
+  Preflight **74 passed**, 1 actual-payload check deferred until rebuild.
+- STA's unique test basename has landed. **`python3 -m pytest tests -q`
+  passes from the repository root: 496 passed in 765.60 s (12 min 45 s)**,
+  with ordinary collection and no import-mode flags or exclusions. This is a
+  fresh run against the current checkout, in addition to STA's independent pass.
+- **All 18 code cells pass** in both captures with empty build/cache trees:
+  fresh default **71.40 s**, forced native notebook stages
+  **416.06 s**. Times include local setup checks, kernel and plotting;
+  exclude installation/final packaging and are not real-Colab times. No error
+  or stderr streams. Default runs the opening/INV DC/paired adder/edited sorter
+  afresh and reads only the explicitly recorded four-design matrix. Forced
+  capture runs every one of the nine cached stages; separate published
+  characterization/sizing/width/load experiments remain precomputed.
+- Refreshed the four-design archive from that completed native capture:
+  **4,727,963 bytes / 4 records / 54 native files**. Its source/PDK/native
+  fingerprints are checked, with no manual rekey. Recorded results contain
+  their actual routing identity in addition to native member hashes.
+- Rebuilt submission: **8 files / 5,257,945 bytes**, **18 executed
+  code cells, 69 saved outputs, 8 embedded paper PNGs, 7 live PNGs,
+  26 HTML tables**. LICENSE/NOTICE match the root files. Build-info has
+  `team_fields_completed=true`, `identity_fields_completed=true`, and no current
+  Colab verification claim. Attendance commitment is reproduced exactly.
+- Final notebook/submission suite: **75 passed in 11.79 s**, including actual
+  saved-payload validation. Builder `--check`, 33-cell/chapter validation,
+  narrative SHA matching and `git diff --check` pass.
+- Audited the actual native/default saved HTML: all **4 physical, 12 per-output
+  timing and 20 producer-phase rows** carry seed-0 geometry labels, marked
+  fresh in the native capture and recorded in the default capture. The separate
+  **6-row identity table** includes both paper routes and all four experiments;
+  the **6-row width table** identifies each width's seed. Full hashes are retained.
+- Local Chrome/MathJax check: sizing math has zero rendering errors; static
+  Appendix B identifiers and expanded physical/timing tables fit an 1100-px
+  text column at a 1350-px viewport without horizontal overflow. Screenshots
+  inspected; this is local presentation evidence, not Colab verification.
+- Both captures use source SHA-256
+  `65012492c7255f4fc7fa3e1ef61c4bb177d6fb9876b319e9377ebe3677ba2cd6`.
+  Current narrative and all its substitutions are integrated; the pending
+  EDITOR handoff recorded under phase 12 is resolved here.
+
+Evidence: `/tmp/tritflow-submission-phase13/{native,default}/executed.raw.ipynb`,
+`/tmp/tritflow-phase13-{native,default,archive,preflight,final-tests,root-tests}.log`,
+`/tmp/tritflow-phase13-table-audit.json`, `/tmp/tritflow-phase13-preview/`.
+
+```sh
+# Publishing-only: attach identities from the matching native paper artifacts.
+python3 notebook/paper_evidence.py --refresh-routing
+python3 notebook/make_notebook.py
+python3 -m pytest tests -q
+python3 -m pytest notebook/tests submission/tests -q
+TRITFLOW_FORCE_RUN=1 python3 submission/build_submission.py --workdir /tmp/tritflow-submission-phase13/native --timeout 1800
+PYTHONPATH=. python3 notebook/campaign.py /tmp/tritflow-submission-phase13/native/flow/cache
+python3 submission/build_submission.py --workdir /tmp/tritflow-submission-phase13/default --timeout 1800
+python3 submission/build_submission.py --check
+```
+
+### Phase 13 handoff
+
+No new real-Colab success is claimed. Publish matching notebook/helpers/archive/
+portable evidence at `colab-v0` or the selected `TRITFLOW_REF` before the final
+real-Colab run. Bootstrap and its scientific-package policy remain unchanged.
+No edits to frozen HDL/synthesis, foreign streams' files or reference trees;
+no packages installed, git writes, PR or push.
 
 ## Phase 12 — Colab round-3 presentation and evidence repair
 

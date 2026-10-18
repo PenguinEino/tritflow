@@ -15,6 +15,7 @@ from tritflow.sim.sizing import load_grid
 from tritflow.synth import evaluate_netlist
 from predictions import divider, zero_dc, rail_power
 from paper_evidence import load_paper
+from routing_identity import archive_routing, routing_label
 
 TOKEN = re.compile(r'\{([a-z][a-z_]*\.[a-z][a-z_0-9]*)\}')
 
@@ -66,7 +67,10 @@ def context(root):
         hdl_lines=len((root/'examples/adder.tv').read_text().splitlines()),
         cells=report['total_cells'],nany=report['cells']['NANY'],inv=report['cells']['INV'],
         equivalence_mode=report['equivalence']['mode'],die_um=dimensions(physical['die']),
-        drc_items=physical['checks']['pdk_drc']['violations'],lvs_status='Match')
+        drc_items=physical['checks']['pdk_drc']['violations'],lvs_status='Match',
+        run_id=routing_label(physical['routing']))
+    for name,route in archive_routing(root/'notebook/assets/four_designs.zip').items():
+        put('archive',**{('adder' if name == 'adder4' else name)+'_run_id':routing_label(route)})
     put('adder',width=2)
     initial,final = [physical['history'][i]['hpwl'] for i in (0,-1)]
     put('paper_pnr',initial_hpwl_mm=initial/1e3,final_hpwl_mm=final/1e3,
@@ -83,6 +87,8 @@ def context(root):
         spice_output_v=zero_dc(a)['output_v']['Y'],
         spice_power_mw=rail_power(zero_dc(a),gi['conditions']['supplies_v'])*1e3)
     put('sizing',adopted_error_mv=a['max_error_v']*1e3,adopted_current_ua=a['max_static_current_a']*1e6,
+        adopted_rr_um=a['dimensions']['RP']['l_um'],selected_rr_um=selected['dimensions']['RP']['l_um'],
+        selected_current_ua=selected['max_static_current_a']*1e6,selected_error_mv=selected['max_error_v']*1e3,
         predicted_shift_mv=(changed['output_v']-hand['output_v'])*1e3,
         spice_shift_mv=(zero_dc(selected)['output_v']['Y']-zero_dc(a)['output_v']['Y'])*1e3)
     def finite_count(g):
@@ -121,7 +127,10 @@ def context(root):
     assert all(r['state'] == 'complete' and r['passed'] for r in scale['rows'])
     widest = max(scale['rows'],key=lambda r:r['n']); one = next(r for r in scale['rows'] if r['n'] == 1)
     put('paper_scaling',width_min=min(r['n'] for r in scale['rows']),width_max=widest['n'],
-        load_ff=widest['conditions']['load_f']*1e15)
+        load_ff=widest['conditions']['load_f']*1e15,
+        run_id=('width-sweep · seed '+str(scale['rows'][0]['seed'])
+                if len({r['seed'] for r in scale['rows']}) == 1 else
+                'width-sweep · '+', '.join(f"N={r['n']} seed {r['seed']}" for r in scale['rows'])))
     mapped = flow.load(root/'examples/adder.tv','adder',{'N':widest['n']}).synthesize()
     zeros = {p.name:0 for p in mapped.ports if p.dir == 'input'}
     assert all(int(v) == 0 for v in evaluate_netlist(mapped,zeros,return_all=True).values())
@@ -144,5 +153,6 @@ def context(root):
         last_pass_pf=sweep['boundary']['last_pass_f']*1e12,first_fail_pf=sweep['boundary']['first_fail_f']*1e12)
     p = paper['paper_post']
     put('paper_post',states=p['states'],hold_ns=p['hold_s']*1e9,load_ff=p['load_f']*1e15,
-        pre_sum_ns=p['pre_sum_s']*1e9,post_sum_ns=p['post_sum_s']*1e9)
+        pre_sum_ns=p['pre_sum_s']*1e9,post_sum_ns=p['post_sum_s']*1e9,
+        run_id=routing_label(p['routing']))
     return values
