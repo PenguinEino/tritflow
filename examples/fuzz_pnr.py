@@ -73,13 +73,13 @@ def random_source(seed):
         fanout_limit=(2, 3, 4, 8)[seed % 4])
 
 
-def scale_sources():
+def scale_sources(adders=(6, 8)):
     """Return standalone HDL including the real HA/FA and one-trit multiplier."""
     fa = (ROOT/"examples/full_add.tv").read_text().replace('`include "half_add.tv"',
         (ROOT/"examples/half_add.tv").read_text())
     adder = (ROOT/"examples/adder.tv").read_text().replace('`include "full_add.tv"', fa)
     sources = {}
-    for n in (6, 8):
+    for n in adders:
         name = f"adder{n}"
         sources[name] = adder.replace("module adder #", f"module {name} #").replace(
             "parameter N = 4", f"parameter N = {n}")
@@ -101,11 +101,16 @@ def fingerprint():
     """Content hashes of the consumed physical views and implementation."""
     paths = [Path(__file__), ROOT/"cells/template.json", ROOT/"cells/out/all.spice",
              ROOT/"cells/out/library.json"]
+    from tritflow import PDK_ROOT
     for package in ("pnr", "hdl", "synth", "extract"):
-        paths += list((ROOT/f"tritflow/{package}").glob("*.py"))
+        paths += [p for p in (ROOT/f"tritflow/{package}").glob("*.py")
+                  if not p.name.startswith(("chip", "signoff"))]
+    paths += [p for group in ("drc", "lvs")
+              for p in (PDK_ROOT/"libs.tech/klayout/tech"/group).rglob("*") if p.is_file()]
+    paths += [ROOT/"notebook/setup_pins.json"]
     paths += [p for p in (ROOT/"cells/out").glob("*/*")
               if p.is_file() and p.name.endswith((".gds", ".abstract.json", ".char.json"))]
-    hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+    hashes = {str(p.resolve()): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in sorted(set(paths))}
     return hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
 
@@ -228,6 +233,7 @@ def main(argv=None):
     parser.add_argument("--timeout", type=float, default=180.)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--scale", action="store_true")
+    parser.add_argument("--all-adders", action="store_true", help="Also build and qualify adders N=1..8")
     parser.add_argument("--worker", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     if args.worker:
@@ -239,9 +245,9 @@ def main(argv=None):
     for seed in (args.seeds if args.seeds is not None else range(args.start_seed, args.start_seed+args.count)):
         source, parameters = random_source(seed)
         sources.append((f"fuzz_{seed:05d}", source, parameters, args.output_root, seed))
-    if args.scale:
+    if args.scale or args.all_adders:
         sources += [(name, source, {"scale": True}, ROOT/"build", 7)
-                    for name, source in scale_sources().items()]
+                    for name, source in scale_sources(range(1, 9) if args.all_adders else (6, 8)).items()]
     for name, source, parameters, root, seed in sources:
         out = (root/name).resolve(); out.mkdir(parents=True, exist_ok=True)
         (out/f"{name}.tv").write_text(source)

@@ -1,11 +1,13 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Phase 7 packaging validation in progress.**
+Updated: 2026-10-18. **Phase 7 packaging and local validation complete.**
 
 ## Phase 7 handoff
 
-Submission packaging is implemented under the newly owned `submission/`;
-the real saved-output capture is running. No PR, push or git-writing command.
+Submission packaging is complete under the newly owned `submission/`, including
+an actually executed notebook with saved outputs. No PR, push or git-writing
+command was run. Identity/licensing confirmations and a matching published
+source release remain submitter/integrator filing actions, as detailed below.
 
 Official sources checked on 2026-10-18:
 
@@ -61,10 +63,34 @@ Implementation:
   code remains unchanged; no tag was created/moved here. Saved reading does
   not require that runtime release to be ready.
 
-Validation so far: **6 packaging tests pass**. The combined command
+Validation: **7 packaging tests pass in 0.42 s**, including checks against the
+actual generated payload, decoding every PNG, and rejecting active JavaScript,
+missing execution evidence and unexpected files. `build_submission.py --check`
+passes: **7 files, 1,850,638 bytes; 16 executed source code cells, 73 saved
+outputs, 23 PNGs and 28 HTML tables**. Source notebook cells are unchanged;
+submission identity/abstract/version front matter is added only in the copy.
+The combined command
 `python3 -m pytest notebook/tests tests/hdl tests/synth tests/viz submission/tests -q`
-passed **234 tests in 45.68 s**. Saved-output notebook/size/readability checks
-will be recorded after the real capture completes.
+passed **234 tests in 45.68 s** before the seventh packaging test was added;
+the final focused suite above includes that additional real-payload test.
+`git diff --check` passes for the owned submission/status paths. Visual review
+of the generated graph, waveform and full-adder schematic confirmed readable
+static output; schematic bundles also retain native SVG for zooming.
+
+The real capture completed all source code cells without errors in **788.98 s
+(13.1 min)**, including static image export and nine fresh expensive stages
+(adder flow/raster, NANY DC, pre-layout, four-design post-layout loop and the
+selected min/max circuit), while other streams were running CPU-heavy jobs.
+This is a local timing observation, not a Colab or under-ten-minute claim.
+Raw execution evidence is retained outside the payload at
+`/tmp/tritflow-submission-phase7/executed.raw.ipynb`. An initial post-execution
+host import failure was fixed in the builder; the successful raw capture was
+then reused with `--from-executed` for packaging, without another EDA run or
+any fabricated outputs. The final package records this capture's duration,
+source hash and bootstrap commit separately from packaging metadata. Tool
+versions are explicitly labeled as observed at packaging because the raw
+capture does not contain a separate version snapshot. Colab verification
+remains postponed by instruction, and the bootstrap is unchanged.
 
 Build-only packages installed using the required user pip command:
 nbformat 5.10.4, nbclient 0.10.4, Kaleido 1.5.0, Choreographer 1.4.0,

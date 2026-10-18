@@ -2,6 +2,7 @@
 from __future__ import annotations
 import numpy as np
 from tritflow import PASS_BAND, TRIT_VOLTS
+from .spice import signal_waveform
 
 
 def settling_time(time, voltage, ideal_v: float, start_s: float, end_s: float,
@@ -50,7 +51,7 @@ def measure_sequence(data: dict, bench: dict, expected, *, ideal_volts=None) -> 
         outputs = {}
         for pin in bench['outputs']:
             target = ideal_volts[ideal[pin]]
-            waveform = data[f'v({pin})'.lower()]
+            waveform = signal_waveform(data, pin)
             observed = float(np.interp(check, time, waveform))
             error = observed - target
             settle = settling_time(time, waveform, target, start, end)

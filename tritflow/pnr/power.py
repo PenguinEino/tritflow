@@ -8,6 +8,27 @@ import numpy as np
 from tritflow import RAILS
 
 
+def dc_current_check(data, library):
+    """Assess solved branch currents against OS00, independently of sizing.
+
+    Use SIM's resistor-network solver and characterized per-rail envelopes.
+    The published width-specific limits are linearly scaled, with conservative
+    stepped-M1 limits throughout. This is not lifetime or transient EM signoff.
+    """
+    if library.mock or any(not library.cells[p["cell"]].characterization.get("dc")
+                           for p in data["placements"]):
+        return {"defined": False, "passed": None, "reason": "No real per-vector rail characterization"}
+    from tritflow.extract import estimate_ir_drop
+    names = {p["cell"] for p in data["placements"]}
+    report = estimate_ir_drop(data, library.template,
+        {n: {"width": library.cells[n].width} for n in names},
+        {n: library.cells[n].characterization for n in names})["em_check"]
+    target = 1-data["power"]["assumptions"]["reserved_current_margin"]
+    return {**report, "defined": True, "target_max_utilization": target,
+            "margin_to_limit": 1-report["max_utilization"],
+            "reserved_margin_met": report["max_utilization"] <= target+1e-7}
+
+
 def cell_current(cell, default):
     """Read explicit ampere quantities; never infer units from an unlabelled number."""
     char = cell.characterization
@@ -33,15 +54,20 @@ def cell_current(cell, default):
 
 def power_plan(placements, library, *, current_density_a_per_um=.00025,
                default_cell_current_a=.0001, sheet_resistance_ohm=.05,
-               span_current_limit_a=None):
+               span_current_limit_a=None, current_margin=.2):
     """Plan split M2 trunks; template rail bands are immutable cell geometry.
 
     Width scaling is an assumption; the conservative default uses the manual's
     500 µA stepped-M1 rating at 2 µm. Sheet resistance is also an assumption. Conservative constant current is sunk at every cell.
     """
+    if not math.isfinite(current_margin) or not 0 <= current_margin < 1:
+        raise ValueError("current_margin must be finite and in [0, 1)")
     if (not all(math.isfinite(v) for v in (current_density_a_per_um, default_cell_current_a, sheet_resistance_ohm))
             or current_density_a_per_um <= 0 or default_cell_current_a < 0 or sheet_resistance_ohm <= 0):
         raise ValueError("Power assumptions must be positive (default current may be zero)")
+    # OS00 p17 I-3-1: stepped M1 is 500 uA at 2 um. Reserve
+    # 20% of that published DC limit, including when a caller asks for more.
+    effective_density = min(current_density_a_per_um, .00025)*(1-current_margin)
     currents, sources, rail_currents = {}, {}, {}
     for pl in placements:
         cell = library.cells[pl["cell"]]
@@ -69,7 +95,7 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
         bank_loads[span] += load/2
         bank_loads[span+1] += load/2
         for name, band in library.template["rails"].items():
-            if load/(2*current_density_a_per_um) > band[1]-band[0]+1e-9:
+            if load/(2*effective_density) > band[1]-band[0]+1e-9:
                 raise ValueError(f"Row {row} span {span} {name}: current requires a wider cell rail")
             if band[1]-band[0] > 45:
                 raise ValueError("Cell rail exceeds the PDK unslotted 45 µm limit")
@@ -80,7 +106,7 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
                       for i in range(spans+1)]
     banks = []
     for index, load in enumerate(bank_loads):
-        required = max(6.4, load/current_density_a_per_um)
+        required = max(6.4, load/effective_density)
         count = math.ceil(required/42.)
         width = math.ceil(max(6.4, required/count)*10)/10
         bank_width = 3*count*width+(3*count-1)*2.4
@@ -97,10 +123,13 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
             "span_current_limit_a": span_current_limit_a,
             "currents_a": currents, "rail_currents_a": rail_currents, "current_sources": sources,
             "assumptions": {"default_cell_current_a": default_cell_current_a,
-                "allowed_current_a_per_um": current_density_a_per_um,
+                "allowed_current_a_per_um": effective_density,
+                "requested_current_a_per_um": current_density_a_per_um,
+                "published_M1_step_a_per_um": .00025,
+                "reserved_current_margin": current_margin,
                 "sheet_resistance_ohm_per_square": sheet_resistance_ohm,
                 "qualification": "linear width scaling, centered load spans and constant-current assumptions; not EM sign-off",
-                "current_reference": "OS00 rev1.1 I.3.1/I.3.2: M1(2um) 900uA flat / 500uA stepped; M2(3um) 3.7mA; V1 780uA/cut"}}
+                "current_reference": "OS00 rev1.1 p17 Tables I-3-1/I-3-3: M1(2um) 900uA flat / 500uA stepped; M2(3um) 3.7mA; V1 780uA/cut"}}
 
 
 def draw_power(data, placements, library, plan):

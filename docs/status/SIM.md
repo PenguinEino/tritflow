@@ -1,4 +1,23 @@
-# SIM status — Phases 2–4 complete
+# SIM status — pinned-PDK requalification in progress
+
+2026-10-18. The only qualification target is public PDK **5d963db9d44e192d37a0489c208bfccf2e2f690c** at `$TR1UM_PDK` (`~/pdk/TR-1um-pinned`). All numerical tables below the historical separator are **superseded dev-PDK results**, pending the republishing described here. No old SIM simulations remain running.
+
+## Review fixes completed first
+
+- Finding 2: restoring a schematic-unused power formal now also requires actual TXM1/TXM2 labels on one connected drawn M1/M2/V1 component. Standard-cell pass-through rails must reach both abutment edges. Missing conductor, missing label and severed-VMID regressions all reject; an intact INV still passes the pinned LVS deck.
+- Finding 6: `gate_spice` uses synthesis's writer directly, including its shared `spice_names` encoding and reversible net annotations. Testbenches use safe external node names; waveform and oracle keys restore exact logical spelling. Independent `a`/`A`, `y`/`Y` truth tables pass ngspice transient and DC tests. Synthesis files were not edited.
+
+## In progress
+
+Phase 5 delay attribution, available process/T/V coverage and rail-current audit; all published datasets will be recomputed with pinned-deck/model/source hashes after CELLS and PNR publish their final revisions.
+
+## Interface requests
+
+FRONTEND/PNR: SIM imports `tritflow.synth.writers.spice_names` and `spice`, without editing the synthesis writer. Treat these as the common SPICE boundary. Encoded net comments provide the inverse mapping; logical oracle/waveform keys retain case. PNR's unloaded-input wrapper should decode this map when comparing encoded formals with physical label names (including bracketed names). Rail sizing currently uses the nominal-cell DC maximum and 250 uA/um stepped-M1 limit; a PVT margin assessment follows below.
+
+---
+
+# Historical dev-PDK results — superseded
 
 2026-10-18. No blockers. No additional packages installed. PDK and reference checkout remained read only.
 

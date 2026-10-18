@@ -4,7 +4,73 @@ from pathlib import Path
 import re
 import subprocess
 from tritflow import PDK_ROOT
-from tritflow.sim.spice import gate_spice, lvs_netlist, subcircuits
+from tritflow.sim.spice import gate_spice, lvs_netlist, subcircuits, logical_spice_names
+
+
+def _physical_rail(gds, top, pin):
+    """Prove an unloaded rail from drawn M1/M2, V1 and actual metal labels.
+
+    No schematic, abstract or restored SPICE formal supplies physical evidence.
+    All occurrences of the rail label must land on the same connected metal
+    component. For a standard cell that component must cross both abutment
+    edges: a severed pass-through rail is not a valid unloaded power terminal.
+    """
+    import klayout.db as db
+    from tritflow.sim.spice import CELL_PINS
+    layout = db.Layout(); layout.read(str(gds))
+    cell = layout.cell(top)
+    if cell is None:
+        return None
+    regions = [db.Region(cell.begin_shapes_rec(layout.layer(*layer))).merged()
+               for layer in ((13, 0), (20, 0), (19, 0))]
+    polygons = [list(region.each()) for region in regions[:2]]
+    vertices = [(layer, polygon) for layer, group in enumerate(polygons) for polygon in group]
+    parent = list(range(len(vertices)))
+    def root(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]; i = parent[i]
+        return i
+    for via in regions[2].each():
+        touched = [i for i, (_, polygon) in enumerate(vertices)
+                   if not (db.Region(polygon) & db.Region(via)).is_empty()]
+        if {vertices[i][0] for i in touched} == {0, 1}:
+            for i in touched[1:]: parent[root(i)] = root(touched[0])
+    labels = []
+    for layer, label_layer in enumerate(((48, 0), (49, 0))):
+        iterator = cell.begin_shapes_rec(layout.layer(*label_layer))
+        while not iterator.at_end():
+            shape = iterator.shape()
+            if shape.is_text():
+                label = shape.text.transformed(iterator.trans())
+                labels.append((label.string, layer, label.trans.disp))
+            iterator.next()
+    own = [item for item in labels if item[0].lower() == pin.lower()]
+    if not own:
+        return None
+    components = []
+    for _, layer, point in own:
+        hits = [root(i) for i, (metal, polygon) in enumerate(vertices)
+                if metal == layer and polygon.inside(point)]
+        if len(set(hits)) != 1: return None
+        components.append(hits[0])
+    if len(set(components)) != 1:
+        return None
+    component = components[0]
+    # An unloaded rail shorted to a differently named rail is also invalid.
+    for name, layer, point in labels:
+        if name.upper() in {'VDD', 'VMID', 'VSS'} and name.lower() != pin.lower():
+            if any(root(i) == component and metal == layer and polygon.inside(point)
+                   for i, (metal, polygon) in enumerate(vertices)):
+                return None
+    metal = db.Region()
+    for i, (_, polygon) in enumerate(vertices):
+        if root(i) == component: metal.insert(polygon)
+    boundary = db.Region(cell.begin_shapes_rec(layout.layer(235, 0))).bbox()
+    if top.upper() in CELL_PINS and not boundary.empty():
+        if metal.bbox().left > boundary.left or metal.bbox().right < boundary.right:
+            return None
+    return {'labels': len(own), 'connected_metal_area_um2': metal.area()*layout.dbu**2,
+            'method': 'drawn M1/M2 connectivity through V1; actual TXM1/TXM2 labels; cell abutment continuity'}
 
 
 class ExtractionError(RuntimeError):
@@ -100,13 +166,18 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
     layout_top = subcircuits(extracted.read_text()).get(top.lower())
     reference_top = subcircuits(text).get(top.lower())
     layout_pins = {p.lower() for p in layout_top['pins']} if layout_top else set()
-    reference_pins = {p.lower() for p in reference_top['pins']} if reference_top else set()
-    restored=[]
+    decoded = logical_spice_names(text)
+    reference_pins = {decoded.get(p,p).lower() for p in reference_top['pins']} if reference_top else set()
+    restored=[]; physical_evidence={}
     # The PDK purges physically present pass-through rails with no device loads.
     # Restore only reference power formals proven unused through the hierarchy.
     for pin in sorted(reference_pins-layout_pins):
         if pin in {'vdd','vmid','vss'} and layout_top and _unused_pin(subcircuits(text),top,pin):
-            restored.append(pin.upper())
+            evidence = _physical_rail(gds, top, pin)
+            if evidence:
+                restored.append(pin.upper()); physical_evidence[pin.upper()] = evidence
+            else:
+                errors.append(f'Unloaded rail {pin.upper()} lacks physical metal/label/continuity evidence')
     if restored:
         raw=extracted.read_text()
         (out/f'{top}.raw.ext.spice').write_text(raw)
@@ -122,4 +193,5 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
     return dict(matched=matched, extracted=str(extracted), report=str(report),
                 circuits=circuits, errors=errors, log=log, strict_ports=True,
                 unused_power_formals_restored=restored,
+                unused_power_physical_evidence=physical_evidence,
                 scope='PDK device extraction; intrinsic device parasitics; no signal-wire resistance')

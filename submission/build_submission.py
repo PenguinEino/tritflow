@@ -53,12 +53,24 @@ def authors_table(team):
         for author in team["authors"])
 
 
-def render_readme(team, release_text="Release compatibility must be checked before filing."):
+def has_placeholders(value):
+    if isinstance(value,dict): return any(has_placeholders(v) for v in value.values())
+    if isinstance(value,list): return any(has_placeholders(v) for v in value)
+    return isinstance(value,str) and bool(re.search(r"\[[A-Z][A-Z_ ]*\]",value))
+
+
+def render_readme(team, release_text="Release compatibility must be checked before filing.", source_commit=None):
     text = read_template("README.md")
     for key, value in {"TEAM_NAME":team["team_name"], "AUTHORS_TABLE":authors_table(team),
                        "REPRESENTATIVE":team["representative"], "ATTENDANCE":team["attendance_and_poster"],
-                       "ASSET_RIGHTS":team["asset_rights_confirmation"],"RELEASE_STATUS":release_text}.items():
+                       "ASSET_RIGHTS":team["asset_rights_confirmation"],"RELEASE_STATUS":release_text,
+                       "SOURCE_LINK":f'[{source_commit}](https://github.com/PenguinEino/tritflow/tree/{source_commit})'
+                           if source_commit else "see build-info.json (commit print unavailable)"}.items():
         text = text.replace("{{"+key+"}}",str(value))
+    if not has_placeholders(team):
+        text=text.replace("**Identity fields are intentionally incomplete;\n"
+                          "the submitter must fill them before filing.** No author identity is inferred.",
+                          "Identity fields were supplied by the submitter; the generator does not verify them.")
     return text
 
 
@@ -257,13 +269,14 @@ def package(document, source, destination, team, info):
     front += "The original source cells and bootstrap are preserved; rerun them for interactive figures. "
     front += "Clean Colab installation remains unverified/postponed.\n\n"
     front += release_notice(info.get("release",{}))+"\n\n"
-    front += "<details><summary>Capture tool versions (full provenance in build-info.json)</summary>\n\n"
+    front += "<details><summary>Tool versions observed at packaging (runtime pins are in the bootstrap)</summary>\n\n"
     front += "```json\n"+json.dumps(info["tools"],indent=2)+"\n```\n</details>\n"
     document.cells.insert(0,nbformat.v4.new_markdown_cell(front,id="submission-identity"))
     info.update(validate(document,source))
     document.metadata["license"] = {"name":"Apache-2.0","url":"https://www.apache.org/licenses/LICENSE-2.0"}
     nbformat.write(document,destination/"tritflow_tr1um.ipynb")
-    (destination/"README.md").write_text(render_readme(team,release_notice(info.get("release",{}))))
+    (destination/"README.md").write_text(render_readme(team,release_notice(info.get("release",{})),
+                                                    info.get("source_commit_at_bootstrap")))
     for name in ("ABSTRACT.md","PITCH.md","CHECKLIST.md"):
         (destination/name).write_text(read_template(name))
     shutil.copyfile(ROOT/"LICENSE",destination/"LICENSE")
@@ -340,9 +353,10 @@ def main(argv=None):
               "packaging_commit":subprocess.check_output(["git","-C",str(ROOT),"rev-parse","HEAD"],text=True).strip(),
               "tracked_working_changes_at_packaging":subprocess.check_output(["git","-C",str(ROOT),"diff","--name-only","HEAD"],text=True).splitlines(),
               "capture":dict(document.metadata["tritflow_submission_capture"]),"tools":tools,
+              "tools_observation":"packaging environment; the raw capture does not store a separate version snapshot",
               "official_rules_commit":"a502a6ba01260d3492df9137dddae0bb5fabeb3c",
               "release":release_status(args.source),
-              "colab_verified":False,"identities_confirmed":not any("[" in str(v) for v in json.loads(args.team.read_text()).values()),
+              "colab_verified":False,"team_fields_completed":not has_placeholders(json.loads(args.team.read_text())),
               "raw_execution_not_in_payload":str(raw.relative_to(ROOT)) if raw.is_relative_to(ROOT) else str(raw),
               "manifest_scope":"files excludes build-info.json itself; total_bytes includes it"}
         args.output.parent.mkdir(parents=True,exist_ok=True)

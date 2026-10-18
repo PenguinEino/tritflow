@@ -8,6 +8,7 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from tritflow import PASS_BAND, TRIT_VOLTS
+from tritflow.sim.spice import signal_waveform
 
 
 def _bands(fig, row=None):
@@ -42,14 +43,14 @@ def waveform_figure(result: dict, outputs=None, *, pre: dict | None = None,
         _bands(fig, index)
         if pre is not None:
             fig.add_trace(go.Scatter(x=pre['waveforms']['time']*1e9,
-                y=pre['waveforms'][f'v({pin})'.lower()], name=f'{pin}: pre-layout',
+                y=signal_waveform(pre['waveforms'], pin), name=f'{pin}: pre-layout',
                 mode='lines', line={'color':'#3478ad', 'dash':'dash', 'width':1.5}), row=index, col=1)
         fig.add_trace(go.Scatter(x=result['waveforms']['time']*1e9,
-            y=result['waveforms'][f'v({pin})'.lower()], name=f'{pin}: post-layout' if pre else pin,
+            y=signal_waveform(result['waveforms'], pin), name=f'{pin}: post-layout' if pre else pin,
             mode='lines', line={'color':'#bc5a22', 'width':1.7}), row=index, col=1)
         if rows:
             hold = result['stimulus']['hold_s']
-            ideal = [r['outputs'][pin]['ideal_trit']*5 for r in rows]
+            ideal = [r['outputs'][pin].get('ideal_voltage_v',r['outputs'][pin]['ideal_trit']*5) for r in rows]
             fig.add_trace(go.Scatter(x=np.arange(len(rows)+1)*hold*1e9,
                 y=ideal+[ideal[-1]], name=f'{pin}: ideal', mode='lines',
                 line={'color':'#566269', 'width':1, 'dash':'dot', 'shape':'hv'}), row=index, col=1)
@@ -88,11 +89,11 @@ def transfer_figure(result: dict, input_pin: str, outputs, *, currents=('VDD',),
                     title='DC transfer and static rail current') -> go.Figure:
     """Plot dc_transfer() data with signed SPICE source current on a second axis."""
     data = result.get('data', result)
-    x = data[f'v({input_pin})'.lower()]
+    x = signal_waveform(data, input_pin)
     fig = make_subplots(specs=[[{'secondary_y':True}]])
     _bands(fig)
     for pin in outputs:
-        fig.add_trace(go.Scatter(x=x,y=data[f'v({pin})'.lower()],name=f'V({pin})',mode='lines'), secondary_y=False)
+        fig.add_trace(go.Scatter(x=x,y=signal_waveform(data, pin),name=f'V({pin})',mode='lines'), secondary_y=False)
     for rail in currents:
         fig.add_trace(go.Scatter(x=x,y=np.asarray(data[f'i({rail.lower()})'])*1e6,name=f'I({rail})',mode='lines',
                                 line={'dash':'dash'}), secondary_y=True)

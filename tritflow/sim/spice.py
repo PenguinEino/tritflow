@@ -51,9 +51,9 @@ def model_includes(pdk: str | Path = PDK_ROOT) -> str:
 
 
 def gate_spice(netlist, cell_subckts: str) -> str:
-    """Build an LVS reference with bit-blasted port names and the contracted cells."""
+    """Use synthesis' reversible SPICE naming and validate the cell pin contract."""
+    from tritflow.synth.writers import spice
     definitions = subcircuits(cell_subckts)
-    lines = [f'.subckt {netlist.top} ' + ' '.join([p.name for p in netlist.ports] + list(RAILS))]
     for inst in netlist.instances:
         order = CELL_PINS[inst.cell]
         if inst.cell.lower() not in definitions:
@@ -61,6 +61,15 @@ def gate_spice(netlist, cell_subckts: str) -> str:
         actual = definitions[inst.cell.lower()]['pins']
         if [p.upper() for p in actual] != list(order) + list(RAILS):
             raise ValueError(f"Cell {inst.cell} port order violates docs/interfaces.md: {actual}")
-        lines.append(f'X{inst.name} ' + ' '.join([inst.pins[p] for p in order] + list(RAILS)) + f' {inst.cell}')
-    lines.append(f'.ends {netlist.top}')
-    return '\n'.join(lines) + '\n' + cell_subckts
+    return spice(netlist) + '\n' + cell_subckts
+
+
+def logical_spice_names(text):
+    """Recover the explicit encoded→logical net annotations written by synthesis."""
+    return {m[1]: m[2] for m in re.finditer(r'^\* net (\S+) = (.+)$', text, re.M)}
+
+
+def signal_waveform(data, pin):
+    """Prefer a case-sensitive logical key; support legacy lowercase raw data."""
+    key = f'v({pin})'
+    return data[key] if key in data else data[key.lower()]

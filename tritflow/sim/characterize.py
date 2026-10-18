@@ -9,9 +9,11 @@ import re
 import numpy as np
 
 from tritflow import CELLS_DIR, PASS_BAND, PDK_ROOT
-from .bench import build_testbench, input_vectors, simulate
+from .bench import build_testbench, input_vectors, simulate, restore_signals
+from .spice import signal_waveform
 from .runner import run_ngspice, SimulationError
 from .spice import CELL_PINS
+from .provenance import pdk_provenance
 
 
 def logic_value(cell: str, values) -> int:
@@ -37,7 +39,8 @@ def dc_operating_points(subckts, top, inputs, outputs, vectors, expected, *, tim
         folder = None if workdir is None else Path(workdir)/f'state_{index:03d}'
         data = run_ngspice(bench['netlist'], 'op', bench['probes'],
                            timeout=timeout, workdir=folder)['data']
-        out = {pin: float(data[f'v({pin})'.lower()][-1]) for pin in outputs}
+        data = restore_signals(data, bench)
+        out = {pin: float(signal_waveform(data, pin)[-1]) for pin in outputs}
         rails=bench['supplies_v'];levels={-1:rails['VSS'],0:rails['VMID'],1:rails['VDD']}
         errors = {pin: out[pin] - levels[ideal[pin]] for pin in outputs}
         rows.append({'input_trits': list(vector), 'output_v': out, 'error_v': errors,
@@ -122,6 +125,7 @@ def characterize_cell(cell: str, subckts: str | None = None, *, top: str | None 
     model_dir = Path(kwargs.get('pdk', PDK_ROOT)).expanduser() / 'libs.tech/spice/models'
     result['model_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in sorted(model_dir.iterdir()) if p.is_file()}
+    result['pdk_provenance'] = pdk_provenance(kwargs.get('pdk', PDK_ROOT))
     if include_cascade and inputs:
         from .cascade import characterize_cascade, attach_cascade
         cascade = characterize_cascade(cell, subckts, fanouts=cascade_fanouts,
@@ -131,7 +135,11 @@ def characterize_cell(cell: str, subckts: str | None = None, *, top: str | None 
     if destination is not None:
         path = Path(destination)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(result, indent=2, allow_nan=False) + '\n')
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w',dir=path.parent,prefix=path.name,suffix='.tmp',delete=False) as stream:
+            stream.write(json.dumps(result, indent=2, allow_nan=False) + '\n')
+            temporary = Path(stream.name)
+        temporary.replace(path)
     return result
 
 

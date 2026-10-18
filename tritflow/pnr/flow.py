@@ -11,7 +11,7 @@ from tritflow.netlist import GateNetlist
 from .gds import write_gds
 from .library import Library
 from .placement import RowCapacityError, pin_location, place
-from .power import cell_current, draw_power, power_plan
+from .power import cell_current, dc_current_check, draw_power, power_plan
 from .router import RoutingFailure, floorplan, route
 from .verify import PhysicalVerificationError, connectivity, pdk_drc, routing_drc
 
@@ -81,7 +81,8 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
                     anneal_steps=600, history_every=25, channel_tracks=None,
                     max_expansions=5, ripup_passes=8, run_pdk_drc=True,
                     current_density_a_per_um=.00025, default_cell_current_a=.0001,
-                    sheet_resistance_ohm=.05, pdk_root=None, klayout_binary=None):
+                    sheet_resistance_ohm=.05, current_margin=.2,
+                    pdk_root=None, klayout_binary=None):
     """Place, route, export and verify a combinational GateNetlist.
 
     The default library is re-discovered on every call, so a newly published real
@@ -117,11 +118,12 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
     currents = {inst.name: cell_current(library.cells[inst.cell],
         0. if inst.cell in ("FILL", "TIEP", "TIEZ", "TIEN") else default_cell_current_a)[0]
                 for inst in netlist.instances}
-    capacity = 2*current_density_a_per_um*min(y1-y0 for y0, y1 in library.template["rails"].values())
     power_options = dict(current_density_a_per_um=current_density_a_per_um,
                          default_cell_current_a=default_cell_current_a,
-                         sheet_resistance_ohm=sheet_resistance_ohm)
-    power_plan([], library, **power_options)  # Validate assumptions before sizing rows.
+                         sheet_resistance_ohm=sheet_resistance_ohm, current_margin=current_margin)
+    validated = power_plan([], library, **power_options)
+    capacity = 2*validated["assumptions"]["allowed_current_a_per_um"]*min(
+        y1-y0 for y0, y1 in library.template["rails"].values())
     row_count, spans, tracks, plan, core_width = _floorplan_choice(
         netlist, library, rows, channel_tracks, currents, capacity, power_options)
     relative, history, _ = place(netlist, library, row_count, seed, anneal_steps, history_every,
@@ -169,6 +171,24 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
             if compact_metal:
                 bypass_tracks += 1
     routed_at = time.perf_counter()
+    assessment = dc_current_check(data, library)
+    data["power"]["dc_current_check"] = assessment
+    if assessment["defined"] and not assessment["reserved_margin_met"]:
+        # Geometry changes in discrete cell increments. Tighten row capacity
+        # until the *solved* network meets the requested reserve as well.
+        tightened = min(current_density_a_per_um, .00025)*min(.9,
+            .95*assessment["target_max_utilization"]/assessment["max_utilization"])
+        result = place_and_route(netlist, library, output_dir=out, rows=rows, seed=seed,
+            anneal_steps=anneal_steps, history_every=history_every, channel_tracks=channel_tracks,
+            max_expansions=max_expansions, ripup_passes=ripup_passes, run_pdk_drc=run_pdk_drc,
+            current_density_a_per_um=tightened, default_cell_current_a=default_cell_current_a,
+            sheet_resistance_ohm=sheet_resistance_ohm, current_margin=current_margin,
+            pdk_root=pdk_root, klayout_binary=klayout_binary)
+        result.data.setdefault("dc_sizing_attempts", []).insert(0, assessment)
+        elapsed = time.perf_counter()-started
+        result.stats["runtime_s"]["total"] = elapsed
+        result.json_path.write_text(json.dumps(result.data, indent=2)+"\n")
+        return result
     data["routing_attempts"] = attempts
     # Animation coordinates must match the final floorplan, including expansion.
     for snapshot in history:

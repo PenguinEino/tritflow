@@ -19,7 +19,7 @@ def scaling_figure(result, *, title='Balanced-ternary ripple-adder scaling'):
     trace([r['cell_count'] for r in rows],'Cells',1,1,secondary_y=True)
     for mode in ('pre','post'):
         trace([None if r['carry'][mode]['max_settling_s'] is None else r['carry'][mode]['max_settling_s']*1e9
-               for r in rows],f'{mode}-layout carry',1,2)
+               for r in rows],{'pre':'Device-only carry','post':'Device + wire C carry'}[mode],1,2)
     trace([r['static_power_worst_w']*1e3 for r in rows],'Static power',2,1)
     trace([r['max_rail_deviation_v']*1e3 for r in rows],'Rail deviation',2,2)
     trace([r['max_zero_shift_v']*1e3 for r in rows],'Zero-level shift',2,2)
@@ -100,11 +100,11 @@ def scaling_fit_figure(result, *, title='Ripple carry and the DC-power cost of t
         selected = [r for r in rows if r['carry'][mode]['max_settling_s'] is not None]
         fig.add_trace(go.Scatter(x=[r['n'] for r in selected],
             y=[r['carry'][mode]['max_settling_s']*1e9 for r in selected],
-            mode='markers',name=f'{mode}-layout measured',marker={'color':color,'size':9}),row=1,col=1)
+            mode='markers',name=f'{"Device-only" if mode=="pre" else "+ wire C"} measured',marker={'color':color,'size':9}),row=1,col=1)
         fit = fits['carry'][mode]
         if fit:
             fig.add_trace(go.Scatter(x=fit['x'],y=[v*1e9 for v in fit['predicted']],
-                mode='lines',name=f'{mode}-layout fit',line={'color':color,'dash':'dash'}),row=1,col=1)
+                mode='lines',name=f'{"Device-only" if mode=="pre" else "+ wire C"} fit',line={'color':color,'dash':'dash'}),row=1,col=1)
             r2 = 'undefined' if fit['r_squared'] is None else f'{fit["r_squared"]:.5f}'
             annotations.append(f'{mode}: {fit["slope"]*1e9:.3f} ns/trit + {fit["intercept"]*1e9:.3f} ns; R²={r2}')
     fig.add_trace(go.Scatter(x=[r['cell_count'] for r in rows],
@@ -129,4 +129,39 @@ def scaling_fit_figure(result, *, title='Ripple carry and the DC-power cost of t
     fig.update_yaxes(title_text='Static power (mW)',row=1,col=2)
     fig.update_layout(title=title,template='plotly_white',height=530,
                       legend={'orientation':'h','y':-.14},margin={'b':145})
+    return fig
+
+
+def corners_figure(result, *, dut='full_add', title=None):
+    """Cached TYP heatmaps with fixed project and supply-tracking band criteria."""
+    temperatures=result['temperatures_c'];scales=result['supply_scales']
+    rows={(r['conditions']['temperature_c'],r['conditions']['supply_scale']):r
+          for r in result['rows'] if r['dut']==dut}
+    if not rows: raise ValueError(f'No cached corner data for {dut}')
+    panels=[('Fixed −5/0/+5 V: worst error (mV)','nominal','max_error_v',1e3),
+            ('Actual rails: worst error (mV)','tracking','max_error_v',1e3),
+            ('Worst static rail current (mA)',None,'max_static_current_a',1e3),
+            ('Actual-rail band: settling (ns)','tracking','max_settling_s',1e9)]
+    fig=make_subplots(rows=2,cols=2,subplot_titles=[p[0] for p in panels],vertical_spacing=.22,horizontal_spacing=.2)
+    for index,(_,criterion,key,factor) in enumerate(panels):
+        z=[];text=[]
+        for t in temperatures:
+            values=[];marks=[]
+            for scale in scales:
+                case=rows.get((t,scale));record=None
+                if case and case['state']=='complete':
+                    record=case['dc'] if criterion is None else case['transient'][criterion]
+                value=None if record is None else record[key]
+                values.append(None if value is None else value*factor)
+                passed=None if record is None or criterion is None else record['passed']
+                marks.append('unavailable' if value is None else f'{value*factor:.3g}'+('' if passed is None else '<br>'+('PASS' if passed else 'FAIL')))
+            z.append(values);text.append(marks)
+        fig.add_trace(go.Heatmap(x=[5*s for s in scales],y=temperatures,z=z,text=text,texttemplate='%{text}',
+            colorscale='YlOrRd',showscale=False,hovertemplate='Rails ±%{x:g} V<br>T=%{y:g} °C<br>%{text}<extra></extra>'),row=index//2+1,col=index%2+1)
+        fig.update_xaxes(title_text='Symmetric rail magnitude (V)',row=index//2+1,col=index%2+1)
+        fig.update_yaxes(title_text='Temperature (°C)',type='category',row=index//2+1,col=index%2+1)
+    fig.add_annotation(x=0,y=-.2,xref='paper',yref='paper',showarrow=False,xanchor='left',align='left',
+        text='Only TYP is distributed. −40 °C extrapolates beyond the published 27–150 °C model fit range.'
+             '<br>Fixed-band failures at ±10% supply include the rail movement itself; actual-rail results use the same absolute ±0.5 V band.')
+    fig.update_layout(title=title or f'{dut}: TYP temperature / supply robustness',template='plotly_white',height=730,margin={'b':130})
     return fig

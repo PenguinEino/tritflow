@@ -5,6 +5,7 @@ uses a documented independent radix-3 oracle and physical extraction/LVS; failed
 runs remain failed rows rather than fabricated timing/area points.
 """
 from __future__ import annotations
+from .provenance import pdk_provenance
 
 import hashlib
 import json
@@ -267,7 +268,7 @@ def run_scaling(sizes=range(1,7), *, jobs=1, destination=RESULT, **kwargs):
     else:
         with ProcessPoolExecutor(max_workers=jobs) as pool:
             rows = list(pool.map(partial(run_size,**kwargs),sizes))
-    result = dict(schema_version=1,experiment='real-layout balanced-ternary ripple-adder scaling',
+    result = dict(pdk_provenance=pdk_provenance(),schema_version=1,experiment='real-layout balanced-ternary ripple-adder scaling',
         rows=rows,passed=all(r['passed'] for r in rows),
         comparison_scope='Identical GDS-extracted intrinsic devices: device-only (pre-wire) versus devices plus estimated wire C. Legacy source-schematic delays archived in results/phase4_before_matched/.',
         measurement='1 ns ramps; settling from ramp start to final entry into ±0.5 V, through entire segment; 2 ns default max timestep',
