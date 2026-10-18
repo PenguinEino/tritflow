@@ -1,7 +1,6 @@
-# SIM status — Phase 2 complete
+# SIM status — Phases 2 and 3 complete
 
-2026-10-18. No blockers. No additional packages installed. No git-state
-changes made by SIM. PDK and reference checkout remained read only.
+2026-10-18. No blockers. No additional packages installed. PDK and reference checkout remained read only.
 
 ## Real PNR post-layout validation
 
@@ -14,10 +13,10 @@ All input/library hashes still match the live files at final verification.
 
 | Design | Input vectors | LVS / pre / post | Max post error (mV) | Max estimated rail deviation (mV) | Max additional divider-zero shift (mV) |
 |---|---:|---|---:|---:|---:|
-| adder4 | 20 | Match / PASS / PASS | 43.340 | 25.572 | 1.232 |
-| full_add | 27 | Match / PASS / PASS | 43.340 | 9.199 | 1.374 |
-| mac1 | 81 | Match / PASS / PASS | 43.446 | 11.640 | 1.351 |
-| mul1 | 9 | Match / PASS / PASS | 100.891 | 2.984 | 0.774 |
+| adder4 | 20 | Match / PASS / PASS | 43.340 | 13.542 | 1.822 |
+| full_add | 27 | Match / PASS / PASS | 43.340 | 7.270 | 1.369 |
+| mac1 | 81 | Match / PASS / PASS | 43.446 | 9.864 | 1.415 |
+| mul1 | 9 | Match / PASS / PASS | 100.891 | 2.174 | 0.569 |
 
 `full_add`, `mac1`, and `mul1` cover **all** 27, 81, and 9 input combinations.
 Adder4 uses 20 documented vectors: positive and negative four-digit carry
@@ -40,13 +39,13 @@ start, with the output required to remain in band through segment end.
 | adder4 | sum[1] | 123.06 | 122.15 | 0.00 |
 | adder4 | sum[0] | 123.73 | 122.73 | 30.38 |
 | adder4 | cout | 192.74 | 191.64 | 0.00 |
-| full_add | sum | 100.57 | 109.87 | 9.30 |
-| full_add | cout | 90.61 | 99.78 | 9.17 |
-| mac1 | sum | 132.25 | 145.12 | 15.59 |
-| mac1 | cout | 122.50 | 135.27 | 13.51 |
-| mac1 | and_out | 13.30 | 16.27 | 3.39 |
-| mac1 | or_out | 17.14 | 20.61 | 3.70 |
-| mul1 | p | 15.69 | 16.94 | 1.92 |
+| full_add | sum | 100.57 | 109.84 | 9.27 |
+| full_add | cout | 90.61 | 99.91 | 9.30 |
+| mac1 | sum | 132.25 | 145.00 | 12.76 |
+| mac1 | cout | 122.50 | 135.10 | 12.60 |
+| mac1 | and_out | 13.30 | 17.24 | 4.76 |
+| mac1 | or_out | 17.14 | 21.00 | 3.85 |
+| mul1 | p | 15.69 | 17.08 | 1.64 |
 
 The two maxima can occur on different transitions. The last column compares
 the same transition; it is not the difference of independently selected maxima.
@@ -201,18 +200,18 @@ mixed revisions. Requirements are the existing numpy/scipy/Plotly/klayout,
 ngspice, KLayout binary and TR-1um PDK. Optional reference regressions require
 `~/balanced-ternary-logic` and copy its GDS/netlists into temporary directories.
 
-**Final tests: 33 passed, no skips, in 132.33 s** with
+**Phase 2 tests: 33 passed, no skips, in 132.33 s** with
 `python3 -m pytest tests/sim tests/extract -q`. The final default post-layout
 script also exited 0 for all four designs using the stored electrical caches.
 `compileall` and `git diff --check` on owned paths pass.
 
 ## Interface requests
 
-None. Newly granted ownership was used only for `tritflow/viz/waves.py`,
-`examples/postlayout_all.py` and generated result paths, alongside prior SIM
-paths and the explicitly authorized cell characterization JSON files.
+No shared-contract changes requested. Phase 2 used the explicit waves/example
+and characterization grants. Phase 3 additionally uses `tritflow/viz/scaling.py`,
+`results/`, `cells/out/sizing/` and `examples/adder_scaling.py`, as authorized.
 
-## Phase 3 — in progress (2026-10-18)
+## Phase 3 — complete (2026-10-18)
 
 `tritflow.sim.sizing.sweep_dimensions` implements FRONTEND's exact proposed
 signature/schema. Canonical device IDs and adopted W/L come from the published
@@ -229,7 +228,116 @@ and both RR lengths; NANY varies common MOS W factor/L and both RR lengths.
 individual candidate caches. `python3 -m tritflow.sim.sizing` reproduces both.
 `tritflow.viz.scaling.sizing_figure()` marks `adopted_index` with a star.
 
-Actual-layout adder scaling and the 500 ns full-adder load boundary are running.
-They use the existing strict PDK LVS/real-GDS wire-C/IR pipeline, independent
-radix-3 carry oracles and source/artifact fingerprints. Completed measurements
-and the final reproduction/test commands will be recorded below.
+Both adopted source sizes pass: INV worst error **39.542 mV**, worst absolute
+static rail current **407.166 µA**; NANY **44.600 mV**, **421.361 µA**. Fourteen
+INV candidates fail the voltage criterion. One NANY candidate (baseline MOS,
+RR length 20 µm) produces a nonphysical DC root outside the supply rails;
+its metrics are null, diagnostic and raw data retained. This is a solver/model
+failure, **not** evidence that the RR20 circuit cannot work. No point is dropped.
+
+The bundled grids carry source/model/analysis hashes. `sweep_dimensions()` can
+serve their rows even with no local per-row cache, including explicit failed
+rows. Disposable `rows/` caches are ignored; the two portable grids and HTML
+figures are published. JSON transfer arrays work directly with `transfer_figure`.
+Measured warm reads: INV grid ~16 ms, NANY ~3 ms, cached failed-grid candidate
+~6 ms; scaling/load JSON reads <1 ms on this workstation.
+
+### Real-layout adder scaling, N=1…6
+
+`results/adder_scaling.json` and `.html` contain the completed six-width study.
+Every width uses public HDL/synthesis and `pnr.place_and_route` with real cells,
+seed 7, normal PDK DRC, strict PDK LVS, extracted devices, actual-GDS wire C,
+pre/post ngspice and the resistive IR solver. All six pass DRC/LVS and every
+representative pre/post output check. No mocks or analytical delay substitutes.
+
+
+| N | Cells | Die area (mm²) | Carry pre (ns) | Carry post (ns) | Worst representative static power (mW) | Max rail deviation (mV) | Max zero shift (mV) |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 16 | 0.555984 | 55.04 | 59.80 | 66.71 | 7.27 | 1.36 |
+| 2 | 32 | 1.393524 | 104.27 | 115.56 | 133.41 | 9.53 | 1.33 |
+| 3 | 48 | 2.136240 | 153.45 | 152.83 | 200.12 | 11.40 | 1.70 |
+| 4 | 64 | 2.766600 | 202.59 | 201.91 | 266.82 | 13.40 | 1.79 |
+| 5 | 80 | 4.030992 | 251.73 | 250.76 | 333.53 | 13.00 | 1.28 |
+| 6 | 96 | 4.383720 | 300.88 | 299.67 | 400.23 | 13.96 | 1.83 |
+
+Conditions: ±5/0 V, nominal 27 °C, 10 fF per output, 1 ns ramp, 1 µs per
+segment, 2 ns maximum timestep, inclusive ±0.5 V band. Carry is the worst of
+COUT and most-significant SUM over four directed full-length carry transitions:
+positive/negative assertion and release, with A all ±1 and B all 0. Additional
+zero/overflow/opposite/alternating cases give 11 states in sequence. N=1 also
+visits all 27 states (38 sequence entries in total). This is the worst measured
+carry case in this documented set, not exhaustive analog transition coverage.
+Synthesis equivalence is exhaustive through N=5 (177,147 inputs); N=6 uses
+100,000 reproducible random vectors, seed 0. The analog arithmetic oracle is
+independent of gate mapping. Sub-2 ns pre/post differences remain unresolved;
+the small negative differences do not establish a speedup.
+
+Static power is `-sum(Vrail * I(source))` from independent post-layout DC solves,
+not transient tails: all 27 unique states for N=1, nine documented unique states
+for other widths. The maximum is scoped to those states. Large-circuit OP
+convergence uses ideal internal-net `.nodeset` guesses mapped through the PDK
+LVS cross-reference. These are released Newton starting guesses, never voltage
+constraints or `uic`. Actual analog outputs are checked against radix arithmetic.
+The IR per-rail worst-current envelope is separate from ideal-rail SPICE; metal R
+and wire C retain the assumptions above. PNR heuristic choices affect area.
+
+Artifacts: `build/adder_scaling/adderN/` contains synthesis/PNR, physical-stage
+cache and `scaling.json`; `postlayout/` contains GDS/reference snapshots, strict
+LVS, geometry/C, pre/post waveforms and measurements, independent vectors,
+static operating points and IR. The published matrix retains all hashes,
+per-transition measurements, reference vectors and evidence paths.
+
+Producer caches validate source/model/code/options and output hashes. Python
+source provenance is frozen when the producer imports its modules, matching
+Python's loaded-code semantics while other streams edit files; use a fresh
+producer process to pick up their edits. Live HDL, library, models, decks and
+physical artifacts remain checked. Changed live cell views invalidate results.
+`load_scaling()` is a fast read of the portable measured dataset; it does not
+silently launch PNR. `scaling_figure()` returns four Plotly panels for area/cells,
+pre/post carry, static power, and estimated rail/zero shifts.
+
+### Full-adder post-layout output-load boundary
+
+`results/full_add_load_sweep.json` and `.html` contain 13 measured loads. Equal
+external capacitors load SUM and COUT to ground, in addition to GDS wire C.
+All 27 input states are visited lexicographically (26 transitions, not all 702).
+Window 500 ns, checkpoint at 499 ns, 1 ns ramp, maximum timestep 2 ns.
+
+- Coarse loads 0.01, 0.1, 1, 3 and 10 pF pass; 30 pF is the first coarse FAIL.
+- Local refinement: **12.8125 pF PASS**, **12.96875 pF FAIL** per output;
+  bracket width **0.15625 pF**, below the 2% stopping criterion.
+- Last PASS: worst SUM settling **498.03 ns**, COUT **422.86 ns**, maximum
+  checkpoint error **0.49690 V**.
+- First FAIL: SUM at `[a,b,cin]=[-1,0,-1]` checks at **4.48626 V** against +5 V,
+  error **−0.51374 V**, and does not settle in its window. Its settling is null.
+
+The bracket is local to measured points and this input sequence; no unmeasured
+monotonic-load, PVT or silicon guarantee. Per-output maximum fields retain the
+maximum among settled transitions; consult `unsettled`/`failures` as well.
+`load_sweep_figure()` omits a pin's settling trace where it has any unsettled
+transition, marks FAIL at the window, and plots check error on a second axis.
+`load_sweep_results()` reads the precomputed dataset instantly;
+`sweep_output_load()` validates and reuses measured evidence. Raw files live
+in `build/full_add/load_sweep/`.
+
+### Phase 3 reproduction and validation
+
+```sh
+python3 -m tritflow.sim.sizing
+python3 examples/adder_scaling.py --jobs 2
+python3 examples/adder_scaling.py --load-only
+python3 examples/postlayout_all.py
+python3 -m pytest tests/sim tests/extract -q
+```
+
+The four original PNR designs were re-extracted/rechecked against their latest
+published GDS/PNR files; all pass, with every recorded input hash matching live
+files. The top two tables were refreshed from those current summaries.
+All six scaling evidence sets and load-sweep artifacts match their recorded
+SHA256 values. No extra packages installed. No changes made outside SIM-owned
+paths and the explicit sizing/results/example/viz grants.
+
+**Final regression: 54 passed, no skips, in 145.99 s** with
+`python3 -m pytest tests/sim tests/extract -q`. `compileall` and
+`git diff --check` on owned paths pass. The full scaling/load producer and
+the four-design post-layout producer both exited 0.

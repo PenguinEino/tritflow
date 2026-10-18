@@ -354,3 +354,15 @@ via whole-directory atomic exchange. All nine cells' GDS/SPICE/extraction/abstra
 truth/PNG hashes match the prior generation; latest live SIM characterizations
 and sizing artifacts were preserved. No SIM/extract code or PDK/reference files
 were edited. No extra dependencies or git-state changes.
+
+## Phase 5 — chapter 3 cell visuals (in progress)
+
+New ownership: `tritflow/viz/cell.py` and `tests/viz/test_cell*.py`. The views read
+only published `cells/out` data. Layer polygons are taken from GDS with hole-safe
+trapezoid decomposition, not drawn from schematic guesses. Device placement is
+joined through persisted strict LVS device pairs to canonical published SPICE;
+optional original XM/R labels come from the independent LVS evidence already
+inside `cells/out`. Actual GDS active-region bounds outline each MOS/RR device.
+The linked device table uses standalone HTML/Plotly JavaScript, so ipywidgets and
+anywidget are not runtime requirements. Separate ordinary Figure/table objects
+remain available for static notebook use. No cell outputs are being modified.

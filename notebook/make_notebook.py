@@ -43,9 +43,10 @@ Colab checkout must match the requested ref and have no tracked edits.
 notebook. Fresh Colab execution and the install-inclusive ten-minute budget
 remain unverified.
 
-The default run uses a small adder and representative analog vectors. Heavy
-stages use content-keyed JSON caches; `TRITFLOW_EXTENDED=1` enables additional
-P&R/load experiments. Cached reports are identified as cache hits and their
+The default run starts with a small adder, then closes the loop on every shared
+example and one selected circuit. Coverage is reported beside each experiment.
+Heavy stages use content-keyed JSON caches; `TRITFLOW_EXTENDED=1` enables extra
+load/routing views. Cached reports are identified as cache hits and their
 artifact hashes are checked. A cache is evidence of the recorded run, not a new
 DRC/LVS execution. Clear `build/notebook/cache` to force recomputation.
 """)
@@ -103,6 +104,8 @@ from tritflow.viz.waves import waveform_figure, transfer_figure
 from tritflow.viz.layout import render_gds, layout_figure, placement_animation, routing_progress
 from cache import Cache, runtime_fingerprint
 from schematics import schematic_gallery
+from experiments import (complete_design, experiment_artifacts, assert_experiment,
+                         load_edited, verify_publication_sources)
 EXTENDED = os.environ.get("TRITFLOW_EXTENDED", "0") == "1"
 BUILD = Path(os.environ.get("TRITFLOW_NOTEBOOK_BUILD", ROOT/"build/notebook")).resolve()
 cache = Cache(BUILD/"cache", runtime_fingerprint(ROOT, PDK_ROOT))
@@ -136,6 +139,7 @@ outputs = [p.name for p in net.ports if p.dir == "output"]
 vectors = [(-1,)*len(inputs), (0,)*len(inputs), (1,)*len(inputs),
            (1,-1,-1,1,0), (-1,1,1,-1,1), (-1,)*len(inputs)]
 LOAD_F, HOLD_S, STEP_S, EDGE_S, TEMP_C = 100e-15, 1e-6, 2e-9, 1e-9, 27
+PNR_ROWS, PNR_ANNEAL_STEPS = None, 600  # automatic near-square floorplan; placement effort
 assert all(len(v) == len(inputs) for v in vectors)
 assert len(logical[inputs[0]]) == 3**len(inputs)
 def adder_reference(vector):
@@ -150,7 +154,7 @@ for row in zip(*(logical[name] for name in inputs)):
     assert adder_reference(row) == {k: int(v) for k,v in d.design.evaluate(dict(zip(inputs,row))).items()}
 out = BUILD/"adder2_demo"
 def complete_adder():
-    lay = net.place_and_route(output_dir=out, seed=0, anneal_steps=80)
+    lay = net.place_and_route(output_dir=out, seed=0, rows=PNR_ROWS, anneal_steps=PNR_ANNEAL_STEPS)
     drc = lay.drc()
     lvs = lay.lvs()
     assert drc["clean"] and lvs["matched"], (drc, lvs)
@@ -162,7 +166,8 @@ def complete_adder():
             "extracted_spice": extracted.spice, "capacitance": extracted.capacitance}
 demo = cache.run("adder2-complete", {"net": net.to_json(), "vectors": vectors, "load": LOAD_F,
                                    "hold": HOLD_S, "step": STEP_S, "edge": EDGE_S,
-                                   "temperature_c":TEMP_C, "seed": 0, "anneal": 80}, complete_adder,
+                                   "temperature_c":TEMP_C, "seed": 0,
+                                   "rows":PNR_ROWS,"anneal_steps":PNR_ANNEAL_STEPS}, complete_adder,
     artifacts=lambda r: [out/"adder2_demo.gds", out/"adder2_demo.pnr.json",
                          r["drc"]["report_path"], r["lvs"]["report"], r["lvs"]["extracted"]])
 lay = flow.load_layout(net, out)
@@ -176,6 +181,8 @@ table([["Logical input states (exhaustive)", len(logical[inputs[0]])],
        ["Output load (fF)", LOAD_F*1e15], ["Hold / ramp / max step (ns)",
         [HOLD_S*1e9,EDGE_S*1e9,STEP_S*1e9]],
        ["Cells", net.report()["cells"]], ["GDS", lay.gds_path],
+       ["Die dimensions (µm)", lay.stats["die_size_um"]],
+       ["Die aspect (long / short)", max(lay.stats["die_size_um"])/min(lay.stats["die_size_um"])],
        ["Die area (µm²)", lay.stats["die_area_um2"]], ["DRC violations", demo["drc"]["violations"]],
        ["LVS matched", demo["lvs"]["matched"]], ["Analog passed", demo["measurements"]["passed"]],
        ["Max error (V)", demo["measurements"]["max_error_v"]]])
@@ -256,13 +263,64 @@ table(rows)
 table([["Cell", "Recorded conditions", "Tested loads (fF)", "Fanout evidence"]]+
       [[cell, char["conditions"], [r["load_f"]*1e15 for r in char["transient"]], char["fanout"]]
        for cell,char in characters.items()])
+fanout_rows = [["Cell", "Measured receiver counts", "Chain depth", "Worst chain (ns)",
+                "Driver at largest tested fanout (ns)", "Max level error (mV)"]]
+for cell, char in characters.items():
+    cascade = char["cascade"]
+    assert cascade["source_sha256"] == char["source_sha256"]
+    assert cascade["passed"] and cascade["chains_passed"] and all(c["passed"] for c in cascade["cases"])
+    largest = max(cascade["fanouts_tested"])
+    chain_times = [t for c in cascade["cases"] if c["mode"] == "chain"
+                   for t in c["max_settling_s"].values() if t is not None]
+    loaded_times = [c["max_settling_s"]["y0"] for c in cascade["cases"]
+                    if c["mode"] == "fanout" and c["fanout"] == largest]
+    fanout_rows.append([cell, cascade["fanouts_tested"], cascade["chain_depth"],
+                       max(chain_times)*1e9, max(loaded_times)*1e9,
+                       max(c["max_error_v"] for c in cascade["cases"])*1e3])
+table(fanout_rows)
 ''')
 md('''
-**TODO — SIM sizing experiment:** expose the requested `sweep_dimensions(...)`
-API (signature/schema in `docs/status/FRONTEND.md`) and mark
-the taped-out dimensions on its transfer/error/current curves. This draft reads
-the real characterized dimensions and does not replace them with synthetic
-sizing results. Full characterization is deliberately not rerun by default.
+Each receiver is a transistor-level load. The largest tested count is a measured
+nominal bound, not an extrapolation to larger fanout or PVT. The chain checks
+every intermediate output. Isolated-cell load sweeps and self-loading chains
+answer different questions; their conditions are displayed separately above.
+
+**SIM publication slot — W/L sweep:** `cells/out/sizing/` supplies cached
+transfer/error/current data. When available, the code below reads SIM's public
+`load_grid(cell)` and uses `sizing_figure(result)` to mark the adopted dimensions.
+Missing or stale grids leave an explicit TODO. Full characterization is not
+rerun by default. To compute new sparse device overrides, use
+`sweep_dimensions(cell, candidates, *, sweep_pin="A", fixed_trits=None,
+start_v=-5., stop_v=5., step_v=.1, temperature_c=27., pdk=None,
+workdir=None, timeout=120.)`; W/L values are µm, not SPICE metre suffixes.
+''')
+code('''
+from tritflow.sim.sizing import load_grid, sweep_dimensions
+from tritflow.viz.scaling import sizing_figure
+SIZING_INDEX = {"INV": None, "NANY": None}  # None selects adopted; set a candidate index to inspect it
+for cell in ["INV", "NANY"]:
+    if not (CELLS_DIR/f"out/sizing/{cell}.grid.json").is_file():
+        print(f"TODO SIM: publish cells/out/sizing/{cell}.grid.json (W/L sweep)")
+        continue
+    try:
+        grid = load_grid(cell)
+    except RuntimeError as error:
+        print(f"TODO SIM: refresh {cell} sizing grid: {error}")
+        continue
+    adopted = grid["rows"][grid["adopted_index"]]
+    table([["Cell", "Candidates", "PASS", "Adopted dimensions (µm)", "Conditions"],
+           [cell, len(grid["rows"]), sum(r["passed"] for r in grid["rows"]),
+            adopted["dimensions"], grid["conditions"]]])
+    show(sizing_figure(grid))
+    index = grid["adopted_index"] if SIZING_INDEX[cell] is None else SIZING_INDEX[cell]
+    candidate = grid["rows"][index]
+    table([["Selected candidate",index], ["Dimensions (µm)",candidate["dimensions"]],
+           ["PASS / solver error",[candidate["passed"],candidate["error"]]]])
+    if candidate["transfer"] is not None:
+        show(transfer_figure(candidate["transfer"],grid["conditions"]["sweep_pin"],["Y"],
+                             title=f"{cell}: candidate {index}, adopted={candidate['is_adopted']}"))
+''')
+md('''
 
 ## 3. Read the standard-cell views
 
@@ -277,6 +335,15 @@ remains a load-dependent property.
 ''')
 code('''
 template = json.loads((CELLS_DIR/"template.json").read_text())
+generation = json.loads((CELLS_DIR/"out/generation.json").read_text())
+abstracts = {item["name"]:json.loads((CELLS_DIR/"out"/item["abstract"]).read_text())
+             for item in json.loads((CELLS_DIR/"out/library.json").read_text())}
+assert {a["height"] for a in abstracts.values()} == {template["height"]}
+assert generation["height_um"] == template["height"]
+print("Published library generation:", generation["id"])
+table([["Cell", "Width × common height (µm)", "Area (µm²)", "Free full-height M2 tracks"]]+
+      [[name, [a["width"],a["height"]], a["width"]*a["height"], a["free_M2_tracks"]["count"]]
+       for name,a in abstracts.items()])
 abstract = json.loads((CELLS_DIR/"out/NANY/NANY.abstract.json").read_text())
 table([["Height (µm)", template["height"]], ["Grid (µm)", template["grid"]],
        ["NANY width (µm)", abstract["width"]], ["Rails", template["rails"]],
@@ -373,6 +440,8 @@ Top-level device LVS compares the exported GDS to mapped-cell connectivity.
 ''')
 code('''
 table([["Metric", "Two-trit adder"]]+[[k,v] for k,v in lay.stats.items()])
+table([["Requested rows (None = automatic)",PNR_ROWS], ["Annealing steps",PNR_ANNEAL_STEPS],
+       ["Actual physical rows",len(lay.data["rows"])], ["Utilization",lay.stats["utilization"]]])
 print("Placement snapshots:", len(lay.data["history"]))
 print("Routing attempts:", lay.data["routing_attempts"])
 assert all(check["clean"] for check in lay.data["checks"].values())
@@ -384,20 +453,34 @@ table([["Initial / final cell-terminal HPWL (µm)",
 show(placement_animation(lay.data))
 if EXTENDED:
     show(routing_progress(lay.data))
-if EXTENDED:
-    larger = flow.load(ROOT/"examples/adder.tv", "adder", {"N":4}).synthesize(name="adder4_experiment")
-    folder = BUILD/"adder4_experiment"
-    def larger_route():
-        routed = larger.place_and_route(output_dir=folder, seed=0)
-        return routed.stats
-    stats4 = cache.run("adder4-route", {"net":larger.to_json()}, larger_route,
-                      artifacts=[folder/"adder4_experiment.gds",folder/"adder4_experiment.pnr.json"])
-    table([["N=4",stats4]])
+RUN_FLOORPLAN_EXPERIMENT = False  # opt in after changing the controls below
+EXPERIMENT_ROWS, EXPERIMENT_ANNEAL_STEPS, EXPERIMENT_SEED = None, 2400, 7
+if RUN_FLOORPLAN_EXPERIMENT:
+    folder = BUILD/"floorplan_experiment"
+    def route_experiment():
+        routed = net.place_and_route(output_dir=folder, rows=EXPERIMENT_ROWS,
+                   anneal_steps=EXPERIMENT_ANNEAL_STEPS, seed=EXPERIMENT_SEED)
+        drc, lvs = routed.drc(), routed.lvs()
+        assert drc["clean"] and lvs["matched"]
+        return {"stats":routed.stats, "drc":drc, "lvs":lvs}
+    trial = cache.run("floorplan-experiment", {"net":net.to_json(),"rows":EXPERIMENT_ROWS,
+                     "steps":EXPERIMENT_ANNEAL_STEPS,"seed":EXPERIMENT_SEED}, route_experiment,
+                     artifacts=[folder/f"{net.top}.gds",folder/f"{net.top}.pnr.json"])
+    assert trial["drc"]["clean"] and trial["lvs"]["matched"]
+    table([["Measured floorplan experiment",trial["stats"]]])
+    show(placement_animation(flow.load_layout(net,folder).data))
 ''')
 md('''
 The placement animation uses recorded snapshots and cell-terminal HPWL.
 With extended experiments enabled, routing progress replays the successful
 recorded pass. Neither animation substitutes for the geometry checks.
+`rows=None` searches row counts and independently fed power spans for a compact,
+near-square floorplan; the dimensions/aspect/utilization shown are measured.
+A positive `rows` fixes the physical row count. `anneal_steps=0` retains initial
+placement; more steps spend effort on swaps/moves/reflections. Change the
+opt-in controls above to compare geometry and HPWL. Row/feed current constraints
+remain active in every saved placement. More steps do not guarantee a better
+route, and explicit row counts can reduce utilization.
 
 ## 7. Measure settled levels and wiring effects
 
@@ -411,8 +494,9 @@ resolution; initialization is excluded from maximum transition delay.
 The extracted devices retain intrinsic/junction effects. Added top-net wire C
 uses actual connected GDS area/perimeter with explicitly assumed coefficients;
 it is not calibrated signoff PEX. Signal-wire resistance, coupling, local poly
-RC and PVT/mismatch are outside this experiment. No rail-IR result is presented
-here; its separate experiment remains in the result-matrix TODO below.
+RC and PVT/mismatch are outside this experiment. The four-design loop below
+also estimates a separate rail-IR envelope from drawn power geometry and
+characterized currents; it does not perturb the ideal supplies in SPICE.
 ''')
 code('''
 pre = cache.run("adder2-pre", {"net":net.to_json(),"vectors":vectors,"load":LOAD_F,
@@ -437,36 +521,165 @@ if EXTENDED:
         print(load, loaded["measurements"]["passed"], loaded["measurements"]["max_settling_s"])
 ''')
 md('''
-**TODO — final result matrix:** add cache-qualified N=1/2/4 area/settling sweeps,
-load sweeps and per-cell IR results before submission. Exhaust all inputs only
-for circuits whose analog sweep is budgeted; label larger patterns as sampled.
-The default two-trit run must not be described as exhaustive analog coverage.
-
-## 8. Edit a circuit and rerun the chain
-
-Change the expression below. `~`, `&`, `|` and `nany` have their ternary gate
-meanings; `+` on signal trits is rejected. This small example reruns the same
-mapped-cell, physical and post-layout interfaces with all nine input states.
+The next loop regenerates all shared designs from committed HDL and cell views;
+it consumes no pre-existing `build/` results. SIM supplies the vector plans and
+independent radix-arithmetic oracles. Small circuits visit every input state;
+the larger adder uses labeled carry assertion/release, overflow and cancellation
+cases. Neither sequence exhausts directed transitions. Each physical result is
+checked before matched pre/post simulation. Maxima can occur on different
+transitions; the last timing column compares each transition with itself.
+Sub-timestep differences do not establish a speedup.
 ''')
 code('''
-source = """module experiment(input trit a,b,output trit y);
- assign y = nany(a,b);
- endmodule"""
-custom = flow.loads(source, "experiment").synthesize()
-display(truth_table_html(custom))
-show(color_nets(custom, {"a":-1,"b":1}))
-custom_out = BUILD/"experiment"
-def run_custom():
-    routed = custom.place_and_route(output_dir=custom_out, seed=0, anneal_steps=30)
-    assert routed.drc()["clean"] and routed.lvs()["matched"]
-    result = routed.extract().simulate(input_vectors(2), load=100e-15, hold_s=500e-9, step_s=2e-9)
-    assert result["measurements"]["passed"]
-    return result
-custom_post = cache.run("editable-experiment", {"source":source,"load":100e-15}, run_custom,
-    artifacts=[custom_out/"experiment.gds",custom_out/"experiment.pnr.json"])
-assert custom_post["measurements"]["passed"]
-assert {tuple(row["input_trits"]) for row in custom_post["measurements"]["rows"]} == set(input_vectors(2))
-show(waveform_figure(custom_post, ["y"], title=f"Edited circuit: {len(custom_post['measurements']['rows'])} input states"))
+from tritflow.sim.postlayout import representative_vectors, arithmetic_oracle
+FOUR_DESIGN_LOAD_F, FOUR_DESIGN_HOLD_S, FOUR_DESIGN_STEP_S = 10e-15, 500e-9, 2e-9
+four_results = {}
+physical_rows = [["Design", "Die (µm)", "Aspect", "Utilization", "DRC / LVS", "Input states visited / possible",
+                  "Post max error (mV)", "Rail deviation / zero shift (mV)"]]
+timing_rows = [["Design", "Output", "Pre max (ns)", "Post max (ns)", "Largest same-transition change (ns)"]]
+for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_add",{}),
+                                  ("mac1","mac1",{}), ("mul1","mul1",{})]:
+    mapped = flow.load(ROOT/f"examples/{source_name}.tv", source_name, params).synthesize(name=name)
+    pins = [p.name for p in mapped.ports if p.dir == "input"]
+    planned, labels = representative_vectors(name, pins)
+    oracle = arithmetic_oracle(name, pins)
+    directory = BUILD/"four_designs"/name
+    result = cache.run(f"four-{name}", {"net":mapped.to_json(),"vectors":planned,"labels":labels,
+                       "expected":[oracle(v) for v in planned],"load_f":FOUR_DESIGN_LOAD_F,
+                       "hold_s":FOUR_DESIGN_HOLD_S,"step_s":FOUR_DESIGN_STEP_S,
+                       "rows":None,"anneal_steps":600,"seed":0},
+        lambda: complete_design(mapped,directory,planned,oracle,load_f=FOUR_DESIGN_LOAD_F,
+                   hold_s=FOUR_DESIGN_HOLD_S,step_s=FOUR_DESIGN_STEP_S),
+        artifacts=lambda r: experiment_artifacts(r,directory,name))
+    assert_experiment(result)
+    assert result["post"]["stimulus"]["vectors"] == list(map(tuple,planned))
+    stats, ir = result["stats"], result["ir"]
+    rail = max(abs(v) for c in ir["cells"].values() for v in c["rail_deviation_v"].values())
+    zero = max(abs(c["zero_level_shift_v"]) for c in ir["cells"].values() if c["zero_level_shift_v"] is not None)
+    physical_rows.append([name,stats["die_size_um"],max(stats["die_size_um"])/min(stats["die_size_um"]),
+                          stats["utilization"],[result["drc"]["clean"],result["lvs"]["matched"]],
+                          f"{len(set(planned))} / {3**len(pins)}",result["post"]["measurements"]["max_error_v"]*1e3,
+                          [rail*1e3,zero*1e3]])
+    before, after = [result[mode]["measurements"] for mode in ("pre","post")]
+    for pin in after["max_settling_s"]:
+        changes = [b["outputs"][pin]["settling_s"]-a["outputs"][pin]["settling_s"]
+                   for a,b in zip(before["rows"][1:],after["rows"][1:],strict=True)]
+        timing_rows.append([name,pin,before["max_settling_s"][pin]*1e9,after["max_settling_s"][pin]*1e9,
+                            max(changes)*1e9])
+    four_results[name] = result
+table(physical_rows)
+table(timing_rows)
+table([["Shared load (fF)",FOUR_DESIGN_LOAD_F*1e15], ["Hold / max step (ns)",
+       [FOUR_DESIGN_HOLD_S*1e9,FOUR_DESIGN_STEP_S*1e9]],
+       ["Input plan labels", {name:representative_vectors(name,
+          r["post"]["stimulus"]["inputs"])[1] for name,r in four_results.items()}]])
+FOUR_DESIGN_VIEW = "full_add"  # switch to adder4, mac1 or mul1
+viewed = four_results[FOUR_DESIGN_VIEW]
+show(waveform_figure(viewed["post"],pre=viewed["pre"],title=f"{FOUR_DESIGN_VIEW}: matched pre/post vectors"))
+print("Wire-C assumptions:", viewed["capacitance"]["assumptions"])
+print("IR assumptions (separate from ideal-rail SPICE):", viewed["ir"]["assumptions"])
+''')
+md('''
+**SIM publication slots — width scaling and load boundary:** the following cell
+reads `results/adder_scaling.json` and `results/full_add_load_sweep.json` when
+SIM publishes them. Missing data stays a TODO; no interpolated or invented
+measurements fill the gap. The precomputed readers/figures are fast. Producing
+the full matrix or refining a failing load is an opt-in experiment, outside
+default Run all: `run_scaling(sizes=range(1,7), *, jobs=1, destination=..., **kwargs)`
+and `sweep_output_load(directory, *, loads_f=..., hold_s=500e-9, step_s=2e-9,
+relative_resolution=.02, absolute_resolution_f=50e-15, timeout=600, destination=...)`.
+The latter reports the first observed failure on its stated sequence/window;
+it is not a universal or PVT-qualified maximum capacitance. Failed/unsettled
+points retain their flags and null delays.
+''')
+code('''
+from tritflow.sim.scaling import load_scaling
+from tritflow.sim.load_sweep import load_sweep_results
+from tritflow.viz.scaling import scaling_figure, load_sweep_figure
+for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figure),
+                                  ("full_add_load_sweep.json",load_sweep_results,load_sweep_figure)]:
+    published = ROOT/"results"/filename
+    if not published.is_file():
+        print(f"TODO SIM: publish results/{filename}; no scaling/boundary result claimed")
+        continue
+    result = loader(published)
+    try:
+        records = result["rows"] if filename == "adder_scaling.json" else [result]
+        for record in records:
+            verify_publication_sources(record,ROOT,PDK_ROOT)
+    except RuntimeError as error:
+        print(f"TODO SIM: refresh results/{filename}: {error}; no current result claimed")
+        continue
+    print("Published experiment:", filename, result.get("coverage",result.get("scope")))
+    print("Limits / conditions:",result.get("limits",result.get("conditions")))
+    if filename == "adder_scaling.json":
+        table([["Width", "Recorded state", "PASS", "Error"]]+
+              [[r["n"],r["state"],r["passed"],r["error"]] for r in result["rows"]])
+    else:
+        table([["Measured boundary (F)",result["boundary"]], ["Boundary found",result["boundary_found"]],
+               ["Outputs / input-state count",[result["outputs"],len(result["vectors"])]]])
+    show(figure(result))
+''')
+md('''
+## 8. Your circuit: choose, edit and check
+
+Choose a catalog key below: sign, signed two-trit comparison, exact two-trit
+multiplication, or a min/max sorter. Each source has an independent integer
+oracle. The generated table checks every input against both source and mapped
+logic. The selected circuit then runs real P&R, DRC/LVS and extracted simulation
+through the same chain. Editing HDL can intentionally fail the oracle; update
+the mathematical specification only when you intend to change the function.
+
+`~`, `&`, `|` and `nany` retain their ternary meanings. Here is a deliberately
+broken expression, caught before any physical work. Located errors identify
+the filename/line/column and the supported replacement operators.
+''')
+code('''
+from tritflow.hdl import HDLError
+broken = """module broken(input trit a,b,output trit y);
+ assign y = a + b;
+endmodule"""
+try:
+    flow.loads(broken,"broken",filename="your_circuit.tv")
+except HDLError as error:
+    print(error)
+    print("Repair: use gates for signal arithmetic; e.g. nany(a,b) gives the negative saturated sum.")
+else:
+    raise AssertionError("unsupported signal arithmetic must be rejected")
+''')
+code('''
+from examples.curated import DESIGNS
+from tritflow.synth import evaluate_netlist
+CHOICE = os.environ.get("TRITFLOW_CIRCUIT", "minmax")  # sign | compare2 | mul2 | minmax
+table([["Choice", "Specification"]]+[[key,item.description] for key,item in DESIGNS.items()])
+example = DESIGNS[CHOICE]
+source = example.path.read_text()  # edit this string, or choose another catalog entry
+print(source)
+# Stage includes beside the edited text, preserving the committed source files.
+custom_circuit = load_edited(example,source,BUILD/"your_circuit"/"source"/example.top)
+custom = custom_circuit.synthesize()
+truth = custom_circuit.truth_table()
+pins = custom_circuit.design.inputs
+planned = list(zip(*(truth[p] for p in pins)))
+oracle = example.oracle(pins)
+mapped_truth = evaluate_netlist(custom,{p:truth[p] for p in pins})
+for i, vector in enumerate(planned):
+    expected = oracle(vector)
+    assert {p:int(truth[p][i]) for p in expected} == expected
+    assert {p:int(mapped_truth[p][i]) for p in expected} == expected
+display(truth_table_html(custom,max_rows=len(planned)))
+show(color_nets(custom,dict(zip(pins,planned[-1]))))
+custom_out = BUILD/"your_circuit"/example.top
+custom_result = cache.run(f"your-{CHOICE}", {"source":source,"net":custom.to_json(),"vectors":planned,
+                         "expected":[oracle(v) for v in planned],"load_f":10e-15,"hold_s":1e-6,
+                         "step_s":2e-9,"rows":None,"anneal_steps":600,"seed":0},
+    lambda: complete_design(custom,custom_out,planned,oracle,hold_s=1e-6),
+    artifacts=lambda r: experiment_artifacts(r,custom_out,example.top))
+assert_experiment(custom_result)
+assert {tuple(row["input_trits"]) for row in custom_result["post"]["measurements"]["rows"]} == set(planned)
+table([["Independent arithmetic input states",len(planned)], ["Physical results",custom_result["stats"]],
+       ["DRC clean / LVS matched",[custom_result["drc"]["clean"],custom_result["lvs"]["matched"]]]])
+show(waveform_figure(custom_result["post"],title=f"{CHOICE}: all input states, selected sequence"))
 ''')
 md('''
 ## 9. Connect the model to a future measurement

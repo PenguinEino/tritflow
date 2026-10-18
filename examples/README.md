@@ -124,3 +124,29 @@ distinct output name uses a BUF so every JSON net has one physical driver.
 Reports count cell stages for logic depth, and count hierarchy cells exclusively
 at their source module/generate scope. SPICE encodes unsafe or case-conflicting
 signal names and records the original names in comments.
+## Notebook circuit catalog
+
+Chapter 8 selects `sign`, `compare2`, `mul2` or `minmax` from
+`examples.curated.DESIGNS`. The existing scalar sign/min-max examples join two
+new arithmetic designs:
+
+- `compare2.tv` compares signed two-trit integers (a₀+3a₁ versus b₀+3b₁),
+  returning −1/0/+1. Two saturated additions let a nonzero high-digit
+  comparison dominate the low digit.
+- `mul2.tv` combines four `mul1` partial products with two `half_add` slices.
+  Its four-trit output preserves the exact signed integer product.
+
+The catalog's independent Python specifications use integer comparison,
+multiplication, balanced-radix encoding and sorting, never mapped cell logic.
+Every choice is exhaustively checked, synthesized and physically routed through
+official PDK DRC and strict device-level LVS:
+
+```sh
+python3 -m pytest tests/synth/test_curated.py -q
+TRITFLOW_CIRCUIT=compare2 python3 notebook/validate_notebook.py --execute
+```
+
+The notebook stages editable HDL and shared include files under its build
+directory, so edits preserve the committed examples. Change the mathematical
+reference deliberately when changing a design's specification.
+

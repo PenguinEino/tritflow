@@ -22,6 +22,7 @@ from .bench import input_vectors
 from .spice import simulation_netlist
 
 RESULT = ROOT/'results'/'adder_scaling.json'
+_IMPORTED_CODE_SHA256 = {}
 
 
 def experiment_sources():
@@ -40,7 +41,13 @@ def experiment_sources():
             if path.is_file(): paths.append(path)
     for folder in ('libs.tech/spice/models', 'libs.tech/klayout/tech/lvs', 'libs.tech/klayout/tech/drc'):
         paths += [p for p in sorted((PDK_ROOT/folder).rglob('*')) if p.is_file()]
-    return {str(p):file_hash(p) for p in paths}
+    # Python modules already loaded by this process keep executing that code
+    # while other streams edit files. Freeze its provenance at import, while
+    # checking live HDL/library/model/deck inputs before and after every run.
+    # A fresh producer process fingerprints new code and invalidates old caches.
+    hashes = {str(p):file_hash(p) for p in paths
+              if not _IMPORTED_CODE_SHA256 or p.suffix != '.py'}
+    return hashes|_IMPORTED_CODE_SHA256
 
 
 def _key(value):
@@ -224,6 +231,7 @@ def run_size(n, *, build_root=None, seeds=(7,0,19), hold_s=1e-6, step_s=2e-9,
             'pre/waveforms.npz','post/waveforms.npz')]
         artifacts += [Path(lvs['extracted']),Path(lvs['report'])]
         record.update(state='complete',passed=summary['passed'] and all(r['passed'] for r in dc),
+            python_code_scope='source hashes frozen at producer import; fresh process required to use edited Python modules',
             cell_count=len(net.instances),die_area_um2=pnr.stats['die_area_um2'],die_size_um=pnr.stats['die_size_um'],
             seed=attempts[-1]['seed'],pnr_attempts=attempts,drc_clean=pnr.data['checks']['pdk_drc']['clean'],
             lvs_matched=summary['lvs_matched'],pre_passed=summary['pre_passed'],post_passed=summary['post_passed'],
@@ -268,3 +276,6 @@ def run_scaling(sizes=range(1,7), *, jobs=1, destination=RESULT, **kwargs):
 def load_scaling(path=RESULT):
     """Read precomputed notebook data without running synthesis, PNR or ngspice."""
     return json.loads(Path(path).read_text())
+
+
+_IMPORTED_CODE_SHA256.update({p:h for p,h in experiment_sources().items() if p.endswith('.py')})

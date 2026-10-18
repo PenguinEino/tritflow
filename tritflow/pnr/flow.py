@@ -100,6 +100,9 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
         raise ValueError("Invalid routing retry limits")
     if rows is not None and (not isinstance(rows, int) or rows < 1):
         raise ValueError("rows must be a positive integer or None")
+    out = Path(output_dir or Path("build")/netlist.top)
+    out.mkdir(parents=True, exist_ok=True)
+    failure_path = out/f"{netlist.top}.pnr.failure.json"
     if library is None:
         library = Library.automatic()
     elif isinstance(library, (str, Path)):
@@ -145,7 +148,15 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
             attempts.append({"channel_tracks": tracks, "bypass_tracks_per_side": bypass_tracks, "failed_net": error.net, "reason": str(error),
                              "ripped_up": getattr(error, "ripup_log", []), "success": False})
             if expansion == max_expansions or "access conflicts" in str(error):
-                raise RoutingFailure(error.net, f"{error}; channel attempts={attempts}") from error
+                failure = RoutingFailure(error.net,
+                    f"{error.reason}; exhausted {len(attempts)} floorplan attempts",
+                    region=error.region_um, blocking_nets=error.blocking_nets,
+                    failed_nets=[a["failed_net"] for a in attempts])
+                failure_path.write_text(json.dumps({"status": "failed", "top": netlist.top,
+                    "error": str(failure), "failed_nets": failure.failed_nets,
+                    "region_um": failure.region_um, "blocking_nets": failure.blocking_nets,
+                    "routing_attempts": attempts}, indent=2)+"\n")
+                raise failure from error
             # Expansion of all channels gives the blocked net alternative paths
             # through neighboring rows, rather than only increasing one cut.
             tracks += 2 if compact_metal else max(2, math.ceil(tracks*.3))
@@ -181,29 +192,43 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
         "hpwl_before_um": history[0]["hpwl"], "hpwl_after_um": history[-1]["hpwl"],
         "hpwl_improvement_pct": (100*(1-history[-1]["hpwl"]/history[0]["hpwl"])
                                  if history[0]["hpwl"] else 0.)}
-    out = Path(output_dir or Path("build")/netlist.top)
-    out.mkdir(parents=True, exist_ok=True)
     gds_path, json_path = out/f"{netlist.top}.gds", out/f"{netlist.top}.pnr.json"
-    write_gds(data, library, gds_path)
-    data["checks"] = {"connectivity": connectivity(gds_path, data, netlist, library),
-                      "routing_drc": routing_drc(gds_path, data, library)}
+    candidate = out/f"{netlist.top}.candidate.gds"
+    write_gds(data, library, candidate)
+    data["checks"] = {"connectivity": connectivity(candidate, data, netlist, library),
+                      "routing_drc": routing_drc(candidate, data, library)}
     own_clean = all(c["clean"] for c in data["checks"].values())
-    json_path.write_text(json.dumps(data, indent=2)+"\n")
     if not own_clean:
-        raise PhysicalVerificationError(f"Physical self-check failed: {data['checks']}; artifacts in {out}")
+        failed = out/f"{netlist.top}.failed.gds"
+        candidate.replace(failed)
+        failure_path.write_text(json.dumps({**data, "status": "failed", "gds_path": str(failed)}, indent=2)+"\n")
+        raise PhysicalVerificationError(f"Physical self-check failed: {data['checks']}; inspect {failure_path} and {failed}; canonical GDS was not published")
     if run_pdk_drc:
         options = {"binary": klayout_binary}
         if pdk_root is not None:
             options["pdk_root"] = pdk_root
-        data["checks"]["pdk_drc"] = pdk_drc(gds_path, netlist.top, **options)
+        try:
+            data["checks"]["pdk_drc"] = pdk_drc(candidate, netlist.top,
+                report_path=out/f"{netlist.top}.drc.lyrdb", **options)
+        except Exception:
+            candidate.replace(out/f"{netlist.top}.failed.gds")
+            failure_path.write_text(json.dumps({**data, "status": "verification_failed"}, indent=2)+"\n")
+            raise
     else:
         data["checks"]["pdk_drc"] = {"clean": None, "skipped": True}
-    json_path.write_text(json.dumps(data, indent=2)+"\n")
     if data["checks"]["pdk_drc"]["clean"] is False:
-        raise PhysicalVerificationError(f"PDK DRC has {data['checks']['pdk_drc']['violations']} violations; see {json_path}")
+        failed = out/f"{netlist.top}.failed.gds"
+        candidate.replace(failed)
+        failure_path.write_text(json.dumps({**data, "status": "failed", "gds_path": str(failed)}, indent=2)+"\n")
+        raise PhysicalVerificationError(f"PDK DRC has {data['checks']['pdk_drc']['violations']} violations; inspect {failure_path} and {failed}; canonical GDS was not published")
+    candidate.replace(gds_path)
+    if run_pdk_drc:
+        data["checks"]["pdk_drc"]["command"] = [s.replace(str(candidate.resolve()), str(gds_path.resolve()))
+                                                for s in data["checks"]["pdk_drc"]["command"]]
     finished = time.perf_counter()
     data["stats"]["runtime_s"] = {"placement": placed_at-started,
         "routing": routed_at-placed_at, "export_and_verification": finished-routed_at,
         "total": finished-started}
     json_path.write_text(json.dumps(data, indent=2)+"\n")
+    failure_path.unlink(missing_ok=True)
     return PnrResult(gds_path, json_path, data["stats"], data)

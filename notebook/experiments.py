@@ -1,7 +1,11 @@
 """Notebook-sized experiments assembled only from public stream APIs."""
 
 import json
+from hashlib import sha256
+from pathlib import Path
+import shutil
 
+from tritflow import flow
 from tritflow.extract import estimate_ir_drop
 from tritflow.synth import write_artifacts
 
@@ -51,3 +55,38 @@ def assert_experiment(result):
     assert result["pre"]["measurements"]["passed"] and result["post"]["measurements"]["passed"]
     assert result["pre"]["stimulus"]["vectors"] == result["post"]["stimulus"]["vectors"]
     assert not result["stats"]["library_mock"]
+
+
+def load_edited(example, source, directory):
+    """Stage editable HDL with its shared includes; never overwrite examples."""
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    for dependency in example.path.parent.glob("*.tv"):
+        shutil.copy2(dependency, directory/dependency.name)
+    edited = directory/example.path.name
+    edited.write_text(source)
+    return flow.load(edited, example.top)
+
+
+def verify_publication_sources(record, root, pdk):
+    """Check a published run's sources after relocation, without needing build/.
+
+    Raw ignored build artifacts are provenance of the recorded run, not inputs
+    to plotting committed JSON. Code/library/HDL/PDK hashes must still agree.
+    This does not assert that the recorded DRC/LVS has been rerun locally.
+    """
+    sources = record.get("sources_sha256")
+    if not sources:
+        raise RuntimeError("published source fingerprints are missing")
+    for original, expected in sources.items():
+        if "/build/" in original:
+            continue
+        if "/libs.tech/" in original:
+            current = Path(pdk)/"libs.tech"/original.split("/libs.tech/", 1)[1]
+        else:
+            anchor = next((s for s in ("tritflow", "examples", "cells") if f"/{s}/" in original), None)
+            if anchor is None:
+                raise RuntimeError(f"unrecognized publication source: {original}")
+            current = Path(root)/anchor/original.split(f"/{anchor}/", 1)[1]
+        if not current.is_file() or sha256(current.read_bytes()).hexdigest() != expected:
+            raise RuntimeError(f"published result is stale relative to {current}")

@@ -17,9 +17,20 @@ from .gds import wire_box
 class RoutingFailure(RuntimeError):
     """A legal path was not found in the current channel allocation."""
 
-    def __init__(self, net, reason="no legal maze path"):
+    def __init__(self, net, reason="no legal maze path", *, region=None,
+                 blocking_nets=(), failed_nets=None):
         self.net = net
-        super().__init__(f"{net}: {reason}")
+        self.reason, self.region_um = reason, region
+        self.blocking_nets = sorted(set(blocking_nets))
+        self.failed_nets = sorted(set(failed_nets or [net]))
+        message = f"Routing failed for nets {', '.join(self.failed_nets)}: {reason}."
+        if region:
+            x0, y0, x1, y1 = region
+            message += f" Congested connection region: x={x0:g}..{x1:g} µm, y={y0:g}..{y1:g} µm."
+        if self.blocking_nets:
+            message += f" Nearby occupied nets: {', '.join(self.blocking_nets[:8])}."
+        message += " Try more rows (rows=...) or channel tracks (channel_tracks=...); check cell pin-access obstructions."
+        super().__init__(message)
 
 
 def floorplan(netlist, library, relative, row_count, margin, tracks, *, core_width=None):
@@ -113,7 +124,7 @@ class Maze:
                 self.block_rect([x-width/2, y-width/2, x+width/2, y+width/2], self.ids[net])
         for net, nodes in self.nodes.items():
             if any(self.base2[y, x] != self.ids[net] for _, x, y in nodes):
-                raise RoutingFailure(net, "pin access conflicts with another terminal or M2 obstruction")
+                raise self.failure(net, "pin access conflicts with another terminal or M2 obstruction")
         self.escape_paths = {net: {} for net in terminals}
         # Pins sharing a column (e.g. compact NANY A/B) must escape on opposite
         # sides. Reserve those mandatory stubs before another net uses their
@@ -140,13 +151,29 @@ class Maze:
                     end = choices[0][-1]
                     value = self.base1[end[2], end[1]]
                     if value not in (0, owner):
-                        raise RoutingFailure(net, "mandatory pin escapes share a channel landing")
+                        raise self.failure(net, "mandatory pin escapes share a channel landing")
                     self.base1[end[2], end[1]] = owner
         self.reset()
         for path, owner in mandatory:
             self.occupy(path, owner)
         self.base2 = self.occ[1].copy()
         self.reset()
+
+    def failure(self, net, reason, nodes=None):
+        """Describe the failed connection window and occupied nets within it."""
+        points = ([(self.xs[x], self.ys[y]) for _, x, y in nodes] if nodes is not None
+                  else [(t["x"], t["y"]) for t in self.terminals[net]])
+        p = self.pitch
+        region = [max(0., min(x for x, y in points)-p),
+                  max(0., min(y for x, y in points)-p),
+                  min(self.data["die"][0], max(x for x, y in points)+p),
+                  min(self.data["die"][1], max(y for x, y in points)+p)]
+        x0, x1 = bisect.bisect_left(self.xs, region[0]), bisect.bisect_right(self.xs, region[2])
+        y0, y1 = bisect.bisect_left(self.ys, region[1]), bisect.bisect_right(self.ys, region[3])
+        occupancy = getattr(self, "occ", (self.base1, self.base2))
+        owners = {int(v) for layer in occupancy for v in np.unique(layer[y0:y1, x0:x1]) if v > 0}
+        blockers = [name for name, owner in self.ids.items() if owner in owners and name != net]
+        return RoutingFailure(net, reason, region=region, blocking_nets=blockers)
 
     def block_rect(self, rect, owner):
         x0, y0, x1, y1 = rect
@@ -237,7 +264,9 @@ class Maze:
             stub = remaining[start_node]
             path = self.search(stub[-1], tree, owner)
             if path is None:
-                raise RoutingFailure(net)
+                target = min(tree, key=lambda b: abs(stub[-1][1]-b[1])+
+                             abs(self.ys[stub[-1][2]]-self.ys[b[2]])/self.pitch)
+                raise self.failure(net, "no legal maze path", [stub[-1], target])
             self.occupy(path, owner)
             tree.update(stub)
             tree.update(path)

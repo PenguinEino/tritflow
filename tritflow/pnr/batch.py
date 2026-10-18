@@ -68,10 +68,10 @@ def checked_artifacts(build_root, designs, views):
 
 
 def _lvs(result, netlist, cell_subckts, directory):
-    from tritflow.extract import extract_layout
+    from .lvs import strict_lvs
     started = time.perf_counter()
-    report = extract_layout(result.gds_path, netlist.top, directory,
-                            gate_netlist=netlist, cell_subckts=cell_subckts)
+    library = Library.load(result.data["library"]["source"])
+    report = strict_lvs(result.gds_path, result.data, netlist, library, directory, cell_subckts)
     summary = {key: value for key, value in report.items() if key != "log"}
     path = result.json_path.with_name(f"{netlist.top}.lvs.summary.json")
     write_json(path, summary)

@@ -1,6 +1,79 @@
 # FRONTEND status
 
-Updated: 2026-10-18. **Complete.**
+Updated: 2026-10-18. **Phase 6 validation in progress.**
+
+## Phase 6 handoff
+
+Implementation is complete; final notebook runs are in progress. The Colab
+bootstrap code cell is byte-identical to phase 5 / committed
+`23f27e20455b29b7abf6d2ce166cd3f2f9c927e0`. Colab verification is postponed
+by instruction. No git-writing commands or edits to other streams' files.
+
+- Chapter 3 derives every library dimension/area/free-M2 count from the current
+  publication and asserts that all cell heights, template and generation agree.
+  No compact-library result number is copied from a status table.
+- Chapters 0/6 expose automatic or fixed `rows`, `anneal_steps`, seed and an
+  opt-in floorplan experiment. Actual dimensions, aspect, utilization, physical
+  rows and recorded HPWL/placement/routing history are displayed. Auto sizing
+  includes independently fed power spans; fixed row counts can reduce density.
+- Chapter 2 checks recorded cascade source hashes/pass flags and derives
+  measured receiver counts, chain depth, worst chain/driver settling and worst
+  level error from `char.json`. Largest tested fanout is explicitly a nominal
+  measured bound, not a PVT/general path guarantee.
+- Chapter 7 synthesizes and physically regenerates adder4/full_add/mac1/mul1
+  under the notebook's own output tree. SIM's public `representative_vectors`
+  and `arithmetic_oracle` define the experiments. `notebook/experiments.py`
+  chains public flow/P&R/extraction/SIM functions for official DRC, strict LVS,
+  actual-GDS wire C, matched pre/post stimuli and separate geometry-based IR.
+  All small-design input states are checked; adder4's coverage is labeled as
+  sampled/directed arithmetic. Timing deltas compare the same transition.
+- Publication slots remain explicit. Available W/L grids use
+  `tritflow.sim.sizing.load_grid(cell)` and
+  `tritflow.viz.scaling.sizing_figure(result)`; the adopted dimensions and a
+  selectable candidate's true DC transfer/current curve are shown. The
+  `sweep_dimensions` signature below is now implemented by SIM. Missing/stale
+  grids print a TODO and no fabricated result.
+- Scaling/load slots use `tritflow.sim.scaling.load_scaling(path)` with
+  `scaling_figure(result)` and
+  `tritflow.sim.load_sweep.load_sweep_results(path)` with
+  `load_sweep_figure(result)`. They activate for
+  `results/adder_scaling.json` / `results/full_add_load_sweep.json` when
+  published, retaining failed widths, failed loads and null delays. Their
+  current code/library/HDL/PDK source hashes are checked after path relocation;
+  raw ignored build trees are provenance, never plotting dependencies.
+  Missing/stale records remain clearly marked TODOs. Heavy producers are
+  documented opt-in calls, not part of default Run all.
+- Chapter 8 provides four choices in `examples/curated.py`: existing `sign`
+  and `minmax`, plus new `compare2.tv` and `mul2.tv`. The comparator returns the
+  sign of the difference of two signed two-trit integers; multiplication uses
+  four scalar products and two half adders. Independent references use integer
+  comparison/multiplication, balanced-radix encoding and sorting. The reader
+  chooses `CHOICE` or `TRITFLOW_CIRCUIT`, sees exhaustive source/mapped checks,
+  then runs physical checks and extracted ngspice. Edited HDL and includes are
+  copied under the notebook output directory; committed examples stay intact.
+- A deliberate `a+b` signal expression displays the real located `HDLError`
+  and an operator-specific repair hint before physical work. The parser's
+  existing diagnostics already supply filename/line/column, so no parser change
+  was needed.
+- Cached pre/post pairs now restore nested NumPy waveform arrays correctly.
+  Cache context includes notebook helpers and example/reference code. Saved
+  pass flags and artifact hashes are checked as well as fresh producer checks.
+
+Phase 6 validation so far:
+
+```sh
+python3 -m pytest tests/synth/test_curated.py -q
+python3 notebook/make_notebook.py
+python3 -m pytest notebook/tests tests/hdl tests/synth tests/viz -q
+TRITFLOW_NOTEBOOK_BUILD=/tmp/tritflow-notebook-phase6 python3 notebook/validate_notebook.py --execute
+```
+
+The four catalog designs passed all independent exhaustive checks and real
+synthesis/P&R/official DRC/strict LVS: **8 tests passed in 16.19 s**.
+The combined owned suite passed **195 tests in 20.05 s**, including nested cache
+restoration, edited shared includes, and portable publication-source validation.
+Final full-notebook/default/choice results will be recorded below.
+No packages installed.
 
 ## Phase 5 handoff
 
@@ -526,9 +599,9 @@ None.
    and push these files, publish `colab-v0` in the public TritFlow repository,
    add the recommended badge to root README, and verify a clean Colab launch.
    The bootstrap defaults to that tag and prints its resolved commit.
-2. **SIM — sizing chapter:** implement the exact `sweep_dimensions` proposal
-   above, with transfer/error/current results and adopted-size provenance.
-   The notebook keeps the explicit TODO until that public function is ready.
+2. **SIM — sizing chapter: resolved in phase 6.** The exact requested API and
+   cached grids are available and integrated conditionally. Publication slots
+   retain explicit missing/stale TODOs, including the scaling/load boundary.
 3. **Schematic assets: resolved in phase 4.** All requested SVGs are bundled and
    integrated; no asset request remains with another stream.
 

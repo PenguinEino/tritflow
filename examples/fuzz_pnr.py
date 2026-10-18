@@ -37,6 +37,8 @@ def random_source(seed):
     rng = random.Random(seed)
     inputs, depth, width = 2+seed % 11, 1+(seed//3) % 12, 1+(seed//7) % 5
     outputs = 1+seed % 5
+    if seed % 5 == 4:
+        depth, width, outputs = 4+seed % 16, 6, 6
     top = f"fuzz_{seed:05d}"
     lines = [f"module {top}(input trit [{inputs-1}:0] a, output trit [{outputs-1}:0] z);"]
     pool = [f"a[{i}]" for i in range(inputs)]
@@ -59,7 +61,7 @@ def random_source(seed):
             current.append(name); operations.append(op)
         levels.append(current); pool.extend(current)
     for index in range(outputs):
-        value = rng.choice(levels[-1])
+        value = levels[-1][index % width] if seed % 5 == 4 else rng.choice(levels[-1])
         if seed % 17 == 0:
             value = ("1'tT", "1't0", "1't1")[index % 3]
         elif seed % 19 == 0:
@@ -116,7 +118,7 @@ def worker(job):
     from tritflow.pnr.batch import _lvs
     out = Path(job["directory"])
     started = time.perf_counter()
-    report = {"name": job["name"], "parameters": job["parameters"],
+    report = {"name": job["name"], "parameters": job["parameters"], "anneal_steps": job["anneal_steps"],
               "fingerprint": job["fingerprint"], "source_sha256": job["source_sha256"]}
     stage = "synthesis"
     try:
@@ -153,6 +155,14 @@ def tree_rss_kib(pid):
     return total
 
 
+def artifact_hashes(out, name):
+    """Certify physical reports as well as source before reusing a fuzz result."""
+    paths = [out/f"{name}{suffix}" for suffix in
+             (".json", ".gds", ".pnr.json", ".drc.lyrdb", ".lvs.summary.json")]
+    paths += [out/"lvs"/f"{name}{suffix}" for suffix in (".ext.spice", ".lvsdb")]
+    return {str(p.relative_to(out)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+
+
 def run_job(job, resume, timeout):
     """Bound the entire process group; even a timed-out run leaves no children."""
     out = Path(job["directory"])
@@ -160,8 +170,14 @@ def run_job(job, resume, timeout):
     if resume and result_path.exists():
         previous = json.loads(result_path.read_text())
         if (previous.get("passed") and previous.get("fingerprint") == job["fingerprint"]
-                and previous.get("source_sha256") == job["source_sha256"]):
-            return previous
+                and previous.get("source_sha256") == job["source_sha256"]
+                and previous.get("anneal_steps") == job["anneal_steps"]):
+            try:
+                if previous.get("artifacts") == artifact_hashes(out, job["name"]):
+                    return previous
+            except FileNotFoundError:
+                pass
+    result_path.unlink(missing_ok=True)
     write_json(out/"fuzz.job.json", job)
     peak, started = 0, time.perf_counter()
     with (out/"worker.log").open("w") as log:
@@ -192,9 +208,12 @@ def run_job(job, resume, timeout):
     else:
         result = json.loads(result_path.read_text())
     result["peak_process_tree_rss_mib"] = peak/1024
+    if result["passed"]:
+        result["artifacts"] = artifact_hashes(out, job["name"])
     write_json(result_path, result)
     if not result["passed"] and not (out/"first_failure.json").exists():
         write_json(out/"first_failure.json", result)
+        (out/"first_failure.tv").write_bytes((out/f"{job['name']}.tv").read_bytes())
     return result
 
 
@@ -244,7 +263,13 @@ def main(argv=None):
                 failed=sum(not r["passed"] for r in results),
                 wall_time_s=time.perf_counter()-started,
                 cases=sorted(results, key=lambda r: r["name"])))
-    if fingerprint() != stamp:
+    stable = fingerprint() == stamp
+    summary_path = args.output_root/"summary.json"
+    if summary_path.exists():
+        summary = json.loads(summary_path.read_text())
+        summary.update(inputs_stable=stable, anneal_steps=args.anneal_steps)
+        write_json(summary_path, summary)
+    if not stable:
         raise RuntimeError("Cell or tool inputs changed during fuzzing; rerun to certify the new publication")
     return int(any(not result["passed"] for result in results))
 
