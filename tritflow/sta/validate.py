@@ -145,6 +145,8 @@ def _validate_design(group, name, directory, models, scaling):
                   output_load_f=summary['output_load_f'], input_transition_s=1e-9)
     predicted = analyze(net, **kwargs)
     endpoint = analyze(net,global_mode='endpoint',**kwargs)
+    from .window import analyze_windows
+    settled_windows=analyze_windows(net,side_states='endpoint',**kwargs)
     from .envelope import analyze_envelope
     relaxed_fixed=analyze_envelope(net,fixed_ramp=True,include_recovery=False,**kwargs)
     without_recovery=analyze_envelope(net,include_recovery=False,**kwargs)
@@ -173,6 +175,7 @@ def _validate_design(group, name, directory, models, scaling):
         outputs.append({'design': f'{group}/{name}', 'output': pin,
             'predicted_s': value, 'tested_predicted_s': tested.arrival[pin], 'simulated_s': observed,
             'fixed_ramp_endpoint_s':endpoint.arrival[pin],
+            'settled_slew_window_s':settled_windows.arrival[pin],
             'fixed_ramp_class_envelope_s':relaxed_fixed.arrival[pin],
             'ramp_envelope_without_recovery_s':without_recovery.arrival[pin],
             'fixed_ramp_midpoint_s':fixed.arrival[pin],
@@ -198,7 +201,7 @@ def _validate_design(group, name, directory, models, scaling):
             ('slew_domain_closed','slew_domain_violations','load_in_measured_domain')},
         'event_diagnostics':tested.statistics,
         'wire_scope': caps.get('scope'),
-        'electrical_scope': 'Independent local-class/ramp envelope with propagated recovery guard; matched-pattern midpoint events retain propagated slew. Same maximum biased device C and top-net metal C.'}
+        'electrical_scope': 'Measured transition/slew windows with source-compatible transient side states and a same-segment endpoint term; local recovery is not promoted to a fictitious full-level transition. Matched event timing and all loads are unchanged.'}
     return record, {f'{report_name}.timing.json': predicted.to_dict(),
                     f'{report_name}.tested.timing.json': tested.to_dict()}
 
@@ -241,12 +244,15 @@ def validate(*, output_dir=None, retries=3):
         rows = [r for d in records for r in d['outputs']]
         current = [r for d in records if d['qualified_current'] for r in d['outputs']]
         accurate=[r for r in rows if r.get('tested_error_percent') is not None and abs(r['tested_error_percent'])<=20]
-        result = {'schema_version': 3, 'created_utc': datetime.now(timezone.utc).isoformat(),
+        result = {'schema_version': 4, 'created_utc': datetime.now(timezone.utc).isoformat(),
             'complete': len(records) == 10 and all(d['outputs'] for d in records),
             'qualified_current': len(records) == 10 and all(d['qualified_current'] for d in records),
             'accuracy_passed':len(rows)==39 and len(accurate)==39,
             'accuracy_target_percent':20.,'outputs_within_target':len(accurate),
             'accuracy_claim_field':'tested_predicted_s',
+            'bound_target_factor':1.5,
+            'bound_outputs_within_target':sum(1<=r['predicted_s']/r['simulated_s']<=1.5 for r in rows if r.get('simulated_s')),
+            'bound_target_passed':len(rows)==39 and all(r.get('simulated_s') and 1<=r['predicted_s']/r['simulated_s']<=1.5 for r in rows),
             'worst_case_conservative':len(records)==10 and all(d.get('worst_case_coverage',{}).get('passed',False) for d in records),
             'worst_case_validation':{
                 'scope':'Every saved nominal output observation, including initial states and stable-endpoint glitches.',
@@ -257,18 +263,20 @@ def validate(*, output_dir=None, retries=3):
                 'certified_analog_bound':False,
                 'interpretation':'Conservative on every saved nominal case; not certified for untested waveforms or PVT.',
                 'all_slew_domains_closed':all(d.get('envelope_domain',{}).get('slew_domain_closed',False) for d in records)},
-            'scope': 'Conservative measured-domain envelope validated against every nominal SPICE case; matched-event timing is the separate ±20% accuracy claim.',
+            'scope': 'Measured slew windows and compatible transient classes, validated against every nominal SPICE case; matched-event timing remains the separate accuracy claim.',
             'outside_accuracy_target':[{'design':r['design'],'output':r['output'],'error_percent':r['tested_error_percent']}
                 for r in rows if r.get('tested_error_percent') is not None and abs(r['tested_error_percent'])>20],
             'limitations': ['Conservatism is established against this complete saved nominal dataset; the characterized scalar envelope is not a certified arbitrary-waveform or PVT bound.',
-                'Independent local-class/ramp maxima and recovery clocks admit unrealizable combinations; their pessimism is reported separately from matched accuracy.',
-                'All-class output slew may exceed the measured input-ramp axis; non-closed domains are reported without silently clipping or claiming analog coverage.',
+                'Measured slew windows preserve local delay/slew correlation and PI compatibility, but side-input time alignment and partial pulse amplitude remain relaxed; this limits tightness.',
+                'Reachable slew labels must fit the extended measured axis; out-of-domain labels raise rather than clip a bound. Stable recovery has no full-level slew and is not propagated as an invented edge.',
                 'Tested-pair comparison removes endpoint coverage differences, but does not reproduce analog slew/skew/history or propagated glitches.',
                 'Slew becomes an equivalent linear ramp. Ordered ideal trit events propagate logical pulses, but partial-voltage pulses and analog hazards on unchanged outputs lack a waveform model.',
                 'Wire coefficients are assumed, not calibrated PEX; signal/poly RC, PVT and package are outside the model.',
                 'Explicit bounded load extensions are uncharacterized estimates, not measured table points.'],
             'designs': records, 'cell_generation': models.generation,
-            'statistics': {'conservative_envelope':statistics(rows,'predicted_s'),
+            'statistics': {'conditioned_slew_windows':statistics(rows,'predicted_s'),
+                           'conservative_envelope':statistics(rows,'predicted_s'),
+                           'settled_slew_windows':statistics(rows,'settled_slew_window_s'),
                            'fixed_ramp_endpoint':statistics(rows,'fixed_ramp_endpoint_s'),
                            'fixed_ramp_class_envelope':statistics(rows,'fixed_ramp_class_envelope_s'),
                            'ramp_envelope_without_recovery':statistics(rows,'ramp_envelope_without_recovery_s'),

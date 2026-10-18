@@ -17,7 +17,7 @@ def test_default_envelope_includes_slow_internal_ramp_without_stacking_tails(lib
     models=midpoint_library(library)
     for arc in models['INV'].arcs:
         arc['propagation_s']=[[2e-9,2e-9],[100e-9,100e-9]]
-    report=analyze(chain(),library=models)
+    report=analyze(chain(),library=models,global_mode="envelope")
     assert report.arrival['y']==pytest.approx(.5e-9+2e-9+100e-9+7e-9)
     assert [s.input_transition_s for s in report.critical_path]==[1e-9,100e-9]
     assert report.critical_path[0].settling_tail_s==0
@@ -26,7 +26,7 @@ def test_default_envelope_includes_slow_internal_ramp_without_stacking_tails(lib
     assert not report.statistics['joint_endpoint_witness']
     assert analyze(chain(),library=models,global_mode='endpoint').arrival['y']<report.arrival['y']
     models['INV'].arcs[0]['passed'][1][0]=False
-    with pytest.raises(ModelDomainError):analyze(chain(),library=models)
+    with pytest.raises(ModelDomainError):analyze(chain(),library=models,global_mode="envelope")
 
 
 def test_recovery_clock_can_launch_downstream_activity_on_stable_endpoint(library):
@@ -35,7 +35,7 @@ def test_recovery_clock_can_launch_downstream_activity_on_stable_endpoint(librar
         arc['recovery_s']=[[30e-9,30e-9],[30e-9,30e-9]]
     net=GateNetlist('hazard',[Port('a','input'),Port('b','input'),Port('y','output')],
         [Instance('g','NANY',{'A':'a','B':'b','Y':'m'}),Instance('h','BUF',{'A':'m','Y':'y'})])
-    r=analyze(net,library=models)
+    r=analyze(net,library=models,global_mode="envelope")
     assert r.arrival['y']==pytest.approx(.5e-9+30e-9+2e-9+7e-9)
     assert r.critical_path[0].output_transition[0]==r.critical_path[0].output_transition[1]
     assert r.critical_path[0].metric=='recovery_guard'
@@ -45,20 +45,20 @@ def test_recovery_clock_can_launch_downstream_activity_on_stable_endpoint(librar
 def test_non_closed_slew_domain_is_reported_without_clipping(library):
     models=midpoint_library(library)
     for arc in models['INV'].arcs:arc['output_slew_10_90_s']=[[200e-9]*2]*2
-    r=analyze(chain(),library=models)
+    r=analyze(chain(),library=models,global_mode="envelope")
     assert not r.statistics['slew_domain_closed']
     assert r.statistics['slew_domain_violations'][0]['full_ramp_upper_s']==pytest.approx(250e-9)
     assert any('not closed' in w for w in r.warnings)
     # The envelope has not used a clipped 250 ns point disguised as a valid ramp.
     assert all(s.input_transition_s<=100e-9 for s in r.critical_path)
-    with pytest.raises(ModelDomainError):analyze(chain(),library=models,input_transition_s=101e-9)
+    with pytest.raises(ModelDomainError):analyze(chain(),library=models,input_transition_s=101e-9,global_mode="envelope")
 
 
 def test_constant_cone_has_no_fictitious_activity(library):
     models=midpoint_library(library)
     n=GateNetlist('constant',[Port('y','output')],
         [Instance('t','TIEZ',{'Y':'z'}),Instance('i','INV',{'A':'z','Y':'y'})])
-    assert analyze(n,library=models).arrival['y']==0
+    assert analyze(n,library=models,global_mode="envelope").arrival['y']==0
 
 
 def test_every_recorded_case_includes_initial_and_unchanged_endpoint_hazards():

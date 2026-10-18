@@ -9,7 +9,7 @@ arrival. Keeping every predecessor avoids losing alternate paths at reconvergenc
 
 The graph engine supports historical additive settling and measured midpoint
 propagation with one endpoint settling tail. Its global search uses a fixed
-input ramp. The public entry point defaults to a conservative local-class/ramp envelope.
+input ramp. The public entry point defaults to compatible transition/slew windows.
 It uses ordered pin-event timing with propagated
 slew when complete vector pairs are provided; that mode can carry logical
 pulses through endpoint-stable nets. Neither mode represents arbitrary analog
@@ -257,11 +257,12 @@ def analyze(netlist,pnr=None,**kwargs) -> TimingReport:
     Passing a legacy TimingLibrary explicitly retains the historical additive
     settling model for controlled ablations. With vector_pairs, midpoint analysis
     also propagates measured output slew between gates. Without patterns the
-    default is a conservative measured-domain envelope. ``global_mode='endpoint'``
-    retains fixed-ramp settled-endpoint timing for diagnosis. See sta/README.md.
+    default uses measured slew windows and primary-input path compatibility. ``global_mode='endpoint'``
+    retains fixed-ramp settled-endpoint timing for diagnosis; ``envelope`` selects
+    the broad phase-3 relaxation. See sta/README.md.
     """
-    global_mode=kwargs.pop('global_mode','envelope')
-    if global_mode not in {'envelope','endpoint'}:raise ValueError('Unknown global timing mode')
+    global_mode=kwargs.pop('global_mode','windows')
+    if global_mode not in {'windows','envelope','endpoint'}:raise ValueError('Unknown global timing mode')
     library=kwargs.get('library')
     if library is None:
         from .propagation import PropagationLibrary
@@ -280,6 +281,9 @@ def analyze(netlist,pnr=None,**kwargs) -> TimingReport:
             options.pop('propagate_slew',None)
             return analyze_events(netlist,pairs,**options)
         return analyze_patterns(netlist,pairs,**options)
+    if getattr(library,'metric',None)=='midpoint' and global_mode=='windows':
+        from .window import analyze_windows
+        return analyze_windows(netlist,pnr,**kwargs)
     if getattr(library,'metric',None)=='midpoint' and global_mode=='envelope':
         from .envelope import analyze_envelope
         return analyze_envelope(netlist,pnr,**kwargs)

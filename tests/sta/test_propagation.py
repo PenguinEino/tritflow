@@ -83,7 +83,7 @@ def test_published_metrics_reconstruct_band_entry():
     for path in folder.glob('*.propagation.json'):
         data=json.loads(path.read_text())
         assert data['passed'] and data['complete']
-        assert data['coverage']['measured_grid_points']==30
+        assert data['coverage']['measured_grid_points']==len(data['axes']['load_f'])*len(data['axes']['input_transition_s'])
         for arc in data['arcs']+data['simultaneous']:
             if arc['output_from']==arc['output_to']:continue
             for i,ramp in enumerate(data['axes']['input_transition_s']):

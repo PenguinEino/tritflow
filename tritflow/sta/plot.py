@@ -34,7 +34,7 @@ def validation_figure(validation=None):
     rows = [row for design in validation["designs"] for row in design.get("outputs", [])
             if row.get("simulated_s") is not None]
     figure = go.Figure()
-    for field, label, symbol in (("predicted_s", "Conservative local-class/ramp envelope", "circle"),
+    for field, label, symbol in (("predicted_s", "Compatible transition/slew bound", "circle"),
                                   ("tested_predicted_s", "SIM endpoint pairs, propagated slew", "diamond")):
         figure.add_scatter(x=[r["simulated_s"]*1e9 for r in rows], y=[r[field]*1e9 for r in rows],
             mode="markers", name=label, marker_symbol=symbol,
@@ -64,7 +64,7 @@ def pessimism_figure(validation=None):
         customdata=[[r['simulated_s']*1e9,r['predicted_s']*1e9] for r in rows],
         hovertemplate='%{x}<br>SPICE %{customdata[0]:.2f} ns<br>Envelope %{customdata[1]:.2f} ns<br>Factor %{y:.2f}×<extra></extra>'))
     figure.add_hline(y=1.,line_dash='dash',annotation_text='Measured maximum')
-    figure.update_layout(title='Conservative nominal envelope: pessimism over measured maxima',
+    figure.update_layout(title='Nominal slew-window bound: pessimism over measured maxima',
         yaxis_title='Envelope / SPICE maximum (×)',xaxis_title='Design / output',template='plotly_white',
         meta=validation.get('worst_case_validation'))
     return figure
