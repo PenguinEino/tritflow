@@ -43,7 +43,7 @@ def snapshot(live, destination):
     destination.mkdir(parents=True,exist_ok=True)
     for name in ('generation.json','verify_report.json','equivalence_report.json',
                  'timing_report.json','poly_timing_report.json','pdk_provenance.json',
-                 'template.json','library.json','all.spice'):
+                 'timing_validation.json','template.json','library.json','all.spice'):
         if (live/name).exists():shutil.copy2(live/name,destination/name)
     for cell in circuits():
         folder=destination/cell;folder.mkdir(exist_ok=True)
@@ -145,13 +145,27 @@ def _bench_audit(baseline,out,old_models,new_models):
         return [' '.join(line.lower().split()) for line in text.splitlines()
                 if line.strip() and not line.lstrip().startswith('*')]
     rows=[]
+    def active(lines):
+        text='\n'.join(lines)
+        if not any(line.startswith('x') and line.split()[-1]=='buf' for line in lines):
+            text=re.sub(r'(?ms)^\.subckt buf\b.*?^\.ends\b[^\n]*\n?','',text)
+        return [line for line in text.splitlines() if line and not line.startswith('.nodeset ')]
     for before in sorted((baseline/'equivalence').rglob('tb.spice')):
         relative=before.relative_to(baseline);after=out/relative
         if not after.exists():continue
-        rows.append({'path':str(relative),'before_sha256':sha(before),'after_sha256':sha(after),
-                     'same_effective_deck':normalized(before.read_text(),old_models)==normalized(after.read_text(),new_models)})
-    return {'checked':len(rows),'mismatches':sum(not row['same_effective_deck'] for row in rows),'rows':rows,
-            'scope':'Include paths replaced only by the recorded content hash of that model filename; blank lines, whitespace, comments and SPICE-insensitive case ignored. No old PDK files are read or used.'}
+        a,b=normalized(before.read_text(),old_models),normalized(after.read_text(),new_models)
+        row={'path':str(relative),'before_sha256':sha(before),'after_sha256':sha(after),
+             'same_normalized_deck':a==b,'active_network_and_stimulus_identical':active(a)==active(b),
+             'nodeset_hints_identical':[s for s in a if s.startswith('.nodeset ')]==[s for s in b if s.startswith('.nodeset ')]}
+        if a!=b:
+            delta=out/'requalification/bench_differences'/relative.with_suffix('.spice.diff')
+            delta.parent.mkdir(parents=True,exist_ok=True)
+            delta.write_text(''.join(difflib.unified_diff(before.read_text().splitlines(True),after.read_text().splitlines(True),fromfile='before',tofile='pinned')))
+            row['difference_file']=str(delta.relative_to(out))
+        rows.append(row)
+    return {'checked':len(rows),'normalized_text_mismatches':sum(not row['same_normalized_deck'] for row in rows),
+            'active_network_or_stimulus_mismatches':sum(not row['active_network_and_stimulus_identical'] for row in rows),'rows':rows,
+            'scope':'Text audit normalizes model include paths by recorded content hash, whitespace, comments and SPICE-insensitive case. The separate active-network check additionally omits only uninstantiated BUF definitions and .nodeset hints; changed hints remain explicit with full diffs. No old PDK files are read or used.'}
 
 
 def _timing_difference(before,after):
@@ -189,6 +203,7 @@ def compare_results(out):
             'baseline_generation':json.loads((baseline/'generation.json').read_text()),
             'scope':'Comparison with the exact pre-Phase-7 published generation. Its physical decks were the dev snapshot; Phase 6 model bytes were already pinned-compatible. Metadata and result changes are retained separately from geometric identity.',
             'cells':{},'original_extractions':{},'wire_capacitor_counts':{},'json_files':{},'text_files':{}}
+    report['introduced_root_files']={path.name:sha(path) for path in out.glob('*.json') if not (baseline/path.name).exists()}
     native_path=folder/'native_reference/manifest.json'
     native=json.loads(native_path.read_text())['cells'] if native_path.exists() else {}
     all_changes=[];numeric=[]
@@ -259,6 +274,24 @@ def compare_results(out):
     report['numeric_changes']=len(numeric)
     report['numeric_changes_by_file']={name:sum(c['file']==name for c in numeric) for name in report['json_files']}
     report['geometry_identical']=all(c['identical'] for c in report['cells'].values())
+    def passed_file(path):
+        if not path.exists():return False
+        value=json.loads(path.read_text())
+        return value.get('passed',False) and value.get('complete',True)
+    equivalence=json.loads((out/'equivalence_report.json').read_text())
+    verification=json.loads((out/'verify_report.json').read_text())
+    report['qualification']={
+        'drawing_DRC_strict_LVS_DC':verification['passed'],
+        'all_324_abutments':verification['abutment']['passed'] and verification['abutment']['ordered_pair_orientation_cases']==324,
+        'independent_device_equivalence':equivalence['passed'],
+        'estimated_wire_C_equivalence':equivalence.get('parasitic_aware',{}).get('passed',False),
+        'timing_surfaces':passed_file(out/'timing_report.json'),
+        'poly_R_sensitivity':passed_file(out/'poly_timing_report.json'),
+        'all_SIM_characterizations':all(passed_file(out/c/f'{c}.char.json') for c in circuits() if c!='FILL')}
+    for key,path in [('negative_rail_fixtures',folder/'rail_negatives/report.json'),
+                     ('regression_suite',folder/'regression.json'),('table_integrity',out/'timing_validation.json')]:
+        if path.exists():report['qualification'][key]=passed_file(path)
+    report['passed']=all(report['qualification'].values())
     report['all_changes_file']='requalification/all_differences.json.gz'
     report['numeric_changes_file']='requalification/numeric_differences.json.gz'
     for name,data in [('all_differences',all_changes),('numeric_differences',numeric)]:

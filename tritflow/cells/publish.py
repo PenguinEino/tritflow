@@ -119,6 +119,7 @@ def publish(stage, *, reason):
     if (stage/'requalification/baseline/generation.json').exists():
         from .requalify import compare_results
         comparison=compare_results(stage);comparison['generation']=generation
+        if not comparison['passed']:raise ValueError('Incomplete/failed pinned requalification evidence')
         (stage/'requalification/report.json').write_text(json.dumps(comparison,indent=2,allow_nan=False)+'\n')
     # Prepare the old generation's template before replacing the outer template
     # with a link; both resolve to the tall template until the directory swap.

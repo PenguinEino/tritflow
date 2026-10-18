@@ -1,0 +1,18 @@
+* Created by KLayout
+*** My special header ***
+
+* cell INV
+* pin A
+* pin VDD
+* pin VSS
+* pin Y
+.SUBCKT INV A VDD VSS Y VMID
+* device instance $1 r0 *1 19.2,56 PMOS
+XM$1 \$5 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
+* device instance $2 r0 *1 19.2,26 NMOS
+XM$2 \$6 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
+* device instance $3 r0 *1 70,44 F_RR
+XR$3 \$6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $4 r0 *1 70,57 F_RR
+XR$4 \$5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+.ENDS INV

@@ -31,7 +31,10 @@ def experiment_sources():
     paths = [ROOT/'cells/template.json', ROOT/'cells/out/library.json', ROOT/'tritflow/__init__.py',
              ROOT/'tritflow/netlist.py']
     for folder in ('hdl','synth','pnr','sim','extract'):
-        paths += sorted((ROOT/'tritflow'/folder).glob('*.py'))
+        paths += [p for p in sorted((ROOT/'tritflow'/folder).glob('*.py'))
+                  if folder!='pnr' or not p.name.startswith(('chip','signoff'))]
+    # This study calls macro place_and_route, never chip packaging/signoff.
+    # Those independent producers must not invalidate measured macro physics.
     # Cell-generator implementation does not affect an already published
     # library; fingerprint the consumed views below, plus the sizing ID table.
     paths.append(ROOT/'tritflow/cells/circuits.py')

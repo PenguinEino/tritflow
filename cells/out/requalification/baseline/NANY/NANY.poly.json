@@ -1,0 +1,438 @@
+{
+  "cell": "NANY",
+  "sheet_ohm_per_square": 120.0,
+  "pitch_um": 0.25,
+  "parameter_origin": "PDK RS resistor-poly specification used as a GC sensitivity proxy; GC applicability is uncalibrated.",
+  "pdk_source": {
+    "RR": 1000.0,
+    "RS_poly": 120.0,
+    "width_um": 6.0,
+    "tolerance_percent": 15.0,
+    "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+    "page": 9,
+    "table": "I-2-4",
+    "use": "Device-resistor specifications, not metal. Existing nonlinear PDK device models remain authoritative in SPICE."
+  },
+  "parameter_audit_sha256": "4358e3ccced80203e2223ac2f7ad08d04e244d3cc650875e23cf6fcaffdff263",
+  "source_sha256": "50a9558ca7588b76ce8e21fca30c73455c010f82078142a9d61bfd2272d5972f",
+  "gds_sha256": "f97c672944631d63c915657c80951d3f3b120bb09246c57715d4e67179b4e155",
+  "scope": "GC gate-interconnect sheet R only. No poly C/contact R; MOS gate-channel regions are equipotential. RR device models and all W/L/junction parameters are unchanged. Structural LVS extraction is preserved.",
+  "components": [
+    {
+      "terminals": [
+        "metal",
+        "gate_6"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_6",
+          "squares": 3.4911413264191298
+        }
+      ],
+      "mesh_vertices": 292,
+      "gate_to_contact_squares": {
+        "gate_6": 3.4911413264191244
+      },
+      "reduced_vertices": 2,
+      "unit_sheet_conductance": [
+        [
+          0.2864392777320486,
+          -0.28643927773204814
+        ],
+        [
+          -0.28643927773204814,
+          0.2864392777320486
+        ]
+      ],
+      "net": "A",
+      "bbox_um": [
+        69.7,
+        21.8,
+        72.3,
+        36.300000000000004
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_1"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_1",
+          "squares": 4.491141326419125
+        }
+      ],
+      "mesh_vertices": 404,
+      "gate_to_contact_squares": {
+        "gate_1": 4.4911413264191395
+      },
+      "reduced_vertices": 2,
+      "unit_sheet_conductance": [
+        [
+          0.22266055047466793,
+          -0.2226605504746651
+        ],
+        [
+          -0.2226605504746651,
+          0.22266055047466438
+        ]
+      ],
+      "net": "A",
+      "bbox_um": [
+        54.7,
+        86.7,
+        57.300000000000004,
+        108.2
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_4",
+        "gate_7"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_4",
+          "squares": 18.499557801978472
+        },
+        {
+          "a": "metal",
+          "b": "gate_7",
+          "squares": 31.014801314849755
+        },
+        {
+          "a": "gate_4",
+          "b": "gate_7",
+          "squares": 40602.81210423653
+        }
+      ],
+      "mesh_vertices": 1628,
+      "gate_to_contact_squares": {
+        "gate_4": 18.491139252080384,
+        "gate_7": 30.99113925208241
+      },
+      "reduced_vertices": 3,
+      "unit_sheet_conductance": [
+        [
+          0.08629801599106024,
+          -0.054055346117140864,
+          -0.03224266987392256
+        ],
+        [
+          -0.054055346117140864,
+          0.05407997495312511,
+          -2.4628835988817118e-05
+        ],
+        [
+          -0.03224266987392256,
+          -2.4628835988817118e-05,
+          0.03226729870990663
+        ]
+      ],
+      "net": "A",
+      "bbox_um": [
+        24.7,
+        20.3,
+        27.3,
+        118.2
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_5"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_5",
+          "squares": 3.4911413264191298
+        }
+      ],
+      "mesh_vertices": 292,
+      "gate_to_contact_squares": {
+        "gate_5": 3.4911413264191244
+      },
+      "reduced_vertices": 2,
+      "unit_sheet_conductance": [
+        [
+          0.2864392777320486,
+          -0.28643927773204814
+        ],
+        [
+          -0.28643927773204814,
+          0.2864392777320486
+        ]
+      ],
+      "net": "B",
+      "bbox_um": [
+        54.7,
+        21.8,
+        57.300000000000004,
+        36.300000000000004
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_2"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_2",
+          "squares": 4.491141326419125
+        }
+      ],
+      "mesh_vertices": 404,
+      "gate_to_contact_squares": {
+        "gate_2": 4.4911413264191395
+      },
+      "reduced_vertices": 2,
+      "unit_sheet_conductance": [
+        [
+          0.22266055047466793,
+          -0.2226605504746651
+        ],
+        [
+          -0.2226605504746651,
+          0.22266055047466438
+        ]
+      ],
+      "net": "B",
+      "bbox_um": [
+        69.7,
+        86.7,
+        72.3,
+        108.2
+      ]
+    },
+    {
+      "terminals": [
+        "metal",
+        "gate_3",
+        "gate_8"
+      ],
+      "edges": [
+        {
+          "a": "metal",
+          "b": "gate_3",
+          "squares": 24.504970547877498
+        },
+        {
+          "a": "metal",
+          "b": "gate_8",
+          "squares": 25.005541391911976
+        },
+        {
+          "a": "gate_3",
+          "b": "gate_8",
+          "squares": 43366.05880861818
+        }
+      ],
+      "mesh_vertices": 1628,
+      "gate_to_contact_squares": {
+        "gate_3": 24.49113925208139,
+        "gate_8": 24.991139252081087
+      },
+      "reduced_vertices": 3,
+      "unit_sheet_conductance": [
+        [
+          0.08079918315189794,
+          -0.040808047414144524,
+          -0.03999113573775488
+        ],
+        [
+          -0.040808047414144524,
+          0.04083110692260039,
+          -2.3059508460595202e-05
+        ],
+        [
+          -0.03999113573775488,
+          -2.3059508460595202e-05,
+          0.040014195246211415
+        ]
+      ],
+      "net": "B",
+      "bbox_um": [
+        39.7,
+        20.3,
+        42.300000000000004,
+        118.2
+      ]
+    }
+  ],
+  "gates": {
+    "1": {
+      "node": "tfpg_1",
+      "base_net": "A",
+      "origin_um": [
+        56.0,
+        100.0
+      ],
+      "w_um": 14.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 538.9369591702967
+    },
+    "4": {
+      "node": "tfpg_4",
+      "base_net": "A",
+      "origin_um": [
+        26.0,
+        100.0
+      ],
+      "w_um": 34.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 2218.9367102496462
+    },
+    "6": {
+      "node": "tfpg_6",
+      "base_net": "A",
+      "origin_um": [
+        71.0,
+        27.0
+      ],
+      "w_um": 8.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 418.9369591702949
+    },
+    "7": {
+      "node": "tfpg_7",
+      "base_net": "A",
+      "origin_um": [
+        26.0,
+        27.0
+      ],
+      "w_um": 11.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 3718.936710249889
+    },
+    "2": {
+      "node": "tfpg_2",
+      "base_net": "B",
+      "origin_um": [
+        71.0,
+        100.0
+      ],
+      "w_um": 14.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 538.9369591702967
+    },
+    "3": {
+      "node": "tfpg_3",
+      "base_net": "B",
+      "origin_um": [
+        41.0,
+        100.0
+      ],
+      "w_um": 34.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 2938.9367102497667
+    },
+    "5": {
+      "node": "tfpg_5",
+      "base_net": "B",
+      "origin_um": [
+        56.0,
+        27.0
+      ],
+      "w_um": 8.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 418.9369591702949
+    },
+    "8": {
+      "node": "tfpg_8",
+      "base_net": "B",
+      "origin_um": [
+        41.0,
+        27.0
+      ],
+      "w_um": 11.0,
+      "l_um": 1.0,
+      "effective_contact_resistance_ohm": 2998.9367102497304
+    }
+  },
+  "resistors": [
+    {
+      "name": "Rtfpg_0",
+      "a": "A",
+      "b": "tfpg_6",
+      "squares": 3.4911413264191298,
+      "resistance_ohm": 418.93695917029555
+    },
+    {
+      "name": "Rtfpg_1",
+      "a": "A",
+      "b": "tfpg_1",
+      "squares": 4.491141326419125,
+      "resistance_ohm": 538.936959170295
+    },
+    {
+      "name": "Rtfpg_2",
+      "a": "A",
+      "b": "tfpg_4",
+      "squares": 18.499557801978472,
+      "resistance_ohm": 2219.9469362374166
+    },
+    {
+      "name": "Rtfpg_3",
+      "a": "A",
+      "b": "tfpg_7",
+      "squares": 31.014801314849755,
+      "resistance_ohm": 3721.7761577819706
+    },
+    {
+      "name": "Rtfpg_4",
+      "a": "tfpg_4",
+      "b": "tfpg_7",
+      "squares": 40602.81210423653,
+      "resistance_ohm": 4872337.452508383
+    },
+    {
+      "name": "Rtfpg_5",
+      "a": "B",
+      "b": "tfpg_5",
+      "squares": 3.4911413264191298,
+      "resistance_ohm": 418.93695917029555
+    },
+    {
+      "name": "Rtfpg_6",
+      "a": "B",
+      "b": "tfpg_2",
+      "squares": 4.491141326419125,
+      "resistance_ohm": 538.936959170295
+    },
+    {
+      "name": "Rtfpg_7",
+      "a": "B",
+      "b": "tfpg_3",
+      "squares": 24.504970547877498,
+      "resistance_ohm": 2940.5964657452996
+    },
+    {
+      "name": "Rtfpg_8",
+      "a": "B",
+      "b": "tfpg_8",
+      "squares": 25.005541391911976,
+      "resistance_ohm": 3000.6649670294373
+    },
+    {
+      "name": "Rtfpg_9",
+      "a": "tfpg_3",
+      "b": "tfpg_8",
+      "squares": 43366.05880861818,
+      "resistance_ohm": 5203927.057034181
+    }
+  ],
+  "annotated_sha256": "7815fd952fd6392edd1daeb85f23d9089427036a90770dda36116b67cb115fb2",
+  "generation": {
+    "id": "2026-10-18T09:49:34.717678+00:00",
+    "reason": "Phase 6 PASS: nine STA timing tables, 160 load/ramp profiles and 7296 directed observations; 30 poly-R proxy profiles with matched baselines; physical cell views unchanged; latest SIM characterization/sizing preserved",
+    "height_um": 132.0
+  }
+}

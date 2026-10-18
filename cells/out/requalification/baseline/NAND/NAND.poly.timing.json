@@ -1,0 +1,7466 @@
+{
+  "cell": "NAND",
+  "source_sha256": "ae7cf24aa990a58f7bfc785c79f7e922d34369dbea26d79e760c66c70f79bf8c",
+  "annotated_sha256": "0f35f3b4e9df6d4b998c2d825de3f106bea889a8ef54f036e6eeb97f1001d4e3",
+  "sheet_ohm_per_square": 120.0,
+  "parameter_origin": "PDK RS resistor-poly specification used as a GC sensitivity proxy; GC applicability is uncalibrated.",
+  "scope": "GC gate-interconnect sheet R only. No poly C/contact R; MOS gate-channel regions are equipotential. RR device models and all W/L/junction parameters are unchanged. Structural LVS extraction is preserved.",
+  "network_file": "NAND/NAND.poly.json",
+  "spice_file": "NAND/NAND.poly.spice",
+  "comparisons": [
+    {
+      "load_f": 1e-14,
+      "input_transition_s": 1e-09,
+      "baseline_run": "NAND/timing_poly/baseline_checks/ramp_00_load_00/measurements.json",
+      "poly_run": "NAND/timing_poly/ramp_00_load_00/measurements.json",
+      "max_step_s": 5e-11,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 1.241317815181057e-09,
+      "max_abs_difference_s": 1.7961415303112415e-09,
+      "baseline_worst_settling_s": 8.945693624153463e-09,
+      "poly_worst_settling_s": 9.403697219173834e-09,
+      "rows": [
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 7.619769598975346e-09,
+          "poly_settling_s": 8.048200028776043e-09,
+          "difference_s": 4.2843042980069744e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.5962729202622714e-09,
+          "poly_settling_s": 2.0786999140272927e-09,
+          "difference_s": 4.824269937650213e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 6.9355928497403084e-09,
+          "poly_settling_s": 7.262502765903546e-09,
+          "difference_s": 3.2690991616323783e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 8.945693624153463e-09,
+          "poly_settling_s": 9.403697219173834e-09,
+          "difference_s": 4.580035950203704e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 7.471555986598754e-09,
+          "poly_settling_s": 7.771990187273468e-09,
+          "difference_s": 3.004342006747135e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.5963117754402135e-09,
+          "poly_settling_s": 2.1815704446234903e-09,
+          "difference_s": 5.852586691832768e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 6.94660791243201e-09,
+          "poly_settling_s": 7.337155868037367e-09,
+          "difference_s": 3.90547955605357e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.2261942153361333e-09,
+          "poly_settling_s": 1.642438399793314e-09,
+          "difference_s": 4.1624418445718064e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 7.309637594483335e-09,
+          "poly_settling_s": 7.674489023109223e-09,
+          "difference_s": 3.64851428625888e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 5.9890593477928305e-09,
+          "poly_settling_s": 6.247013294572447e-09,
+          "difference_s": 2.5795394677961624e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 7.587552814519473e-09,
+          "poly_settling_s": 7.919509791837633e-09,
+          "difference_s": 3.3195697731816046e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 4.164289161888589e-09,
+          "poly_settling_s": 4.469835982813252e-09,
+          "difference_s": 3.0554682092466255e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 7.417568486818967e-09,
+          "poly_settling_s": 7.80796912702419e-09,
+          "difference_s": 3.904006402052237e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 4.092090418089947e-09,
+          "poly_settling_s": 4.38745061479294e-09,
+          "difference_s": 2.953601967029931e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 7.568570805546817e-09,
+          "poly_settling_s": 7.935492862386223e-09,
+          "difference_s": 3.6692205683940563e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 4.14951920454093e-09,
+          "poly_settling_s": 4.485390984997954e-09,
+          "difference_s": 3.3587178045702356e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.2484901842800807e-09,
+          "poly_settling_s": 1.4876761845749204e-09,
+          "difference_s": 2.391860002948397e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 8.553530946855781e-09,
+          "poly_settling_s": 8.998917827672769e-09,
+          "difference_s": 4.453868808169877e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.3025882497154337e-09,
+          "poly_settling_s": 1.6046690598073128e-09,
+          "difference_s": 3.0208081009187903e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 5.808780434897306e-09,
+          "poly_settling_s": 6.058407434051268e-09,
+          "difference_s": 2.496269991539621e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.2869966113207665e-09,
+          "poly_settling_s": 1.5644264239192743e-09,
+          "difference_s": 2.774298125985078e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 4.0697113227555716e-09,
+          "poly_settling_s": 4.337046766093896e-09,
+          "difference_s": 2.6733544333832433e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 8.329707229502589e-10,
+          "poly_settling_s": 9.757731203733e-10,
+          "difference_s": 1.4280239742304112e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 4.019195405271963e-09,
+          "poly_settling_s": 4.282652549676387e-09,
+          "difference_s": 2.63457144404424e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.0417938367465333e-09,
+          "poly_settling_s": 1.1400173855021423e-09,
+          "difference_s": 9.822354875560892e-11,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 4.134207978037378e-09,
+          "poly_settling_s": 4.475655897426338e-09,
+          "difference_s": 3.4144791938895975e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 3.2716731248209815e-09,
+          "poly_settling_s": 3.3854190231972527e-09,
+          "difference_s": 1.1374589837627122e-10,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 8.91903406941122e-10,
+          "poly_settling_s": 1.2528024966679209e-09,
+          "difference_s": 3.6089908972679894e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 8.458634092122118e-09,
+          "poly_settling_s": 9.015995462839066e-09,
+          "difference_s": 5.573613707169484e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.2634470563153657e-09,
+          "poly_settling_s": 1.699989074667842e-09,
+          "difference_s": 4.365420183524764e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 7.937942107918088e-09,
+          "poly_settling_s": 8.4763158669134e-09,
+          "difference_s": 5.383737589953117e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 3.166942912810104e-09,
+          "poly_settling_s": 1.9586893364233893e-09,
+          "difference_s": -1.2082535763867147e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 7.611056101226385e-09,
+          "poly_settling_s": 8.439495314968787e-09,
+          "difference_s": 8.284392137424017e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.4769502995052761e-09,
+          "poly_settling_s": 1.5145581658892673e-09,
+          "difference_s": 3.760786638399118e-11,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 5.810911304709402e-09,
+          "poly_settling_s": 7.052229119890459e-09,
+          "difference_s": 1.241317815181057e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.4604077949446117e-09,
+          "poly_settling_s": 1.6127880605445663e-09,
+          "difference_s": 1.523802655999546e-10,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.2098274614333245e-09,
+          "poly_settling_s": 1.5159564453307196e-09,
+          "difference_s": 3.061289838973951e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 5.58473860315343e-09,
+          "poly_settling_s": 5.921563259452751e-09,
+          "difference_s": 3.3682465629932066e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.0028100603666598e-09,
+          "poly_settling_s": 1.323401064949603e-09,
+          "difference_s": 3.2059100458294324e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 3.872790135911363e-09,
+          "poly_settling_s": 4.117065634982544e-09,
+          "difference_s": 2.4427549907118094e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.0922119805953178e-09,
+          "poly_settling_s": 1.2941722724133398e-09,
+          "difference_s": 2.0196029181802206e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 3.8300543927884866e-09,
+          "poly_settling_s": 4.070767745247578e-09,
+          "difference_s": 2.4071335245909125e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.1366906034014754e-09,
+          "poly_settling_s": 1.350198077715775e-09,
+          "difference_s": 2.1350747431429958e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 3.895961891483689e-09,
+          "poly_settling_s": 4.140359808637011e-09,
+          "difference_s": 2.4439791715332197e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.2617103741078856e-09,
+          "poly_settling_s": 1.5399995169093161e-09,
+          "difference_s": 2.7828914280143054e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 5.326684439649484e-09,
+          "poly_settling_s": 5.634350282531951e-09,
+          "difference_s": 3.076658428824669e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.2514748159623374e-09,
+          "poly_settling_s": 1.6248393916994954e-09,
+          "difference_s": 3.73364575737158e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 3.827204940846793e-09,
+          "poly_settling_s": 4.066927240925478e-09,
+          "difference_s": 2.397223000786847e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.083452866259307e-09,
+          "poly_settling_s": 1.2771257884854168e-09,
+          "difference_s": 1.936729222261097e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 3.788770531633871e-09,
+          "poly_settling_s": 4.025126213408434e-09,
+          "difference_s": 2.3635568177456296e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.154627493167923e-09,
+          "poly_settling_s": 1.357917006093788e-09,
+          "difference_s": 2.0328951292586492e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 3.869810558248545e-09,
+          "poly_settling_s": 4.115031241197384e-09,
+          "difference_s": 2.4522068294883874e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 2.3725987387254797e-09,
+          "poly_settling_s": 2.481351142468596e-09,
+          "difference_s": 1.0875240374311635e-10,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.7961415303112415e-09,
+          "poly_settling_s": 0.0,
+          "difference_s": -1.7961415303112415e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 4.358012880733062e-09,
+          "poly_settling_s": 5.058172543253534e-09,
+          "difference_s": 7.001596625204722e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 3.6539270270092477e-09,
+          "poly_settling_s": 4.221454978234964e-09,
+          "difference_s": 5.67527951225716e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-13,
+      "input_transition_s": 1e-09,
+      "baseline_run": "NAND/timing_poly/baseline_checks/ramp_00_load_01/measurements.json",
+      "poly_run": "NAND/timing_poly/ramp_00_load_01/measurements.json",
+      "max_step_s": 5e-11,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 1.4010107851357602e-09,
+      "max_abs_difference_s": 2.0736330568874885e-09,
+      "baseline_worst_settling_s": 1.132380777765509e-08,
+      "poly_worst_settling_s": 1.1709701181419175e-08,
+      "rows": [
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 9.793015496163593e-09,
+          "poly_settling_s": 1.017850412719182e-08,
+          "difference_s": 3.854886310282264e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 2.687246618911935e-09,
+          "poly_settling_s": 3.1228250610360507e-09,
+          "difference_s": 4.355784421241158e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 8.766459802679772e-09,
+          "poly_settling_s": 9.090237088694723e-09,
+          "difference_s": 3.237772860149503e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.132380777765509e-08,
+          "poly_settling_s": 1.1709701181419175e-08,
+          "difference_s": 3.858934037640854e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 9.76718082909962e-09,
+          "poly_settling_s": 1.0003752720772484e-08,
+          "difference_s": 2.365718916728637e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 2.6907592420689204e-09,
+          "poly_settling_s": 3.2205433266835706e-09,
+          "difference_s": 5.297840846146502e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 8.781126127762808e-09,
+          "poly_settling_s": 9.168675153996764e-09,
+          "difference_s": 3.8754902623395544e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 2.250152990407229e-09,
+          "poly_settling_s": 2.6390491898589084e-09,
+          "difference_s": 3.8889619945167955e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 9.168228403343325e-09,
+          "poly_settling_s": 9.529084209103337e-09,
+          "difference_s": 3.6085580576001206e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 8.347939518103723e-09,
+          "poly_settling_s": 8.600700091580152e-09,
+          "difference_s": 2.527605734764293e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 9.77434517986141e-09,
+          "poly_settling_s": 1.0105075522925959e-08,
+          "difference_s": 3.3073034306454785e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 6.727113927049891e-09,
+          "poly_settling_s": 7.024197268298213e-09,
+          "difference_s": 2.970833412483218e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 9.687946548554832e-09,
+          "poly_settling_s": 9.933306725098331e-09,
+          "difference_s": 2.453601765434993e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 6.561707934185198e-09,
+          "poly_settling_s": 6.8519458034534724e-09,
+          "difference_s": 2.902378692682742e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 9.74073843707944e-09,
+          "poly_settling_s": 1.0046956468495177e-08,
+          "difference_s": 3.062180314157369e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 6.522350989761211e-09,
+          "poly_settling_s": 6.877091623360241e-09,
+          "difference_s": 3.5474063359902983e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 2.2051799952052675e-09,
+          "poly_settling_s": 2.4462260968471466e-09,
+          "difference_s": 2.410461016418792e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.0462298052002291e-08,
+          "poly_settling_s": 1.0878924559047214e-08,
+          "difference_s": 4.166265070449233e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 2.297975396632416e-09,
+          "poly_settling_s": 2.596536330905191e-09,
+          "difference_s": 2.9856093427277504e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 7.789177433918221e-09,
+          "poly_settling_s": 8.02663691235213e-09,
+          "difference_s": 2.3745947843390917e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 2.275472382409889e-09,
+          "poly_settling_s": 2.548684029155268e-09,
+          "difference_s": 2.7321164674537913e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 6.174194526031417e-09,
+          "poly_settling_s": 6.434494221039635e-09,
+          "difference_s": 2.6029969500821805e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.8647142968880576e-09,
+          "poly_settling_s": 2.0570333707656344e-09,
+          "difference_s": 1.9231907387757684e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 6.065822786634984e-09,
+          "poly_settling_s": 6.3221995408068224e-09,
+          "difference_s": 2.5637675417183837e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.9428609104358793e-09,
+          "poly_settling_s": 2.1451887303274416e-09,
+          "difference_s": 2.0232781989156228e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 6.191818006312733e-09,
+          "poly_settling_s": 6.511742507683057e-09,
+          "difference_s": 3.199245013703236e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 3.745417508620801e-09,
+          "poly_settling_s": 3.849430029081839e-09,
+          "difference_s": 1.040125204610382e-10,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.95425095662461e-09,
+          "poly_settling_s": 2.293345691009333e-09,
+          "difference_s": 3.390947343847228e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.0363111533135723e-08,
+          "poly_settling_s": 1.0890590386927333e-08,
+          "difference_s": 5.274788537916106e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 2.3766467687539293e-09,
+          "poly_settling_s": 2.7988401942477623e-09,
+          "difference_s": 4.2219342549383305e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 9.82257732061589e-09,
+          "poly_settling_s": 1.033063215302569e-08,
+          "difference_s": 5.080548324098012e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 4.074877455952666e-09,
+          "poly_settling_s": 2.0012443990651777e-09,
+          "difference_s": -2.0736330568874885e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 8.844013866084535e-09,
+          "poly_settling_s": 9.830728199379667e-09,
+          "difference_s": 9.867143332951321e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 6.7640677284947875e-09,
+          "poly_settling_s": 8.165078513630548e-09,
+          "difference_s": 1.4010107851357602e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 2.2570481833377473e-09,
+          "poly_settling_s": 2.5748314367747137e-09,
+          "difference_s": 3.177832534369664e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 7.559164608453658e-09,
+          "poly_settling_s": 7.882794173127194e-09,
+          "difference_s": 3.236295646735359e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 2.0282424508170877e-09,
+          "poly_settling_s": 2.3641932793863987e-09,
+          "difference_s": 3.3595082856931093e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 5.9666832686729e-09,
+          "poly_settling_s": 6.204665569871403e-09,
+          "difference_s": 2.379823011985032e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 2.103363970039888e-09,
+          "poly_settling_s": 2.3270605530120063e-09,
+          "difference_s": 2.2369658297211829e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 5.866887712766442e-09,
+          "poly_settling_s": 6.101536061577914e-09,
+          "difference_s": 2.3464834881147185e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 2.1485382279899754e-09,
+          "poly_settling_s": 2.3803298304153e-09,
+          "difference_s": 2.3179160242532476e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 5.935721183619486e-09,
+          "poly_settling_s": 6.168575114895864e-09,
+          "difference_s": 2.3285393127637816e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 2.3675021497624447e-09,
+          "poly_settling_s": 2.6378748921659792e-09,
+          "difference_s": 2.7037274240353454e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 7.279772981622052e-09,
+          "poly_settling_s": 7.575472629230818e-09,
+          "difference_s": 2.956996476087656e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 2.3699508289951867e-09,
+          "poly_settling_s": 2.7340731922004876e-09,
+          "difference_s": 3.6412236320530083e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 5.892178885963026e-09,
+          "poly_settling_s": 6.1268250052736665e-09,
+          "difference_s": 2.346461193106404e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 2.1774090229150552e-09,
+          "poly_settling_s": 2.382753602745872e-09,
+          "difference_s": 2.0534457983081692e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 5.798968386812499e-09,
+          "poly_settling_s": 6.030307263236198e-09,
+          "difference_s": 2.3133887642369923e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 2.2383819112981333e-09,
+          "poly_settling_s": 2.4564159725017694e-09,
+          "difference_s": 2.180340612036361e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 5.8863026952343605e-09,
+          "poly_settling_s": 6.119970483305196e-09,
+          "difference_s": 2.3366778807083527e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 2.46288908788722e-09,
+          "poly_settling_s": 2.5833955292132625e-09,
+          "difference_s": 1.2050644132604238e-10,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.7542896874614888e-09,
+          "poly_settling_s": 0.0,
+          "difference_s": -1.7542896874614888e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 5.5874514658061855e-09,
+          "poly_settling_s": 6.396984658517846e-09,
+          "difference_s": 8.095331927116607e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 4.632627768694903e-09,
+          "poly_settling_s": 5.353131398520009e-09,
+          "difference_s": 7.205036298251063e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-12,
+      "input_transition_s": 1e-09,
+      "baseline_run": "NAND/timing_poly/baseline_checks/ramp_00_load_02/measurements.json",
+      "poly_run": "NAND/timing_poly/ramp_00_load_02/measurements.json",
+      "max_step_s": 5e-11,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 4.194209942780236e-09,
+      "max_abs_difference_s": 4.194209942780236e-09,
+      "baseline_worst_settling_s": 4.0758426992939094e-08,
+      "poly_worst_settling_s": 4.10206561412568e-08,
+      "rows": [
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 3.853929343818179e-08,
+          "poly_settling_s": 3.8804930927816326e-08,
+          "difference_s": 2.656374896345327e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.5964350194024327e-08,
+          "poly_settling_s": 1.632240649993348e-08,
+          "difference_s": 3.58056305909152e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 3.069789104575508e-08,
+          "poly_settling_s": 3.101076280733968e-08,
+          "difference_s": 3.128717615846005e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 4.0758426992939094e-08,
+          "poly_settling_s": 4.10206561412568e-08,
+          "difference_s": 2.622291483177086e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 3.8520918273863114e-08,
+          "poly_settling_s": 3.87502933965884e-08,
+          "difference_s": 2.2937512272528556e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.5954117449529106e-08,
+          "poly_settling_s": 1.6389936598038807e-08,
+          "difference_s": 4.3581914850970094e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 3.072639417646683e-08,
+          "poly_settling_s": 3.1102409839146817e-08,
+          "difference_s": 3.760156626799893e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.3944359897792734e-08,
+          "poly_settling_s": 1.4284096024427505e-08,
+          "difference_s": 3.39736126634771e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 3.138474058987877e-08,
+          "poly_settling_s": 3.1732061420104405e-08,
+          "difference_s": 3.473208302256356e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 3.7747653846993177e-08,
+          "poly_settling_s": 3.80163074110569e-08,
+          "difference_s": 2.686535640637233e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 3.851147590839958e-08,
+          "poly_settling_s": 3.8791696502564874e-08,
+          "difference_s": 2.8022059416529365e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 3.748303908797671e-08,
+          "poly_settling_s": 3.7786598937525464e-08,
+          "difference_s": 3.035598495487565e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 3.840497255916812e-08,
+          "poly_settling_s": 3.856489421134389e-08,
+          "difference_s": 1.5992165217577133e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 3.6516052516534016e-08,
+          "poly_settling_s": 3.6817672410847356e-08,
+          "difference_s": 3.016198943133397e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 3.8435930485186426e-08,
+          "poly_settling_s": 3.8645036128030126e-08,
+          "difference_s": 2.0910564284370005e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 3.63465486267822e-08,
+          "poly_settling_s": 3.6654473296878616e-08,
+          "difference_s": 3.0792467009641434e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.3608905996289231e-08,
+          "poly_settling_s": 1.378241249794687e-08,
+          "difference_s": 1.735065016576388e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 3.337092392604593e-08,
+          "poly_settling_s": 3.368533651349292e-08,
+          "difference_s": 3.1441258744699277e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.3724676563259666e-08,
+          "poly_settling_s": 1.3978396303704697e-08,
+          "difference_s": 2.5371974044503093e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 3.091100268871051e-08,
+          "poly_settling_s": 3.1132713853478004e-08,
+          "difference_s": 2.2171116476749336e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.3701101608026554e-08,
+          "poly_settling_s": 1.3923023057610273e-08,
+          "difference_s": 2.2192144958371892e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 3.010126610874386e-08,
+          "poly_settling_s": 3.03537467716092e-08,
+          "difference_s": 2.5248066286534163e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.328027426008206e-08,
+          "poly_settling_s": 1.3438031687798533e-08,
+          "difference_s": 1.577574277164724e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 2.9385597030726375e-08,
+          "poly_settling_s": 2.9634734995865637e-08,
+          "difference_s": 2.4913796513926264e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 1.334233335076024e-08,
+          "poly_settling_s": 1.3494999285980477e-08,
+          "difference_s": 1.526659352202379e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 2.948108164619527e-08,
+          "poly_settling_s": 2.9775864396894888e-08,
+          "difference_s": 2.9478275069961916e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.343195758602942e-08,
+          "poly_settling_s": 1.3740538558178468e-08,
+          "difference_s": 3.085809721490489e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 3.3260098348237327e-08,
+          "poly_settling_s": 3.368289234927952e-08,
+          "difference_s": 4.227940010421917e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.4884736246147099e-08,
+          "poly_settling_s": 1.5267275276322124e-08,
+          "difference_s": 3.8253903017502545e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 3.2466706463632207e-08,
+          "poly_settling_s": 3.2869190379663436e-08,
+          "difference_s": 4.0248391603122974e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.4181123314646518e-08,
+          "poly_settling_s": 1.672157552486418e-08,
+          "difference_s": 2.5404522102176626e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 7.227306068888621e-09,
+          "poly_settling_s": 1.1421516011668857e-08,
+          "difference_s": 4.194209942780236e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.3739762578683168e-08,
+          "poly_settling_s": 1.4023610720321141e-08,
+          "difference_s": 2.838481416379731e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 3.065880336504932e-08,
+          "poly_settling_s": 3.096722809497137e-08,
+          "difference_s": 3.0842472992204757e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.349629635251655e-08,
+          "poly_settling_s": 1.3798760803445829e-08,
+          "difference_s": 3.024644509292795e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 2.9868714058696984e-08,
+          "poly_settling_s": 3.0099324936933234e-08,
+          "difference_s": 2.3061087823625002e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.3567523800877483e-08,
+          "poly_settling_s": 1.3758812702752601e-08,
+          "difference_s": 1.912889018751185e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 2.9160735442765347e-08,
+          "poly_settling_s": 2.9388246169042382e-08,
+          "difference_s": 2.2751072627703493e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 1.3611900745233706e-08,
+          "poly_settling_s": 1.3803280661563031e-08,
+          "difference_s": 1.9137991632932469e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 2.9182003011524426e-08,
+          "poly_settling_s": 2.9398561536217866e-08,
+          "difference_s": 2.1655852469344011e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.4879121246476025e-08,
+          "poly_settling_s": 1.5104664664792168e-08,
+          "difference_s": 2.2554341831614272e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 3.012014866596416e-08,
+          "poly_settling_s": 3.040210917567006e-08,
+          "difference_s": 2.819605097059035e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.4887567838466862e-08,
+          "poly_settling_s": 1.521445399773122e-08,
+          "difference_s": 3.268861592643595e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 2.9506187155145085e-08,
+          "poly_settling_s": 2.973485372993913e-08,
+          "difference_s": 2.2866657479404437e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.4681803766937722e-08,
+          "poly_settling_s": 1.4867558675222382e-08,
+          "difference_s": 1.857549082846593e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 2.8813729941234637e-08,
+          "poly_settling_s": 2.903908187937759e-08,
+          "difference_s": 2.253519381429541e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 1.4740521984034566e-08,
+          "poly_settling_s": 1.4926281065975817e-08,
+          "difference_s": 1.8575908194125106e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 2.8860140163569355e-08,
+          "poly_settling_s": 2.907691454919178e-08,
+          "difference_s": 2.1677438562242514e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 5.956085801140141e-09,
+          "poly_settling_s": 9.224345080296564e-09,
+          "difference_s": 3.268259279156423e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 3.650047389665035e-09,
+          "difference_s": 3.650047389665035e-09,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-14,
+      "input_transition_s": 1.5e-07,
+      "baseline_run": "NAND/timing/ramp_03_load_01/measurements.json",
+      "poly_run": "NAND/timing_poly/ramp_01_load_00/measurements.json",
+      "max_step_s": 2e-09,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 1.285498173408828e-09,
+      "max_abs_difference_s": 1.285498173408828e-09,
+      "baseline_worst_settling_s": 1.3765706498836237e-07,
+      "poly_worst_settling_s": 1.38223987063078e-07,
+      "rows": [
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.3653063205126358e-07,
+          "poly_settling_s": 1.3726173542560673e-07,
+          "difference_s": 7.311033743431519e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 7.978035425549272e-08,
+          "poly_settling_s": 8.070209854050339e-08,
+          "difference_s": 9.217442850106629e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.1507962483753766e-07,
+          "poly_settling_s": 1.1551362153389436e-07,
+          "difference_s": 4.3399669635669264e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.3765706498836237e-07,
+          "poly_settling_s": 1.38223987063078e-07,
+          "difference_s": 5.669220747156275e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.3405766071449416e-07,
+          "poly_settling_s": 1.3448592665596743e-07,
+          "difference_s": 4.282659414732735e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 7.977897534714981e-08,
+          "poly_settling_s": 8.088695970918825e-08,
+          "difference_s": 1.1079843620384325e-09,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.1509387754349074e-07,
+          "poly_settling_s": 1.1562648961346028e-07,
+          "difference_s": 5.326120699695447e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.24997622929235e-08,
+          "poly_settling_s": 6.378526046633232e-08,
+          "difference_s": 1.285498173408828e-09,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.1965062850169247e-07,
+          "poly_settling_s": 1.2021646681700853e-07,
+          "difference_s": 5.658383153160626e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.351718797567089e-07,
+          "poly_settling_s": 1.3531994754869507e-07,
+          "difference_s": 1.4806779198616918e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.3414047566866272e-07,
+          "poly_settling_s": 1.3457453474326856e-07,
+          "difference_s": 4.340590746058329e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.3670400976799242e-07,
+          "poly_settling_s": 1.3696010825092615e-07,
+          "difference_s": 2.560984829337278e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.340748160461195e-07,
+          "poly_settling_s": 1.3460001446104406e-07,
+          "difference_s": 5.251984149245585e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.365677895607134e-07,
+          "poly_settling_s": 1.3680971720548818e-07,
+          "difference_s": 2.419276447747769e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.341463499746101e-07,
+          "poly_settling_s": 1.3467781318783172e-07,
+          "difference_s": 5.314632132216238e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.3338308790202108e-07,
+          "poly_settling_s": 1.3365335334910185e-07,
+          "difference_s": 2.702654470807683e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 6.066494534874835e-08,
+          "poly_settling_s": 6.123468957000012e-08,
+          "difference_s": 5.697442212517645e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.2086332579766684e-07,
+          "poly_settling_s": 1.21128326502471e-07,
+          "difference_s": 2.650007048041604e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 6.046980127218952e-08,
+          "poly_settling_s": 6.141378897704615e-08,
+          "difference_s": 9.439877048566316e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.1820775529184632e-07,
+          "poly_settling_s": 1.1840274747764221e-07,
+          "difference_s": 1.949921857958897e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 6.092689021043056e-08,
+          "poly_settling_s": 6.190158250996319e-08,
+          "difference_s": 9.74692299532623e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.3668503336042705e-07,
+          "poly_settling_s": 1.3696438781466042e-07,
+          "difference_s": 2.7935445423336815e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 3.2553534075008703e-08,
+          "poly_settling_s": 3.321886004003011e-08,
+          "difference_s": 6.653259650214082e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.3651471969764007e-07,
+          "poly_settling_s": 1.3676948087026065e-07,
+          "difference_s": 2.5476117262058107e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 3.4066943191529676e-08,
+          "poly_settling_s": 3.457802052241175e-08,
+          "difference_s": 5.11077330882077e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.1750152728689289e-07,
+          "poly_settling_s": 1.1773304752169e-07,
+          "difference_s": 2.3152023479711364e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 3.2061574169920556e-08,
+          "poly_settling_s": 3.265803454858231e-08,
+          "difference_s": 5.964603786617531e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.3690285836566445e-07,
+          "poly_settling_s": 1.3762966534221963e-07,
+          "difference_s": 7.268069765551787e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.061880731314303e-08,
+          "poly_settling_s": 6.159360117335752e-08,
+          "difference_s": 9.747938602144846e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.195049726977884e-07,
+          "poly_settling_s": 1.1983963491743715e-07,
+          "difference_s": 3.3466221964874657e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.3665578897279789e-07,
+          "poly_settling_s": 1.369265950417633e-07,
+          "difference_s": 2.7080606896542317e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.3647165869996408e-07,
+          "poly_settling_s": 1.3700653102343888e-07,
+          "difference_s": 5.348723234747986e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.3646731470370153e-07,
+          "poly_settling_s": 1.36698332465632e-07,
+          "difference_s": 2.3101776193046775e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.1881460345363883e-07,
+          "poly_settling_s": 1.1910080256316891e-07,
+          "difference_s": 2.861991095300825e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 6.7140233332631e-08,
+          "poly_settling_s": 6.783903564293596e-08,
+          "difference_s": 6.988023103049565e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.351547102553163e-07,
+          "poly_settling_s": 1.3539941498173511e-07,
+          "difference_s": 2.447047264188154e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 3.188315523148865e-08,
+          "poly_settling_s": 3.242532429729571e-08,
+          "difference_s": 5.421690658070585e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.224499495842034e-07,
+          "poly_settling_s": 1.2270646484280906e-07,
+          "difference_s": 2.565152586056583e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 6.32821823333361e-08,
+          "poly_settling_s": 6.403537819680297e-08,
+          "difference_s": 7.531958634668682e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.2221327920803538e-07,
+          "poly_settling_s": 1.2246624258718466e-07,
+          "difference_s": 2.5296337914927874e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 6.45849229222566e-08,
+          "poly_settling_s": 6.536263087512692e-08,
+          "difference_s": 7.777079528703274e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.2102606286780058e-07,
+          "poly_settling_s": 1.2128307293410922e-07,
+          "difference_s": 2.5701006630863437e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 7.534725241784202e-08,
+          "poly_settling_s": 7.603039066960931e-08,
+          "difference_s": 6.831382517672867e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.1815145670981538e-07,
+          "poly_settling_s": 1.1840052218099441e-07,
+          "difference_s": 2.490654711790328e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.074668995803954e-08,
+          "poly_settling_s": 6.16255318673676e-08,
+          "difference_s": 8.788419093280612e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.2239094176707722e-07,
+          "poly_settling_s": 1.2264699153405787e-07,
+          "difference_s": 2.560497669806491e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.412525949101334e-08,
+          "poly_settling_s": 6.483354124782597e-08,
+          "difference_s": 7.082817568126315e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.2209067867053196e-07,
+          "poly_settling_s": 1.223419951908709e-07,
+          "difference_s": 2.51316520338932e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.620510845360033e-08,
+          "poly_settling_s": 6.687210005760095e-08,
+          "difference_s": 6.669916040006219e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.1529080458463111e-07,
+          "poly_settling_s": 1.155549434471842e-07,
+          "difference_s": 2.6413886255308486e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.222735611234506e-07,
+          "poly_settling_s": 1.2252793355837057e-07,
+          "difference_s": 2.5437243491996863e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.3516873368810497e-07,
+          "poly_settling_s": 1.3540685255971035e-07,
+          "difference_s": 2.3811887160538276e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.2190359623318433e-07,
+          "poly_settling_s": 1.2215935048609739e-07,
+          "difference_s": 2.557542529130598e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.1815608600488752e-07,
+          "poly_settling_s": 1.1845201125416187e-07,
+          "difference_s": 2.9592524927434254e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-13,
+      "input_transition_s": 1.5e-07,
+      "baseline_run": "NAND/timing/ramp_03_load_04/measurements.json",
+      "poly_run": "NAND/timing_poly/ramp_01_load_01/measurements.json",
+      "max_step_s": 2e-09,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 1.270737996837855e-09,
+      "max_abs_difference_s": 1.270737996837855e-09,
+      "baseline_worst_settling_s": 1.3900319546191704e-07,
+      "poly_worst_settling_s": 1.398054257520867e-07,
+      "rows": [
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.3790710525158485e-07,
+          "poly_settling_s": 1.3858839034158584e-07,
+          "difference_s": 6.81285090000989e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 8.063807063489635e-08,
+          "poly_settling_s": 8.16744610618153e-08,
+          "difference_s": 1.0363904269189475e-09,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.1618013879318812e-07,
+          "poly_settling_s": 1.1659009792948212e-07,
+          "difference_s": 4.0995913629400544e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.3900319546191704e-07,
+          "poly_settling_s": 1.398054257520867e-07,
+          "difference_s": 8.022302901696616e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.3525192003086998e-07,
+          "poly_settling_s": 1.3570248930640428e-07,
+          "difference_s": 4.505692755342923e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 8.063503526836021e-08,
+          "poly_settling_s": 8.190577326519806e-08,
+          "difference_s": 1.270737996837855e-09,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.1619365664529607e-07,
+          "poly_settling_s": 1.1669705274705805e-07,
+          "difference_s": 5.033961017619776e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.341314849464982e-08,
+          "poly_settling_s": 6.460970669275356e-08,
+          "difference_s": 1.1965581981037402e-09,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.2076840541178107e-07,
+          "poly_settling_s": 1.2135278703642428e-07,
+          "difference_s": 5.84381624643209e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.364861581549531e-07,
+          "poly_settling_s": 1.3678558982320023e-07,
+          "difference_s": 2.994316682471322e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.3532090310860436e-07,
+          "poly_settling_s": 1.3575784278901352e-07,
+          "difference_s": 4.3693968040916175e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.3765534558771262e-07,
+          "poly_settling_s": 1.3791854858005402e-07,
+          "difference_s": 2.6320299234139507e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.3526369813667345e-07,
+          "poly_settling_s": 1.3580090710748048e-07,
+          "difference_s": 5.372089708070266e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.374476074051394e-07,
+          "poly_settling_s": 1.377317743977521e-07,
+          "difference_s": 2.8416699261268294e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.353506920860779e-07,
+          "poly_settling_s": 1.3587926076844903e-07,
+          "difference_s": 5.285686823711309e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.3441467802516114e-07,
+          "poly_settling_s": 1.3468019772931804e-07,
+          "difference_s": 2.655197041568982e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 6.158727140281463e-08,
+          "poly_settling_s": 6.210918193062913e-08,
+          "difference_s": 5.219105278144999e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.221823954397584e-07,
+          "poly_settling_s": 1.2253430382027657e-07,
+          "difference_s": 3.51908380518182e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 6.144956843482201e-08,
+          "poly_settling_s": 6.233583985901371e-08,
+          "difference_s": 8.862714241916937e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.19356347014908e-07,
+          "poly_settling_s": 1.195984641606034e-07,
+          "difference_s": 2.42117145695395e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 6.193931332818374e-08,
+          "poly_settling_s": 6.273325582070831e-08,
+          "difference_s": 7.939424925245672e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.3763596378919275e-07,
+          "poly_settling_s": 1.3788945143058914e-07,
+          "difference_s": 2.5348764139639167e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 3.363838732508659e-08,
+          "poly_settling_s": 3.424535282988541e-08,
+          "difference_s": 6.069655047988195e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.3742292247854448e-07,
+          "poly_settling_s": 1.3768303745081524e-07,
+          "difference_s": 2.601149722707591e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 3.489919150534113e-08,
+          "poly_settling_s": 3.5608598835975126e-08,
+          "difference_s": 7.094073306339945e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.1861154876484786e-07,
+          "poly_settling_s": 1.1882205134331185e-07,
+          "difference_s": 2.105025784639934e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 3.286164693711843e-08,
+          "poly_settling_s": 3.366983818372256e-08,
+          "difference_s": 8.081912466041343e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.3858653216331017e-07,
+          "poly_settling_s": 1.391836453040096e-07,
+          "difference_s": 5.971131406994269e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.161566159647671e-08,
+          "poly_settling_s": 6.248500463161051e-08,
+          "difference_s": 8.693430351337946e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.2076985500919475e-07,
+          "poly_settling_s": 1.2108604707092492e-07,
+          "difference_s": 3.16192061730169e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.3760478048830194e-07,
+          "poly_settling_s": 1.3785147676046336e-07,
+          "difference_s": 2.466962721614247e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.380616978696774e-07,
+          "poly_settling_s": 1.3866251352582186e-07,
+          "difference_s": 6.008156561444745e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.3736526964298171e-07,
+          "poly_settling_s": 1.3762922435001465e-07,
+          "difference_s": 2.639547070329331e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.200686796990456e-07,
+          "poly_settling_s": 1.2036764647676805e-07,
+          "difference_s": 2.989667777224421e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 6.801680189659145e-08,
+          "poly_settling_s": 6.879425672424324e-08,
+          "difference_s": 7.774548276517879e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.3646391402314311e-07,
+          "poly_settling_s": 1.3669386832796787e-07,
+          "difference_s": 2.2995430482475234e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 3.2689533504379913e-08,
+          "poly_settling_s": 3.3324284320385725e-08,
+          "difference_s": 6.347508160058112e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.2331385885182316e-07,
+          "poly_settling_s": 1.235762371342336e-07,
+          "difference_s": 2.6237828241044677e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 6.426054157847297e-08,
+          "poly_settling_s": 6.495098251391233e-08,
+          "difference_s": 6.904409354393604e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.2304968915311017e-07,
+          "poly_settling_s": 1.2331351745084002e-07,
+          "difference_s": 2.6382829772985056e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 6.558997434558871e-08,
+          "poly_settling_s": 6.629625175458244e-08,
+          "difference_s": 7.062774089937286e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.2191655443103322e-07,
+          "poly_settling_s": 1.2215243709358742e-07,
+          "difference_s": 2.35882662554199e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 7.63685471634572e-08,
+          "poly_settling_s": 7.687602661250829e-08,
+          "difference_s": 5.074794490510855e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.1929179387097692e-07,
+          "poly_settling_s": 1.1950759371917268e-07,
+          "difference_s": 2.1579984819575693e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.171795121318483e-08,
+          "poly_settling_s": 6.246621793464029e-08,
+          "difference_s": 7.482667214554555e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.2325087907693469e-07,
+          "poly_settling_s": 1.2351277864937457e-07,
+          "difference_s": 2.6189957243988424e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.503070170860118e-08,
+          "poly_settling_s": 6.583055631970047e-08,
+          "difference_s": 7.998546110992853e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.2292586403948183e-07,
+          "poly_settling_s": 1.2318229174343592e-07,
+          "difference_s": 2.564277039540869e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 6.710451706658265e-08,
+          "poly_settling_s": 6.78903868202238e-08,
+          "difference_s": 7.858697536411517e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.1626870864438248e-07,
+          "poly_settling_s": 1.165228139952181e-07,
+          "difference_s": 2.541053508356276e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.2311995608394404e-07,
+          "poly_settling_s": 1.233744840051412e-07,
+          "difference_s": 2.545279211971696e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.3642363667964723e-07,
+          "poly_settling_s": 1.3675852710736663e-07,
+          "difference_s": 3.348904277194055e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.2275567610731786e-07,
+          "poly_settling_s": 1.2299759442341301e-07,
+          "difference_s": 2.419183160951499e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.192650171343567e-07,
+          "poly_settling_s": 1.1959160409758595e-07,
+          "difference_s": 3.265869632292518e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    },
+    {
+      "load_f": 1e-12,
+      "input_transition_s": 1.5e-07,
+      "baseline_run": "NAND/timing/ramp_03_load_07/measurements.json",
+      "poly_run": "NAND/timing_poly/ramp_01_load_02/measurements.json",
+      "max_step_s": 2e-09,
+      "baseline_complete": true,
+      "poly_complete": true,
+      "baseline_passed": true,
+      "poly_passed": true,
+      "max_increase_s": 8.958132895863969e-10,
+      "max_abs_difference_s": 8.958132895863969e-10,
+      "baseline_worst_settling_s": 1.6001932295008038e-07,
+      "poly_worst_settling_s": 1.6054318268138838e-07,
+      "rows": [
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.5738566629360217e-07,
+          "poly_settling_s": 1.5808514661665256e-07,
+          "difference_s": 6.994803230503914e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 9.244269805814176e-08,
+          "poly_settling_s": 9.315148578742999e-08,
+          "difference_s": 7.087877292882256e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.2991866455760937e-07,
+          "poly_settling_s": 1.3038403926715575e-07,
+          "difference_s": 4.653747095463755e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.6001932295008038e-07,
+          "poly_settling_s": 1.6054318268138838e-07,
+          "difference_s": 5.238597313080006e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.5269772778590528e-07,
+          "poly_settling_s": 1.5320830173359915e-07,
+          "difference_s": 5.105739476938761e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 9.244201678332602e-08,
+          "poly_settling_s": 9.333783007291241e-08,
+          "difference_s": 8.958132895863969e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.2994183785051494e-07,
+          "poly_settling_s": 1.3051183989621096e-07,
+          "difference_s": 5.700020456960165e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 7.4022967236653e-08,
+          "poly_settling_s": 7.491176181317631e-08,
+          "difference_s": 8.887945765233102e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.367810987392039e-07,
+          "poly_settling_s": 1.3746246275326e-07,
+          "difference_s": 6.813640140560897e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.5692668992078566e-07,
+          "poly_settling_s": 1.5738582861298018e-07,
+          "difference_s": 4.5913869219451914e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.5314855289393e-07,
+          "poly_settling_s": 1.5372345209883843e-07,
+          "difference_s": 5.748992049084346e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.5584447930533965e-07,
+          "poly_settling_s": 1.562013587982281e-07,
+          "difference_s": 3.5687949288846436e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.5273304853362976e-07,
+          "poly_settling_s": 1.533712515648601e-07,
+          "difference_s": 6.38203031230347e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.5467842487702814e-07,
+          "poly_settling_s": 1.5499776426589903e-07,
+          "difference_s": 3.1933938887089704e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            1
+          ],
+          "baseline_settling_s": 1.5316719373655737e-07,
+          "poly_settling_s": 1.5384572792819784e-07,
+          "difference_s": 6.785341916404691e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.51367790304866e-07,
+          "poly_settling_s": 1.5168338234306595e-07,
+          "difference_s": 3.1559203819995834e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 7.339747262260749e-08,
+          "poly_settling_s": 7.378220417978048e-08,
+          "difference_s": 3.847315571729954e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.3977010705973954e-07,
+          "poly_settling_s": 1.4028536203900354e-07,
+          "difference_s": 5.152549792639984e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 7.207932963083668e-08,
+          "poly_settling_s": 7.272604983298417e-08,
+          "difference_s": 6.467202021474925e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.3670653639983247e-07,
+          "poly_settling_s": 1.370813999027998e-07,
+          "difference_s": 3.748635029673247e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 7.278386385080392e-08,
+          "poly_settling_s": 7.338423636688809e-08,
+          "difference_s": 6.003725160841697e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.5577604838762154e-07,
+          "poly_settling_s": 1.5613250629717224e-07,
+          "difference_s": 3.564579095506989e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 4.490840590024195e-08,
+          "poly_settling_s": 4.5361971988885376e-08,
+          "difference_s": 4.5356608864342656e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.5448548996758791e-07,
+          "poly_settling_s": 1.5480575868077447e-07,
+          "difference_s": 3.2026871318655947e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            0
+          ],
+          "baseline_settling_s": 4.678473720607309e-08,
+          "poly_settling_s": 4.7190373698209964e-08,
+          "difference_s": 4.056364921368761e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.3500554894139389e-07,
+          "poly_settling_s": 1.3528770331629245e-07,
+          "difference_s": 2.8215437489856083e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 4.3910556174140954e-08,
+          "poly_settling_s": 4.442931926514598e-08,
+          "difference_s": 5.18763091005028e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.5968260672103525e-07,
+          "poly_settling_s": 1.6022150611492506e-07,
+          "difference_s": 5.388993938898088e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 7.259242283451188e-08,
+          "poly_settling_s": 7.322337512989693e-08,
+          "difference_s": 6.309522953850441e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.3875328291939327e-07,
+          "poly_settling_s": 1.392502921986455e-07,
+          "difference_s": 4.970092792522447e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.5556588241511258e-07,
+          "poly_settling_s": 1.5590851259216415e-07,
+          "difference_s": 3.426301770515644e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.5924577704019895e-07,
+          "poly_settling_s": 1.5978989630761306e-07,
+          "difference_s": 5.441192674141145e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.5419981457212386e-07,
+          "poly_settling_s": 1.5451766335088443e-07,
+          "difference_s": 3.178487787605774e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            1,
+            -1
+          ],
+          "baseline_settling_s": 1.3773723684804213e-07,
+          "poly_settling_s": 1.382013007367347e-07,
+          "difference_s": 4.640638886925822e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            1,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 7.941568993458914e-08,
+          "poly_settling_s": 7.990824811307141e-08,
+          "difference_s": 4.925581784822708e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.56736595476769e-07,
+          "poly_settling_s": 1.5714430885012965e-07,
+          "difference_s": 4.0771337336063915e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 4.4533485087538716e-08,
+          "poly_settling_s": 4.489382009224889e-08,
+          "difference_s": 3.603350047101737e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.361699190540368e-07,
+          "poly_settling_s": 1.3647767746921444e-07,
+          "difference_s": 3.077584151776468e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 7.513486977172123e-08,
+          "poly_settling_s": 7.570336894509005e-08,
+          "difference_s": 5.684991733688168e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.3523910533895026e-07,
+          "poly_settling_s": 1.355646000306528e-07,
+          "difference_s": 3.254946917025266e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            1
+          ],
+          "baseline_settling_s": 7.666036467453071e-08,
+          "poly_settling_s": 7.715064318107159e-08,
+          "difference_s": 4.90278506540872e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.340533398543593e-07,
+          "poly_settling_s": 1.3431980368757272e-07,
+          "difference_s": 2.6646383321341535e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 8.833721774803541e-08,
+          "poly_settling_s": 8.875337641120248e-08,
+          "difference_s": 4.1615866316706794e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.362133870782337e-07,
+          "poly_settling_s": 1.3653241962505383e-07,
+          "difference_s": 3.1903254682014636e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 7.310051881733064e-08,
+          "poly_settling_s": 7.366240960900752e-08,
+          "difference_s": 5.618907916768825e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.3593030143213626e-07,
+          "poly_settling_s": 1.3623966977353958e-07,
+          "difference_s": 3.093683414033175e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 7.62808323193411e-08,
+          "poly_settling_s": 7.676423407693549e-08,
+          "difference_s": 4.834017575943849e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.3487298191575898e-07,
+          "poly_settling_s": 1.3517203027693696e-07,
+          "difference_s": 2.990483611779824e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            0
+          ],
+          "baseline_settling_s": 7.855738842228106e-08,
+          "poly_settling_s": 7.901165046459346e-08,
+          "difference_s": 4.5426204231240204e-10,
+          "single_pin": true,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 1.2904416633463336e-07,
+          "poly_settling_s": 1.2934364949562102e-07,
+          "difference_s": 2.994831609876643e-10,
+          "single_pin": false,
+          "output_changes": true,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 1.3543286054518237e-07,
+          "poly_settling_s": 1.3573888160410913e-07,
+          "difference_s": 3.060210589267583e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.5656876857333258e-07,
+          "poly_settling_s": 1.5694555894444303e-07,
+          "difference_s": 3.767903711104491e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 1.3412163631797388e-07,
+          "poly_settling_s": 1.3442335717256333e-07,
+          "difference_s": 3.01720854589449e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            0,
+            -1
+          ],
+          "baseline_settling_s": 1.357010712308855e-07,
+          "poly_settling_s": 1.360625737123792e-07,
+          "difference_s": 3.6150248149368876e-10,
+          "single_pin": false,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            0,
+            -1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            1
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            -1
+          ],
+          "to": [
+            -1,
+            0
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        },
+        {
+          "from": [
+            -1,
+            0
+          ],
+          "to": [
+            -1,
+            -1
+          ],
+          "baseline_settling_s": 0.0,
+          "poly_settling_s": 0.0,
+          "difference_s": 0.0,
+          "single_pin": true,
+          "output_changes": false,
+          "baseline_passed": true,
+          "poly_passed": true
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "passed": true,
+  "max_single_pin_output_change_increase_s": 1.270737996837855e-09,
+  "generation": {
+    "id": "2026-10-18T09:49:34.717678+00:00",
+    "reason": "Phase 6 PASS: nine STA timing tables, 160 load/ramp profiles and 7296 directed observations; 30 poly-R proxy profiles with matched baselines; physical cell views unchanged; latest SIM characterization/sizing preserved",
+    "height_um": 132.0
+  }
+}

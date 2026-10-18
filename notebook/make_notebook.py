@@ -809,6 +809,11 @@ print("Artifacts:", BUILD)
 
 
 if __name__ == "__main__":
+    # Keep long data-reader cells folded in Jupyter hosts that honor this hint;
+    # source, editable controls and all outputs remain in the notebook.
+    for item in cells:
+        if item["id"] in {"tritflow-09","tritflow-11","tritflow-13","tritflow-23","tritflow-25"}:
+            item["metadata"]["jupyter"] = {"source_hidden": True}
     document = {"nbformat": 4, "nbformat_minor": 5, "metadata": {
         "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
         "language_info": {"name": "python", "version": "3.12"},

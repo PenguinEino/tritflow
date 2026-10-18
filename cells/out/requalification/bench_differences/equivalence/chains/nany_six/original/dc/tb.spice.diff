@@ -1,0 +1,257 @@
+--- before
++++ pinned
+@@ -7,10 +7,10 @@
+ .parameters magRR       = 1
+ .parameters magRS       = 1 
+ .parameters magCSIO     = 1 
+-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_diode_v2.lib"
+-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_mos_v2.lib"
+-.include "/home/ishi-kai/pdk/TR-1um/libs.tech/spice/models/models_IP62_res_v5.lib"
++.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
++.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib"
++.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib"
++.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib"
+ * Public ports renamed from independent taped-out reference
+ .subckt INV A Y VDD VMID VSS
+ * device instance $1 r0 *1 13.2,44 PMOS
+@@ -75,6 +75,16 @@
+ * device instance $10 r0 *1 112.5,72 F_RR
+ XR_ex_10 n_ex_3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+ .ends NANY
++.subckt BUF A Y VDD VMID VSS
++Xstage0_M_ex_1 stage0_n_ex_4 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
++Xstage0_M_ex_2 stage0_n_ex_5 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
++Xstage0_R_ex_3 stage0_n_ex_5 mid VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++Xstage0_R_ex_4 stage0_n_ex_4 mid VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++Xstage1_M_ex_1 stage1_n_ex_4 mid VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u
++Xstage1_M_ex_2 stage1_n_ex_5 mid VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u
++Xstage1_R_ex_3 stage1_n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++Xstage1_R_ex_4 stage1_n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
++.ends BUF
+ 
+ .subckt CASCADE A a1 a2 a3 a4 a5 a6 b1 b2 b3 b4 b5 b6 tied1 tied2 tied3 tied4 tied5 tied6 VDD VMID VSS
+ Xstage_a1 A VMID a1 VDD VMID VSS NANY
+@@ -125,114 +135,114 @@
+ .nodeset v(tied4)=-5
+ .nodeset v(tied5)=5
+ .nodeset v(tied6)=-5
+-.nodeset v(xdut.xstage_a1.n_ex_7)=0
+-.nodeset v(xdut.xstage_a1.n_ex_10)=0
+-.nodeset v(xdut.xstage_a1.n_ex_32)=5
+-.nodeset v(xdut.xstage_a1.n_ex_3)=5
+-.nodeset v(xdut.xstage_a1.n_ex_33)=-5
+-.nodeset v(xdut.xstage_a1.n_ex_4)=-5
+-.nodeset v(xdut.xstage_a2.n_ex_7)=0
+-.nodeset v(xdut.xstage_a2.n_ex_10)=0
+-.nodeset v(xdut.xstage_a2.n_ex_32)=5
+-.nodeset v(xdut.xstage_a2.n_ex_3)=5
+-.nodeset v(xdut.xstage_a2.n_ex_33)=-5
+-.nodeset v(xdut.xstage_a2.n_ex_4)=-5
+-.nodeset v(xdut.xstage_a3.n_ex_7)=0
+-.nodeset v(xdut.xstage_a3.n_ex_10)=0
+-.nodeset v(xdut.xstage_a3.n_ex_32)=5
+-.nodeset v(xdut.xstage_a3.n_ex_3)=5
+-.nodeset v(xdut.xstage_a3.n_ex_33)=-5
+-.nodeset v(xdut.xstage_a3.n_ex_4)=-5
+-.nodeset v(xdut.xstage_a4.n_ex_7)=0
+-.nodeset v(xdut.xstage_a4.n_ex_10)=0
+-.nodeset v(xdut.xstage_a4.n_ex_32)=5
+-.nodeset v(xdut.xstage_a4.n_ex_3)=5
+-.nodeset v(xdut.xstage_a4.n_ex_33)=-5
+-.nodeset v(xdut.xstage_a4.n_ex_4)=-5
+-.nodeset v(xdut.xstage_a5.n_ex_7)=0
+-.nodeset v(xdut.xstage_a5.n_ex_10)=0
+-.nodeset v(xdut.xstage_a5.n_ex_32)=5
+-.nodeset v(xdut.xstage_a5.n_ex_3)=5
+-.nodeset v(xdut.xstage_a5.n_ex_33)=-5
+-.nodeset v(xdut.xstage_a5.n_ex_4)=-5
+-.nodeset v(xdut.xstage_a6.n_ex_7)=0
+-.nodeset v(xdut.xstage_a6.n_ex_10)=0
+-.nodeset v(xdut.xstage_a6.n_ex_32)=5
+-.nodeset v(xdut.xstage_a6.n_ex_3)=5
+-.nodeset v(xdut.xstage_a6.n_ex_33)=-5
+-.nodeset v(xdut.xstage_a6.n_ex_4)=-5
+-.nodeset v(xdut.xstage_b1.n_ex_7)=0
+-.nodeset v(xdut.xstage_b1.n_ex_10)=0
+-.nodeset v(xdut.xstage_b1.n_ex_32)=5
+-.nodeset v(xdut.xstage_b1.n_ex_3)=5
+-.nodeset v(xdut.xstage_b1.n_ex_33)=-5
+-.nodeset v(xdut.xstage_b1.n_ex_4)=-5
+-.nodeset v(xdut.xstage_b2.n_ex_7)=0
+-.nodeset v(xdut.xstage_b2.n_ex_10)=0
+-.nodeset v(xdut.xstage_b2.n_ex_32)=5
+-.nodeset v(xdut.xstage_b2.n_ex_3)=5
+-.nodeset v(xdut.xstage_b2.n_ex_33)=-5
+-.nodeset v(xdut.xstage_b2.n_ex_4)=-5
+-.nodeset v(xdut.xstage_b3.n_ex_7)=0
+-.nodeset v(xdut.xstage_b3.n_ex_10)=0
+-.nodeset v(xdut.xstage_b3.n_ex_32)=5
+-.nodeset v(xdut.xstage_b3.n_ex_3)=5
+-.nodeset v(xdut.xstage_b3.n_ex_33)=-5
+-.nodeset v(xdut.xstage_b3.n_ex_4)=-5
+-.nodeset v(xdut.xstage_b4.n_ex_7)=0
+-.nodeset v(xdut.xstage_b4.n_ex_10)=0
+-.nodeset v(xdut.xstage_b4.n_ex_32)=5
+-.nodeset v(xdut.xstage_b4.n_ex_3)=5
+-.nodeset v(xdut.xstage_b4.n_ex_33)=-5
+-.nodeset v(xdut.xstage_b4.n_ex_4)=-5
+-.nodeset v(xdut.xstage_b5.n_ex_7)=0
+-.nodeset v(xdut.xstage_b5.n_ex_10)=0
+-.nodeset v(xdut.xstage_b5.n_ex_32)=5
+-.nodeset v(xdut.xstage_b5.n_ex_3)=5
+-.nodeset v(xdut.xstage_b5.n_ex_33)=-5
+-.nodeset v(xdut.xstage_b5.n_ex_4)=-5
+-.nodeset v(xdut.xstage_b6.n_ex_7)=0
+-.nodeset v(xdut.xstage_b6.n_ex_10)=0
+-.nodeset v(xdut.xstage_b6.n_ex_32)=5
+-.nodeset v(xdut.xstage_b6.n_ex_3)=5
+-.nodeset v(xdut.xstage_b6.n_ex_33)=-5
+-.nodeset v(xdut.xstage_b6.n_ex_4)=-5
+-.nodeset v(xdut.xstage_tied1.n_ex_7)=0
+-.nodeset v(xdut.xstage_tied1.n_ex_10)=0
+-.nodeset v(xdut.xstage_tied1.n_ex_32)=5
+-.nodeset v(xdut.xstage_tied1.n_ex_3)=5
+-.nodeset v(xdut.xstage_tied1.n_ex_33)=-5
+-.nodeset v(xdut.xstage_tied1.n_ex_4)=-5
+-.nodeset v(xdut.xstage_tied2.n_ex_7)=0
+-.nodeset v(xdut.xstage_tied2.n_ex_10)=0
+-.nodeset v(xdut.xstage_tied2.n_ex_32)=5
+-.nodeset v(xdut.xstage_tied2.n_ex_3)=5
+-.nodeset v(xdut.xstage_tied2.n_ex_33)=-5
+-.nodeset v(xdut.xstage_tied2.n_ex_4)=-5
+-.nodeset v(xdut.xstage_tied3.n_ex_7)=0
+-.nodeset v(xdut.xstage_tied3.n_ex_10)=0
+-.nodeset v(xdut.xstage_tied3.n_ex_32)=5
+-.nodeset v(xdut.xstage_tied3.n_ex_3)=5
+-.nodeset v(xdut.xstage_tied3.n_ex_33)=-5
+-.nodeset v(xdut.xstage_tied3.n_ex_4)=-5
+-.nodeset v(xdut.xstage_tied4.n_ex_7)=0
+-.nodeset v(xdut.xstage_tied4.n_ex_10)=0
+-.nodeset v(xdut.xstage_tied4.n_ex_32)=5
+-.nodeset v(xdut.xstage_tied4.n_ex_3)=5
+-.nodeset v(xdut.xstage_tied4.n_ex_33)=-5
+-.nodeset v(xdut.xstage_tied4.n_ex_4)=-5
+-.nodeset v(xdut.xstage_tied5.n_ex_7)=0
+-.nodeset v(xdut.xstage_tied5.n_ex_10)=0
+-.nodeset v(xdut.xstage_tied5.n_ex_32)=5
+-.nodeset v(xdut.xstage_tied5.n_ex_3)=5
+-.nodeset v(xdut.xstage_tied5.n_ex_33)=-5
+-.nodeset v(xdut.xstage_tied5.n_ex_4)=-5
+-.nodeset v(xdut.xstage_tied6.n_ex_7)=0
+-.nodeset v(xdut.xstage_tied6.n_ex_10)=0
+-.nodeset v(xdut.xstage_tied6.n_ex_32)=5
+-.nodeset v(xdut.xstage_tied6.n_ex_3)=5
+-.nodeset v(xdut.xstage_tied6.n_ex_33)=-5
+-.nodeset v(xdut.xstage_tied6.n_ex_4)=-5
++.nodeset v(xdut.xstage_a1.n_ex_7)=4.99999768705584
++.nodeset v(xdut.xstage_a1.n_ex_10)=5.00000737901735
++.nodeset v(xdut.xstage_a1.n_ex_32)=4.99999991992284
++.nodeset v(xdut.xstage_a1.n_ex_3)=4.99999981580822
++.nodeset v(xdut.xstage_a1.n_ex_33)=-4.99999991864555
++.nodeset v(xdut.xstage_a1.n_ex_4)=4.99999577909056
++.nodeset v(xdut.xstage_a2.n_ex_7)=0.000555808075463384
++.nodeset v(xdut.xstage_a2.n_ex_10)=1.5008937552374e-12
++.nodeset v(xdut.xstage_a2.n_ex_32)=1.17640855077394
++.nodeset v(xdut.xstage_a2.n_ex_3)=-4.99999886505289
++.nodeset v(xdut.xstage_a2.n_ex_33)=-4.99999996184091
++.nodeset v(xdut.xstage_a2.n_ex_4)=-4.99999993538087
++.nodeset v(xdut.xstage_a3.n_ex_7)=4.99999768705584
++.nodeset v(xdut.xstage_a3.n_ex_10)=5.00000737901735
++.nodeset v(xdut.xstage_a3.n_ex_32)=4.99999991992284
++.nodeset v(xdut.xstage_a3.n_ex_3)=4.99999981580822
++.nodeset v(xdut.xstage_a3.n_ex_33)=-4.99999991864555
++.nodeset v(xdut.xstage_a3.n_ex_4)=4.99999577909056
++.nodeset v(xdut.xstage_a4.n_ex_7)=0.000555808075463384
++.nodeset v(xdut.xstage_a4.n_ex_10)=1.5008937552374e-12
++.nodeset v(xdut.xstage_a4.n_ex_32)=1.17640855077394
++.nodeset v(xdut.xstage_a4.n_ex_3)=-4.99999886505289
++.nodeset v(xdut.xstage_a4.n_ex_33)=-4.99999996184091
++.nodeset v(xdut.xstage_a4.n_ex_4)=-4.99999993538087
++.nodeset v(xdut.xstage_a5.n_ex_7)=4.99999768705584
++.nodeset v(xdut.xstage_a5.n_ex_10)=5.00000737901735
++.nodeset v(xdut.xstage_a5.n_ex_32)=4.99999991992284
++.nodeset v(xdut.xstage_a5.n_ex_3)=4.99999981580822
++.nodeset v(xdut.xstage_a5.n_ex_33)=-4.99999991864555
++.nodeset v(xdut.xstage_a5.n_ex_4)=4.99999577909056
++.nodeset v(xdut.xstage_a6.n_ex_7)=0.000555808075463384
++.nodeset v(xdut.xstage_a6.n_ex_10)=1.5008937552374e-12
++.nodeset v(xdut.xstage_a6.n_ex_32)=1.17640855077394
++.nodeset v(xdut.xstage_a6.n_ex_3)=-4.99999886505289
++.nodeset v(xdut.xstage_a6.n_ex_33)=-4.99999996184091
++.nodeset v(xdut.xstage_a6.n_ex_4)=-4.99999993538087
++.nodeset v(xdut.xstage_b1.n_ex_7)=5.00000885369907
++.nodeset v(xdut.xstage_b1.n_ex_10)=4.99999925248846
++.nodeset v(xdut.xstage_b1.n_ex_32)=4.99999996004357
++.nodeset v(xdut.xstage_b1.n_ex_3)=4.99999993190372
++.nodeset v(xdut.xstage_b1.n_ex_33)=-0.725316966537582
++.nodeset v(xdut.xstage_b1.n_ex_4)=4.99999879156585
++.nodeset v(xdut.xstage_b2.n_ex_7)=1.50089375523721e-12
++.nodeset v(xdut.xstage_b2.n_ex_10)=0.000555808075463384
++.nodeset v(xdut.xstage_b2.n_ex_32)=4.99999998497261
++.nodeset v(xdut.xstage_b2.n_ex_3)=-4.99999885407861
++.nodeset v(xdut.xstage_b2.n_ex_33)=-4.99999997137688
++.nodeset v(xdut.xstage_b2.n_ex_4)=-4.99999993543167
++.nodeset v(xdut.xstage_b3.n_ex_7)=5.00000885369907
++.nodeset v(xdut.xstage_b3.n_ex_10)=4.99999925248846
++.nodeset v(xdut.xstage_b3.n_ex_32)=4.99999996004357
++.nodeset v(xdut.xstage_b3.n_ex_3)=4.99999993190372
++.nodeset v(xdut.xstage_b3.n_ex_33)=-0.725316966537582
++.nodeset v(xdut.xstage_b3.n_ex_4)=4.99999879156585
++.nodeset v(xdut.xstage_b4.n_ex_7)=1.50089375523721e-12
++.nodeset v(xdut.xstage_b4.n_ex_10)=0.000555808075463384
++.nodeset v(xdut.xstage_b4.n_ex_32)=4.99999998497261
++.nodeset v(xdut.xstage_b4.n_ex_3)=-4.99999885407861
++.nodeset v(xdut.xstage_b4.n_ex_33)=-4.99999997137688
++.nodeset v(xdut.xstage_b4.n_ex_4)=-4.99999993543167
++.nodeset v(xdut.xstage_b5.n_ex_7)=5.00000885369907
++.nodeset v(xdut.xstage_b5.n_ex_10)=4.99999925248846
++.nodeset v(xdut.xstage_b5.n_ex_32)=4.99999996004357
++.nodeset v(xdut.xstage_b5.n_ex_3)=4.99999993190372
++.nodeset v(xdut.xstage_b5.n_ex_33)=-0.725316966537582
++.nodeset v(xdut.xstage_b5.n_ex_4)=4.99999879156585
++.nodeset v(xdut.xstage_b6.n_ex_7)=1.50089375523721e-12
++.nodeset v(xdut.xstage_b6.n_ex_10)=0.000555808075463384
++.nodeset v(xdut.xstage_b6.n_ex_32)=4.99999998497261
++.nodeset v(xdut.xstage_b6.n_ex_3)=-4.99999885407861
++.nodeset v(xdut.xstage_b6.n_ex_33)=-4.99999997137688
++.nodeset v(xdut.xstage_b6.n_ex_4)=-4.99999993543167
++.nodeset v(xdut.xstage_tied1.n_ex_7)=4.99999935556322
++.nodeset v(xdut.xstage_tied1.n_ex_10)=4.99999935556322
++.nodeset v(xdut.xstage_tied1.n_ex_32)=4.99999997606611
++.nodeset v(xdut.xstage_tied1.n_ex_3)=4.99999995400508
++.nodeset v(xdut.xstage_tied1.n_ex_33)=-4.82086628472659
++.nodeset v(xdut.xstage_tied1.n_ex_4)=4.99999916533387
++.nodeset v(xdut.xstage_tied2.n_ex_7)=1.50089383341904e-12
++.nodeset v(xdut.xstage_tied2.n_ex_10)=1.50089383341904e-12
++.nodeset v(xdut.xstage_tied2.n_ex_32)=4.94744025483034
++.nodeset v(xdut.xstage_tied2.n_ex_3)=-4.99999926169509
++.nodeset v(xdut.xstage_tied2.n_ex_33)=-4.99999997853434
++.nodeset v(xdut.xstage_tied2.n_ex_4)=-4.99999995897302
++.nodeset v(xdut.xstage_tied3.n_ex_7)=4.99999935556322
++.nodeset v(xdut.xstage_tied3.n_ex_10)=4.99999935556322
++.nodeset v(xdut.xstage_tied3.n_ex_32)=4.99999997606611
++.nodeset v(xdut.xstage_tied3.n_ex_3)=4.99999995400508
++.nodeset v(xdut.xstage_tied3.n_ex_33)=-4.82086628472659
++.nodeset v(xdut.xstage_tied3.n_ex_4)=4.99999916533387
++.nodeset v(xdut.xstage_tied4.n_ex_7)=1.50089383341904e-12
++.nodeset v(xdut.xstage_tied4.n_ex_10)=1.50089383341904e-12
++.nodeset v(xdut.xstage_tied4.n_ex_32)=4.94744025483034
++.nodeset v(xdut.xstage_tied4.n_ex_3)=-4.99999926169509
++.nodeset v(xdut.xstage_tied4.n_ex_33)=-4.99999997853434
++.nodeset v(xdut.xstage_tied4.n_ex_4)=-4.99999995897302
++.nodeset v(xdut.xstage_tied5.n_ex_7)=4.99999935556322
++.nodeset v(xdut.xstage_tied5.n_ex_10)=4.99999935556322
++.nodeset v(xdut.xstage_tied5.n_ex_32)=4.99999997606611
++.nodeset v(xdut.xstage_tied5.n_ex_3)=4.99999995400508
++.nodeset v(xdut.xstage_tied5.n_ex_33)=-4.82086628472659
++.nodeset v(xdut.xstage_tied5.n_ex_4)=4.99999916533387
++.nodeset v(xdut.xstage_tied6.n_ex_7)=1.50089383341904e-12
++.nodeset v(xdut.xstage_tied6.n_ex_10)=1.50089383341904e-12
++.nodeset v(xdut.xstage_tied6.n_ex_32)=4.94744025483034
++.nodeset v(xdut.xstage_tied6.n_ex_3)=-4.99999926169509
++.nodeset v(xdut.xstage_tied6.n_ex_33)=-4.99999997853434
++.nodeset v(xdut.xstage_tied6.n_ex_4)=-4.99999995897302
+ .control
+ set noaskquit
+ set wr_singlescale

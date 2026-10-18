@@ -1,0 +1,14 @@
+** sch_path: /home/ishi-kai/balanced-ternary-logic/nany.sch
+.subckt nany A B Y VDD VSS VMID
+*.PININFO VDD:B a:I b:I vout:O VSS:B VMID:B
+MXM3 net2 B net1 VDD PMOS w=34u l=1u
+XR2 net2 Y VDD F_RR w=2.8e-06 l=30e-06
+XR1 Y net3 VDD F_RR w=2.8e-06 l=30e-06
+MXM2 net3 A net4 VSS NMOS w=11u l=1u
+MXM1 net4 B VSS VSS NMOS w=11u l=1u
+MXM5 net1 A VDD VDD PMOS w=34u l=1u
+MXM6 net5 A Y VDD PMOS w=14u l=1u
+MXM7 net5 B VMID VSS NMOS w=8u l=1u
+MXM8 net6 B Y VDD PMOS w=14u l=1u
+MXM9 net6 A VMID VSS NMOS w=8u l=1u
+.ends

@@ -1,0 +1,36 @@
+* Public ports renamed from independent taped-out reference
+.subckt NANY A B Y VDD VMID VSS
+* device instance $1 r0 *1 50,88 PMOS
+XM$1 \$7 A Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $2 r0 *1 65,88 PMOS
+XM$2 \$10 B Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u
+* device instance $3 r0 *1 20,88 PMOS
+XM$3 \$32 A VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $4 r0 *1 35,88 PMOS
+XM$4 \$3 B \$32 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u
+* device instance $5 r0 *1 50,15 NMOS
+XM$5 \$7 B VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $6 r0 *1 65,15 NMOS
+XM$6 \$10 A VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u
+* device instance $7 r0 *1 20,15 NMOS
+XM$7 \$33 A \$4 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $8 r0 *1 35,15 NMOS
+XM$8 VSS B \$33 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u
+* device instance $9 r0 *1 112.5,42 F_RR
+XR$9 \$4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* device instance $10 r0 *1 112.5,72 F_RR
+XR$10 \$3 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
+* Estimated lumped wire C to substrate (node 0); not signoff PEX
+Ctfwire0 VDD 0 5.00961732e-14
+Ctfwire1 \$3 0 1.73473818e-14
+Ctfwire2 \$4 0 1.52914248e-14
+Ctfwire3 Y 0 2.8933305e-14
+Ctfwire4 VMID 0 1.8007801e-14
+Ctfwire5 \$7 0 1.3524332e-14
+Ctfwire6 \$10 0 1.3524332e-14
+Ctfwire7 a 0 1.91278484e-14
+Ctfwire8 b 0 1.58847588e-14
+Ctfwire9 \$32 0 9.6556608e-15
+Ctfwire10 \$33 0 3.9454288e-15
+Ctfwire11 VSS 0 3.02584622e-14
+.ends NANY
