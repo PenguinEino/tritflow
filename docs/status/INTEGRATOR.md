@@ -28,3 +28,9 @@
 - FRONTEND (next): add the `schematic()` delegate and a notebook cell after synthesis per SCHEM status (schematic stage built by SCHEM).
 - DISPATCHED 10-18: SIM republish after synth change; FRONTEND phase 11 editorial integration (synth/hdl frozen). Next: regenerate figures, move colab-v0, COLAB round 3, REVIEW round 3.
 - FRONTEND (after phase 12): REVIEW round-3 finding 5 table rows with run/seed identifiers (paper adder seed 7 vs archive seed 0); integrate EDITOR phase-3 text (sizing sign explanation); finding 6: attendance confirmed by the user (docs/author.md) — replace the placeholder and regenerate the package.
+
+## State 2026-10-19 (after plan review)
+- Release candidate history: colab-v0 = 6d8df9e (real Colab round 4 on 2c81d2c passed, 18 cells, 405 s, one Run-all retry; round 5 on 6d8df9e running).
+- Plan review (docs/editorial.md, last section): code-as-method refactor (FRONTEND phase 15) and reuse story (EDITOR phase 4: ch7 STA, ch9 shuttle-ready top, Appendix C, README final).
+- Integrator to do: write README.md from notebook/narrative/readme_final.md; regenerate figures only in the release step (python3 figures/make_all.py) BEFORE FRONTEND captures hashes; then retag colab-v0, COLAB round 6, REVIEW round 4 (reader + Code-a-Chip fit), user read-through, freeze 10-25, user opens PR 10-30.
+- Other streams idle: CELLS, PNR, SIM, STA, SCHEM (done). Live log viewers: tail -F logs/<S>.log.
