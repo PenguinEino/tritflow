@@ -1,3 +1,20 @@
+# STA stream — phase 3 conservative envelope implemented; final validation in progress
+
+2026-10-18. Phase-2 results are preserved in `results/sta/phase2/`. The default
+global estimate is now a local-class/ramp envelope; matched event timing is
+unchanged. Initial phase-3 validation covers all **838 saved observations / 799
+transition observations**, with **zero underpredictions** across the 39 outputs.
+Envelope / measured maximum is **4.52–8.50×**, mean **6.02×**. This is deliberately
+pessimistic and is not the accuracy claim. Matched timing remains **38/39 within
+±20%, MAPE 6.78%**. The first full phase-3 test run passed **30 tests in 19.97 s**.
+
+Final checks now refresh validation after reporting changes, produce the
+reproducible `diagnosis/phase3_audit.json`, and verify source freshness. Detailed
+phase-3 conclusions will replace this in-progress note. The historical phase-2
+notes below describe the former default and are superseded by phase 3.
+
+---
+
 # STA stream — phase 2 complete, one documented accuracy exception
 
 2026-10-18. Only STA-owned paths were changed. No packages installed, PDK or

@@ -255,6 +255,7 @@ def validate(*, output_dir=None, retries=3):
                 'underprediction_count':sum(d.get('worst_case_coverage',{}).get('underprediction_count',0) for d in records),
                 'pessimism_vs_output_maxima':pessimism(rows),
                 'certified_analog_bound':False,
+                'interpretation':'Conservative on every saved nominal case; not certified for untested waveforms or PVT.',
                 'all_slew_domains_closed':all(d.get('envelope_domain',{}).get('slew_domain_closed',False) for d in records)},
             'scope': 'Conservative measured-domain envelope validated against every nominal SPICE case; matched-event timing is the separate ±20% accuracy claim.',
             'outside_accuracy_target':[{'design':r['design'],'output':r['output'],'error_percent':r['tested_error_percent']}
@@ -282,8 +283,9 @@ def validate(*, output_dir=None, retries=3):
             'stable_snapshot': True, 'attempts': attempt+1}
         for name, data in reports.items(): _save(output/name, data)
         _save(output/'validation.json', result)
-        from .plot import validation_figure
+        from .plot import validation_figure,pessimism_figure
         validation_figure(result).write_html(output/'validation.html', include_plotlyjs='cdn')
+        pessimism_figure(result).write_html(output/'pessimism.html',include_plotlyjs='cdn')
         return result
     raise PublicationChanged('Shared results changed on every validation attempt; retry after publication')
 

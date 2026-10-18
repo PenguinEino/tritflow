@@ -49,3 +49,22 @@ def validation_figure(validation=None):
         xaxis_title="Observed worst settling in SIM sequence (ns)", yaxis_title="Analytical settling estimate (ns)",
         template="plotly_white", meta={"scope": validation.get("scope"), "statistics": validation.get("statistics")})
     return figure
+
+
+def pessimism_figure(validation=None):
+    """Envelope / measured maximum, explicitly separate from accuracy error."""
+    import plotly.graph_objects as go
+    if validation is None:
+        from tritflow import ROOT
+        validation=ROOT/'results/sta/validation.json'
+    if isinstance(validation,(str,Path)):validation=json.loads(Path(validation).read_text())
+    rows=[r for d in validation['designs'] for r in d.get('outputs',[]) if r.get('simulated_s',0)]
+    ratios=[r['predicted_s']/r['simulated_s'] for r in rows]
+    figure=go.Figure(go.Bar(x=[f"{r['design']}/{r['output']}" for r in rows],y=ratios,
+        customdata=[[r['simulated_s']*1e9,r['predicted_s']*1e9] for r in rows],
+        hovertemplate='%{x}<br>SPICE %{customdata[0]:.2f} ns<br>Envelope %{customdata[1]:.2f} ns<br>Factor %{y:.2f}×<extra></extra>'))
+    figure.add_hline(y=1.,line_dash='dash',annotation_text='Measured maximum')
+    figure.update_layout(title='Conservative nominal envelope: pessimism over measured maxima',
+        yaxis_title='Envelope / SPICE maximum (×)',xaxis_title='Design / output',template='plotly_white',
+        meta=validation.get('worst_case_validation'))
+    return figure

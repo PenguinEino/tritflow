@@ -2,9 +2,11 @@
 
 `analyze` uses measured midpoint propagation and an endpoint-only settling tail.
 No SPICE is launched by analysis, plotting or validation; characterization is a
-separate offline producer. The default global graph checks settled endpoint
-sensitization with a fixed input ramp. Supply complete `vector_pairs` to use
-measured slew propagation and ordered pin events for those patterns.
+separate offline producer. Without `vector_pairs`, the default is a conservative local-class/ramp envelope.
+It considers independently every measured transient class and internal ramp,
+propagates a recovery guard on endpoint-stable nets, and adds the final tail
+once. Supply complete `vector_pairs` for matched slew/event timing. The exact
+fixed-ramp endpoint graph remains available as `global_mode="endpoint"`.
 
 ```python
 from tritflow.sta import analyze
@@ -83,12 +85,44 @@ Paths in this mode contain timed intermediate states, which need not equal
 all internal nets' whole-vector endpoints. Partial pulse amplitude and arbitrary
 skew/shape require additional characterization.
 
-The global graph retains separate transitions and every predecessor. Reduced
+The diagnostic fixed-ramp endpoint graph retains separate transitions and every predecessor. Reduced
 ternary decision diagrams intersect path conditions; best-first backward search
 rejects incompatible reconvergence. Its critical endpoint pattern is jointly
 sensitizable in settled logic. Fixed-ramp global timing is a distinct model
 from the tested-pattern event analysis and is not a global analog bound.
 Resource limits raise rather than return partial success.
+
+Phase 3 corrects the unsafe interpretation of the old global estimate. It
+underpredicted 35/39 maxima (down to −38.47%). The isolated tables already
+contain every six/72 directed local class. The problem was discarded slew and
+transient classes excluded by settled endpoint constraints. Relaxing those
+constraints at the same 1 ns ramp leaves eight underpredictions (down to
+−11.87%), so class coverage alone is insufficient. Maximizing local midpoint
+and endpoint-tail terms over the measured internal ramp knots removes all
+underpredictions. The recovery clock adds protection for downstream activity
+on nets that return to their original level. Actual loads are unchanged.
+
+The new default `predicted_s` is conservative against **all 838 saved output
+observations (799 transitions)**, covering all 39 maxima. It is deliberately
+pessimistic: **4.52–8.50×**, mean **6.02×**, the measured maximum (+351.89% to
++750.08%). Every term comes from independent isolated-cell SPICE; there is no
+circuit fit, simulated-value floor or fitted multiplier. Known primary ramps
+remain 1 ns; internal ramps range across all measured knots. The endpoint tail
+uses the same local class and ramp as its propagation term, and is added once.
+The maximizing local classes are independent, so no jointly sensitizing vector
+is asserted for an envelope path. `global_mode="endpoint"` still provides a
+joint settled-endpoint witness when that diagnostic is needed.
+
+This establishes conservatism on the saved nominal dataset, not an analog
+signoff guarantee. All-class output slew can exceed the 150 ns input-ramp axis;
+reports explicitly flag non-closed domains, without silently clipping a bound.
+Arbitrary partial pulses, unequal multi-input ramps, waveform history, PVT and
+wire/poly RC remain outside the scalar characterization. Tighter useful global
+bounds need class-correlated slew and skew/pulse characterization; claiming
+that accuracy from this deliberately relaxed envelope would be misleading.
+`worst_case_conservative` is the finite-dataset coverage flag;
+`certified_analog_bound` remains false. The same 39 matched results below are
+unchanged and are the only accuracy claim.
 
 Validation covers the same 39 outputs as phase 1: **38 within ±20%**, MAPE
 **6.78%**, signed error **−7.90% to +36.48%**. The remaining scaling-adder2
@@ -103,9 +137,11 @@ this outlier is retained, and no fitted correction is applied.
 The successive comparisons are archived: additive settling MAPE 70.31%;
 midpoint composition with fixed ramp 35.91%; midpoint with propagated slew but
 synchronous endpoint classes 10.30%; ordered midpoint events 6.78%. Phase-1
-reports remain in `results/sta/phase1/`. The default validation figure shows the
-matched-pattern event estimates and ±20% reference lines; the fixed-ramp global
-trace is available in the legend. Empirical error ranges apply only to the
+reports remain in `results/sta/phase1/`; the complete phase-2 publication is
+archived in `results/sta/phase2/`. The default validation figure shows the
+matched-pattern event estimates and ±20% reference lines; the conservative envelope
+trace is available in the legend. `pessimism_figure()` and
+`results/sta/pessimism.html` show envelope / measured maximum separately. Empirical error ranges apply only to the
 finite nominal dataset. No PVT, calibrated wire/poly RC, coupling or package
 claim is made. A finite-transition input-charge experiment was not adopted:
 signed multi-terminal charge does not justify replacing pin C with a positive
@@ -113,6 +149,7 @@ lumped capacitor inferred from those samples.
 
 ```sh
 python3 -m tritflow.sta.validate
+python3 -m tritflow.sta.worst_audit
 python3 -m tritflow.sta.validate --watch-seconds 600
 python3 -m pytest tests/sta -q
 
