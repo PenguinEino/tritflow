@@ -150,3 +150,41 @@ def test_real_published_cells_and_six_trit_adder():
         assert (before[stage.input_net],after[stage.input_net])==stage.input_transition
         assert (before[stage.output_net],after[stage.output_net])==stage.output_transition
     assert report.statistics['all_endpoint_pairs']
+
+
+def test_active_publication_retry_reuses_only_unchanged_designs(monkeypatch,tmp_path):
+    """Unrelated corner publications trigger refresh without repeating graph work."""
+    import importlib
+    from types import SimpleNamespace
+    from tritflow import ROOT
+    producer=importlib.import_module('tritflow.sta.validate')
+    monkeypatch.setattr(producer,'DESIGNS',[('example','x',ROOT/'build/x')])
+    monkeypatch.setattr(producer,'TimingLibrary',lambda *a:SimpleNamespace(generation='test'))
+    monkeypatch.setattr(producer,'_read',lambda p:{})
+    monkeypatch.setattr(producer,'_DESIGN_CACHE',{})
+    calls=[]
+    def design(*args):
+        calls.append(True)
+        return {'qualified_current':True,'outputs':[]},{}
+    monkeypatch.setattr(producer,'_validate_design',design)
+    first={'results/corners/summary.json':'old','build/x/postlayout/summary.json':'stable'}
+    second=first|{'results/corners/summary.json':'new'}
+    snapshots=iter([first,second,second,second])
+    monkeypatch.setattr(producer,'fingerprint',lambda:next(snapshots))
+    result=producer.validate(output_dir=tmp_path)
+    assert result['attempts']==2 and result['source_sha256']==second
+    assert len(calls)==1
+    # A changed consumed physical summary must invalidate that cached design.
+    third=second|{'build/x/postlayout/summary.json':'changed'}
+    monkeypatch.setattr(producer,'fingerprint',lambda:third)
+    producer.validate(output_dir=tmp_path)
+    assert len(calls)==2
+
+
+def test_running_sim_is_not_qualified(tmp_path):
+    import importlib
+    producer=importlib.import_module('tritflow.sta.validate')
+    folder=tmp_path/'postlayout';folder.mkdir()
+    (folder/'summary.json').write_text('{"state":"running","passed":false}')
+    with pytest.raises(RuntimeError,match='incomplete'):
+        producer._validate_design('example','x',tmp_path,None,{})
