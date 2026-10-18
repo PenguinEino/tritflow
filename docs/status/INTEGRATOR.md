@@ -35,3 +35,15 @@
 - Integrator to do: write README.md from notebook/narrative/readme_final.md; regenerate figures only in the release step (python3 figures/make_all.py) BEFORE FRONTEND captures hashes; then retag colab-v0, COLAB round 6, REVIEW round 4 (reader + Code-a-Chip fit), user read-through, freeze 10-25, user opens PR 10-30.
 - Other streams idle: CELLS, PNR, SIM, STA, SCHEM (done). Live log viewers: tail -F logs/<S>.log.
 - DONE by integrator 08722c4: Appendix A prose tables -> wrapped paragraphs (notebook/markdown_support.py), larger fig_flow text, darker sizing series. FRONTEND phase 15 rebuild must keep markdown_support._prose_list and embed the regenerated figures.
+
+## State 2026-10-19 (integrator took over the notebook directly)
+- 91f642d (tag colab-v0): code-as-method refactor done by the integrator. Visible method cells live in
+  notebook/methods.py; collapsed checks in notebook/stages.py; builder notebook/make_notebook.py adds
+  '#@title' form cells. Chapter 8 = method-custom → custom_check → method-custom_layout → custom.
+  New: ch7 STA live cell, ch9 shuttle snapshot (notebook/assets/chip/adder4), Appendix C, README.
+- Release procedure (any notebook/*.py or ipynb change invalidates the recorded four-design campaign):
+  make_notebook.py → validate_notebook.py --execute (fresh, ~7 min) → PYTHONPATH=.:notebook
+  python3 notebook/campaign.py build/notebook/cache → submission/build_submission.py → commit → tag colab-v0.
+  Figures: regenerate (figures/make_all.py) and then notebook/paper_evidence.py --refresh-presentation BEFORE make_notebook.
+- FRONTEND stream was interrupted at the user's request; it may be resumed for later work, but notebook/
+  is now edited by the integrator.
