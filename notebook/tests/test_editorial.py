@@ -65,7 +65,7 @@ def test_static_context_and_embedded_figures_have_no_unresolved_results():
         assert not TOKEN.search(render((ROOT/'notebook/narrative'/name).read_text(),values))
     document = json.loads((ROOT/'notebook/tritflow_tr1um.ipynb').read_text())
     intro = document['cells'][0]['source']
-    assert 'Japan' in intro and 'taped them out' in intro and 'mW' in intro and 'Open in Colab' in intro
+    assert 'Japan' in intro and 'taped out' in intro and 'mW' in intro and 'Open in Colab' in intro
     assert intro.index('data:image/png;base64,') < intro.index('<summary>Author')
     assert sum(c['source'].count('data:image/png;base64,') for c in document['cells']) == 8
     markdown = '\n'.join(c['source'] for c in document['cells'] if c['cell_type']=='markdown')

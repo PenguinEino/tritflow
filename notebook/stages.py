@@ -97,6 +97,7 @@ from paper_evidence import load_paper
 from learning import sizing_slider, value_selector
 from predictions import divider, zero_dc, rail_power
 from presentation import details_html, details_svg
+from routing_identity import routing_label, archive_routing
 paper = load_paper(ROOT)
 narrative_values = context(ROOT)
 assert context_identity(narrative_values) == NARRATIVE_CONTEXT_SHA256, "Published figure measurements changed; regenerate the notebook before running."
@@ -412,9 +413,10 @@ FOUR = r'''
 from tritflow.sim.postlayout import representative_vectors, arithmetic_oracle
 FOUR_DESIGN_LOAD_F, FOUR_DESIGN_HOLD_S, FOUR_DESIGN_STEP_S = 10e-15, 500e-9, 2e-9
 four_results = {}
-physical_rows = [["Design", "Die (µm)", "Aspect", "Utilization", "DRC / LVS", "Input states visited / possible",
+physical_rows = [["Design", "Routing realization", "Die (µm)", "Aspect", "Utilization", "DRC / LVS", "Input states visited / possible",
                   "Post max error (mV)", "Rail deviation / zero shift (mV)"]]
-timing_rows = [["Design", "Output", "Device-only max (ns)", "+ wire-C max (ns)", "Largest same-transition change (ns)"]]
+timing_rows = [["Design", "Routing realization", "Output", "Device-only max (ns)", "+ wire-C max (ns)", "Largest same-transition change (ns)"]]
+four_run_labels = {}
 for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_add",{}),
                                   ("mac1","mac1",{}), ("mul1","mul1",{})]:
     mapped = flow.load(ROOT/f"examples/{source_name}.tv", source_name, params).synthesize(name=name)
@@ -436,14 +438,19 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
     else:
         result = cache.run(f"four-{name}",options,
             lambda: complete_design(mapped,directory,planned,oracle,load_f=FOUR_DESIGN_LOAD_F,
-                       hold_s=FOUR_DESIGN_HOLD_S,step_s=FOUR_DESIGN_STEP_S,initialize_internal=True),
+                       hold_s=FOUR_DESIGN_HOLD_S,step_s=FOUR_DESIGN_STEP_S,initialize_internal=True,dataset='four-design'),
             artifacts=lambda r: experiment_artifacts(r,directory,name))
     assert_experiment(result)
+    state = 'recorded' if cache.events[-1][1] == 'recorded' else ('fresh' if cache.events[-1][1] == 'run' else 'local reuse')
+    if state == 'recorded':
+        assert result['routing'] == archive_routing(ROOT/'notebook/assets/four_designs.zip')[name]
+    run_label = routing_label(result['routing'],state=state,digest=True)
+    four_run_labels[name] = run_label
     assert result["post"]["stimulus"]["vectors"] == list(map(tuple,planned))
     stats, ir = result["stats"], result["ir"]
     rail = max(abs(v) for c in ir["cells"].values() for v in c["rail_deviation_v"].values())
     zero = max(abs(c["zero_level_shift_v"]) for c in ir["cells"].values() if c["zero_level_shift_v"] is not None)
-    physical_rows.append([name,stats["die_size_um"],max(stats["die_size_um"])/min(stats["die_size_um"]),
+    physical_rows.append([name,run_label,stats["die_size_um"],max(stats["die_size_um"])/min(stats["die_size_um"]),
                           stats["utilization"],[result["drc"]["clean"],result["lvs"]["matched"]],
                           f"{len(set(planned))} / {3**len(pins)}",result["post"]["measurements"]["max_error_v"]*1e3,
                           [rail*1e3,zero*1e3]])
@@ -451,7 +458,7 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
     for pin in after["max_settling_s"]:
         changes = [b["outputs"][pin]["settling_s"]-a["outputs"][pin]["settling_s"]
                    for a,b in zip(before["rows"][1:],after["rows"][1:],strict=True)]
-        timing_rows.append([name,pin,before["max_settling_s"][pin]*1e9,after["max_settling_s"][pin]*1e9,
+        timing_rows.append([name,run_label,pin,before["max_settling_s"][pin]*1e9,after["max_settling_s"][pin]*1e9,
                             max(changes)*1e9])
     four_results[name] = result
 
@@ -482,8 +489,8 @@ for filename, loader, figure in [("adder_scaling.json",load_scaling,scaling_figu
     evidence("Published experiment scope: "+filename,result.get("coverage",result.get("scope")))
     evidence("Published limits / conditions",result.get("limits",result.get("conditions")))
     if filename == "adder_scaling.json":
-        table([["Width", "Selected routing seed", "Recorded state", "PASS", "Error"]]+
-              [[r["n"],r.get("seed"),r["state"],r["passed"],r["error"]] for r in result["rows"]])
+        table([["Width", "Routing realization", "Recorded state", "PASS", "Error"]]+
+              [[r["n"],f"width-sweep/adder{r['n']} · seed {r['seed']}",r["state"],r["passed"],r["error"]] for r in result["rows"]])
     else:
         table([["Measured boundary (F)",result["boundary"]], ["Boundary found",result["boundary_found"]],
                ["Outputs / input-state count",[result["outputs"],len(result["vectors"])]]])
@@ -577,13 +584,18 @@ evidence("Live adder acceptance, sequence and initialized Newton guesses",{
     "measurements":demo["measurements"],"nodeset":demo["initial_nodeset_v"],
     "conditions":{"load_f":LOAD_F,"hold_s":HOLD_S,"edge_s":EDGE_S,"step_s":STEP_S,"temperature_c":TEMP_C}})
 evidence("Native paper-figure inputs and committed image/data hashes",paper)
+table([["Routing realization", "PNR SHA-256", "GDS SHA-256"]]+
+      [[routing_label(r),r['pnr_sha256'],r['gds_sha256']]
+       for r in (paper['paper_pnr']['routing'],paper['paper_post']['routing'])]+
+      [[four_run_labels[name],r['routing']['pnr_sha256'],r['routing']['gds_sha256']]
+       for name,r in four_results.items()],details="Native identities for each paper and four-design routing realization")
 assert (runtime_fingerprint(ROOT,PDK_ROOT,names=native_sources) == cache.fingerprint and
         source_manifest(ROOT,PDK_ROOT,names=native_sources) == native_sources), "consumed sources changed during Run all; rerun after publication settles"
 load_paper(ROOT)  # measurements remain strict; illustration changes only warn
 table([["Stage", "Fresh / local cache / recorded", "Wall time this run (s)"]]+[
     [r["stage"],r["state"],round(r["elapsed_s"],3)] for r in sorted(cache.timings,key=lambda r:r["elapsed_s"],reverse=True)])
-table([["Design", "Measured producer phase", "Wall time (s)", "Process + child CPU time (s)"]]+[
-    [name,stage,round(seconds,3),round(result["cpu_times_s"][stage],3)] for name,result in four_results.items()
+table([["Design", "Routing realization", "Measured producer phase", "Wall time (s)", "Process + child CPU time (s)"]]+[
+    [name,four_run_labels[name],stage,round(seconds,3),round(result["cpu_times_s"][stage],3)] for name,result in four_results.items()
     for stage,seconds in result["timings_s"].items()],details="Physical and pre/post-SPICE runtime breakdown (producer evidence)")
 print("Cache stages:", cache.events)
 print(f"Run time including setup: {time.monotonic()-started:.1f} s")

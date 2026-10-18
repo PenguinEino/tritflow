@@ -112,5 +112,6 @@ Open the PR by **October 31, 2026, 11:59 AM Pacific Time**, then monitor organiz
 feedback. Do not copy the surrounding builder, tests or source repository.
 The team must designate one attending representative and, if selected, arrange
 the poster and required reimbursement documentation. No PR has been opened by
-this packaging task. Fill `submission/team.json` in the TritFlow source checkout
-and rerun `python3 submission/build_submission.py` to regenerate the package.
+this packaging task. Author and attendance information in `submission/team.json`
+follows the confirmed `docs/author.md` record. Rerun
+`python3 submission/build_submission.py` to regenerate the package.

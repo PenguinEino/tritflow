@@ -11,6 +11,7 @@ import resource
 from tritflow import flow
 from tritflow.extract import estimate_ir_drop
 from tritflow.synth import write_artifacts
+from routing_identity import routing_files
 
 
 def adder_demo_vectors(inputs, width=2):
@@ -39,7 +40,7 @@ def adder_demo_vectors(inputs, width=2):
 
 def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
                     hold_s=500e-9, step_s=2e-9, rows=None, anneal_steps=600, seed=0,
-                    initialize_internal=False):
+                    initialize_internal=False, dataset='notebook'):
     """Real GDS + DRC/LVS + matched pre/post vectors + separate rail-IR envelope.
 
     ``expected`` is an independent integer oracle. The analog sequence is
@@ -105,7 +106,8 @@ def complete_design(net, directory, vectors, expected, *, load_f=10e-15,
                          {c: read(f"out/{c}/{c}.char.json") for c in used})
     return {"pre": pre, "post": post, "drc": drc, "lvs": lvs, "stats": lay.stats,
             "capacitance": extracted.capacitance, "ir": ir, "initial_nodeset_v": guesses,
-            "timings_s": timings, "cpu_times_s": cpu_times}
+            "timings_s": timings, "cpu_times_s": cpu_times,
+            "routing":routing_files(directory/f'{net.top}.pnr.json',directory/f'{net.top}.gds',dataset)}
 
 
 def experiment_artifacts(result, directory, top):

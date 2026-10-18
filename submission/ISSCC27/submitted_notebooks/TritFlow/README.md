@@ -13,7 +13,7 @@ Fifth-year student (final year of the five-year KOSEN engineering programme, whi
 GitHub: [PenguinEino](https://github.com/PenguinEino).
 
 Designated representative: **Einosuke Okazaki (岡崎 英之介)**.
-Attendance/poster confirmation: **[CONFIRM_IN_PERSON_ATTENDANCE_AND_POSTER_IF_SELECTED]**.
+Attendance/poster confirmation: **Einosuke Okazaki will attend ISSCC 2027 in person and present the poster if selected (confirmed by the author, 2026-10-18).**.
 The author of the historical balanced-ternary-logic project releases the derived schematic assets in this repository under Apache-2.0.
 
 Read [tritflow_tr1um.ipynb](tritflow_tr1um.ipynb) directly: its tables, layout,
@@ -22,7 +22,7 @@ frames; rerun for interactive figures. [Abstract](ABSTRACT.md),
 [three-sentence pitch](PITCH.md), and [requirements checklist](CHECKLIST.md)
 are included. [build-info.json](build-info.json) records source hashes, tools,
 capture conditions and the automatically measured package size.
-Captured bootstrap source commit: [505626a0320dded197c19ea8ec12984a1d1f4b38](https://github.com/PenguinEino/tritflow/tree/505626a0320dded197c19ea8ec12984a1d1f4b38). Any tracked working-tree
+Captured bootstrap source commit: [dd682d727c7e81c2e261e22cfff8d7478218e6e4](https://github.com/PenguinEino/tritflow/tree/dd682d727c7e81c2e261e22cfff8d7478218e6e4). Any tracked working-tree
 changes observed at packaging are recorded separately; a commit ID alone is
 not an assertion that the whole working tree was clean.
 
@@ -115,5 +115,6 @@ Open the PR by **October 31, 2026, 11:59 AM Pacific Time**, then monitor organiz
 feedback. Do not copy the surrounding builder, tests or source repository.
 The team must designate one attending representative and, if selected, arrange
 the poster and required reimbursement documentation. No PR has been opened by
-this packaging task. Fill `submission/team.json` in the TritFlow source checkout
-and rerun `python3 submission/build_submission.py` to regenerate the package.
+this packaging task. Author and attendance information in `submission/team.json`
+follows the confirmed `docs/author.md` record. Rerun
+`python3 submission/build_submission.py` to regenerate the package.

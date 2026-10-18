@@ -126,6 +126,9 @@ def test_author_identity_matches_integrator_record_and_asset_authorization():
     team = json.loads((ROOT/"submission/team.json").read_text())
     assert team["authors"] == [fields]
     assert team["representative"] == fields["name"]
+    attendance = " ".join(re.search(r"^- Representative: (.*(?:\n  .*)*)",text,re.M)[1].split())
+    assert team['attendance_and_poster'] == attendance
+    assert not builder.has_placeholders(team)
     readme = builder.render_readme(team)
     for value in fields.values(): assert value in readme
     assert "releases the derived assets" in readme and "Apache-2.0" in readme
