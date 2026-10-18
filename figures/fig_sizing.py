@@ -49,7 +49,7 @@ def scatter(ax, cell, floor_mv=None, limit=True):
         ax.text(0.02, 540, "±0.5 V limit", transform=ax.get_yaxis_transform(),
                 fontsize=6.5, color=style.INK2, va="bottom", ha="left")
         ax.set_yscale("log")
-    ax.set_xlabel("Max static current over input states (mA)")
+    ax.set_xlabel("Max static current (mA)")
     return d
 
 
