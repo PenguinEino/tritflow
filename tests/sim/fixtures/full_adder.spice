@@ -1,0 +1,53 @@
+** sch_path: /home/ishi-kai/balanced-ternary-logic/full_adder.sch
+.subckt full_adder a b cin sum cout VDD VSS VMID
+*.PININFO a:I b:I cin:I sum:O cout:O VDD:B VSS:B VMID:B
+x_ha1 a b s1 c1 VDD VSS VMID half_adder
+x_ha2 s1 cin sum c2 VDD VSS VMID half_adder
+x_cmerge c1 c2 nc VDD VSS VMID nany
+x_cout nc cout VDD VSS inverter
+.ends
+
+* expanding   symbol:  half_adder.sym # of pins=7
+** sym_path: /home/ishi-kai/balanced-ternary-logic/half_adder.sym
+** sch_path: /home/ishi-kai/balanced-ternary-logic/half_adder.sch
+.subckt half_adder a b sum carry VDD VSS VMID
+*.PININFO a:I b:I carry:O VDD:B VSS:B VMID:B sum:O
+x_t a b t VDD VSS VMID nany
+x_u b t u VDD VSS VMID nany
+x_na a na VDD VSS inverter
+x_c na u carry VDD VSS VMID nany
+x_d t carry d VDD VSS VMID nany
+x_nd d nd VDD VSS inverter
+x_s nd carry sum VDD VSS VMID nany
+.ends
+
+
+* expanding   symbol:  nany.sym # of pins=6
+** sym_path: /home/ishi-kai/balanced-ternary-logic/nany.sym
+** sch_path: /home/ishi-kai/balanced-ternary-logic/nany.sch
+.subckt nany a b vout VDD VSS VMID
+*.PININFO VDD:B a:I b:I vout:O VSS:B VMID:B
+MXM3 net2 b net1 VDD PMOS w=34u l=1u
+XR2 net2 vout VDD F_RR w=2.8e-06 l=30e-06
+XR1 vout net3 VDD F_RR w=2.8e-06 l=30e-06
+MXM2 net3 a net4 VSS NMOS w=11u l=1u
+MXM1 net4 b VSS VSS NMOS w=11u l=1u
+MXM5 net1 a VDD VDD PMOS w=34u l=1u
+MXM6 net5 a vout VDD PMOS w=14u l=1u
+MXM7 net5 b VMID VSS NMOS w=8u l=1u
+MXM8 net6 b vout VDD PMOS w=14u l=1u
+MXM9 net6 a VMID VSS NMOS w=8u l=1u
+.ends
+
+
+* expanding   symbol:  inverter.sym # of pins=4
+** sym_path: /home/ishi-kai/balanced-ternary-logic/inverter.sym
+** sch_path: /home/ishi-kai/balanced-ternary-logic/inverter.sch
+.subckt inverter vin vout VDD VSS
+*.PININFO VDD:B vin:I vout:O VSS:B
+MXM1 net1 vin VDD VDD PMOS w=13.5u l=1u
+XR1 net1 vout VDD F_RR w=2.8e-06 l=30e-06
+XR2 vout net2 VDD F_RR w=2.8e-06 l=30e-06
+MXM2 net2 vin VSS VSS NMOS w=5u l=1u
+.ends
+

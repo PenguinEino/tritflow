@@ -1,0 +1,8 @@
+* Public ports renamed from independent taped-out reference
+.subckt INV A Y VDD VMID VSS
+*.PININFO VDD:B vin:I vout:O VSS:B
+MXM1 net1 A VDD VDD PMOS w=13.5u l=1u
+XR1 net1 Y VDD F_RR w=2.8e-06 l=30e-06
+XR2 Y net2 VDD F_RR w=2.8e-06 l=30e-06
+MXM2 net2 A VSS VSS NMOS w=5u l=1u
+.ends INV

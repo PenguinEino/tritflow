@@ -1,0 +1,15 @@
+`include "full_add.tv"
+// Reference: balanced-ternary-logic/MAC.md. The exposed MUL nodes also
+// drive the taped-out AND/OR outputs through one and two INV cells.
+// x + a*b + cin = sum + 3*cout; no accumulation register is implied.
+module mac1(input trit x, a, b, cin, output trit sum, cout, and_out, or_out);
+  wire trit t1, t2, t3, product, or_buffer;
+  nand mul_t1 (t1, a, b);
+  nor mul_t2 (t2, a, b);
+  inv mul_t3 (t3, t2);
+  nand mul_p (product, t1, t3);
+  full_add fa (.a(x), .b(product), .cin(cin), .sum(sum), .cout(cout));
+  inv and_inv (and_out, t1);
+  inv or_inv1 (or_buffer, t3);
+  inv or_inv2 (or_out, or_buffer);
+endmodule

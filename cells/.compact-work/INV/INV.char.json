@@ -1,0 +1,655 @@
+{
+  "schema_version": 1,
+  "cell": "INV",
+  "top": "INV",
+  "inputs": [
+    "A"
+  ],
+  "output": "Y",
+  "created_utc": "2026-10-18T07:25:13.379710+00:00",
+  "source_sha256": "72ab69fbff2d18faf17c998382081f114d7bdde7865ef6d1d99658d21538c46d",
+  "conditions": {
+    "temperature_c": 27,
+    "supplies_v": {
+      "VDD": 5,
+      "VMID": 0,
+      "VSS": -5
+    },
+    "band_v": 0.5,
+    "edge_s": 1e-09,
+    "hold_s": 2e-07,
+    "step_s": 5e-10
+  },
+  "max_static_current_a": 0.0004071662464862235,
+  "dc": [
+    {
+      "input_trits": [
+        -1
+      ],
+      "output_v": {
+        "Y": 4.999999089584165
+      },
+      "error_v": {
+        "Y": -9.104158351647129e-07
+      },
+      "rail_current_a": {
+        "VDD": -8.647576204830965e-11,
+        "VMID": 0.0,
+        "VSS": 7.147576505717277e-11
+      },
+      "passed": true
+    },
+    {
+      "input_trits": [
+        0
+      ],
+      "output_v": {
+        "Y": -0.03954206876789414
+      },
+      "error_v": {
+        "Y": -0.03954206876789414
+      },
+      "rail_current_a": {
+        "VDD": -0.0004071662464675244,
+        "VMID": 0.0,
+        "VSS": 0.0004071662464862235
+      },
+      "passed": true
+    },
+    {
+      "input_trits": [
+        1
+      ],
+      "output_v": {
+        "Y": -4.999999684141524
+      },
+      "error_v": {
+        "Y": 3.158584762630312e-07
+      },
+      "rail_current_a": {
+        "VDD": -2.255042805519937e-11,
+        "VMID": 0.0,
+        "VSS": 3.755042711576985e-11
+      },
+      "passed": true
+    }
+  ],
+  "input_capacitance": {
+    "method": "biased AC driving-point, unloaded output",
+    "frequency_hz": 1000000.0,
+    "rows": [
+      {
+        "input_trits": [
+          -1
+        ],
+        "pin": "A",
+        "capacitance_f": 9.76087941151514e-14
+      },
+      {
+        "input_trits": [
+          0
+        ],
+        "pin": "A",
+        "capacitance_f": 1.1442603344899378e-13
+      },
+      {
+        "input_trits": [
+          1
+        ],
+        "pin": "A",
+        "capacitance_f": 7.389828137785663e-14
+      }
+    ],
+    "max_f": 1.1442603344899378e-13
+  },
+  "transient": [
+    {
+      "load_f": 1e-14,
+      "passed": true,
+      "rows": [
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": null,
+          "check_s": 1.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.999999089584164,
+              "error_v": -9.104158360528913e-07,
+              "passed": true,
+              "settling_s": 0.0
+            }
+          },
+          "rail_current_a": {
+            "VDD": -8.647576307751253e-11,
+            "VMID": 0.0,
+            "VSS": 7.147576512397113e-11
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            1
+          ],
+          "previous_trits": [
+            -1
+          ],
+          "check_s": 3.9899999999999996e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": -1,
+              "voltage_v": -4.999999684141518,
+              "error_v": 3.158584815921017e-07,
+              "passed": true,
+              "settling_s": 4.852422354212521e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": 1.8700273543688682e-06,
+            "VMID": 0.0,
+            "VSS": 8.206643226380598e-08
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            0
+          ],
+          "previous_trits": [
+            1
+          ],
+          "check_s": 5.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 0,
+              "voltage_v": -0.03953660309028138,
+              "error_v": -0.03953660309028138,
+              "passed": true,
+              "settling_s": 1.7016757993324026e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -0.00040513020975283464,
+            "VMID": 0.0,
+            "VSS": 0.0004072630771055475
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            1
+          ],
+          "previous_trits": [
+            0
+          ],
+          "check_s": 7.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": -1,
+              "voltage_v": -4.999999684141518,
+              "error_v": 3.158584815921017e-07,
+              "passed": true,
+              "settling_s": 4.4578558633279845e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -1.9221780990490386e-08,
+            "VMID": 0.0,
+            "VSS": -1.0654871831836061e-08
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": [
+            1
+          ],
+          "check_s": 9.989999999999999e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.999999089584163,
+              "error_v": -9.104158369410698e-07,
+              "passed": true,
+              "settling_s": 2.5505861223336743e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": 1.837254883064192e-07,
+            "VMID": 0.0,
+            "VSS": 9.971318807637595e-09
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            0
+          ],
+          "previous_trits": [
+            -1
+          ],
+          "check_s": 1.1989999999999999e-06,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 0,
+              "voltage_v": -0.039536603090281605,
+              "error_v": -0.039536603090281605,
+              "passed": true,
+              "settling_s": 1.329320225592979e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -0.0004073734801054269,
+            "VMID": 0.0,
+            "VSS": 0.0004076112163362378
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": [
+            0
+          ],
+          "check_s": 1.3989999999999999e-06,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.999999089584163,
+              "error_v": -9.104158369410698e-07,
+              "passed": true,
+              "settling_s": 2.154407224869726e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": 4.315721230115642e-08,
+            "VMID": 0.0,
+            "VSS": -7.811862079955595e-09
+          },
+          "passed": true
+        }
+      ],
+      "max_error_v": 0.039536603090281605,
+      "max_settling_s": {
+        "Y": 4.852422354212521e-09
+      },
+      "unsettled": 0,
+      "sample_step_s": 5e-10
+    },
+    {
+      "load_f": 1e-13,
+      "passed": true,
+      "rows": [
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": null,
+          "check_s": 1.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.999999089584168,
+              "error_v": -9.104158316119992e-07,
+              "passed": true,
+              "settling_s": 0.0
+            }
+          },
+          "rail_current_a": {
+            "VDD": -8.647576138055747e-11,
+            "VMID": 0.0,
+            "VSS": 7.147577065625064e-11
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            1
+          ],
+          "previous_trits": [
+            -1
+          ],
+          "check_s": 3.9899999999999996e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": -1,
+              "voltage_v": -4.999999684141518,
+              "error_v": 3.158584815921017e-07,
+              "passed": true,
+              "settling_s": 7.50755071766293e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -1.0670390917912363e-06,
+            "VMID": 0.0,
+            "VSS": 2.3967556617867198e-08
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            0
+          ],
+          "previous_trits": [
+            1
+          ],
+          "check_s": 5.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 0,
+              "voltage_v": -0.0395366030902809,
+              "error_v": -0.0395366030902809,
+              "passed": true,
+              "settling_s": 2.9457866923336258e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -0.0004142128267198518,
+            "VMID": 0.0,
+            "VSS": 0.00040706416396043405
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            1
+          ],
+          "previous_trits": [
+            0
+          ],
+          "check_s": 7.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": -1,
+              "voltage_v": -4.999999684141516,
+              "error_v": 3.15858484256637e-07,
+              "passed": true,
+              "settling_s": 6.556254986672355e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -4.586835592997993e-08,
+            "VMID": 0.0,
+            "VSS": -1.613412913383897e-08
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": [
+            1
+          ],
+          "check_s": 9.989999999999999e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.99999908958416,
+              "error_v": -9.10415839605605e-07,
+              "passed": true,
+              "settling_s": 5.644390233285241e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -1.2853742930654281e-07,
+            "VMID": 0.0,
+            "VSS": -1.602971687597326e-07
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            0
+          ],
+          "previous_trits": [
+            -1
+          ],
+          "check_s": 1.1989999999999999e-06,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 0,
+              "voltage_v": -0.03953660309028088,
+              "error_v": -0.03953660309028088,
+              "passed": true,
+              "settling_s": 2.555995046336641e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -0.0004076007408709428,
+            "VMID": 0.0,
+            "VSS": 0.00040717405895349026
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": [
+            0
+          ],
+          "check_s": 1.3989999999999999e-06,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.999999089584161,
+              "error_v": -9.104158387174266e-07,
+              "passed": true,
+              "settling_s": 4.557350691219971e-09
+            }
+          },
+          "rail_current_a": {
+            "VDD": -9.563638000004246e-08,
+            "VMID": 0.0,
+            "VSS": 1.3905266829596986e-08
+          },
+          "passed": true
+        }
+      ],
+      "max_error_v": 0.0395366030902809,
+      "max_settling_s": {
+        "Y": 7.50755071766293e-09
+      },
+      "unsettled": 0,
+      "sample_step_s": 5e-10
+    },
+    {
+      "load_f": 1e-12,
+      "passed": true,
+      "rows": [
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": null,
+          "check_s": 1.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.999999089584165,
+              "error_v": -9.104158351647129e-07,
+              "passed": true,
+              "settling_s": 0.0
+            }
+          },
+          "rail_current_a": {
+            "VDD": -8.64757666629334e-11,
+            "VMID": 0.0,
+            "VSS": 7.147576493315248e-11
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            1
+          ],
+          "previous_trits": [
+            -1
+          ],
+          "check_s": 3.9899999999999996e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": -1,
+              "voltage_v": -4.999998744156573,
+              "error_v": 1.2558434265841356e-06,
+              "passed": true,
+              "settling_s": 3.812583833253492e-08
+            }
+          },
+          "rail_current_a": {
+            "VDD": 2.7018691736232877e-07,
+            "VMID": 0.0,
+            "VSS": 2.7160784828204055e-08
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            0
+          ],
+          "previous_trits": [
+            1
+          ],
+          "check_s": 5.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 0,
+              "voltage_v": -0.03953660309057717,
+              "error_v": -0.03953660309057717,
+              "passed": true,
+              "settling_s": 1.6357992661342723e-08
+            }
+          },
+          "rail_current_a": {
+            "VDD": -0.00042481030119251865,
+            "VMID": 0.0,
+            "VSS": 0.0004071343465982903
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            1
+          ],
+          "previous_trits": [
+            0
+          ],
+          "check_s": 7.99e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": -1,
+              "voltage_v": -4.999999203961831,
+              "error_v": 7.960381687155405e-07,
+              "passed": true,
+              "settling_s": 2.9931836381249735e-08
+            }
+          },
+          "rail_current_a": {
+            "VDD": -3.878991385254147e-08,
+            "VMID": 0.0,
+            "VSS": -1.6048400974449276e-08
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": [
+            1
+          ],
+          "check_s": 9.989999999999999e-07,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.999998119256736,
+              "error_v": -1.8807432642375943e-06,
+              "passed": true,
+              "settling_s": 3.76801810906758e-08
+            }
+          },
+          "rail_current_a": {
+            "VDD": -1.326090361610237e-07,
+            "VMID": 0.0,
+            "VSS": -5.888355574755392e-07
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            0
+          ],
+          "previous_trits": [
+            -1
+          ],
+          "check_s": 1.1989999999999999e-06,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 0,
+              "voltage_v": -0.03953660308998261,
+              "error_v": -0.03953660308998261,
+              "passed": true,
+              "settling_s": 1.534677800328707e-08
+            }
+          },
+          "rail_current_a": {
+            "VDD": -0.0004073818879143086,
+            "VMID": 0.0,
+            "VSS": 0.0004074726974738271
+          },
+          "passed": true
+        },
+        {
+          "input_trits": [
+            -1
+          ],
+          "previous_trits": [
+            0
+          ],
+          "check_s": 1.3989999999999999e-06,
+          "outputs": {
+            "Y": {
+              "ideal_trit": 1,
+              "voltage_v": 4.999998601286814,
+              "error_v": -1.3987131861625812e-06,
+              "passed": true,
+              "settling_s": 2.9257893187708978e-08
+            }
+          },
+          "rail_current_a": {
+            "VDD": -7.110241673334442e-08,
+            "VMID": 0.0,
+            "VSS": 5.032596740311223e-09
+          },
+          "passed": true
+        }
+      ],
+      "max_error_v": 0.03953660309057717,
+      "max_settling_s": {
+        "Y": 3.812583833253492e-08
+      },
+      "unsettled": 0,
+      "sample_step_s": 5e-10
+    }
+  ],
+  "fanout": {
+    "suggested_max": 4,
+    "tested_load_f": 1e-12,
+    "method": "min(4, floor(largest passing tested load / maximum input C))",
+    "scope": "nominal single-cell estimate; no PVT/path qualification"
+  },
+  "passed": true,
+  "model_sha256": {
+    "ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec",
+    "models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+    "models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+    "models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+    "models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311"
+  }
+}

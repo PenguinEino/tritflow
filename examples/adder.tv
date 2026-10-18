@@ -1,0 +1,17 @@
+`include "full_add.tv"
+// Little-endian arithmetic: a[i] and b[i] have weight 3**i.
+// A + B + cin = SUM + 3**N * cout; N must be >= 1.
+module adder #(parameter N = 4)
+  (input trit [N-1:0] a, b, input trit cin,
+   output trit [N-1:0] sum, output trit cout);
+  wire trit [N:0] c;
+  assign c[0] = cin;
+  genvar i;
+  generate
+    for (i = 0; i < N; i = i + 1) begin : digit
+      full_add fa (.a(a[i]), .b(b[i]), .cin(c[i]),
+                   .sum(sum[i]), .cout(c[i+1]));
+    end
+  endgenerate
+  assign cout = c[N];
+endmodule

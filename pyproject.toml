@@ -1,0 +1,13 @@
+[project]
+name = "tritflow"
+version = "0.1.0"
+description = "Balanced-ternary HDL to GDS flow for the OpenSUSI TR-1um PDK"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+dependencies = ["klayout>=0.30", "lark>=1.1", "numpy", "scipy", "plotly", "matplotlib"]
+
+[tool.setuptools.packages.find]
+include = ["tritflow*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
