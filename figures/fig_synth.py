@@ -88,7 +88,7 @@ def junction(ax, xy, value):
 
 
 def label(ax, xy, text, *, ha="center", va="bottom"):
-    ax.text(*xy, text, ha=ha, va=va, fontsize=6.2, color=style.INK2, zorder=4)
+    ax.text(*xy, text, ha=ha, va=va, fontsize=7, color=style.INK2, zorder=4)
 
 
 def box(ax, xy, size, text, pins, *, fill="white"):
@@ -112,7 +112,7 @@ def box(ax, xy, size, text, pins, *, fill="white"):
         ax.annotate(name, (px, py), xytext=(-3 if inside else -1.5 if left else 1.5,
                                           -3 if inside else 3),
                     textcoords="offset points", ha="right" if left or inside else "left",
-                    va="top" if inside else "bottom", fontsize=4.7, color=style.INK2,
+                    va="top" if inside else "bottom", fontsize=6, color=style.INK2,
                     zorder=4, gid=f"pin-label-{instance}-{name}")
 
 
