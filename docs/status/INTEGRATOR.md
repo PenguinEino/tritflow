@@ -27,4 +27,4 @@
   the notebook only if clean by then.
 - FRONTEND (next): add the `schematic()` delegate and a notebook cell after synthesis per SCHEM status (schematic stage built by SCHEM).
 - DISPATCHED 10-18: SIM republish after synth change; FRONTEND phase 11 editorial integration (synth/hdl frozen). Next: regenerate figures, move colab-v0, COLAB round 3, REVIEW round 3.
-- FRONTEND (after phase 12): REVIEW round-3 finding 5 table rows with run/seed identifiers (paper adder seed 7 vs archive seed 0); integrate EDITOR phase-3 text (sizing sign explanation); finding 6 attendance field once the user confirms.
+- FRONTEND (after phase 12): REVIEW round-3 finding 5 table rows with run/seed identifiers (paper adder seed 7 vs archive seed 0); integrate EDITOR phase-3 text (sizing sign explanation); finding 6: attendance confirmed by the user (docs/author.md) — replace the placeholder and regenerate the package.

@@ -11,7 +11,7 @@ Primary sources: [current root rules](https://github.com/sscs-ose/sscs-ose-code-
 | Open Jupyter project about circuit design or education | Executed `tritflow_tr1um.ipynb`, chapters 0–9; linked public source | Included |
 | Explain ideas, decisions, method, evidence and reproduction | Chapters 0/1, 4–6, 7/8; first setup cell and README | Included |
 | Use open tools; open PDK where applicable | Lark/NumPy, KLayout, ngspice, Plotly; OpenSUSI TR-1um; versions in build information | Included |
-| Reproducible source release | Real free-Colab Run all at 842afe2: all 17 code cells, 384.1 s including setup; scoped record in build-info.json | Verified at stated revision; presentation edits checked locally |
+| Reproducible source release | Current local execution and source hashes in build-info.json; public source and pinned setup | Next real-Colab verification pending |
 | Suitable open-source license | Apache-2.0 `LICENSE`, verbatim attribution `NOTICE` and author-authorized derived schematic assets; README license statement | Included |
 | One project folder under the current event's submitted notebooks | This directory maps to `ISSCC27/submitted_notebooks/TritFlow/` | Prepared |
 | Keep proposed changes within that project folder | Copy only these small payload files; builder/tests remain in TritFlow | Prepared |
@@ -50,5 +50,5 @@ Accepted structure examples inspected (not templates copied):
 
 Before filing: confirm attendance/poster arrangements, check the release
 tag and external links, inspect saved outputs, and re-check live official rules.
-The successful Colab verification applies to commit 842afe2 and default
-recorded experiments. Later presentation edits retain separate local checks.
+The current saved outputs have local execution evidence. A new successful
+real-Colab pass is required before publishing an installation-inclusive runtime.

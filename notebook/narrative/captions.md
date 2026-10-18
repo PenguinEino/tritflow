@@ -2,8 +2,9 @@
 
 ## fig_flow
 
-**TritFlow from HDL to extracted simulation** A {paper_adder.width}-trit adder
-described in {paper_adder.hdl_lines} top-level HDL lines plus shared arithmetic
+**TritFlow from HDL to extracted simulation** For run {paper_adder.run_id},
+a {paper_adder.width}-trit adder described in {paper_adder.hdl_lines} top-level
+HDL lines plus shared arithmetic
 modules maps to {paper_adder.nany} NANY and {paper_adder.inv} INV cells, with
 {paper_adder.equivalence_mode} source-to-cell equivalence.
 The {paper_adder.die_um} µm layout uses two routing metals and three supply
@@ -54,7 +55,8 @@ inputs; the sum and carry preserve the integer total in both examples.
 
 **Placement and routing of the illustrated adder** (a) Initial placement in
 signal order, (b) the annealed and routed {paper_adder.width}-trit layout
-occupying {paper_adder.die_um} µm, and (c) the recorded cell-terminal HPWL.
+occupying {paper_adder.die_um} µm in run {paper_adder.run_id}, and (c) the
+recorded cell-terminal HPWL.
 Annealing reduces HPWL from {paper_pnr.initial_hpwl_mm} to
 {paper_pnr.final_hpwl_mm} mm, a {paper_pnr.hpwl_reduction_pct}% reduction;
 cell colors identify full-adder digits, while the routes distinguish
@@ -63,7 +65,8 @@ horizontal M1 in channels from vertical M2 over the cells.
 ## fig_postlayout
 
 **Full-adder settling and the observed load boundary** (a) The full adder
-visits {paper_post.states} input states with {paper_post.hold_ns} ns intervals
+in run {paper_post.run_id} visits {paper_post.states} input states with
+{paper_post.hold_ns} ns intervals
 and {paper_post.load_ff} fF per output; device-only and device-plus-wire-C
 outputs meet the ±{levels.band_v} V criterion.
 (b) On the transition with the largest post-wire sum settling, final band
@@ -78,7 +81,7 @@ when estimated wire capacitance is added to the same extracted devices.
 **Ripple-adders generated from one parameterized HDL source** Adders of
 width {paper_scaling.width_min}–{paper_scaling.width_max} trits are synthesized,
 routed, drawing-DRC/LVS checked and simulated at {paper_scaling.load_ff} fF
-per output under nominal models.
+per output under nominal models (run family {paper_scaling.run_id}).
 (a) Fits to the recorded carry-endpoint settling give
 {scaling.device_slope_ns} ns/trit for extracted devices alone and
 {scaling.wired_slope_ns} ns/trit with estimated wire capacitance.

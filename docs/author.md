@@ -11,3 +11,5 @@ Use exactly this in submission READMEs and the notebook title block.
 - GitHub: PenguinEino
 
 Do not publish the phone number anywhere.
+- Representative: Einosuke Okazaki will attend ISSCC 2027 in person and present the poster if
+  selected (confirmed by the author, 2026-10-18).

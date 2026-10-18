@@ -28,6 +28,28 @@ FRONTEND should embed the image bytes or rebase paths when inserting text into
 the notebook. The official-repository payload must render these static images
 without depending on a local `figures/` directory.
 
+## First-screen and routing labels after review round 3
+
+Use one compact generated adder-result sentence with the opening hero. Omit
+its full paper caption on that first screen; the image footer already carries
+the cell count and physical checks. Keep the paper run identifier in that
+compact sentence when its full caption is omitted. Place the power/trade-off sentence from
+teaser.md, or the equivalent generated sentence, immediately with the headline
+before the hero, and keep the Run-all action visible. Do not display both
+versions of the power sentence. The shortened intro and chapter-0 takeaway
+now omit the repeated HDL-line/cell/DRC/LVS metrics; retain the explicit paper
+width versus executable-example width distinction.
+
+The complete captions remain available when figures are reused in a paper or
+the appendix. `fig_flow` and `fig_pnr` identify the paper adder realization;
+`fig_postlayout` identifies the paper full-adder realization; `fig_scaling`
+identifies its seed family. Appendix B supplies the corresponding separate
+four-design identities. Repeat the realization in generated physical and
+timing table rows, including each output row of a full adder. Match identities
+to the plotted GDS and native PNR seed; equal dimensions do not imply equal
+routes. Exact source fields and portable-snapshot requirements are specified
+in placeholders.md.
+
 ## Match the image to the caption
 
 Caption substitutions use the exact sources in placeholders.md and must be

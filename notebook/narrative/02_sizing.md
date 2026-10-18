@@ -33,9 +33,15 @@ I'=\frac{V_{DD}-V_{SS}}{R_u'+R_d'},
 > {sizing.adopted_current_ua} µA; the corresponding NANY values are
 > {paper_sizing.nany_error_mv} mV and {paper_sizing.nany_current_ua} µA.
 
-For the longest-resistor INV curve at the adopted MOS dimensions, the divider
-predicts a middle-level shift of {sizing.predicted_shift_mv} mV; the schematic
-DC result shifts by {sizing.spice_shift_mv} mV relative to the circled size.
-
-The sweep changes schematic dimensions; generating and checking a new physical
-cell is a separate step. Next we inspect the library built from the adopted sizes.
+Lengthening both INV resistors from {sizing.adopted_rr_um} to
+{sizing.selected_rr_um} µm at fixed MOS dimensions, the divider predicts an
+upward middle-level shift of {sizing.predicted_shift_mv} mV; schematic SPICE
+instead gives {sizing.spice_shift_mv} mV. The hand model gets the reduction
+in current right, but misses the sign of this small voltage shift. It keeps
+only geometric resistor resistance and a constant MOS on-resistance. Both
+F_RR substrate terminals actually tie to VDD, while the two resistors' signal
+terminals sit at different voltages, so their bias-dependent resistance
+corrections differ; the MOS also operate nonlinearly. The measured trade-off
+is current falling from {sizing.adopted_current_ua} to
+{sizing.selected_current_ua} µA while worst level error rises from
+{sizing.adopted_error_mv} to {sizing.selected_error_mv} mV.

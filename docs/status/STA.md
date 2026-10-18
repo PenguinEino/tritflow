@@ -1,3 +1,12 @@
+# REVIEW round 3, finding 7 — test collection fix in progress
+
+Renamed `tests/sta/test_timing.py` to the unique basename
+`tests/sta/test_sta_timing.py`. No code imports refer to the old name, so no
+import edits were needed. Running `python3 -m pytest tests -q` from the repo
+root; output is retained at `results/sta/review3_full_tests.log`.
+
+---
+
 # STA stream — phase 4 complete: tighter bound; 1.5× target not achieved
 
 2026-10-18. Only STA-owned paths changed. No packages installed, PDK/reference
