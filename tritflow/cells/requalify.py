@@ -6,6 +6,8 @@ electrical summaries compare matching sensitized arcs, never unrelated maxima.
 """
 from __future__ import annotations
 
+from tritflow.sim.tools import ngspice_binary
+
 import difflib
 import gzip
 import json
@@ -31,7 +33,7 @@ def record_environment(out):
     from .verify import BINARY
     value={'python':sys.version,'platform':platform.platform(),'klayout_python':db.__version__,
            'klayout_executable':subprocess.check_output([str(BINARY),'-v'],text=True).strip(),
-           'ngspice_version':subprocess.check_output(['ngspice','--version'],text=True).strip(),
+           'ngspice_version':subprocess.check_output([ngspice_binary(),'--version'],text=True).strip(),
            'pdk_provenance':pdk_provenance()}
     write_json(Path(out)/'requalification/environment.json',value)
     return value

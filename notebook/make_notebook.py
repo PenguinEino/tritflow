@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import subprocess
 import textwrap
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
@@ -25,6 +26,10 @@ NARRATIVE = ROOT/'notebook/narrative'
 
 
 def build():
+    # A submission notebook is generated after the implementation commit exists.
+    revision = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
+    setup_source = re.sub(r'(?m)^SOURCE_REF = .*',
+        f'SOURCE_REF = os.environ.get("TRITFLOW_REF", "{revision}")', stages.SETUP)
     values = context(ROOT)
     context_sha = context_identity(values)
     cells, code_ids = [], {}
@@ -128,7 +133,7 @@ $$''',text,count=1)
        '\n\n'+headline+'\n\n'+power+'\n\n'+badge+('\n\n'+run_note() if run_note() else '')+
        '\n\n<details><summary>Author and license</summary>\n\n'+author_block+
        '\n\n'+attendance+'\n\nApache-2.0, including historical schematic assets released by their author.\n\n</details>')
-    cell('code',stages.SETUP,'setup',title='Setup: clone TritFlow at the release tag, install KLayout and ngspice, fetch the pinned TR-1um PDK')
+    cell('code',setup_source,'setup',title='Setup: clone TritFlow at the release tag, install KLayout and ngspice, fetch the pinned TR-1um PDK')
     imports = cell('code',f'NARRATIVE_CONTEXT_SHA256 = {context_sha!r}\n'+stages.IMPORTS,'imports',
                    title='Imports and run bookkeeping')
     chapter_title = 'Chapter 0: From HDL to a checked adder layout'
@@ -205,10 +210,13 @@ $$''',text,count=1)
     md(render(appendix,values)+('\n\n'+run_note() if run_note() else '')+'\n\n'+textwrap.dedent('''
     <details><summary>Setup, recovery and source selection</summary>
 
-    Colab shallow-clones `colab-v0` into `/content/tritflow`; `TRITFLOW_REF` selects another release.
-    Use the source revision matching this notebook. Setup preserves Colab's NumPy/SciPy/Matplotlib/Plotly,
-    checks minimum versions, and prints KLayout/ngspice versions. If mixed versions are detected,
-    restart once and rerun setup/imports. After a failed chapter, rerun its named prerequisite.
+    Colab clones the source revision named in the setup cell into `/content/tritflow` (`TRITFLOW_REF`
+    selects another release). Setup downloads
+    checksum-verified KLayout 0.30.6 and Ubuntu ngspice 42+ds-3build1 with exact snapshot dependencies;
+    hash-locked Python packages that Colab has not yet imported, and the pinned circuit-label fonts, install
+    privately, while Colab's already imported scientific modules are preserved and version-checked. Tested
+    minimum and current stacks and a weekly pinned run cover the review period; `notebook/Dockerfile` is a
+    digest-pinned independent reproduction route. After a failed chapter, rerun its named prerequisite.
     Missing or changed scientific inputs stop execution; changed illustrations only warn.
     The closing table distinguishes calculations from recorded experiments.
 

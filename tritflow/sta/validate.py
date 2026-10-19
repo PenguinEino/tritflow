@@ -123,6 +123,15 @@ def _read(path):
     return json.loads(Path(path).read_text())
 
 
+def pinned_public_pdk(record, reference):
+    """Qualify archive-backed PDKs against the pinned cell publication's bytes."""
+    consumed=record.get('consumed_sha256',{})
+    return (record.get('qualified_commit')==PIN and reference.get('qualified_commit')==PIN
+            and record.get('checkout_commit') in (None,PIN)
+            and 'libs.tech/klayout/tech/lvs/01_Extract.lvs' in consumed
+            and consumed==reference.get('consumed_sha256'))
+
+
 def _validate_design(group, name, directory, models, scaling):
     out = directory/'postlayout'
     summary = _read(out/'summary.json')
@@ -159,9 +168,7 @@ def _validate_design(group, name, directory, models, scaling):
     # A report's historical inputs_unchanged flag does not establish freshness now.
     stale = [p for p,h in summary.get('input_sha256', {}).items() if not Path(p).is_file() or _sha(p) != h]
     pdk = summary.get('pdk_provenance', {})
-    pinned = pdk.get('qualified_commit') == PIN and pdk.get('checkout_commit') == PIN
-    if pdk.get('consumed_sha256', {}).get('libs.tech/klayout/tech/lvs/01_Extract.lvs') is None:
-        pinned = False
+    pinned = pinned_public_pdk(pdk,_read(ROOT/'cells/out/pdk_provenance.json'))
     published = None
     if group == 'scaling':
         published = next((r for r in scaling.get('rows', []) if r['n'] == int(name[5:])), None)

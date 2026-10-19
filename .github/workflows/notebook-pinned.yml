@@ -1,0 +1,19 @@
+name: Pinned notebook qualification
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths: ['notebook/**', 'tritflow/**', 'cells/**', 'examples/**', 'figures/**', 'pyproject.toml', '.github/workflows/notebook-pinned.yml']
+permissions:
+  contents: read
+jobs:
+  notebook:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Build the digest-pinned runtime and execute all notebook cells
+        run: |
+          docker build --platform linux/amd64 -f notebook/Dockerfile -t tritflow-pinned .
+          docker run --rm --platform linux/amd64 tritflow-pinned

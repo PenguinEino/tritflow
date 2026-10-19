@@ -103,7 +103,7 @@ def _unused_pin(definitions, top, pin, active=()):
 def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
                    reference: str | Path | None = None, gate_netlist=None,
                    cell_subckts: str | None = None, pdk: str | Path = PDK_ROOT,
-                   executable: str | Path = Path.home() / 'bin/klayout/klayout',
+                   executable: str | Path | None = None,
                    timeout: float = 180) -> dict:
     """Extract devices and optionally compare to reference SPICE or GateNetlist.
 
@@ -112,6 +112,8 @@ def extract_layout(gds: str | Path, top: str, outdir: str | Path, *,
     Input files are read only; all outputs are inside outdir.
     """
     import klayout.db as db
+    import os
+    executable = executable or os.environ.get("KLAYOUT_BINARY") or Path.home()/"bin/klayout/klayout"
     out = Path(outdir).expanduser().resolve()
     out.mkdir(parents=True, exist_ok=True)
     gds = Path(gds).expanduser().resolve()

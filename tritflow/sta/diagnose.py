@@ -13,6 +13,7 @@ import re
 
 import numpy as np
 
+from tritflow.sim.tools import simulator_identity
 from tritflow import ROOT
 from tritflow.extract import reference_net_map
 from tritflow.netlist import GateNetlist
@@ -48,7 +49,7 @@ def probe(directory, destination, *, step_s=2e-9):
         node = mapping[name]
         node = simulation_netlist('\\'+node if node.startswith('$') else node)
         probes[name] = f'v({safe[name]})' if name in ports else f'v(xdut.{node})'
-    digest = hashlib.sha256((circuit+str(step_s)+json.dumps(probes,sort_keys=True)).encode()).hexdigest()
+    digest = hashlib.sha256((circuit+str(step_s)+json.dumps(probes,sort_keys=True)+json.dumps(simulator_identity(),sort_keys=True)).encode()).hexdigest()
     cache = destination/'waveforms.npz'
     meta = destination/'simulation.json'
     if cache.is_file() and meta.is_file() and json.loads(meta.read_text())['sha256']==digest:
@@ -58,7 +59,7 @@ def probe(directory, destination, *, step_s=2e-9):
                              list(probes.values()),timeout=600,workdir=destination)
         waves = {'time':result['data']['time']}|{name:result['data'][p.lower()] for name,p in probes.items()}
         np.savez_compressed(cache,**waves)
-        write(meta,{'sha256':digest,'source_deck_sha256':hashlib.sha256(deck.encode()).hexdigest(),
+        write(meta,{'simulator':simulator_identity(),'sha256':digest,'source_deck_sha256':hashlib.sha256(deck.encode()).hexdigest(),
                     'step_s':step_s,'probes':probes})
         (destination/'waveform.txt').unlink(missing_ok=True)
     plan = json.loads((out/'vectors.json').read_text());hold=summary['hold_s']

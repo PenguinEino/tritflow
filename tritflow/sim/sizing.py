@@ -6,6 +6,7 @@ are an educational nominal-bias experiment, not layout or PVT qualification.
 """
 from __future__ import annotations
 from .provenance import pdk_provenance
+from .tools import simulator_identity
 
 from collections.abc import Mapping, Sequence
 import hashlib
@@ -159,7 +160,7 @@ def sweep_dimensions(
             seen.add(digest)
     root = PDK_ROOT if pdk is None else Path(pdk).expanduser().resolve()
     models = {p.name: file_hash(p) for p in sorted((root/'libs.tech/spice/models').iterdir()) if p.is_file()}
-    conditions = dict(supplies_v={'VDD':VDD, 'VMID':VMID, 'VSS':VSS}, temperature_c=temperature_c,
+    conditions = dict(simulator=simulator_identity(), supplies_v={'VDD':VDD, 'VMID':VMID, 'VSS':VSS}, temperature_c=temperature_c,
                       band_v=PASS_BAND, sweep_pin=sweep_pin, fixed_trits=fixed,
                       start_v=start_v, stop_v=stop_v, step_v=step_v)
     result = dict(pdk_provenance=pdk_provenance(root),cell=cell, source_sha256=hashlib.sha256(source.encode()).hexdigest(),

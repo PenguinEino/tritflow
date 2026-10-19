@@ -13,7 +13,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/"notebook"))
 import runtime_support
-CELL = json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())["cells"][1]["source"]
+from stages import SETUP as CELL
 COMMIT = "a"*40
 URL = "https://github.com/PenguinEino/tritflow.git"
 
@@ -33,7 +33,8 @@ def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False
     if existing:
         seed()
     if configured:
-        (target/"notebook/runtime.json").write_text(json.dumps({"TRITFLOW_SETUP_SCHEMA":runtime_support.SETUP_SCHEMA}))
+        (target/"notebook/runtime.json").write_text(json.dumps({"TRITFLOW_SETUP_SCHEMA":runtime_support.SETUP_SCHEMA,
+            "TRITFLOW_SETUP_SHA256":"fixture", "TRITFLOW_PYTHON_TARGET":str(tmp_path/"python")}))
     monkeypatch.delenv("TRITFLOW_REF", raising=False)
     if ref:
         monkeypatch.setenv("TRITFLOW_REF", ref)
@@ -45,9 +46,12 @@ def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False
             if clone_failure:
                 raise subprocess.CalledProcessError(128, command)
             seed()
+        elif command[:3] == ["git", "-C", str(target)] and command[3] in {"fetch", "switch"}:
+            pass
         elif command[0] == "bash":
             (target/"notebook/runtime.json").write_text(json.dumps({"TRITFLOW_ROOT": str(target),
-                "TRITFLOW_SETUP_SCHEMA":runtime_support.SETUP_SCHEMA}))
+                "TRITFLOW_SETUP_SCHEMA":runtime_support.SETUP_SCHEMA,
+                "TRITFLOW_PYTHON_TARGET":str(tmp_path/"python")}))
         elif command[-1] == "-v":
             return SimpleNamespace(returncode=0,stdout=f"{command[0]} version (unit fixture)",stderr="")
         else:
@@ -70,6 +74,9 @@ def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False
     monkeypatch.setattr(subprocess, "check_output", check_output)
     monkeypatch.setattr(importlib.util, "find_spec", lambda name: object())
     monkeypatch.setattr(runtime_support,"check_runtime",lambda:{})
+    monkeypatch.setattr(runtime_support,"setup_identity",lambda root:"fixture")
+    from tritflow.sim import tools
+    monkeypatch.setattr(tools,"ngspice_binary",lambda:"/fixture/ngspice")
     # Patch this import only, preserving pathlib itself for pytest and real files.
     proxy = SimpleNamespace(Path=lambda p: target if str(p) == "/content/tritflow" else Path(p))
     namespace = {}
@@ -80,11 +87,13 @@ def run_colab(monkeypatch, tmp_path, *, existing=False, ref=None, mismatch=False
     return commands, namespace
 
 
-@pytest.mark.parametrize("ref", [None, "release-test"])
-def test_shallow_pinned_clone_prints_hash_and_installs(monkeypatch, tmp_path, capsys, ref):
+@pytest.mark.parametrize("ref", [None, COMMIT])
+def test_immutable_clone_prints_hash_and_installs(monkeypatch, tmp_path, capsys, ref):
     commands, ns = run_colab(monkeypatch, tmp_path, ref=ref)
-    assert commands[0] == ["git", "clone", "--depth", "1", "--single-branch", "--branch",
-                           ref or "colab-v0", URL, str(tmp_path/"tritflow")]
+    assert commands[0] == ["git", "clone", "--no-checkout", "--depth", "1", "--filter=blob:none",
+                           URL, str(tmp_path/"tritflow")]
+    assert commands[1][:4] == ["git", "-C", str(tmp_path/"tritflow"), "fetch"]
+    assert commands[2][:5] == ["git", "-C", str(tmp_path/"tritflow"), "switch", "--detach"]
     assert ["bash", str(tmp_path/"tritflow/notebook/colab_setup.sh"),
             "--source", str(tmp_path/"tritflow")] in commands
     assert ns["SOURCE_COMMIT"] == COMMIT
@@ -113,9 +122,15 @@ def test_existing_modified_checkout_is_not_silently_used(monkeypatch, tmp_path, 
 def test_missing_tag_does_not_fall_back_to_main(monkeypatch, tmp_path):
     with pytest.raises(subprocess.CalledProcessError) as error:
         run_colab(monkeypatch, tmp_path, clone_failure=True)
-    assert "colab-v0" in error.value.cmd
+    assert URL in error.value.cmd
 
 
 def test_old_release_missing_setup_helper_explains_matching_ref(monkeypatch,tmp_path):
     with pytest.raises(RuntimeError,match="TRITFLOW_REF predates.*matching immutable release"):
         run_colab(monkeypatch,tmp_path,missing_helper=True)
+
+
+@pytest.mark.parametrize("ref",["main","colab-v0","-bad","a"*39])
+def test_movable_or_invalid_source_refs_fail_before_clone(monkeypatch,tmp_path,ref):
+    with pytest.raises(ValueError,match="immutable full 40-character"):
+        run_colab(monkeypatch,tmp_path,ref=ref)

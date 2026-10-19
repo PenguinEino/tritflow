@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from hashlib import sha256
+from tritflow.sim.tools import ngspice_binary
+
 import gzip
 import json
 from pathlib import Path
@@ -77,7 +79,9 @@ def runtime_fingerprint(root, pdk, *, names=None):
     digest = sha256((source_fingerprint(root,pdk,names=names)+sys.version).encode())
     for package in ["numpy", "scipy", "klayout", "plotly", "lark"]:
         digest.update(f"{package}={importlib.metadata.version(package)}".encode())
-    for binary in [shutil.which("ngspice"), os.environ.get("KLAYOUT_BINARY")
+    from tritflow.sim.tools import simulator_identity
+    digest.update(json.dumps(simulator_identity(),sort_keys=True).encode())
+    for binary in [ngspice_binary(), os.environ.get("KLAYOUT_BINARY")
                    or shutil.which("klayout") or Path.home()/"bin/klayout/klayout"]:
         if binary and Path(binary).is_file():
             digest.update(Path(binary).read_bytes())

@@ -12,6 +12,7 @@ import copy
 from dataclasses import dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -471,7 +472,7 @@ def chip_signoff(
     out.mkdir(exist_ok=True)
     pdk = Path(pdk_root).expanduser().resolve()
     binary = Path(
-        klayout_binary or shutil.which("klayout") or Path.home() / "bin/klayout/klayout"
+        klayout_binary or os.environ.get("KLAYOUT_BINARY") or shutil.which("klayout") or Path.home() / "bin/klayout/klayout"
     ).resolve()
     files = [
         source.parent / (top + ".cir"),

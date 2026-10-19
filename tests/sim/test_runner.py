@@ -32,8 +32,9 @@ def test_batch_runner_real_waveforms_and_failure(tmp_path):
 
 def test_timeout_and_missing_executable(tmp_path):
     fake = tmp_path/'fake'
-    fake.write_text('#!/usr/bin/python3\nwhile True: pass\n'); fake.chmod(0o755)
+    fake.write_text('#!/usr/bin/python3\nimport sys\nif "-v" in sys.argv:\n'
+                    ' print("ngspice-42 : fixture");sys.exit(0)\nwhile True: pass\n'); fake.chmod(0o755)
     with pytest.raises(SimulationError, match='timeout'):
         run_ngspice('dummy', 'op', ['v(y)'], executable=str(fake), timeout=.05)
-    with pytest.raises(SimulationError, match='Cannot execute'):
+    with pytest.raises(RuntimeError, match='Pinned Ubuntu ngspice-42 is missing'):
         run_ngspice('dummy', 'op', ['v(y)'], executable=str(tmp_path/'missing'))

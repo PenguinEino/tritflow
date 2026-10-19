@@ -188,3 +188,15 @@ def test_running_sim_is_not_qualified(tmp_path):
     (folder/'summary.json').write_text('{"state":"running","passed":false}')
     with pytest.raises(RuntimeError,match='incomplete'):
         producer._validate_design('example','x',tmp_path,None,{})
+
+
+def test_pinned_archive_matches_git_reference_by_consumed_bytes():
+    from tritflow.sta.validate import PIN,pinned_public_pdk
+    reference={'qualified_commit':PIN,'checkout_commit':PIN,
+        'consumed_sha256':{'libs.tech/klayout/tech/lvs/01_Extract.lvs':'deck','libs.tech/spice/models/ip62_models':'model'}}
+    archive={**reference,'checkout_commit':None}
+    assert pinned_public_pdk(reference,reference)
+    assert pinned_public_pdk(archive,reference)
+    assert not pinned_public_pdk({**archive,'consumed_sha256':{'libs.tech/klayout/tech/lvs/01_Extract.lvs':'dev'}},reference)
+    assert not pinned_public_pdk({**archive,'checkout_commit':'dev'},reference)
+    assert not pinned_public_pdk({'qualified_commit':PIN},reference)

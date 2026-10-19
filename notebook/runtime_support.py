@@ -13,13 +13,24 @@ import re
 import shutil
 import subprocess
 import sys
+from hashlib import sha256
+from pathlib import Path
 
 
-SETUP_SCHEMA = "2"
-MINIMUM_VERSIONS = {"numpy":"1.26", "scipy":"1.11", "matplotlib":"3.8", "plotly":"5.18"}
+SETUP_SCHEMA = "3"
+MINIMUM_VERSIONS = {"numpy":"1.26.4", "scipy":"1.11.4", "matplotlib":"3.8.4", "plotly":"5.24.1"}
 RESTART = ("Restart the runtime once (Runtime → Restart session), then run setup and imports again. "
            "Do not reinstall NumPy/SciPy in the live kernel. If this persists, disconnect/delete "
            "the old runtime and connect a fresh one.")
+
+
+def setup_identity(root):
+    """Invalidate a setup marker when a consumed lock or installer changes."""
+    digest = sha256()
+    for name in ("setup_pins.json", "requirements-colab.txt", "native_runtime.py",
+                 "ubuntu-24.04-lock.json", "setup_colab.py", "font_runtime.py", "fonts-lock.json"):
+        digest.update((Path(root)/"notebook"/name).read_bytes())
+    return digest.hexdigest()
 
 
 def _release(version):
@@ -29,10 +40,12 @@ def _release(version):
     return tuple(int(value or 0) for value in match.groups())
 
 
-def check_minimum_versions():
+def check_minimum_versions(packages=None):
     """Inspect installed metadata without importing or changing any package."""
     versions = {}
     for name, minimum in MINIMUM_VERSIONS.items():
+        if packages is not None and name not in packages:
+            continue
         try:
             versions[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError as error:
@@ -58,19 +71,23 @@ def check_runtime():
         linalg = importlib.import_module("scipy.linalg")
         importlib.import_module("matplotlib")
         importlib.import_module("plotly")
+        if os.environ.get('TRITFLOW_FONT_ROOT'):
+            from font_runtime import register_fonts
+            register_fonts(os.environ['TRITFLOW_FONT_ROOT'])
         numpy.testing.assert_allclose(linalg.solve([[2.0]], [4.0]), [2.0])
     except Exception as error:
         raise RuntimeError(f"Scientific Python import/BLAS check failed: {type(error).__name__}: {error}. "
                            + RESTART) from error
-    print("Scientific Python (host versions preserved): " + ", ".join(f"{k}={v}" for k,v in versions.items()))
+    print("Scientific Python (loaded host modules preserved): " + ", ".join(f"{k}={v}" for k,v in versions.items()))
     return versions
 
 
 def print_tool_versions():
     """Print the actual executables used for PDK decks and circuit simulation."""
+    from tritflow.sim.tools import ngspice_binary
     versions = {}
     for name, binary in (("KLayout",os.environ.get("KLAYOUT_BINARY") or shutil.which("klayout")),
-                         ("ngspice",shutil.which("ngspice"))):
+                         ("ngspice",ngspice_binary())):
         if not binary:
             raise RuntimeError(f"{name} is missing. Run the setup cell successfully first.")
         result = subprocess.run([str(binary), "-v"],capture_output=True,text=True,check=True,timeout=15)

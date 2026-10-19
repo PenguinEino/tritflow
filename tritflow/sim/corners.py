@@ -17,6 +17,7 @@ import shutil
 import time
 
 import numpy as np
+from tritflow.sim.tools import simulator_identity
 from tritflow import ROOT,CELLS_DIR,PDK_ROOT,TRIT_VOLTS
 from tritflow.netlist import GateNetlist
 from tritflow.synth import evaluate_netlist
@@ -107,13 +108,13 @@ def _run_case(task,*,timeout=600):
     sources={str(source):file_hash(source)}|extra
     code={name:file_hash(Path(__file__).with_name(name)) for name in ['corners.py','bench.py','measure.py','runner.py','spice.py','characterize.py']}
     code['extract/capacitance.py']=file_hash(ROOT/'tritflow/extract/capacitance.py')
-    digest=_key(dict(sources=sources,conditions=conditions,models=inventory['model_sha256'],pdk=inventory['pdk_provenance'],code=code))
+    digest=_key(dict(simulator=simulator_identity(),sources=sources,conditions=conditions,models=inventory['model_sha256'],pdk=inventory['pdk_provenance'],code=code))
     cache=ROOT/f'results/corners/cases/{digest}.json.gz';cache.parent.mkdir(parents=True,exist_ok=True)
     if cache.is_file():
         result=json.loads(gzip.decompress(cache.read_bytes()))
         if result.get('configuration_sha256')==digest:return result
     folder=ROOT/'build/corners'/digest;folder.mkdir(parents=True,exist_ok=True)
-    result=dict(dut=dut,conditions=conditions,configuration_sha256=digest,sources_sha256=sources,
+    result=dict(simulator=simulator_identity(),dut=dut,conditions=conditions,configuration_sha256=digest,sources_sha256=sources,
         model_sha256=inventory['model_sha256'],analysis_sha256=code,cache=str(cache.relative_to(ROOT)),
         state='running',error=None,dc=None,transient=None)
     try:

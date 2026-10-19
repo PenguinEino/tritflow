@@ -766,3 +766,7 @@ not an additional amd64 Colab installation run. No blockers/interface requests.
 Publish 2026-10-18T10:26:47.211617+00:00: Phase 7 public PDK 5d963db requalification PASS: all nine regenerated cells, strict physical-rail LVS, 324 abutments, native taped-out extraction/equivalence, wire-C/cascades, 160 timing and 30 poly-R profiles; 66 tests passed; no numerical result changes. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.
 
 Post-publish integrity PASS: pinned provenance, all nine generation/source/view/timing/poly hashes, template linkage, 324-case evidence and the empty numerical-difference ledger match generation `2026-10-18T10:26:47.211617+00:00`. PNR and SIM may rerun now.
+
+Publish 2026-10-19T05:07:38.582245+00:00: Phase 6 measured load/ramp timing tables; physical cell views unchanged. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.
+
+Publish 2026-10-19T05:58:51.067350+00:00: Phase 6 measured load/ramp timing tables; physical cell views unchanged. Whole-library directory exchange; height 132 um. GDS/SPICE/extraction/abstracts/truth/PNG/characterization/verification and template belong to this generation.

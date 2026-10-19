@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 
 import numpy as np
+from .tools import ngspice_binary
 
 
 class SimulationError(RuntimeError):
@@ -47,7 +48,7 @@ def read_ascii_raw(path: str | Path) -> dict[str, np.ndarray]:
 
 
 def run_ngspice(netlist: str, commands: str, vectors: list[str], *,
-                timeout: float = 120, executable: str = 'ngspice',
+                timeout: float = 120, executable: str | None = None,
                 workdir: str | Path | None = None) -> dict:
     """Run a circuit and analysis, returning {data, log, deck}.
 
@@ -58,6 +59,7 @@ def run_ngspice(netlist: str, commands: str, vectors: list[str], *,
         raise ValueError("Pass analysis commands separately from the circuit")
     if not vectors:
         raise ValueError("At least one output vector is required")
+    executable = ngspice_binary(executable)
     circuit = re.sub(r'^\s*\.end\s*$', '', netlist, flags=re.M | re.I)
     # Nutmeg treats square brackets as vector indexing unless the node is quoted.
     # Preserve SPICE's bit-blasted names and the canonical wrdata column names.

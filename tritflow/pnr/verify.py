@@ -170,7 +170,8 @@ def pdk_drc(gds_path, top, report_path=None, *, pdk_root=PDK_ROOT, binary=None, 
     KLayout exit status alone is insufficient: a successful run can report DRC
     errors. Missing executables/decks raise errors rather than reporting a pass.
     """
-    binary = Path(binary or Path.home()/"bin/klayout/klayout")
+    import os
+    binary = Path(binary or os.environ.get("KLAYOUT_BINARY") or Path.home()/"bin/klayout/klayout")
     deck = Path(pdk_root)/"libs.tech/klayout/tech/drc/run.drc"
     gds_path = Path(gds_path).resolve()
     report = Path(report_path or gds_path.with_suffix(".drc.lyrdb")).resolve()

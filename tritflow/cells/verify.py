@@ -13,7 +13,7 @@ from tritflow import CELLS_DIR, PDK_ROOT
 from .circuits import circuits, truth_table
 
 TECH = PDK_ROOT/'libs.tech/klayout/tech'
-BINARY = Path(os.environ.get('KLAYOUT_BIN',Path.home()/'bin/klayout/klayout'))
+BINARY = Path(os.environ.get('KLAYOUT_BINARY') or os.environ.get('KLAYOUT_BIN') or Path.home()/'bin/klayout/klayout')
 
 
 def run(cmd, folder, log):
@@ -187,7 +187,8 @@ def dc(circuit,folder):
         deck += ['XU '+' '.join(circuit.ports)+' '+circuit.name,'.temp 27',
                  '.options rshunt=1e12',f'.nodeset v(Y)={row["Y"]*5}','.control','op','print v(Y)','quit','.endc','.end']
         path=folder/f'dc_{i}.spice';path.write_text('\n'.join(deck)+'\n')
-        code,log=run(['ngspice','-n','-b',path],folder,f'dc_{i}.log')
+        from tritflow.sim.tools import ngspice_binary
+        code,log=run([ngspice_binary(),'-n','-b',path],folder,f'dc_{i}.log')
         m=re.search(r'(?im)^v\(y\)\s*=\s*([-+\deE.]+)',log)
         value=float(m.group(1)) if m else None
         error=abs(value-row['Y']*5) if value is not None else None

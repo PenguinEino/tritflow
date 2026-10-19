@@ -4,7 +4,31 @@
   "pdk_archive_sha256": "003010a0f64fafb96acf5a0d18614c096d8faf6ade29e13af4bde54d85262769",
   "klayout_version": "0.30.6",
   "klayout_deb": {
-    "22.04": {"url": "https://www.klayout.org/downloads/Ubuntu-22/klayout_0.30.6-1_amd64.deb", "sha256": "c711f14b71e9d3e5fc1660c6fc9d15ed5f6ec66880e8fa51d4041c0066b7c0bf"},
-    "24.04": {"url": "https://www.klayout.org/downloads/Ubuntu-24/klayout_0.30.6-1_amd64.deb", "sha256": "1e921676d218e43e5bf39d1b36f510df889ec42d7e7f601b4b5ee1a16d84d41f"}
+    "24.04": {
+      "url": "https://www.klayout.org/downloads/Ubuntu-24/klayout_0.30.6-1_amd64.deb",
+      "sha256": "1e921676d218e43e5bf39d1b36f510df889ec42d7e7f601b4b5ee1a16d84d41f"
+    }
+  },
+  "ubuntu_snapshot": "20261019T000000Z",
+  "docker_image": "ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac",
+  "ubuntu_dependency_lock": {
+    "24.04": "ubuntu-24.04-lock.json"
+  },
+  "pip_wheel": {
+    "version": "25.2",
+    "url": "https://files.pythonhosted.org/packages/b7/3f/945ef7ab14dc4f9d7f40288d2df998d1837ee0888ec3659c813487572faa/pip-25.2-py3-none-any.whl",
+    "sha256": "6d67a2b4e7f14d8b31b8b52648866fa717f45a1eb70e83002f4331d07e953717"
+  },
+  "ngspice_package": {
+    "version": "42+ds-3build1",
+    "upstream_version": "42",
+    "architectures": [
+      "amd64",
+      "arm64"
+    ]
+  },
+  "ngspice_dependency_locks": {
+    "amd64": "ngspice-24.04-amd64-lock.json",
+    "arm64": "ngspice-24.04-arm64-lock.json"
   }
 }

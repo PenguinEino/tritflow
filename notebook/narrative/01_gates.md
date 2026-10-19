@@ -4,8 +4,10 @@ The middle output level comes from conducting transistor and resistor branches.
 At a zero input, the inverter connects its output toward both supply rails;
 the balance sets the voltage and draws current even with constant inputs.
 NANY adds paths to VMID that clamp the output for opposite input trits.
-Read each transfer curve above its VDD current, with the other input held
-at each logical level.
+The method cell below first lays out each primitive: its ternary truth
+table, the taped-out transistor schematic and how its branches produce the
+three levels. It then reads each transfer curve above its VDD current, with
+the other input held at each logical level.
 
 The gate functions are
 

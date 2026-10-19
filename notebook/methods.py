@@ -23,6 +23,7 @@ from fig_gates import simulate, draw                      # the paper's own Fig.
 from paperstyle import save as save_figure
 gates = flow.load(ROOT/"examples/gates.tv", "gates")       # the definition shown above
 t = gates.truth_table()                                    # all nine input pairs, ideal trits
+display(cell_cards(t, CELLS_DIR/"out", ROOT/"notebook/assets/schematics"))  # truth tables + taped-out schematics
 curves = simulate(CELLS_DIR/"out")                         # ten ngspice DC sweeps of the extracted layouts
 png = save_figure(draw(curves), "fig_gates", out=BUILD/"figures")
 display(Image(filename=str(png), width=1000))              # Fig. 2, regenerated from your own run
@@ -75,8 +76,9 @@ display(sch)                                     # the synthesized netlist, draw
 '''
 
 PNR = r'''
-png = render_gds(lay.gds_path, out/"adder2_demo.layout.png", top=net.top)   # KLayout render of the GDS
-display(Image(filename=str(png), width=760))
+from tritflow.viz.layout import gds_viewer
+display(gds_viewer(lay.gds_path, top=net.top))                     # wheel to zoom, drag to pan
+gds_download(lay.gds_path)                                                   # the routed GDS itself
 s = lay.stats
 print(f"{s['instance_count']} cells in {s['row_count']} rows · die {s['die_size_um'][0]:.0f} × {s['die_size_um'][1]:.0f} µm"
       f" · utilization {100*s['utilization']:.0f} % · annealing shortened HPWL by {s['hpwl_improvement_pct']:.0f} %")
@@ -110,16 +112,20 @@ display(custom.schematic(net_names=True, title=f"{custom.top}: schematic of the 
 '''
 
 CUSTOM_LAYOUT = r'''
+from tritflow.viz.layout import gds_viewer
 custom_out = BUILD/"your_circuit"/example.top
 custom_lay = custom.place_and_route(output_dir=custom_out, seed=0, anneal_steps=600)   # → GDS
 print("DRC clean:", custom_lay.drc()["clean"], "· LVS match:", custom_lay.lvs()["matched"])
-display(Image(filename=str(render_gds(custom_lay.gds_path, custom_out/f"{custom.top}.layout.png",
-                                      top=custom.top)), width=760))
+display(gds_viewer(custom_lay.gds_path, top=custom.top))             # live KLayout in Colab
+gds_download(custom_lay.gds_path)                                            # your circuit as GDSII
 '''
 
 SHUTTLE = r'''
+from tritflow.viz.layout import gds_viewer
 chip = json.loads((ROOT/"notebook/assets/chip/adder4/signoff.json").read_text())   # recorded run, adder4 seed 7
-display(Image(filename=str(ROOT/"notebook/assets/chip/adder4/tr_1um_adder4.png"), width=640))
+display(gds_viewer(ROOT/"notebook/assets/chip/adder4/tr_1um_adder4.gds"))   # zoom down to devices
+gds_download(ROOT/"notebook/assets/chip/adder4/tr_1um_adder4.gds",
+             url=f"https://github.com/PenguinEino/tritflow/raw/{SOURCE_COMMIT}/notebook/assets/chip/adder4/tr_1um_adder4.gds")
 table([["Check", "Result"]] + [[k, chip[k]] for k in
       ("drawing_drc", "drawing_lvs", "mask_drc", "mpw_precheck", "submission_ready", "reason")])
 # Reproduce locally with KLayout and the OpenSUSI MPW template (see docs/status/PNR.md):
