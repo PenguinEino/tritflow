@@ -108,6 +108,56 @@ def test_local_html_embeds_overview_and_no_remote_assets(gds, monkeypatch):
     assert len(image.getcolors(2_000_000)) > 2
 
 
+def test_busy_kernel_retries_without_permanent_static_transition(gds, monkeypatch):
+    """Regress round 16: Run all can occupy the kernel longer than two timeouts."""
+    monkeypatch.setitem(sys.modules, 'google.colab', None)
+    script = gds_viewer(gds, width=500, height=300).data.split('<script>', 1)[1]
+    assert 'const live = !!(config.callback && window.google?.colab);' in script
+    assert 'live = false' not in script
+    assert 'Promise.race' not in script  # A slow queued request must not be abandoned.
+    assert 'live: waiting for kernel…' in script
+    assert 'if (!root.isConnected || !live || pending || drag) return;' in script
+    assert 'failures++;' in script and 'failures = 0; paint();' in script
+    assert 'Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5))' in script
+    assert 'schedule(retryDelay(failures))' in script
+    assert 'requested !== revision || failures' in script  # Retry newest view after recovery.
+
+
+def test_labels_hide_at_overview_and_return_with_detail_and_static_export(tmp_path):
+    from tritflow.viz.layout import render_gds
+    if _pdk_layer_properties() is None:
+        pytest.skip('Pinned TR-1um LYP unavailable')
+    layout = db.Layout(); layout.dbu = .001
+    cell = layout.create_cell('labels')
+    cell.shapes(layout.layer(235, 0)).insert(db.DBox(0, 0, 3000, 3000))
+    text_layer = layout.layer(49, 0)
+    cell.shapes(text_layer).insert(db.DText('VDD overlapping pad and rail names', 20, 30))
+    path = tmp_path/'labels.gds'; layout.write(str(path))
+    renderer = _GdsRenderer(path)
+    try:
+        overview = renderer.render([0, 0, 3000, 3000], 600, 600)
+        assert overview['labels'] is False
+        renderer.view.set_config('text-visible', 'true')
+        with_labels = np.array(Image.open(io.BytesIO(bytes(
+            renderer.view.get_pixels_with_options(600, 600, 0, 0, 0, db.DBox(*overview['box'])).to_png_data()))).convert('RGB'))
+        assert np.any(pixels(overview) != with_labels)
+        detail = renderer.render([0, 0, 100, 100], 600, 600)
+        assert detail['labels'] is True
+        renderer.view.set_config('text-visible', 'false')
+        without_labels = np.array(Image.open(io.BytesIO(bytes(
+            renderer.view.get_pixels_with_options(600, 600, 0, 0, 0, db.DBox(*detail['box'])).to_png_data()))).convert('RGB'))
+        assert np.any(pixels(detail) != without_labels)
+        assert renderer.render([0, 0, 3000, 3000], 600, 600)['labels'] is False
+    finally:
+        renderer.close()
+    annotated = render_gds(path, tmp_path/'annotated.png', width=900, height=650)
+    cell.shapes(text_layer).clear(); layout.write(str(path))
+    unannotated = render_gds(path, tmp_path/'unannotated.png', width=900, height=650)
+    # The legend still lists the text layer when present; compare the GDS viewport.
+    assert np.array_equal(np.array(Image.open(annotated))[54:, :570],
+                          np.array(Image.open(unannotated))[54:, :570])
+
+
 def test_registered_callback_json_and_independent_sessions(gds, monkeypatch):
     callbacks = {}
     module = types.ModuleType('google.colab')

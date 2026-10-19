@@ -213,10 +213,11 @@ def cell_cards(truth, cells_dir, schematics_dir):
             f'<div style="font-size:14px;line-height:1.45">{note}</div>'
             f'<div style="font-size:12.5px;color:#57606a;margin-top:8px">{devices} devices · cell '
             f'{abstract["width"]:g} × {abstract["height"]:g} µm · schematic: taped-out Xschem source '
-            '(click it to enlarge)</div></div>'
-            f'<img alt="{name} cell schematic" title="Click to enlarge" src="data:image/svg+xml;base64,{svg}" '
-            'onclick="this.style.maxHeight=this.style.maxHeight===\'none\'?\'430px\':\'none\';'
-            'this.style.maxWidth=this.style.maxHeight===\'none\'?\'100%\':\'560px\'" '
+            '(click it to open full size)</div></div>'
+            f'<img alt="{name} cell schematic" title="Click to open full size" src="data:image/svg+xml;base64,{svg}" '
+            'onclick="var w=window.open(URL.createObjectURL(new Blob([atob(this.src.split(\',\')[1])],'
+            '{type:\'image/svg+xml\'})),\'_blank\');if(!w){this.style.maxHeight=this.style.maxHeight===\'none\'?'
+            '\'430px\':\'none\';this.style.maxWidth=this.style.maxHeight===\'none\'?\'100%\':\'560px\';}" '
             'style="flex:1 1 auto;max-width:560px;max-height:430px;width:auto;height:auto;object-fit:contain;'
             'margin-left:auto;background:#fff;cursor:zoom-in"></div>')
     others = ('<div style="border:1px solid #d0d7de;border-radius:8px;padding:12px 16px;margin:10px 0;'
@@ -225,4 +226,18 @@ def cell_cards(truth, cells_dir, schematics_dir):
               'large fanout. <b>TIEP / TIEZ / TIEN</b> are a single 30 µm resistor from Y to VDD / VMID / VSS, '
               'supplying a constant +1 / 0 / −1 through finite resistance. <b>FILL</b> carries the rails and '
               'wells across gaps in a row.</div>')
-    return HTML('<div data-cell-cards="1">' + ''.join(cards) + others + '</div>')
+    # Tabs show one cell at a time; without JavaScript (static exports) every card stays visible.
+    import uuid
+    uid = 'cc' + uuid.uuid4().hex[:8]
+    names = list(columns) + ['Support cells']
+    panes = ''.join(f'<div data-pane="{i}">{body}</div>' for i, body in enumerate(cards + [others]))
+    tabs = ''.join(f'<button type="button" data-tab="{i}" onclick="{uid}({i})" style="font:600 14px sans-serif;'
+                   'padding:6px 14px;margin-right:4px;border:1px solid #d0d7de;border-radius:6px 6px 0 0;'
+                   f'background:#f6f8fa;color:#1f2328;cursor:pointer">{n}</button>' for i, n in enumerate(names))
+    script = (f'<script>function {uid}(k){{var r=document.getElementById("{uid}");'
+              f'r.querySelectorAll("[data-pane]").forEach(function(p){{p.style.display=p.dataset.pane==k?"block":"none"}});'
+              f'r.querySelectorAll("[data-tab]").forEach(function(b){{var on=b.dataset.tab==k;'
+              f'b.style.background=on?"#1f2328":"#f6f8fa";b.style.color=on?"#fff":"#1f2328"}})}}'
+              f'document.getElementById("{uid}").querySelector("[data-tabs]").style.display="block";{uid}(0);</script>')
+    return HTML(f'<div id="{uid}" data-cell-cards="1"><div data-tabs style="display:none;margin-top:6px">{tabs}</div>'
+                + panes + '</div>' + script)

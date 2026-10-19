@@ -43,6 +43,13 @@ def _data(pnr):
     return json.loads(Path(pnr).read_text()) if isinstance(pnr, (str, Path)) else pnr
 
 
+def _gds_text_visibility(view, box):
+    """Hide dense pad/net names at overview; restore labels below a 1 mm span."""
+    visible = box.width() <= 1000.0 and _pdk_layer_properties() is not None
+    view.set_config("text-visible", "true" if visible else "false")
+    return visible
+
+
 def _open_gds_view(gds_path, top=None):
     """Load the real hierarchy and apply the same TR-1um styling to every view."""
     import klayout.db as db
@@ -91,7 +98,7 @@ def _open_gds_view(gds_path, top=None):
         view.max_hier_levels = 100
         view.min_hier_levels = 0
         for key, value in (("background-color", background), ("grid-visible", "false"),
-                           ("text-visible", "true" if lyp is not None else "false"),
+                           ("text-visible", "false"),
                            ("cell-box-visible", "false")):
             view.set_config(key, value)
         return view, cell, active, (background, ink, muted, rule)
@@ -119,6 +126,7 @@ def render_gds(gds_path, output_path=None, *, top=None, width=1800, height=1250)
     lyp = _pdk_layer_properties()
     try:
         view.zoom_fit()
+        _gds_text_visibility(view, view.box())
         with tempfile.TemporaryDirectory(dir=output.parent) as temporary:
             raw = Path(temporary)/"klayout.png"
             legend_width, header = 330, 54
