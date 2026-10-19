@@ -255,7 +255,7 @@ def test_paper_palette_matches_source():
     # Source is not an importable installed-package dependency; check the
     # copied three constants so paper and notebook signal hues cannot drift.
     import runpy
-    palette=runpy.run_path(str(ROOT/'figures/style.py'))
+    palette=runpy.run_path(str(ROOT/'figures/paperstyle.py'))
     assert TRIT_COLOR==palette['TRIT_COLOR']
 
 

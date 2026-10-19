@@ -8,7 +8,7 @@ from matplotlib.lines import Line2D
 
 from tritflow import ROOT
 
-import style
+import paperstyle as style
 
 RR_SHADE = {20.0: "#6da7ec", 30.0: "#2a78d6", 45.0: "#104281"}
 

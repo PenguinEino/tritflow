@@ -9,7 +9,7 @@ from matplotlib.patches import FancyArrowPatch
 from tritflow import CELLS_DIR, ROOT
 
 import gdsdraw
-import style
+import paperstyle as style
 
 B = ROOT / "build/adder4"
 HDL = """generate

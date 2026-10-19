@@ -20,7 +20,7 @@ print(f"DRC clean: {drc['clean']} · LVS match: {lvs['matched']} · analog PASS:
 
 GATES = r'''
 from fig_gates import simulate, draw                      # the paper's own Fig. 2 script
-from style import save as save_figure
+from paperstyle import save as save_figure
 gates = flow.load(ROOT/"examples/gates.tv", "gates")       # the definition shown above
 t = gates.truth_table()                                    # all nine input pairs, ideal trits
 curves = simulate(CELLS_DIR/"out")                         # ten ngspice DC sweeps of the extracted layouts

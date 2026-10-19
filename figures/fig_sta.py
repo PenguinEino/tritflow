@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import data
-import style
+import paperstyle as style
 
 GROUP_COLOR = {"scaling": style.BLUE, "example": style.ORANGE}
 

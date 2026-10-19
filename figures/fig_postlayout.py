@@ -8,7 +8,7 @@ import numpy as np
 from tritflow import ROOT
 
 import data
-import style
+import paperstyle as style
 
 DIR = ROOT / "build/full_add/postlayout"
 
