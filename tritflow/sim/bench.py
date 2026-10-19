@@ -109,7 +109,9 @@ def build_testbench(subckts: str, top: str, inputs: list[str], outputs: list[str
         for k in range(1, len(vectors)):
             points.extend([f'{k * hold_s:.15g} {trit_volts[vectors[k-1][col]]:g}',
                            f'{k * hold_s + edge_s:.15g} {trit_volts[vectors[k][col]]:g}'])
-        lines.append(f'Vin{col} {names[pin]} 0 PWL(' + ' '.join(points) + ')')
+        # Explicit DC value: ngspice 42 (Colab's apt package) takes 0 V for a bare PWL
+        # source in .dc, which silently ignored the held inputs of dc_transfer.
+        lines.append(f'Vin{col} {names[pin]} 0 DC {trit_volts[vectors[0][col]]:g} PWL(' + ' '.join(points) + ')')
     for i, pin in enumerate(outputs):
         load = loads_f.get(pin, 0) if isinstance(loads_f, dict) else loads_f
         if load < 0:

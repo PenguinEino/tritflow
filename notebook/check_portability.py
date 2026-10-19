@@ -13,6 +13,8 @@ check, not a clean Ubuntu installation or a kernel filesystem sandbox.
 
 from __future__ import annotations
 
+from tritflow.sim.tools import ngspice_binary
+
 import argparse
 from hashlib import sha256
 import json
@@ -129,7 +131,7 @@ def main(argv=None):
               "forbidden_native_accesses": accesses, "blocked_paths": list(map(str, forbidden)),
               "initial_build_exists": False, "execution_log": str(log), "trace": str(trace)}
     report["klayout_version"] = subprocess.check_output([str(binary), "-v"], env=environment, text=True).strip()
-    report["ngspice_version"] = subprocess.check_output(["ngspice", "-v"], env=environment, text=True).strip()
+    report["ngspice_version"] = subprocess.check_output([ngspice_binary(), "-v"], env=environment, text=True).strip()
     (scratch/"report.json").write_text(json.dumps(report, indent=2)+"\n")
     print(json.dumps({**report, "forbidden_native_accesses": accesses[:5],
                       "forbidden_native_access_count": len(accesses)}, indent=2))

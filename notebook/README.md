@@ -96,34 +96,30 @@ the manifest and `report.json` remain in the work directory. This checks runtime
 asset independence; it does not test Colab installation or replace the release
 test after the integrator commits/tags the tree.
 
-The first cell in a fresh Colab runtime shallow-clones
-`https://github.com/PenguinEino/tritflow.git` at the default tag `colab-v0` into
-`/content/tritflow`. It prints the resolved commit before installing the package
-editably. Set `os.environ["TRITFLOW_REF"] = "another-tag"` before running the
-first cell to override the tag (branch names also work; their resolved commits
-are printed). An existing checkout is reused only when its origin and resolved
-ref match and it has no tracked edits; otherwise start a fresh Colab runtime.
-The notebook never silently falls back to `main`. The archive-URL bootstrap has
-been removed. Source-selection and rerun details are in Appendix B of the notebook.
+The first cell clones `https://github.com/PenguinEino/tritflow.git` at the full
+40-character commit stamped when the notebook is generated. An override through
+`TRITFLOW_REF` must also be a full commit: tags and branches are rejected.
+The origin, commit and tracked working tree are checked before setup. There is
+no fallback to `main`. The final submission notebook must be generated after
+the implementation commit exists; see [dependencies.md](dependencies.md).
 
 ```sh
 bash notebook/colab_setup.sh --source /content/tritflow
-# Non-mutating platform plans, usable locally:
-bash notebook/colab_setup.sh --plan --ubuntu 22.04 --arch amd64
 bash notebook/colab_setup.sh --plan --ubuntu 24.04 --arch amd64
 ```
 
-Setup installs ngspice through apt; selects KLayout 0.30.6's official `.deb`
-for the **detected** Ubuntu 22.04/24.04 amd64 release; installs its dependencies
-through apt; pins only klayout and lark; preserves Colab’s NumPy/SciPy/
-Matplotlib/Plotly and checks their minimum versions; installs this package
-editably beside its assets; and unpacks the PDK at commit
-`5d963db9d44e192d37a0489c208bfccf2e2f690c`. The script verifies SHA-256 for
-both binary and PDK downloads, checks required PDK/source files, and tests the
-KLayout Ruby DRC engine. Unsupported OS/architecture fails explicitly. A
-`runtime.json` supplies the notebook's environment before TritFlow is imported.
-The script's default PDK destination is separate from any existing checkout.
-The Python wheel alone does not provide the Ruby DRC/LVS runtime.
+Setup checks SHA-256 for the official Ubuntu ngspice 42 package, KLayout
+0.30.6's official Ubuntu 24.04 amd64 package, every package in its complete
+Ubuntu dependency lock, and the fixed PDK archive at commit
+`5d963db9d44e192d37a0489c208bfccf2e2f690c`. Native libraries are unpacked into
+a private runtime; setup never invokes apt. KLayout runs with that runtime's
+loader, Qt, Ruby and Python libraries. A Ruby smoke deck checks the installed
+engine. Unsupported OS/architecture points to the pinned Docker environment.
+Python packages not preloaded by the tested Colab kernel are installed with
+`--no-deps --require-hashes` into an immutable private target. Source/assets
+are imported directly from the checkout. `runtime.json` records absolute
+simulator, KLayout, PDK and Python-target paths before TritFlow is imported;
+its fingerprint invalidates setup when a lock or installer changes.
 
 The official packages and their release mapping were checked against
 [KLayout's download page](https://www.klayout.de/build.html). Pinned PDK source
@@ -231,13 +227,13 @@ The explicit Python path also supports a source checkout that has not been
 installed editably. Publishing rejects changed inputs, options or native bytes;
 it does not repair a stale/failed run or claim new verification on replay.
 
-Phase 9 setup uses pip `--no-deps`, so an already imported NumPy is not replaced.
-Minimum host versions are NumPy 1.26, SciPy 1.11, Matplotlib 3.8 and Plotly 5.18.
-Metadata checks, live/disk version comparison, the formerly failing NumPy-testing
-import and a SciPy BLAS solve run before chapters. A mixed old kernel gets an
-explicit restart-once instruction. Actual KLayout/ngspice executable versions
-print even when setup is reused. The setup schema refreshes older runtime
-configuration; it never silently reinstalls the scientific stack.
+Setup preserves preloaded NumPy, Matplotlib, Pillow and IPython modules. The
+minimum scientific boundary is NumPy 1.26.4, SciPy 1.11.4, Matplotlib 3.8.4 and
+Plotly 5.24.1. The exact tested Colab stack and full local locks are in
+[python-compatibility.json](python-compatibility.json) and
+[dependencies.md](dependencies.md). Live/disk version comparisons, a NumPy
+import and a SciPy BLAS solve run before chapters. Tool versions print even
+when a current setup is reused.
 
 Each chapter cell checks setup and completed prerequisites. A failing rerun
 invalidates downstream completion markers, so stale `lay`/`demo` globals cannot
@@ -311,3 +307,8 @@ does not establish causation. Setup is unchanged; its existing safe rerun
 checks remain active. Tables now constrain intrinsic width as well as their
 visible width, have HTML width-attribute fallbacks and keep any overflow inside
 their scroll container. Cache-event output uses one short line per stage.
+
+Exact native/Python pins, the Docker reproduction commands, tested Colab host
+packages and the immutable source-release procedure are described in
+[dependencies.md](dependencies.md). Dependency qualification is tracked in
+[PIN status](../docs/status/PIN.md).

@@ -19,7 +19,7 @@ setup = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(setup)
 
 
-@pytest.mark.parametrize("version", ["22.04", "24.04"])
+@pytest.mark.parametrize("version", ["24.04"])
 def test_official_deb_plan_is_release_specific(version, capsys, monkeypatch):
     def forbidden(*a, **k):
         raise AssertionError("planning must not run commands or download")
@@ -31,15 +31,17 @@ def test_official_deb_plan_is_release_specific(version, capsys, monkeypatch):
     assert f"Ubuntu-{version[:2]}/" in result["klayout"]["url"]
     assert len(result["klayout"]["sha256"]) == 64
     assert setup.PINS["pdk_commit"] in result["pdk_archive"]
-    assert any("ngspice" in c for c in result["commands"])
-    assert any("-e" in c for c in result["commands"])
-    pip = next(c for c in result["commands"] if "pip" in c)
+    assert result["ngspice"]["version"] == "42+ds-3build1"
+    assert not any("apt-get" in c for c in result["commands"])
+    pip = next(c for c in result["commands"] if "install" in c)
     assert "--no-deps" in pip
-    assert result["scientific_packages_installed"] is False
+    assert "--require-hashes" in pip and "--target" in pip
+    assert result["scientific_packages_installed"] is True
+    assert result["preloaded_packages_replaced"] is False
     assert set(result["host_scientific_minimums"]) == {"numpy","scipy","matplotlib","plotly"}
 
 
-@pytest.mark.parametrize("version,arch", [("26.04", "amd64"), ("24.04", "arm64")])
+@pytest.mark.parametrize("version,arch", [("22.04", "amd64"), ("26.04", "amd64"), ("24.04", "arm64")])
 def test_unknown_platforms_fail_instead_of_guessing(version, arch):
     with pytest.raises(ValueError):
         setup.package_for(version, arch)
@@ -94,7 +96,7 @@ def test_bash_wrapper_syntax():
 def test_host_minimum_check_fails_before_installation(monkeypatch,tmp_path):
     monkeypatch.setattr(setup,"ubuntu_version",lambda:"24.04")
     monkeypatch.setattr(setup.platform,"machine",lambda:"x86_64")
-    def old_stack(): raise RuntimeError("host stack is too old")
+    def old_stack(*names): raise RuntimeError("host stack is too old")
     monkeypatch.setattr(setup,"check_minimum_versions",old_stack)
     monkeypatch.setattr(setup.subprocess,"run",lambda *a,**k:pytest.fail("must not install"))
     monkeypatch.setattr(setup,"download",lambda *a,**k:pytest.fail("must not download"))

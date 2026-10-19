@@ -15,16 +15,19 @@ try:
 except ModuleNotFoundError:
     IN_COLAB = False
 SOURCE_URL = "https://github.com/PenguinEino/tritflow.git"
-SOURCE_REF = os.environ.get("TRITFLOW_REF", "colab-v0")
+SOURCE_REF = os.environ.get("TRITFLOW_REF", "839adbf19f7590221d18d171adaaddb95c8fd27a")
 def source_git(*args):
     return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True).strip()
 if IN_COLAB:
     ROOT = Path("/content/tritflow")
-    if not SOURCE_REF or SOURCE_REF.startswith("-") or any(c.isspace() for c in SOURCE_REF):
-        raise ValueError("TRITFLOW_REF must name a Git tag or branch")
+    import re
+    if not re.fullmatch(r"[0-9a-f]{40}", SOURCE_REF):
+        raise ValueError("TRITFLOW_REF must be an immutable full 40-character Git commit")
     if not ROOT.exists():
-        subprocess.run(["git", "clone", "--depth", "1", "--single-branch", "--branch", SOURCE_REF,
+        subprocess.run(["git", "clone", "--no-checkout", "--depth", "1", "--filter=blob:none",
                         SOURCE_URL, str(ROOT)], check=True)
+        subprocess.run(["git", "-C", str(ROOT), "fetch", "--depth", "1", "origin", SOURCE_REF], check=True)
+        subprocess.run(["git", "-C", str(ROOT), "switch", "--detach", SOURCE_REF], check=True)
     if not (ROOT/".git").is_dir():
         raise RuntimeError("/content/tritflow must be a git clone; use a fresh Colab runtime")
     if source_git("remote", "get-url", "origin").removesuffix(".git") != SOURCE_URL.removesuffix(".git"):
@@ -37,11 +40,16 @@ if IN_COLAB:
     if not (ROOT/"notebook/runtime_support.py").is_file():
         raise RuntimeError("TRITFLOW_REF predates this notebook's setup. Select its matching immutable release with TRITFLOW_REF in a fresh runtime.")
     sys.path.insert(0, str(ROOT/"notebook"))
-    from runtime_support import SETUP_SCHEMA
+    from runtime_support import SETUP_SCHEMA, setup_identity
+    if SETUP_SCHEMA != "3":
+        raise RuntimeError("The selected source commit predates the pinned runtime. Use the final submission commit with TRITFLOW_REF.")
     runtime = ROOT/"notebook/runtime.json"
-    if not runtime.is_file() or json.loads(runtime.read_text()).get("TRITFLOW_SETUP_SCHEMA") != SETUP_SCHEMA:
+    if (not runtime.is_file()
+            or json.loads(runtime.read_text()).get("TRITFLOW_SETUP_SCHEMA") != SETUP_SCHEMA
+            or json.loads(runtime.read_text()).get("TRITFLOW_SETUP_SHA256") != setup_identity(ROOT)):
         subprocess.run(["bash", str(ROOT/"notebook/colab_setup.sh"), "--source", str(ROOT)], check=True)
     os.environ.update(json.loads(runtime.read_text()))
+    sys.path.insert(0, os.environ["TRITFLOW_PYTHON_TARGET"])
 else:
     candidates = [Path(os.environ.get("TRITFLOW_ROOT", ".")), Path.cwd(), Path.cwd().parent]
     ROOT = next((p.resolve() for p in candidates if (p/"pyproject.toml").is_file()
@@ -50,6 +58,10 @@ else:
         raise RuntimeError("run locally from the full checkout or set TRITFLOW_ROOT")
     SOURCE_COMMIT = source_git("rev-parse", "--verify", "HEAD^{commit}") if (ROOT/".git").exists() else "tracked-tree export (no .git)"
     print(f"Source: {ROOT} commit={SOURCE_COMMIT}")
+runtime = ROOT/"notebook/runtime.json"
+if not IN_COLAB and runtime.is_file():
+    os.environ.update(json.loads(runtime.read_text()))
+    sys.path.insert(0, os.environ["TRITFLOW_PYTHON_TARGET"])
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT/"notebook"))
 sys.path.append(str(ROOT/"figures"))   # the paper's figure scripts, reused by method cells
@@ -70,7 +82,7 @@ from IPython.display import display, HTML, Image
 from tritflow import flow, CELLS_DIR, PDK_ROOT, PASS_BAND, TRIT_VOLTS
 from tritflow.sim import dc_transfer, input_vectors, subcircuits
 from tritflow.viz.graph import truth_table_html
-from tritflow.viz.waves import waveform_figure
+from tritflow.viz.waves import waveform_figure, waveform_scope
 from tritflow.viz.layout import render_gds, placement_animation, routing_progress
 from tritflow.viz.cell import device_mapping
 from tritflow.sim.provenance import pdk_provenance
@@ -90,12 +102,12 @@ cache = Cache(BUILD/"cache", runtime_fingerprint(ROOT, PDK_ROOT,names=native_sou
 recorded_campaign = RecordedCampaign(ROOT/"notebook/assets/four_designs.zip",ROOT,PDK_ROOT,
                                      enabled=not cache.force)
 renderer_sha256 = hashlib.sha256((ROOT/"tritflow/viz/layout.py").read_bytes()).hexdigest()
-from presentation import show, table, evidence
+from presentation import show, table, evidence, gds_download
 
 from IPython.display import Markdown, Code
 from editorial import context, context_identity, render as render_narrative, dimensions
 from paper_evidence import load_paper
-from learning import sizing_slider, value_selector, highlight_devices
+from learning import sizing_slider, value_selector, highlight_devices, cell_cards
 from predictions import divider, zero_dc, rail_power
 from presentation import details_html, details_svg
 from routing_identity import routing_label, archive_routing
@@ -147,7 +159,6 @@ assert np.array_equal(t["inva"], -t["a"])
 assert np.array_equal(t["nandab"], -np.minimum(t["a"], t["b"]))
 assert np.array_equal(t["norab"], -np.maximum(t["a"], t["b"]))
 assert np.array_equal(t["nanyab"], -np.clip(t["a"]+t["b"],-1,1))
-details_html("Gate truth tables", truth_table_html(gates.design))
 for name in ["INV","NAND","NOR","NANY"]:
     body = subcircuits((CELLS_DIR/f"out/{name}/{name}.spice").read_text())[name.lower()]["body"]
     assert ("VMID" in body.upper()) == (name == "NANY"), name
@@ -155,6 +166,8 @@ for name in ["INV","NAND","NOR","NANY"]:
 assert {cell: sorted(c) for cell, c in curves.items()} == {"INV": [0], "NAND": [-1, 0, 1], "NOR": [-1, 0, 1], "NANY": [-1, 0, 1]}
 assert abs(v_a[i0]) < 1e-9
 assert abs(v_y[i0]-paper["inv_dc"]["output_v"]) < 1e-8
+# The held input really is held: at A = +5 V, NAND gives +5 V for B = −1 and −5 V for B = +1.
+assert curves["NAND"][-1][1][-1] > 4.5 and curves["NAND"][1][1][-1] < -4.5
 details_html("Taped-out INV schematic and exported source",schematic_gallery(
     ROOT/"notebook/assets/schematics",names=["INV"],selected="INV"))
 '''
@@ -452,7 +465,7 @@ table([["Independent arithmetic input states",len(planned)], ["Physical results"
        ["DRC clean / LVS matched",[custom_result["drc"]["clean"],custom_result["lvs"]["matched"]]],
        ["Initial Newton guesses (V)",custom_result["initial_nodeset_v"]]],details="Selected circuit physical evidence and Newton guesses")
 
-show(waveform_figure(custom_result["post"],title=f"{CHOICE}: all input states, selected sequence"))
+show(waveform_scope(custom_result["post"],title=f"{CHOICE}: post-layout transient, every input state"))
 custom_values = {"custom.name":custom.top,"custom.logic_states":len(planned),
     "custom.cells":custom.report()["total_cells"],"custom.die_um":dimensions(custom_result["stats"]["die_size_um"]),
     "custom.drc_items":custom_result["drc"]["violations"],"custom.lvs_status":"Match",

@@ -13,10 +13,11 @@ sys.path.insert(0,str(ROOT/"notebook"))
 import runtime_support as runtime
 
 
-def test_colab_pins_only_the_two_notebook_owned_packages():
-    lines=[line.strip() for line in (ROOT/"notebook/requirements-colab.txt").read_text().splitlines()
-           if line.strip() and not line.startswith("#")]
-    assert {line.split("==")[0] for line in lines} == {"klayout","lark"}
+def test_colab_pins_only_packages_not_preloaded_by_the_kernel():
+    import re
+    text=(ROOT/"notebook/requirements-colab.txt").read_text()
+    assert set(re.findall(r"(?m)^([a-z-]+)==",text)) == {"klayout","lark","scipy","plotly","tenacity","contourpy","fonttools"}
+    assert "--hash=sha256:" in text
 
 
 def test_preloaded_version_change_requests_one_restart_before_importing(monkeypatch):

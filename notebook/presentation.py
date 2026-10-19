@@ -26,6 +26,27 @@ def title_controls(figure):
     return result
 
 
+def gds_download(path, *, url=None):
+    """Offer a GDSII file as a one-click browser download.
+
+    Generated layouts are embedded as a data link, so the button also works in a
+    saved or exported notebook. ``url`` links to a published copy instead of
+    embedding it (used for the 1.4 MB shuttle chip).
+    """
+    import base64, hashlib
+    from pathlib import Path
+    path = Path(path)
+    data = path.read_bytes()
+    href = escape(url, quote=True) if url else "data:application/octet-stream;base64,"+base64.b64encode(data).decode()
+    display(HTML(
+        f'<a download="{escape(path.name, quote=True)}" href="{href}" target="_blank" '
+        'style="display:inline-block;margin:6px 0;padding:9px 18px;border-radius:6px;background:#1a5fb4;'
+        'color:#fff;font:600 15px sans-serif;text-decoration:none">'
+        f'⬇ Download {escape(path.name)}</a>'
+        f'<span style="margin-left:12px;color:#555;font:13px sans-serif">GDSII, {len(data)/1024:.0f} KB · '
+        f'open in KLayout · SHA-256 {hashlib.sha256(data).hexdigest()[:16]}…</span>'))
+
+
 def show(figure):
     figure = title_controls(figure)
     if os.environ.get("TRITFLOW_NOTEBOOK_HEADLESS") == "1":

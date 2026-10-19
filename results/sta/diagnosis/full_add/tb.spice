@@ -7,55 +7,55 @@ TritFlow ternary testbench
 .parameters magRR       = 1
 .parameters magRS       = 1 
 .parameters magCSIO     = 1 
-.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
-.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib"
-.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib"
-.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib"
+.include "/home/penguin/tritflow-sim/runtime/native/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/penguin/tritflow-sim/runtime/native/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/penguin/tritflow-sim/runtime/native/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/penguin/tritflow-sim/runtime/native/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c/libs.tech/spice/models/models_IP62_res_v5.lib"
 * Created by KLayout
 *** My special header ***
 
 * cell full_add
 * pin VDD
 * pin VMID
-* pin VSS
 * pin a
 * pin b
 * pin cin
-* pin cout
 * pin sum
-.SUBCKT full_add VDD VMID VSS a b cin cout sum
-* cell instance $1 m90 *1 402,198
-X_ex_1 VMID n_ex_I68 n_ex_I71 VDD n_ex_I70 VSS NANY
-* cell instance $2 r0 *1 66,198
-X_ex_2 VMID n_ex_I69 n_ex_I60 VDD n_ex_I71 VSS NANY
-* cell instance $3 m90 *1 234,534
-X_ex_3 VMID n_ex_I62 b VDD n_ex_I69 VSS NANY
-* cell instance $4 m90 *1 672,198
-X_ex_4 VMID n_ex_I67 n_ex_I57 VDD n_ex_I68 VSS NANY
-* cell instance $5 m90 *1 642,366
-X_ex_5 VMID n_ex_I66 cin VDD n_ex_I67 VSS NANY
-* cell instance $6 m90 *1 810,366
-X_ex_6 VMID cin n_ex_I61 VDD n_ex_I66 VSS NANY
-* cell instance $7 m90 *1 642,30
-X_ex_7 VMID n_ex_I68 n_ex_I66 VDD n_ex_I65 VSS NANY
-* cell instance $8 r0 *1 642,30
-X_ex_8 VMID n_ex_I68 n_ex_I53 VDD sum VSS NANY
+* pin cout
+* pin VSS
+.SUBCKT full_add VDD VMID a b cin sum cout VSS
+* cell instance $1 m90 *1 342,30
+X_ex_1 VDD n_ex_I9 n_ex_I14 VSS INV
+* cell instance $2 m90 *1 234,30
+X_ex_2 VDD n_ex_I13 cout VSS INV
+* cell instance $4 m90 *1 402,198
+X_ex_4 VMID n_ex_I48 n_ex_I71 VDD n_ex_I13 VSS NANY
+* cell instance $5 r0 *1 66,198
+X_ex_5 VMID n_ex_I49 n_ex_I60 VDD n_ex_I71 VSS NANY
+* cell instance $6 m90 *1 204,366
+X_ex_6 VDD a n_ex_I60 VSS INV
+* cell instance $7 r0 *1 204,366
+X_ex_7 VMID b a VDD n_ex_I62 VSS NANY
+* cell instance $8 m90 *1 234,534
+X_ex_8 VMID n_ex_I62 b VDD n_ex_I49 VSS NANY
 * cell instance $9 r0 *1 234,534
 X_ex_9 VMID n_ex_I71 n_ex_I62 VDD n_ex_I63 VSS NANY
-* cell instance $10 r0 *1 204,366
-X_ex_10 VMID b a VDD n_ex_I62 VSS NANY
-* cell instance $11 r0 *1 612,534
-X_ex_11 VMID n_ex_I71 n_ex_I50 VDD n_ex_I61 VSS NANY
-* cell instance $12 m90 *1 780,198
-X_ex_12 VDD n_ex_I61 n_ex_I57 VSS INV
-* cell instance $13 m90 *1 612,534
-X_ex_13 VDD n_ex_I63 n_ex_I50 VSS INV
-* cell instance $14 m90 *1 204,366
-X_ex_14 VDD a n_ex_I60 VSS INV
-* cell instance $15 m90 *1 342,30
-X_ex_15 VDD n_ex_I65 n_ex_I53 VSS INV
-* cell instance $16 m90 *1 234,30
-X_ex_16 VDD n_ex_I70 cout VSS INV
+* cell instance $10 m90 *1 642,30
+X_ex_10 VMID n_ex_I48 n_ex_I54 VDD n_ex_I9 VSS NANY
+* cell instance $11 r0 *1 642,30
+X_ex_11 VMID n_ex_I48 n_ex_I14 VDD sum VSS NANY
+* cell instance $12 m90 *1 672,198
+X_ex_12 VMID n_ex_I46 n_ex_I57 VDD n_ex_I48 VSS NANY
+* cell instance $13 m90 *1 780,198
+X_ex_13 VDD n_ex_I12 n_ex_I57 VSS INV
+* cell instance $14 m90 *1 642,366
+X_ex_14 VMID n_ex_I54 cin VDD n_ex_I46 VSS NANY
+* cell instance $15 m90 *1 810,366
+X_ex_15 VMID cin n_ex_I12 VDD n_ex_I54 VSS NANY
+* cell instance $16 m90 *1 612,534
+X_ex_16 VDD n_ex_I63 n_ex_I16 VSS INV
+* cell instance $17 r0 *1 612,534
+X_ex_17 VMID n_ex_I71 n_ex_I16 VDD n_ex_I12 VSS NANY
 * Estimated lumped wire C to substrate (node 0); not signoff PEX
 Ctfwire0 VDD 0 2.1868710342e-12
 Ctfwire1 VMID 0 1.4806713056e-12
@@ -66,19 +66,19 @@ Ctfwire5 sum 0 4.88502406e-14
 Ctfwire6 cout 0 9.55017366e-14
 Ctfwire7 VSS 0 1.745154001e-12
 Ctfwire8 n_ex_I71 0 1.99757113e-13
-Ctfwire9 n_ex_I70 0 1.299437568e-13
-Ctfwire10 n_ex_I69 0 1.700703822e-13
-Ctfwire11 n_ex_I68 0 1.574135874e-13
-Ctfwire12 n_ex_I67 0 1.130915982e-13
-Ctfwire13 n_ex_I66 0 1.259455792e-13
-Ctfwire14 n_ex_I65 0 6.35213344e-14
-Ctfwire15 n_ex_I63 0 6.97747024e-14
-Ctfwire16 n_ex_I62 0 1.431100232e-13
-Ctfwire17 n_ex_I61 0 1.202191442e-13
-Ctfwire18 n_ex_I60 0 4.58396626e-14
-Ctfwire19 n_ex_I57 0 4.45814966e-14
-Ctfwire20 n_ex_I53 0 9.0386703e-14
-Ctfwire21 n_ex_I50 0 5.50012046e-14
+Ctfwire9 n_ex_I63 0 6.97747024e-14
+Ctfwire10 n_ex_I62 0 1.431100232e-13
+Ctfwire11 n_ex_I60 0 4.58396626e-14
+Ctfwire12 n_ex_I57 0 4.45814966e-14
+Ctfwire13 n_ex_I54 0 1.259455792e-13
+Ctfwire14 n_ex_I49 0 1.700703822e-13
+Ctfwire15 n_ex_I48 0 1.574135874e-13
+Ctfwire16 n_ex_I46 0 1.130915982e-13
+Ctfwire17 n_ex_I16 0 5.50012046e-14
+Ctfwire18 n_ex_I14 0 9.0386703e-14
+Ctfwire19 n_ex_I13 0 1.299437568e-13
+Ctfwire20 n_ex_I12 0 1.202191442e-13
+Ctfwire21 n_ex_I9 0 6.35213344e-14
 .ends full_add
 
 * cell NANY
@@ -132,28 +132,28 @@ XR_ex_4 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1
 VDD VDD 0 5
 VMID VMID 0 0
 VSS VSS 0 -5
-Xdut VDD VMID VSS a b cin cout sum full_add
-Vin0 a 0 PWL(0 -5 5e-07 -5 5.01e-07 -5 1e-06 -5 1.001e-06 -5 1.5e-06 -5 1.501e-06 -5 2e-06 -5 2.001e-06 -5 2.5e-06 -5 2.501e-06 -5 3e-06 -5 3.001e-06 -5 3.5e-06 -5 3.501e-06 -5 4e-06 -5 4.001e-06 -5 4.5e-06 -5 4.501e-06 0 5e-06 0 5.001e-06 0 5.5e-06 0 5.501e-06 0 6e-06 0 6.001e-06 0 6.5e-06 0 6.501e-06 0 7e-06 0 7.001e-06 0 7.5e-06 0 7.501e-06 0 8e-06 0 8.001e-06 0 8.5e-06 0 8.501e-06 0 9e-06 0 9.001e-06 5 9.5e-06 5 9.501e-06 5 1e-05 5 1.0001e-05 5 1.05e-05 5 1.0501e-05 5 1.1e-05 5 1.1001e-05 5 1.15e-05 5 1.1501e-05 5 1.2e-05 5 1.2001e-05 5 1.25e-05 5 1.2501e-05 5 1.3e-05 5 1.3001e-05 5)
-Vin1 b 0 PWL(0 -5 5e-07 -5 5.01e-07 -5 1e-06 -5 1.001e-06 -5 1.5e-06 -5 1.501e-06 0 2e-06 0 2.001e-06 0 2.5e-06 0 2.501e-06 0 3e-06 0 3.001e-06 5 3.5e-06 5 3.501e-06 5 4e-06 5 4.001e-06 5 4.5e-06 5 4.501e-06 -5 5e-06 -5 5.001e-06 -5 5.5e-06 -5 5.501e-06 -5 6e-06 -5 6.001e-06 0 6.5e-06 0 6.501e-06 0 7e-06 0 7.001e-06 0 7.5e-06 0 7.501e-06 5 8e-06 5 8.001e-06 5 8.5e-06 5 8.501e-06 5 9e-06 5 9.001e-06 -5 9.5e-06 -5 9.501e-06 -5 1e-05 -5 1.0001e-05 -5 1.05e-05 -5 1.0501e-05 0 1.1e-05 0 1.1001e-05 0 1.15e-05 0 1.1501e-05 0 1.2e-05 0 1.2001e-05 5 1.25e-05 5 1.2501e-05 5 1.3e-05 5 1.3001e-05 5)
-Vin2 cin 0 PWL(0 -5 5e-07 -5 5.01e-07 0 1e-06 0 1.001e-06 5 1.5e-06 5 1.501e-06 -5 2e-06 -5 2.001e-06 0 2.5e-06 0 2.501e-06 5 3e-06 5 3.001e-06 -5 3.5e-06 -5 3.501e-06 0 4e-06 0 4.001e-06 5 4.5e-06 5 4.501e-06 -5 5e-06 -5 5.001e-06 0 5.5e-06 0 5.501e-06 5 6e-06 5 6.001e-06 -5 6.5e-06 -5 6.501e-06 0 7e-06 0 7.001e-06 5 7.5e-06 5 7.501e-06 -5 8e-06 -5 8.001e-06 0 8.5e-06 0 8.501e-06 5 9e-06 5 9.001e-06 -5 9.5e-06 -5 9.501e-06 0 1e-05 0 1.0001e-05 5 1.05e-05 5 1.0501e-05 -5 1.1e-05 -5 1.1001e-05 0 1.15e-05 0 1.1501e-05 5 1.2e-05 5 1.2001e-05 -5 1.25e-05 -5 1.2501e-05 0 1.3e-05 0 1.3001e-05 5)
+Xdut VDD VMID a b cin sum cout VSS full_add
+Vin0 a 0 DC -5 PWL(0 -5 5e-07 -5 5.01e-07 -5 1e-06 -5 1.001e-06 -5 1.5e-06 -5 1.501e-06 -5 2e-06 -5 2.001e-06 -5 2.5e-06 -5 2.501e-06 -5 3e-06 -5 3.001e-06 -5 3.5e-06 -5 3.501e-06 -5 4e-06 -5 4.001e-06 -5 4.5e-06 -5 4.501e-06 0 5e-06 0 5.001e-06 0 5.5e-06 0 5.501e-06 0 6e-06 0 6.001e-06 0 6.5e-06 0 6.501e-06 0 7e-06 0 7.001e-06 0 7.5e-06 0 7.501e-06 0 8e-06 0 8.001e-06 0 8.5e-06 0 8.501e-06 0 9e-06 0 9.001e-06 5 9.5e-06 5 9.501e-06 5 1e-05 5 1.0001e-05 5 1.05e-05 5 1.0501e-05 5 1.1e-05 5 1.1001e-05 5 1.15e-05 5 1.1501e-05 5 1.2e-05 5 1.2001e-05 5 1.25e-05 5 1.2501e-05 5 1.3e-05 5 1.3001e-05 5)
+Vin1 b 0 DC -5 PWL(0 -5 5e-07 -5 5.01e-07 -5 1e-06 -5 1.001e-06 -5 1.5e-06 -5 1.501e-06 0 2e-06 0 2.001e-06 0 2.5e-06 0 2.501e-06 0 3e-06 0 3.001e-06 5 3.5e-06 5 3.501e-06 5 4e-06 5 4.001e-06 5 4.5e-06 5 4.501e-06 -5 5e-06 -5 5.001e-06 -5 5.5e-06 -5 5.501e-06 -5 6e-06 -5 6.001e-06 0 6.5e-06 0 6.501e-06 0 7e-06 0 7.001e-06 0 7.5e-06 0 7.501e-06 5 8e-06 5 8.001e-06 5 8.5e-06 5 8.501e-06 5 9e-06 5 9.001e-06 -5 9.5e-06 -5 9.501e-06 -5 1e-05 -5 1.0001e-05 -5 1.05e-05 -5 1.0501e-05 0 1.1e-05 0 1.1001e-05 0 1.15e-05 0 1.1501e-05 0 1.2e-05 0 1.2001e-05 5 1.25e-05 5 1.2501e-05 5 1.3e-05 5 1.3001e-05 5)
+Vin2 cin 0 DC -5 PWL(0 -5 5e-07 -5 5.01e-07 0 1e-06 0 1.001e-06 5 1.5e-06 5 1.501e-06 -5 2e-06 -5 2.001e-06 0 2.5e-06 0 2.501e-06 5 3e-06 5 3.001e-06 -5 3.5e-06 -5 3.501e-06 0 4e-06 0 4.001e-06 5 4.5e-06 5 4.501e-06 -5 5e-06 -5 5.001e-06 0 5.5e-06 0 5.501e-06 5 6e-06 5 6.001e-06 -5 6.5e-06 -5 6.501e-06 0 7e-06 0 7.001e-06 5 7.5e-06 5 7.501e-06 -5 8e-06 -5 8.001e-06 0 8.5e-06 0 8.501e-06 5 9e-06 5 9.001e-06 -5 9.5e-06 -5 9.501e-06 0 1e-05 0 1.0001e-05 5 1.05e-05 5 1.0501e-05 -5 1.1e-05 -5 1.1001e-05 0 1.15e-05 0 1.1501e-05 5 1.2e-05 5 1.2001e-05 -5 1.25e-05 -5 1.2501e-05 0 1.3e-05 0 1.3001e-05 5)
 Cload0 sum 0 1e-14
 Cload1 cout 0 1e-14
 .nodeset v(sum)=0
 .nodeset v(cout)=-5
 .nodeset v(xdut.n_ex_I62)=5
 .nodeset v(xdut.n_ex_I60)=5
-.nodeset v(xdut.n_ex_I69)=0
+.nodeset v(xdut.n_ex_I49)=0
 .nodeset v(xdut.n_ex_I71)=-5
 .nodeset v(xdut.n_ex_I63)=0
-.nodeset v(xdut.n_ex_I50)=0
-.nodeset v(xdut.n_ex_I61)=5
-.nodeset v(xdut.n_ex_I66)=0
+.nodeset v(xdut.n_ex_I16)=0
+.nodeset v(xdut.n_ex_I12)=5
+.nodeset v(xdut.n_ex_I54)=0
 .nodeset v(xdut.n_ex_I57)=-5
-.nodeset v(xdut.n_ex_I67)=5
-.nodeset v(xdut.n_ex_I68)=0
-.nodeset v(xdut.n_ex_I65)=0
-.nodeset v(xdut.n_ex_I70)=5
-.nodeset v(xdut.n_ex_I53)=0
+.nodeset v(xdut.n_ex_I46)=5
+.nodeset v(xdut.n_ex_I48)=0
+.nodeset v(xdut.n_ex_I9)=0
+.nodeset v(xdut.n_ex_I13)=5
+.nodeset v(xdut.n_ex_I14)=0
 
 .control
 set noaskquit
@@ -161,7 +161,7 @@ set wr_singlescale
 set wr_vecnames
 set numdgt=15
 tran 2.5e-10 1.35e-05 0 2.5e-10
-wrdata waveform.txt v(xdut.n_ex_I62) v(xdut.n_ex_I60) v(xdut.n_ex_I68) v(xdut.n_ex_I65) v(xdut.n_ex_I53) v(xdut.n_ex_I70) v(xdut.n_ex_I69) v(xdut.n_ex_I71) v(xdut.n_ex_I63) v(xdut.n_ex_I50) v(xdut.n_ex_I61) v(xdut.n_ex_I66) v(xdut.n_ex_I57) v(xdut.n_ex_I67) v(a) v(b) v(cin) v(cout) v(sum)
+wrdata waveform.txt v(xdut.n_ex_I62) v(xdut.n_ex_I60) v(xdut.n_ex_I48) v(xdut.n_ex_I9) v(xdut.n_ex_I14) v(xdut.n_ex_I13) v(xdut.n_ex_I49) v(xdut.n_ex_I71) v(xdut.n_ex_I63) v(xdut.n_ex_I16) v(xdut.n_ex_I12) v(xdut.n_ex_I54) v(xdut.n_ex_I57) v(xdut.n_ex_I46) v(a) v(b) v(cin) v(cout) v(sum)
 quit
 .endc
 .end

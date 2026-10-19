@@ -77,7 +77,7 @@ def test_static_context_and_embedded_figures_have_no_unresolved_results():
     # The reader's edit is synthesized and checked against the oracle before any physical work.
     assert order.index('method-custom') < order.index('custom_check') < order.index('method-custom_layout') < order.index('custom')
     assert 'custom.schematic(' in cells['method-custom']['source']
-    assert 'render_gds(custom_lay.gds_path' in cells['method-custom_layout']['source']
+    assert 'gds_viewer(custom_lay.gds_path' in cells['method-custom_layout']['source']
     assert 'oracle(vector)' in cells['custom_check']['source'] and 'custom_result' in cells['custom']['source']
     # Visible method cells stay short; checks live in collapsed form cells.
     for c in document['cells']:

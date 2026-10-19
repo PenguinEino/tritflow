@@ -30,29 +30,24 @@ METAL_COLORS = {"M1": "#2869ae", "M2": "#b43d8a", "V1": "#da9a22"}
 CELL_COLORS = {"INV": "#d2e5f1", "NANY": "#d8d2eb", "NAND": "#d5e8d2", "NOR": "#f2dec1"}
 
 
+def _pdk_layer_properties():
+    """The TR-1um KLayout layer-properties file of the pinned PDK, if present."""
+    from tritflow import PDK_ROOT
+    path = Path(PDK_ROOT)/"libs.tech/klayout/tech/TR-1um.lyp"
+    return path if path.is_file() else None
+
+
 def _data(pnr):
     if hasattr(pnr, "data"):
         return pnr.data
     return json.loads(Path(pnr).read_text()) if isinstance(pnr, (str, Path)) else pnr
 
 
-def render_gds(gds_path, output_path=None, *, top=None, width=1400, height=950):
-    """Save a KLayout raster with an embedded layer legend and return its Path.
-
-    Uses the headless pip ``klayout.lay`` renderer; no display server or Qt app
-    is required. The legend lists only layers present in this GDS hierarchy.
-    Device layers retain their actual PDK drawing-layer numbers.
-    """
-    import tempfile
+def _open_gds_view(gds_path, top=None):
+    """Load the real hierarchy and apply the same TR-1um styling to every view."""
     import klayout.db as db
     import klayout.lay as lay
-    from PIL import Image, ImageDraw, ImageFont, PngImagePlugin
 
-    gds_path = Path(gds_path)
-    output = Path(output_path or gds_path.with_suffix(".png"))
-    output.parent.mkdir(parents=True, exist_ok=True)
-    if width < 500 or height < 300:
-        raise ValueError("Raster must be at least 500 × 300 pixels to fit the legend")
     view = lay.LayoutView()
     try:
         view.load_layout(str(gds_path), 0)
@@ -61,31 +56,74 @@ def render_gds(gds_path, output_path=None, *, top=None, width=1400, height=950):
         if cell is None:
             raise ValueError(f"No GDS top cell {top}")
         cv.cell = cell
-        view.clear_layers()
+        lyp = _pdk_layer_properties()
+        friendly = {pair: name for name, pair, _ in LAYERS}
         active = []
-        for name, pair, color in LAYERS:
-            index = cv.layout().find_layer(*pair)
-            if index is None or db.Region(cell.begin_shapes_rec(index)).is_empty():
-                continue
-            node = lay.LayerPropertiesNode()
-            node.source = f"{pair[0]}/{pair[1]}@1"
-            node.name = name
-            node.fill_color = int(color[1:], 16)
-            node.frame_color = int(color[1:], 16)
-            node.dither_pattern = 1 if name in ("Boundary", "N-well") else 0
-            view.insert_layer(view.end_layers(), node)
-            active.append((name, pair, color))
+        if lyp is not None:
+            # The PDK's own KLayout layer properties: same colours, stipples and names
+            # a designer sees when opening this GDS with the TR-1um technology.
+            view.load_layer_props(str(lyp))
+            node = view.begin_layers()
+            while not node.at_end():
+                props = node.current()
+                index = props.layer_index()
+                if index >= 0 and not db.Region(cell.begin_shapes_rec(index)).is_empty():
+                    pair = (props.source_layer, props.source_datatype)
+                    active.append((props.name or f"{pair[0]}/{pair[1]}", pair,
+                                   "#%06x" % (props.fill_color & 0xffffff), friendly.get(pair, "")))
+                node.next()
+            background, ink, muted, rule = "#000000", "#f2f4f7", "#98a2b3", "#344054"
+        else:
+            view.clear_layers()
+            for name, pair, color in LAYERS:
+                index = cv.layout().find_layer(*pair)
+                if index is None or db.Region(cell.begin_shapes_rec(index)).is_empty():
+                    continue
+                node = lay.LayerPropertiesNode()
+                node.source = f"{pair[0]}/{pair[1]}@1"
+                node.name = name
+                node.fill_color = int(color[1:], 16)
+                node.frame_color = int(color[1:], 16)
+                node.dither_pattern = 1 if name in ("Boundary", "N-well") else 0
+                view.insert_layer(view.end_layers(), node)
+                active.append((name, pair, color, ""))
+            background, ink, muted, rule = "#ffffff", "#223044", "#667085", "#d8dee8"
         view.max_hier_levels = 100
         view.min_hier_levels = 0
-        for key, value in (("background-color", "#ffffff"), ("grid-visible", "false"),
-                           ("text-visible", "false"), ("cell-box-visible", "false")):
+        for key, value in (("background-color", background), ("grid-visible", "false"),
+                           ("text-visible", "true" if lyp is not None else "false"),
+                           ("cell-box-visible", "false")):
             view.set_config(key, value)
+        return view, cell, active, (background, ink, muted, rule)
+    except Exception:
+        view.destroy()
+        raise
+
+
+def render_gds(gds_path, output_path=None, *, top=None, width=1800, height=1250):
+    """Save a KLayout raster with an embedded layer legend and return its Path.
+
+    Uses the headless pip ``klayout.lay`` renderer; no display server or Qt app
+    is required. The legend lists only layers present in this GDS hierarchy.
+    Device layers retain their actual PDK drawing-layer numbers.
+    """
+    import tempfile
+    from PIL import Image, ImageDraw, ImageFont, PngImagePlugin
+
+    gds_path = Path(gds_path)
+    output = Path(output_path or gds_path.with_suffix(".png"))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if width < 500 or height < 300:
+        raise ValueError("Raster must be at least 500 × 300 pixels to fit the legend")
+    view, cell, active, (background, ink, muted, rule) = _open_gds_view(gds_path, top)
+    lyp = _pdk_layer_properties()
+    try:
         view.zoom_fit()
         with tempfile.TemporaryDirectory(dir=output.parent) as temporary:
             raw = Path(temporary)/"klayout.png"
-            legend_width, header = 225, 54
+            legend_width, header = 330, 54
             view.save_image(str(raw), width-legend_width, height-header)
-            canvas = Image.new("RGB", (width, height), "white")
+            canvas = Image.new("RGB", (width, height), background)
             with Image.open(raw) as image:
                 canvas.paste(image.convert("RGB"), (0, header))
         draw = ImageDraw.Draw(canvas)
@@ -98,23 +136,38 @@ def render_gds(gds_path, output_path=None, *, top=None, width=1400, height=950):
         except (ImportError, OSError):
             font = title_font = ImageFont.load_default()
         bbox = cell.dbbox()
-        draw.text((18, 13), f"{cell.name}  |  {bbox.width():g} × {bbox.height():g} µm", fill="#223044", font=title_font)
+        draw.text((18, 13), f"{cell.name}  |  {bbox.width():g} × {bbox.height():g} µm", fill=ink, font=title_font)
         x = width-legend_width+16
-        draw.line((x-12, header, x-12, height-15), fill="#d8dee8", width=1)
-        draw.text((x, header+12), "Drawing layers", fill="#223044", font=font)
-        for i, (name, (layer, datatype), color) in enumerate(active):
-            y = header+48+i*34
+        draw.line((x-12, header, x-12, height-15), fill=rule, width=1)
+        draw.text((x, header+12), "TR-1um layers" if lyp is not None else "Drawing layers", fill=ink, font=font)
+        step = max(22, min(34, (height-header-130)//max(1, len(active))))
+        for i, (name, (layer, datatype), color, meaning) in enumerate(active):
+            y = header+48+i*step
             draw.rectangle((x, y, x+17, y+17), fill=color)
-            draw.text((x+26, y-1), f"{name}  {layer}/{datatype}", fill="#344054", font=font)
-        draw.text((x, height-50), "KLayout raster", fill="#667085", font=font)
-        draw.text((x, height-29), "Coordinates in µm", fill="#667085", font=font)
+            draw.text((x+26, y-1), f"{name}  {layer}/{datatype}" + (f"  {meaning}" if meaning and meaning != name else ""),
+                      fill=ink, font=font)
+        draw.text((x, height-50), "KLayout, PDK layer properties" if lyp is not None else "KLayout raster",
+                  fill=muted, font=font)
+        draw.text((x, height-29), "Coordinates in µm", fill=muted, font=font)
         metadata = PngImagePlugin.PngInfo()
         metadata.add_text("Renderer", "KLayout LayoutView")
-        metadata.add_text("Layer legend", json.dumps([{ "name": n, "layer": list(p)} for n, p, _ in active]))
+        metadata.add_text("Layer legend", json.dumps([{"name": n, "layer": list(p), "color": c} for n, p, c, _ in active]))
         canvas.save(output, pnginfo=metadata)
     finally:
         view.destroy()
     return output
+
+
+def gds_viewer(gds_path, *, top=None, width=1000, height=700):
+    """Interactive KLayout GDS: live Colab detail, embedded overview elsewhere.
+
+    Wheel zooms about the cursor, dragging pans, and double-click/Fit restores
+    the overview. No server, CDN or notebook extension is required. A connected
+    Colab kernel rerenders the visible box; exported/local notebooks retain
+    client-side pan/zoom of the embedded PNG. Coordinates and scale are in µm.
+    """
+    from ._gds_viewer import viewer_html
+    return viewer_html(gds_path, top=top, width=width, height=height)
 
 
 def _cell_traces(data, placements=None, highlight=None):

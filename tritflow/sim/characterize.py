@@ -12,6 +12,7 @@ from tritflow import CELLS_DIR, PASS_BAND, PDK_ROOT
 from .bench import build_testbench, input_vectors, simulate, restore_signals
 from .spice import signal_waveform
 from .runner import run_ngspice, SimulationError
+from .tools import simulator_identity
 from .spice import CELL_PINS
 from .provenance import pdk_provenance
 
@@ -111,7 +112,7 @@ def characterize_cell(cell: str, subckts: str | None = None, *, top: str | None 
     max_cap = max((r['capacitance_f'] for r in cap), default=0)
     available = max(successful_loads, default=0)
     fanout = min(4, int(available // max_cap)) if max_cap else None
-    result = {'schema_version': 1, 'cell': cell, 'top': top, 'inputs': inputs, 'output': output,
+    result = {'simulator': simulator_identity(), 'schema_version': 1, 'cell': cell, 'top': top, 'inputs': inputs, 'output': output,
               'created_utc': datetime.now(timezone.utc).isoformat(),
               'source_sha256': hashlib.sha256(subckts.encode()).hexdigest(),
               'conditions': {'temperature_c': kwargs.get('temperature_c', 27),

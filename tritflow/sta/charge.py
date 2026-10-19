@@ -14,6 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
+from tritflow.sim.tools import simulator_identity
 from tritflow import ROOT,CELLS_DIR
 from tritflow.cells.regression import guesses
 from tritflow.sim import input_vectors,build_testbench,run_ngspice
@@ -29,7 +30,7 @@ def cell_charge(cell, *, step_s=.1e-9):
     source=CELLS_DIR/'out'/cell/f'{cell}.ext.spice'
     base=json.loads((source.parent/f'{cell}.timing.json').read_text())
     cache=root/'measurements.json'
-    key={'source_sha256':sha(source),'step_s':step_s,'code_sha256':sha(__file__)}
+    key={'simulator':simulator_identity(),'source_sha256':sha(source),'step_s':step_s,'code_sha256':sha(__file__)}
     if cache.exists():
         previous=json.loads(cache.read_text())
         if previous.get('configuration')==key:return previous

@@ -21,6 +21,7 @@ from tritflow import CELLS_DIR, PDK_ROOT, PASS_BAND
 from tritflow.sim import build_testbench, input_vectors, run_ngspice, measure_sequence, SimulationError
 from tritflow.sim.characterize import input_capacitance
 from tritflow.sim.provenance import pdk_provenance
+from tritflow.sim.tools import simulator_identity
 from .circuits import circuits, ideal
 from .reference import sha
 from .regression import guesses
@@ -48,7 +49,8 @@ def _measurement_code():
         return value
     signature=[stable(f.__code__) for f in (point,_slew,guesses,ideal)]
     return {'cells_bytecode':hashlib.sha256(json.dumps(signature,sort_keys=True).encode()).hexdigest(),
-            'sim_source':{k:v for k,v in CODE_SHA256.items() if k.startswith('sim/')}}
+            'sim_source':{k:v for k,v in CODE_SHA256.items() if k.startswith('sim/')},
+            'simulator':simulator_identity()}
 
 
 def write_json(path, value):

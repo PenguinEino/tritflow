@@ -15,6 +15,7 @@ from .spice import gate_spice
 from .characterize import characterize_cell
 from tritflow.extract.technology import parameter_audit
 from .provenance import pdk_provenance
+from .tools import simulator_identity
 
 
 def _save(path, data):
@@ -169,6 +170,7 @@ def _simulate_cached_unlocked(out, mode, circuit, top, inputs, outputs, vectors,
                    'hold_s':hold_s,'step_s':step_s,'load_f':load_f,
                    'analysis_sha256':{name:file_hash(Path(__file__).with_name(name))
                        for name in ('bench.py','runner.py','measure.py','spice.py')},
+                   'simulator':simulator_identity(),
                    'pdk_root':str(PDK_ROOT.resolve()),
                    'models':{p.name:file_hash(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}}
     options={}
@@ -216,7 +218,7 @@ def _run_postlayout(directory, *, cells_root=CELLS_DIR, hold_s=500e-9, step_s=2e
         source=root/'out'/cell/f'{cell}.ext.spice';char=root/'out'/cell/f'{cell}.char.json'
         current=json.loads(char.read_text()) if char.is_file() else {}
         active_models={p.name:file_hash(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}
-        if (current.get('source_sha256')!=file_hash(source) or current.get('model_sha256')!=active_models
+        if (current.get('simulator')!=simulator_identity() or current.get('source_sha256')!=file_hash(source) or current.get('model_sha256')!=active_models
                 or current.get('pdk_provenance',{}).get('qualified_commit')!=pdk_provenance()['qualified_commit']):
             if not refresh_characterization: raise RuntimeError(f'{cell} characterization is stale')
             characterize_cell(cell,source.read_text(),destination=char)

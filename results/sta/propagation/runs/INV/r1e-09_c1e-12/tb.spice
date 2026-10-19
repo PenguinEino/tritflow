@@ -7,10 +7,10 @@ TritFlow ternary testbench
 .parameters magRR       = 1
 .parameters magRS       = 1 
 .parameters magCSIO     = 1 
-.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
-.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib"
-.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib"
-.include "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib"
+.include "/home/penguin/tritflow-sim/runtime/native/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c/libs.tech/spice/models/models_IP62_cap_v5p1.lib"
+.include "/home/penguin/tritflow-sim/runtime/native/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c/libs.tech/spice/models/models_IP62_diode_v2.lib"
+.include "/home/penguin/tritflow-sim/runtime/native/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c/libs.tech/spice/models/models_IP62_mos_v2.lib"
+.include "/home/penguin/tritflow-sim/runtime/native/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c/libs.tech/spice/models/models_IP62_res_v5.lib"
 * PDK extraction; public ports normalized, no parasitic RC
 .subckt INV A Y VDD VMID VSS
 * device instance $1 r0 *1 19.2,56 PMOS
@@ -30,7 +30,7 @@ VDD VDD 0 5
 VMID VMID 0 0
 VSS VSS 0 -5
 Xdut A Y VDD VMID VSS INV
-Vin0 A 0 PWL(0 -5 4.01e-07 -5 4.02e-07 5 8.02e-07 5 8.03e-07 0 1.203e-06 0 1.204e-06 5 1.604e-06 5 1.605e-06 -5 2.005e-06 -5 2.006e-06 0 2.406e-06 0 2.407e-06 -5)
+Vin0 A 0 DC -5 PWL(0 -5 2.51e-07 -5 2.52e-07 5 5.02e-07 5 5.03e-07 0 7.53e-07 0 7.54e-07 5 1.004e-06 5 1.005e-06 -5 1.255e-06 -5 1.256e-06 0 1.506e-06 0 1.507e-06 -5)
 Cload0 Y 0 1e-12
 .nodeset v(Y)=5
 .nodeset v(xdut.n_ex_5)=5
@@ -40,7 +40,7 @@ set noaskquit
 set wr_singlescale
 set wr_vecnames
 set numdgt=15
-tran 1e-10 2.807e-06 0 1e-10
+tran 2.5e-10 1.757e-06 0 2.5e-10
 wrdata waveform.txt v(A) v(Y) i(vdd) i(vmid) i(vss)
 quit
 .endc

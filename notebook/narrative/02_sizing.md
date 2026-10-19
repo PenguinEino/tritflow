@@ -45,3 +45,8 @@ corrections differ; the MOS also operate nonlinearly. The measured trade-off
 is current falling from {sizing.adopted_current_ua} to
 {sizing.selected_current_ua} µA while worst level error rises from
 {sizing.adopted_error_mv} to {sizing.selected_error_mv} mV.
+
+**Try it.** The method cell below opens an interactive explorer: drag the
+orange slider above its plots to step through every simulated INV size and
+watch the prediction, the SPICE transfer curve and the error/current point move
+together.

@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -187,7 +188,7 @@ def signoff(result, netlist=None, library=None, *, output_dir=None, pdk_root=PDK
     elif isinstance(library, (str, Path)):
         library = Library.load(library)
     pdk = Path(pdk_root).expanduser().resolve()
-    binary = Path(klayout_binary or shutil.which("klayout") or Path.home()/"bin/klayout/klayout").resolve()
+    binary = Path(klayout_binary or os.environ.get("KLAYOUT_BINARY") or shutil.which("klayout") or Path.home()/"bin/klayout/klayout").resolve()
     if not binary.is_file() or timeout <= 0:
         raise ValueError("Sign-off needs an existing KLayout binary and positive timeout")
     tech = pdk/"libs.tech/klayout/tech"

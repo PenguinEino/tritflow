@@ -12,6 +12,21 @@ from .provenance import pdk_provenance
 from .spice import signal_waveform
 
 
+def schematic_nodeset(net, inputs, vector):
+    """Seed only internal gate nets at their ideal initial logic voltages.
+
+    F_RR has nonphysical off-rail Newton roots. These soft .nodeset guesses
+    select the initial operating point; they never force a transient voltage.
+    Use the writer's reversible names so bus and hierarchy spelling is exact.
+    """
+    from tritflow.synth import evaluate_netlist
+    from tritflow.synth.writers import spice_names
+    values=evaluate_netlist(net,dict(zip(inputs,vector)),return_all=True)
+    names=spice_names(net.nets(),('VDD','VMID','VSS','0'))
+    ports={p.name for p in net.ports}
+    return {'xdut.'+names[name]:5*int(value) for name,value in values.items() if name not in ports}
+
+
 def reverse_negative_resistors(text):
     """Reverse only canonical RN terminals, retaining the schematic device model."""
     def swap(match):
@@ -51,11 +66,16 @@ def diagnose_delay(destination=ROOT/'results/delay_diagnosis.json'):
     expected=adder_oracle(1,inputs,outputs);out=ROOT/'build/delay_diagnosis/control'
     modes={'schematic':schematic,'schematic_RN_reversed':reverse_negative_resistors(schematic),
            'extracted_device_only':device_only,'extracted_plus_wire':wire}
+    from .postlayout import logical_nodeset
+    schematic_seed=schematic_nodeset(net,inputs,vectors[0])
+    lvs=json.loads((directory/'postlayout/lvs.json').read_text())
+    extracted_seed=logical_nodeset(net,lvs['report'],inputs,vectors[0])
+    seeds={mode:schematic_seed if mode.startswith('schematic') else extracted_seed for mode in modes}
     measurements={};waves={}
     for mode,text in modes.items():
         print('delay control:',mode,flush=True)
         run=_simulate_cached(out,mode,text,net.top,inputs,outputs,vectors,expected,
-                             hold_s=1e-6,step_s=.5e-9,load_f=10e-15,timeout=600)
+                             hold_s=1e-6,step_s=.5e-9,load_f=10e-15,timeout=600,nodeset=seeds[mode])
         measurements[mode]=run['measurements'];waves[mode]=run['waveforms']
     reference=waves['extracted_device_only'];corrected=waves['schematic_RN_reversed']
     differences={p:float(max(abs(np.interp(reference['time'],corrected['time'],signal_waveform(corrected,p))-signal_waveform(reference,p)))) for p in outputs}
@@ -63,13 +83,15 @@ def diagnose_delay(destination=ROOT/'results/delay_diagnosis.json'):
                    if i in (2,3,5,6) for pin in outputs) for mode,value in measurements.items()}
     result=dict(pdk_provenance=pdk_provenance(),schema_version=1,carry_max_settling_s=carry,vector_plan={'inputs':inputs,'vectors':vectors,'labels':labels},
         conditions={'hold_s':1e-6,'step_s':.5e-9,'load_f':10e-15,'temperature_c':27},
+        initialization={'method':'Identical ideal internal gate-net .nodeset guesses in all four controls; no .ic/uic or transient forcing',
+                        'nodeset_v':seeds},
         measurements=measurements,corrected_schematic_vs_extracted_max_waveform_difference_v=differences,
         junctions=[_junction_audit(cell) for cell in ['INV','NANY']],
         resistor_model=dict(source='models_IP62_res_v5.lib F_RR W=2.8u',
             length_um=30,plus_to_substrate_capacitance_f=(5.96e-4*30+8.07e-3)*1e-12,
             minus_to_substrate_capacitance_f=0.,
             schematic_RN='PLUS=Y, MINUS=n',extracted_RN='PLUS=n, MINUS=Y'),
-        source_sha256={str(source):file_hash(source),
+        source_sha256={str(Path(__file__)):file_hash(Path(__file__)),str(source):file_hash(source),
             str(directory/'postlayout/lvs/adder1.ext.spice'):file_hash(directory/'postlayout/lvs/adder1.ext.spice'),
             str(PDK_ROOT/'libs.tech/spice/models/models_IP62_res_v5.lib'):file_hash(PDK_ROOT/'libs.tech/spice/models/models_IP62_res_v5.lib')},
         interpretation='PDK F_RR lumped C is attached to PLUS only. Swapping RN terminals preserves symmetric DC resistor topology but moves its intrinsic 25.95 fF from Y to the internal NMOS drain. MOS junction parameters equal the active schematic wrapper defaults. Use the exact same extracted devices with/without added wire C for an isolated wire-effect comparison.')

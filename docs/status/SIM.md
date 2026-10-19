@@ -1,5 +1,11 @@
 # SIM — complete, public pinned PDK
 
+## Explicit DC input bias — regeneration in progress (2026-10-19)
+
+Keeping the integrator's `DC <initial voltage> PWL(...)` source fix for ngspice 42. Added regressions for every input's DC value (nominal and scaled rails) and NAND side-input separation at A=+5 V; all three pass. Before-state evidence is retained in `results/dc_bias_before/` (374 JSON records). Eight characterizations and both sizing grids have been recomputed with the new bench hash: every numeric value is exactly unchanged. A controlled ngspice-46 comparison also finds zero difference on all ten Fig. 2 curves (`results/dc_bias_gate_curves.json`).
+
+Timing publication is rebuilding before PNR, post-layout/scaling/load/corner campaigns and downstream figure/paper evidence. Fresh STA raw profiles are being measured independently; their tables will be reassembled against the new timing generation. Earlier completion statements below describe the preceding campaign until this regeneration finishes. No notebook Python source is being edited; evidence tools will refresh the generated assets. The full root test suite will run last.
+
 2026-10-18. Qualification target: **5d963db9d44e192d37a0489c208bfccf2e2f690c**, installed at `$TR1UM_PDK` / `~/pdk/TR-1um-pinned`. CELLS generation **2026-10-18T10:26:47.211617+00:00** and the final PNR Phase 7 outputs are consumed. Phase 7 adds per-net reporting; all four canonical GDS files and complete rail networks are unchanged. No blockers or extra installed packages. No PDK/reference files or foreign source paths were edited; no git-writing commands ran.
 
 The pinned publication campaign is current with frozen synthesis source `mapping.py` SHA-256 **f9f51ffa90ddcbd15e8d14004becbc4ec799228cc5d0d9642246c9ee38ad5cd1**. It covers all four canonical post-layout loops, N=1…6 scaling, load sweep, sizing grids, eight electrical `.char.json` files, robustness matrix and derived figures. `results/pinned_requalification.json` reports **passed=true, errors=[]** and checks consumed hashes, native PDK identity, actual C-element counts and retained artifacts. `results/environment.json` records local Python 3.12 / native KLayout 0.30.9 / Python KLayout 0.30.6 / ngspice 46+ and executable hashes on aarch64. This is local qualification, not a new clean amd64 Colab run.

@@ -33,6 +33,11 @@ def qualified_pdk(record, expected):
 def publish_audit(destination=ROOT/'results/pinned_requalification.json'):
     """Hash live consumed inputs, reject stale evidence, publish numerical deltas."""
     baseline=ROOT/'results/dev_before_pinned'
+    required=[baseline/f'build/{name}/postlayout/summary.json' for name in ('adder4','full_add','mac1','mul1')]
+    required += [baseline/'results/adder_scaling.json',baseline/'results/full_add_load_sweep.json']
+    missing=[str(path) for path in required if not path.is_file()]
+    if missing:
+        raise FileNotFoundError('Historical baseline is incomplete; restore the archived evidence before comparing: '+', '.join(missing))
     pdk=pdk_provenance();changes={};errors=[];sources={};artifacts={}
     def consume(path):
         sources[str(path.resolve())]=file_hash(path)

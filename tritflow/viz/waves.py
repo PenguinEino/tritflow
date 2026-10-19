@@ -114,3 +114,106 @@ def transfer_figure(result: dict, input_pin: str, outputs, *, currents=('VDD',),
 # Short notebook-facing names match the existing gate_graph/layout helpers.
 waveform_plot = waveform_figure
 dc_transfer_plot = transfer_figure
+
+
+SCOPE_COLORS = ('#ffd23f', '#4cc9f0', '#ff6b81', '#7cfc6a', '#ffa94d', '#9ec5ff')
+
+
+def _netlist_census(netlist: str) -> dict:
+    """Count MOSFETs, resistors and wire capacitors the simulated top instantiates."""
+    bodies, current = {}, None
+    for line in netlist.splitlines():
+        word = line.split()[0].upper() if line.split() else ''
+        if word == '.SUBCKT':
+            current = line.split()[1]
+            bodies[current] = []
+        elif word == '.ENDS':
+            current = None
+        elif current and word[:1] in ('X', 'M', 'R', 'C'):
+            bodies[current].append(line.split())
+    def count(name):
+        total = {'mos': 0, 'res': 0, 'wire_c': 0, 'cells': 0}
+        for fields in bodies.get(name, []):
+            model = fields[-1] if fields[0][0].upper() == 'X' else None
+            if fields[0].upper().startswith('XM') or fields[0][0].upper() == 'M':
+                total['mos'] += 1
+            elif fields[0].upper().startswith('XR') or fields[0][0].upper() == 'R':
+                total['res'] += 1
+            elif fields[0].upper().startswith('CTFWIRE'):
+                total['wire_c'] += 1
+            elif fields[0][0].upper() == 'X':
+                callee = next((f for f in reversed(fields) if f in bodies), model)
+                if callee in bodies:
+                    sub = count(callee)
+                    total['cells'] += 1
+                    for key in ('mos', 'res', 'wire_c'):
+                        total[key] += sub[key]
+        return total
+    top = next((l.split()[-1] for l in netlist.splitlines() if l.upper().startswith('XDUT')), None)
+    return count(top) if top else {'mos': 0, 'res': 0, 'wire_c': 0, 'cells': 0}
+
+
+def waveform_scope(result: dict, *, title='Post-layout transient', currents=('VDD',)) -> go.Figure:
+    """Simulator-viewer rendering of a simulate() result: every node in its own lane.
+
+    Inputs, outputs and supply current are drawn from the raw ngspice vectors on a
+    dark scope background, with a cursor, a time range slider and a header that
+    names the simulator run (version, analysis card, extracted device census).
+    """
+    import re
+    stimulus, waves = result['stimulus'], result['waveforms']
+    signals = [('v', pin) for pin in stimulus['inputs']] + [('v', pin) for pin in stimulus['outputs']]
+    signals += [('i', rail) for rail in currents if f'i({rail.lower()})' in waves]
+    time_us = np.asarray(waves['time'])*1e6
+    fig = make_subplots(rows=len(signals), cols=1, shared_xaxes=True, vertical_spacing=.025)
+    levels = sorted((result.get('measurements', {}).get('ideal_volts') or
+                     {-1: -5., 0: 0., 1: 5.}).values())
+    outputs = set(stimulus['outputs'])
+    for row, ((kind, name), color) in enumerate(zip(signals, SCOPE_COLORS*3), 1):
+        if kind == 'v':
+            y, unit, label = signal_waveform(waves, name), 'V', f'v({name})'
+            for level in levels:
+                fig.add_hrect(y0=level-PASS_BAND, y1=level+PASS_BAND, fillcolor='#1f6f4a', opacity=.25,
+                              line_width=0, row=row, col=1)
+            fig.update_yaxes(range=[levels[0]-1.2, levels[-1]+1.2], tickvals=levels, row=row, col=1)
+        else:
+            y, unit, label = np.abs(np.asarray(waves[f'i({name.lower()})']))*1e3, 'mA', f'|i({name.lower()})|'
+        fig.add_trace(go.Scatter(x=time_us, y=y, mode='lines', name=label,
+                                 line={'color': color, 'width': 1.3},
+                                 hovertemplate=f'{label} %{{y:.4g}} {unit}<extra></extra>'), row=row, col=1)
+        rows = result.get('measurements', {}).get('rows', [])
+        if kind == 'v' and name in outputs and rows:
+            # The verifier's own sample points: where each settled level was checked.
+            ok = [r['outputs'][name]['passed'] for r in rows]
+            fig.add_trace(go.Scatter(x=[r['check_s']*1e6 for r in rows], y=[r['outputs'][name]['voltage_v'] for r in rows],
+                mode='markers', marker={'symbol': ['circle-open' if p else 'x' for p in ok], 'size': 8,
+                                        'color': ['#7ee787' if p else '#ff4d4f' for p in ok], 'line': {'width': 1.5}},
+                customdata=[[r['outputs'][name]['error_v']*1e3, str(r['input_trits']), 'PASS' if p else 'FAIL']
+                            for r, p in zip(rows, ok)],
+                hovertemplate='check %{customdata[2]}: %{y:.4f} V, error %{customdata[0]:.2f} mV, inputs %{customdata[1]}<extra></extra>'),
+                row=row, col=1)
+        fig.add_annotation(text=f'<b>{label}</b>{"  out" if name in outputs and kind == "v" else ""}',
+                           x=0.005, y=1, xref=f'x{row if row > 1 else ""} domain', yref=f'y{row if row > 1 else ""} domain',
+                           xanchor='left', yanchor='top', showarrow=False,
+                           font={'color': color, 'size': 13, 'family': 'DejaVu Sans Mono, monospace'})
+        fig.update_yaxes(title_text=unit, row=row, col=1)
+    version = re.search(r'ngspice-([0-9][^\s:]*)', result.get('log', '') or '')
+    census = _netlist_census(stimulus.get('netlist', ''))
+    header = (f"ngspice{' '+version[1] if version else ''} · .{stimulus.get('commands', 'tran')} · "
+              f"extracted layout: {census['cells']} cells, {census['mos']} MOSFETs, {census['res']} resistors, "
+              f"{census['wire_c']} wire C · T = {stimulus.get('temperature_c', 27)} °C · {len(time_us):,} points")
+    mono = {'family': 'DejaVu Sans Mono, monospace', 'color': '#c9d1d9'}
+    grid = {'gridcolor': '#2b333d', 'zerolinecolor': '#3a4450', 'linecolor': '#5b6675', 'showline': True,
+            'tickfont': mono, 'title_font': mono, 'mirror': True, 'showspikes': True,
+            'spikecolor': '#e6edf3', 'spikethickness': 1, 'spikedash': 'dot', 'spikemode': 'across'}
+    fig.update_xaxes(**grid)
+    fig.update_yaxes(**grid)
+    fig.update_xaxes(title_text='time (µs)', rangeslider={'visible': True, 'thickness': .06, 'bgcolor': '#161b22'},
+                     row=len(signals), col=1)
+    fig.update_layout(height=150*len(signals)+170, paper_bgcolor='#0d1117', plot_bgcolor='#000000',
+                      font=mono, showlegend=False, hovermode='x unified',
+                      hoverlabel={'bgcolor': '#161b22', 'font': mono, 'bordercolor': '#5b6675'},
+                      title={'text': f"{title}<br><span style='font-size:12px;color:#8b949e'>{header}</span>",
+                             'font': {**mono, 'size': 17, 'color': '#e6edf3'}, 'x': .01, 'xanchor': 'left'},
+                      margin={'t': 95, 'l': 70, 'r': 25, 'b': 40})
+    return fig

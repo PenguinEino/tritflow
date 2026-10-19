@@ -20,6 +20,7 @@ import numpy as np
 from tritflow import CELLS_DIR, ROOT, PDK_ROOT
 from tritflow.cells.regression import guesses
 from tritflow.sim import build_testbench, input_vectors, run_ngspice
+from tritflow.sim.tools import simulator_identity
 from tritflow.sim.bench import restore_signals
 from tritflow.sim.provenance import pdk_provenance
 from .diagnose import write
@@ -43,7 +44,7 @@ def profile(cell, load, ramp, output, *, step=None):
     vectors=input_vectors(len(inputs),transitions=True);hold=ramp+250e-9
     bench=build_testbench(text,cell,inputs,['Y'],vectors,loads_f=load,edge_s=ramp,
             hold_s=hold,step_s=step,nodeset=guesses(text),initial_outputs={'Y':function(cell,vectors[0])})
-    provenance={'source_sha256':sha(source), 'model_sha256':{p.name:sha(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()},
+    provenance={'simulator':simulator_identity(), 'source_sha256':sha(source), 'model_sha256':{p.name:sha(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()},
         'code_sha256':{p.name:sha(p) for p in [Path(__file__),Path(__file__).with_name('metrics.py')]},
         'load_f':load,'input_transition_s':ramp,'step_s':step,'hold_s':hold,
         'pdk_provenance':pdk_provenance()}
@@ -54,8 +55,8 @@ def profile(cell, load, ramp, output, *, step=None):
         old=prior['provenance']
         # Earlier finer-step/longer-plateau observations are valid measurements
         # of the same edges. Keep their original provenance, never relabel them.
-        if (prior['passed'] and all(old[k]==provenance[k] for k in
-                ('source_sha256','model_sha256','load_f','input_transition_s','pdk_provenance'))
+        if (prior['passed'] and all(old.get(k)==provenance[k] for k in
+                ('simulator','source_sha256','model_sha256','load_f','input_transition_s','pdk_provenance'))
                 and old['code_sha256']['metrics.py']==provenance['code_sha256']['metrics.py']
                 and old['step_s']<=step and old['hold_s']>=hold):return prior
     run=run_ngspice(bench['netlist'],bench['commands'],bench['probes'],timeout=600,workdir=folder)

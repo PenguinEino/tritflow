@@ -79,9 +79,10 @@ def test_gds_raster_and_portable_html_outputs(result, tmp_path):
         colors = image.convert("RGB").getcolors(maxcolors=1000000)
         assert len(colors) > 15
         counts = {color: count for count, color in colors}
-        assert counts.get((40, 105, 174), 0) > 600  # M1 beyond its legend swatch.
-        assert counts.get((180, 61, 138), 0) > 600  # M2 beyond its legend swatch.
-        assert max(count for count, color in colors if color != (255, 255, 255)) < image.width*image.height*.6
+        rgb = {item["name"]: tuple(int(item["color"][i:i+2], 16) for i in (1, 3, 5)) for item in legend}
+        assert counts.get(rgb["M1"], 0) > 600  # M1 beyond its legend swatch.
+        background = max(colors)[1]
+        assert max(count for count, color in colors if color != background) < image.width*image.height*.6
     assert original == result.gds_path.read_bytes()
     paths = save_layout_views(result)
     assert set(paths) == {"png", "layout", "placement", "routing", "capacitance"}

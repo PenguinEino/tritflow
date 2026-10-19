@@ -20,9 +20,13 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
+import zipfile
 from urllib.request import urlopen
 
-from runtime_support import MINIMUM_VERSIONS, SETUP_SCHEMA, check_minimum_versions, print_tool_versions
+from runtime_support import MINIMUM_VERSIONS, SETUP_SCHEMA, check_minimum_versions, print_tool_versions, setup_identity
+from native_runtime import install_native
+from font_runtime import install_fonts
 
 
 HERE = Path(__file__).resolve().parent
@@ -43,18 +47,25 @@ def ubuntu_version(path=Path("/etc/os-release")):
 def package_for(version, architecture):
     if architecture not in {"amd64", "x86_64"}:
         raise ValueError("the pinned official KLayout packages require amd64")
-    if version not in PINS["klayout_deb"]:
-        raise ValueError(f"no pinned official KLayout package for Ubuntu {version}; update setup_pins.json")
+    if version not in PINS["ubuntu_dependency_lock"]:
+        raise ValueError(f"no qualified native runtime for Ubuntu {version}; use notebook/Dockerfile")
     return PINS["klayout_deb"][version]
 
 
 def download(url, destination, checksum=None):
     destination = Path(destination)
-    with urlopen(url, timeout=120) as response, destination.open("wb") as stream:
-        shutil.copyfileobj(response, stream)
-    if checksum and sha256(destination.read_bytes()).hexdigest() != checksum:
-        destination.unlink()
-        raise RuntimeError(f"SHA-256 mismatch: {url}")
+    for attempt in range(4):
+        try:
+            with urlopen(url, timeout=120) as response, destination.open("wb") as stream:
+                shutil.copyfileobj(response, stream)
+            if checksum and sha256(destination.read_bytes()).hexdigest() != checksum:
+                raise RuntimeError(f"SHA-256 mismatch: {url}")
+            return
+        except Exception:
+            destination.unlink(missing_ok=True)
+            if attempt == 3:
+                raise
+            time.sleep(1)
 
 
 def unpack_archive(archive, destination):
@@ -70,6 +81,19 @@ def unpack_archive(archive, destination):
         stream.extractall(destination, filter="data")
 
 
+def bootstrap_pip(prefix):
+    """Use a checked official wheel instead of Colab's changing pip installer."""
+    pin = PINS["pip_wheel"]
+    directory = Path(prefix)/("pip-"+pin["version"])
+    directory.mkdir(parents=True, exist_ok=True)
+    archive = directory/"pip.whl"
+    if not archive.is_file() or sha256(archive.read_bytes()).hexdigest() != pin["sha256"]:
+        download(pin["url"], archive, pin["sha256"])
+    with zipfile.ZipFile(archive) as wheel:
+        wheel.extractall(directory)
+    return directory/"pip"
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", action="store_true")
@@ -78,6 +102,8 @@ def main(argv=None):
     parser.add_argument("--prefix", type=Path, default=Path("/content/tritflow-runtime"))
     parser.add_argument("--ubuntu", help="planning override; requires --plan")
     parser.add_argument("--arch", help="planning override; requires --plan")
+    parser.add_argument("--python-lock", type=Path,
+                        help="full hashed lock for an isolated Docker/venv interpreter")
     args = parser.parse_args(argv)
     if (args.ubuntu or args.arch) and not args.plan:
         parser.error("--ubuntu/--arch are only permitted with --plan")
@@ -92,26 +118,31 @@ def main(argv=None):
     revision = PINS["pdk_commit"]
     pdk = prefix/f"TR-1um-{revision}"
     url = f"https://codeload.github.com/OpenSUSI/TR-1um/tar.gz/{revision}"
-    privilege = [] if os.geteuid() == 0 else ["sudo"]
-    commands = [privilege+["apt-get", "update"],
-                privilege+["apt-get", "install", "-y", "--no-install-recommends", "ngspice", "ca-certificates"],
-                privilege+["apt-get", "install", "-y", str(prefix/"klayout.deb")],
-                [sys.executable, "-m", "pip", "install", "--no-deps", "-r", str(HERE/"requirements-colab.txt"), "-e", str(source)],
-                ["/usr/bin/klayout", "-b", "-r", str(HERE/"ruby_smoke.drc")]]
+    lock = args.python_lock or HERE/"requirements-colab.txt"
+    target = prefix/f"python-{sys.version_info.major}{sys.version_info.minor}-{sha256(lock.read_bytes()).hexdigest()[:16]}"
+    commands = [[sys.executable, str(prefix/("pip-"+PINS["pip_wheel"]["version"])/"pip"),
+                 "install", "--no-deps", "--require-hashes",
+                 "--only-binary=:all:", "--target", str(target), "-r", str(lock)],
+                [str(prefix/"bin/klayout"), "-b", "-r", str(HERE/"ruby_smoke.drc")]]
     plan = {"ubuntu": version, "klayout": package, "pdk_archive": url, "pdk_root": str(pdk),
             "source": str(source), "commands": commands,
+            "ubuntu_dependency_lock": PINS["ubuntu_dependency_lock"][version],
+            "ngspice": PINS["ngspice_package"], "python_target": str(target),
             "host_scientific_minimums": MINIMUM_VERSIONS,
-            "scientific_packages_installed": False}
+            "scientific_packages_installed": True, "preloaded_packages_replaced": False}
     if args.plan:
         print(json.dumps(plan, indent=2))
         return 0
-    check_minimum_versions()
+    if not args.python_lock:
+        check_minimum_versions(("numpy", "matplotlib"))
     prefix.mkdir(parents=True, exist_ok=True)
-    environment = {**os.environ, "DEBIAN_FRONTEND": "noninteractive", "QT_QPA_PLATFORM": "offscreen"}
-    for command in commands[:2]:
-        subprocess.run(command, check=True, env=environment)
-    download(package["url"], prefix/"klayout.deb", package["sha256"])
-    subprocess.run(commands[2], check=True, env=environment)
+    environment = {**os.environ, "DEBIAN_FRONTEND": "noninteractive", "QT_QPA_PLATFORM": "offscreen",
+                   "PIP_CACHE_DIR": str(prefix/"pip-cache"), "XDG_CACHE_HOME": str(prefix/"cache")}
+    bootstrap_pip(prefix)
+    native, wrappers = install_native(package, HERE/PINS["ubuntu_dependency_lock"][version], prefix, download)
+    fonts = install_fonts(prefix, download)
+    binary, ngspice = wrappers["klayout"], wrappers["ngspice"]
+    payload = native/"usr/bin/ngspice"
     if not (pdk/".tritflow-commit").is_file():
         if pdk.exists():
             raise RuntimeError(f"refusing to overwrite an unrecognized PDK directory: {pdk}")
@@ -129,21 +160,26 @@ def main(argv=None):
             (pdk/".tritflow-commit").write_text(revision+"\n")
     if (pdk/".tritflow-commit").read_text().strip() != revision:
         raise RuntimeError("PDK commit marker mismatch")
-    subprocess.run(commands[3], check=True, env=environment)
-    subprocess.run(commands[4], check=True, env=environment)
-    # Default stream paths expect ~/bin/klayout/klayout. Keep that compatibility
-    # inside this fresh runtime without overwriting an existing installation.
-    binary = Path("/usr/bin/klayout")
-    legacy = Path.home()/"bin/klayout/klayout"
-    legacy.parent.mkdir(parents=True, exist_ok=True)
-    if not legacy.exists():
-        legacy.symlink_to(binary)
+    subprocess.run(commands[0], check=True, env=environment)
+    subprocess.run(commands[1], check=True, env=environment)
+    # All callers use KLAYOUT_BINARY from runtime.json. Keep installation
+    # confined to prefix; a simulation-server run must not alter ~/bin.
     config = {"TR1UM_PDK": str(pdk), "TRITFLOW_ROOT": str(source), "KLAYOUT_BINARY": str(binary),
-              "QT_QPA_PLATFORM": "offscreen", "TRITFLOW_SETUP_SCHEMA": SETUP_SCHEMA}
-    (HERE/"runtime.json").write_text(json.dumps(config, indent=2)+"\n")
+              "NGSPICE_BINARY": str(ngspice), "TRITFLOW_PYTHON_TARGET": str(target),
+              "NGSPICE_PAYLOAD": str(payload),
+              "TRITFLOW_FONT_ROOT": str(fonts),
+              "TRITFLOW_SETUP_SHA256": setup_identity(source),
+              "QT_QPA_PLATFORM": "offscreen", "XDG_CACHE_HOME": str(prefix/"cache"),
+              "TRITFLOW_SETUP_SCHEMA": SETUP_SCHEMA}
+    os.environ.update(config)
+    sys.path[:0] = [str(target), str(source)]
+    versions = print_tool_versions()
+    if versions["KLayout"].strip() != "KLayout "+PINS["klayout_version"]:
+        raise RuntimeError("Installed KLayout differs from setup_pins.json")
+    temporary = HERE/"runtime.json.tmp"
+    temporary.write_text(json.dumps(config, indent=2)+"\n")
+    temporary.replace(HERE/"runtime.json")
     print(json.dumps(config, indent=2))
-    os.environ["KLAYOUT_BINARY"] = str(binary)
-    print_tool_versions()
     return 0
 
 

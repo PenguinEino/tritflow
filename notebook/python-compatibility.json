@@ -1,0 +1,153 @@
+{
+  "qualification_date": "2026-10-19",
+  "minimum": {
+    "python": "3.12.12",
+    "numpy": "1.26.4",
+    "scipy": "1.11.4",
+    "matplotlib": "3.8.4",
+    "plotly": "5.24.1",
+    "IPython": "7.34.0"
+  },
+  "colab": {
+    "ubuntu": "24.04.5",
+    "architecture": "x86_64",
+    "python": "3.13.16",
+    "numpy": "2.1.3",
+    "scipy": "1.16.3",
+    "matplotlib": "3.10.0",
+    "plotly": "5.24.1",
+    "IPython": "7.34.0",
+    "Pillow": "11.3.0"
+  },
+  "preloaded": [
+    "numpy",
+    "matplotlib",
+    "PIL",
+    "IPython",
+    "ipywidgets",
+    "cycler",
+    "dateutil",
+    "kiwisolver",
+    "packaging",
+    "pyparsing"
+  ],
+  "privately_pinned": [
+    "klayout",
+    "lark",
+    "scipy",
+    "plotly",
+    "tenacity",
+    "contourpy",
+    "fonttools"
+  ],
+  "scope": "Boundary notebook executions and import/BLAS checks; no promise about untested future Colab kernels.",
+  "smoke_checks": {
+    "minimum": "passed",
+    "colab_boundary": "passed",
+    "coverage": [
+      "NumPy/SciPy BLAS import",
+      "sparse conductance solve",
+      "full-adder synthesis",
+      "ten DC sweeps",
+      "Fig. 2 rendering"
+    ]
+  },
+  "full_notebook": {
+    "minimum": {
+      "passed": true,
+      "code_cells": 35,
+      "seconds": 64.23644751802203,
+      "python": "3.12.12",
+      "notebook_sha256": "7e4ce664606f116103dd959c6ceb3857f281a45392dba5a5ff749a6c52074a62",
+      "report": "build/pin42/notebook-minimum/report.json"
+    },
+    "colab_boundary": {
+      "passed": true,
+      "code_cells": 35,
+      "seconds": 63.314331639994634,
+      "python": "3.13.16",
+      "notebook_sha256": "7e4ce664606f116103dd959c6ceb3857f281a45392dba5a5ff749a6c52074a62",
+      "report": "build/pin42/notebook-colab-boundary/report.json"
+    },
+    "docker_lock_boundary": {
+      "passed": true,
+      "code_cells": 35,
+      "seconds": 62.413293065008475,
+      "python": "3.12.12",
+      "notebook_sha256": "7e4ce664606f116103dd959c6ceb3857f281a45392dba5a5ff749a6c52074a62",
+      "report": "build/pin42/notebook-docker-boundary/report.json"
+    },
+    "amd64_native": {
+      "passed": true,
+      "code_cells": 35,
+      "seconds": 348.1239302389995,
+      "python": "3.12.3",
+      "notebook_sha256": "7e4ce664606f116103dd959c6ceb3857f281a45392dba5a5ff749a6c52074a62",
+      "report": "build/pin42/notebook-amd64/report.json"
+    },
+    "real_colab": {
+      "passed": true,
+      "code_cells": 35,
+      "seconds": 307.76973879199977,
+      "python": "3.13.16",
+      "patched_dirty_tree_guard": true,
+      "actual_colab_setup_branch": true,
+      "report": "build/pin42/colab-final-report.json",
+      "notebook_sha256": "e04341e12be34ed5228e29b5e153e6b4ea9decf86bec30154dcd01409bb3c0f3"
+    },
+    "real_colab_final_metadata": {
+      "passed": true,
+      "code_cells": 35,
+      "seconds": 277.82588282300094,
+      "python": "3.13.16",
+      "patched_dirty_tree_guard": true,
+      "report": "build/pin42/colab-after-readers-report.json",
+      "notebook_sha256": "e04341e12be34ed5228e29b5e153e6b4ea9decf86bec30154dcd01409bb3c0f3"
+    },
+    "real_colab_latest": {
+      "passed": true,
+      "code_cells": 35,
+      "seconds": 313.8061944309993,
+      "python": "3.13.16",
+      "notebook_sha256": "7e4ce664606f116103dd959c6ceb3857f281a45392dba5a5ff749a6c52074a62",
+      "patched_dirty_tree_guard": true,
+      "report": "build/pin42/colab-latest-report.json"
+    }
+  },
+  "package_consistency": {
+    "minimum": "uv pip check passed (54 packages)",
+    "colab_boundary": "uv pip check passed (54 packages)",
+    "docker_lock_boundary": "uv pip check passed (59 packages)"
+  },
+  "ngspice_package": "42+ds-3build1",
+  "ubuntu_snapshot": "20261019T000000Z",
+  "tested_packages": {
+    "minimum": {
+      "numpy": "1.26.4",
+      "scipy": "1.11.4",
+      "matplotlib": "3.8.4",
+      "plotly": "5.24.1",
+      "Pillow": "13.0.0",
+      "IPython": "7.34.0",
+      "klayout": "0.30.6",
+      "lark": "1.3.1"
+    },
+    "colab_boundary": {
+      "numpy": "2.1.3",
+      "scipy": "1.16.3",
+      "matplotlib": "3.10.0",
+      "plotly": "5.24.1",
+      "Pillow": "11.3.0",
+      "IPython": "7.34.0",
+      "klayout": "0.30.6",
+      "lark": "1.3.1"
+    }
+  },
+  "native_scope": "Authoritative server and real Colab: official amd64 ngspice 42+ds-3build1 and KLayout 0.30.6. Local Python-boundary tests: official arm64 ngspice 42, existing native KLayout 0.30.9. Docker Python lock tested natively on amd64; Docker image build not executed (Docker unavailable).",
+  "fonts": {
+    "package": "fonts-urw-base35",
+    "version": "20200910-8",
+    "lock": "fonts-lock.json",
+    "registration": "Only checksum-verified private Nimbus Roman faces"
+  }
+}

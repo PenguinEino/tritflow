@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import time
 
+from tritflow.sim.tools import simulator_identity
 from tritflow import ROOT, CELLS_DIR, PDK_ROOT
 from tritflow.hdl import load
 from tritflow.synth import synthesize, write_artifacts, evaluate_netlist
@@ -133,7 +134,7 @@ def static_points(net, circuit, lvs_report, vectors, expected, *, folder, timeou
             result['xdut.'+node] = 5*int(value)
         return result
     models = {p.name:file_hash(p) for p in sorted((PDK_ROOT/'libs.tech/spice/models').iterdir()) if p.is_file()}
-    digest = _key(dict(circuit=circuit,vectors=vectors,models=models,
+    digest = _key(dict(simulator=simulator_identity(),circuit=circuit,vectors=vectors,models=models,
         expected=[expected(v) for v in vectors],mapping=mapping,
         code={name:file_hash(Path(__file__).with_name(name))
               for name in ('scaling.py','characterize.py','bench.py','spice.py','runner.py')}))
@@ -162,13 +163,13 @@ def run_size(n, *, build_root=None, seeds=(7,0,19), hold_s=1e-6, step_s=2e-9,
     directory.mkdir(parents=True,exist_ok=True)
     sources = experiment_sources()
     options = dict(n=n,seeds=list(seeds),hold_s=hold_s,step_s=step_s,load_f=load_f,timeout=timeout)
-    digest = _key(dict(sources=sources,options=options))
+    digest = _key(dict(simulator=simulator_identity(),sources=sources,options=options))
     record_path = directory/'scaling.json'
     if record_path.is_file():
         record = json.loads(record_path.read_text())
         if _valid_cache(record,digest): return record
     started = time.monotonic()
-    record = dict(n=n,state='running',passed=False,configuration_sha256=digest,
+    record = dict(simulator=simulator_identity(),n=n,state='running',passed=False,configuration_sha256=digest,
                   sources_sha256=sources,conditions=options,error=None)
     _save(record_path,record)
     try:

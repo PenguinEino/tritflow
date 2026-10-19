@@ -9,6 +9,8 @@ JSON; no ignored build tree is needed to read or validate it.
 
 from datetime import datetime, timezone
 from hashlib import sha256
+from tritflow.sim.tools import ngspice_binary
+
 import gzip
 import importlib.metadata
 import json
@@ -58,7 +60,7 @@ def publish_campaign(cache_dir, destination, root, pdk, *, designs=DESIGNS):
     binary=os.environ.get("KLAYOUT_BINARY") or shutil.which("klayout") or Path.home()/"bin/klayout/klayout"
     manifest["tools"].update(
         klayout_binary=subprocess.check_output([str(binary),"-v"],text=True).strip(),
-        ngspice=subprocess.check_output(["ngspice","-v"],text=True).strip())
+        ngspice=subprocess.check_output([ngspice_binary(),"-v"],text=True).strip())
     data = {}
     for name in designs:
         with gzip.open(cache_dir/f"four-{name}.json.gz","rt") as stream: saved=json.load(stream)

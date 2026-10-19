@@ -9,6 +9,7 @@ read-only; this program does not submit, commit, clone or push anything.
 
 from __future__ import annotations
 
+
 import argparse
 from base64 import b64decode, b64encode
 from datetime import datetime, timezone
@@ -31,6 +32,7 @@ import time
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0,str(ROOT))
+from tritflow.sim.tools import ngspice_binary
 sys.path.insert(0,str(ROOT/"notebook"))
 from colab_evidence import CURRENT_EVIDENCE as COLAB_EVIDENCE, run_note
 SOURCE = ROOT/"notebook/tritflow_tr1um.ipynb"
@@ -87,14 +89,26 @@ def tool_version(command):
 
 def release_status(source):
     """Read local release objects without fetching or changing git state."""
-    ref="colab-v0"
+    document=json.loads(Path(source).read_text())
+    setup=next(c["source"] for c in document["cells"] if c.get("id")=="setup")
+    match=re.search(r'SOURCE_REF = os.environ.get\("TRITFLOW_REF", "([0-9a-f]{40})"\)',setup)
+    if not match: raise ValueError("Submission SOURCE_REF must be a full immutable Git commit")
+    ref=match[1]
     result=subprocess.run(["git","-C",str(ROOT),"rev-parse","--verify",ref+"^{commit}"],
                           capture_output=True,text=True)
     info={"default_ref":ref,"commit":result.stdout.strip() if not result.returncode else None,
           "matches_source_notebook":False,"missing_required_helpers":[]}
     if info["commit"]:
         notebook=subprocess.run(["git","-C",str(ROOT),"show",ref+":notebook/tritflow_tr1um.ipynb"],capture_output=True)
-        info["matches_source_notebook"]=(not notebook.returncode and sha256(notebook.stdout).hexdigest()==digest(source))
+        def identity(raw):
+            # Stamping the containing implementation commit must not require
+            # a notebook to contain its own Git hash (an impossible fixed point).
+            document=json.loads(raw)
+            for cell in document["cells"]:
+                if cell.get("id") == "setup":
+                    cell["source"]=re.sub(r'(?m)^SOURCE_REF = .*', 'SOURCE_REF = "<implementation commit>"',cell["source"])
+            return document
+        info["matches_source_notebook"]=(not notebook.returncode and identity(notebook.stdout)==identity(Path(source).read_bytes()))
         for name in ("notebook/experiments.py","examples/curated.py"):
             test=subprocess.run(["git","-C",str(ROOT),"cat-file","-e",ref+":"+name],capture_output=True)
             if test.returncode: info["missing_required_helpers"].append(name)
@@ -104,7 +118,7 @@ def release_status(source):
 
 def release_notice(info):
     if info.get("compatible"):
-        return f'Default source tag `{info["default_ref"]}` matches the packaged notebook at `{info["commit"]}` (local git-object check).'
+        return f'Immutable source commit `{info["commit"]}` matches the packaged notebook, allowing its commit-stamp line (local git-object check).'
     return (f"The local source-ref check found `{info.get('default_ref','colab-v0')}` at "
             f"`{info.get('commit') or 'unavailable'}`. This capture includes later presentation edits. "
             "Build-info.json records the checked source-ref details. "
@@ -215,6 +229,32 @@ def selector_outputs(html):
         "text/plain":"Mapped half adder, initial input selection; rerun for the selector"},metadata={})]
 
 
+def gds_viewer_outputs(html):
+    """Keep the viewer's real KLayout overview when packaging without a kernel."""
+    from html.parser import HTMLParser
+    import nbformat
+
+    class Overview(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            values = dict(attrs)
+            if tag == "img" and values.get("data-gds-overview") == "1":
+                self.image = values.get("src", "")
+                self.title = values.get("alt", "KLayout GDS overview")
+
+    parser = Overview()
+    parser.feed(html)
+    image = getattr(parser, "image", "")
+    prefix = "data:image/png;base64,"
+    if not image.startswith(prefix):
+        raise ValueError("GDS viewer markup changed; refusing to drop its overview")
+    png = b64decode(image[len(prefix):], validate=True)
+    if not png.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise ValueError("GDS viewer overview is not a PNG")
+    return [nbformat.v4.new_output("display_data", data={
+        "image/png": b64encode(png).decode(),
+        "text/plain": parser.title + "; rerun in Colab for live pan/zoom"}, metadata={})]
+
+
 def portable_outputs(document, replacements):
     """Keep actual values; normalize machine paths and remove active/web payloads."""
     from PIL import Image
@@ -227,6 +267,18 @@ def portable_outputs(document, replacements):
                 raise ValueError("failed execution cannot be packaged")
             data = output.get("data",{})
             html = data.get("text/html","")
+            if 'data-gds-viewer="1"' in html:
+                outputs.extend(gds_viewer_outputs(html))
+                continue
+            if 'data-cell-cards="1"' in html:
+                # Keep the cards; static readers get PNG schematics instead of SVG data links.
+                import cairosvg
+                def svg_png(match):
+                    png = cairosvg.svg2png(bytestring=b64decode(match[1]),output_width=1100)
+                    return 'data:image/png;base64,'+b64encode(png).decode()
+                data['text/html'] = re.sub(r'data:image/svg\+xml;base64,([A-Za-z0-9+/=]+)',svg_png,html)
+                outputs.append(output)
+                continue
             if 'data-trit-selector="1"' in html:
                 outputs.extend(selector_outputs(html))
                 continue
@@ -390,7 +442,7 @@ def main(argv=None):
         binary=os.environ.get("KLAYOUT_BINARY") or shutil.which("klayout") or Path.home()/"bin/klayout/klayout"
         tools={p:importlib.metadata.version(p) for p in ("numpy","scipy","plotly","klayout","lark","matplotlib",
                "Pillow","nbformat","nbclient","kaleido","choreographer","CairoSVG")}
-        tools.update(python=platform.python_version(),ngspice=tool_version(["ngspice","-v"]),
+        tools.update(python=platform.python_version(),ngspice=tool_version([ngspice_binary(),"-v"]),
                      klayout_binary=tool_version([str(binary),"-v"]))
         version=re.search(r"ngspice-[^\s]+",tools["ngspice"])
         if version: tools["ngspice"]=version[0]
