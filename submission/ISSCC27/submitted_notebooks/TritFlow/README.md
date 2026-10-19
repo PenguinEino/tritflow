@@ -34,7 +34,7 @@ If Run all stops after setup, choose Run all again.
 
 <details><summary>Source reference for this saved notebook</summary>
 
-The local source-ref check found `colab-v0` at `134dfe793d8170a1547decbca76e558cbb7ca9a6`. This capture includes later presentation edits. Build-info.json records the checked source-ref details. Source-selection and rerun instructions are in Appendix B.
+Default source tag `colab-v0` matches the packaged notebook at `c28739b82042f1ccbb0b42612cd92b2e7c56cf7b` (local git-object check).
 
 </details>
 
