@@ -84,7 +84,8 @@ def build():
 \end{aligned}
 $$''',text,count=1)
         return text
-    def chapter(filename,hero=None):
+    def chapter(filename,hero=None,generated=None):
+        """generated=(lead, cells): the hero is drawn by method cells, not embedded."""
         nonlocal chapter_title
         text = prose(filename)
         chapter_title = text.splitlines()[0].removeprefix('## ')
@@ -98,7 +99,12 @@ $$''',text,count=1)
                     f"**Hand estimate, before SPICE:** I = {values['divider.current_ma']:.4g} mA; "
                     f"Y = {values['divider.output_v']:.4g} V; "
                     f"P = {values['divider.power_mw']:.4g} mW.\n\n")
-            md(render(before,values)+'\n\n'+image(hero,chapter_title)+'\n\n'+render('> **What this shows.**'+after,values))
+            if generated:
+                lead,cells = generated
+                md(render(before,values)+'\n\n'+lead); cells()
+                md(caption(hero)+'\n\n'+render('> **What this shows.**'+after,values))
+            else:
+                md(render(before,values)+'\n\n'+image(hero,chapter_title)+'\n\n'+render('> **What this shows.**'+after,values))
         else:
             md(render(text,values))
 
@@ -130,7 +136,8 @@ $$''',text,count=1)
     code('opening_inputs','Chapter 0 inputs: test conditions and an independent integer oracle')
     method('opening')
     code('opening','Chapter 0 checks')
-    chapter('01_gates.md','gates'); md(verilog('gates.tv')); method('gates')
+    # Fig. 2 is regenerated from ten live DC sweeps by the paper's own figure script.
+    chapter('01_gates.md','gates',generated=(verilog('gates.tv'),lambda: method('gates')))
     code('gates','Chapter 1 checks and the taped-out INV schematic')
     chapter('02_sizing.md','sizing'); method('sizing')
     code('sizing','Chapter 2 details: resistor-length candidates at the taped-out MOS sizes')

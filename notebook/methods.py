@@ -19,12 +19,16 @@ print(f"DRC clean: {drc['clean']} · LVS match: {lvs['matched']} · analog PASS:
 '''
 
 GATES = r'''
+from fig_gates import simulate, draw                      # the paper's own Fig. 2 script
+from style import save as save_figure
 gates = flow.load(ROOT/"examples/gates.tv", "gates")       # the definition shown above
 t = gates.truth_table()                                    # all nine input pairs, ideal trits
-curve = dc_transfer((CELLS_DIR/"out/INV/INV.ext.spice").read_text(), "INV", ["A"], ["Y"], "A",
-                    fixed_trits={}, step_v=0.02)["data"]   # extracted INV layout, DC sweep in ngspice
-i0 = int(np.argmin(abs(curve["v-sweep"])))
-print(f"A = 0 V:  Y = {1e3*curve['v(y)'][i0]:.1f} mV,  supply current = {1e3*abs(curve['i(vdd)'][i0]):.3f} mA")
+curves = simulate(CELLS_DIR/"out")                         # ten ngspice DC sweeps of the extracted layouts
+png = save_figure(draw(curves), "fig_gates", out=BUILD/"figures")
+display(Image(filename=str(png), width=1000))              # Fig. 2, regenerated from your own run
+v_a, v_y, i_ma = curves["INV"][0]
+i0 = int(np.argmin(abs(v_a)))
+print(f"A = 0 V:  Y = {1e3*v_y[i0]:.1f} mV,  supply current = {i_ma[i0]:.3f} mA")
 '''
 
 SIZING = r'''

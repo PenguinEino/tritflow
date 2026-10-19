@@ -78,10 +78,11 @@ def bands(ax, levels=(-5, 0, 5), half=0.5, horizontal=True):
             ax.axvspan(v - half, v + half, color=BAND, lw=0, zorder=0)
 
 
-def save(fig, name):
-    OUT.mkdir(parents=True, exist_ok=True)
+def save(fig, name, out=None):
+    out = Path(out) if out is not None else OUT
+    out.mkdir(parents=True, exist_ok=True)
     meta = {"pdf": {"CreationDate": None, "ModDate": None}, "svg": {"Date": None}, "png": {}}
     for ext in ("pdf", "png", "svg"):
-        fig.savefig(OUT / f"{name}.{ext}", metadata=meta[ext])
+        fig.savefig(out / f"{name}.{ext}", metadata=meta[ext])
     plt.close(fig)
-    return OUT / f"{name}.png"
+    return out / f"{name}.png"
