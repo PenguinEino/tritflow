@@ -52,6 +52,7 @@ else:
     print(f"Source: {ROOT} commit={SOURCE_COMMIT}")
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT/"notebook"))
+sys.path.append(str(ROOT/"figures"))   # the paper's figure scripts, reused by method cells
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from runtime_support import check_runtime, print_tool_versions
 check_runtime()
@@ -150,9 +151,10 @@ details_html("Gate truth tables", truth_table_html(gates.design))
 for name in ["INV","NAND","NOR","NANY"]:
     body = subcircuits((CELLS_DIR/f"out/{name}/{name}.spice").read_text())[name.lower()]["body"]
     assert ("VMID" in body.upper()) == (name == "NANY"), name
-# Same public DC call and zero-input sample as the static gate figure.
-assert abs(curve["v-sweep"][i0]) < 1e-9
-assert abs(curve["v(y)"][i0]-paper["inv_dc"]["output_v"]) < 1e-8
+# The regenerated figure uses the same public DC call and zero-input sample as the paper.
+assert {cell: sorted(c) for cell, c in curves.items()} == {"INV": [0], "NAND": [-1, 0, 1], "NOR": [-1, 0, 1], "NANY": [-1, 0, 1]}
+assert abs(v_a[i0]) < 1e-9
+assert abs(v_y[i0]-paper["inv_dc"]["output_v"]) < 1e-8
 details_html("Taped-out INV schematic and exported source",schematic_gallery(
     ROOT/"notebook/assets/schematics",names=["INV"],selected="INV"))
 '''
