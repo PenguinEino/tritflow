@@ -62,6 +62,7 @@ class _GdsRenderer:
     def render(self, box, width, height):
         """Return the actual crop and PNG data URL; preserve isotropic µm scale."""
         import klayout.db as db
+        from .layout import _gds_text_visibility
         width, height = _pixel_size(width, height)
         box = _aspect_box(box, width, height)
         key = (*box, width, height)
@@ -74,12 +75,13 @@ class _GdsRenderer:
             self.view.resize(width, height)
             target = db.DBox(*box)
             self.view.zoom_box(target)
+            labels = _gds_text_visibility(self.view, target)
             # Explicit target_box avoids viewport/aspect rounding shifting coordinates.
             png = bytes(self.view.get_pixels_with_options(width, height, 0, 0, 0, target).to_png_data())
             self.render_count += 1
             result = {"image": "data:image/png;base64," + b64encode(png).decode(),
                       "box": box, "width": width, "height": height,
-                      "render_count": self.render_count, "cached": False}
+                      "render_count": self.render_count, "cached": False, "labels": labels}
             size = len(result["image"])
             if size <= _CACHE_BYTES:
                 self.cache[key] = result
@@ -170,7 +172,14 @@ canvas.style.cssText = 'display:block;width:100%;height:100%;cursor:grab;touch-a
 const ctx = canvas.getContext('2d');
 let box = config.box.slice(), imageBox = box.slice(), tile = overview;
 let timer, pending = false, revision = 0, drag = null, failures = 0, liveRenders = 0;
-let live = !!(config.callback && window.google?.colab?.kernel?.invokeFunction);
+// Kernel availability can change during Run all. Only a non-Colab output is static.
+const live = !!(config.callback && window.google?.colab);
+function retryDelay(failed) {
+  return failed ? Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5)) : 140;
+}
+function schedule(delay) {
+  clearTimeout(timer); timer = setTimeout(render, delay);
+}
 function dims() { return [box[2] - box[0], box[3] - box[1]]; }
 function paint() {
   const [dx, dy] = dims();
@@ -197,20 +206,24 @@ function paint() {
   root.dataset.liveRenders = liveRenders;
 }
 function state() {
-  status.textContent = live ? (pending ? 'Rendering…' : 'Live KLayout · ' + liveRenders + ' updates')
+  const waiting = live && (pending || failures > 0 || liveRenders === 0);
+  status.textContent = live ? (waiting ? 'live: waiting for kernel…' : 'Live KLayout · ' + liveRenders + ' updates')
     : 'Static overview · rerun in Colab for live detail';
   root.dataset.mode = live ? 'live' : 'static';
+  root.dataset.waiting = waiting ? '1' : '0';
+  root.dataset.retryCount = failures;
+  root.dataset.retryDelay = failures ? retryDelay(failures) : 0;
 }
 async function render() {
   if (!root.isConnected || !live || pending || drag) return;
   const requested = revision, crop = box.slice();
   pending = true; state();
   try {
-    const result = await Promise.race([
-      window.google.colab.kernel.invokeFunction(config.callback,
-        [crop, canvas.width, canvas.height], {}),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Kernel unavailable')), 15000))
-    ]);
+    // Leave one request queued behind later notebook cells, even for minutes.
+    // Timing it out would abandon a valid reply and accumulate duplicate work.
+    const kernel = window.google?.colab?.kernel;
+    if (!kernel?.invokeFunction) throw new Error('Kernel not connected yet');
+    const result = await kernel.invokeFunction(config.callback, [crop, canvas.width, canvas.height], {});
     const data = result.data['application/json'];
     if (!data?.image?.startsWith('data:image/png;base64,')) throw new Error('No KLayout image');
     const next = new Image(); next.src = data.image; await next.decode();
@@ -219,14 +232,13 @@ async function render() {
     tile = next; imageBox = data.box; liveRenders++; failures = 0; paint();
   } catch (error) {
     failures++;
-    if (failures >= 2) live = false;
   } finally {
     pending = false; state();
-    if (live && (requested !== revision || failures)) timer = setTimeout(render, 180);
+    if (root.isConnected && live && (requested !== revision || failures)) schedule(retryDelay(failures));
   }
 }
 function changed() {
-  revision++; paint(); clearTimeout(timer); timer = setTimeout(render, 140);
+  revision++; paint(); schedule(retryDelay(failures));
 }
 function zoom(factor, px = 0.5, py = 0.5) {
   const [dx, dy] = dims();
@@ -283,7 +295,7 @@ root.querySelector('[data-action="out"]').onclick = () => zoom(1 / 0.6);
 function start() {
   if (!overview.naturalWidth) return;
   viewport.insertBefore(canvas, overview); overview.style.display = 'none';
-  paint(); state(); if (live) timer = setTimeout(render, 140);
+  paint(); state(); if (live) schedule(140);
   new ResizeObserver(() => { if (root.isConnected) changed(); }).observe(viewport);
 }
 if (overview.complete) start(); else overview.onload = start;

@@ -213,7 +213,7 @@ def waveform_scope(result: dict, *, title='Post-layout transient', currents=('VD
     fig.update_layout(height=150*len(signals)+170, paper_bgcolor='#0d1117', plot_bgcolor='#000000',
                       font=mono, showlegend=False, hovermode='x unified',
                       hoverlabel={'bgcolor': '#161b22', 'font': mono, 'bordercolor': '#5b6675'},
-                      title={'text': f"{title}<br><span style='font-size:12px;color:#8b949e'>{header}</span>",
+                      title={'text': f"{title}<br><span style='font-size:14px;color:#d0d7de'>{header}</span>",
                              'font': {**mono, 'size': 17, 'color': '#e6edf3'}, 'x': .01, 'xanchor': 'left'},
                       margin={'t': 95, 'l': 70, 'r': 25, 'b': 40})
     return fig

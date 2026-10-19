@@ -276,6 +276,9 @@ def portable_outputs(document, replacements):
                 def svg_png(match):
                     png = cairosvg.svg2png(bytestring=b64decode(match[1]),output_width=1100)
                     return 'data:image/png;base64,'+b64encode(png).decode()
+                html = re.sub(r'<script>.*?</script>','',html,flags=re.S)        # static: every card visible
+                html = re.sub(r'<div data-tabs[^>]*>.*?</div>','',html,count=1,flags=re.S)
+                html = re.sub(r' onclick="[^"]*"','',html)
                 data['text/html'] = re.sub(r'data:image/svg\+xml;base64,([A-Za-z0-9+/=]+)',svg_png,html)
                 outputs.append(output)
                 continue
