@@ -8,7 +8,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
 
 import data
-import style
+import paperstyle as style
 
 DIGIT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]  # categorical slots 1-4, fixed order
 DIGIT_FILL = ["#cde2fb", "#fbd5c4", "#c4ecdd", "#fbe6b3"]

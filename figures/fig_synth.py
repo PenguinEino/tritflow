@@ -16,7 +16,7 @@ from tritflow import flow
 from tritflow.synth.simulate import evaluate_netlist
 
 import data
-import style
+import paperstyle as style
 
 SOURCE = """module half_add(input trit a, b,
                 output trit sum, carry);

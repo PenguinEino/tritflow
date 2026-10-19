@@ -8,7 +8,7 @@ from tritflow import CELLS_DIR, ROOT
 from tritflow.viz.cell import device_locations
 
 import gdsdraw
-import style
+import paperstyle as style
 
 ORIGINAL = Path.home() / "balanced-ternary-logic" / "nany.gds"
 ROW = ("INV", "NAND", "NOR", "NANY")

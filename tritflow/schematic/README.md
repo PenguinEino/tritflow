@@ -40,7 +40,7 @@ from AND, OR, XOR and an amplifier triangle. TIE symbols resemble supply
 sources and print +1, 0 or −1. Directional flags identify external ports.
 
 Colours, serif font preferences and nominal line weights follow
-`figures/style.py`: −1 blue `#2a78d6`, 0 grey `#6f6e69`, +1 red `#e34948`;
+`figures/paperstyle.py`: −1 blue `#2a78d6`, 0 grey `#6f6e69`, +1 red `#e34948`;
 Nimbus Roman / Liberation Serif / DejaVu Serif. Notebook circuits (up to ten
 visible gates/blocks) use at least 11 pt at both their natural size and 1000 px
 wide. Larger expanded circuits retain the 9 pt minimum at 1000 px; symbol strokes are at least

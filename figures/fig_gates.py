@@ -8,7 +8,7 @@ import numpy as np
 from tritflow import ROOT
 from tritflow.sim import dc_transfer
 
-import style
+import paperstyle as style
 from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 
 # Swept input A is the x axis, output Y the y axis. Colour carries one meaning only:

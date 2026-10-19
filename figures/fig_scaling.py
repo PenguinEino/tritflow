@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import data
-import style
+import paperstyle as style
 
 
 def rows():
