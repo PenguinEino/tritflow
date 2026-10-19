@@ -66,8 +66,21 @@ def source_manifest(root, pdk, *, names=None):
         path=base/relative
         if not path.resolve().is_relative_to(base.resolve()):
             raise ValueError(f"recorded source escapes its root: {label}")
-        result[label]=file_hash(path)
+        result[label]=notebook_hash(path) if path.suffix == ".ipynb" else file_hash(path)
     return result
+
+
+def notebook_hash(path):
+    """Notebook identity without its own source pin.
+
+    The released notebook names the implementation commit it clones, which is
+    only known after that commit exists; the pin line must not invalidate the
+    experiments recorded for that very commit.
+    """
+    import re
+    text = re.sub(r'SOURCE_REF = os\.environ\.get\(\\"TRITFLOW_REF\\", \\"[^"\\]*\\"\)',
+                  'SOURCE_REF = <pinned>', Path(path).read_text())
+    return sha256(text.encode()).hexdigest()
 
 
 def source_fingerprint(root, pdk, *, names=None):

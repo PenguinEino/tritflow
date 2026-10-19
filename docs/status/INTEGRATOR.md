@@ -49,3 +49,7 @@
   is now edited by the integrator.
 - Pending release: fig_gates recoloured (refresh paper evidence + full release procedure together with SCHEM phase 5).
 - 10-19: colab-v0 = 020fc73 (Colab round 10 on 0ffe7a1 passed first Run all, 35 cells, 300.7 s). ch4 fig_synth redrawn (FIGSYNTH), ch5 trit selector over flat schematic (notebook/learning.py value_selector; submission packs its default view), SCHEM phase 6 Colab sizing. Japanese one-off review copy at build/review_ja/ (untracked; user reviewing). Next: user feedback from JA review, REVIEW round 4, freeze 10-25.
+- 10-19 release order (immutable source pin): (1) release steps + commit implementation X; (2) make_notebook
+  now pins X (SOURCE_REF = full SHA of HEAD); validate + build_submission + tests; commit Y (notebook only);
+  (3) tag colab-v0 -> Y, push. The campaign manifest hashes the notebook without its SOURCE_REF line
+  (notebook/cache.py notebook_hash), so step 2 does not invalidate recorded experiments.
