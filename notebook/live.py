@@ -143,6 +143,8 @@ def _streamed_tools(report):
             parse, launched = _klayout_progress(), [command[0], "-d", "11", *command[1:]]
         else:
             parse, launched = _ngspice_progress(options.get("cwd")), list(command)
+        # Both tools are silent for a few seconds while they load decks or the operating point.
+        report("KLayout · 起動中" if "klayout" in name else "ngspice · 動作点を計算中")
         timeout = options.pop("timeout", None)
         options.pop("capture_output"), options.pop("text")
         process = subprocess.Popen(launched, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
