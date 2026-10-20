@@ -58,8 +58,11 @@ step: NAME "=" expr -> step_assign
         | equality
 ?equality: equality EQ relation -> comparison
          | relation
-?relation: relation REL sum -> comparison
-         | sum
+?relation: relation REL shift -> comparison
+         | shift
+?shift: shift LSHIFT sum -> shift_left
+      | shift RSHIFT sum -> shift_right
+      | sum
 ?sum: sum "+" product -> add
     | sum "-" product -> sub
     | product
@@ -84,6 +87,8 @@ DIRECTION.2: /(?:input|output)\b/
 PRIMITIVE.2: /(?:inv|nand|nor|nany|buf)\b/
 EQ: "==" | "!="
 REL: "<=" | ">=" | "<" | ">"
+LSHIFT.2: "<<<" | "<<"
+RSHIFT.2: ">>>" | ">>"
 TRIT: /[0-9]+'[tT][A-Za-z0-9_]+/
 INT: /[0-9]+/
 NAME: /[a-zA-Z_][a-zA-Z_0-9$]*/ | /\\[^\s]+/

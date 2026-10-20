@@ -24,6 +24,15 @@ def test_all_original_examples_retain_exact_netlists_and_cell_counts():
         assert net.report()['cells'] == before['cells'],name
 
 
+def test_retained_first_round_rtl_examples_retain_exact_physical_netlists():
+    snapshot = json.loads(Path(__file__).with_name('fixtures').joinpath('round1_netlists.json').read_text())
+    assert len(snapshot) == 5
+    for name, before in snapshot.items():
+        net = synthesize(load(Path('examples')/name))
+        assert json.loads(net.to_json()) == before['netlist'], name
+        assert net.report()['cells'] == before['cells'], name
+
+
 def test_unary_cell_basis_closure_maps_all_twenty_seven_functions():
     networks = unary_networks()
     assert set(networks) == set(product((-1,0,1),repeat=3))
@@ -70,7 +79,7 @@ def test_arbitrary_multi_input_truth_tables_against_independent_table(inputs,cou
         assert {i.cell for i in net.instances} <= {'INV','NAND','NOR','NANY','BUF','TIEP','TIEZ','TIEN'}
 
 
-@pytest.mark.parametrize('name',['full_add_rtl','adder4_rtl','alu_rtl','case_table','comparator_rtl','mux_rtl'])
+@pytest.mark.parametrize('name',['full_add_rtl','adder4_rtl','alu','case_table','comparator_rtl','mux_rtl'])
 def test_new_constructs_no_optimize_and_gate_writer_round_trip(name):
     source=load('examples/'+name+'.tv')
     net=synthesize(source)
