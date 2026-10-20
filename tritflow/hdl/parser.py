@@ -1,4 +1,4 @@
-"""Source-located Lark AST for the combinational TritVerilog language."""
+"""Source-located Lark AST for combinational and single-clock TritVerilog."""
 
 from __future__ import annotations
 
@@ -15,17 +15,25 @@ module: "module" NAME parameter_header? "(" ports? ")" ";" item* "endmodule"
 parameter_header: "#" "(" parameter_entry ("," parameter_entry)* ")"
 parameter_entry: "parameter" "integer"? NAME "=" expr
 ports: port ("," port)*
-port: DIRECTION "reg"? "trit" range? NAME -> typed_port
+port: DIRECTION "trit" range? NAME -> typed_port
+    | DIRECTION "reg" "trit" range? NAME -> typed_reg_port
     | NAME                         -> continued_port
 range: "[" expr ":" expr "]"
-?item: wire_decl | parameter_decl | localparam_decl | genvar_decl | assign
-     | primitive | instance | generate | for_generate | always_comb
-wire_decl: ("wire" | "reg") "trit" range? NAME ("," NAME)* ";"
+?item: wire_decl | reg_decl | parameter_decl | localparam_decl | genvar_decl | assign
+     | primitive | instance | generate | for_generate | always_comb | always_seq
+wire_decl: "wire" "trit" range? NAME ("," NAME)* ";"
+reg_decl: "reg" "trit" range? NAME ("," NAME)* ";"
 always_comb: "always" "@" ("(" "*" ")" | "*") statement
+always_seq: "always" "@" "(" event (("or" | ",") event)* ")" statement
+event: EDGE expr
+EDGE.2: /(?:posedge|negedge)\b/
+?target: NAME select? -> ref
+       | "{" target ("," target)* "}" -> concat
 ?statement: "begin" statement* "end" -> block
           | "if" "(" expr ")" statement ("else" statement)? -> if_stmt
           | "case" "(" expr ")" case_item* "endcase" -> case_stmt
-          | expr "=" expr ";" -> blocking
+          | target "=" expr ";" -> blocking
+          | target "<=" expr ";" -> nonblocking
           | ";" -> empty_stmt
 case_item: expr ("," expr)* ":" statement -> labeled_case
          | "default" ":"? statement -> default_case
@@ -144,7 +152,7 @@ def parse(text: str, filename: str = "<string>") -> AST:
         context = exc.get_context(text).strip()
         raise HDLError(
             f"{filename}:{exc.line}:{exc.column}: invalid TritVerilog syntax "
-            f"(combinational trit logic; use always @* and blocking = assignments)\n{context}"
+            f"(use always @* with =, or always @(posedge clk) with <=)\n{context}"
         ) from None
     modules = {}
     for node in tree.children:

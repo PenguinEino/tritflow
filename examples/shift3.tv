@@ -1,0 +1,8 @@
+// q[0] captures d; old q[0] and q[1] advance together on each rising edge.
+module shift3(input trit clk, d, output reg trit [2:0] q);
+  always @(posedge clk) begin
+    q[0] <= d;
+    q[1] <= q[0];
+    q[2] <= q[1];
+  end
+endmodule

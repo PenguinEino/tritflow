@@ -54,7 +54,7 @@ def cell_current(cell, default):
 
 def power_plan(placements, library, *, current_density_a_per_um=.00025,
                default_cell_current_a=.0001, sheet_resistance_ohm=.05,
-               span_current_limit_a=None, current_margin=.2):
+               span_current_limit_a=None, current_margin=.2, sequential_rails=False):
     """Plan split M2 trunks; template rail bands are immutable cell geometry.
 
     Width scaling is an assumption; the conservative default uses the manual's
@@ -65,6 +65,8 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
     if (not all(math.isfinite(v) for v in (current_density_a_per_um, default_cell_current_a, sheet_resistance_ohm))
             or current_density_a_per_um <= 0 or default_cell_current_a < 0 or sheet_resistance_ohm <= 0):
         raise ValueError("Power assumptions must be positive (default current may be zero)")
+    from tritflow.seq.power import bands
+    rail_bands = bands(library.template, sequential_rails)
     # OS00 p17 I-3-1: stepped M1 is 500 uA at 2 um. Reserve
     # 20% of that published DC limit, including when a caller asks for more.
     effective_density = min(current_density_a_per_um, .00025)*(1-current_margin)
@@ -95,8 +97,11 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
     for (row, span), load in groups.items():
         bank_loads[span] += load/2
         bank_loads[span+1] += load/2
-        for name, band in library.template["rails"].items():
-            if load/(2*effective_density) > band[1]-band[0]+1e-9:
+        for name, band in rail_bands.items():
+            rail_load = (sum(rail_currents[pl["inst"]][name] for pl in placements
+                             if (pl["row"], pl.get("span", 0)) == (row, span))
+                         if sequential_rails else load)
+            if rail_load/(2*effective_density) > band[1]-band[0]+1e-9:
                 raise ValueError(f"Row {row} span {span} {name}: current requires a wider cell rail")
             if band[1]-band[0] > 45:
                 raise ValueError("Cell rail exceeds the PDK unslotted 45 µm limit")
@@ -109,7 +114,7 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
     for index, load in enumerate(bank_loads):
         # M2 uses its published field rating. At least five TC columns fit
         # in 16 um, allowing current spreading at the narrow row-rail taps.
-        required = max(16., load/m2_density)
+        required = max(32. if sequential_rails else 16., load/m2_density)
         count = math.ceil(required/42.)
         width = math.ceil(max(16., required/count)*10)/10
         bank_width = 3*count*width+(3*count-1)*2.4
@@ -125,7 +130,9 @@ def power_plan(placements, library, *, current_density_a_per_um=.00025,
             "stride": banks[0]["width"]+2.4, "feed_banks": banks, "span_gap": gap,
             "span_current_limit_a": span_current_limit_a,
             "currents_a": currents, "rail_currents_a": rail_currents, "current_sources": sources,
-            "assumptions": {"default_cell_current_a": default_cell_current_a,
+            "assumptions": {**({"sequential_rails": sequential_rails,
+                "row_rail_bands_um": rail_bands} if sequential_rails else {}),
+                "default_cell_current_a": default_cell_current_a,
                 "allowed_current_a_per_um": effective_density,
                 "M2_allowed_current_a_per_um": m2_density,
                 "requested_current_a_per_um": current_density_a_per_um,
@@ -162,10 +169,13 @@ def draw_power(data, placements, library, plan):
                 x = start+(k*count+j)*(width+2.4)+width/2
                 feeds.append((x, width))
                 straps.append({"net": rail, "layer": "M2", "width": width,
-                               "points": [[x, p+width/2], [x, h-width/2]],
+                               "points": [[x, width/2 if plan["assumptions"].get("sequential_rails") else p+width/2],
+                                          [x, h-width/2]],
                                "side": side, "bank": index})
                 pins.append({"name": rail, "layer": "M2", "rect": [x-width/2, h-p, x+width/2, h]})
-        y0, y1 = t["rails"][rail]
+                if plan["assumptions"].get("sequential_rails"):
+                    pins.append({"name": rail, "layer": "M2", "rect": [x-width/2, 0., x+width/2, p]})
+        y0, y1 = plan["assumptions"].get("row_rail_bands_um", t["rails"])[rail]
         railwidth = y1-y0
         for row, y in sorted(row_ys.items()):
             cy = y+(y0+y1)/2

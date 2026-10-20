@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "clock_half_ramp_ns": 25,
+  "clock_zero_pause_ns": 200,
+  "load_fF": 100,
+  "temperature_C": 27,
+  "hold": [
+    {
+      "stored_V": -5,
+      "max_error_V": 0.0006801699999998689,
+      "passed": true
+    },
+    {
+      "stored_V": 0,
+      "max_error_V": 0.0380595945,
+      "passed": true
+    },
+    {
+      "stored_V": 5,
+      "max_error_V": 0.0008650100000000549,
+      "passed": true
+    }
+  ],
+  "zero_clock_controls": [
+    {
+      "time_ns": 480,
+      "ML_MB_SL_SB_V": [
+        -4.95922276,
+        4.99999988,
+        -4.99999963,
+        4.74956133
+      ],
+      "passed": true
+    },
+    {
+      "time_ns": 980,
+      "ML_MB_SL_SB_V": [
+        -4.95922276,
+        4.99999988,
+        -4.99999963,
+        4.74956133
+      ],
+      "passed": true
+    },
+    {
+      "time_ns": 1380,
+      "ML_MB_SL_SB_V": [
+        -4.95922276,
+        4.99999988,
+        -4.99999963,
+        4.74956133
+      ],
+      "passed": true
+    }
+  ],
+  "scope": "D changes during 0 V pauses on rising/falling edges; after valid initial write; master data is restored before next opening/closing window",
+  "source_sha256": {
+    "tdff.sch": "6bf6e5fafb11f679996a2fd35c6453029eb9cc742300675261f518aef82742f9",
+    "tlatch.sch": "497e112e730512848b246fec301ef91e2d6d7625352441ec54eda22dca1fb30e",
+    "inverter.sch": "db254c47b4c8c1f0bc3329fc52e70e6d8809a85122c820d12f57564d70228def",
+    "scripts/check_tdff_clock.py": "aab4267019e8efbf5cfb551eb73241d146af974297d7b2d92c359c4052daa906"
+  }
+}

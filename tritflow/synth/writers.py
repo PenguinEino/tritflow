@@ -19,6 +19,9 @@ def tv_identifier(name: str) -> str:
 
 def tritverilog(net: GateNetlist) -> str:
     """Write scalar gate primitives in the same parseable TritVerilog language."""
+    if any(i.cell == "TDFF" for i in net.instances):
+        from tritflow.seq import writers
+        return writers.tritverilog(net)
     instances = ordered_instances(net)
     ports = ", ".join(f"{p.dir} trit {tv_identifier(p.name)}" for p in net.ports)
     lines = ["// Generated combinational TritVerilog; trits are -1/0/+1.",
@@ -66,6 +69,9 @@ def spice(net: GateNetlist) -> str:
     Each instance uses signal pins A[, B], Y followed by VDD VMID VSS, exactly
     matching the shared cell contract. Node renaming is recorded in comments.
     """
+    if any(i.cell == "TDFF" for i in net.instances):
+        from tritflow.seq import writers
+        return writers.spice(net)
     instances = ordered_instances(net)
     names = spice_names(net.nets(), ("VDD", "VMID", "VSS", "0"))
     inst_names = spice_names([inst.name for inst in instances])

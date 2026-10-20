@@ -3,7 +3,10 @@
 At settled logic levels, -1, 0 and +1 correspond to -5, 0 and +5 V on
 TR-1um. ``~a`` is -a; ``a & b`` and ``a | b`` are min(a,b) and max(a,b).
 ``nany(a,b)`` is -clamp(a+b,-1,+1), not a Boolean NAND. There are no x/z
-states or storage elements. Balanced-ternary integer +, -, * and comparisons
+states. ``always @(posedge clk)`` with ``reg trit`` and nonblocking ``<=``
+adds TDFF storage through the opt-in :mod:`tritflow.seq` extension; its
+``transition(inputs, state)`` and ``cycles(vectors, initial)`` methods require
+explicit state. Balanced-ternary integer +, -, * and comparisons
 work on signals; context widths extend with zero and discard high trits.
 ``c ? a : b`` uses Kleene consensus at c=0. ``always @*`` blocks use blocking
 assignments, if/else and exact case tables; incomplete assignment is an error.

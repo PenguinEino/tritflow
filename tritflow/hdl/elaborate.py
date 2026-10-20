@@ -17,6 +17,8 @@ class Bit:
     name: str
     loc: Location
     driver: Node | None = None
+    is_reg: bool = False
+    direction: str = "wire"
 
 
 @dataclass
@@ -74,8 +76,9 @@ class Elaborator:
     def __init__(self, ast: AST):
         self.ast = ast
         self.bits: dict[str, Bit] = {}
+        self.registers = []
 
-    def declare(self, name, range_node, direction, prefix, env, module, scope, source):
+    def declare(self, name, range_node, direction, prefix, env, module, scope, source, is_reg=False):
         if name in scope:
             raise module.location(source).error(f"duplicate signal {name!r}")
         indices = None
@@ -85,7 +88,7 @@ class Elaborator:
                 raise module.location(range_node).error("vector width exceeds 100001 trits")
             indices = list(range(left, right + (1 if right >= left else -1), 1 if right >= left else -1))
         names = [name] if indices is None else [f"{name}[{i}]" for i in indices]
-        bits = [Bit(prefix + n, module.location(source)) for n in names]
+        bits = [Bit(prefix + n, module.location(source), is_reg=is_reg, direction=direction) for n in names]
         for bit in bits:
             if bit.name in RAILS:
                 raise bit.loc.error(f"{bit.name!r} is reserved for a global power rail; use a TIE constant")
@@ -179,13 +182,15 @@ class Elaborator:
         direction, width = None, None
         if port_tree:
             for port in port_tree.children:
-                if port.data == "typed_port":
+                if port.data in {"typed_port", "typed_reg_port"}:
                     direction = str(port.children[0])
                     width = port.children[1] if isinstance(port.children[1], Tree) else None
                 elif direction is None:
                     raise module.location(port).error("first port must declare input/output trit")
                 port_name = identifier(port.children[-1])
-                self.declare(port_name, width, direction, prefix, env, module, scope, port)
+                self.declare(port_name, width, direction, prefix, env, module, scope, port,
+                             is_reg=port.data == "typed_reg_port" or (port.data == "continued_port" and register_port))
+                register_port = scope[port_name].bits[0].is_reg
                 ports[port_name] = scope[port_name]
         self.items(items, scope, env, module, prefix, (*stack, name))
         return ports, env
@@ -193,10 +198,11 @@ class Elaborator:
     def items(self, items, scope, env, module, prefix, stack):
         # Declarations precede connectivity so forward references behave like HDL wires.
         for item in items:
-            if item.data == "wire_decl":
+            if item.data in {"wire_decl", "reg_decl"}:
                 width = item.children[0] if isinstance(item.children[0], Tree) else None
                 for token in item.children[1:] if width is not None else item.children:
-                    self.declare(identifier(token), width, "wire", prefix, env, module, scope, item)
+                    self.declare(identifier(token), width, "wire", prefix, env, module, scope, item,
+                                 is_reg=item.data == "reg_decl")
         names = set()
         for item in items:
             loc = module.location(item)
@@ -205,6 +211,9 @@ class Elaborator:
                 targets = self.targets(lhs, scope, env, module)
                 self.drive(targets, self.expression(rhs, scope, env, module,
                                                    prefix.rstrip("."), len(targets)), loc)
+            elif item.data == "always_seq":
+                from tritflow.seq.elaborate import elaborate_clocked
+                elaborate_clocked(self, item, scope, env, module, prefix.rstrip("."))
             elif item.data == "always_comb":
                 from .procedural import elaborate_block
                 elaborate_block(self, item, scope, env, module, prefix.rstrip("."))
@@ -288,7 +297,7 @@ class Elaborator:
                     # A generated scope may shadow parent signals, but local declarations
                     # still receive unique flattened names.
                     iteration_scope = scope.copy()
-                    local_names = [identifier(c) for stmt in body if stmt.data == "wire_decl"
+                    local_names = [identifier(c) for stmt in body if stmt.data in {"wire_decl", "reg_decl"}
                                    for c in stmt.children if not isinstance(c, Tree)]
                     for local_name in local_names:
                         iteration_scope.pop(local_name, None)
@@ -343,7 +352,11 @@ class Elaborator:
             if bit.driver is None:
                 raise bit.loc.error(f"undriven output {name!r}")
             outputs[name] = resolve(bit.driver)
-        return Design(top, flat_ports, outputs, inputs, env)
+        design = Design(top, flat_ports, outputs, inputs, env)
+        if self.registers:
+            from tritflow.seq.elaborate import finish_sequential
+            return finish_sequential(design, self.registers, resolve)
+        return design
 
 
 def elaborate(ast: AST, *, top: str | None = None, params: dict[str, int] | None = None) -> Design:

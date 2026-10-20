@@ -10,7 +10,7 @@ from .library import Library
 
 
 def validate_netlist(netlist, library: Library) -> list:
-    """Check single drivers and combinational acyclicity; return topological order."""
+    """Check single drivers and acyclicity between TDFF state boundaries."""
     names, drivers, dependencies = set(), {}, {}
     ports = set()
     for port in netlist.ports:
@@ -41,7 +41,8 @@ def validate_netlist(netlist, library: Library) -> list:
         for pin, net in inst.pins.items():
             if net not in drivers:
                 raise ValueError(f"Undriven net {net}")
-            if library.cells[inst.cell].pins[pin]["dir"] == "input" and drivers[net] is not None:
+            if (inst.cell != "TDFF" and library.cells[inst.cell].pins[pin]["dir"] == "input"
+                    and drivers[net] is not None):
                 deps.add(drivers[net])
         dependencies[inst.name] = deps
     for port in netlist.ports:

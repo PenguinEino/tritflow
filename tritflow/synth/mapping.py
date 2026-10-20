@@ -12,7 +12,7 @@ from .simulate import CELL_INPUTS, check_equivalence, ordered_instances
 
 def fanouts(net: GateNetlist):
     """Count physical cell input pins (an external output load is unspecified)."""
-    return Counter(inst.pins[pin] for inst in net.instances for pin in CELL_INPUTS[inst.cell])
+    return Counter(inst.pins[pin] for inst in net.instances for pin in (("D", "CLK") if inst.cell == "TDFF" else CELL_INPUTS[inst.cell]))
 
 
 class SynthesizedNetlist(GateNetlist):
@@ -177,6 +177,11 @@ def synthesize(design: Design, *, fanout_limit: int = 4, optimize_logic: bool = 
     otherwise; ``seed`` controls that random sample. ``verify=False`` explicitly
     skips this check and leaves report equivalence evidence unset.
     """
+    from tritflow.seq.ir import SequentialDesign
+    if isinstance(design, SequentialDesign):
+        from tritflow.seq.synthesis import synthesize as map_sequential
+        return map_sequential(design, fanout_limit=fanout_limit, optimize_logic=optimize_logic,
+                              verify=verify, seed=seed)
     if not isinstance(fanout_limit, int) or isinstance(fanout_limit, bool) or fanout_limit < 2:
         raise ValueError("fanout_limit must be an integer >= 2")
     from .lower import lower

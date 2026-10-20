@@ -75,8 +75,15 @@ def _floorplan_choice(netlist, library, rows, channel_tracks, currents, capacity
                 widths[key] = widths.get(key, 0.)+pl["width"]
             span_loads = [sum(currents[pl["inst"]] for pl in initial if pl["span"] == span)
                           for span in range(spans)]
-            plan = power_plan(initial, library, **power_options,
-                              span_current_limit_a=max(span_loads))
+            try:
+                plan = power_plan(initial, library, **power_options,
+                                  span_current_limit_a=max(span_loads))
+            except ValueError:
+                if power_options.get("sequential_rails"):
+                    # Widened VDD/VSS do not widen VMID: try a different row/span
+                    # packing when its measured VMID envelope exceeds capacity.
+                    continue
+                raise
             plan["span_width"] = max(widths.values(), default=6*p)
             core_width = spans*plan["span_width"]+(spans-1)*plan["span_gap"]
             w = core_width+2*plan["margin"]
@@ -95,7 +102,7 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
                     anneal_steps=600, history_every=25, channel_tracks=None,
                     max_expansions=5, ripup_passes=8, run_pdk_drc=True,
                     current_density_a_per_um=.00025, default_cell_current_a=.0001,
-                    sheet_resistance_ohm=.05, current_margin=.2,
+                    sheet_resistance_ohm=.05, current_margin=.2, sequential_rails=False,
                     pdk_root=None, klayout_binary=None):
     """Place, route, export and verify a combinational GateNetlist.
 
@@ -134,10 +141,13 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
                 for inst in netlist.instances}
     power_options = dict(current_density_a_per_um=current_density_a_per_um,
                          default_cell_current_a=default_cell_current_a,
-                         sheet_resistance_ohm=sheet_resistance_ohm, current_margin=current_margin)
+                         sheet_resistance_ohm=sheet_resistance_ohm, current_margin=current_margin,
+                         sequential_rails=sequential_rails)
     validated = power_plan([], library, **power_options)
     capacity = 2*validated["assumptions"]["allowed_current_a_per_um"]*min(
         y1-y0 for y0, y1 in library.template["rails"].values())
+    if sequential_rails:
+        capacity *= 3  # Real 12-um VDD/VSS reinforcement; VMID checked per rail in power_plan.
     row_count, spans, tracks, plan, core_width = _floorplan_choice(
         netlist, library, rows, channel_tracks, currents, capacity, power_options)
     relative, history, _ = place(netlist, library, row_count, seed, anneal_steps, history_every,
@@ -166,10 +176,20 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
                                    for name, cell in library.cells.items()}}})
         draw_power(data, data["placements"], library,
                    {**plan, "margin": plan["margin"]+bypass_tracks*library.template["grid"]})
+        if sequential_rails:
+            from tritflow.seq.power import reserve_channels
+            reserve_channels(data, library.template)
         # Power feasibility is independent of signal routing. Reject and
         # resize the floorplan before spending time on its maze routes.
         assessment = dc_current_check(data, library)
         data["power"]["dc_current_check"] = assessment
+        if sequential_rails:
+            audit = out/f"{netlist.top}.power_trials.json"
+            trials = json.loads(audit.read_text()) if audit.exists() else []
+            trials.append({"requested_density": current_density_a_per_um,
+                           "die":data["die"], "rows":row_count, "spans":spans,
+                           "assessment":assessment})
+            audit.write_text(json.dumps(trials, indent=2)+"\n")
         if assessment["defined"] and not assessment["reserved_margin_met"]:
             # Geometry changes in discrete cell increments. Tighten row capacity
             # until the *solved* network meets the requested reserve as well.
@@ -180,7 +200,7 @@ def place_and_route(netlist, library=None, *, output_dir=None, rows=None, seed=0
                 max_expansions=max_expansions, ripup_passes=ripup_passes, run_pdk_drc=run_pdk_drc,
                 current_density_a_per_um=tightened, default_cell_current_a=default_cell_current_a,
                 sheet_resistance_ohm=sheet_resistance_ohm, current_margin=current_margin,
-                pdk_root=pdk_root, klayout_binary=klayout_binary)
+                sequential_rails=sequential_rails, pdk_root=pdk_root, klayout_binary=klayout_binary)
             result.data.setdefault("dc_sizing_attempts", []).insert(0, assessment)
             elapsed = time.perf_counter()-started
             result.stats["runtime_s"]["total"] = elapsed

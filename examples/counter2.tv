@@ -1,0 +1,4 @@
+// Two balanced trits wrap modulo nine: ... +3, +4, -4, -3, ...
+module counter2(input trit clk, output reg trit [1:0] n);
+  always @(posedge clk) n <= n + 1;
+endmodule

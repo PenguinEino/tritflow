@@ -1,0 +1,592 @@
+{
+  "schema_version": 1,
+  "cell": "TDFF",
+  "sequential": true,
+  "passed": true,
+  "created_utc": "2026-10-20T11:02:35.717070+00:00",
+  "ports": [
+    "D",
+    "CLK",
+    "Q",
+    "VDD",
+    "VMID",
+    "VSS"
+  ],
+  "port_directions": {
+    "D": "input",
+    "CLK": "input",
+    "Q": "output",
+    "VDD": "power",
+    "VMID": "power",
+    "VSS": "power"
+  },
+  "data_levels_V": [
+    -5,
+    0,
+    5
+  ],
+  "tolerance_V": 0.5,
+  "supplies_V": {
+    "VDD": 5,
+    "VMID": 0,
+    "VSS": -5
+  },
+  "clock": {
+    "pin": "CLK",
+    "edge": "rising",
+    "low_V": -5,
+    "high_V": 5,
+    "reference_V": 0,
+    "reset": null,
+    "initial_state": "unspecified until first valid write",
+    "nominal_period_tested_ns": 500,
+    "phase_contract": "master transparent low, slave transparent high; both hold near CLK=0; use slew-dependent setup constraints"
+  },
+  "dimensions_um": {
+    "width": 1260.0,
+    "height": 132.0
+  },
+  "dbu_um": 0.001,
+  "placement_grid_um": 0.05,
+  "pins": {
+    "D": {
+      "dir": "input",
+      "layer": "M1",
+      "rects": [
+        [
+          1.3,
+          35.3,
+          4.7,
+          38.7
+        ]
+      ],
+      "access": [
+        [
+          3,
+          37
+        ]
+      ]
+    },
+    "CLK": {
+      "dir": "input",
+      "layer": "M1",
+      "rects": [
+        [
+          1.3,
+          56.3,
+          4.7,
+          59.7
+        ]
+      ],
+      "access": [
+        [
+          3,
+          58
+        ]
+      ]
+    },
+    "Q": {
+      "dir": "output",
+      "layer": "M1",
+      "rects": [
+        [
+          1255.3,
+          62.3,
+          1258.7,
+          65.7
+        ]
+      ],
+      "access": [
+        [
+          1257.0,
+          64
+        ]
+      ]
+    },
+    "VDD": {
+      "dir": "power",
+      "layer": "M1",
+      "rects": [
+        [
+          0,
+          124.0,
+          1260.0,
+          132.0
+        ]
+      ],
+      "access": [
+        [
+          3,
+          128.0
+        ]
+      ]
+    },
+    "VMID": {
+      "dir": "power",
+      "layer": "M1",
+      "rects": [
+        [
+          0,
+          6.0,
+          1260.0,
+          10.0
+        ]
+      ],
+      "access": [
+        [
+          3,
+          8.0
+        ]
+      ]
+    },
+    "VSS": {
+      "dir": "power",
+      "layer": "M1",
+      "rects": [
+        [
+          0,
+          0.0,
+          1260.0,
+          4.0
+        ]
+      ],
+      "access": [
+        [
+          3,
+          2.0
+        ]
+      ]
+    }
+  },
+  "pin_coordinates_um": {
+    "D": [
+      3,
+      37
+    ],
+    "CLK": [
+      3,
+      58
+    ],
+    "Q": [
+      1257.0,
+      64
+    ],
+    "VDD": [
+      3,
+      128.0
+    ],
+    "VMID": [
+      3,
+      8.0
+    ],
+    "VSS": [
+      3,
+      2.0
+    ]
+  },
+  "orientations": [
+    "R0",
+    "MY"
+  ],
+  "free_M2_tracks": {
+    "x": [
+      3.0,
+      1257.0
+    ],
+    "count": 2,
+    "wire_width": 3.4,
+    "clearance": 2.0
+  },
+  "device_counts": {
+    "PMOS": 16,
+    "NMOS": 16,
+    "F_RR": 16
+  },
+  "timing_unit": "ns",
+  "timing_source": "schematic nominal, 27 C",
+  "timing_by_load_and_clock_slew": [
+    {
+      "load_fF": 10,
+      "clock_slew_ns": 1,
+      "data_slew_ns": 1.0,
+      "reference": "CLK=0 V rising; D midpoint; worst of six directed data transitions",
+      "setup_definition": "all six correct; each clk-to-Q midpoint delay <= its nominal + max(10%, 0.2 ns)",
+      "hold_definition": "all six captured values correct at 400 ns after post-edge D reversal",
+      "resolution_ns": 0.5,
+      "clk_to_Q_50_ns": 10.158947877857656,
+      "clk_to_Q_settle_ns": 16.44495500000005,
+      "setup_boundary_ns": [
+        14.1796,
+        14.4336
+      ],
+      "setup_ns": 14.5,
+      "hold_boundary_ns": [
+        -3.75,
+        -3.3984
+      ],
+      "hold_ns": 0.0,
+      "passed": true
+    },
+    {
+      "load_fF": 10,
+      "clock_slew_ns": 50,
+      "data_slew_ns": 1.0,
+      "reference": "CLK=0 V rising; D midpoint; worst of six directed data transitions",
+      "setup_definition": "all six correct; each clk-to-Q midpoint delay <= its nominal + max(10%, 0.2 ns)",
+      "hold_definition": "all six captured values correct at 400 ns after post-edge D reversal",
+      "resolution_ns": 0.5,
+      "clk_to_Q_50_ns": 24.796229892215592,
+      "clk_to_Q_settle_ns": 31.25,
+      "setup_boundary_ns": [
+        29.414,
+        29.6679
+      ],
+      "setup_ns": 30.0,
+      "hold_boundary_ns": [
+        -19.5704,
+        -19.2188
+      ],
+      "hold_ns": 0.0,
+      "passed": true
+    },
+    {
+      "load_fF": 100,
+      "clock_slew_ns": 1,
+      "data_slew_ns": 1.0,
+      "reference": "CLK=0 V rising; D midpoint; worst of six directed data transitions",
+      "setup_definition": "all six correct; each clk-to-Q midpoint delay <= its nominal + max(10%, 0.2 ns)",
+      "hold_definition": "all six captured values correct at 400 ns after post-edge D reversal",
+      "resolution_ns": 0.5,
+      "clk_to_Q_50_ns": 11.044222302175854,
+      "clk_to_Q_settle_ns": 18.32439899999997,
+      "setup_boundary_ns": [
+        14.1796,
+        14.4336
+      ],
+      "setup_ns": 14.5,
+      "hold_boundary_ns": [
+        -3.75,
+        -3.3984
+      ],
+      "hold_ns": 0.0,
+      "passed": true
+    },
+    {
+      "load_fF": 100,
+      "clock_slew_ns": 50,
+      "data_slew_ns": 1.0,
+      "reference": "CLK=0 V rising; D midpoint; worst of six directed data transitions",
+      "setup_definition": "all six correct; each clk-to-Q midpoint delay <= its nominal + max(10%, 0.2 ns)",
+      "hold_definition": "all six captured values correct at 400 ns after post-edge D reversal",
+      "resolution_ns": 0.5,
+      "clk_to_Q_50_ns": 25.679869257003418,
+      "clk_to_Q_settle_ns": 33.25,
+      "setup_boundary_ns": [
+        29.414,
+        29.6679
+      ],
+      "setup_ns": 30.0,
+      "hold_boundary_ns": [
+        -19.5704,
+        -19.2188
+      ],
+      "hold_ns": 0.0,
+      "passed": true
+    }
+  ],
+  "extracted_timing_nominal": [
+    {
+      "load_fF": 10,
+      "clock_slew_ns": 1,
+      "passed": true,
+      "clk_to_Q_50_ns": 10.069537451354392,
+      "clk_to_Q_settle_ns": 16.147779999999955
+    },
+    {
+      "load_fF": 10,
+      "clock_slew_ns": 50,
+      "passed": true,
+      "clk_to_Q_50_ns": 24.68892378325853,
+      "clk_to_Q_settle_ns": 31.25
+    },
+    {
+      "load_fF": 100,
+      "clock_slew_ns": 1,
+      "passed": true,
+      "clk_to_Q_50_ns": 10.94308489362794,
+      "clk_to_Q_settle_ns": 17.90043800000001
+    },
+    {
+      "load_fF": 100,
+      "clock_slew_ns": 50,
+      "passed": true,
+      "clk_to_Q_50_ns": 25.56427429917221,
+      "clk_to_Q_settle_ns": 32.75
+    }
+  ],
+  "static_current": {
+    "method": "700-800 ns time-weighted integration, Gear2, reltol=1e-5; peak-to-peak current < 1 nA",
+    "cases": [
+      {
+        "stored_V": -5,
+        "CLK_V": -5,
+        "Q_V": -4.999999800000005,
+        "I_VDD_A": 9.465328009741318e-10,
+        "I_VSS_A": -9.465327678704007e-10,
+        "I_VMID_A": -0.0,
+        "power_W": 9.465327844222663e-09,
+        "current_peak_to_peak_A": [
+          1.5599999990910761e-16,
+          2.899999998442895e-17,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": -5,
+        "CLK_V": 5,
+        "Q_V": -4.999999800000005,
+        "I_VDD_A": 5.68929662028127e-10,
+        "I_VSS_A": -5.689296299624505e-10,
+        "I_VMID_A": -0.0,
+        "power_W": 5.689296459952887e-09,
+        "current_peak_to_peak_A": [
+          1.2599999998226254e-16,
+          5.100000006175227e-17,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": 0,
+        "CLK_V": -5,
+        "Q_V": -0.03565559399999994,
+        "I_VDD_A": 0.003257134719999999,
+        "I_VSS_A": -0.003257134719999999,
+        "I_VMID_A": -0.0,
+        "power_W": 0.03257134719999999,
+        "current_peak_to_peak_A": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": 0,
+        "CLK_V": 5,
+        "Q_V": -0.03565559399999994,
+        "I_VDD_A": 0.003257134060000001,
+        "I_VSS_A": -0.003257134060000001,
+        "I_VMID_A": -0.0,
+        "power_W": 0.03257134060000001,
+        "current_peak_to_peak_A": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": 5,
+        "CLK_V": -5,
+        "Q_V": 4.999999210000003,
+        "I_VDD_A": 1.0443641098169487e-09,
+        "I_VSS_A": -1.0443640800000017e-09,
+        "I_VMID_A": -0.0,
+        "power_W": 1.0443640949084752e-08,
+        "current_peak_to_peak_A": [
+          8.00000001495788e-17,
+          0.0,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": 5,
+        "CLK_V": 5,
+        "Q_V": 4.999999210000003,
+        "I_VDD_A": 6.66760959396632e-10,
+        "I_VSS_A": -6.667609402202404e-10,
+        "I_VMID_A": -0.0,
+        "power_W": 6.667609498084362e-09,
+        "current_peak_to_peak_A": [
+          8.499999996505701e-17,
+          3.0000000030242654e-17,
+          0.0
+        ],
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "extracted_static_current": {
+    "method": "700-800 ns time-weighted integration, Gear2, reltol=1e-5; peak-to-peak current < 1 nA",
+    "cases": [
+      {
+        "stored_V": -5,
+        "CLK_V": -5,
+        "Q_V": -4.999999800000005,
+        "I_VDD_A": 9.46532806560686e-10,
+        "I_VSS_A": -9.465327660095064e-10,
+        "I_VMID_A": -0.0,
+        "power_W": 9.46532786285096e-09,
+        "current_peak_to_peak_A": [
+          6.400000003694497e-17,
+          2.6000000157180563e-17,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": -5,
+        "CLK_V": 5,
+        "Q_V": -4.999999800000005,
+        "I_VDD_A": 5.689296574390266e-10,
+        "I_VSS_A": -5.689296286787879e-10,
+        "I_VMID_A": -0.0,
+        "power_W": 5.689296430589072e-09,
+        "current_peak_to_peak_A": [
+          3.100000007605636e-17,
+          4.499999999366519e-17,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": 0,
+        "CLK_V": -5,
+        "Q_V": -0.03565559399999994,
+        "I_VDD_A": 0.0032571347199999985,
+        "I_VSS_A": -0.0032571347199999985,
+        "I_VMID_A": -0.0,
+        "power_W": 0.03257134719999998,
+        "current_peak_to_peak_A": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": 0,
+        "CLK_V": 5,
+        "Q_V": -0.03565559399999994,
+        "I_VDD_A": 0.003257134060000001,
+        "I_VSS_A": -0.003257134060000001,
+        "I_VMID_A": -0.0,
+        "power_W": 0.03257134060000001,
+        "current_peak_to_peak_A": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": 5,
+        "CLK_V": -5,
+        "Q_V": 4.999999210000003,
+        "I_VDD_A": 1.044364119098017e-09,
+        "I_VSS_A": -1.044364077198992e-09,
+        "I_VMID_A": -0.0,
+        "power_W": 1.0443640981485045e-08,
+        "current_peak_to_peak_A": [
+          8.999999998733038e-17,
+          1.0000000044546743e-17,
+          0.0
+        ],
+        "passed": true
+      },
+      {
+        "stored_V": 5,
+        "CLK_V": 5,
+        "Q_V": 4.999999210000003,
+        "I_VDD_A": 6.667609566615802e-10,
+        "I_VSS_A": -6.667609371222215e-10,
+        "I_VMID_A": -0.0,
+        "power_W": 6.667609468919009e-09,
+        "current_peak_to_peak_A": [
+          4.1000000017205525e-17,
+          3.5000000052516025e-17,
+          0.0
+        ],
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "pdk": {
+    "path": "/home/ishi-kai/pdk/TR-1um-pinned",
+    "commit": "5d963db9d44e192d37a0489c208bfccf2e2f690c",
+    "tracked_sources_match_pin": true
+  },
+  "artifacts": {
+    "gds": "tdff.gds",
+    "schematic": "tdff.sch",
+    "symbol": "tdff.sym",
+    "schematic_netlist": "tdff.spice",
+    "extracted": "tdff.extracted",
+    "abstract": "layout/tdff.abstract.json",
+    "layout_metadata": "layout/tdff.ports.json"
+  },
+  "artifact_sha256": {
+    "gds": "65471775ebd39f05fb1c57b6cfeba941526273cb8d7215071f09461aa02163c2",
+    "schematic": "6bf6e5fafb11f679996a2fd35c6453029eb9cc742300675261f518aef82742f9",
+    "symbol": "79f9f6225b9ee648673775bd78c194c169c42c090a0bd2405b27454cc6bab4f0",
+    "schematic_netlist": "9a92b73cd4294c203fd36b12a867b010df342b1a15f8d17669c82b4050ca55e5",
+    "extracted": "cfbe08824e2424263134c0ccc78fa43bdba934ab70c8dbdd9d6b36ee9227a0fa",
+    "abstract": "fc083b36476c55c0242fdc1cee9cd0300a4f92af2f29edd51e1a5ef4b01a08a9",
+    "layout_metadata": "b050f1e45f55469aaf5a8199ba4e1a1962d80185b278eb0439509a44ecb672f2"
+  },
+  "qualification": {
+    "schematic": true,
+    "extracted": true,
+    "clock_zero_pause": true,
+    "continuous_shift_hold": true,
+    "drawing_drc_markers": 0,
+    "strict_lvs": true,
+    "unloaded_power_formals": [
+      "VMID"
+    ],
+    "standalone_mask": {
+      "passed": false,
+      "items": 3,
+      "categories": {
+        "WAR06: Floating SG Detected": 3
+      }
+    },
+    "tied_input_fixture": true,
+    "abutment": {
+      "passed": true,
+      "items": 0,
+      "categories": {},
+      "ordered_orientation_cases": 4
+    },
+    "router_pin_access": {
+      "passed": true,
+      "items": 0,
+      "categories": {},
+      "orientations": [
+        "R0",
+        "MY"
+      ]
+    }
+  },
+  "limits": [
+    "27 C nominal only; no PVT, mismatch or SNM",
+    "LVS device extraction includes MOS junction geometry, no wire/poly RC or coupling extraction",
+    "Minimum clock period/pulse width and clock-tree skew not characterized",
+    "No reset; initial state unspecified",
+    "VMID is a physical unloaded pass-through rail",
+    "Only two full-height free M2 tracks; wide cell may constrain routing",
+    "Middle-trit retention dissipates static power through RR divider"
+  ],
+  "reports": {
+    "schematic": "reports/tdff_schematic.json",
+    "extracted": "reports/tdff_extracted.json",
+    "layout": "reports/tdff_layout.json",
+    "clock": "reports/tdff_clock.json",
+    "waveforms": "reports/tdff_waveforms.json"
+  }
+}

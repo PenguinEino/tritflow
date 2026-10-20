@@ -50,7 +50,11 @@ class Circuit:
     def synthesize(self, *, name: str | None = None, **kwargs) -> Netlist:
         """Map/verify source logic; optional name selects the physical top name."""
         mapped = synth.synthesize(self.design, **kwargs)
-        net = Netlist(name or mapped.top, mapped.ports, mapped.instances)
+        if any(i.cell == "TDFF" for i in mapped.instances):
+            from tritflow.seq.flow import Netlist as SequentialNetlist
+            net = SequentialNetlist(name or mapped.top, mapped.ports, mapped.instances)
+        else:
+            net = Netlist(name or mapped.top, mapped.ports, mapped.instances)
         net.settings = self.settings
         net.fanout_limit, net.equivalence = mapped.fanout_limit, mapped.equivalence
         return net
@@ -253,6 +257,9 @@ def load_layout(net: Netlist, directory) -> Layout:
     if data["top"] != net.top or data.get("library", {}).get("mock"):
         raise ValueError("cached layout must match this top and use a real library")
     result = PnrResult(directory/f"{net.top}.gds", directory/f"{net.top}.pnr.json", data["stats"], data)
+    if any(i.cell == "TDFF" for i in net.instances):
+        from tritflow.seq.flow import Layout as SequentialLayout
+        return SequentialLayout(result, net, net.settings)
     return Layout(result, net, net.settings)
 
 

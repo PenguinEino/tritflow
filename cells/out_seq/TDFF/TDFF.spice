@@ -1,0 +1,59 @@
+.subckt tdff D CLK Q VDD VMID VSS
+*.ipin D
+*.ipin CLK
+*.opin Q
+*.iopin VDD
+*.iopin VMID
+*.iopin VSS
+XXLP VDD CLK ML VDD PMOS w=3.4u l=1u nrd=0 nrs=0
+XXLN ML CLK VSS VSS NMOS w=30u l=1u nrd=0 nrs=0
+XXMP VDD ML MB VDD PMOS w=13.5u l=1u nrd=0 nrs=0
+XXMN MB ML VSS VSS NMOS w=5u l=1u nrd=0 nrs=0
+XXHP VDD CLK SB VDD PMOS w=60u l=1u nrd=0 nrs=0
+XXHN SB CLK VSS VSS NMOS w=3.4u l=1u nrd=0 nrs=0
+XXSP VDD SB SL VDD PMOS w=13.5u l=1u nrd=0 nrs=0
+XXSN SL SB VSS VSS NMOS w=5u l=1u nrd=0 nrs=0
+XDA D DB VDD VSS inverter
+XDB DB DI VDD VSS inverter
+XM DI ML MB M MQB VDD VSS tlatch
+XB MQB B VDD VSS inverter
+XS B SL SB SQ SQB VDD VSS tlatch
+XQ SQB Q VDD VSS inverter
+.ends
+
+
+* expanding   symbol:  inverter.sym # of pins=4
+** sym_path: /home/ishi-kai/balanced-ternary-seq/inverter.sym
+** sch_path: /home/ishi-kai/balanced-ternary-seq/inverter.sch
+.subckt inverter vin vout VDD VSS
+*.iopin VDD
+*.ipin vin
+*.opin vout
+*.iopin VSS
+XXM1 net1 vin VDD VDD PMOS w=13.5u l=1u nrd=0 nrs=0
+XR1 net1 vout VDD F_RR w=2.8e-06 l=30e-06 R=1 tc1=0 tc2=0
+XR2 vout net2 VDD F_RR w=2.8e-06 l=30e-06 R=1 tc1=0 tc2=0
+XXM2 net2 vin VSS VSS NMOS w=5u l=1u nrd=0 nrs=0
+.ends
+
+
+* expanding   symbol:  tlatch.sym # of pins=7
+** sym_path: /home/ishi-kai/balanced-ternary-seq/tlatch.sym
+** sch_path: /home/ishi-kai/balanced-ternary-seq/tlatch.sch
+.subckt tlatch D EN EB Q QB VDD VSS
+*.ipin D
+*.ipin EN
+*.ipin EB
+*.opin Q
+*.opin QB
+*.iopin VDD
+*.iopin VSS
+XXIN D EN U VSS NMOS w=5u l=1u nrd=0 nrs=0
+XXIP U EB D VDD PMOS w=13.5u l=1u nrd=0 nrs=0
+XXFN Q EB U VSS NMOS w=5u l=1u nrd=0 nrs=0
+XXFP U EN Q VDD PMOS w=13.5u l=1u nrd=0 nrs=0
+X1 U QB VDD VSS inverter
+X2 QB Q VDD VSS inverter
+.ends
+
+.GLOBAL GND
