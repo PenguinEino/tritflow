@@ -22,7 +22,7 @@ frames; rerun for interactive figures. [Abstract](ABSTRACT.md),
 [three-sentence pitch](PITCH.md), and [requirements checklist](CHECKLIST.md)
 are included. [build-info.json](build-info.json) records source hashes, tools,
 capture conditions and the automatically measured package size.
-Captured bootstrap source commit: [181206ba804bc800231dc31447e091ee32496d25](https://github.com/PenguinEino/tritflow/tree/181206ba804bc800231dc31447e091ee32496d25). Any tracked working-tree
+Captured bootstrap source commit: [4f702252cfc701c6538b640dfaeba2d97063b349](https://github.com/PenguinEino/tritflow/tree/4f702252cfc701c6538b640dfaeba2d97063b349). Any tracked working-tree
 changes observed at packaging are recorded separately; a commit ID alone is
 not an assertion that the whole working tree was clean.
 
@@ -34,7 +34,7 @@ If Run all stops after setup, choose Run all again.
 
 <details><summary>Source reference for this saved notebook</summary>
 
-The local source-ref check found `181206ba804bc800231dc31447e091ee32496d25` at `181206ba804bc800231dc31447e091ee32496d25`. This capture includes later presentation edits. Build-info.json records the checked source-ref details. Source-selection and rerun instructions are in Appendix B.
+Immutable source commit `7e3ea1dca8048f998c222d977dfbbb7123ae971b` matches the packaged notebook, allowing its commit-stamp line (local git-object check).
 
 </details>
 
