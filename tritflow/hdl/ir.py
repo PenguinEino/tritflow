@@ -20,6 +20,8 @@ class Node:
     the result's LSB-based digit index. Comparisons use the same operand format
     and return +/-1. A mux has (condition, then, else) args and Kleene consensus;
     select is a procedural join with a crisp +/-1 condition.
+    Shifts concatenate a width-trit data operand and a self-sized amount;
+    value selects the result digit. Negative amounts reverse the direction.
     """
 
     op: str
@@ -29,6 +31,7 @@ class Node:
     hier: str = ""
     loc: Location | None = None
     primitive: str = ""
+    width: int = 0
 
 
 def reachable(outputs: Iterable[Node]) -> list[Node]:
@@ -127,7 +130,7 @@ class Design:
             elif node.op == "nany":
                 result = -np.clip(args[0] + args[1], -1, 1)
             elif node.op in EXTENDED:
-                result = evaluate_operation(node.op, args, node.value)
+                result = evaluate_operation(node.op, args, node.value, width=node.width)
             else:
                 raise ValueError(f"unknown IR operation {node.op!r}")
             results[node] = result
