@@ -7,7 +7,7 @@ import klayout.db as db
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.collections import PolyCollection
-from matplotlib.patches import FancyArrowPatch
+from matplotlib.patches import ConnectionPatch, FancyArrowPatch
 
 from tritflow import CELLS_DIR, ROOT, flow
 from tritflow.viz.layers import LAYER_STYLE, MATPLOTLIB_HATCH
@@ -56,6 +56,20 @@ def draw_gds(ax, path, *, line=0.3):
     return box
 
 
+def panel(fig, rect, title, note):
+    """An axes with its title above and a two-line note below, in figure coordinates."""
+    ax = fig.add_axes(rect)
+    x, y, w, h = rect
+    fig.text(x, y+h+0.045, title, fontsize=9, fontweight="bold", color=style.INK, va="bottom")
+    fig.text(x, y-0.025, "\n".join(note), fontsize=7.4, color=style.INK2, va="top", linespacing=1.35)
+    return ax
+
+
+def arrow(fig, start, end, **options):
+    fig.patches.append(FancyArrowPatch(start, end, transform=fig.transFigure, arrowstyle="-|>",
+                                       mutation_scale=8, lw=0.8, color=style.INK2, **options))
+
+
 def make():
     style.use()
     plt.rcParams["hatch.linewidth"] = 0.25
@@ -63,33 +77,18 @@ def make():
     pnr = json.loads((B/"adder4.pnr.json").read_text())
     lvs = json.loads((B/"adder4.lvs.summary.json").read_text())
     drc_items = pnr.get("checks", {}).get("pdk_drc", {}).get("violations") or 0
+    fig = plt.figure(figsize=(style.DOUBLE, 4.9))
 
-    fig = plt.figure(figsize=(style.DOUBLE, 2.5))
-    widths, gap, x = [0.14, 0.22, 0.15, 0.2, 0.14], 0.03, 0.012
-    axes = []
-    for width in widths:
-        axes.append(fig.add_axes([x, 0.27, width, 0.6]))
-        x += width+gap
-    titles = ["TritVerilog", "Synthesis", "Standard cell", "Place & route", "Post-layout SPICE"]
-    notes = [["four full adders in a chain", "+ full_add, half_add"],
-             [f"{report['total_cells']} cells; one half adder:", "1 + 1 = sum −1, carry +1"],
-             ["NANY, from the taped-out", "circuit; 3 rails"],
-             [f"{pnr['die'][0]:.0f} × {pnr['die'][1]:.0f} µm, M1 + M2",
-              f"DRC {drc_items}, LVS {'match' if lvs['matched'] else 'mismatch'}"],
-             ["extracted devices + wire C", "three levels, ±0.5 V bands"]]
-    for ax, title, note in zip(axes, titles, notes):
-        x = ax.get_position().x0
-        fig.text(x, 0.95, title, fontsize=9, fontweight="bold", color=style.INK, va="top")
-        fig.text(x, 0.2, "\n".join(note), fontsize=7.4, color=style.INK2, va="top", linespacing=1.35)
-
-    ax = axes[0]
+    # Top row: the source and what synthesis makes of it.
+    top, height = 0.6, 0.3
+    ax = panel(fig, [0.01, top, 0.2, height], "TritVerilog", ["four full adders in a chain", "+ full_add, half_add"])
     ax.axis("off")
     ax.add_patch(plt.Rectangle((0, 0), 1, 1, transform=ax.transAxes, fc="#f6f5f1", ec=style.AXIS, lw=0.6))
-    ax.text(0.06, 0.95, HDL, transform=ax.transAxes, family="monospace", fontsize=5.9, va="top",
+    ax.text(0.06, 0.95, HDL, transform=ax.transAxes, family="monospace", fontsize=6.4, va="top",
             color=style.INK, linespacing=1.3)
-
-    # The synthesized half adder with a = b = +1, colored by settled trit (TritFlow's own schematic).
-    ax = axes[1]
+    ax = panel(fig, [0.27, top, 0.72, height], "Synthesis",
+               [f"{report['total_cells']} cells for the adder; one half adder at a = b = +1:",
+                "1 + 1 = sum −1, carry +1 (red +1, blue −1, gray 0)"])
     ax.axis("off")
     half = flow.load(ROOT/"examples/half_add.tv", "half_add").synthesize()
     picture = plt.imread(io.BytesIO(half.schematic(inputs={"a": 1, "b": 1}, net_names=False, title="").png(scale=3)))
@@ -98,29 +97,37 @@ def make():
     picture = picture[ink[0].min():ink[0].max()+1, ink[1].min():ink[1].max()+1]
     ax.imshow(picture, interpolation="lanczos")
     ax.set_anchor("W")
+    arrow(fig, (0.215, top+height/2), (0.262, top+height/2))
 
-    draw_gds(axes[2], CELLS_DIR/"out/NANY/NANY.gds", line=0.35)
-
-    # Whole routed adder, with a magnified corner so devices and wires are visible.
-    ax = axes[3]
+    # Bottom row: the cell it is built from, the routed layout, and the extracted circuit running.
+    low, height = 0.12, 0.3
+    ax = panel(fig, [0.01, low, 0.16, height], "Standard cell", ["NANY, from the taped-out", "circuit; 3 rails"])
+    draw_gds(ax, CELLS_DIR/"out/NANY/NANY.gds", line=0.35)
+    ax = panel(fig, [0.21, low, 0.2, height], "Place & route",
+               [f"{pnr['die'][0]:.0f} × {pnr['die'][1]:.0f} µm, M1 + M2",
+                f"DRC {drc_items}, LVS {'match' if lvs['matched'] else 'mismatch'}"])
     box = draw_gds(ax, B/"adder4.gds", line=0.08)
-    ax.set_anchor("NW")
-    x0, y0, size = box.left+0.02*box.width(), box.bottom+0.03*box.height(), 0.3*box.width()
+    # A corner next to the magnified view keeps the guide lines short.
+    size = 0.28*box.width()
+    x0, y0 = box.right-0.03*box.width()-size, box.bottom+0.35*box.height()
     ax.add_patch(plt.Rectangle((x0, y0), size, size, fill=False, ec="#eb6834", lw=0.9, zorder=10))
-    inset = ax.inset_axes([0.5, 0.0, 0.5, 0.5])
-    draw_gds(inset, B/"adder4.gds", line=0.25)
-    inset.set_xlim(x0, x0+size)
-    inset.set_ylim(y0, y0+size)
-    inset.axis("on")
-    inset.set_xticks([])
-    inset.set_yticks([])
-    for spine in inset.spines.values():
+    zoom = panel(fig, [0.43, low, 0.2, height], "", ["magnified: transistors,", "M1, M2 and vias"])
+    draw_gds(zoom, B/"adder4.gds", line=0.25)
+    zoom.set_xlim(x0, x0+size)
+    zoom.set_ylim(y0, y0+size)
+    zoom.axis("on")
+    zoom.set_xticks([])
+    zoom.set_yticks([])
+    for spine in zoom.spines.values():
         spine.set_edgecolor("#eb6834")
         spine.set_linewidth(0.9)
-    inset.set_facecolor("white")
+    fig.add_artist(ConnectionPatch((x0+size, y0+size), (0, 1), "data", "axes fraction", axesA=ax, axesB=zoom,
+                                   color="#eb6834", lw=0.6, ls=":"))
+    fig.add_artist(ConnectionPatch((x0+size, y0), (0, 0), "data", "axes fraction", axesA=ax, axesB=zoom,
+                                   color="#eb6834", lw=0.6, ls=":"))
 
-    # A short window in which the outputs visit all three levels.
-    ax = axes[4]
+    ax = panel(fig, [0.7, low, 0.25, height], "Post-layout SPICE",
+               ["extracted devices + wire C", "three levels, ±0.5 V bands"])
     z = np.load(B/"postlayout/post/waveforms.npz")
     t = z["time"]*1e6
     window = t <= 3.2
@@ -137,11 +144,9 @@ def make():
     ax.text(0.05, 6.0, "sum[3]", fontsize=6, color=style.BLUE)
     ax.text(1.1, 6.0, "cout", fontsize=6, color=style.ORANGE)
 
-    for a, b in zip(axes, axes[1:]):
-        pa, pb = a.get_position(), b.get_position()
-        y = (pa.y0+pa.y1)/2
-        fig.patches.append(FancyArrowPatch((pa.x1+0.004, y), (pb.x0-0.004, y), transform=fig.transFigure,
-                                           arrowstyle="-|>", mutation_scale=8, lw=0.8, color=style.INK2))
+    middle = low+height/2
+    arrow(fig, (0.175, middle), (0.205, middle))
+    arrow(fig, (0.645, middle), (0.69, middle))
     return style.save(fig, "fig_flow_v2")
 
 
