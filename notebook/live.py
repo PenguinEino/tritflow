@@ -228,28 +228,16 @@ def _streamed_tools(report):
 
 # --- live placement and routing picture, drawn like KLayout ---------------------------------
 
-# TR-1um.lyp colors (white contacts and silver M2 darkened for a white page); hatch
-# angle and density stand in for KLayout's dither patterns.
-LAYER_STYLE = (  # (layer/datatype, color, hatch, fill opacity)
-    ((140, 0), "#00aa00", None, 0.10),     # N-well
-    ((3, 1), "#ff00ff", "dots", 0.0),      # P diffusion
-    ((3, 2), "#00aa00", "dots", 0.0),      # N diffusion
-    ((3, 3), "#ffae00", "back", 0.0),      # diffusion resistor
-    ((8, 1), "#ff7c25", "fwd", 0.0),       # gate poly
-    ((8, 2), "#c050c0", "back", 0.0),      # resistor poly
-    ((11, 0), "#3a3f45", "cross", 0.0),    # contact
-    ((13, 0), "#0080ff", "fwd", 0.15),     # M1
-    ((19, 0), "#3a3f45", "cross", 0.0),    # V1
-    ((20, 0), "#8c8c8c", "back", 0.12),    # M2
-)
-WIRE_WIDTH = {"M1": 1.8, "M2": 3.0}
-VIA_SIZE = 1.4
+def _style():
+    # Imported on use: setup loads this module before TritFlow's runtime settings exist.
+    from tritflow.viz.layers import LAYER_STYLE
+    return tuple((key, color, hatch, opacity) for key, _, color, hatch, opacity in LAYER_STYLE)
 
 
 def _patterns(unit):
     """SVG hatches sized to the view, one per layer."""
     defs = []
-    for (layer, datatype), color, hatch, _ in LAYER_STYLE:
+    for (layer, datatype), color, hatch, _ in _style():
         key, size = f"L{layer}_{datatype}", 4*unit
         if hatch == "fwd":
             body = f'<path d="M0,{size} L{size},0" stroke="{color}" stroke-width="{unit*.7}"/>'
@@ -272,7 +260,7 @@ def _layer_paths(shapes, unit):
     for style, points in shapes:
         by_style.setdefault(style, []).append("M" + " L".join(f"{x:.6g},{y:.6g}" for x, y in points) + "Z")
     out = []
-    for style in LAYER_STYLE:
+    for style in _style():
         if style not in by_style:
             continue
         (layer, datatype), color, hatch, opacity = style
@@ -301,7 +289,7 @@ class LayoutView:
             layout = db.Layout()
             layout.read(str(self.cells_dir/f"out/{name}/{name}.gds"))
             top, shapes = layout.top_cell(), []
-            for style in LAYER_STYLE:
+            for style in _style():
                 index = layout.find_layer(*style[0])
                 if index is None:
                     continue
@@ -342,7 +330,8 @@ class LayoutView:
             f'<use href="#tf-{p["cell"]}" transform="translate({p["x"]+p["width"]:g},{p["y"]:g}) scale(-1,1)"/>'
             if p["orient"] == "MY" else f'<use href="#tf-{p["cell"]}" transform="translate({p["x"]:g},{p["y"]:g})"/>'
             for p in self.placements)
-        m1, v1, m2 = LAYER_STYLE[7], LAYER_STYLE[8], LAYER_STYLE[9]
+        from tritflow.viz.layers import WIRE_WIDTH, VIA_SIZE
+        m1, v1, m2 = _style()[7], _style()[8], _style()[9]
         wires, newest = [], []
         for net, route in self.routes.items():
             target = newest if net == self.newest else wires
