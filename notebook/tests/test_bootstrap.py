@@ -98,7 +98,7 @@ def test_immutable_clone_prints_hash_and_installs(monkeypatch, tmp_path, capsys,
             "--source", str(tmp_path/"tritflow")] in commands
     assert ns["SOURCE_COMMIT"] == COMMIT
     output = capsys.readouterr().out
-    assert COMMIT in output and "KLayout executable" in output and "ngspice executable" in output
+    assert COMMIT in output and "KLayout: " in output and "ngspice: " in output and "Setup complete" in output
     assert ns["_TRITFLOW_SETUP_READY"] is True
 
 

@@ -83,6 +83,12 @@ def notebook_hash(path):
     return sha256(text.encode()).hexdigest()
 
 
+def _progress(prefix, name):
+    from runtime_support import step
+    from presentation import label
+    step(label(prefix)+name)
+
+
 def source_fingerprint(root, pdk, *, names=None):
     return sha256(json.dumps(source_manifest(root,pdk,names=names),sort_keys=True).encode()).hexdigest()
 
@@ -152,9 +158,9 @@ class Cache:
                                            for p, h in saved["artifacts"].items()):
                 self.events.append((name, "hit"))
                 self.timings.append({"stage":name, "state":"hit", "elapsed_s":time.perf_counter()-started})
-                print(f"Cache hit: {name}")
+                _progress("Reusing the result computed earlier in this runtime: ", name)
                 return restore_result(saved["result"])
-        print(f"Running: {name}")
+        _progress("Computing: ", name)
         result = producer()
         paths = artifacts(result) if callable(artifacts) else artifacts
         hashes = {str(Path(p).resolve()): file_hash(p) for p in paths}

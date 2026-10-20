@@ -12,16 +12,19 @@ import gdsdraw
 import paperstyle as style
 
 B = ROOT / "build/adder4"
-HDL = """generate
- for (i=0; i<N; i=i+1)
- begin : digit
-  full_add fa (
-   .a(a[i]), .b(b[i]),
-   .cin(c[i]),
-   .sum(sum[i]),
-   .cout(c[i+1]));
- end
-endgenerate"""
+# The four full adders that adder #(N = 4) elaborates to, written out.
+HDL = """full_add fa0(
+  a[0],b[0],cin,
+  sum[0],c1);
+full_add fa1(
+  a[1],b[1],c1,
+  sum[1],c2);
+full_add fa2(
+  a[2],b[2],c2,
+  sum[2],c3);
+full_add fa3(
+  a[3],b[3],c3,
+  sum[3],cout);"""
 
 
 def stage_axes(fig, i, n, top=0.84, bottom=0.30, gap=0.035):
@@ -62,9 +65,9 @@ def make():
     ax.axis("off")
     ax.add_patch(plt.Rectangle((0, 0), 1, 1, transform=ax.transAxes, fc="#f6f5f1", ec=style.AXIS,
                                lw=0.6))
-    ax.text(0.05, 0.95, HDL, transform=ax.transAxes, family="monospace", fontsize=6.3, va="top",
+    ax.text(0.05, 0.95, HDL, transform=ax.transAxes, family="monospace", fontsize=6.0, va="top",
             color=style.INK, linespacing=1.3)
-    caption(fig, ax, "TritVerilog", [f"adder #(N = 4): {len((ROOT / 'examples/adder.tv').read_text().splitlines())} lines",
+    caption(fig, ax, "TritVerilog", ["four full adders in a chain",
                                      "+ full_add, half_add modules"])
 
     ax = axes[1]

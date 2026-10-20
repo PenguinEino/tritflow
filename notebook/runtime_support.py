@@ -13,6 +13,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from hashlib import sha256
 from pathlib import Path
 
@@ -78,8 +79,13 @@ def check_runtime():
     except Exception as error:
         raise RuntimeError(f"Scientific Python import/BLAS check failed: {type(error).__name__}: {error}. "
                            + RESTART) from error
-    print("Scientific Python (loaded host modules preserved): " + ", ".join(f"{k}={v}" for k,v in versions.items()))
+    print("Python: " + ", ".join(f"{k} {v}" for k,v in versions.items()))
     return versions
+
+
+def step(message):
+    """Say what the notebook is doing now, so a long cell is never silent."""
+    print(f"[{time.strftime('%H:%M:%S')}] {message}", flush=True)
 
 
 def print_tool_versions():
@@ -92,7 +98,10 @@ def print_tool_versions():
             raise RuntimeError(f"{name} is missing. Run the setup cell successfully first.")
         result = subprocess.run([str(binary), "-v"],capture_output=True,text=True,check=True,timeout=15)
         versions[name] = (result.stdout+result.stderr).strip()
-        print(f"{name} executable: {binary}\n{versions[name]}")
+        # ngspice prints a banner; its "** ngspice-NN" line names the release.
+        release = next((line.strip("* ").strip() for line in versions[name].splitlines()
+                        if line.strip("* ").lower().startswith(name.lower())), versions[name].splitlines()[0])
+        print(f"{name}: {release} ({binary})")
     return versions
 
 
@@ -120,5 +129,8 @@ class CellState:
             labels = ", ".join(self.titles.get(item,item) for item in sorted(missing))
             raise RuntimeError(f"{title}: first run {labels} successfully, then rerun this cell. "
                                "Results from a failed or partially rerun cell cannot be used.")
+        started = time.monotonic()
+        step(f"▶ {title}")
         yield
         self.completed.add(name)
+        step(f"✓ {title} ({time.monotonic()-started:.1f} s)")

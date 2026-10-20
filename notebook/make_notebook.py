@@ -39,6 +39,9 @@ def build(language="en"):
     revision = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
     setup_source = re.sub(r'(?m)^SOURCE_REF = .*',
         f'SOURCE_REF = os.environ.get("TRITFLOW_REF", "{revision}")', stages.SETUP)
+    # Setup's installer reports progress in the notebook's language.
+    setup_source = setup_source.replace('from pathlib import Path\n',
+        f'from pathlib import Path\nos.environ["TRITFLOW_NOTEBOOK_LANGUAGE"] = {language!r}\n',1)
     values = context(ROOT)
     context_sha = context_identity(values)
     cells, code_ids = [], {}
@@ -55,6 +58,8 @@ def build(language="en"):
         if kind == 'code':
             tracked = key not in ('setup','imports') and not key.startswith('method-')
             if tracked:
+                # The cell's own title is what its progress lines and prerequisite errors name.
+                display_chapter = title or display_chapter
                 dependency_ids = [code_ids[k] for k in requires]
                 item['source'] = ('if "_tf_cells" not in globals():\n'
                     '    raise RuntimeError("Run setup and imports successfully before this chapter; rerun them after any requested runtime restart.")\n'
@@ -164,7 +169,7 @@ $$''',text,count=1)
     imports = cell('code',f'NARRATIVE_CONTEXT_SHA256 = {context_sha!r}\nNOTEBOOK_LANGUAGE = {language!r}\n'+stages.IMPORTS,'imports',
                    title='Imports and run bookkeeping')
     chapter_title = 'Chapter 0: From HDL to a checked adder layout'
-    md(render('## 0.'+chapter0,values)+'\n\n'+verilog('adder.tv'))
+    md(render('## 0.'+chapter0,values)+'\n\n'+verilog('adder2.tv'))
     code('opening_inputs','Chapter 0 inputs: test conditions and an independent integer oracle')
     method('opening')
     code('opening','Chapter 0 checks')
@@ -240,7 +245,7 @@ $$''',text,count=1)
                                 'The closing cell prints the measured runtime for this session, including setup.')
     appendix = appendix.replace(' The clean-Colab result above\nstates whether an installation-inclusive Run all has completed successfully.','')
     if language == 'ja':
-        md(render(appendix,values)+'\n\n'+run_note(language))
+        md(render(appendix,values))
     else:
         md(render(appendix,values)+('\n\n'+run_note(language) if run_note(language) else '')+'\n\n'+textwrap.dedent('''
         <details><summary>Setup, recovery and source selection</summary>

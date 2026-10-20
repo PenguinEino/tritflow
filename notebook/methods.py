@@ -6,13 +6,18 @@ provenance and evidence tables run in the collapsed cell that follows it
 """
 
 OPENING = r'''
-d = flow.load(ROOT/"examples/adder.tv", "adder", {"N": 2})        # 1. TritVerilog source
+step("1/5 Reading the TritVerilog adder")
+d = flow.load(ROOT/"examples/adder2.tv", "adder2")                # 1. TritVerilog source
+step("2/5 Synthesis: mapping expressions to cells and checking every input")
 net = d.synthesize(name="adder2_demo")                           # 2. cells + exhaustive equivalence check
 inputs = [p.name for p in net.ports if p.dir == "input"]
 vectors, vector_labels = adder_demo_vectors(inputs)               #    three-level test sequence
+step("3/5 Placement and routing on two metal layers")
 lay = net.place_and_route(output_dir=out, seed=0, rows=PNR_ROWS, anneal_steps=PNR_ANNEAL_STEPS)  # 3. GDS
+step("4/5 DRC and LVS with the TR-1um decks")
 drc, lvs = lay.drc(), lay.lvs()                                  # 4. TR-1um DRC deck, strict LVS
 guesses = logical_nodeset(net, lvs["report"], inputs, vectors[0])
+step("5/5 Extracting the layout and simulating it in ngspice (about 30 s)")
 post = lay.extract().simulate(vectors, load=LOAD_F, expected=adder_reference,
                               nodeset=guesses, **CONDITIONS)     # 5. extracted devices + wire C in ngspice
 print(f"DRC clean: {drc['clean']} · LVS match: {lvs['matched']} · analog PASS: {post['measurements']['passed']}")
@@ -21,9 +26,11 @@ print(f"DRC clean: {drc['clean']} · LVS match: {lvs['matched']} · analog PASS:
 GATES = r'''
 from fig_gates import simulate, draw                      # the paper's own Fig. 2 script
 from paperstyle import save as save_figure
+step("Truth tables of the four gates")
 gates = flow.load(ROOT/"examples/gates.tv", "gates")       # the definition shown above
 t = gates.truth_table()                                    # all nine input pairs, ideal trits
 display(cell_cards(t, CELLS_DIR/"out", ROOT/"notebook/assets/schematics"))  # truth tables + taped-out schematics
+step("Ten DC sweeps of the extracted cell layouts in ngspice")
 curves = simulate(CELLS_DIR/"out")                         # ten ngspice DC sweeps of the extracted layouts
 png = save_figure(draw(curves), "fig_gates", out=BUILD/"figures")
 display(paper_figure(png, width=1000))                      # Fig. 2, regenerated from your own run
@@ -37,23 +44,27 @@ from completeness import unary_closure, inv, nand, nor, nany
 bases = [("INV/NAND/NOR + TIEP/TIEZ/TIEN", (inv,), (nand, nor), (-1, 0, 1), 11),
          ("NANY + TIEZ", (), (nany,), (0,), 3),
          ("NANY + TIEP/TIEN", (), (nany,), (-1, 1), 27)]
+step("Composing gates until no new one-input function appears")
 closures = {}
 for basis_name, unary, binary, constants, expected in bases:
     closures[basis_name] = unary_closure(unary=unary, binary=binary, constants=constants)
     assert len(closures[basis_name]) == expected
     print(f"{basis_name}: {len(closures[basis_name])}/27 unary functions")
+step("Counting the cells of the synthesized half adder")
 half_counts = flow.load(ROOT/"examples/half_add.tv", "half_add").synthesize().report()["cells"]
 print("half_add:", half_counts)
 '''
 
 GDS = r'''
 from tritflow.viz.layout import gds_viewer
+step("Opening the routed GDS in the viewer")
 display(gds_viewer(lay.gds_path, top=net.top))             # zoom to the actual routed cells
 gds_download(lay.gds_path)                               # download the checked GDSII
 '''
 
 SIZING = r'''
 from tritflow.sim.sizing import load_grid
+step("Loading the simulated W/L and resistor-length sweeps")
 sizing_grids = {cell: load_grid(cell) for cell in ("INV", "NANY")}  # precomputed W/L/R sweeps
 gi = sizing_grids["INV"]
 adopted = gi["rows"][gi["adopted_index"]]                           # the taped-out size
@@ -65,9 +76,11 @@ show(sizing_slider(gi, PDK_ROOT))                                   # ... then e
 '''
 
 CELLS = r'''
+step("Reading the standard-cell library")
 library = json.loads((CELLS_DIR/"out/library.json").read_text())
 abstracts = {c["name"]: json.loads((CELLS_DIR/"out"/c["abstract"]).read_text()) for c in library}
 print({name: f"{a['width']:g} × {a['height']:g} µm" for name, a in abstracts.items()})
+step("Matching the NANY schematic devices to its GDS through LVS")
 mapping = device_mapping("NANY", selected="XCN1")       # LVS-matched schematic devices on the real GDS
 show(highlight_devices(mapping, {"XCP1", "XCN1"},
                        title="NANY: Y → XCP1/XM6 → c1 → XCN1/XM7 → VMID, A=−1 B=+1"))
@@ -76,20 +89,25 @@ show(highlight_devices(mapping, {"XCP1", "XCN1"},
 ARITHMETIC = r'''
 ha = flow.load(ROOT/"examples/half_add.tv", "half_add")
 fa = flow.load(ROOT/"examples/full_add.tv", "full_add")
+step("Checking the full adder on all 27 input states")
 fa_table = fa.truth_table()                                     # all 27 input states
 assert np.array_equal(fa_table["a"] + fa_table["b"] + fa_table["cin"], fa_table["sum"] + 3*fa_table["cout"])
+step("Synthesizing the half and full adders")
 ha_counts, fa_counts = ha.synthesize().report()["cells"], fa.synthesize().report()["cells"]
 print("half_add:", ha_counts, "  full_add:", fa_counts)
 '''
 
 SYNTHESIS = r'''
+step("Synthesis of the full adder: rewrite, map to cells, check every input")
 fa_net = fa.synthesize()                         # rewrite → map to cells → equivalence check
 print(fa_net.report()["equivalence"])
 half_net = flow.load(ROOT/"examples/half_add.tv", "half_add").synthesize()
+step("Drawing the mapped half adder")
 display(value_selector(half_net, title=display_label("Mapped half adder: choose the input trits")))  # settled nets
 '''
 
 SCHEMATIC = r'''
+step("Drawing the synthesized two-trit adder as a schematic")
 sch = net.schematic(inputs={"a[0]": 1, "a[1]": 0, "b[0]": 1, "b[1]": 0, "cin": 0}, net_names=True,
                     title="Two-trit adder: mapped hierarchy and settled trits")
 display(sch)                                     # the synthesized netlist, drawn as a schematic
@@ -97,6 +115,7 @@ display(sch)                                     # the synthesized netlist, draw
 
 PNR = r'''
 from tritflow.viz.layout import gds_viewer
+step("Opening the routed GDS in the viewer")
 display(gds_viewer(lay.gds_path, top=net.top))                     # wheel to zoom, drag to pan
 gds_download(lay.gds_path)                                                   # the routed GDS itself
 s = lay.stats
@@ -105,11 +124,13 @@ print(f"{s['instance_count']} cells in {s['row_count']} rows · die {s['die_size
 '''
 
 PRE = r'''
+step("Simulating the same devices without wire capacitance (about 30 s)")
 pre = lay.extract(wire_c=False).simulate(vectors, load=LOAD_F, expected=adder_reference,
                                          nodeset=guesses, **CONDITIONS)    # same devices, no wire C
 for pin, t_post in post["measurements"]["max_settling_s"].items():
     print(f"{pin:7s} devices only {1e9*pre['measurements']['max_settling_s'][pin]:6.1f} ns"
           f"  →  with wire C {1e9*t_post:6.1f} ns")
+step("Wire capacitance of each routed net")
 wire_report = lay.result.net_parasitics()                                 # routed wire C per logical net
 routed_sch = sch.annotate(parasitics=wire_report, title="Same schematic: settled trits and routed wire C (fF)")
 display(routed_sch)
@@ -119,6 +140,7 @@ STA = r'''
 from tritflow.sta import analyze
 states = [dict(zip(inputs, v)) for v in vectors]
 wire_caps = {name: e["wire_capacitance_f"] for name, e in wire_report["nets"].items()}
+step("Static timing analysis (no SPICE)")
 timing = analyze(net, vector_pairs=list(zip(states, states[1:])), wire_caps=wire_caps,
                  output_load_f=LOAD_F, input_transition_s=EDGE_S)    # milliseconds, no SPICE
 for pin, t_sta in timing.arrival.items():
@@ -126,6 +148,7 @@ for pin, t_sta in timing.arrival.items():
 '''
 
 CUSTOM = r'''
+step("Synthesizing your HDL")
 custom_circuit = load_edited(example, source, BUILD/"your_circuit"/"source"/example.top)
 custom = custom_circuit.synthesize()                                     # your HDL → cells
 display(custom.schematic(net_names=True, title=f"{custom.top}: schematic of the edited HDL"))
@@ -134,7 +157,9 @@ display(custom.schematic(net_names=True, title=f"{custom.top}: schematic of the 
 CUSTOM_LAYOUT = r'''
 from tritflow.viz.layout import gds_viewer
 custom_out = BUILD/"your_circuit"/example.top
+step("Placement and routing of your circuit")
 custom_lay = custom.place_and_route(output_dir=custom_out, seed=0, anneal_steps=600)   # → GDS
+step("DRC and LVS of your circuit")
 print("DRC clean:", custom_lay.drc()["clean"], "· LVS match:", custom_lay.lvs()["matched"])
 display(gds_viewer(custom_lay.gds_path, top=custom.top))             # live KLayout in Colab
 gds_download(custom_lay.gds_path)                                            # your circuit as GDSII
@@ -142,6 +167,7 @@ gds_download(custom_lay.gds_path)                                            # y
 
 SHUTTLE = r'''
 from tritflow.viz.layout import gds_viewer
+step("Opening the shuttle top GDS (2.5 mm square, recorded run)")
 chip = json.loads((ROOT/"notebook/assets/chip/adder4/signoff.json").read_text())   # recorded run, adder4 seed 7
 display(gds_viewer(ROOT/"notebook/assets/chip/adder4/tr_1um_adder4.gds"))   # zoom down to devices
 gds_download(ROOT/"notebook/assets/chip/adder4/tr_1um_adder4.gds",
@@ -171,6 +197,7 @@ module broken(input trit a, b, output trit y);
   assign y = a + b;   // '+' on signals is not a gate
 endmodule
 """
+step("Reading an HDL with an unsupported expression")
 try:
     flow.loads(broken, "broken", filename="your_circuit.tv")
 except HDLError as error:
@@ -184,6 +211,7 @@ PICK = r'''
 from examples.curated import DESIGNS
 from tritflow.synth import evaluate_netlist
 CHOICE = os.environ.get("TRITFLOW_CIRCUIT", "minmax")   # or: sign | compare2 | mul2
+step(f"Selected circuit: {CHOICE}")
 example = DESIGNS[CHOICE]                                # its independent arithmetic reference
 if CHOICE != "minmax":
     source = example.path.read_text()

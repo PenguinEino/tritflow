@@ -10,6 +10,8 @@ globals().pop("_tf_cells", None)
 import os, sys, json, time, hashlib, subprocess, importlib.util
 from pathlib import Path
 started = time.monotonic()
+def step(message):
+    print(f"[{time.strftime('%H:%M:%S')}] {message}", flush=True)
 try:
     IN_COLAB = importlib.util.find_spec("google.colab") is not None
 except ModuleNotFoundError:
@@ -24,6 +26,7 @@ if IN_COLAB:
     if not re.fullmatch(r"[0-9a-f]{40}", SOURCE_REF):
         raise ValueError("TRITFLOW_REF must be an immutable full 40-character Git commit")
     if not ROOT.exists():
+        step("Downloading the TritFlow source from GitHub")
         subprocess.run(["git", "clone", "--no-checkout", "--depth", "1", "--filter=blob:none",
                         SOURCE_URL, str(ROOT)], check=True)
         subprocess.run(["git", "-C", str(ROOT), "fetch", "--depth", "1", "origin", SOURCE_REF], check=True)
@@ -47,7 +50,10 @@ if IN_COLAB:
     if (not runtime.is_file()
             or json.loads(runtime.read_text()).get("TRITFLOW_SETUP_SCHEMA") != SETUP_SCHEMA
             or json.loads(runtime.read_text()).get("TRITFLOW_SETUP_SHA256") != setup_identity(ROOT)):
+        step("Installing KLayout, ngspice, Python packages and the TR-1um PDK (first run only, about 2 minutes)")
         subprocess.run(["bash", str(ROOT/"notebook/colab_setup.sh"), "--source", str(ROOT)], check=True)
+    else:
+        step("Tools are already installed in this runtime")
     os.environ.update(json.loads(runtime.read_text()))
     sys.path.insert(0, os.environ["TRITFLOW_PYTHON_TARGET"])
 else:
@@ -67,16 +73,19 @@ sys.path.insert(0, str(ROOT/"notebook"))
 sys.path.append(str(ROOT/"figures"))   # the paper's figure scripts, reused by method cells
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from runtime_support import check_runtime, print_tool_versions
+step("Checking the Python packages, KLayout and ngspice")
 check_runtime()
 print_tool_versions()
 _TRITFLOW_SETUP_READY = True
+step(f"Setup complete: {time.monotonic()-started:.0f} s")
 '''
 
 IMPORTS = r'''
 globals().pop("_tf_cells", None)
 if not globals().get("_TRITFLOW_SETUP_READY", False):
     raise RuntimeError("Run the first setup cell successfully, then rerun the imports cell. If setup requested a restart, restart once first.")
-from runtime_support import CellState
+from runtime_support import CellState, step
+step("Loading TritFlow and checking the pinned inputs")
 import numpy as np
 from IPython.display import display, HTML, Image
 from tritflow import flow, CELLS_DIR, PDK_ROOT, PASS_BAND, TRIT_VOLTS
@@ -117,6 +126,7 @@ from routing_identity import routing_label, archive_routing
 paper = load_paper(ROOT)
 narrative_values = context(ROOT)
 assert context_identity(narrative_values) == NARRATIVE_CONTEXT_SHA256, "Published figure measurements changed; regenerate the notebook before running."
+step("Ready")
 '''
 
 OPENING_INPUTS = r'''
@@ -154,7 +164,7 @@ assert all({row["outputs"][p]["ideal_trit"] for row in demo["measurements"]["row
 table([["Live adder", "Cells", "Die (µm)", "DRC markers", "Strict LVS", "Analog"],
        [net.top,net.report()["total_cells"],dimensions(lay.stats["die_size_um"]),
         demo["drc"]["violations"],demo["lvs"]["matched"],demo["measurements"]["passed"]]])
-print(f"Independent integer oracle: {len(logical[inputs[0]])} exhaustive states; extracted sequence: {len(set(vectors))} selected states.")
+print(f"Integer addition check: all {len(logical[inputs[0]])} input states match; SPICE steps through {len(set(vectors))} of them.")
 '''
 
 GATES = r'''
@@ -291,7 +301,7 @@ assert fa_counts == {cell:fa_symbols["half_adder"]*ha_counts[cell]+fa_symbols[sy
                      for cell,symbol in symbol_names.items()}
 table([["Circuit", "Cells", "Exhaustive input states"],
        ["half_add",ha_counts,len(ha_table["sum"])], ["full_add",fa_counts,len(fa_table["sum"])]])
-evidence("Ripple-adder HDL", (ROOT/"examples/adder.tv").read_text())
+evidence("Two-trit adder HDL", (ROOT/"examples/adder2.tv").read_text())
 '''
 
 SYNTHESIS = r'''
@@ -383,8 +393,9 @@ for name, source_name, params in [("adder4","adder",{"N":4}), ("full_add","full_
         cache.events.append((f"four-{name}","recorded"))
         cache.timings.append({"stage":f"four-{name}","state":"recorded",
                               "elapsed_s":time.monotonic()-lookup_started})
-        print(f"Recorded {name}: retained native checks; see Appendix B")
+        step(f"{name}: using the recorded layout and SPICE result (checks below)")
     else:
+        step(f"{name}: placement, routing, DRC/LVS and SPICE (one to three minutes)")
         result = cache.run(f"four-{name}",options,
             lambda: complete_design(mapped,directory,planned,oracle,load_f=FOUR_DESIGN_LOAD_F,
                        hold_s=FOUR_DESIGN_HOLD_S,step_s=FOUR_DESIGN_STEP_S,initialize_internal=True,dataset='four-design'),

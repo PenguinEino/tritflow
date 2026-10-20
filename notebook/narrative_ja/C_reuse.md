@@ -14,7 +14,7 @@ bash notebook/colab_setup.sh --source "$PWD"
 
 ```python
 from tritflow import flow
-net = flow.load("examples/adder.tv", "adder", {"N": 2}).synthesize(name="adder2")
+net = flow.load("examples/adder2.tv", "adder2").synthesize()
 layout = net.place_and_route(output_dir="build/adder2")
 assert layout.drc()["clean"] and layout.lvs()["matched"]
 vectors = [tuple(0 for p in net.ports if p.dir == "input")]
@@ -26,7 +26,7 @@ post = layout.extract().simulate(vectors, load=100e-15)
 配置前の回路図は`net.schematic(expand="*")`、文字列のHDLは`flow.loads(source, top=..., params=...)`で扱えます。CLIからも合成と配置配線を実行できます。
 
 ```sh
-python3 -m tritflow.synth examples/adder.tv --top adder -P N=2 --name adder2 -o build/adder2
+python3 -m tritflow.synth examples/adder2.tv --top adder2 -o build/adder2
 python3 -m tritflow.pnr build/adder2/adder2.json -o build/adder2 --seed 7
 ```
 
