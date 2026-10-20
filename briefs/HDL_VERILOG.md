@@ -91,3 +91,31 @@ Balanced ternary integers: a vector `trit [N-1:0] x` has value Σ x[i]·3^i (lit
    unsupported, and decisions you made.
 
 Constraints: TR1UM_PDK=~/pdk/TR-1um-pinned. Do not publish anything. No sign-in anywhere.
+
+## Round 2 (2026-10-20): shifts and the showcase ALU
+
+The first round is committed (b4ca669) and merged. Continue in the same worktree and branch.
+
+1. Shift operators on trit vectors: `<<` and `>>`. Left shift by k multiplies by 3**k (zeros enter at
+   the bottom, the result is truncated to the context width). Right shift by k drops the k lowest
+   trits; in balanced ternary this equals division by 3**k rounded to the nearest integer (exact
+   halves cannot occur) — state this property in the docs and test it against an independent integer
+   reference. Constant shift amounts are pure wiring (no cells). Signal shift amounts (a trit vector
+   read as a balanced integer) must also work; choose and document the meaning of a negative amount
+   (shifting the other way is natural in balanced ternary) and implement it with multiplexers.
+   `<<<`/`>>>` may be aliases. Shift precedence as in Verilog.
+2. Replace `examples/alu_rtl.tv` with `examples/alu.tv` (module `alu`): inputs `trit [1:0] a, b`
+   (−4..+4) and `trit [1:0] op`; output `trit [3:0] r` (−40..+40) for every operation, written in
+   plain student Verilog (`always @*`, `case`). The nine opcodes, in this order:
+   `2'tTT` add a+b, `2'tT0` subtract a−b, `2'tT1` negate −a, `2't0T` min (a & b, digit-wise),
+   `2't00` max (a | b), `2't01` shift left a<<1 (×3), `2't1T` shift right a>>1 (÷3 rounded),
+   `2't10` compare (sign of a−b: −1, 0, +1), `2't11` multiply a*b.
+   If digit-wise min/max read oddly against the integer ops, say so in the status note. Check all 729
+   input states exhaustively against an independent integer reference, then place and route with
+   DRC/LVS (`tritflow.flow`) and run a post-layout SPICE on a representative input sequence that
+   exercises every opcode and all three levels on every output trit. Report the cell count, die size,
+   and the wall time of synthesis, P&R, DRC, LVS and SPICE separately (it will run on a free Colab
+   CPU, roughly 3–5× slower than here).
+3. Update tests, `examples/README.md`, `examples/rtl_check.py` and `docs/status/HDL_VERILOG.md`
+   (append a Round 2 section). Keep every rule of the first round (no notebook edits, no other
+   streams' paths, legacy netlists unchanged, no git commits).
