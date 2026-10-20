@@ -20,6 +20,8 @@ class Node:
     the result's LSB-based digit index. Comparisons use the same operand format
     and return +/-1. A mux has (condition, then, else) args and Kleene consensus;
     select is a procedural join with a crisp +/-1 condition.
+    A case has (predicate, data) pairs followed by a fallback digit; predicates
+    retain exact label equalities so the mapper can prove a one-hot partition.
     Shifts concatenate a width-trit data operand and a self-sized amount;
     value selects the result digit. Negative amounts reverse the direction.
     """

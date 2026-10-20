@@ -1,18 +1,12 @@
-// Nine operations on signed two-trit integers (-4..+4).
-// Four result trits preserve every arithmetic result, including multiplication.
-// Min/max act on individual trits; they are not integer minimum/maximum.
-module alu(input trit [1:0] a, b, op, output reg trit [3:0] r);
+// Three operations on signed two-trit integers a,b (-4..+4).
+// op=-1: subtract; op=0: nearest a/3; op=+1: add.
+// One signed opcode trit multiplies b by -1 or +1, sharing the adder.
+// Three result trits retain the full -8..+8 add/subtract range.
+module alu(input trit [1:0] a, b, input trit op, output reg trit [2:0] r);
   always @* begin
     case (op)
-      2'tTT: r = a + b;
-      2'tT0: r = a - b;
-      2'tT1: r = -a;
-      2't0T: r = a & b;
-      2't00: r = a | b;
-      2't01: r = a << 1;
-      2't1T: r = a >> 1;
-      2't10: r = (a > b) ? 1't1 : ((a < b) ? 1'tT : 1't0);
-      2't11: r = a * b;
+      1'tT, 1't1: r = a + op*b;
+      1't0:      r = a >> 1;
     endcase
   end
 endmodule

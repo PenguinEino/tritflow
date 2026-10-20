@@ -156,11 +156,46 @@ The RTL examples demonstrate the new constructs:
 | `case_table.tv` | Multiplication truth table with multiple case labels |
 | `comparator_rtl.tv` | Signed two-trit less/equal/greater predicates |
 | `mux_rtl.tv` | Conditional selection with Kleene consensus |
-| `alu.tv` / `alu` | Nine operations; two-trit operands/opcode and a four-trit result |
+| `alu.tv` / `alu` | Shuttle showcase: two-trit operands, one-trit opcode, three-trit result |
+| `alu9.tv` / `alu9` | Large nine-operation variant; two-trit operands/opcode, four-trit result |
 
-The showcase ALU accepts a,b in -4..+4 and always returns four result trits
-(-40..+40), preserving every arithmetic result. Its plain `always @* case`
-enumerates all nine two-trit opcodes without a default:
+The shuttle showcase `alu.tv` accepts a,b in -4..+4. One opcode trit
+selects three instructions; three result trits preserve all sums/differences:
+
+| op | Result |
+|---|---|
+| `1'tT` (-1) | a-b |
+| `1't0` (0) | a >> 1, nearest-integer division by 3 |
+| `1't1` (+1) | a+b |
+
+The two add/subtract labels share `r = a + op*b` inside `always @* case`.
+The opcode is a signed arithmetic digit as well as an instruction selector.
+This explicitly shares the adder; two separate `r=a+b` / `r=a-b` branches
+would build two arithmetic networks. The zero opcode demonstrates balanced
+rounding: -2/3 rounds to -1, and -1/3 rounds to 0. There is no saturation or
+arithmetic overflow for any valid operand. An independent integer oracle in
+`examples/alu_reference.py` checks all **243** input states against source and
+cells; `examples/alu9_reference.py` retains the large variant's **729** checks.
+
+The small ALU uses **64 cells**, routes to **1692 × 1590 µm**, and fits inside
+a **2500 × 2500 µm** OpenSUSI frame with actual power and signal pads.
+`PnrResult.to_chip()` plus `signoff()` passed drawing DRC, strict LVS, MDP,
+mask DRC, connectivity, the current reserve and the local organizer pre-check.
+The wrapper uses 17 passive TEG pads and needs a custom probe/bond allocation;
+its report correctly keeps `submission_ready=False`. The 2.5 mm frame check
+establishes physical fit; package/ESD approval remains the shuttle owner's work.
+
+The local run took about **34 seconds**, including full-chip qualification and
+post-layout SPICE. Four representative vectors cover all instructions and
+-1/0/+1 on every output; all 12 level/settling checks passed at 10 fF/output,
+1 µs holds and a 2 ns maximum step. Maximum level error was 0.039 V and the
+longest measured settling time was 221 ns. These selected transitions do not
+establish exhaustive analog delay. The brief's rough 3–5× Colab factor would
+make this about 1.7–2.8 minutes; that is an estimate, not a Colab measurement.
+
+`alu9.tv` retains the original nine instructions, with its module renamed
+`alu9`. It remains a large teaching variant. Shared one-hot selection reduces
+it from **423 to 262 cells**, with no claim of minimum area:
 
 | op | Integer code | Result |
 |---|---:|---|
@@ -175,32 +210,43 @@ enumerates all nine two-trit opcodes without a default:
 | `2't11` | +4 | a*b |
 
 Digit min/max differ from integer min/max: for -2 (`T1`) and +2 (`1T`),
-digit min is -4 (`TT`) and digit max is +4 (`11`). All 729 ALU states are
-checked against the independent specification in `examples/alu_reference.py`.
+digit min is -4 (`TT`) and digit max is +4 (`11`). Four output trits retain
+all products, including ±16. The large variant is excluded from the default
+physical run and does not carry a new shuttle-fit or timing claim.
 
-`python3 -m examples.rtl_check` synthesizes all six examples and runs real-PDK
-P&R, drawing DRC and strict device LVS. For the ALU it also runs post-layout
-device SPICE with estimated GDS wire capacitance, 10 fF output loads and an
-independent integer oracle. The representative sequence covers every opcode
-and all three voltage levels on each output trit. Results and separate stage
-wall times go to `build/hdl_verilog_round2/summary.json`. To run only the ALU:
+`python3 -m examples.rtl_check` synthesizes the six default examples and runs
+real-PDK P&R, drawing DRC and strict device LVS. The small ALU additionally
+gets the full-chip checks and post-layout device SPICE with estimated GDS wire
+capacitance and the independent integer oracle. Reports and separate stage
+wall times go to `build/hdl_verilog_round3/summary.json`:
 
 ```sh
 TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.rtl_check --names alu
+# Reproduce the four instruction/area candidates, including frame-fit trials:
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.alu_candidates
+# Optional, much larger nine-operation physical/SPICE run:
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.rtl_check --names alu9
 ```
 
-Use `--output-root <directory>` for an isolated run.
-The ALU runner selects 32 cell rows and a conservative power sizing density of
-0.000135 A/µm, retaining the default 20% current reserve. It checks the actual
-drawn rail/via network before routing. It starts with 24 channel tracks and
-two rip-up passes per floorplan to avoid repeated congested trials. Other
-examples use default floorplanning.
-The supported language, mapping decisions and qualification results are in
+Use `--output-root <directory>` for an isolated run and `--mpw-template <path>`
+for the organizer checkout's exact pre-check. By default the runner uses
+`~/TR-1um_MPW_Sanken` when present. The small ALU uses ordinary default P&R
+settings, seed 0 and 600 placement steps; all power limits retain their default
+20% reserve. Only the optional large variant retains Round 2's conservative
+32-row / 24-track routing envelope. The supported language, candidate table,
+mapping decisions and complete qualification results are in
 [the HDL_VERILOG status](../docs/status/HDL_VERILOG.md).
 
 Synthesis folds constants, removes double negation and dead logic, shares
 expressions and applies De Morgan transformations when they remove single-use
 inversions. It never treats `a & ~a` or `a | ~a` as Boolean constants.
+For a condition proved to return only ±1, selection uses min/max AND–OR.
+Case label equalities form a shared one-hot decoder only after proving common
+selectors, disjoint labels and coverage from the source IR. Missing labels get
+one shared default mask. Identical arms and constants fold before selection.
+Selectors that can be 0 retain general MUX3 and the Kleene consensus rule.
+Inferred RTL uses compact BUF trees that keep direct loads where possible;
+the pre-existing structural examples retain their exact saved netlists.
 Independent cell simulation checks every input vector up to 12 input trits;
 larger designs use 100,000 reproducible random vectors. `truth_table()` limits
 materialized tables to 12 inputs by default; synthesis streams batches.

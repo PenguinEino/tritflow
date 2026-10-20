@@ -13,6 +13,7 @@ from itertools import product
 
 from tritflow.hdl.ir import Design, Node
 from tritflow.hdl.semantics import EXTENDED
+from .predicates import Predicates, case_partition
 
 
 @lru_cache(maxsize=1)
@@ -48,10 +49,32 @@ def unary_networks():
 class Lowerer:
     def __init__(self):
         self.cache, self.vectors, self.unaries = {}, {}, {}
+        self.predicates = Predicates()
+        self.generated = {}
         self.source = None
 
     def make(self, op, *args, value=None):
-        return Node(op, tuple(args), value=value, hier=self.source.hier, loc=self.source.loc)
+        # Simplify selection masks before building the rest of the network,
+        # including when optional post-lowering rewriting is disabled.
+        if op == 'neg' and args[0].op == 'const':
+            return self.const(-args[0].value)
+        if op == 'neg' and args[0].op == 'neg' and not args[0].primitive:
+            return args[0].args[0]
+        if op in {'min', 'max'}:
+            if args[0] is args[1]:
+                return args[0]
+            for index, arg in enumerate(args):
+                if arg.op == 'const':
+                    absorbing = -1 if op == 'min' else 1
+                    if arg.value == absorbing:
+                        return arg
+                    if arg.value == -absorbing:
+                        return args[1-index]
+        key = op, args, value, self.source.hier
+        if key not in self.generated:
+            self.generated[key] = Node(op, tuple(args), value=value,
+                                       hier=self.source.hier, loc=self.source.loc)
+        return self.generated[key]
 
     def const(self, value):
         return self.make('const', value=value)
@@ -163,6 +186,46 @@ class Lowerer:
         return self.make('max', self.make('min', condition, yes),
                          self.make('min', self.neg(condition), no))
 
+    def case(self, node):
+        """One-hot AND–OR for proved case partitions; priority selects otherwise."""
+        conditions = node.args[:-1:2]
+        coverage = case_partition(conditions)
+        crisp = all(self.predicates.crisp(n) for n in conditions)
+        data = tuple(self.visit(n) for n in node.args[1:-1:2])
+        fallback = () if coverage else (self.visit(node.args[-1]),)
+        candidates = data + fallback
+        if candidates and all(n is candidates[0] for n in candidates):
+            return candidates[0]
+        if coverage is None or not crisp:
+            result = self.visit(node.args[-1])
+            for index in reversed(range(0, len(node.args)-1, 2)):
+                c = self.visit(node.args[index])
+                if not self.predicates.crisp(node.args[index]):
+                    c = self.unary((-1, -1, 1), c)
+                result = self.select(c, self.visit(node.args[index+1]), result)
+            return result
+        branches, decoded, groups = [], [], {}
+        for c, branch in zip(conditions, data):
+            predicate = self.visit(c)
+            decoded.append(predicate)
+            groups.setdefault(branch, []).append(predicate)
+        for branch, predicates in groups.items():
+            branches.append(self.make('min', self.reduce('max', predicates), branch))
+        if not coverage:
+            active = self.reduce('max', decoded)
+            branches.append(self.make('min', self.neg(active), self.visit(node.args[-1])))
+        return self.reduce('max', branches)
+
+    def reduce(self, op, nodes):
+        """Balanced lattice tree limits decoder/selection logic depth."""
+        nodes = list(nodes)
+        if not nodes:
+            return self.const(-1 if op == 'max' else 1)
+        while len(nodes) > 1:
+            nodes = [self.make(op, *nodes[i:i+2]) if i+1 < len(nodes) else nodes[i]
+                     for i in range(0, len(nodes), 2)]
+        return nodes[0]
+
     def arithmetic(self, node):
         key = node.op, node.args
         if key in self.vectors:
@@ -208,6 +271,8 @@ class Lowerer:
             pins = primitive_inputs(node)
             args = tuple(self.visit(n) for n in pins)
             result = node if args == pins else primitive_node(node, args)
+        elif node.op == 'const':
+            result = self.const(node.value)
         elif node.op in {'add', 'sub', 'mul'}:
             result = self.arithmetic(node)[-1-node.value]
         elif node.op in {'shift_left', 'shift_right'}:
@@ -216,18 +281,27 @@ class Lowerer:
             if key not in self.vectors:
                 self.vectors[key] = shift_vector(self, node)
             result = self.vectors[key][-1-node.value]
+        elif node.op == 'case':
+            result = self.case(node)
         else:
             args = tuple(self.visit(n) for n in node.args)
             if node.op == 'select':
-                result = self.select(*args)
+                c, a, b = args
+                if not self.predicates.crisp(node.args[0]):
+                    c = self.unary((-1, -1, 1), c)
+                result = self.select(c, a, b)
             elif node.op == 'mux':
                 c, a, b = args
-                # At c=0 preserve an agreed trit, otherwise return 0: median(a,b,0).
-                consensus = self.make('min', self.make('max', self.make('min', a, b), self.const(0)),
-                                      self.make('max', a, b))
-                result = self.mux3(c, b, consensus, a)
+                if self.predicates.crisp(node.args[0]):
+                    result = self.select(c, a, b)
+                else:
+                    # At c=0 preserve agreement: median(a,b,0).
+                    consensus = self.make('min', self.make('max', self.make('min', a, b), self.const(0)),
+                                          self.make('max', a, b))
+                    result = self.mux3(c, b, consensus, a)
             elif node.op == 'is_true':
-                result = self.unary((-1, -1, 1), args[0])
+                result = (args[0] if self.predicates.crisp(node.args[0])
+                          else self.unary((-1, -1, 1), args[0]))
             elif node.op in {'eq', 'ne'}:
                 width = len(args)//2
                 result = self.const(1)

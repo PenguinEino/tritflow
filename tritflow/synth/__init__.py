@@ -10,7 +10,9 @@ The mapping follows the actual cell functions, with a/b in {-1,0,+1}:
 
 Arithmetic lowers to ripple adders and arrays of one-trit products. General
 selectors use the complete unary cell basis and ternary Shannon selection.
-Procedural case/if joins select on crisp +/-1 predicates.
+Proved crisp +/-1 predicates use AND–OR selection. Case equality labels retain
+their source identity, permitting shared, one-hot decoders after a partition
+proof. Unknown selectors retain the three-way/Kleene-consensus implementation.
 
 ``synthesize(design)`` first simplifies only ternary-valid expressions, shares
 common logic and removes unused gates. In particular ``a & ~a`` is not a
