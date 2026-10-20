@@ -20,8 +20,6 @@ import time
 
 from IPython.display import HTML, display
 
-from tritflow import progress
-
 SPINNER = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 FONT = "font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"
 GREEN, RED, CYAN, DIM = "#1a9c4a", "#d0342c", "#0b8fb3", "#8a8f98"
@@ -93,6 +91,8 @@ def step(title, *, view=None):
     ``view`` (for example a :class:`LayoutView`) receives every progress event
     and is redrawn below the line while the step runs.
     """
+    # Imported here: setup loads this module before TritFlow's runtime settings exist.
+    from tritflow import progress
     line = Line(title, view)
 
     def listen(event):
@@ -113,18 +113,21 @@ def run_stages(command, **options):
     """Run an installer that prints ``@stage`` and ``@progress`` lines, one ✓ line per stage."""
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                text=True, bufsize=1, **options)
-    line, tail = None, []
+    line, tail, files = None, [], {}
     for text in process.stdout:
         text = text.rstrip("\n")
         tail = (tail+[text])[-80:]
         if text.startswith("@stage "):
             if line:
                 line.close()
-            line = Line(text[7:])
+            line, files = Line(text[7:]), {}
         elif text.startswith("@progress ") and line:
             done, total, label = text.split(" ", 3)[1:]
-            size = f"{int(done)/1e6:.1f} / {int(total)/1e6:.1f} MB" if int(total) else f"{int(done)/1e6:.1f} MB"
-            line.detail = f"{label} · {size}"
+            files[label] = (int(done), int(total))
+            finished = sum(1 for d, t in files.values() if t and d >= t)
+            megabytes = sum(d for d, _ in files.values())/1e6
+            line.detail = (f"{finished}/{len(files)} ファイル · {megabytes:.1f} MB" if len(files) > 1
+                           else f"{label} · {megabytes:.1f} MB")
         elif line and (found := re.match(r"\s*(Collecting|Downloading|Installing)\s+(\S+)", text)):
             line.detail = f"pip · {found[2]}"
     process.wait()
