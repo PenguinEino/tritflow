@@ -2,6 +2,7 @@
 
 from copy import deepcopy
 import json
+import re
 from pathlib import Path
 import sys
 
@@ -64,9 +65,10 @@ def test_static_context_and_embedded_figures_have_no_unresolved_results():
                  '05_synthesis.md','06_pnr.md','07_results.md','09_next.md','A_limits.md','captions.md'):
         assert not TOKEN.search(render((ROOT/'notebook/narrative'/name).read_text(),values))
     document = json.loads((ROOT/'notebook/tritflow_tr1um.ipynb').read_text())
-    intro = document['cells'][0]['source']
-    assert 'Japan' in intro and 'taped out' in intro and 'mW' in intro and 'Open in Colab' in intro
-    assert intro.index('data:image/png;base64,') < intro.index('<summary>Author')
+    intro = re.sub(r'<img\b[^>]*>', '', document['cells'][0]['source'])
+    assert 'Japan' in intro and 'taped out' in intro and 'mW' not in intro and 'Open in Colab' in intro
+    first = document['cells'][0]['source']
+    assert first.index('data:image/png;base64,') < first.index('<summary>Author')
     assert sum(c['source'].count('data:image/png;base64,') for c in document['cells']) == 8   # Fig. 2 is generated live in chapter 1
     markdown = '\n'.join(c['source'] for c in document['cells'] if c['cell_type']=='markdown')
     assert '## Appendix A.' in markdown and not TOKEN.search(markdown)

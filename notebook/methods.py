@@ -26,10 +26,30 @@ t = gates.truth_table()                                    # all nine input pair
 display(cell_cards(t, CELLS_DIR/"out", ROOT/"notebook/assets/schematics"))  # truth tables + taped-out schematics
 curves = simulate(CELLS_DIR/"out")                         # ten ngspice DC sweeps of the extracted layouts
 png = save_figure(draw(curves), "fig_gates", out=BUILD/"figures")
-display(Image(filename=str(png), width=1000))              # Fig. 2, regenerated from your own run
+display(paper_figure(png, width=1000))                      # Fig. 2, regenerated from your own run
 v_a, v_y, i_ma = curves["INV"][0]
 i0 = int(np.argmin(abs(v_a)))
 print(f"A = 0 V:  Y = {1e3*v_y[i0]:.1f} mV,  supply current = {i_ma[i0]:.3f} mA")
+'''
+
+COMPLETENESS = r'''
+from completeness import unary_closure, inv, nand, nor, nany
+bases = [("INV/NAND/NOR + TIEP/TIEZ/TIEN", (inv,), (nand, nor), (-1, 0, 1), 11),
+         ("NANY + TIEZ", (), (nany,), (0,), 3),
+         ("NANY + TIEP/TIEN", (), (nany,), (-1, 1), 27)]
+closures = {}
+for basis_name, unary, binary, constants, expected in bases:
+    closures[basis_name] = unary_closure(unary=unary, binary=binary, constants=constants)
+    assert len(closures[basis_name]) == expected
+    print(f"{basis_name}: {len(closures[basis_name])}/27 unary functions")
+half_counts = flow.load(ROOT/"examples/half_add.tv", "half_add").synthesize().report()["cells"]
+print("half_add:", half_counts)
+'''
+
+GDS = r'''
+from tritflow.viz.layout import gds_viewer
+display(gds_viewer(lay.gds_path, top=net.top))             # zoom to the actual routed cells
+gds_download(lay.gds_path)                               # download the checked GDSII
 '''
 
 SIZING = r'''
@@ -66,7 +86,7 @@ SYNTHESIS = r'''
 fa_net = fa.synthesize()                         # rewrite → map to cells → equivalence check
 print(fa_net.report()["equivalence"])
 half_net = flow.load(ROOT/"examples/half_add.tv", "half_add").synthesize()
-display(value_selector(half_net))                # click input trits; every net shows its settled value
+display(value_selector(half_net, title=display_label("Mapped half adder: choose the input trits")))  # settled nets
 '''
 
 SCHEMATIC = r'''
@@ -167,5 +187,5 @@ CHOICE = os.environ.get("TRITFLOW_CIRCUIT", "minmax")   # or: sign | compare2 | 
 example = DESIGNS[CHOICE]                                # its independent arithmetic reference
 if CHOICE != "minmax":
     source = example.path.read_text()
-print(example.description)
+print(display_label(example.description))
 '''

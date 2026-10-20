@@ -16,6 +16,7 @@ from tritflow.synth import evaluate_netlist
 from predictions import divider, zero_dc, rail_power
 from paper_evidence import load_paper
 from routing_identity import archive_routing, routing_label
+from colab_evidence import narrative_values as colab_values
 
 TOKEN = re.compile(r'\{([a-z][a-z_]*\.[a-z][a-z_0-9]*)\}')
 
@@ -60,6 +61,16 @@ def context(root):
         pdk_opened_year=re.search(r'opened (\d+)',history)[1],
         tapeout_year=re.search(r'shuttle in\s+(\d+)',history)[1],
         delivery_month=re.search(r'expected in ([A-Z][a-z]+ \d+)',history)[1])
+    delivery = values['history.delivery_month'].split()
+    months = ('January February March April May June July August September October November December').split()
+    put('history',delivery_month_ja=f'{delivery[1]}年{months.index(delivery[0])+1}月',
+        isscc_dates_ja='2027年2月14〜18日')
+    from completeness import unary_closure, inv, nand, nor, nany
+    put('basis',unary_total=3**3,
+        minmax_count=len(unary_closure(unary=(inv,),binary=(nand,nor),constants=(-1,0,1))),
+        zero_count=len(unary_closure(binary=(nany,),constants=(0,))),
+        complete_count=len(unary_closure(binary=(nany,),constants=(-1,1))))
+    values.update(colab_values())
     put('levels',negative_v=TRIT_VOLTS[-1],zero_v=TRIT_VOLTS[0],
         positive_v=f'{TRIT_VOLTS[1]:+g}',band_v=PASS_BAND)
     report,physical = paper['paper_report'],paper['paper_pnr']

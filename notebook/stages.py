@@ -103,6 +103,9 @@ recorded_campaign = RecordedCampaign(ROOT/"notebook/assets/four_designs.zip",ROO
                                      enabled=not cache.force)
 renderer_sha256 = hashlib.sha256((ROOT/"tritflow/viz/layout.py").read_bytes()).hexdigest()
 from presentation import show, table, evidence, gds_download
+from presentation import configure_language, label as display_label, paper_figure
+configure_language(globals().get("NOTEBOOK_LANGUAGE", "en"))
+from presentation import localized_display as display
 
 from IPython.display import Markdown, Code
 from editorial import context, context_identity, render as render_narrative, dimensions
@@ -206,6 +209,18 @@ for cell, char in characters.items():
                        max(chain_times)*1e9, max(loaded_times)*1e9,
                        max(c["max_error_v"] for c in cascade["cases"])*1e3])
 
+'''
+
+COMPLETENESS = r'''
+from itertools import product
+from completeness import TRITS, surjective_and_depends_on_both
+assert set(closures[bases[2][0]]) == set(product(TRITS, repeat=3))
+assert surjective_and_depends_on_both(nany)
+assert all(nany(-a, -b) == -nany(a, b) for a, b in product(TRITS, repeat=2))
+assert all(f[1] == 0 and f[0] == -f[2] for f in closures[bases[1][0]])
+assert half_counts == {"NANY": 5, "INV": 2}
+table([["Cell basis", "Unary functions", "All unary functions"]] +
+      [[label, len(closures[label]), len(closures[label]) == 27] for label, *_ in bases])
 '''
 
 SIZING = r'''
@@ -470,8 +485,10 @@ custom_values = {"custom.name":custom.top,"custom.logic_states":len(planned),
     "custom.cells":custom.report()["total_cells"],"custom.die_um":dimensions(custom_result["stats"]["die_size_um"]),
     "custom.drc_items":custom_result["drc"]["violations"],"custom.lvs_status":"Match",
     "custom.analog_states":len(set(planned)),"custom.analog_status":"PASS"}
-custom_takeaway = (ROOT/"notebook/narrative/08_your_circuit.md").read_text().split("> **What this shows.**",1)[1]
-display(Markdown(render_narrative("> **What this shows.**"+custom_takeaway,{**narrative_values,**custom_values})))
+narrative_directory = "narrative_ja" if globals().get("NOTEBOOK_LANGUAGE") == "ja" else "narrative"
+result_marker = "> **ここから分かること。**" if narrative_directory == "narrative_ja" else "> **What this shows.**"
+custom_takeaway = (ROOT/"notebook"/narrative_directory/"08_your_circuit.md").read_text().split(result_marker,1)[1]
+display(Markdown(render_narrative(result_marker+custom_takeaway,{**narrative_values,**custom_values})))
 '''
 
 FINAL = r'''
