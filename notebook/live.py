@@ -36,14 +36,44 @@ def _line(mark, color, title, detail, seconds):
         f'<span style="color:{DIM}">{seconds:.1f}s</span></div>')
 
 
-class Step:
-    """Handle for one running step: ``done()`` sets the closing summary."""
+class Line:
+    """One status line, redrawn by a background thread until :meth:`close`."""
 
-    def __init__(self, title):
-        self.title, self.detail, self.summary = title, "", ""
+    def __init__(self, title, view=None):
+        self.title, self.detail, self.summary, self.view = title, "", "", view
+        self.handle = display(_line(SPINNER[0], CYAN, title, "", 0.0), display_id=True)
+        self.picture = display(HTML(""), display_id=True) if view else None
+        self.started, self.stop = time.monotonic(), threading.Event()
+        self.ticker = threading.Thread(target=self._redraw, daemon=True)
+        self.ticker.start()
 
     def done(self, summary):
+        """Set the closing summary shown after the check mark."""
         self.summary = summary
+
+    def _redraw(self):
+        frame, drawn = 0, -1
+        while not self.stop.wait(0.1):
+            frame += 1
+            self.handle.update(_line(SPINNER[frame % len(SPINNER)], CYAN, self.title, self.detail,
+                                     time.monotonic()-self.started))
+            if self.view and self.view.version != drawn and frame % 6 == 0:
+                drawn = self.view.version
+                self.picture.update(HTML(self.view.svg()))
+
+    def close(self, error=None):
+        self.stop.set()
+        self.ticker.join()
+        seconds = time.monotonic()-self.started
+        if error is None:
+            self.handle.update(_line("✓", GREEN, self.title, self.summary, seconds))
+        else:
+            self.handle.update(_line("✗", RED, self.title, f"{type(error).__name__}: {error}"[:160], seconds))
+        if self.view:
+            self.picture.update(HTML(self.view.svg()))
+
+
+Step = Line
 
 
 def describe(event):
@@ -63,42 +93,49 @@ def step(title, *, view=None):
     ``view`` (for example a :class:`LayoutView`) receives every progress event
     and is redrawn below the line while the step runs.
     """
-    current = Step(title)
-    line = display(_line(SPINNER[0], CYAN, title, "", 0.0), display_id=True)
-    picture = display(HTML(""), display_id=True) if view else None
-    started, stop = time.monotonic(), threading.Event()
+    line = Line(title, view)
 
     def listen(event):
-        current.detail = describe(event)
+        line.detail = describe(event)
         if view:
             view.add(event)
 
-    def redraw():
-        frame, drawn = 0, -1
-        while not stop.wait(0.1):
-            frame += 1
-            line.update(_line(SPINNER[frame % len(SPINNER)], CYAN, title, current.detail,
-                              time.monotonic()-started))
-            if view and view.version != drawn and frame % 6 == 0:
-                drawn = view.version
-                picture.update(HTML(view.svg()))
-
-    ticker = threading.Thread(target=redraw, daemon=True)
-    ticker.start()
     try:
-        with progress.listening(listen), _streamed_tools(lambda text: setattr(current, "detail", text)):
-            yield current
+        with progress.listening(listen), _streamed_tools(lambda text: setattr(line, "detail", text)):
+            yield line
     except BaseException as error:
-        stop.set()
-        ticker.join()
-        line.update(_line("✗", RED, title, f"{type(error).__name__}: {error}"[:160],
-                          time.monotonic()-started))
+        line.close(error)
         raise
-    stop.set()
-    ticker.join()
-    line.update(_line("✓", GREEN, title, current.summary, time.monotonic()-started))
-    if view:
-        picture.update(HTML(view.svg()))
+    line.close()
+
+
+def run_stages(command, **options):
+    """Run an installer that prints ``@stage`` and ``@progress`` lines, one ✓ line per stage."""
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               text=True, bufsize=1, **options)
+    line, tail = None, []
+    for text in process.stdout:
+        text = text.rstrip("\n")
+        tail = (tail+[text])[-80:]
+        if text.startswith("@stage "):
+            if line:
+                line.close()
+            line = Line(text[7:])
+        elif text.startswith("@progress ") and line:
+            done, total, label = text.split(" ", 3)[1:]
+            size = f"{int(done)/1e6:.1f} / {int(total)/1e6:.1f} MB" if int(total) else f"{int(done)/1e6:.1f} MB"
+            line.detail = f"{label} · {size}"
+        elif line and (found := re.match(r"\s*(Collecting|Downloading|Installing)\s+(\S+)", text)):
+            line.detail = f"pip · {found[2]}"
+    process.wait()
+    if process.returncode:
+        error = subprocess.CalledProcessError(process.returncode, command, "\n".join(tail))
+        if line:
+            line.close(error)
+        print("\n".join(tail))
+        raise error
+    if line:
+        line.close()
 
 
 # --- KLayout and ngspice: read their output while they run ---------------------------------
@@ -135,8 +172,9 @@ def _streamed_tools(report):
 
     def run(command, *args, **options):
         name = os.path.basename(str(command[0])) if isinstance(command, (list, tuple)) and command else ""
-        if args or not (options.get("capture_output") and options.get("text")) or \
-                not ("klayout" in name or "ngspice" in name):
+        # Only DRC/LVS decks (-r) and batch simulations (-b) are streamed; version probes are not.
+        if args or not (options.get("capture_output") and options.get("text")) or not (
+                ("klayout" in name and "-r" in command) or ("ngspice" in name and "-b" in command)):
             return original(command, *args, **options)
         if "klayout" in name:
             # -d 11 makes KLayout log each DRC/LVS operation; the results are unchanged.
@@ -145,7 +183,7 @@ def _streamed_tools(report):
             parse, launched = _ngspice_progress(options.get("cwd")), list(command)
         # Both tools are silent for a few seconds while they load decks or the operating point.
         report("KLayout · 起動中" if "klayout" in name else "ngspice · 動作点を計算中")
-        timeout = options.pop("timeout", None)
+        timeout, check = options.pop("timeout", None), options.pop("check", False)
         options.pop("capture_output"), options.pop("text")
         process = subprocess.Popen(launched, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    text=True, **options)
@@ -172,8 +210,11 @@ def _streamed_tools(report):
             raise
         for reader in readers:
             reader.join()
-        return subprocess.CompletedProcess(command, process.returncode,
-                                           "".join(captured["out"]), "".join(captured["err"]))
+        result = subprocess.CompletedProcess(command, process.returncode,
+                                             "".join(captured["out"]), "".join(captured["err"]))
+        if check:
+            result.check_returncode()
+        return result
 
     subprocess.run = run
     try:
