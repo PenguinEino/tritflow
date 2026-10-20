@@ -4,16 +4,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/"notebook"))
-import stages
+sys.path.insert(0, str(ROOT/"notebook/v2"))
+from setup_cell import SETUP
 
 revision = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
-setup = re.sub(r'(?m)^SOURCE_REF = .*', f'SOURCE_REF = os.environ.get("TRITFLOW_REF", "{revision}")', stages.SETUP)
+setup = SETUP.replace('"PINNED"', f'"{revision}"')
 
 cells = [
 ("markdown", "# ライブ表示の試作\n\n「ランタイム → すべてのセルを実行」で、各セルの進捗表示を確かめます。"),
 ("code", "#@title 準備 { display-mode: \"form\" }\n" + setup + '''
-BUILD = Path(os.environ.get("TRITFLOW_NOTEBOOK_BUILD", ROOT/"build/notebook")).resolve()
-from live import step, need, provides, install_error_view, LayoutView
+from live import need, provides, install_error_view, LayoutView
 from tritflow import flow
 install_error_view()
 provides("design", "1-1 HDLを読み込む")

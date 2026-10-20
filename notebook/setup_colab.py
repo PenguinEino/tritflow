@@ -57,7 +57,14 @@ def download(url, destination, checksum=None):
     for attempt in range(4):
         try:
             with urlopen(url, timeout=120) as response, destination.open("wb") as stream:
-                shutil.copyfileobj(response, stream)
+                total, done, shown = int(response.headers.get("Content-Length") or 0), 0, 0.
+                for chunk in iter(lambda: response.read(1 << 18), b""):
+                    stream.write(chunk)
+                    done += len(chunk)
+                    if time.monotonic()-shown > .25:
+                        progress(done, total, Path(url).name)
+                        shown = time.monotonic()
+                progress(done, total or done, Path(url).name)
             if checksum and sha256(destination.read_bytes()).hexdigest() != checksum:
                 raise RuntimeError(f"SHA-256 mismatch: {url}")
             return
@@ -95,9 +102,17 @@ def bootstrap_pip(prefix):
 
 
 def say(english, japanese):
-    """Progress line in the notebook's language; setup runs silently otherwise."""
+    """Start a setup stage, named in the notebook's language.
+
+    ``@stage`` and ``@progress`` lines are read by the notebook's progress view
+    (notebook/live.py); in a terminal they are plain, readable log lines.
+    """
     japanese_notebook = os.environ.get("TRITFLOW_NOTEBOOK_LANGUAGE") == "ja"
-    print(f"  · {japanese if japanese_notebook else english}", flush=True)
+    print(f"@stage {japanese if japanese_notebook else english}", flush=True)
+
+
+def progress(done, total, label):
+    print(f"@progress {done} {total} {label}", flush=True)
 
 
 def main(argv=None):
@@ -191,7 +206,6 @@ def main(argv=None):
     temporary = HERE/"runtime.json.tmp"
     temporary.write_text(json.dumps(config, indent=2)+"\n")
     temporary.replace(HERE/"runtime.json")
-    say(f"Installed; settings saved to {HERE/'runtime.json'}", f"インストール完了。設定を{HERE/'runtime.json'}に保存")
     return 0
 
 
