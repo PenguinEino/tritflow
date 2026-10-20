@@ -167,16 +167,20 @@ def synthesize(design: Design, *, fanout_limit: int = 4, optimize_logic: bool = 
     directly and constants become supply TIE cells. Explicit live gate instances
     preserve cell identity and source hierarchy, even with constant inputs.
 
+    Integer arithmetic and procedural selections lower to the cell basis before
+    local rewriting. Source simulation retains independent integer/table rules.
+
     ``fanout_limit`` counts cell input pins, including repeated pins on one
     gate; it must be >=2. ``optimize_logic=False`` skips expression rewriting
-    for comparisons. ``verify=True`` checks the mapped result against the
-    unoptimized source, exhaustively for <=12 inputs and with 100,000 vectors
+    while retaining required operator lowering. ``verify=True`` checks the mapped
+    result against the unoptimized source, exhaustively for <=12 inputs and with 100,000 vectors
     otherwise; ``seed`` controls that random sample. ``verify=False`` explicitly
     skips this check and leaves report equivalence evidence unset.
     """
     if not isinstance(fanout_limit, int) or isinstance(fanout_limit, bool) or fanout_limit < 2:
         raise ValueError("fanout_limit must be an integer >= 2")
-    mapped = Mapper(optimize(design) if optimize_logic else design).finish()
+    from .lower import lower
+    mapped = Mapper(optimize(design) if optimize_logic else lower(design)).finish()
     buffer_fanout(mapped, fanout_limit)
     mapped.fanout_limit = fanout_limit
     mapped.equivalence = check_equivalence(design, mapped, seed=seed) if verify else None

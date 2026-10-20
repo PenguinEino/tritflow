@@ -1,0 +1,6 @@
+// Comparisons return +1 for true and -1 for false, including equality at zero.
+module comparator_rtl(input trit [1:0] a, b, output trit lt, eq, gt);
+  assign lt = a < b;
+  assign eq = a == b;
+  assign gt = a > b;
+endmodule

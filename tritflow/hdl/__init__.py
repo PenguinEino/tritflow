@@ -3,7 +3,10 @@
 At settled logic levels, -1, 0 and +1 correspond to -5, 0 and +5 V on
 TR-1um. ``~a`` is -a; ``a & b`` and ``a | b`` are min(a,b) and max(a,b).
 ``nany(a,b)`` is -clamp(a+b,-1,+1), not a Boolean NAND. There are no x/z
-states, storage elements, or signal-level arithmetic operators.
+states or storage elements. Balanced-ternary integer +, -, * and comparisons
+work on signals; context widths extend with zero and discard high trits.
+``c ? a : b`` uses Kleene consensus at c=0. ``always @*`` blocks use blocking
+assignments, if/else and exact case tables; incomplete assignment is an error.
 
 ``load(path, top=..., params={"N": 4})`` parses source, evaluates integer
 parameters and generate loops, then flattens module connections into a DAG of
