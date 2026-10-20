@@ -22,6 +22,9 @@ def file_hash(path):
     return sha256(Path(path).read_bytes()).hexdigest()
 
 
+COMPUTING_MODULES = ("cache.py", "campaign.py", "experiments.py", "routing_identity.py")
+
+
 def source_manifest(root, pdk, *, names=None):
     """Content hashes of cached physical/electrical experiment inputs.
 
@@ -44,9 +47,13 @@ def source_manifest(root, pdk, *, names=None):
             return not (package == "sim" and name in {
                 "diagnose.py","publication.py","corners.py","sizing.py","scaling.py","load_sweep.py"})
         files = [p for p in root.glob("tritflow/**/*.py") if consumed(p)]
+        # Only notebook modules that compute or restore cached results are inputs.
+        # Prose, presentation and the generated notebooks never change a result,
+        # so editing them keeps recorded experiments valid.
         files += [root/"cells/template.json", *root.glob("cells/out/*.json"),root/"cells/out/all.spice",
-                  root/"notebook/setup_pins.json",root/"notebook/tritflow_tr1um.ipynb",
-                  *root.glob("notebook/*.py"),*root.glob("examples/*.tv"),*root.glob("examples/curated.py")]
+                  root/"notebook/setup_pins.json",
+                  *(p for name in COMPUTING_MODULES if (p:=root/"notebook"/name).is_file()),
+                  *root.glob("examples/*.tv"),*root.glob("examples/curated.py")]
         library=json.loads((root/"cells/out/library.json").read_text())
         entries=library.get("cells",library) if isinstance(library,dict) else library
         cells=list(entries) if isinstance(entries,dict) else [e if isinstance(e,str) else e["name"] for e in entries]
