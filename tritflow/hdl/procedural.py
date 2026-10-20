@@ -96,7 +96,7 @@ def elaborate_block(elaborator, block, scope, env, module, hier):
                 result = merge(cond, branch, result, item)
             state = result
         elif kind != 'empty_stmt':
-            raise module.location(stmt).error(f'unsupported procedural statement {kind}')
+            raise module.location(stmt).error(f'unsupported procedural syntax: {kind} (use blocking = in always @*)')
         return state
 
     result = execute(statement, {})

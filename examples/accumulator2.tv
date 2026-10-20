@@ -1,0 +1,8 @@
+// Synchronous reset establishes state on a clock edge. Overflow wraps modulo 9.
+module accumulator2(input trit clk, rst, input trit [1:0] a,
+                    output reg trit [1:0] q);
+  always @(posedge clk) begin
+    if (rst == 1't1) q <= 2't00;
+    else q <= q + a;
+  end
+endmodule
