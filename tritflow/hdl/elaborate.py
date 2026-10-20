@@ -41,6 +41,10 @@ def integer(expr: Tree, env: dict[str, int], module: Module) -> int:
     if op in {"minus", "plus"}:
         value = integer(children[0], env, module)
         return -value if op == "minus" else value
+    if op in {"shift_left", "shift_right"}:
+        a, amount = (integer(child, env, module) for child in (children[0], children[-1]))
+        amount *= 1 if op == "shift_left" else -1
+        return a * 3**amount if amount >= 0 else (a + 3**(-amount)//2) // 3**(-amount)
     if op in {"add", "sub", "mul", "div", "mod"}:
         a, b = (integer(child, env, module) for child in children)
         if op in {"div", "mod"} and b == 0:

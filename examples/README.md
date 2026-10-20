@@ -115,6 +115,25 @@ connections retain strict widths; primitives have scalar inputs and output first
 Verilog operator precedence applies; `*` binds before `+`, comparison before
 bitwise logic, and `&&` before `||`.
 
+`a << k` shifts balanced digits toward the MSB and inserts zeros at the LSB,
+so it multiplies by 3**k before context-width truncation. `a >> k` drops the
+lowest k digits and inserts zeros at the MSB. Numerically this divides by
+3**k rounded to the nearest integer: +2 >> 1 = +1 and -2 >> 1 = -1.
+Exact halves cannot occur because the divisor is odd. A negative amount
+reverses direction; `a << -1` equals `a >> 1`. `<<<` and `>>>` are aliases.
+An amount whose magnitude reaches the evaluated data width produces zero.
+
+Shifts determine their natural width from the left operand only; the assignment
+context can widen that operand before shifting. The amount is self determined
+and reads a trit vector as a signed balanced integer. Constant integer amount
+expressions evaluate exactly (`a << (1+1)` shifts by two). Signal amount
+expressions follow the ordinary self-sized arithmetic rules. Shifts associate
+left to right, bind less tightly than addition and more tightly than comparisons:
+`a+b << 1` means `(a+b) << 1`. Constant shifts are wiring; TIE/BUF cells may
+still provide zeros and distinct physical output drivers. Variable shifts use
+three-way selectors over the complete signed amount, with overshifts pruned.
+They do not cascade opposite-direction shifts, which could discard useful digits.
+
 `c ? x : y` selects x at +1 and y at −1. At c=0, each result trit is the
 agreed input value where x and y match, and zero otherwise. `always @(*)` /
 `always @*` accept blocking assignments, begin/end, if/else and exact case
@@ -123,7 +142,7 @@ only at +1; at 0 it takes else. `reg trit` is a combinational wire synonym.
 Every written bit must be assigned on every path, with reads following a
 blocking assignment, so incomplete blocks cannot infer latches.
 
-Parameters, indices and generate loops support integer `+ - * / %` and
+Parameters, indices and generate loops support integer `+ - * / %`, ternary shifts and
 comparisons; integer division truncates toward zero. Signal `/ %`, sequential
 logic, nonblocking assignments and `x/z` produce file:line:column diagnostics.
 Global net names `VDD`, `VMID`, and `VSS` are reserved.
@@ -137,11 +156,45 @@ The RTL examples demonstrate the new constructs:
 | `case_table.tv` | Multiplication truth table with multiple case labels |
 | `comparator_rtl.tv` | Signed two-trit less/equal/greater predicates |
 | `mux_rtl.tv` | Conditional selection with Kleene consensus |
-| `alu_rtl.tv` | Add/subtract/negate/min/max; two-trit opcode and result |
+| `alu.tv` / `alu` | Nine operations; two-trit operands/opcode and a four-trit result |
 
-Five ALU operations need more than one opcode trit, so the ALU uses two.
+The showcase ALU accepts a,b in -4..+4 and always returns four result trits
+(-40..+40), preserving every arithmetic result. Its plain `always @* case`
+enumerates all nine two-trit opcodes without a default:
+
+| op | Integer code | Result |
+|---|---:|---|
+| `2'tTT` | -4 | a+b |
+| `2'tT0` | -3 | a-b |
+| `2'tT1` | -2 | -a |
+| `2't0T` | -1 | a & b, digit minimum |
+| `2't00` | 0 | a \| b, digit maximum |
+| `2't01` | +1 | a << 1, multiplication by 3 |
+| `2't1T` | +2 | a >> 1, nearest-integer division by 3 |
+| `2't10` | +3 | sign(a-b), -1/0/+1 |
+| `2't11` | +4 | a*b |
+
+Digit min/max differ from integer min/max: for -2 (`T1`) and +2 (`1T`),
+digit min is -4 (`TT`) and digit max is +4 (`11`). All 729 ALU states are
+checked against the independent specification in `examples/alu_reference.py`.
+
 `python3 -m examples.rtl_check` synthesizes all six examples and runs real-PDK
-P&R, drawing DRC and strict device LVS, writing `build/hdl_verilog/summary.json`.
+P&R, drawing DRC and strict device LVS. For the ALU it also runs post-layout
+device SPICE with estimated GDS wire capacitance, 10 fF output loads and an
+independent integer oracle. The representative sequence covers every opcode
+and all three voltage levels on each output trit. Results and separate stage
+wall times go to `build/hdl_verilog_round2/summary.json`. To run only the ALU:
+
+```sh
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.rtl_check --names alu
+```
+
+Use `--output-root <directory>` for an isolated run.
+The ALU runner selects 32 cell rows and a conservative power sizing density of
+0.000135 A/µm, retaining the default 20% current reserve. It checks the actual
+drawn rail/via network before routing. It starts with 24 channel tracks and
+two rip-up passes per floorplan to avoid repeated congested trials. Other
+examples use default floorplanning.
 The supported language, mapping decisions and qualification results are in
 [the HDL_VERILOG status](../docs/status/HDL_VERILOG.md).
 

@@ -168,7 +168,7 @@ def test_new_located_diagnostics(body,message):
 
 
 def test_new_examples_against_integer_and_table_oracles():
-    for name in ['full_add_rtl','adder4_rtl','case_table','comparator_rtl','mux_rtl','alu_rtl']:
+    for name in ['full_add_rtl','adder4_rtl','case_table','comparator_rtl','mux_rtl','alu']:
         t,net=checked(load('examples/'+name+'.tv'))
         if name=='full_add_rtl':
             np.testing.assert_array_equal(t['sum']+3*t['cout'],t['a']+t['b']+t['cin'])
@@ -185,11 +185,11 @@ def test_new_examples_against_integer_and_table_oracles():
             ref=[a if c==1 else b if c==-1 else a if a==b else 0 for c,a,b in zip(t['c'],t['a'],t['b'])]
             np.testing.assert_array_equal(t['y'],ref)
         else:
-            expected=[]
-            for code,a,b in zip(bus(t,'opcode',2),t['a'],t['b']):
-                expected.append({-2:int(a)+int(b),-1:int(a)-int(b),0:-int(a),
-                                 1:min(a,b),2:max(a,b)}.get(code,0))
-            np.testing.assert_array_equal(bus(t,'y',2),expected)
+            from examples.alu_reference import result
+            expected=[result(int(a),int(b),int(code)) for a,b,code in
+                      zip(bus(t,'a',2),bus(t,'b',2),bus(t,'op',2))]
+            assert len(expected) == 729
+            np.testing.assert_array_equal(bus(t,'r',4),expected)
 
 
 def test_constant_case_expressions_and_provably_active_if():

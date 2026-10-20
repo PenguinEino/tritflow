@@ -210,6 +210,12 @@ class Lowerer:
             result = node if args == pins else primitive_node(node, args)
         elif node.op in {'add', 'sub', 'mul'}:
             result = self.arithmetic(node)[-1-node.value]
+        elif node.op in {'shift_left', 'shift_right'}:
+            from .shifts import shift_vector
+            key = node.op, node.args, node.width
+            if key not in self.vectors:
+                self.vectors[key] = shift_vector(self, node)
+            result = self.vectors[key][-1-node.value]
         else:
             args = tuple(self.visit(n) for n in node.args)
             if node.op == 'select':

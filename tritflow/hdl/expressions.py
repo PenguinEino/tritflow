@@ -51,6 +51,8 @@ class Expressions:
             return len(digits(int(c[0])))
         if op == 'concat':
             return sum(self.width(e) for e in c)
+        if op in {'shift_left', 'shift_right'}:
+            return self.width(c[0])
         if op in {'comparison', 'logical_and', 'logical_or', 'logical_not'}:
             return 1
         if op == 'conditional':
@@ -93,6 +95,20 @@ class Expressions:
         elif op in {'add', 'sub', 'mul'}:
             a, b = (self.build(e, width) for e in c)
             out = [make(op, a+b, i) for i in reversed(range(width))]
+        elif op in {'shift_left', 'shift_right'}:
+            # The amount never supplies width to the data or receives its context.
+            # Constant integer expressions retain their exact value (1+1 is 2).
+            from .elaborate import integer
+            from .parser import HDLError
+            try:
+                amount = integer(c[-1], self.env, self.module)
+            except HDLError:
+                b = self.build(c[-1])
+            else:
+                b = [make('const', value=d) for d in digits(amount)]
+            a = self.build(c[0], width)
+            out = [Node(op, tuple(a+b), value=i, width=width, loc=loc, hier=self.hier)
+                   for i in reversed(range(width))]
         elif op in {'div', 'mod'}:
             raise loc.error('signal division / and remainder % are unsupported; integer parameters may use them')
         elif op == 'comparison':
