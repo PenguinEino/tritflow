@@ -1,6 +1,7 @@
 # HDL_VERILOG status
 
-Updated: 2026-10-20. Complete: implementation, six physical examples and the
+Updated: 2026-10-20. Round 3 complete: cheaper proved selection, the 64-cell
+shuttle ALU, six physical examples, full-chip signoff, post-layout SPICE, and
 required plus remaining regression suites passed. No commits, pushes, tags, package installs,
 notebook edits, or changes to other streams' implementations.
 
@@ -364,3 +365,252 @@ PDK remains public pinned commit `5d963db9d44e192d37a0489c208bfccf2e2f690c`.
 - `git diff --check` passed. Round 1's notebook-integration notes still apply;
   no references to the removed `alu_rtl` remain in executable code or notebook
   sources. Historical first-round status evidence is retained above.
+
+## Round 3 — shared selection and a shuttle-size ALU (2026-10-20)
+
+Round 3 is complete: implementation, physical/frame qualification, post-layout
+SPICE and all regression suites passed. No work in progress, blockers or new
+interface requests remain. The decisions in this section supersede the earlier
+ALU interface and mapping counts.
+
+### Selection proofs and mapping decisions
+
+`tritflow/synth/predicates.py` computes a conservative set of possible trit
+values from source IR. Constants, comparisons, `is_true`, negation, min/max,
+NANY, procedural selects, cases and Kleene muxes have explicit rules; unsupported
+or arithmetic result digits conservatively admit all three values. A selector
+is crisp only when its proved set excludes zero. The value-set tests compare
+these overapproximations against exhaustive simulation, including expressions
+whose correlated operands make the proof deliberately conservative.
+
+| Source construct | Round 3 implementation |
+|---|---|
+| Comparison used by `?:` | Two-arm min/max AND–OR; no unknown/consensus arm |
+| Comparison used by procedural `if` | Its existing +/-1 result is reused; no second `is_true` detector |
+| General procedural `if` | Still tests exactly +1; zero takes else |
+| `case` | IR keeps predicate/data pairs and a fallback; source simulation evaluates ordinary priority matching independently of mapping |
+| Proven disjoint literal equalities on one selector | Shared one-hot decoders; result is max(min(predicate, data)) |
+| Complete case enumeration | No default decoder or redundant fallback masking |
+| Partial case enumeration | One default predicate, negated max of the explicit matches |
+| Identical case data | Share one data mask with the OR of its labels; all-identical results bypass the decoder |
+| Constant branches | Fold lattice absorbing/identity values while lowering |
+| Zero-capable `?:` and general MUX3 | Existing Kleene consensus and all three selection arms remain |
+| A case IR without a partition proof | Retain priority selection; never assume one-hot predicates |
+
+A case partition is proved by recovering constant equality labels from the IR,
+requiring identical source selector nodes, proving disjoint label sets, and
+counting their coverage of all 3**width digit patterns. Multi-label items are
+unions of exact equality labels. No correlation between distinct selector
+expressions is assumed. Balanced min/max trees reduce selection depth; generated
+nodes, literal detectors and the default mask share across result digits.
+This is local circuit mapping and sharing, with no minimum-network claim.
+
+The fanout investigation found actual excess: the old balanced splitter buffered
+every root child even when some pins could stay directly driven. Inferred RTL
+now groups shallow loads first and retains direct loads, using
+ceil((pin_loads-limit)/(limit-1)) additional BUFs when a signal exceeds its
+limit. This count follows the pin-capacity bound for a BUF tree; it is not a
+minimum-circuit claim. Repeated gate pins count separately. The limit remains
+four at **every** input, logic output, tie and inserted BUF. Pre-Round-1
+structural designs retain the previous algorithm to preserve their exact
+netlists, names, ports, hierarchy and pins.
+
+### Before/after cell counts
+
+The before reports were captured before edits in
+`build/hdl_verilog_round3/before.json`; current reports are in `after.json`.
+Counts include all fanout BUFs and ties.
+
+| RTL example | Round 2 cells | Round 3 cells | Comment |
+|---|---:|---:|---|
+| `full_add_rtl` | 16 | 16 | Still 11 NANY + 5 INV, identical to authored `full_add` |
+| `adder4_rtl` | 55 | 55 | Unchanged reference ripple structure |
+| `case_table` | 32 | 32 | Different selection network, same total |
+| `comparator_rtl` | 27 | 27 | Already has crisp comparison outputs |
+| `mux_rtl` | 34 | 32 | Consensus retained; two redundant fanout BUFs removed |
+| Old nine-op `alu`, now `alu9` | 423 | 262 | 38.1% fewer cells; depth 66 to 27 |
+| New shuttle `alu` | — | 64 | Three operations, shared signed add/subtract |
+
+`alu9` has 60 NANY, 104 INV, 47 NAND, 38 NOR, 10 BUF and three ties.
+Round 2 had 61 fanout BUFs; the intermediate new selection mapping with the old
+splitter used 28, and the first compact-tree mapping used 11. Grouping identical
+case arms removed the final extra BUF and additional masks. The complete old
+nine-operation source is retained in `examples/alu9.tv` (only the module name
+changes), with its independent integer specification in `alu9_reference.py`.
+All 729 states still pass, including equivalence against the saved Round 2
+423-cell physical netlist. No new physical/runtime qualification of `alu9` is
+claimed; the old physical evidence above remains historical Round 2 evidence.
+
+For the brief's two-trit a,b / one-trit op / three-trit result example, a
+zero-capable `op ? (a+b) : (a-b)` falls from 116 to 114 cells only by
+removing excess BUFs; its consensus remains required. Replacing the condition
+with `op==1` allows the cheaper crisp circuit, at 69 cells. Writing
+`a+op*b` explicitly shares the arithmetic and costs 31 cells. The mapper does
+not silently rewrite arbitrary separate add/subtract branches into that form.
+
+### Candidate experiments and choice
+
+All candidates use two-trit a,b, one opcode trit and three result trits. Their
+243 states were checked against independent integer references, source
+simulation and mapped cells. The final candidate script includes those checks.
+The two 90-cell synthesis-only screens were set aside in favor of sharing
+arithmetic. All four routed macros passed fresh official drawing DRC and strict
+device/port LVS. Default P&R uses seed 0, 600 annealing steps and the unchanged 20% current
+reserve; no PNR, cell, extraction or simulator implementation was edited.
+
+| Candidate / operations at op=-1,0,+1 | Cells | Macro µm | Synth / P&R / DRC / LVS (s) | Frame + signoff (s) | Post-layout SPICE (s) |
+|---|---:|---|---|---|---|
+| Separate subtract / negate / add (synthesis screen) | 90 | Not routed | 0.028 / — / — / — | Not run | Not run |
+| Separate subtract / 3a / add (synthesis screen) | 90 | Not routed | 0.008 / — / — / — | Not run | Not run |
+| Separate subtract / round(a/3) / add | 88 | 1704 × 2310 | 0.010 / 9.62 / 2.32 / 0.94 | Rejected: too tall | Not run |
+| Shared `a+op*b`, zero opcode round(a/3) | 64 | 1692 × 1590 | 0.002 / 1.59 / 1.89 / 0.91 | 9.99, passed | 18.93, selected ALU run below |
+| Shared `a+op*b`, zero opcode negate | 66 | 1596 × 1782 | 0.002 / 1.72 / 1.90 / 0.95 | Rejected: too tall | Not run |
+| `a+op*b`: subtract / pass a / add | 31 | 1284 × 1038 | 0.001 / 0.57 / 1.46 / 0.83 | 7.60, passed | Not run |
+
+These are measurements of the tested floorplans, not impossibility proofs for
+other seeds/row counts. Evidence is in
+`build/hdl_verilog_round3/candidates_final/summary.json`; the two synthesis-only
+screens are in `build/hdl_verilog_round3/screened/summary.json`. The selected candidate
+and pass-through candidate both used actual `PnrResult.to_chip()` and
+`ChipResult.signoff()` with the local `~/TR-1um_MPW_Sanken` pre-check. The other
+two routed alternatives failed the wrapper's 1850 × 1602 µm macro bound before
+chip construction.
+
+The selected design keeps subtract and add and spends the extra area on a
+rounded divide-by-three instruction, which demonstrates balanced ternary better
+than a pass-through instruction. One signed opcode trit controls the sign of b,
+so the two arithmetic labels share `a + op*b` in plain student `always @* case`.
+This is an explicit HDL circuit choice, not an optimizer assumption about
+opcode correlations.
+
+| New `alu` port / code | Meaning |
+|---|---|
+| `a[1:0]`, `b[1:0]` | Signed balanced integers -4..+4 |
+| `op = 1'tT` | a-b |
+| `op = 1't0` | a >> 1 = nearest a/3 |
+| `op = 1't1` | a+b |
+| `r[2:0]` | Exact result; range -13..+13 can hold every sum/difference -8..+8 |
+
+There are 64 cells: 22 NANY, 20 INV, 10 NAND, 7 NOR, 2 BUF, and one each
+TIEN/TIEP/TIEZ; depth is 20, maximum fanout 4. `alu_reference.py` checks every
+one of the 243 input states with independent integer arithmetic and radix
+encoding. The old nine-op opcode/result interface is now explicitly `alu9`;
+notebook/integration code that expects it should select that example.
+
+### Selected ALU physical and SPICE evidence
+
+The fresh final `alu` macro is **1692 × 1590 µm** (2.69028 mm²). Its final
+wrapper has the actual **2500 × 2500 µm** bounding box and **17 passive TEG
+pads**, with signal and power routing. Checks passed without waivers: official
+drawing DRC (zero violations), strict drawing LVS, MDP with metal preservation,
+mask DRC (zero violations), connectivity, fixed frame/DBU/top-cell audit, and
+the exact local organizer pre-check. The copied pinned seal ring is preserved.
+
+The solved wrapper DC envelope's maximum utilization is **0.78698**, below the
+0.8 target; its margin to the published limit is 21.30%. This is the existing
+PNR model with its documented current/width assumptions, not lifetime EM
+qualification. `submission_ready` remains **false**: the custom 17-pad
+probe/bond map, package/substrate/VMID arrangement and ESD/operating conditions
+still need shuttle-owner approval. No upload or publication occurred.
+
+| Stage | Local wall time (s) |
+|---|---:|
+| Source loading, synthesis and exhaustive source/cell equivalence | 0.0098 |
+| P&R and native connectivity/routing checks | 1.534 |
+| Official macro drawing DRC | 1.872 |
+| Strict macro device/port LVS | 0.912 |
+| Full-chip construction and all signoff checks | 10.079 |
+| Matched-device/wire-C extraction and setup | 0.188 |
+| Post-layout SPICE and measurements | 18.928 |
+| **Total including full-chip qualification** | **33.523** |
+
+This is comfortably inside the requested ~150 s local budget. The brief's
+rough 3–5× Colab factor gives 101–168 s; no actual Colab timing is claimed.
+
+Post-layout SPICE uses the matched **macro** devices, actual-GDS estimated
+lumped wire capacitance and 10 fF/output. The full-chip wrapper gets physical
+and DC-network qualification; its pads/package parasitics are not included in
+the macro transient. Stimuli hold for 1 µs with 1 ns edges and 2 ns maximum
+step; existing logical `.nodeset` initialization only guesses the initial state.
+The deterministic greedy sequence covers all three instructions and every
+-1/0/+1 level on each of the three output trits:
+
+| a | b | op | Expected r |
+|---:|---:|---:|---:|
+| -4 | -4 | -1 | 0 |
+| -4 | -3 | +1 | -7 |
+| +3 | -4 | -1 | +7 |
+| -4 | -4 | 0 | -1 |
+
+All **4 vectors / 12 output checks passed**, with zero unsettled windows.
+Maximum absolute level error: **0.038973 V**. Maximum measured settling:
+**221.06 ns**, with per-output maxima r[2:0] = 197.09 / 221.06 / 124.85 ns.
+These are representative transitions, not exhaustive analog timing. The
+largest settled supply consumption among these four vectors is about 116.65 mW
+(ideal supply sources, approximately 11.665 mA rail current); this is not an
+exhaustive worst-case power claim.
+
+All five other RTL examples also passed fresh P&R, official drawing DRC and
+strict LVS, in `build/hdl_verilog_round3/regression/summary.json`. Macro sizes
+are 876 × 702 / 1692 × 1398 / 1212 × 1038 / 1164 × 870 / 1212 × 1038 µm for
+full_add_rtl / adder4_rtl / case_table / comparator_rtl / mux_rtl.
+
+### Reproduce and regression status
+
+```sh
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.rtl_check
+# Just the small showcase, including frame signoff and SPICE:
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.rtl_check --names alu
+# All instruction/area experiments (SPICE is in rtl_check):
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.alu_candidates
+# The two extra synthesis-only screens:
+python3 -m examples.alu_candidates --names case_add_sub_neg case_add_sub_left --synthesis-only --output-root build/hdl_verilog_round3/screened
+# Large variant, explicitly opt in to P&R and SPICE:
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.rtl_check --names alu9
+```
+
+The main evidence is `build/hdl_verilog_round3/summary.json`. Its `alu/`
+contains gate JSON/TritVerilog/SPICE, reports, routed macro GDS/JSON, strict LVS
+and extracted devices, `alu.capacitance.json`, `alu.measurements.json` and
+`spice/{tb.spice,ngspice.log,waveform.txt}`. `alu/chip/` contains the wrapped
+GDS, pad map/notes and native signoff reports. Use `--output-root` for isolated
+runs and `--mpw-template` to select another organizer checkout.
+
+Focused implementation checks: **139 passed in 1.01 s** before final suites.
+New tests cover conservative value sets, crisp conditional/if identity,
+zero-capable consensus, explicit partition proof failure, partial/default and
+multi-label cases, identical constant outputs, bounded compact BUF trees and
+the new 243-state oracle/stimulus coverage. All 27 unary truth tables and
+seeded arbitrary two-/three-input tables still pass, including disabled
+optimization and gate-writer round trips.
+
+Final regression evidence:
+
+- Required `python3 -m pytest tests/hdl tests/synth tests/pnr -q`:
+  **370 passed in 102.53 s**.
+- Remaining directories, `python3 -m pytest tests/ -q --ignore=tests/hdl
+  --ignore=tests/synth --ignore=tests/pnr`:
+  **392 passed, 2 skipped in 730.92 s**. The same optional STA checks skip
+  because `build/adder_scaling/adder6/adder6.json` is absent; these are not
+  implementation failures.
+- Combined: **762 passed, 2 skipped, no failures**. Logs are
+  `build/hdl_verilog_round3/{required-tests,remaining-tests}.log`.
+- After the final mapper changes, all six saved physical gate JSON files and
+  all four saved routed-candidate JSON files still equal current synthesis.
+- The two extra synthesis-only screens passed the candidate runner's 243-state
+  independent integer checks. The selected 64-cell artifact, full-chip
+  signoff and 2 ns SPICE result remain the measured artifacts above.
+- `git diff --check` passed.
+
+The 11 pre-Round-1 examples still require exact JSON/cell-count identity against
+the unchanged legacy fixture. The retained Round 1 RTL fixture is kept as an
+independent functional and no-cell-growth reference: Round 3 intentionally
+remaps its inferred selections, so its old physical netlists are no longer
+required to have identical generated instance names. No fixture was rewritten.
+
+Remaining unsupported syntax and the earlier notebook `broken` integration
+note are unchanged. No notebook files or other streams' implementations were
+edited; no packages installed, remote services accessed, sign-ins, publication,
+commits, pushes, tags, checkouts, resets or stashes. The user's pre-existing
+`briefs/HDL_VERILOG.md` modification is preserved. PDK remains pinned to public
+commit `5d963db9d44e192d37a0489c208bfccf2e2f690c`.

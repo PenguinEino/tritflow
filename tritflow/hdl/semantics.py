@@ -4,13 +4,18 @@ import numpy as np
 
 
 EXTENDED = {'add', 'sub', 'mul', 'eq', 'ne', 'lt', 'le', 'gt', 'ge', 'mux', 'select', 'is_true',
-            'shift_left', 'shift_right'}
+            'shift_left', 'shift_right', 'case'}
 
 
 def evaluate_operation(op, args, digit=None, *, width=0):
     """Evaluate source semantics independently of adder/selector gate networks."""
     if op == 'select':
         return np.where(args[0] == 1, args[1], args[2]).astype(np.int8)
+    if op == 'case':
+        result = args[-1]
+        for index in reversed(range(0, len(args)-1, 2)):
+            result = np.where(args[index] == 1, args[index+1], result)
+        return np.asarray(result, dtype=np.int8)
     if op == 'mux':
         c, x, y = args
         return np.where(c == 1, x, np.where(c == -1, y, np.where(x == y, x, 0))).astype(np.int8)

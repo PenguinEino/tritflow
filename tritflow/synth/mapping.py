@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 
 from tritflow.hdl.ir import Design
 from tritflow.netlist import GateNetlist, Instance
@@ -117,7 +117,7 @@ class Mapper:
         return self.net
 
 
-def buffer_fanout(net: GateNetlist, limit: int) -> None:
+def buffer_fanout(net: GateNetlist, limit: int, *, compact: bool = False) -> None:
     """Insert balanced BUF trees, counting repeated gate pins separately.
 
     Outputs remain on the original driven net so their public names are stable.
@@ -155,7 +155,30 @@ def buffer_fanout(net: GateNetlist, limit: int) -> None:
 
     for signal, loads in consumers.items():
         if len(loads) > limit:
-            branch(signal, loads)
+            if not compact:
+                branch(signal, loads)
+                continue
+            # Group shallow loads first. Each BUF replaces k root loads by one
+            # and saves k-1 slots; retain direct loads instead of buffering
+            # every child of the root. This uses ceil((loads-limit)/(limit-1))
+            # added BUFs and keeps the resulting tree shallow.
+            pending = deque(loads)
+            while len(pending) > limit:
+                size = min(limit, len(pending)-limit+1)
+                group = [pending.popleft() for _ in range(size)]
+                while f"_buf{index}" in used_names or f"_bufnet{index}" in used_nets:
+                    index += 1
+                name, output = f"_buf{index}", f"_bufnet{index}"
+                index += 1
+                used_names.add(name)
+                used_nets.add(output)
+                added = Instance(name, "BUF", {"A": signal, "Y": output}, group[0][0].hier)
+                net.instances.append(added)
+                for inst, pin in group:
+                    inst.pins[pin] = output
+                pending.append((added, "A"))
+            for inst, pin in pending:
+                inst.pins[pin] = signal
 
 
 def synthesize(design: Design, *, fanout_limit: int = 4, optimize_logic: bool = True,
@@ -180,8 +203,11 @@ def synthesize(design: Design, *, fanout_limit: int = 4, optimize_logic: bool = 
     if not isinstance(fanout_limit, int) or isinstance(fanout_limit, bool) or fanout_limit < 2:
         raise ValueError("fanout_limit must be an integer >= 2")
     from .lower import lower
+    from tritflow.hdl.semantics import EXTENDED
     mapped = Mapper(optimize(design) if optimize_logic else lower(design)).finish()
-    buffer_fanout(mapped, fanout_limit)
+    # Preserve the established structural examples byte for byte. New RTL uses
+    # the compact pin-counted tree; the electrical fanout limit is identical.
+    buffer_fanout(mapped, fanout_limit, compact=any(n.op in EXTENDED for n in design.nodes))
     mapped.fanout_limit = fanout_limit
     mapped.equivalence = check_equivalence(design, mapped, seed=seed) if verify else None
     return mapped

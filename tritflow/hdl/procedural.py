@@ -90,11 +90,14 @@ def elaborate_block(elaborator, block, scope, env, module, hier):
                 cases.append((cond, execute(item.children[-1], state), item))
             # A fully enumerated table needs no default or fictitious latch path.
             if default is None and len(seen) == 3**width and cases:
-                _, default, _ = cases.pop()
-            result = default if default is not None else state
-            for cond, branch, item in reversed(cases):
-                result = merge(cond, branch, result, item)
-            state = result
+                _, default, _ = cases[-1]
+            fallback = default if default is not None else state
+            keys = set(fallback).intersection(*(set(branch) for _, branch, _ in cases))
+            # Retain the equality predicates in the IR. The mapper can prove
+            # their partition and share one decoder across every result digit.
+            state = {key: node('case', [n for cond, branch, _ in cases
+                                        for n in (cond, branch[key])] + [fallback[key]], stmt)
+                     for key in fallback if key in keys}
         elif kind != 'empty_stmt':
             raise module.location(stmt).error(f'unsupported procedural statement {kind}')
         return state

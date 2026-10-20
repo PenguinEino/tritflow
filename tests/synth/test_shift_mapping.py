@@ -5,7 +5,7 @@ from itertools import product
 import numpy as np
 import pytest
 
-from examples.alu_reference import check_truth_table, decode, expected, representative_vectors, result
+from examples.alu9_reference import check_truth_table, decode, expected, representative_vectors, result
 from tritflow.hdl import load, loads
 from tritflow.synth import check_equivalence, synthesize, tritverilog
 
@@ -39,7 +39,7 @@ def test_large_amount_bus_prunes_overshifts_without_enumerating_its_states():
 
 
 def test_showcase_alu_every_state_source_and_cells_against_integer_oracle():
-    design=load('examples/alu.tv')
+    design=load('examples/alu9.tv')
     net=synthesize(design)
     assert net.equivalence['vectors']==729
     assert check_truth_table(design,net)==729
