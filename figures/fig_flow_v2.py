@@ -77,10 +77,10 @@ def make():
     pnr = json.loads((B/"adder4.pnr.json").read_text())
     lvs = json.loads((B/"adder4.lvs.summary.json").read_text())
     drc_items = pnr.get("checks", {}).get("pdk_drc", {}).get("violations") or 0
-    fig = plt.figure(figsize=(style.DOUBLE, 4.9))
+    fig = plt.figure(figsize=(style.DOUBLE, 5.1))
 
     # Top row: the source and what synthesis makes of it.
-    top, height = 0.6, 0.3
+    top, height = 0.635, 0.29
     ax = panel(fig, [0.01, top, 0.2, height], "TritVerilog", ["four full adders in a chain", "+ full_add, half_add"])
     ax.axis("off")
     ax.add_patch(plt.Rectangle((0, 0), 1, 1, transform=ax.transAxes, fc="#f6f5f1", ec=style.AXIS, lw=0.6))
@@ -100,7 +100,7 @@ def make():
     arrow(fig, (0.215, top+height/2), (0.262, top+height/2))
 
     # Bottom row: the cell it is built from, the routed layout, and the extracted circuit running.
-    low, height = 0.12, 0.3
+    low, height = 0.11, 0.29
     ax = panel(fig, [0.01, low, 0.16, height], "Standard cell", ["NANY, from the taped-out", "circuit; 3 rails"])
     draw_gds(ax, CELLS_DIR/"out/NANY/NANY.gds", line=0.35)
     ax = panel(fig, [0.21, low, 0.2, height], "Place & route",
@@ -145,6 +145,11 @@ def make():
     ax.text(1.1, 6.0, "cout", fontsize=6, color=style.ORANGE)
 
     middle = low+height/2
+    # From the end of the top row, around the right margin and back to the start of the bottom row.
+    turn = 0.537
+    fig.add_artist(plt.Line2D([0.993, 0.993, 0.03], [top+height/2, turn, turn], transform=fig.transFigure,
+                              color=style.INK2, lw=0.8))
+    arrow(fig, (0.03, turn), (0.03, low+height+0.085))
     arrow(fig, (0.175, middle), (0.205, middle))
     arrow(fig, (0.645, middle), (0.69, middle))
     return style.save(fig, "fig_flow_v2")
