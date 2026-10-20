@@ -79,7 +79,7 @@ def step(title, *, view=None):
             frame += 1
             line.update(_line(SPINNER[frame % len(SPINNER)], CYAN, title, current.detail,
                               time.monotonic()-started))
-            if view and view.version != drawn and frame % 3 == 0:
+            if view and view.version != drawn and frame % 6 == 0:
                 drawn = view.version
                 picture.update(HTML(view.svg()))
 
@@ -182,54 +182,134 @@ def _streamed_tools(report):
         subprocess.run = original
 
 
-# --- live placement and routing picture -----------------------------------------------------
+# --- live placement and routing picture, drawn like KLayout ---------------------------------
 
-CELL_FILL = {"INV": "#cfe3f7", "NAND": "#d8ecd2", "NOR": "#f3e2c7", "NANY": "#ead7f2",
-             "BUF": "#e3e3e3", "TIEP": "#f7d0cf", "TIEZ": "#e0e0e0", "TIEN": "#cfd8f7", "FILL": "#f2f2f2"}
+# TR-1um.lyp colors; hatch angle and density stand in for KLayout's dither patterns.
+LAYER_STYLE = (  # (layer/datatype, color, hatch, fill opacity)
+    ((140, 0), "#00aa00", None, 0.10),     # N-well
+    ((3, 1), "#ff00ff", "dots", 0.0),      # P diffusion
+    ((3, 2), "#00aa00", "dots", 0.0),      # N diffusion
+    ((3, 3), "#ffae00", "back", 0.0),      # diffusion resistor
+    ((8, 1), "#ff7c25", "fwd", 0.0),       # gate poly
+    ((8, 2), "#c050c0", "back", 0.0),      # resistor poly
+    ((11, 0), "#ffffff", "cross", 0.0),    # contact
+    ((13, 0), "#0080ff", "fwd", 0.15),     # M1
+    ((19, 0), "#ffffff", "cross", 0.0),    # V1
+    ((20, 0), "#c0c0c0", "back", 0.10),    # M2
+)
+WIRE_WIDTH = {"M1": 1.8, "M2": 3.0}
+VIA_SIZE = 1.4
+
+
+def _patterns(unit):
+    """SVG hatches sized to the view, one per layer."""
+    defs = []
+    for (layer, datatype), color, hatch, _ in LAYER_STYLE:
+        key, size = f"L{layer}_{datatype}", 4*unit
+        if hatch == "fwd":
+            body = f'<path d="M0,{size} L{size},0" stroke="{color}" stroke-width="{unit*.7}"/>'
+        elif hatch == "back":
+            body = f'<path d="M0,0 L{size},{size}" stroke="{color}" stroke-width="{unit*.7}"/>'
+        elif hatch == "dots":
+            body = f'<circle cx="{size/2}" cy="{size/2}" r="{unit*.6}" fill="{color}"/>'
+        elif hatch == "cross":
+            body = (f'<path d="M0,0 L{size},{size} M0,{size} L{size},0" stroke="{color}" '
+                    f'stroke-width="{unit*.5}"/>')
+        else:
+            continue
+        defs.append(f'<pattern id="{key}" width="{size}" height="{size}" patternUnits="userSpaceOnUse">{body}</pattern>')
+    return "".join(defs)
+
+
+def _layer_paths(shapes, unit):
+    """One <path> per layer holding all its polygons; hatched fill, outline in the layer color."""
+    by_style = {}
+    for style, points in shapes:
+        by_style.setdefault(style, []).append("M" + " L".join(f"{x:.6g},{y:.6g}" for x, y in points) + "Z")
+    out = []
+    for style in LAYER_STYLE:
+        if style not in by_style:
+            continue
+        (layer, datatype), color, hatch, opacity = style
+        d = "".join(by_style[style])
+        if opacity:
+            out.append(f'<path d="{d}" fill="{color}" fill-opacity="{opacity}"/>')
+        fill = f"url(#L{layer}_{datatype})" if hatch else "none"
+        out.append(f'<path d="{d}" fill="{fill}" stroke="{color}" stroke-width="{unit*.6:.3g}"/>')
+    return "".join(out)
 
 
 class LayoutView:
-    """Cells as they are placed, then each net as it is routed (M1 blue, M2 red)."""
+    """The real cell GDS, placed as annealing moves it, then each net routed at its drawn width."""
 
-    def __init__(self):
+    def __init__(self, cells_dir=None):
+        from tritflow import CELLS_DIR
+        self.cells_dir = cells_dir or CELLS_DIR
+        self.geometry = {}
         self.placements, self.routes, self.version, self.caption = [], {}, 0, ""
+
+    def _cell(self, name):
+        """Polygons of one standard cell per drawn layer, read once from its GDS."""
+        if name not in self.geometry:
+            import klayout.db as db
+            layout = db.Layout()
+            layout.read(str(self.cells_dir/f"out/{name}/{name}.gds"))
+            top, shapes = layout.top_cell(), []
+            for style in LAYER_STYLE:
+                index = layout.find_layer(*style[0])
+                if index is None:
+                    continue
+                for item in top.begin_shapes_rec(index).each():
+                    polygon = item.shape().polygon.transformed(item.trans()).to_dtype(layout.dbu)
+                    shapes.append((style, [(p.x, p.y) for p in polygon.each_point_hull()]))
+            self.geometry[name] = shapes
+        return self.geometry[name]
 
     def add(self, event):
         if event["kind"] == "place":
-            self.placements = event["placements"]
-            self.routes = {}
+            self.placements, self.routes = event["placements"], {}
             self.caption = f"配置 {event['step']}/{event['steps']} · 配線長 {event['hpwl']/1e3:.2f} mm"
         elif event["kind"] == "route":
             if event["done"] == 1:
                 self.routes = {}
             self.routes[event["net"]] = event["segments"]
-            self.caption = f"配線 {event['done']}/{event['total']} 本"
+            self.caption = f"配線 {event['done']}/{event['total']} 本 · {event['net']}"
         self.version += 1
 
-    def svg(self, width=720):
+    def svg(self, width=760):
         if not self.placements:
             return ""
-        xs = [p["x"] for p in self.placements]+[p["x"]+p["width"] for p in self.placements]
-        ys = [p["y"] for p in self.placements]+[p["y"]+p["height"] for p in self.placements]
-        for segments in self.routes.values():
-            for _, x0, y0, x1, y1 in segments:
-                xs += [x0, x1]
-                ys += [y0, y1]
-        pad = 10
+        xs = [v for p in self.placements for v in (p["x"], p["x"]+p["width"])]
+        ys = [v for p in self.placements for v in (p["y"], p["y"]+p["height"])]
+        for route in self.routes.values():
+            for _, a, b, c, d in route["wires"]:
+                xs += [a, c]
+                ys += [b, d]
+        pad = 8
         x0, x1, y0, y1 = min(xs)-pad, max(xs)+pad, min(ys)-pad, max(ys)+pad
-        stroke = max(x1-x0, y1-y0)/300
-        parts = [f'<rect x="{p["x"]}" y="{p["y"]}" width="{p["width"]}" height="{p["height"]}" '
-                 f'fill="{CELL_FILL.get(p["cell"], "#eee")}" stroke="#7a7f87" stroke-width="{stroke}"/>'
-                 for p in self.placements]
-        for segments in self.routes.values():
-            for layer, a, b, c, d in segments:
-                color = "#2f6fd6" if layer == "M1" else "#d6452f"
-                parts.append(f'<line x1="{a}" y1="{b}" x2="{c}" y2="{d}" stroke="{color}" '
-                             f'stroke-width="{stroke*2.2}" stroke-linecap="round"/>')
+        unit = max(x1-x0, y1-y0)/400
+        # Each cell type is drawn once and reused; MY mirrors it about the cell's own width.
+        cells = sorted({p["cell"] for p in self.placements})
+        symbols = "".join(f'<g id="tf-{name}">{_layer_paths(self._cell(name), unit)}</g>' for name in cells)
+        uses = "".join(
+            f'<use href="#tf-{p["cell"]}" transform="translate({p["x"]+p["width"]:g},{p["y"]:g}) scale(-1,1)"/>'
+            if p["orient"] == "MY" else f'<use href="#tf-{p["cell"]}" transform="translate({p["x"]:g},{p["y"]:g})"/>'
+            for p in self.placements)
+        m1, v1, m2 = LAYER_STYLE[7], LAYER_STYLE[8], LAYER_STYLE[9]
+        wires = []
+        for route in self.routes.values():
+            for layer, a, b, c, d in route["wires"]:
+                half = WIRE_WIDTH[layer]/2
+                left, right, low, high = min(a, c)-half, max(a, c)+half, min(b, d)-half, max(b, d)+half
+                wires.append((m1 if layer == "M1" else m2, [(left, low), (right, low), (right, high), (left, high)]))
+            for x, y in route["vias"]:
+                h = VIA_SIZE/2
+                wires.append((v1, [(x-h, y-h), (x+h, y-h), (x+h, y+h), (x-h, y+h)]))
         return (f'<div style="{FONT};color:{DIM}">{escape(self.caption)}</div>'
-                f'<svg viewBox="{x0} {-y1} {x1-x0} {y1-y0}" style="width:100%;max-width:{width}px;'
-                f'height:auto;background:#fbfbfa;border:1px solid #e3e3e0">'
-                f'<g transform="scale(1,-1)">{"".join(parts)}</g></svg>')
+                f'<svg viewBox="{x0:g} {-y1:g} {x1-x0:g} {y1-y0:g}" style="width:100%;max-width:{width}px;'
+                f'height:auto;background:#000;border-radius:4px">'
+                f'<defs>{_patterns(unit)}{symbols}</defs>'
+                f'<g transform="scale(1,-1)">{uses}{_layer_paths(wires, unit)}</g></svg>')
 
 
 # --- running cells out of order ------------------------------------------------------------
