@@ -17,7 +17,7 @@ lay = net.place_and_route(output_dir=out, seed=0, rows=PNR_ROWS, anneal_steps=PN
 step("4/5 DRC and LVS with the TR-1um decks")
 drc, lvs = lay.drc(), lay.lvs()                                  # 4. TR-1um DRC deck, strict LVS
 guesses = logical_nodeset(net, lvs["report"], inputs, vectors[0])
-step("5/5 Extracting the layout and simulating it in ngspice (about 30 s)")
+step("5/5 Extracting the layout and simulating it in ngspice (about 1.5 minutes on Colab)")
 post = lay.extract().simulate(vectors, load=LOAD_F, expected=adder_reference,
                               nodeset=guesses, **CONDITIONS)     # 5. extracted devices + wire C in ngspice
 print(f"DRC clean: {drc['clean']} · LVS match: {lvs['matched']} · analog PASS: {post['measurements']['passed']}")
@@ -124,7 +124,7 @@ print(f"{s['instance_count']} cells in {s['row_count']} rows · die {s['die_size
 '''
 
 PRE = r'''
-step("Simulating the same devices without wire capacitance (about 30 s)")
+step("Simulating the same devices without wire capacitance (about 1.5 minutes on Colab)")
 pre = lay.extract(wire_c=False).simulate(vectors, load=LOAD_F, expected=adder_reference,
                                          nodeset=guesses, **CONDITIONS)    # same devices, no wire C
 for pin, t_post in post["measurements"]["max_settling_s"].items():
