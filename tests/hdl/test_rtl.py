@@ -187,9 +187,9 @@ def test_new_examples_against_integer_and_table_oracles():
         else:
             from examples.alu_reference import result
             expected=[result(int(a),int(b),int(code)) for a,b,code in
-                      zip(bus(t,'a',2),bus(t,'b',2),bus(t,'op',2))]
-            assert len(expected) == 729
-            np.testing.assert_array_equal(bus(t,'r',4),expected)
+                      zip(bus(t,'a',2),bus(t,'b',2),t['op'])]
+            assert len(expected) == 243
+            np.testing.assert_array_equal(bus(t,'r',3),expected)
 
 
 def test_constant_case_expressions_and_provably_active_if():
