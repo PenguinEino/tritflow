@@ -184,7 +184,8 @@ def _streamed_tools(report):
 
 # --- live placement and routing picture, drawn like KLayout ---------------------------------
 
-# TR-1um.lyp colors; hatch angle and density stand in for KLayout's dither patterns.
+# TR-1um.lyp colors (white contacts and silver M2 darkened for a white page); hatch
+# angle and density stand in for KLayout's dither patterns.
 LAYER_STYLE = (  # (layer/datatype, color, hatch, fill opacity)
     ((140, 0), "#00aa00", None, 0.10),     # N-well
     ((3, 1), "#ff00ff", "dots", 0.0),      # P diffusion
@@ -192,10 +193,10 @@ LAYER_STYLE = (  # (layer/datatype, color, hatch, fill opacity)
     ((3, 3), "#ffae00", "back", 0.0),      # diffusion resistor
     ((8, 1), "#ff7c25", "fwd", 0.0),       # gate poly
     ((8, 2), "#c050c0", "back", 0.0),      # resistor poly
-    ((11, 0), "#ffffff", "cross", 0.0),    # contact
+    ((11, 0), "#3a3f45", "cross", 0.0),    # contact
     ((13, 0), "#0080ff", "fwd", 0.15),     # M1
-    ((19, 0), "#ffffff", "cross", 0.0),    # V1
-    ((20, 0), "#c0c0c0", "back", 0.10),    # M2
+    ((19, 0), "#3a3f45", "cross", 0.0),    # V1
+    ((20, 0), "#8c8c8c", "back", 0.12),    # M2
 )
 WIRE_WIDTH = {"M1": 1.8, "M2": 3.0}
 VIA_SIZE = 1.4
@@ -247,6 +248,7 @@ class LayoutView:
         self.cells_dir = cells_dir or CELLS_DIR
         self.geometry = {}
         self.placements, self.routes, self.version, self.caption = [], {}, 0, ""
+        self.newest = None
 
     def _cell(self, name):
         """Polygons of one standard cell per drawn layer, read once from its GDS."""
@@ -273,6 +275,7 @@ class LayoutView:
             if event["done"] == 1:
                 self.routes = {}
             self.routes[event["net"]] = event["segments"]
+            self.newest = event["net"] if event["done"] < event["total"] else None
             self.caption = f"配線 {event['done']}/{event['total']} 本 · {event['net']}"
         self.version += 1
 
@@ -296,20 +299,25 @@ class LayoutView:
             if p["orient"] == "MY" else f'<use href="#tf-{p["cell"]}" transform="translate({p["x"]:g},{p["y"]:g})"/>'
             for p in self.placements)
         m1, v1, m2 = LAYER_STYLE[7], LAYER_STYLE[8], LAYER_STYLE[9]
-        wires = []
-        for route in self.routes.values():
+        wires, newest = [], []
+        for net, route in self.routes.items():
+            target = newest if net == self.newest else wires
             for layer, a, b, c, d in route["wires"]:
                 half = WIRE_WIDTH[layer]/2
                 left, right, low, high = min(a, c)-half, max(a, c)+half, min(b, d)-half, max(b, d)+half
-                wires.append((m1 if layer == "M1" else m2, [(left, low), (right, low), (right, high), (left, high)]))
+                target.append((m1 if layer == "M1" else m2, [(left, low), (right, low), (right, high), (left, high)]))
             for x, y in route["vias"]:
                 h = VIA_SIZE/2
-                wires.append((v1, [(x-h, y-h), (x+h, y-h), (x+h, y+h), (x-h, y+h)]))
+                target.append((v1, [(x-h, y-h), (x+h, y-h), (x+h, y+h), (x-h, y+h)]))
+        # The net just routed glows, so each frame shows what changed.
+        glow = "".join(f'<path d="M{" L".join(f"{x:.6g},{y:.6g}" for x, y in points)}Z" fill="#ff8a00" '
+                       f'fill-opacity=".55" stroke="#ff8a00" stroke-width="{unit*2.5:.3g}"/>' for _, points in newest)
         return (f'<div style="{FONT};color:{DIM}">{escape(self.caption)}</div>'
                 f'<svg viewBox="{x0:g} {-y1:g} {x1-x0:g} {y1-y0:g}" style="width:100%;max-width:{width}px;'
-                f'height:auto;background:#000;border-radius:4px">'
+                f'height:auto;background:#fff;border:1px solid #d5d7db;border-radius:6px">'
                 f'<defs>{_patterns(unit)}{symbols}</defs>'
-                f'<g transform="scale(1,-1)">{uses}{_layer_paths(wires, unit)}</g></svg>')
+                f'<g transform="scale(1,-1)">{uses}{_layer_paths(wires, unit)}{glow}'
+                f'{_layer_paths(newest, unit)}</g></svg>')
 
 
 # --- running cells out of order ------------------------------------------------------------
