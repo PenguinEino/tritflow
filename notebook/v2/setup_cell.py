@@ -14,17 +14,22 @@ except ModuleNotFoundError:
     IN_COLAB = False
 
 def git(*args, progress=None):
-    """Run git; with ``progress``, redraw git's own counter on one line."""
+    """Run git; with ``progress``, show git's own counter on one redrawn line."""
     if progress is None:
         return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True).strip()
-    process = subprocess.Popen(["git", *args], stderr=subprocess.PIPE, text=True)
+    from IPython.display import display, HTML
+    style = "font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre"
+    line = display(HTML(f'<div style="{style}">⠿ {progress}</div>'), display_id=True)
+    process, text, started = subprocess.Popen(["git", *args], stderr=subprocess.PIPE, text=True), "", time.monotonic()
     for chunk in iter(lambda: process.stderr.read(64), ""):
-        last = re.split(r"[\r\n]", chunk.strip())[-1]
-        if last:
-            print(f"\r⠿ {progress}  {last[:70]:<70}", end="", flush=True)
+        text += chunk
+        parts = [p.strip() for p in re.split(r"[\r\n]", text)[:-1] if p.strip()]
+        if parts:
+            line.update(HTML(f'<div style="{style}">⠿ <b>{progress}</b>  <span style="color:#8a8f98">{parts[-1][:80]}</span></div>'))
     if process.wait():
-        raise RuntimeError(f"git {' '.join(args[:2])} failed")
-    print(f"\r✓ {progress}{' '*72}", flush=True)
+        raise RuntimeError(f"git {' '.join(args[:2])} failed:\n{text[-2000:]}")
+    line.update(HTML(f'<div style="{style}"><span style="color:#1a9c4a">✓</span> <b>{progress}</b>  '
+                     f'<span style="color:#8a8f98">{time.monotonic()-started:.1f}s</span></div>'))
 
 if IN_COLAB:
     ROOT = Path("/content/tritflow")
