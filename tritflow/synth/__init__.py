@@ -8,6 +8,10 @@ The mapping follows the actual cell functions, with a/b in {-1,0,+1}:
 * ``nany(a,b)`` -> NANY (Y=-clamp(A+B,-1,+1)).
 * Constants +1/0/-1 -> TIEP/TIEZ/TIEN, physically tied to the three supplies.
 
+Arithmetic lowers to ripple adders and arrays of one-trit products. General
+selectors use the complete unary cell basis and ternary Shannon selection.
+Procedural case/if joins select on crisp +/-1 predicates.
+
 ``synthesize(design)`` first simplifies only ternary-valid expressions, shares
 common logic and removes unused gates. In particular ``a & ~a`` is not a
 constant: its value at a=0 is 0. Authored primitive cells retain their identities,

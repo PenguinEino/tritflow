@@ -1,0 +1,10 @@
+// A complete two-input truth table: one-trit integer multiplication.
+module case_table(input trit a, b, output reg trit y);
+  always @(*) begin
+    case ({a, b})
+      2'tTT, 2't11: y = 1't1;
+      2'tT1, 2't1T: y = 1'tT;
+      default: y = 1't0;
+    endcase
+  end
+endmodule

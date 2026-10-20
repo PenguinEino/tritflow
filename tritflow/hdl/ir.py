@@ -9,11 +9,18 @@ import numpy as np
 
 from tritflow.netlist import Port
 from .parser import Location
+from .semantics import EXTENDED, evaluate_operation
 
 
 @dataclass(eq=False)
 class Node:
-    """One trit-valued operation; primitive metadata preserves authored cells."""
+    """One trit-valued operation; primitive metadata preserves authored cells.
+
+    Arithmetic args concatenate two equally wide MSB-first operands; value is
+    the result's LSB-based digit index. Comparisons use the same operand format
+    and return +/-1. A mux has (condition, then, else) args and Kleene consensus;
+    select is a procedural join with a crisp +/-1 condition.
+    """
 
     op: str
     args: tuple[Node, ...] = ()
@@ -79,7 +86,8 @@ class Design:
 
     ``ports`` retain declared bit indices and direction; ``inputs`` maps input
     names to source nodes and ``outputs`` maps output names to driving nodes.
-    Operations are neg, min, max, nany, const and input. An authored primitive
+    Operations include neg/min/max/nany, integer arithmetic result digits,
+    comparisons and Kleene muxes. An authored primitive
     also records its cell name so synthesis can retain the original circuit.
     """
 
@@ -118,6 +126,8 @@ class Design:
                 result = np.maximum(*args)
             elif node.op == "nany":
                 result = -np.clip(args[0] + args[1], -1, 1)
+            elif node.op in EXTENDED:
+                result = evaluate_operation(node.op, args, node.value)
             else:
                 raise ValueError(f"unknown IR operation {node.op!r}")
             results[node] = result

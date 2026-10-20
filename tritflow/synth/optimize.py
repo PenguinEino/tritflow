@@ -28,6 +28,8 @@ def optimize(design: Design) -> Design:
     In particular min(a,-a) and max(a,-a) are never Boolean-folded: at a=0
     they both equal zero.
     """
+    from .lower import lower
+    design = lower(design)
     uses = Counter(arg for node in design.nodes for arg in node.args)
     uses.update(design.outputs.values())
     cache, shared = {}, {}
