@@ -67,7 +67,7 @@ def panel(fig, rect, title, note):
 
 def arrow(fig, start, end, **options):
     fig.patches.append(FancyArrowPatch(start, end, transform=fig.transFigure, arrowstyle="-|>",
-                                       mutation_scale=8, lw=0.8, color=style.INK2, **options))
+                                       mutation_scale=13, lw=1.6, color=style.INK2, **options))
 
 
 def make():
@@ -152,8 +152,10 @@ def make():
     turn = 0.537
     # Leave the top row sideways, like the other arrows, then turn down at the margin.
     fig.add_artist(plt.Line2D([0.962, 0.993, 0.993, 0.03], [top+height/2, top+height/2, turn, turn],
-                              transform=fig.transFigure, color=style.INK2, lw=0.8, solid_joinstyle="round"))
-    arrow(fig, (0.03, turn), (0.03, low+height+0.085))
+                              transform=fig.transFigure, color=style.INK2, lw=1.6, solid_joinstyle="round",
+                              solid_capstyle="round"))
+    # shrinkA=0: the arrow continues the line without a gap at the corner.
+    arrow(fig, (0.03, turn), (0.03, low+height+0.085), shrinkA=0)
     arrow(fig, (0.175, middle), (0.205, middle))
     arrow(fig, (0.645, middle), (0.69, middle))
     return style.save(fig, "fig_flow_v2")
