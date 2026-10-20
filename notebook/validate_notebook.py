@@ -29,8 +29,10 @@ def validate(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--language", choices=("en", "ja"), default="en")
     args = parser.parse_args()
-    document = validate(Path(__file__).with_name("tritflow_tr1um.ipynb"))
+    filename = "tritflow_tr1um_ja.ipynb" if args.language == "ja" else "tritflow_tr1um.ipynb"
+    document = validate(Path(__file__).with_name(filename))
     print(f"Validated {len(document['cells'])} cells and chapters 0–9")
     if args.execute:
         os.environ["TRITFLOW_NOTEBOOK_HEADLESS"] = "1"

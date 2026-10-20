@@ -7,6 +7,44 @@ import os
 import numpy as np
 from IPython.display import HTML, display
 
+_translations = {}
+_figure_translations = {}
+
+
+def configure_language(language="en"):
+    """Choose prose labels only; circuit names and native reports stay intact."""
+    global _translations, _figure_translations
+    from pathlib import Path
+    _translations = (json.loads(Path(__file__).with_name("narrative_ja").joinpath("labels.json").read_text())["display"]
+                     if language == "ja" else {})
+    _figure_translations = (json.loads(Path(__file__).with_name("narrative_ja").joinpath("labels.json").read_text())["figure"]
+                            if language == "ja" else {})
+
+
+def paper_figure(png, *, width):
+    """Display the paper's fresh curve with localized SVG labels in Japanese."""
+    from pathlib import Path
+    from IPython.display import Image
+    if not _figure_translations:
+        return Image(filename=str(png), width=width)
+    import base64
+    from localization import localize_svg
+    svg = localize_svg(Path(png).with_suffix('.svg').read_text(), _figure_translations)
+    data = base64.b64encode(svg.encode()).decode()
+    return HTML(f'<img src="data:image/svg+xml;base64,{data}" '
+                f'style="width:100%;max-width:{width}px;height:auto">')
+
+
+def label(value):
+    from localization import translate_text
+    return translate_text(value, _translations) if isinstance(value, str) else value
+
+
+def localized_display(*objects, **kwargs):
+    """Translate visible HTML labels while retaining embedded circuit data."""
+    from localization import localize_html
+    display(*(HTML(localize_html(obj.data, _translations)) if isinstance(obj, HTML) else obj for obj in objects), **kwargs)
+
 
 def title_controls(figure):
     """Reserve separate title, controls and subplot-label bands in notebook views.
@@ -42,13 +80,22 @@ def gds_download(path, *, url=None):
         f'<a download="{escape(path.name, quote=True)}" href="{href}" target="_blank" '
         'style="display:inline-block;margin:6px 0;padding:9px 18px;border-radius:6px;background:#1a5fb4;'
         'color:#fff;font:600 15px sans-serif;text-decoration:none">'
-        f'⬇ Download {escape(path.name)}</a>'
+        f'{label("Download")} {escape(path.name)}</a>'
         f'<span style="margin-left:12px;color:#555;font:13px sans-serif">GDSII, {len(data)/1024:.0f} KB · '
-        f'open in KLayout · SHA-256 {hashlib.sha256(data).hexdigest()[:16]}…</span>'))
+        f'{label("open in KLayout")} · SHA-256 {hashlib.sha256(data).hexdigest()[:16]}…</span>'))
 
 
 def show(figure):
     figure = title_controls(figure)
+    if _translations:
+        import plotly.graph_objects as go
+        def translated(item, key=""):
+            if isinstance(item, dict):
+                return {k: translated(v,k) for k,v in item.items()}
+            if isinstance(item, list):
+                return [translated(v,key) for v in item]
+            return label(item) if key in {"text","title","name","label","prefix","suffix","hovertemplate"} else item
+        figure = go.Figure(translated(figure.to_plotly_json()))
     if os.environ.get("TRITFLOW_NOTEBOOK_HEADLESS") == "1":
         figure.to_json()
     else:
@@ -63,7 +110,7 @@ def display_value(value):
         return "; ".join(f"{key}: {display_value(item)}" for key,item in value.items())
     if isinstance(value,(list,tuple)):
         return "["+", ".join(display_value(item) for item in value)+"]"
-    return str(value)
+    return str(label(value))
 
 
 def table(rows, *, details=None):
@@ -71,18 +118,19 @@ def table(rows, *, details=None):
         "<td style='padding:.3em .8em;white-space:normal;overflow-wrap:anywhere;vertical-align:top'>"+escape(display_value(v))+"</td>" for v in row)+"</tr>"
         for row in rows)+"</table></div>"
     if details:
-        content = "<details style='min-width:0;max-width:100%;overflow-x:auto'><summary>"+escape(details)+"</summary>"+content+"</details>"
+        content = "<details style='min-width:0;max-width:100%;overflow-x:auto'><summary>"+escape(label(details))+"</summary>"+content+"</details>"
     display(HTML(content))
 
 
 def evidence(title, value):
     text=value if isinstance(value,str) else json.dumps(value,indent=2,default=str)
-    display(HTML("<details><summary>"+escape(title)+"</summary><pre style='white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%'>"+escape(text)+"</pre></details>"))
+    display(HTML("<details><summary>"+escape(label(title))+"</summary><pre style='white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%'>"+escape(text)+"</pre></details>"))
 
 
 def details_html(title, content):
     """Collapse an existing HTML report without discarding any of its rows."""
-    display(HTML('<details><summary>'+escape(title)+'</summary>'+content+'</details>'))
+    from localization import localize_html
+    display(HTML('<details><summary>'+escape(label(title))+'</summary>'+localize_html(content, _translations)+'</details>'))
 
 
 def details_svg(title, svg):
