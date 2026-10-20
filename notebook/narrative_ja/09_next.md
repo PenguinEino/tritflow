@@ -6,16 +6,16 @@
 
 ### シャトル向けトップの生成
 
-配線済みコアにフレームと端子を加えるには、`layout.result.to_chip()`と、返されたチップの`signoff()`を使います。下のビューアとダウンロードは、図と同じ加算器をMPWのTEGフレームへ入れたGDSです。
+配線済みコアにフレームと端子を加えるには、`lay.result.to_chip()`と、返されたチップの`signoff()`を使います。下のビューアとダウンロードは、図と同じ加算器をMPWのTEGフレームへ入れたGDSです。
 
 ```python
-chip = layout.result.to_chip()
+chip = lay.result.to_chip()
 checks = chip.signoff()
 chip.gds_path
 ```
 
 > **ここから分かること。** 保存済みトップは{chip.die_um} µm、{chip.pad_count}パッドです。描画GDSのDRCは{chip.drawing_drc_items}件、厳密な端子照合を含むLVSは{chip.lvs_status}、マスク処理後のDRCは{chip.mask_drc_items}件、MPW事前チェックは{chip.precheck_status}です。
 
-このトップの`submission_ready`は`{chip.submission_ready}`です。実際の提出には領域の割当、パッド・ボンド図、電源・基板接続、プロセスとESDの承認、シャトル側のCIが残ります。受動パッドにはESD回路がありません。条件と残作業は付録A/Bにまとめています。
+実際にシャトルへ出すには、領域の割当やESDの確認などが残ります（付録A）。
 
 ここまでに作った配線済みGDSとライブラリは、別のHDLでも使えます。付録Cにはローカル実行と拡張の手順を載せています。

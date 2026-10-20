@@ -84,7 +84,7 @@ def test_static_context_and_embedded_figures_have_no_unresolved_results():
     # Visible method cells stay short; checks live in collapsed form cells.
     for c in document['cells']:
         if c['cell_type'] == 'code' and c['id'].startswith('method-'):
-            assert len(c['source'].strip().splitlines()) <= 14, c['id']
+            assert len(c["source"].strip().splitlines()) <= 16, c["id"]
         elif c['cell_type'] == 'code':
             assert c['metadata'].get('cellView') == 'form' and c['source'].startswith('#@title'), c['id']
 

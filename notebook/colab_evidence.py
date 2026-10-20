@@ -21,6 +21,7 @@ def narrative_values():
         "commit": record["commit"], "short_commit": record["commit"][:7],
         "date_utc": record.get("date_utc", ""),
         "seconds": record["run_all_seconds_including_setup"],
+        "minutes": max(1, round(record["run_all_seconds_including_setup"]/60)),
         "code_cells": record["passed_code_cells"],
         "attempts": record.get("run_all_attempts", 1),
     }.items()}

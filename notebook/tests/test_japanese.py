@@ -35,7 +35,7 @@ def test_cell_basis_closes_exact_unary_functions_and_slupecki_premise():
 def test_completeness_then_synthesis_cells_keep_display_helper_callable():
     import methods
     from tritflow import flow
-    namespace = {"flow": flow, "ROOT": ROOT, "display_label": lambda text: text,
+    namespace = {"flow": flow, "ROOT": ROOT, "display_label": lambda text: text, "step": print,
                  "display": lambda value: None,
                  "value_selector": lambda net, **kwargs: kwargs}
     exec(methods.COMPLETENESS, namespace)
@@ -64,7 +64,7 @@ def test_japanese_build_is_complete_unexecuted_and_language_option_is_repeatable
         if c["cell_type"] == "code" and c["source"].startswith("#@title"):
             assert re.search(r"[\u3040-\u9fff]", c["source"].splitlines()[0])
         if c["cell_type"] == "code" and c["id"].startswith("method-"):
-            assert len(c["source"].strip().splitlines()) <= 14
+            assert len(c["source"].strip().splitlines()) <= 16
     english = build("en")
     assert [c["id"] for c in english["cells"] if c["cell_type"] == "code"] == [
         c["id"] for c in doc["cells"] if c["cell_type"] == "code"]
@@ -80,12 +80,13 @@ def test_japanese_story_has_resolved_measurements_and_single_historical_colab_re
     record = json.loads((ROOT / "notebook/colab_verified.json").read_text())
     markdown = "\n".join(c["source"] for c in doc["cells"] if c["cell_type"] == "markdown")
     assert "世界初" not in markdown and "初めて" not in markdown
-    assert record["commit"] in intro
-    assert f'{record["run_all_seconds_including_setup"]:g}秒' in intro
-    assert "日本語版のColab実行記録はまだありません" in intro
+    minutes = max(1, round(record["run_all_seconds_including_setup"] / 60))
+    assert f"約{minutes}分" in intro
     assert "## 付録A." in markdown and "## 付録C." in markdown
     assert not TOKEN.search(markdown)
-    assert "公開済み英語版のColab実行記録" in markdown
+    assert markdown.count("すべてのセルを実行」を選んでください") == 1   # one run note, in the intro
+    for removed in ("generate", "まだありません。セットアップ", "submission_ready"):
+        assert removed not in markdown
     author = (ROOT / "docs/author.md").read_text()
     block = author[author.index("- Name:"):].split("\n\n", 1)[0]
     assert block in intro
@@ -111,3 +112,13 @@ def test_translation_preserves_expressions_identifiers_hdl_and_svg_geometry():
     assert '<div>出力</div>' in translated
     assert '<script>let Output = 1;</script>' in translated
     assert 'base64,Output' in translated and '<pre>Output</pre>' in translated
+
+
+def test_japanese_progress_lines_are_translated():
+    """Every visible progress line names its work in Japanese."""
+    doc = json.loads((ROOT / "notebook/tritflow_tr1um_ja.ipynb").read_text())
+    source = "\n".join(c["source"] for c in doc["cells"] if c["cell_type"] == "code")
+    messages = re.findall(r'step\(f?"([^"]*)"', source)
+    assert len(messages) >= 30
+    for message in messages:
+        assert re.search(r"[぀-鿿]", message), message

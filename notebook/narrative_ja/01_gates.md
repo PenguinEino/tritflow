@@ -27,4 +27,4 @@ P_{\rm hand}=(V_{DD}-V_{SS})I_{\rm hand}.
 
 [Słupeckiの判定法](https://www.conferences.info.uaic.ro/mathematical-foundations-of-informatics/2019/PDF/MFOI2019_Volume.pdf)では全1入力関数を作れ、かつ両入力に本質的に依存して3値すべてを出す2入力関数があれば機能的完全です。NANYは後者を満たすので、NANYとTIEP/TIENの組は機能的完全です。NANYは\(f(-a,-b)=-f(a,b)\)を満たす奇関数で、0だけを足して合成しても奇関数のままです。±1の定数がこの制約を外します。
 
-半加算器はNANY {arithmetic.ha_nany}個とINV {arithmetic.ha_inv}個になります。これも同じセルでHDLを合成して数えます。完全性はセルの組に関する性質です。TritFlowの合成は式をセルへ写す方式で、任意の真理値表から回路を自動生成する機能はありません。
+算術にも向いていて、半加算器はNANY {arithmetic.ha_nany}個とINV {arithmetic.ha_inv}個でできます。この数も、下のセルでHDLを合成して数えます。なお、完全なのはセルの組です。TritFlowの合成は書いた式をセルへ割り当てるもので、真理値表から回路を探すわけではありません。
