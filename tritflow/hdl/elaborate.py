@@ -111,37 +111,10 @@ class Elaborator:
         except ValueError:
             raise module.location(select).error(f"index outside declared range of {name!r}") from None
 
-    def expression(self, expr, scope, env, module, hier):
-        op = str(expr.data)
-        loc = module.location(expr)
-        if op == "ref":
-            return [Node("ref", name=bit.name, loc=loc, hier=hier)
-                    for bit in self.selected(expr, scope, env, module)]
-        if op == "trit":
-            width_text, digits = str(expr.children[0]).split("'", 1)
-            digits = digits[1:].replace("_", "").upper()
-            if len(digits) != int(width_text) or not digits or set(digits) - set("T01"):
-                raise loc.error("trit literal needs exactly its width in T/0/1 digits; x/z are unsupported")
-            return [Node("const", value={"T": -1, "0": 0, "1": 1}[digit], hier=hier, loc=loc)
-                    for digit in digits]
-        if op == "concat":
-            return [node for child in expr.children
-                    for node in self.expression(child, scope, env, module, hier)]
-        if op == "neg":
-            return [Node("neg", (a,), hier=hier, loc=loc)
-                    for a in self.expression(expr.children[0], scope, env, module, hier)]
-        if op in {"min_op", "max_op", "call"}:
-            operands = expr.children
-            operation = {"min_op": "min", "max_op": "max", "call": "nany"}[op]
-            if op == "call":
-                if identifier(operands[0]) != "nany":
-                    raise loc.error("only the builtin nany(a, b) function is supported")
-                operands = operands[1:]
-            a, b = [self.expression(child, scope, env, module, hier) for child in operands]
-            if len(a) != len(b):
-                raise loc.error(f"operand width mismatch: {len(a)} versus {len(b)} trits")
-            return [Node(operation, (x, y), hier=hier, loc=loc) for x, y in zip(a, b)]
-        raise loc.error("arithmetic/comparison on trits is unsupported; use ~, &, |, nany and sized trit literals")
+    def expression(self, expr, scope, env, module, hier, context=None, values=None, required=()):
+        from .expressions import Expressions
+        return Expressions(lambda e: self.selected(e, scope, env, module), env,
+                           module, hier, values, required).build(expr, context)
 
     def targets(self, expr, scope, env, module):
         if expr.data == "concat":
@@ -225,8 +198,12 @@ class Elaborator:
             loc = module.location(item)
             if item.data == "assign":
                 lhs, rhs = item.children
-                self.drive(self.targets(lhs, scope, env, module),
-                           self.expression(rhs, scope, env, module, prefix.rstrip(".")), loc)
+                targets = self.targets(lhs, scope, env, module)
+                self.drive(targets, self.expression(rhs, scope, env, module,
+                                                   prefix.rstrip("."), len(targets)), loc)
+            elif item.data == "always_comb":
+                from .procedural import elaborate_block
+                elaborate_block(self, item, scope, env, module, prefix.rstrip("."))
             elif item.data == "primitive":
                 cell, token, *connections = item.children
                 inst = identifier(token)

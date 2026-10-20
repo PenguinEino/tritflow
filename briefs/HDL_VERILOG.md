@@ -1,0 +1,93 @@
+# Brief: HDL_VERILOG — basic Verilog on trit signals, and synthesis of any function
+
+You work in the git worktree `~/code-a-chip-hdl` (branch `hdl-verilog`). Never touch `~/code-a-chip`
+or `~/code-a-chip-rewrite` (other people work there). No git commit, push or tag: the integrator
+reviews and commits. Code comments and docs in English; your status note may be Japanese.
+
+## Why
+
+TritVerilog (`tritflow/hdl/parser.py`) only allows `~` (negate), `&` (min), `|` (max) and `nany()` on
+trit signals, plus structural instances. `+ - * / %` and comparisons parse but work only on integer
+parameters and indices; on signals they raise "arithmetic/comparison on trits is unsupported".
+There is no `case`, no `if`, no `? :`, no `always`. A reviewer who writes
+`assign {cout, sum} = a + b + cin;` gets an error. That is not acceptable for a tool called an HDL
+flow. The goal: everything a student learns as basic combinational Verilog works on trits, and
+synthesis can implement any combinational function, using the fact that NANY with the ±1 constants
+is functionally complete (`notebook/completeness.py` shows the closure: INV/NAND/NOR + constants reach
+11/27 one-input functions, NANY + TIEZ 3/27, NANY + TIEP/TIEN 27/27).
+
+## Part 1 — operators on trit signals and vectors (do this first)
+
+Balanced ternary integers: a vector `trit [N-1:0] x` has value Σ x[i]·3^i (little-endian, as in
+`examples/adder.tv`). Logic values follow Kleene's three-valued logic, consistent with the existing
+`&` = min, `|` = max, `~` = negation: true = +1, unknown = 0, false = −1.
+
+- Arithmetic on signals: binary `+`, `-`, unary `-` (negation is free: negate every trit), `*`.
+  Width rules like Verilog: an expression is evaluated at the width of its context (the assignment
+  target, including concatenations such as `{cout, sum}`), operands are sign-extended (in balanced
+  ternary, extension is with 0), and results are truncated to the target width. Document the rules.
+- Synthesis of `+`/`-`: expand into ripple-carry adders built from the verified half/full-adder
+  structures (`examples/half_add.tv`: 5 NANY + 2 INV; full adder: 11 NANY + 5 INV), the way Yosys maps
+  `$add` to an adder. Constant operands should simplify (e.g. `x + 0`, adding a constant trit).
+  `*`: an array multiplier built from the 1-trit product (`examples/mul1.tv`/`mac1.tv` show the
+  existing gate-level structures) and adders.
+- Comparisons `== != < <= > >=` on vectors return one trit: +1 true, −1 false. Base them on the sign
+  of the difference (`examples/sign.tv` and `compare2.tv` show existing structures).
+- Conditional operator `c ? x : y`: selects `x` when `c` is +1 (true), `y` when `c` is −1 (false);
+  when `c` is 0 (unknown) the result is `x` where `x == y` trit by trit, otherwise 0 (Kleene). State the
+  rule in the docs and check it exhaustively.
+- Logical operators if cheap: `!` (= `~`), `&&` (= min), `||` (= max) on single trits.
+- `/` and `%` on signals may stay unsupported with a clear error, unless trivial.
+
+## Part 2 — procedural combinational code and any function
+
+- `always @(*)` / `always @*` blocks with `begin … end`, blocking `=` assignments to `wire`/`reg trit`
+  declarations (accept `reg trit` as a synonym of `wire trit` for combinational use), `if`/`else if`/
+  `else`, `case (expr) … endcase` with `default`, and multiple labels per item. Literals already exist:
+  `1'tT` (−1), `1't0`, `1't1`, and wider ones like `2'tT1`. A case on a concatenation
+  (`case ({a, b}) 2'tTT: y = 1't1; …`) is how a student writes a truth table.
+  Incomplete assignment in a combinational block must be an error (no latches), with file:line.
+- Elaborate procedural code into the existing expression IR (multiplexers/selects), so the simulator,
+  equivalence checker and writers keep working.
+- Synthesis of any function: add a mapping for a general three-way selection / arbitrary truth table
+  using only library cells (INV, NAND, NOR, NANY, BUF, TIEP, TIEZ, TIEN). Suggested approach:
+  (a) precompute, by closure search over NANY/INV/NAND/NOR and the three ties, a small cell network for
+  every one-input function (27) and for the selector/literal functions a three-way multiplexer needs;
+  (b) build a three-way multiplexer from them; (c) decompose larger functions by ternary Shannon
+  expansion f = MUX3(x, f|x=−1, f|x=0, f|x=+1), sharing identical cofactors; (d) keep the existing
+  rewrite/optimize passes. Optionally (time permitting) search small two-input functions exhaustively
+  for cheaper networks. Never claim the result is minimal.
+- Every synthesized netlist must still pass the existing exhaustive equivalence check against the
+  HDL's own semantics (`tritflow/synth`), and the HDL semantics must match an independent integer or
+  table reference in the tests.
+
+## Must not break
+
+- Every existing example and test keeps the same synthesized netlist (same cells, same instance
+  names) where it does not use the new features. Add a test that compares cell counts/netlist JSON
+  of all `examples/*.tv` before/after.
+- `tritflow/pnr`, `tritflow/sim`, `tritflow/extract`, `tritflow/cells` are out of scope; do not edit them.
+  Do not edit `notebook/` either (the integrator is rewriting it); if the notebook's `broken` example
+  (signal `+` rejected) stops being an error, note it in your status file instead.
+
+## Deliverables
+
+1. Parser, elaborator, IR, simulator and synthesis changes, with focused modules and docstrings that
+   explain the circuit meaning.
+2. New examples: `examples/full_add_rtl.tv` (`assign {cout, sum} = a + b + cin;`),
+   `examples/adder4_rtl.tv` (4-trit `+`), a case-statement truth table, a comparator, a `?:` mux, and
+   a small ALU selected by a trit opcode (add / subtract / negate / min / max). Each one must
+   synthesize, pass the exhaustive equivalence check, and place and route DRC-clean and LVS-matched
+   with `tritflow.flow` (run P&R + DRC/LVS on at least the full adder, the 4-trit adder and the ALU;
+   the 5090 server `ssh penguin@einosuke-llm-5090`, workspace `~/tritflow-sim`, may be used for heavy
+   jobs — rsync excluding build/.git/logs, touch nothing else there, never stop/start its services).
+   Report cell counts of `full_add_rtl` vs the hand-written `full_add`.
+3. Tests in `tests/hdl` and `tests/synth`: parsing, semantics (exhaustive against independent
+   references), width rules, error messages with file:line for unsupported constructs and latches.
+   Run `python3 -m pytest tests/hdl tests/synth tests/pnr -q` (and the rest of `tests/` if time allows)
+   and report the results.
+4. `docs/status/HDL_VERILOG.md`: the supported language (a table a student can read), width and
+   Kleene rules, the synthesis method for each construct, cell counts, test results, what remains
+   unsupported, and decisions you made.
+
+Constraints: TR1UM_PDK=~/pdk/TR-1um-pinned. Do not publish anything. No sign-in anywhere.

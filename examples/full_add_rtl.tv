@@ -1,0 +1,4 @@
+// Context width is two trits, so the full sum includes its carry.
+module full_add_rtl(input trit a, b, cin, output trit sum, cout);
+  assign {cout, sum} = a + b + cin;
+endmodule

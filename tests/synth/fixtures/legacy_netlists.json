@@ -1,0 +1,2319 @@
+{
+  "adder.tv": {
+    "netlist": {
+      "top": "adder",
+      "ports": [
+        {
+          "name": "a[3]",
+          "dir": "input"
+        },
+        {
+          "name": "a[2]",
+          "dir": "input"
+        },
+        {
+          "name": "a[1]",
+          "dir": "input"
+        },
+        {
+          "name": "a[0]",
+          "dir": "input"
+        },
+        {
+          "name": "b[3]",
+          "dir": "input"
+        },
+        {
+          "name": "b[2]",
+          "dir": "input"
+        },
+        {
+          "name": "b[1]",
+          "dir": "input"
+        },
+        {
+          "name": "b[0]",
+          "dir": "input"
+        },
+        {
+          "name": "cin",
+          "dir": "input"
+        },
+        {
+          "name": "sum[3]",
+          "dir": "output"
+        },
+        {
+          "name": "sum[2]",
+          "dir": "output"
+        },
+        {
+          "name": "sum[1]",
+          "dir": "output"
+        },
+        {
+          "name": "sum[0]",
+          "dir": "output"
+        },
+        {
+          "name": "cout",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "digit[3].fa.ha1.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "a[3]",
+            "B": "b[3]",
+            "Y": "_n0"
+          },
+          "hier": "digit[3].fa.ha1"
+        },
+        {
+          "name": "digit[3].fa.ha1.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "a[3]",
+            "Y": "_n1"
+          },
+          "hier": "digit[3].fa.ha1"
+        },
+        {
+          "name": "digit[3].fa.ha1.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "b[3]",
+            "B": "_n0",
+            "Y": "_n2"
+          },
+          "hier": "digit[3].fa.ha1"
+        },
+        {
+          "name": "digit[3].fa.ha1.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n1",
+            "B": "_n2",
+            "Y": "_n3"
+          },
+          "hier": "digit[3].fa.ha1"
+        },
+        {
+          "name": "digit[3].fa.ha1.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n0",
+            "B": "_n3",
+            "Y": "_n4"
+          },
+          "hier": "digit[3].fa.ha1"
+        },
+        {
+          "name": "digit[3].fa.ha1.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n4",
+            "Y": "_n5"
+          },
+          "hier": "digit[3].fa.ha1"
+        },
+        {
+          "name": "digit[3].fa.ha1.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n5",
+            "B": "_n3",
+            "Y": "_n6"
+          },
+          "hier": "digit[3].fa.ha1"
+        },
+        {
+          "name": "digit[2].fa.ha1.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "a[2]",
+            "Y": "_n7"
+          },
+          "hier": "digit[2].fa.ha1"
+        },
+        {
+          "name": "digit[2].fa.ha1.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "a[2]",
+            "B": "b[2]",
+            "Y": "_n8"
+          },
+          "hier": "digit[2].fa.ha1"
+        },
+        {
+          "name": "digit[2].fa.ha1.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "b[2]",
+            "B": "_n8",
+            "Y": "_n9"
+          },
+          "hier": "digit[2].fa.ha1"
+        },
+        {
+          "name": "digit[2].fa.ha1.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n7",
+            "B": "_n9",
+            "Y": "_n10"
+          },
+          "hier": "digit[2].fa.ha1"
+        },
+        {
+          "name": "digit[2].fa.ha1.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n8",
+            "B": "_n10",
+            "Y": "_n11"
+          },
+          "hier": "digit[2].fa.ha1"
+        },
+        {
+          "name": "digit[2].fa.ha1.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n11",
+            "Y": "_n12"
+          },
+          "hier": "digit[2].fa.ha1"
+        },
+        {
+          "name": "digit[2].fa.ha1.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n12",
+            "B": "_n10",
+            "Y": "_n13"
+          },
+          "hier": "digit[2].fa.ha1"
+        },
+        {
+          "name": "digit[2].fa.ha2.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n13",
+            "Y": "_n14"
+          },
+          "hier": "digit[2].fa.ha2"
+        },
+        {
+          "name": "digit[1].fa.ha1.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "a[1]",
+            "Y": "_n15"
+          },
+          "hier": "digit[1].fa.ha1"
+        },
+        {
+          "name": "digit[1].fa.ha1.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "a[1]",
+            "B": "b[1]",
+            "Y": "_n16"
+          },
+          "hier": "digit[1].fa.ha1"
+        },
+        {
+          "name": "digit[1].fa.ha1.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "b[1]",
+            "B": "_n16",
+            "Y": "_n17"
+          },
+          "hier": "digit[1].fa.ha1"
+        },
+        {
+          "name": "digit[1].fa.ha1.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n15",
+            "B": "_n17",
+            "Y": "_n18"
+          },
+          "hier": "digit[1].fa.ha1"
+        },
+        {
+          "name": "digit[1].fa.ha1.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n16",
+            "B": "_n18",
+            "Y": "_n19"
+          },
+          "hier": "digit[1].fa.ha1"
+        },
+        {
+          "name": "digit[1].fa.ha1.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n19",
+            "Y": "_n20"
+          },
+          "hier": "digit[1].fa.ha1"
+        },
+        {
+          "name": "digit[1].fa.ha1.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n20",
+            "B": "_n18",
+            "Y": "_n21"
+          },
+          "hier": "digit[1].fa.ha1"
+        },
+        {
+          "name": "digit[1].fa.ha2.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n21",
+            "Y": "_n22"
+          },
+          "hier": "digit[1].fa.ha2"
+        },
+        {
+          "name": "digit[0].fa.ha1.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "a[0]",
+            "Y": "_n23"
+          },
+          "hier": "digit[0].fa.ha1"
+        },
+        {
+          "name": "digit[0].fa.ha1.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "a[0]",
+            "B": "b[0]",
+            "Y": "_n24"
+          },
+          "hier": "digit[0].fa.ha1"
+        },
+        {
+          "name": "digit[0].fa.ha1.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "b[0]",
+            "B": "_n24",
+            "Y": "_n25"
+          },
+          "hier": "digit[0].fa.ha1"
+        },
+        {
+          "name": "digit[0].fa.ha1.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n23",
+            "B": "_n25",
+            "Y": "_n26"
+          },
+          "hier": "digit[0].fa.ha1"
+        },
+        {
+          "name": "digit[0].fa.ha1.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n24",
+            "B": "_n26",
+            "Y": "_n27"
+          },
+          "hier": "digit[0].fa.ha1"
+        },
+        {
+          "name": "digit[0].fa.ha1.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n27",
+            "Y": "_n28"
+          },
+          "hier": "digit[0].fa.ha1"
+        },
+        {
+          "name": "digit[0].fa.ha1.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n28",
+            "B": "_n26",
+            "Y": "_n29"
+          },
+          "hier": "digit[0].fa.ha1"
+        },
+        {
+          "name": "digit[0].fa.ha2.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n29",
+            "Y": "_n30"
+          },
+          "hier": "digit[0].fa.ha2"
+        },
+        {
+          "name": "digit[0].fa.ha2.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n29",
+            "B": "cin",
+            "Y": "_n31"
+          },
+          "hier": "digit[0].fa.ha2"
+        },
+        {
+          "name": "digit[0].fa.ha2.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "cin",
+            "B": "_n31",
+            "Y": "_n32"
+          },
+          "hier": "digit[0].fa.ha2"
+        },
+        {
+          "name": "digit[0].fa.ha2.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n30",
+            "B": "_n32",
+            "Y": "_n33"
+          },
+          "hier": "digit[0].fa.ha2"
+        },
+        {
+          "name": "digit[0].fa.g_nc",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n26",
+            "B": "_n33",
+            "Y": "_n34"
+          },
+          "hier": "digit[0].fa"
+        },
+        {
+          "name": "digit[0].fa.g_cout",
+          "cell": "INV",
+          "pins": {
+            "A": "_n34",
+            "Y": "_n35"
+          },
+          "hier": "digit[0].fa"
+        },
+        {
+          "name": "digit[1].fa.ha2.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n21",
+            "B": "_n35",
+            "Y": "_n36"
+          },
+          "hier": "digit[1].fa.ha2"
+        },
+        {
+          "name": "digit[1].fa.ha2.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n35",
+            "B": "_n36",
+            "Y": "_n37"
+          },
+          "hier": "digit[1].fa.ha2"
+        },
+        {
+          "name": "digit[1].fa.ha2.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n22",
+            "B": "_n37",
+            "Y": "_n38"
+          },
+          "hier": "digit[1].fa.ha2"
+        },
+        {
+          "name": "digit[1].fa.g_nc",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n18",
+            "B": "_n38",
+            "Y": "_n39"
+          },
+          "hier": "digit[1].fa"
+        },
+        {
+          "name": "digit[1].fa.g_cout",
+          "cell": "INV",
+          "pins": {
+            "A": "_n39",
+            "Y": "_n40"
+          },
+          "hier": "digit[1].fa"
+        },
+        {
+          "name": "digit[2].fa.ha2.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n13",
+            "B": "_n40",
+            "Y": "_n41"
+          },
+          "hier": "digit[2].fa.ha2"
+        },
+        {
+          "name": "digit[2].fa.ha2.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n40",
+            "B": "_n41",
+            "Y": "_n42"
+          },
+          "hier": "digit[2].fa.ha2"
+        },
+        {
+          "name": "digit[2].fa.ha2.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n14",
+            "B": "_n42",
+            "Y": "_n43"
+          },
+          "hier": "digit[2].fa.ha2"
+        },
+        {
+          "name": "digit[2].fa.g_nc",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n10",
+            "B": "_n43",
+            "Y": "_n44"
+          },
+          "hier": "digit[2].fa"
+        },
+        {
+          "name": "digit[2].fa.g_cout",
+          "cell": "INV",
+          "pins": {
+            "A": "_n44",
+            "Y": "_n45"
+          },
+          "hier": "digit[2].fa"
+        },
+        {
+          "name": "digit[3].fa.ha2.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n6",
+            "B": "_n45",
+            "Y": "_n46"
+          },
+          "hier": "digit[3].fa.ha2"
+        },
+        {
+          "name": "digit[3].fa.ha2.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n6",
+            "Y": "_n47"
+          },
+          "hier": "digit[3].fa.ha2"
+        },
+        {
+          "name": "digit[3].fa.ha2.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n45",
+            "B": "_n46",
+            "Y": "_n48"
+          },
+          "hier": "digit[3].fa.ha2"
+        },
+        {
+          "name": "digit[3].fa.ha2.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n47",
+            "B": "_n48",
+            "Y": "_n49"
+          },
+          "hier": "digit[3].fa.ha2"
+        },
+        {
+          "name": "digit[3].fa.ha2.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n46",
+            "B": "_n49",
+            "Y": "_n50"
+          },
+          "hier": "digit[3].fa.ha2"
+        },
+        {
+          "name": "digit[3].fa.ha2.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n50",
+            "Y": "_n51"
+          },
+          "hier": "digit[3].fa.ha2"
+        },
+        {
+          "name": "digit[3].fa.ha2.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n51",
+            "B": "_n49",
+            "Y": "sum[3]"
+          },
+          "hier": "digit[3].fa.ha2"
+        },
+        {
+          "name": "digit[2].fa.ha2.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n41",
+            "B": "_n43",
+            "Y": "_n53"
+          },
+          "hier": "digit[2].fa.ha2"
+        },
+        {
+          "name": "digit[2].fa.ha2.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n53",
+            "Y": "_n54"
+          },
+          "hier": "digit[2].fa.ha2"
+        },
+        {
+          "name": "digit[2].fa.ha2.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n54",
+            "B": "_n43",
+            "Y": "sum[2]"
+          },
+          "hier": "digit[2].fa.ha2"
+        },
+        {
+          "name": "digit[1].fa.ha2.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n36",
+            "B": "_n38",
+            "Y": "_n56"
+          },
+          "hier": "digit[1].fa.ha2"
+        },
+        {
+          "name": "digit[1].fa.ha2.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n56",
+            "Y": "_n57"
+          },
+          "hier": "digit[1].fa.ha2"
+        },
+        {
+          "name": "digit[1].fa.ha2.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n57",
+            "B": "_n38",
+            "Y": "sum[1]"
+          },
+          "hier": "digit[1].fa.ha2"
+        },
+        {
+          "name": "digit[0].fa.ha2.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n31",
+            "B": "_n33",
+            "Y": "_n59"
+          },
+          "hier": "digit[0].fa.ha2"
+        },
+        {
+          "name": "digit[0].fa.ha2.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n59",
+            "Y": "_n60"
+          },
+          "hier": "digit[0].fa.ha2"
+        },
+        {
+          "name": "digit[0].fa.ha2.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n60",
+            "B": "_n33",
+            "Y": "sum[0]"
+          },
+          "hier": "digit[0].fa.ha2"
+        },
+        {
+          "name": "digit[3].fa.g_nc",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n3",
+            "B": "_n49",
+            "Y": "_n62"
+          },
+          "hier": "digit[3].fa"
+        },
+        {
+          "name": "digit[3].fa.g_cout",
+          "cell": "INV",
+          "pins": {
+            "A": "_n62",
+            "Y": "cout"
+          },
+          "hier": "digit[3].fa"
+        }
+      ]
+    },
+    "cells": {
+      "INV": 20,
+      "NANY": 44
+    }
+  },
+  "adder2.tv": {
+    "netlist": {
+      "top": "adder2",
+      "ports": [
+        {
+          "name": "a[1]",
+          "dir": "input"
+        },
+        {
+          "name": "a[0]",
+          "dir": "input"
+        },
+        {
+          "name": "b[1]",
+          "dir": "input"
+        },
+        {
+          "name": "b[0]",
+          "dir": "input"
+        },
+        {
+          "name": "cin",
+          "dir": "input"
+        },
+        {
+          "name": "sum[1]",
+          "dir": "output"
+        },
+        {
+          "name": "sum[0]",
+          "dir": "output"
+        },
+        {
+          "name": "cout",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "fa1.ha1.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "a[1]",
+            "B": "b[1]",
+            "Y": "_n0"
+          },
+          "hier": "fa1.ha1"
+        },
+        {
+          "name": "fa1.ha1.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "a[1]",
+            "Y": "_n1"
+          },
+          "hier": "fa1.ha1"
+        },
+        {
+          "name": "fa1.ha1.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "b[1]",
+            "B": "_n0",
+            "Y": "_n2"
+          },
+          "hier": "fa1.ha1"
+        },
+        {
+          "name": "fa1.ha1.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n1",
+            "B": "_n2",
+            "Y": "_n3"
+          },
+          "hier": "fa1.ha1"
+        },
+        {
+          "name": "fa1.ha1.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n0",
+            "B": "_n3",
+            "Y": "_n4"
+          },
+          "hier": "fa1.ha1"
+        },
+        {
+          "name": "fa1.ha1.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n4",
+            "Y": "_n5"
+          },
+          "hier": "fa1.ha1"
+        },
+        {
+          "name": "fa1.ha1.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n5",
+            "B": "_n3",
+            "Y": "_n6"
+          },
+          "hier": "fa1.ha1"
+        },
+        {
+          "name": "fa0.ha1.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "a[0]",
+            "Y": "_n7"
+          },
+          "hier": "fa0.ha1"
+        },
+        {
+          "name": "fa0.ha1.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "a[0]",
+            "B": "b[0]",
+            "Y": "_n8"
+          },
+          "hier": "fa0.ha1"
+        },
+        {
+          "name": "fa0.ha1.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "b[0]",
+            "B": "_n8",
+            "Y": "_n9"
+          },
+          "hier": "fa0.ha1"
+        },
+        {
+          "name": "fa0.ha1.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n7",
+            "B": "_n9",
+            "Y": "_n10"
+          },
+          "hier": "fa0.ha1"
+        },
+        {
+          "name": "fa0.ha1.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n8",
+            "B": "_n10",
+            "Y": "_n11"
+          },
+          "hier": "fa0.ha1"
+        },
+        {
+          "name": "fa0.ha1.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n11",
+            "Y": "_n12"
+          },
+          "hier": "fa0.ha1"
+        },
+        {
+          "name": "fa0.ha1.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n12",
+            "B": "_n10",
+            "Y": "_n13"
+          },
+          "hier": "fa0.ha1"
+        },
+        {
+          "name": "fa0.ha2.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n13",
+            "Y": "_n14"
+          },
+          "hier": "fa0.ha2"
+        },
+        {
+          "name": "fa0.ha2.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n13",
+            "B": "cin",
+            "Y": "_n15"
+          },
+          "hier": "fa0.ha2"
+        },
+        {
+          "name": "fa0.ha2.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "cin",
+            "B": "_n15",
+            "Y": "_n16"
+          },
+          "hier": "fa0.ha2"
+        },
+        {
+          "name": "fa0.ha2.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n14",
+            "B": "_n16",
+            "Y": "_n17"
+          },
+          "hier": "fa0.ha2"
+        },
+        {
+          "name": "fa0.g_nc",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n10",
+            "B": "_n17",
+            "Y": "_n18"
+          },
+          "hier": "fa0"
+        },
+        {
+          "name": "fa0.g_cout",
+          "cell": "INV",
+          "pins": {
+            "A": "_n18",
+            "Y": "_n19"
+          },
+          "hier": "fa0"
+        },
+        {
+          "name": "fa1.ha2.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n6",
+            "B": "_n19",
+            "Y": "_n20"
+          },
+          "hier": "fa1.ha2"
+        },
+        {
+          "name": "fa1.ha2.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n6",
+            "Y": "_n21"
+          },
+          "hier": "fa1.ha2"
+        },
+        {
+          "name": "fa1.ha2.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n19",
+            "B": "_n20",
+            "Y": "_n22"
+          },
+          "hier": "fa1.ha2"
+        },
+        {
+          "name": "fa1.ha2.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n21",
+            "B": "_n22",
+            "Y": "_n23"
+          },
+          "hier": "fa1.ha2"
+        },
+        {
+          "name": "fa1.ha2.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n20",
+            "B": "_n23",
+            "Y": "_n24"
+          },
+          "hier": "fa1.ha2"
+        },
+        {
+          "name": "fa1.ha2.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n24",
+            "Y": "_n25"
+          },
+          "hier": "fa1.ha2"
+        },
+        {
+          "name": "fa1.ha2.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n25",
+            "B": "_n23",
+            "Y": "sum[1]"
+          },
+          "hier": "fa1.ha2"
+        },
+        {
+          "name": "fa0.ha2.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n15",
+            "B": "_n17",
+            "Y": "_n27"
+          },
+          "hier": "fa0.ha2"
+        },
+        {
+          "name": "fa0.ha2.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n27",
+            "Y": "_n28"
+          },
+          "hier": "fa0.ha2"
+        },
+        {
+          "name": "fa0.ha2.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n28",
+            "B": "_n17",
+            "Y": "sum[0]"
+          },
+          "hier": "fa0.ha2"
+        },
+        {
+          "name": "fa1.g_nc",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n3",
+            "B": "_n23",
+            "Y": "_n30"
+          },
+          "hier": "fa1"
+        },
+        {
+          "name": "fa1.g_cout",
+          "cell": "INV",
+          "pins": {
+            "A": "_n30",
+            "Y": "cout"
+          },
+          "hier": "fa1"
+        }
+      ]
+    },
+    "cells": {
+      "INV": 10,
+      "NANY": 22
+    }
+  },
+  "compare2.tv": {
+    "netlist": {
+      "top": "compare2",
+      "ports": [
+        {
+          "name": "a[1]",
+          "dir": "input"
+        },
+        {
+          "name": "a[0]",
+          "dir": "input"
+        },
+        {
+          "name": "b[1]",
+          "dir": "input"
+        },
+        {
+          "name": "b[0]",
+          "dir": "input"
+        },
+        {
+          "name": "cmp",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "g0",
+          "cell": "INV",
+          "pins": {
+            "A": "b[1]",
+            "Y": "_n0"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g1",
+          "cell": "NANY",
+          "pins": {
+            "A": "a[1]",
+            "B": "_n0",
+            "Y": "_n1"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g2",
+          "cell": "INV",
+          "pins": {
+            "A": "_n1",
+            "Y": "_n2"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g3",
+          "cell": "INV",
+          "pins": {
+            "A": "b[0]",
+            "Y": "_n3"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g4",
+          "cell": "NANY",
+          "pins": {
+            "A": "a[0]",
+            "B": "_n3",
+            "Y": "_n4"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g5",
+          "cell": "INV",
+          "pins": {
+            "A": "_n4",
+            "Y": "_n5"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g6",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n2",
+            "B": "_n5",
+            "Y": "_n6"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g7",
+          "cell": "INV",
+          "pins": {
+            "A": "_n6",
+            "Y": "_n7"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g8",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n2",
+            "B": "_n7",
+            "Y": "_n8"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g9",
+          "cell": "INV",
+          "pins": {
+            "A": "_n8",
+            "Y": "cmp"
+          },
+          "hier": ""
+        }
+      ]
+    },
+    "cells": {
+      "INV": 6,
+      "NANY": 4
+    }
+  },
+  "full_add.tv": {
+    "netlist": {
+      "top": "full_add",
+      "ports": [
+        {
+          "name": "a",
+          "dir": "input"
+        },
+        {
+          "name": "b",
+          "dir": "input"
+        },
+        {
+          "name": "cin",
+          "dir": "input"
+        },
+        {
+          "name": "sum",
+          "dir": "output"
+        },
+        {
+          "name": "cout",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "ha1.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "_n0"
+          },
+          "hier": "ha1"
+        },
+        {
+          "name": "ha1.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "a",
+            "Y": "_n1"
+          },
+          "hier": "ha1"
+        },
+        {
+          "name": "ha1.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "b",
+            "B": "_n0",
+            "Y": "_n2"
+          },
+          "hier": "ha1"
+        },
+        {
+          "name": "ha1.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n1",
+            "B": "_n2",
+            "Y": "_n3"
+          },
+          "hier": "ha1"
+        },
+        {
+          "name": "ha1.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n0",
+            "B": "_n3",
+            "Y": "_n4"
+          },
+          "hier": "ha1"
+        },
+        {
+          "name": "ha1.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n4",
+            "Y": "_n5"
+          },
+          "hier": "ha1"
+        },
+        {
+          "name": "ha1.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n5",
+            "B": "_n3",
+            "Y": "_n6"
+          },
+          "hier": "ha1"
+        },
+        {
+          "name": "ha2.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n6",
+            "B": "cin",
+            "Y": "_n7"
+          },
+          "hier": "ha2"
+        },
+        {
+          "name": "ha2.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n6",
+            "Y": "_n8"
+          },
+          "hier": "ha2"
+        },
+        {
+          "name": "ha2.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "cin",
+            "B": "_n7",
+            "Y": "_n9"
+          },
+          "hier": "ha2"
+        },
+        {
+          "name": "ha2.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n8",
+            "B": "_n9",
+            "Y": "_n10"
+          },
+          "hier": "ha2"
+        },
+        {
+          "name": "ha2.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n7",
+            "B": "_n10",
+            "Y": "_n11"
+          },
+          "hier": "ha2"
+        },
+        {
+          "name": "ha2.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n11",
+            "Y": "_n12"
+          },
+          "hier": "ha2"
+        },
+        {
+          "name": "ha2.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n12",
+            "B": "_n10",
+            "Y": "sum"
+          },
+          "hier": "ha2"
+        },
+        {
+          "name": "g_nc",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n3",
+            "B": "_n10",
+            "Y": "_n14"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_cout",
+          "cell": "INV",
+          "pins": {
+            "A": "_n14",
+            "Y": "cout"
+          },
+          "hier": ""
+        }
+      ]
+    },
+    "cells": {
+      "INV": 5,
+      "NANY": 11
+    }
+  },
+  "gates.tv": {
+    "netlist": {
+      "top": "gates",
+      "ports": [
+        {
+          "name": "a",
+          "dir": "input"
+        },
+        {
+          "name": "b",
+          "dir": "input"
+        },
+        {
+          "name": "inva",
+          "dir": "output"
+        },
+        {
+          "name": "nandab",
+          "dir": "output"
+        },
+        {
+          "name": "norab",
+          "dir": "output"
+        },
+        {
+          "name": "nanyab",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "g0",
+          "cell": "INV",
+          "pins": {
+            "A": "a",
+            "Y": "inva"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g1",
+          "cell": "NAND",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "nandab"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g2",
+          "cell": "NOR",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "norab"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g3",
+          "cell": "NANY",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "nanyab"
+          },
+          "hier": ""
+        }
+      ]
+    },
+    "cells": {
+      "INV": 1,
+      "NAND": 1,
+      "NANY": 1,
+      "NOR": 1
+    }
+  },
+  "half_add.tv": {
+    "netlist": {
+      "top": "half_add",
+      "ports": [
+        {
+          "name": "a",
+          "dir": "input"
+        },
+        {
+          "name": "b",
+          "dir": "input"
+        },
+        {
+          "name": "sum",
+          "dir": "output"
+        },
+        {
+          "name": "carry",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "_n0"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "a",
+            "Y": "_n1"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "b",
+            "B": "_n0",
+            "Y": "_n2"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n1",
+            "B": "_n2",
+            "Y": "carry"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n0",
+            "B": "carry",
+            "Y": "_n4"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n4",
+            "Y": "_n5"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n5",
+            "B": "carry",
+            "Y": "sum"
+          },
+          "hier": ""
+        }
+      ]
+    },
+    "cells": {
+      "INV": 2,
+      "NANY": 5
+    }
+  },
+  "mac1.tv": {
+    "netlist": {
+      "top": "mac1",
+      "ports": [
+        {
+          "name": "x",
+          "dir": "input"
+        },
+        {
+          "name": "a",
+          "dir": "input"
+        },
+        {
+          "name": "b",
+          "dir": "input"
+        },
+        {
+          "name": "cin",
+          "dir": "input"
+        },
+        {
+          "name": "sum",
+          "dir": "output"
+        },
+        {
+          "name": "cout",
+          "dir": "output"
+        },
+        {
+          "name": "and_out",
+          "dir": "output"
+        },
+        {
+          "name": "or_out",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "mul_t1",
+          "cell": "NAND",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "_n0"
+          },
+          "hier": ""
+        },
+        {
+          "name": "mul_t2",
+          "cell": "NOR",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "_n1"
+          },
+          "hier": ""
+        },
+        {
+          "name": "mul_t3",
+          "cell": "INV",
+          "pins": {
+            "A": "_n1",
+            "Y": "_n2"
+          },
+          "hier": ""
+        },
+        {
+          "name": "mul_p",
+          "cell": "NAND",
+          "pins": {
+            "A": "_n0",
+            "B": "_n2",
+            "Y": "_n3"
+          },
+          "hier": ""
+        },
+        {
+          "name": "fa.ha1.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "x",
+            "B": "_n3",
+            "Y": "_n4"
+          },
+          "hier": "fa.ha1"
+        },
+        {
+          "name": "fa.ha1.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "x",
+            "Y": "_n5"
+          },
+          "hier": "fa.ha1"
+        },
+        {
+          "name": "fa.ha1.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n3",
+            "B": "_n4",
+            "Y": "_n6"
+          },
+          "hier": "fa.ha1"
+        },
+        {
+          "name": "fa.ha1.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n5",
+            "B": "_n6",
+            "Y": "_n7"
+          },
+          "hier": "fa.ha1"
+        },
+        {
+          "name": "fa.ha1.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n4",
+            "B": "_n7",
+            "Y": "_n8"
+          },
+          "hier": "fa.ha1"
+        },
+        {
+          "name": "fa.ha1.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n8",
+            "Y": "_n9"
+          },
+          "hier": "fa.ha1"
+        },
+        {
+          "name": "fa.ha1.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n9",
+            "B": "_n7",
+            "Y": "_n10"
+          },
+          "hier": "fa.ha1"
+        },
+        {
+          "name": "fa.ha2.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n10",
+            "B": "cin",
+            "Y": "_n11"
+          },
+          "hier": "fa.ha2"
+        },
+        {
+          "name": "fa.ha2.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n10",
+            "Y": "_n12"
+          },
+          "hier": "fa.ha2"
+        },
+        {
+          "name": "fa.ha2.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "cin",
+            "B": "_n11",
+            "Y": "_n13"
+          },
+          "hier": "fa.ha2"
+        },
+        {
+          "name": "fa.ha2.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n12",
+            "B": "_n13",
+            "Y": "_n14"
+          },
+          "hier": "fa.ha2"
+        },
+        {
+          "name": "fa.ha2.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n11",
+            "B": "_n14",
+            "Y": "_n15"
+          },
+          "hier": "fa.ha2"
+        },
+        {
+          "name": "fa.ha2.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n15",
+            "Y": "_n16"
+          },
+          "hier": "fa.ha2"
+        },
+        {
+          "name": "fa.ha2.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n16",
+            "B": "_n14",
+            "Y": "sum"
+          },
+          "hier": "fa.ha2"
+        },
+        {
+          "name": "fa.g_nc",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n7",
+            "B": "_n14",
+            "Y": "_n18"
+          },
+          "hier": "fa"
+        },
+        {
+          "name": "fa.g_cout",
+          "cell": "INV",
+          "pins": {
+            "A": "_n18",
+            "Y": "cout"
+          },
+          "hier": "fa"
+        },
+        {
+          "name": "and_inv",
+          "cell": "INV",
+          "pins": {
+            "A": "_n0",
+            "Y": "and_out"
+          },
+          "hier": ""
+        },
+        {
+          "name": "or_inv1",
+          "cell": "INV",
+          "pins": {
+            "A": "_n2",
+            "Y": "_n21"
+          },
+          "hier": ""
+        },
+        {
+          "name": "or_inv2",
+          "cell": "INV",
+          "pins": {
+            "A": "_n21",
+            "Y": "or_out"
+          },
+          "hier": ""
+        }
+      ]
+    },
+    "cells": {
+      "INV": 9,
+      "NAND": 2,
+      "NANY": 11,
+      "NOR": 1
+    }
+  },
+  "minmax.tv": {
+    "netlist": {
+      "top": "minmax",
+      "ports": [
+        {
+          "name": "a",
+          "dir": "input"
+        },
+        {
+          "name": "b",
+          "dir": "input"
+        },
+        {
+          "name": "lo",
+          "dir": "output"
+        },
+        {
+          "name": "hi",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "g0",
+          "cell": "NAND",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "_n0"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g1",
+          "cell": "INV",
+          "pins": {
+            "A": "_n0",
+            "Y": "lo"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g2",
+          "cell": "NOR",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "_n2"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g3",
+          "cell": "INV",
+          "pins": {
+            "A": "_n2",
+            "Y": "hi"
+          },
+          "hier": ""
+        }
+      ]
+    },
+    "cells": {
+      "INV": 2,
+      "NAND": 1,
+      "NOR": 1
+    }
+  },
+  "mul1.tv": {
+    "netlist": {
+      "top": "mul1",
+      "ports": [
+        {
+          "name": "a",
+          "dir": "input"
+        },
+        {
+          "name": "b",
+          "dir": "input"
+        },
+        {
+          "name": "p",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "g_t1",
+          "cell": "NAND",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "_n0"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_t2",
+          "cell": "NOR",
+          "pins": {
+            "A": "a",
+            "B": "b",
+            "Y": "_n1"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_t3",
+          "cell": "INV",
+          "pins": {
+            "A": "_n1",
+            "Y": "_n2"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g_p",
+          "cell": "NAND",
+          "pins": {
+            "A": "_n0",
+            "B": "_n2",
+            "Y": "p"
+          },
+          "hier": ""
+        }
+      ]
+    },
+    "cells": {
+      "INV": 1,
+      "NAND": 2,
+      "NOR": 1
+    }
+  },
+  "mul2.tv": {
+    "netlist": {
+      "top": "mul2",
+      "ports": [
+        {
+          "name": "a[1]",
+          "dir": "input"
+        },
+        {
+          "name": "a[0]",
+          "dir": "input"
+        },
+        {
+          "name": "b[1]",
+          "dir": "input"
+        },
+        {
+          "name": "b[0]",
+          "dir": "input"
+        },
+        {
+          "name": "p[3]",
+          "dir": "output"
+        },
+        {
+          "name": "p[2]",
+          "dir": "output"
+        },
+        {
+          "name": "p[1]",
+          "dir": "output"
+        },
+        {
+          "name": "p[0]",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "u11.g_t1",
+          "cell": "NAND",
+          "pins": {
+            "A": "a[1]",
+            "B": "b[1]",
+            "Y": "_n0"
+          },
+          "hier": "u11"
+        },
+        {
+          "name": "u11.g_t2",
+          "cell": "NOR",
+          "pins": {
+            "A": "a[1]",
+            "B": "b[1]",
+            "Y": "_n1"
+          },
+          "hier": "u11"
+        },
+        {
+          "name": "u11.g_t3",
+          "cell": "INV",
+          "pins": {
+            "A": "_n1",
+            "Y": "_n2"
+          },
+          "hier": "u11"
+        },
+        {
+          "name": "u11.g_p",
+          "cell": "NAND",
+          "pins": {
+            "A": "_n0",
+            "B": "_n2",
+            "Y": "_n3"
+          },
+          "hier": "u11"
+        },
+        {
+          "name": "upper.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n3",
+            "Y": "_n4"
+          },
+          "hier": "upper"
+        },
+        {
+          "name": "u01.g_t1",
+          "cell": "NAND",
+          "pins": {
+            "A": "a[0]",
+            "B": "b[1]",
+            "Y": "_n5"
+          },
+          "hier": "u01"
+        },
+        {
+          "name": "u01.g_t2",
+          "cell": "NOR",
+          "pins": {
+            "A": "a[0]",
+            "B": "b[1]",
+            "Y": "_n6"
+          },
+          "hier": "u01"
+        },
+        {
+          "name": "u01.g_t3",
+          "cell": "INV",
+          "pins": {
+            "A": "_n6",
+            "Y": "_n7"
+          },
+          "hier": "u01"
+        },
+        {
+          "name": "u01.g_p",
+          "cell": "NAND",
+          "pins": {
+            "A": "_n5",
+            "B": "_n7",
+            "Y": "_n8"
+          },
+          "hier": "u01"
+        },
+        {
+          "name": "middle.g_na",
+          "cell": "INV",
+          "pins": {
+            "A": "_n8",
+            "Y": "_n9"
+          },
+          "hier": "middle"
+        },
+        {
+          "name": "u10.g_t1",
+          "cell": "NAND",
+          "pins": {
+            "A": "a[1]",
+            "B": "b[0]",
+            "Y": "_n10"
+          },
+          "hier": "u10"
+        },
+        {
+          "name": "u10.g_t2",
+          "cell": "NOR",
+          "pins": {
+            "A": "a[1]",
+            "B": "b[0]",
+            "Y": "_n11"
+          },
+          "hier": "u10"
+        },
+        {
+          "name": "u10.g_t3",
+          "cell": "INV",
+          "pins": {
+            "A": "_n11",
+            "Y": "_n12"
+          },
+          "hier": "u10"
+        },
+        {
+          "name": "u10.g_p",
+          "cell": "NAND",
+          "pins": {
+            "A": "_n10",
+            "B": "_n12",
+            "Y": "_n13"
+          },
+          "hier": "u10"
+        },
+        {
+          "name": "middle.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n8",
+            "B": "_n13",
+            "Y": "_n14"
+          },
+          "hier": "middle"
+        },
+        {
+          "name": "middle.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n13",
+            "B": "_n14",
+            "Y": "_n15"
+          },
+          "hier": "middle"
+        },
+        {
+          "name": "middle.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n9",
+            "B": "_n15",
+            "Y": "_n16"
+          },
+          "hier": "middle"
+        },
+        {
+          "name": "upper.g_t",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n3",
+            "B": "_n16",
+            "Y": "_n17"
+          },
+          "hier": "upper"
+        },
+        {
+          "name": "upper.g_u",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n16",
+            "B": "_n17",
+            "Y": "_n18"
+          },
+          "hier": "upper"
+        },
+        {
+          "name": "upper.g_c",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n4",
+            "B": "_n18",
+            "Y": "p[3]"
+          },
+          "hier": "upper"
+        },
+        {
+          "name": "upper.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n17",
+            "B": "p[3]",
+            "Y": "_n20"
+          },
+          "hier": "upper"
+        },
+        {
+          "name": "upper.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n20",
+            "Y": "_n21"
+          },
+          "hier": "upper"
+        },
+        {
+          "name": "upper.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n21",
+            "B": "p[3]",
+            "Y": "p[2]"
+          },
+          "hier": "upper"
+        },
+        {
+          "name": "middle.g_d",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n14",
+            "B": "_n16",
+            "Y": "_n23"
+          },
+          "hier": "middle"
+        },
+        {
+          "name": "middle.g_nd",
+          "cell": "INV",
+          "pins": {
+            "A": "_n23",
+            "Y": "_n24"
+          },
+          "hier": "middle"
+        },
+        {
+          "name": "middle.g_s",
+          "cell": "NANY",
+          "pins": {
+            "A": "_n24",
+            "B": "_n16",
+            "Y": "p[1]"
+          },
+          "hier": "middle"
+        },
+        {
+          "name": "u00.g_t1",
+          "cell": "NAND",
+          "pins": {
+            "A": "a[0]",
+            "B": "b[0]",
+            "Y": "_n26"
+          },
+          "hier": "u00"
+        },
+        {
+          "name": "u00.g_t2",
+          "cell": "NOR",
+          "pins": {
+            "A": "a[0]",
+            "B": "b[0]",
+            "Y": "_n27"
+          },
+          "hier": "u00"
+        },
+        {
+          "name": "u00.g_t3",
+          "cell": "INV",
+          "pins": {
+            "A": "_n27",
+            "Y": "_n28"
+          },
+          "hier": "u00"
+        },
+        {
+          "name": "u00.g_p",
+          "cell": "NAND",
+          "pins": {
+            "A": "_n26",
+            "B": "_n28",
+            "Y": "p[0]"
+          },
+          "hier": "u00"
+        }
+      ]
+    },
+    "cells": {
+      "INV": 8,
+      "NAND": 8,
+      "NANY": 10,
+      "NOR": 4
+    }
+  },
+  "sign.tv": {
+    "netlist": {
+      "top": "sign",
+      "ports": [
+        {
+          "name": "a",
+          "dir": "input"
+        },
+        {
+          "name": "s",
+          "dir": "output"
+        },
+        {
+          "name": "opposite",
+          "dir": "output"
+        }
+      ],
+      "instances": [
+        {
+          "name": "g0",
+          "cell": "BUF",
+          "pins": {
+            "A": "a",
+            "Y": "s"
+          },
+          "hier": ""
+        },
+        {
+          "name": "g1",
+          "cell": "INV",
+          "pins": {
+            "A": "a",
+            "Y": "opposite"
+          },
+          "hier": ""
+        }
+      ]
+    },
+    "cells": {
+      "BUF": 1,
+      "INV": 1
+    }
+  }
+}
