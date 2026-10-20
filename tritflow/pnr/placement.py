@@ -5,7 +5,7 @@ import math
 import random
 from collections import defaultdict
 
-from tritflow import RAILS
+from tritflow import RAILS, progress
 from .library import Library
 
 
@@ -188,6 +188,8 @@ def place(netlist, library, rows=None, seed=0, steps=600, history_every=25, *,
             row_lists, orientations = old_rows, old_orient
         if step % history_every == 0:
             history.append({"step": step, "hpwl": hpwl, "placements": current})
+        if progress.active() and (step % 10 == 0 or step == steps):
+            progress.report(kind="place", step=step, steps=steps, hpwl=hpwl, placements=current)
     row_lists, orientations = best
     placements = unpack()
     history.append({"step": steps+1, "hpwl": cost(placements)[1], "placements": placements})
