@@ -100,14 +100,50 @@ left-to-right/MSB order. For arithmetic, `a[i]` has weight 3ⁱ. Parameterized
 adders require `N >= 1`. The tests exhaust all inputs for N=1 through N=5;
 N=6 additionally uses 100,000 independent arithmetic reference vectors.
 
-Supported signal operators are `~a` (−a), `a & b` (min), `a | b` (max), and
-`nany(a,b)` (negative saturated sum), applied elementwise to equally sized
-vectors. `4'tT01T` is a four-trit constant (T=−1). Assignments require equal
-widths, with no implicit extension or truncation. Gate primitives are scalar,
-with output first. Parameters, indices and generate loops support integer
-`+ - * / %` and comparisons; division truncates toward zero. Trit arithmetic,
-`always`, `reg`, sequential logic and `x/z` are rejected with file:line:column
-diagnostics. Global net names `VDD`, `VMID`, and `VSS` are reserved.
+Signal operators include `~a` and `-a` (negate each trit), `a & b` (min),
+`a | b` (max), `nany(a,b)` (negative saturated sum), integer `+ - *`, and
+`== != < <= > >=` (one trit, +1 true / -1 false). `!`, `&&`, `||` operate on
+single trits with Kleene logic. `4'tT01T` is a four-trit constant (T=−1);
+decimal integer constants and parameters are also accepted in signal expressions.
+
+Assignment targets provide the arithmetic context width, including carry/sum
+concatenations. Operators evaluate at max(context, operand widths); operands
+extend with zero trits and assignments discard high trits that do not fit.
+Concatenation members and comparison operands determine their own widths.
+A plain reference assignment also extends/truncates. Gate primitive and module
+connections retain strict widths; primitives have scalar inputs and output first.
+Verilog operator precedence applies; `*` binds before `+`, comparison before
+bitwise logic, and `&&` before `||`.
+
+`c ? x : y` selects x at +1 and y at −1. At c=0, each result trit is the
+agreed input value where x and y match, and zero otherwise. `always @(*)` /
+`always @*` accept blocking assignments, begin/end, if/else and exact case
+statements with multiple labels and default. Procedural if takes its then arm
+only at +1; at 0 it takes else. `reg trit` is a combinational wire synonym.
+Every written bit must be assigned on every path, with reads following a
+blocking assignment, so incomplete blocks cannot infer latches.
+
+Parameters, indices and generate loops support integer `+ - * / %` and
+comparisons; integer division truncates toward zero. Signal `/ %`, sequential
+logic, nonblocking assignments and `x/z` produce file:line:column diagnostics.
+Global net names `VDD`, `VMID`, and `VSS` are reserved.
+
+The RTL examples demonstrate the new constructs:
+
+| File / top | Meaning |
+|---|---|
+| `full_add_rtl.tv` | `assign {cout, sum} = a + b + cin;` maps to 11 NANY + 5 INV |
+| `adder4_rtl.tv` | Four-trit addition with an explicit carry, 55 cells |
+| `case_table.tv` | Multiplication truth table with multiple case labels |
+| `comparator_rtl.tv` | Signed two-trit less/equal/greater predicates |
+| `mux_rtl.tv` | Conditional selection with Kleene consensus |
+| `alu_rtl.tv` | Add/subtract/negate/min/max; two-trit opcode and result |
+
+Five ALU operations need more than one opcode trit, so the ALU uses two.
+`python3 -m examples.rtl_check` synthesizes all six examples and runs real-PDK
+P&R, drawing DRC and strict device LVS, writing `build/hdl_verilog/summary.json`.
+The supported language, mapping decisions and qualification results are in
+[the HDL_VERILOG status](../docs/status/HDL_VERILOG.md).
 
 Synthesis folds constants, removes double negation and dead logic, shares
 expressions and applies De Morgan transformations when they remove single-use

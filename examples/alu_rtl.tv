@@ -1,0 +1,14 @@
+// Five operations need a two-trit opcode: -2 add, -1 subtract, 0 negate,
+// +1 min, +2 max. Remaining codes return zero. Result arithmetic is two trits.
+module alu_rtl(input trit a, b, input trit [1:0] opcode, output reg trit [1:0] y);
+  always @* begin
+    case (opcode)
+      2'tT1: y = a + b;
+      2't0T: y = a - b;
+      2't00: y = -a;
+      2't01: y = a & b;
+      2't1T: y = a | b;
+      default: y = 2't00;
+    endcase
+  end
+endmodule
