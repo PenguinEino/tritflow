@@ -41,18 +41,8 @@ if IN_COLAB:
         git("-C", str(ROOT), "fetch", "--progress", "--depth", "1", "origin", SOURCE_REF,
             progress=f"コミット {SOURCE_REF[:7]} を取得")
         git("-C", str(ROOT), "switch", "--detach", SOURCE_REF, progress="ファイルを展開")
-    if git("rev-parse", "HEAD") != SOURCE_REF:
-        # This runtime holds another version (the notebook was updated, or reloaded): switch to the pinned one.
-        if git("status", "--porcelain", "--untracked-files=no"):
-            raise RuntimeError("/content/tritflow のファイルが書き換えられています。"
-                               "「ランタイム → ランタイムを接続解除して削除」のあと、もう一度実行してください。")
-        git("-C", str(ROOT), "fetch", "--progress", "--depth", "1", "origin", SOURCE_REF,
-            progress=f"コミット {SOURCE_REF[:7]} に更新")
-        git("-C", str(ROOT), "switch", "--detach", SOURCE_REF, progress="ファイルを展開")
-        # Code imported from the previous version must not mix with the new one.
-        for name, module in list(sys.modules.items()):
-            if str(getattr(module, "__file__", "") or "").startswith(str(ROOT)):
-                del sys.modules[name]
+    if git("rev-parse", "HEAD") != SOURCE_REF or git("status", "--porcelain", "--untracked-files=no"):
+        raise RuntimeError("/content/tritflow differs from the pinned commit; connect a fresh runtime")
 else:
     candidates = [Path(os.environ.get("TRITFLOW_ROOT", ".")), Path.cwd(), Path.cwd().parent]
     ROOT = next((p.resolve() for p in candidates if (p/"tritflow").is_dir() and (p/"notebook").is_dir()), None)
