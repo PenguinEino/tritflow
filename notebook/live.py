@@ -397,7 +397,7 @@ def _box(first, why):
         f'padding:.6em 1em;margin:.3em 0">'
         f'<div style="color:{RED};font-weight:700">✗ このセルはまだ実行できません</div>'
         f'<div style="margin-top:.3em">先に <b>「{escape(first)}」</b> を実行してください。</div>'
-        + (f'<div style="color:{DIM}">理由：{escape(why)}</div>' if why else "") + '</div>')
+        + (f'<div style="color:{DIM}">{escape(why)}</div>' if why else "") + '</div>')
 
 
 def install_error_view():
