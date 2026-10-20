@@ -39,6 +39,11 @@ need("net", why="このセルは、合成した回路 net を配置配線しま�
 with step("配置配線", view=LayoutView()) as s:
     lay = net.place_and_route(output_dir=BUILD/"first", seed=0)
     s.done(f"{lay.stats['instance_count']}セル · {lay.stats['die_size_um'][0]:.0f} × {lay.stats['die_size_um'][1]:.0f} µm")'''),
+("code", '''# 1-3b 2トリット加算器でも配置配線する（大きめの例）
+with step("配置配線（2トリット加算器）", view=LayoutView()) as s:
+    adder = flow.load(ROOT/"examples/adder2.tv", "adder2").synthesize()
+    adder_lay = adder.place_and_route(output_dir=BUILD/"adder2", seed=0)
+    s.done(f"{adder_lay.stats['instance_count']}セル · {adder_lay.stats['die_size_um'][0]:.0f} × {adder_lay.stats['die_size_um'][1]:.0f} µm")'''),
 ("code", '''# 1-4 DRCとLVS
 need("lay", why="DRCとLVSは、1-3で作ったGDSを調べます。")
 with step("DRC") as s:

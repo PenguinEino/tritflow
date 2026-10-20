@@ -276,9 +276,16 @@ class Maze:
         self.paths[net] = paths
 
     def segments(self, net):
-        """Routed segments of one net as (layer, x0, y0, x1, y1) in µm, for live views."""
-        return [("M1" if a[0] == 0 else "M2", self.xs[a[1]], self.ys[a[2]], self.xs[b[1]], self.ys[b[2]])
-                for path in self.paths[net] for a, b in zip(path, path[1:]) if a[0] == b[0]]
+        """One routed net for live views: wires as (layer, x0, y0, x1, y1) and V1 cuts as (x, y), in µm."""
+        wires, vias = [], {(t["x"], t["y"]) for t in self.terminals[net] if "inst" in t}
+        for path in self.paths[net]:
+            for a, b in zip(path, path[1:]):
+                if a[0] == b[0]:
+                    wires.append(("M1" if a[0] == 0 else "M2", self.xs[a[1]], self.ys[a[2]],
+                                  self.xs[b[1]], self.ys[b[2]]))
+                else:
+                    vias.add((self.xs[a[1]], self.ys[a[2]]))
+        return {"wires": wires, "vias": sorted(vias)}
 
     def export(self):
         wires, vias = [], set()
