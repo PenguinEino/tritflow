@@ -119,3 +119,32 @@ The first round is committed (b4ca669) and merged. Continue in the same worktree
 3. Update tests, `examples/README.md`, `examples/rtl_check.py` and `docs/status/HDL_VERILOG.md`
    (append a Round 2 section). Keep every rule of the first round (no notebook edits, no other
    streams' paths, legacy netlists unchanged, no git commits).
+
+## Round 3 (2026-10-20): cheaper selection logic, and an ALU that fits a shuttle
+
+Round 2 is committed (merged as 5b10012). The nine-operation ALU works but is 423 cells,
+4440 × 9366 µm and ~1.8 W static: too large for the 2.5 mm OpenSUSI MPW frame and too slow for a free
+Colab run (~8 min locally). Most cells are the `case` selection, not the arithmetic: dropping the
+multiplier only saves 57 cells; `r = op ? (a+b) : (a-b)` costs 116 cells while `r = a + op*b` costs 31.
+
+1. **Cheaper multiplexing.** When every selector is crisp (always ±1, never 0) — case-label equality
+   detectors, comparisons, `if` conditions that are comparisons — select with Kleene AND–OR instead of
+   the general three-way multiplexer: r = MAX_i MIN(s_i, x_i) with exactly one s_i = +1 and the rest
+   −1 (MIN = NAND+INV, MAX = NOR+INV, share decoders across output trits). Keep the general MUX3 and the
+   Kleene-consensus `?:` wherever a selector can be 0. Prove crispness from the IR (do not assume), and
+   check every result exhaustively as before. Look for other large costs (fanout BUF insertion,
+   duplicated decoders, constant propagation through selects) and fix what is real. Report before/after
+   cell counts for every RTL example and the old nine-op ALU. Never claim minimality.
+2. **The showcase ALU, rewritten for a shuttle.** Replace `examples/alu.tv` with a smaller ALU:
+   two-trit `a`, `b`; a reduced instruction set chosen by you (the author asked for "two trits, fewer
+   instructions"), in plain student Verilog (`always @*`, `case`). It must include add and subtract;
+   prefer operations that show ternary character (for example shift ×3 / ÷3-rounded, negate, compare,
+   and `a + op*b`-style add/subtract selected by one trit). Constraints: the routed core must fit inside
+   the TR-1um MPW frame with room for pads — measure it with `PnrResult.to_chip()` and `signoff()` as
+   in `tritflow/pnr/chip.py` (the integrator's local MPW template is `~/TR-1um_MPW_Sanken`); local
+   synthesis + P&R + DRC + LVS + post-layout SPICE together within about 2.5 minutes. Give a table of the
+   candidates you tried (operations, cells, die, times) and justify the choice in the status note.
+   Keep the nine-op version as `examples/alu9.tv` (documented as the large variant).
+3. Same rules as before: legacy (pre-Round-1) netlists unchanged; independent references; exhaustive
+   checks; tests; `examples/rtl_check.py` and `docs/status/HDL_VERILOG.md` (append Round 3); no notebook
+   edits; no git commits.
