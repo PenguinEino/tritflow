@@ -4,11 +4,7 @@
 
 TritFlowのINVは、VDDとVSSの間にPMOS、抵抗、抵抗、NMOSを直列につないだ回路で、出力Yは2本の抵抗の間からとる。
 
-| A | Y |
-|---|---|
-| −1（−5 V） | +1（+5 V） |
-| 0（0 V） | 0（0 V） |
-| +1（+5 V） | −1（−5 V） |
+<table style="border-collapse:collapse;font-size:16px;margin:8px 0"><tr><th style="border:1px solid #c9ccd1;padding:6px 14px;text-align:center;background:#f3f4f6">A</th><th style="border:1px solid #c9ccd1;padding:6px 14px;text-align:center;background:#f3f4f6">Y</th></tr><tr><td style="border:1px solid #c9ccd1;padding:6px 14px;text-align:center">−1（−5 V）</td><td style="border:1px solid #c9ccd1;padding:6px 14px;text-align:center">+1（+5 V）</td></tr><tr><td style="border:1px solid #c9ccd1;padding:6px 14px;text-align:center">0（0 V）</td><td style="border:1px solid #c9ccd1;padding:6px 14px;text-align:center">0（0 V）</td></tr><tr><td style="border:1px solid #c9ccd1;padding:6px 14px;text-align:center">+1（+5 V）</td><td style="border:1px solid #c9ccd1;padding:6px 14px;text-align:center">−1（−5 V）</td></tr></table>
 
 入力が±5 Vのときは片方のMOSだけがオンになり、Yはそちら側のレールに引かれる。入力が0 Vでは両方のMOSがオンになる。オンのMOSをオン抵抗 $r_{on} \propto (W/L)^{-1}$ で近似し、上側を $R_u = r_{on,P} + R_{RP}$、下側を $R_d = r_{on,N} + R_{RN}$ とすると、
 
