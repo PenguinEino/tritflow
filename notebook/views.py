@@ -9,9 +9,8 @@ from itertools import product
 
 from IPython.display import HTML, display
 
-from live import FONT, DIM, control_style
-
-TRIT_TEXT = {-1: "−1", 0: "0", 1: "+1"}
+from style import (ACCENT, BAND, INK, INK2, MUTED, TRIT_COLOR, TRIT_TEXT, control_style, figure_css,
+                   paper_axes, paper_layout, table_css)
 
 
 def stimulus(net, limit=27):
@@ -34,7 +33,53 @@ def _reading(post, chosen):
 
 _PICKS = 0
 HIGHLIGHT = {"type": "rect", "xref": "x", "yref": "paper", "y0": 0, "y1": 1, "layer": "below",
-             "fillcolor": "#e8782a", "opacity": .28, "line": {"width": 0}}
+             "fillcolor": ACCENT, "opacity": .14, "line": {"width": 0}}
+
+
+def scope_figure(post, *, title=None):
+    """Post-layout transient in the paper style: one lane per input and output with the ±0.5 V
+    bands and the checker's sample points, then the VDD current; a range slider under it."""
+    import numpy as np
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    from tritflow import PASS_BAND
+    from tritflow.sim.spice import signal_waveform
+
+    stimulus, waves = post["stimulus"], post["waveforms"]
+    lanes = [("v", p) for p in stimulus["inputs"]] + [("v", p) for p in stimulus["outputs"]] + [("i", "VDD")]
+    t = np.asarray(waves["time"])*1e6
+    rows = post["measurements"]["rows"]
+    figure = make_subplots(rows=len(lanes), cols=1, shared_xaxes=True, vertical_spacing=.035)
+    for row, (kind, name) in enumerate(lanes, 1):
+        if kind == "v":
+            for level in (-5, 0, 5):
+                figure.add_hrect(y0=level-PASS_BAND, y1=level+PASS_BAND, fillcolor=BAND, opacity=1, line_width=0,
+                                 layer="below", row=row, col=1, exclude_empty_subplots=False)
+            output = name in stimulus["outputs"]
+            figure.add_trace(go.Scatter(x=t, y=signal_waveform(waves, name), mode="lines", name=name, showlegend=False,
+                                        line={"color": TRIT_COLOR[-1] if output else INK2, "width": 1.4},
+                                        hovertemplate=f"{name} %{{y:.3f}} V<extra></extra>"), row=row, col=1)
+            if output:
+                figure.add_trace(go.Scatter(
+                    x=[r["check_s"]*1e6 for r in rows], y=[r["outputs"][name]["voltage_v"] for r in rows],
+                    mode="markers", showlegend=False, hoverinfo="skip",
+                    marker={"symbol": ["circle-open" if r["outputs"][name]["passed"] else "x" for r in rows],
+                            "size": 7, "color": [INK if r["outputs"][name]["passed"] else ACCENT for r in rows],
+                            "line": {"width": 1.3}}), row=row, col=1)
+            figure.update_yaxes(range=[-6.2, 6.2], tickvals=[-5, 0, 5], title_text=f"{name} (V)", row=row, col=1)
+        else:
+            figure.add_trace(go.Scatter(x=t, y=np.abs(np.asarray(waves["i(vdd)"]))*1e3, mode="lines", showlegend=False,
+                                        line={"color": MUTED, "width": 1.2},
+                                        hovertemplate="|I(VDD)| %{y:.3f} mA<extra></extra>"), row=row, col=1)
+            figure.update_yaxes(title_text="|I<sub>VDD</sub>| (mA)", row=row, col=1)
+    paper_axes(figure)
+    figure.update_xaxes(range=[0, len(rows)*stimulus["hold_s"]*1e6])
+    figure.update_xaxes(title_text="time (µs)", rangeslider={"visible": True, "thickness": .05, "bgcolor": "#f6f5f1"},
+                        row=len(lanes), col=1)
+    figure.update_layout(**paper_layout(height=150*len(lanes)+110, hovermode="x unified",
+                                        margin={"t": 40 if title else 15, "l": 70, "r": 15, "b": 40},
+                                        title={"text": title, "font": {"size": 15}, "x": 0} if title else None))
+    return figure
 
 
 def _truth_table(net, inputs, outputs, rows, chosen):
@@ -57,13 +102,11 @@ def _truth_table(net, inputs, outputs, rows, chosen):
     return f'<table class="tt"><tr>{head}</tr>{"".join(body)}</table>'
 
 
-def pick_input(net, post, *, title="ポストレイアウトシミュレーション"):
-    """The post-layout waveform (zoomable, simulator style) with input buttons. A button marks
-    its stretches on the waveform and shows the schematic with net values and the truth table
-    with that row marked. Schematic and table switch by CSS alone; the waveform marks need the
-    Plotly script, which Colab and Jupyter run."""
+def pick_input(net, post):
+    """Input buttons over the schematic (net values in colour) beside the truth table with the
+    chosen row marked, then the zoomable post-layout waveform with the chosen stretches shaded.
+    Schematic and table switch by CSS alone; the waveform shading needs Plotly's script."""
     import json
-    from tritflow.viz.waves import waveform_scope
     global _PICKS
     _PICKS += 1
     key = f"tfpick{_PICKS}"
@@ -75,12 +118,11 @@ def pick_input(net, post, *, title="ポストレイアウトシミュレーシ�
     start = choices.index((0,)*len(inputs)) if (0,)*len(inputs) in choices else 0
     table_rows = list(product((-1, 0, 1), repeat=len(inputs))) if len(inputs) <= 3 else choices
 
-    scope = waveform_scope(post, title=title)
+    scope = scope_figure(post)
     base = scope.to_plotly_json()["layout"].get("shapes", [])
     marks = [[{**HIGHLIGHT, "x0": i*hold, "x1": (i+1)*hold} for i, row in enumerate(rows)
               if tuple(row["input_trits"]) == chosen] for chosen in choices]
-    scope.update_layout(shapes=[*base, *marks[start]], paper_bgcolor="#0d1117", height=min(scope.layout.height, 560))
-    scope.update_xaxes(range=[0, len(rows)*hold])
+    scope.update_layout(shapes=[*base, *marks[start]])
     plot = scope.to_html(include_plotlyjs="cdn", full_html=False, div_id=f"{key}-scope",
                          config={"displaylogo": False, "scrollZoom": True})
 
@@ -94,23 +136,15 @@ def pick_input(net, post, *, title="ポストレイアウトシミュレーシ�
                       f'<div class="sch">{circuit._repr_svg_()}</div>'
                       f'{_truth_table(net, inputs, outputs, table_rows, chosen)}</div></div>')
         rules.append(f"#{key}-{index}:checked ~ .p{index}{{display:block}}")
-    style = (control_style(f".{key}") + f".{key}{{max-width:1180px}}"
-             f".{key} > div[class^=p]{{display:none}} .{key} .reading{{margin:.2em 0 .6em;font-size:14px}}"
+    style = (figure_css(f".{key}") + control_style(f".{key}") + table_css(f".{key}") + f".{key}{{max-width:1080px}}"
+             f".{key} > div[class^=p]{{display:none}} .{key} .reading{{margin:.1em 0 .4em}}"
              f".{key} .row{{display:flex;flex-wrap:wrap;gap:1.5em;align-items:center}}"
-             f".{key} .sch{{flex:3 1 520px;min-width:0}} .{key} .sch svg{{width:100%;height:auto;display:block}}"
-             f".{key} .tt{{flex:0 0 auto;border-collapse:collapse;font-size:15px}}"
-             f".{key} .tt td, .{key} .tt th{{border:1px solid #d5d7db;padding:.3em .8em;text-align:center}}"
-             f".{key} .tt th{{background:#f3f4f6;font-weight:700}} .{key} .tt th.mid{{background:#fafafa;color:#59606b;font-weight:600}}"
-             f".{key} .tt th small{{display:block;font-size:10px;font-weight:400;color:{DIM}}}"
-             f".{key} .tt td.t0{{color:#2f6fbf}} .{key} .tt td.t2{{color:#c8423b}} .{key} .tt td.t1{{color:#6b7280}}"
-             f".{key} .tt tr.on td{{background:#e8782a26;font-weight:700}}"
-             f".{key} .scope{{background:#0d1117;border-radius:12px;padding:8px 6px 2px;margin:.3em 0 1em;"
-             f"box-shadow:0 0 0 1px #d5d7db, 0 6px 18px -8px rgba(13,17,23,.55)}}"
-             f".{key} .hint{{color:{DIM};margin:1em 0 .2em}}" + "".join(rules))
+             f".{key} .sch{{flex:3 1 480px;min-width:0}} .{key} .sch svg{{width:100%;height:auto;display:block}}"
+             f".{key} .hint{{color:{MUTED};font-size:13px;margin:.8em 0 0}}" + "".join(rules))
     script = (f"<script>(function(){{var marks={json.dumps(marks)},base={json.dumps(base)};"
               f"document.querySelectorAll('input[name={key}]').forEach(function(r){{r.addEventListener('change',function(){{"
               f"var d=document.getElementById('{key}-scope');if(window.Plotly&&d)"
               f"Plotly.relayout(d,{{shapes:base.concat(marks[+r.dataset.i])}});}});}});}})();</script>")
-    display(HTML(f'<style>{style}</style><div class="{key}" style="{FONT}">{"".join(radios)}{"".join(panels)}'
+    display(HTML(f'<style>{style}</style><div class="{key}">{"".join(radios)}{"".join(panels)}'
                  f'<div class="hint">ドラッグで拡大、ダブルクリックで全体に戻る。下のスライダーで時間の範囲を選べる。</div>'
-                 f'<div class="scope">{plot}</div></div>{script}'))
+                 f'{plot}</div>{script}'))
