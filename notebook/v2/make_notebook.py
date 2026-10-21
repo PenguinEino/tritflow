@@ -24,6 +24,8 @@ from live import need, provides, install_error_view, LayoutView
 from views import pick_input, flow_map, stimulus
 from tritflow import flow
 from tritflow.viz.layout import gds_viewer
+from tritflow.schematic import set_language
+set_language("ja")
 install_error_view()
 for name, cell in {"source": "1-1 HDL", "net": "1-2 合成する", "lay": "1-3 配置配線する",
                    "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション"}.items():
