@@ -110,23 +110,25 @@ def step(title, *, view=None):
 
 
 def run_stages(command, **options):
-    """Run an installer that prints ``@stage`` and ``@progress`` lines, one ✓ line per stage."""
+    """Run an installer that prints ``@stage``, ``@files`` and ``@progress`` lines, one ✓ line per stage."""
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                text=True, bufsize=1, **options)
-    line, tail, files = None, [], {}
+    line, tail, files, expected = None, [], {}, 0
     for text in process.stdout:
         text = text.rstrip("\n")
         tail = (tail+[text])[-80:]
         if text.startswith("@stage "):
             if line:
                 line.close()
-            line, files = Line(text[7:]), {}
+            line, files, expected = Line(text[7:]), {}, 0
+        elif text.startswith("@files "):
+            expected = int(text.split()[1])
         elif text.startswith("@progress ") and line:
             done, total, label = text.split(" ", 3)[1:]
             files[label] = (int(done), int(total))
             finished = sum(1 for d, t in files.values() if t and d >= t)
             megabytes = sum(d for d, _ in files.values())/1e6
-            line.detail = (f"{finished}/{len(files)} ファイル · {megabytes:.1f} MB" if len(files) > 1
+            line.detail = (f"{finished}/{max(expected, len(files))} ファイル · {megabytes:.1f} MB" if expected > 1
                            else f"{label} · {megabytes:.1f} MB")
         elif line and (found := re.match(r"\s*(Collecting|Downloading)\s+(\S+)", text)):
             line.detail = f"pip · {found[2]}"

@@ -104,7 +104,7 @@ def bootstrap_pip(prefix):
 def say(english, japanese):
     """Start a setup stage, named in the notebook's language.
 
-    ``@stage`` and ``@progress`` lines are read by the notebook's progress view
+    ``@stage``, ``@files`` and ``@progress`` lines are read by the notebook's progress view
     (notebook/live.py); in a terminal they are plain, readable log lines.
     """
     japanese_notebook = os.environ.get("TRITFLOW_NOTEBOOK_LANGUAGE") == "ja"
@@ -161,7 +161,9 @@ def main(argv=None):
                    "PIP_CACHE_DIR": str(prefix/"pip-cache"), "XDG_CACHE_HOME": str(prefix/"cache")}
     say("pip", "pipを準備")
     bootstrap_pip(prefix)
-    say("KLayout and ngspice (checksum-verified packages)", "KLayoutとngspice（チェックサムを確認したパッケージ）")
+    say("KLayout and ngspice", "KLayoutとngspice")
+    lock = json.loads((HERE/PINS["ubuntu_dependency_lock"][version]).read_text())
+    print(f"@files {len(lock['packages']) + (1 if package else 0)}", flush=True)
     native, wrappers = install_native(package, HERE/PINS["ubuntu_dependency_lock"][version], prefix, download)
     say("Fonts for circuit labels", "回路図ラベル用のフォント")
     fonts = install_fonts(prefix, download)
@@ -185,7 +187,7 @@ def main(argv=None):
             (pdk/".tritflow-commit").write_text(revision+"\n")
     if (pdk/".tritflow-commit").read_text().strip() != revision:
         raise RuntimeError("PDK commit marker mismatch")
-    say("Pinned Python packages", "固定版のPythonパッケージ")
+    say("Pinned Python packages", "Pythonパッケージ")
     subprocess.run(commands[0], check=True, env=environment)
     say("KLayout smoke test", "KLayoutの動作確認")
     subprocess.run(commands[1], check=True, env=environment)
