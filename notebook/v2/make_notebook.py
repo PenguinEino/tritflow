@@ -26,33 +26,36 @@ from tritflow import flow
 from tritflow.viz.graph import gate_graph
 from tritflow.viz.layout import gds_viewer
 install_error_view()
-for name, cell in {"net": "1-1 HDLを書いて合成する", "lay": "1-2 配置配線する",
-                   "lvs": "1-3 DRCとLVS", "post": "1-4 ポストレイアウトシミュレーション"}.items():
+for name, cell in {"source": "1-1 HDL", "net": "1-2 合成する", "lay": "1-3 配置配線する",
+                   "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション"}.items():
     provides(name, cell)
 '''
 
 CODE = {
-"hdl": '''# 1-1 HDLを書いて合成する
+"source": '''# 1-1 HDL
 source = """
 module first(input trit a, output trit y);
   assign y = a & ~a;
 endmodule
-"""
+"""''',
+
+"hdl": '''# 1-2 合成する
+need("source", why="合成するHDLは、1-1に書いてあります。")
 with step("HDLを読み込んで合成") as s:
     net = flow.loads(source).synthesize()
     s.done(" · ".join(f"{cell}×{n}" for cell, n in net.report()["cells"].items())
            + (" · 全入力で等価" if net.equivalence["passed"] else " · 等価でない"))
 gate_graph(net, title=f"{net.top}：合成した回路").show()''',
 
-"pnr": '''# 1-2 配置配線する
-need("net", why="配置配線する回路 net は、1-1で合成します。")
+"pnr": '''# 1-3 配置配線する
+need("net", why="配置配線する回路 net は、1-2で合成します。")
 with step("配置配線", view=LayoutView()) as s:
     lay = net.place_and_route(output_dir=BUILD/net.top, seed=0)
     width, height = lay.stats["die_size_um"]
     s.done(f"{lay.stats['instance_count']}セル · {width:.0f} × {height:.0f} µm · 配線 {lay.stats['routed_nets']}本")''',
 
-"check": '''# 1-3 DRCとLVS
-need("lay", why="DRCとLVSは、1-2で作ったGDSを調べます。")
+"check": '''# 1-4 DRCとLVS
+need("lay", why="DRCとLVSは、1-3で作ったGDSを調べます。")
 with step("DRC") as s:
     drc = lay.drc()
     s.done(f"違反 {drc['violations']}件")
@@ -61,8 +64,8 @@ with step("LVS") as s:
     s.done("一致" if lvs["matched"] else "不一致")
 gds_viewer(lay.gds_path)''',
 
-"spice": '''# 1-4 ポストレイアウトシミュレーション
-need("lvs", why="シミュレーションは、1-3でLVSが一致したGDSから回路を取り出して動かします。")
+"spice": '''# 1-5 ポストレイアウトシミュレーション
+need("lvs", why="シミュレーションは、1-4でLVSが一致したGDSから回路を取り出して動かします。")
 with step("抽出と配線容量") as s:
     extracted = lay.extract()
     signals = [n for n in extracted.capacitance["nets"] if n not in ("VDD", "VMID", "VSS")]
@@ -73,8 +76,8 @@ with step("ngspice") as s:
     s.done("全区間で ±0.5 V の帯に入った" if post["measurements"]["passed"] else "帯に入らない区間がある")
 pick_input(net, post)''',
 
-"map": '''# 1-5 いま何が起きたか
-need("post", why="この図は、1-1から1-4までの実行結果をまとめます。")
+"map": '''# 1-6 いま何が起きたか
+need("post", why="この図は、1-1から1-5までの実行結果をまとめます。")
 flow_map(net, lay, drc, lvs, extracted, post)''',
 }
 
