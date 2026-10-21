@@ -91,19 +91,25 @@ def beside(table_parts, schematic, gap=40):
     svg, sw, sh = schematic
     height = max(th, sh)
     body = svg[svg.index(">", svg.index("<svg"))+1:svg.rindex("</svg>")]
+    # Xschem's stylesheet styles every <text>; scope it to the schematic so the table keeps its colours.
+    body = re.sub(r"<style>(.*?)</style>", lambda m: "<style>" + re.sub(r"(^|\})\s*([^{}]+)\{",
+                  lambda r: f"{r[1]}#schematic {r[2].strip()}{{", m[1]) + "</style>", body, flags=re.S)
     view = re.search(r'viewBox="([^"]+)"', svg)[1]
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{tw+gap+sw}" height="{height}" '
             f'viewBox="0 0 {tw+gap+sw} {height}" font-family="{SERIF}">'
             f'<g transform="translate(0,{(height-th)/2})">{inner}</g>'
-            f'<svg x="{tw+gap}" y="{(height-sh)/2}" width="{sw}" height="{sh}" viewBox="{view}">{body}</svg></svg>\n')
+            f'<svg id="schematic" x="{tw+gap}" y="{(height-sh)/2}" width="{sw}" height="{sh}" viewBox="{view}">{body}</svg></svg>\n')
 
 
+# The same layout as the cell tables of chapter 3: one input across the top (A, then −1 0 +1),
+# two inputs as A＼B with B across and A down.
 TABLES = {
-    "and": svg(table([["a", "~a", "a & ~a"], ["−1", "+1", "−1"], ["0", "0", "**0"], ["+1", "−1", "−1"]]),
-               table([["a & b", "b = −1", "b = 0", "b = +1"], ["a = −1", "−1", "−1", "−1"],
-                      ["a = 0", "−1", "0", "0"], ["a = +1", "−1", "0", "+1"]], header_cols=1)),
-    "inv": beside(table([["A", "Y"], ["−1（−5 V）", "+1（+5 V）"], ["0（0 V）", "0（0 V）"], ["+1（+5 V）", "−1（−5 V）"]],
-                        widths=[150, 150]), compact_schematic()),
+    "and": svg(table([["a", "−1", "0", "+1"], ["~a", "+1", "0", "−1"], ["a & ~a", "−1", "**0", "−1"]],
+                     header_cols=1, widths=[96, 70, 70, 70]),
+               table([["a＼b", "−1", "0", "+1"], ["−1", "−1", "−1", "−1"], ["0", "−1", "0", "0"], ["+1", "−1", "0", "+1"]],
+                     header_cols=1, widths=[96, 70, 70, 70])),
+    "inv": beside(table([["A", "−1", "0", "+1"], ["Y", "+1", "0", "−1"]], header_cols=1, widths=[70, 70, 70, 70]),
+                  compact_schematic()),
 }
 
 
