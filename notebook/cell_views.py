@@ -89,10 +89,29 @@ def cell_tables(cells_dir, schematics_dir):
                  f'</details></div>'))
 
 
+# Device outlines on the cell drawings: one colour per device kind, named once in the caption.
+DEVICE = {"PMOS": ("#c2185b", "PMOS"), "NMOS": ("#1565c0", "NMOS"), "F_RR": ("#2e7d32", "RR")}
+
+
+def _device_marks(name, x, unit, margin=3.0):
+    """Dashed outlines around each transistor and resistor of cell ``name`` placed at ``x``, from
+    the LVS device pairs and the actual GDS geometry (``tritflow.viz.cell.device_locations``)."""
+    from tritflow.viz.cell import device_locations
+    marks = []
+    for row in device_locations(name):
+        color, _ = DEVICE[row["model"]]
+        left, bottom, right, top = row["bbox_um"]
+        marks.append(f'<rect x="{x+left-margin:g}" y="{-(top+margin):g}" width="{right-left+2*margin:g}" '
+                     f'height="{top-bottom+2*margin:g}" fill="{color}" fill-opacity=".10" stroke="{color}" '
+                     f'stroke-width="{1.6*unit:g}" stroke-dasharray="{4*unit:g} {2.5*unit:g}"/>')
+    return "".join(marks)
+
+
 def cell_row(library, cells_dir, *, groups=(("INV", "NAND", "NOR", "NANY"), ("BUF", "TIEP", "TIEZ", "TIEN", "FILL")),
              gap=24.0):
     """Every standard cell from its GDS, in rows at one common scale, with the template's rails
-    named."""
+    named and every PMOS, NMOS and RR outlined. The layout is drawn a little faded so the outlines
+    read first."""
     view = LayoutView(cells_dir.parent)
     template = json.loads((cells_dir.parent/"template.json").read_text())
     widths = {cell["name"]: cell["width"] for cell in library}
@@ -106,9 +125,10 @@ def cell_row(library, cells_dir, *, groups=(("INV", "NAND", "NOR", "NANY"), ("BU
                    f'<text x="{-6*unit:g}" y="{-rails["VSS"][0]+7*unit:g}" font-size="{9*unit:g}" text-anchor="end">VSS</text>')
     pictures = []
     for group in groups:
-        x, uses, names = 0.0, [], []
+        x, uses, names, marks = 0.0, [], [], []
         for name in group:
             uses.append(f'<use href="#tfc-{name}" transform="translate({x:g},0)"/>')
+            marks.append(_device_marks(name, x, unit))
             cx = x+widths[name]/2
             names.append(f'<text x="{cx:g}" y="{18*unit:g}" font-size="{10*unit:g}" text-anchor="middle" '
                          f'font-weight="700">{name}</text><text x="{cx:g}" y="{30*unit:g}" font-size="{8*unit:g}" '
@@ -118,9 +138,12 @@ def cell_row(library, cells_dir, *, groups=(("INV", "NAND", "NOR", "NANY"), ("BU
         pictures.append(
             f'<svg viewBox="{-pad:g} {-height-8*unit:g} {span+pad+8*unit:g} {height+40*unit:g}" '
             f'style="width:100%;height:auto;display:block;font-family:{SERIF}" fill="#0b0b0b">'
-            f'<defs>{_patterns(unit)}{symbols}</defs><g transform="scale(1,-1)">{"".join(uses)}</g>'
-            f'{rail_labels}{"".join(names)}</svg>')
+            f'<defs>{_patterns(unit)}{symbols}</defs><g transform="scale(1,-1)" opacity=".55">{"".join(uses)}</g>'
+            f'{"".join(marks)}{rail_labels}{"".join(names)}</svg>')
     display(HTML(f'<style>{figure_css(".tfrow")}</style><div class="tfrow" style="max-width:1000px">'
                  f'<div style="border-top:1.4px solid #0b0b0b;border-bottom:1.4px solid #0b0b0b;padding:6px 0">{"".join(pictures)}</div>'
-                 f'<div style="color:{MUTED};font-size:13px;margin-top:.3em">同じ縮尺。高さはすべて {height:g} µm、幅は '
+                 f'<div style="font-size:13px;margin-top:.3em">' + "　".join(
+                     f'<span style="display:inline-block;width:14px;height:9px;border:1.5px dashed {c};background:{c}1a;'
+                     f'vertical-align:middle;margin-right:4px"></span>{label}' for c, label in DEVICE.values()) +
+                 f'</div><div style="color:{MUTED};font-size:13px;margin-top:.2em">同じ縮尺。高さはすべて {height:g} µm、幅は '
                  f'{template["grid"]:g} µm の倍数。</div></div>'))
