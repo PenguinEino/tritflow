@@ -54,7 +54,6 @@ def pick_input(net, post):
     """Buttons for each input trit; the circuit's net values and the matching stretch of the
     post-layout waveform follow the choice."""
     import ipywidgets as widgets
-    from tritflow.viz.graph import color_nets
 
     inputs = [p.name for p in net.ports if p.dir == "input"]
     buttons = {name: widgets.ToggleButtons(options=[("−1", -1), ("0", 0), ("+1", 1)], value=0,
@@ -65,12 +64,12 @@ def pick_input(net, post):
     def draw(_=None):
         chosen = tuple(buttons[name].value for name in inputs)
         label = ", ".join(f"{name} = {TRIT_TEXT[v]}" for name, v in zip(inputs, chosen))
-        circuit = color_nets(net, dict(zip(inputs, chosen)), title=f"{net.top}（{label}）")
-        circuit.update_layout(height=320, margin={"t": 50, "b": 30})
+        circuit = net.schematic(inputs=dict(zip(inputs, chosen)), net_names=True, expand="*",
+                                title=f"{net.top}（{label}）")
         with out:
             out.clear_output(wait=True)
             display(HTML(f'<div style="{FONT}">{escape(_reading(post, chosen))}</div>'))
-            display(HTML(circuit.to_html(include_plotlyjs="cdn", full_html=False)))
+            display(circuit)
             display(HTML(_waveform(post, chosen, "ポストレイアウトシミュレーション（橙が選んだ入力の区間）")
                          .to_html(include_plotlyjs="cdn", full_html=False)))
 
