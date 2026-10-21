@@ -22,13 +22,18 @@ RAW = "https://raw.githubusercontent.com/PenguinEino/tritflow"
 PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
 from views import pick_input, flow_map, stimulus
+from inverter_views import inverter, sizing_explorer, hand_estimate
+from predictions import divider
+from tritflow import PDK_ROOT
+from tritflow.sim.sizing import sweep_dimensions, load_grid
 from tritflow import flow
 from tritflow.viz.layout import gds_viewer
 from tritflow.schematic import set_language
 set_language("ja")
 install_error_view()
 for name, cell in {"source": "1-1 HDL", "net": "1-2 合成する", "lay": "1-3 配置配線する",
-                   "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション"}.items():
+                   "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション",
+                   "hand": "2-1 手計算"}.items():
     provides(name, cell)
 '''
 
@@ -80,9 +85,29 @@ pick_input(net, post)''',
 "map": '''# 1-6 いま何が起きたか
 need("post", why="この図は、1-1から1-5までの実行結果をまとめます。")
 flow_map(net, lay, drc, lvs, extracted, post)''',
+
+"hand": '''# 2-1 手計算
+from tritflow.sim.sizing import published_dimensions
+_, dimensions = published_dimensions("INV")
+hand = divider(dimensions, PDK_ROOT)
+hand_estimate(hand)''',
+
+"inv_spice": '''# 2-2 INVのDC解析
+need("hand", why="SPICEの結果は、2-1の手計算と並べて示します。")
+with step("ngspice（INVのDC解析）") as s:
+    spice = sweep_dimensions("INV", [], workdir=BUILD/"inv")
+    zero = next(r for r in spice["rows"][0]["dc"] if r["input_trits"] == [0])
+    s.done(f"入力 0 V：Y = {zero['output_v']['Y']:+.3f} V · {abs(zero['rail_current_a']['VDD'])*1e3:.3f} mA")
+inverter(spice, hand)''',
+
+"sizing": '''# 2-3 寸法を変える
+with step("寸法の記録を照合") as s:
+    grid = load_grid("INV")
+    s.done(f"{len(grid['rows'])}通り · 回路・モデル・解析コードが一致")
+sizing_explorer(grid)''',
 }
 
-CHAPTERS = ["00_opening.md", "01_first.md"]
+CHAPTERS = ["00_opening.md", "01_first.md", "02_inverter.md"]
 
 
 def cells(ref):
@@ -90,6 +115,8 @@ def cells(ref):
     setup = "#@title 準備（最初に実行） { display-mode: \"form\" }\n" + SETUP.replace('"PINNED"', f'"{ref}"') + PREAMBLE
     for index, name in enumerate(CHAPTERS):
         text = (HERE/"narrative"/name).read_text()
+        text = re.sub(r"<!-- asset: (\S+) \| (.+?) -->", lambda m: f"<details><summary>{m[2]}</summary>\n\n"
+                      f"![{m[2]}]({RAW}/{ref}/{m[1]})\n\n</details>", text)
         text = re.sub(r"<!-- figure: (\w+) -->", lambda m: f"![図1]({RAW}/{ref}/figures/out/{m[1]}_ja.png)", text)
         for chunk in re.split(r"\n*<!-- code: (\w+) -->\n*", text):
             if chunk in CODE:
