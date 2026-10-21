@@ -191,10 +191,12 @@ let timer, pending = false, revision = 0, drag = null, failures = 0, liveRenders
 // Kernel availability can change during Run all. Only a non-Colab output is static.
 const live = !!(config.callback && window.google?.colab);
 function retryDelay(failed) {
-  return failed ? Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5)) : 140;
+  return failed ? Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5)) : 50;
 }
-function schedule(delay) {
-  clearTimeout(timer); timer = setTimeout(render, delay);
+// Two passes per view: a quick one at one pixel per CSS pixel with a margin around the view,
+// so small pans and zooms are already covered, then a sharp one at the display's pixel ratio.
+function schedule(delay, sharp = false) {
+  clearTimeout(timer); timer = setTimeout(() => render(sharp), delay);
 }
 function dims() { return [box[2] - box[0], box[3] - box[1]]; }
 function paint() {
@@ -230,16 +232,19 @@ function state() {
   root.dataset.retryCount = failures;
   root.dataset.retryDelay = failures ? retryDelay(failures) : 0;
 }
-async function render() {
-  if (!root.isConnected || !live || pending || drag) return;
-  const requested = revision, crop = box.slice();
+async function render(sharp = false) {
+  if (!root.isConnected || !live || pending) return;
+  const requested = revision, [dx, dy] = dims(), margin = sharp ? 0 : 0.25;
+  const crop = [box[0] - dx * margin, box[1] - dy * margin, box[2] + dx * margin, box[3] + dy * margin];
+  const width = sharp ? canvas.width : Math.round(viewport.clientWidth * (1 + 2 * margin));
+  const height = sharp ? canvas.height : Math.round(viewport.clientHeight * (1 + 2 * margin));
   pending = true; state();
   try {
     // Leave one request queued behind later notebook cells, even for minutes.
     // Timing it out would abandon a valid reply and accumulate duplicate work.
     const kernel = window.google?.colab?.kernel;
     if (!kernel?.invokeFunction) throw new Error('Kernel not connected yet');
-    const result = await kernel.invokeFunction(config.callback, [crop, canvas.width, canvas.height], {});
+    const result = await kernel.invokeFunction(config.callback, [crop, width, height], {});
     const data = result.data['application/json'];
     if (!data?.image?.startsWith('data:image/png;base64,')) throw new Error('No KLayout image');
     const next = new Image(); next.src = data.image; await next.decode();
@@ -250,7 +255,10 @@ async function render() {
     failures++;
   } finally {
     pending = false; state();
-    if (root.isConnected && live && (requested !== revision || failures)) schedule(retryDelay(failures));
+    if (root.isConnected && live) {
+      if (requested !== revision || failures) schedule(retryDelay(failures));
+      else if (!sharp && !drag) schedule(200, true);
+    }
   }
 }
 function changed() {

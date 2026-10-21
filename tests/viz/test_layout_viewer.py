@@ -116,7 +116,10 @@ def test_busy_kernel_retries_without_permanent_static_transition(gds, monkeypatc
     assert 'live = false' not in script
     assert 'Promise.race' not in script  # A slow queued request must not be abandoned.
     assert 'live: waiting for kernel…' in script
-    assert 'if (!root.isConnected || !live || pending || drag) return;' in script
+    # Renders also run while dragging; one request at a time keeps the queue short.
+    assert 'if (!root.isConnected || !live || pending) return;' in script
+    # A quick pass with a margin around the view, then a sharp pass at the pixel ratio.
+    assert 'margin = sharp ? 0 : 0.25' in script and 'schedule(200, true)' in script
     assert 'failures++;' in script and 'failures = 0; paint();' in script
     assert 'Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5))' in script
     assert 'schedule(retryDelay(failures))' in script
