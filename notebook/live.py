@@ -128,7 +128,9 @@ def run_stages(command, **options):
             files[label] = (int(done), int(total))
             finished = sum(1 for d, t in files.values() if t and d >= t)
             megabytes = sum(d for d, _ in files.values())/1e6
-            line.detail = (f"{finished}/{max(expected, len(files))} ファイル · {megabytes:.1f} MB" if expected > 1
+            # After the last download the installer unpacks; say so instead of a frozen counter.
+            unpacking = " · 展開中" if expected > 1 and finished >= expected else ""
+            line.detail = (f"{finished}/{max(expected, len(files))} ファイル · {megabytes:.1f} MB{unpacking}" if expected > 1
                            else f"{label} · {megabytes:.1f} MB")
         elif line and (found := re.match(r"\s*(Collecting|Downloading)\s+(\S+)", text)):
             line.detail = f"pip · {found[2]}"
