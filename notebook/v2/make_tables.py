@@ -53,7 +53,6 @@ def width(svg):
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    import cairosvg
     for name, svg in TABLES.items():
-        cairosvg.svg2png(bytestring=svg.encode(), write_to=str(OUT/f"{name}.png"), scale=2)
-        print(OUT/f"{name}.png", width(svg))
+        (OUT/f"{name}.svg").write_text(svg)
+        print(OUT/f"{name}.svg", width(svg))
