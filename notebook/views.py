@@ -9,7 +9,7 @@ from itertools import product
 
 from IPython.display import HTML, display
 
-from live import FONT, DIM
+from live import FONT, DIM, control_style
 
 TRIT_TEXT = {-1: "−1", 0: "0", 1: "+1"}
 
@@ -94,10 +94,7 @@ def pick_input(net, post, *, title="ポストレイアウトシミュレーシ�
                       f'<div class="sch">{circuit._repr_svg_()}</div>'
                       f'{_truth_table(net, inputs, outputs, table_rows, chosen)}</div></div>')
         rules.append(f"#{key}-{index}:checked ~ .p{index}{{display:block}}")
-    style = (f".{key}{{max-width:1180px}} .{key} input{{display:none}}"
-             f".{key} label{{display:inline-block;padding:.3em 1em;margin:0 .35em .5em 0;border:1px solid #c9ccd1;"
-             f"border-radius:4px;cursor:pointer;font-size:14px}}"
-             f".{key} input:checked + label{{background:#e8782a;color:#fff;border-color:#e8782a}}"
+    style = (control_style(f".{key}") + f".{key}{{max-width:1180px}}"
              f".{key} > div[class^=p]{{display:none}} .{key} .reading{{margin:.2em 0 .6em;font-size:14px}}"
              f".{key} .row{{display:flex;flex-wrap:wrap;gap:1.5em;align-items:center}}"
              f".{key} .sch{{flex:3 1 520px;min-width:0}} .{key} .sch svg{{width:100%;height:auto;display:block}}"
