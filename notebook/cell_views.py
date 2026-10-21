@@ -66,6 +66,25 @@ def _truth_grid(rows):
     return f'<table ><tr><th>Y</th>{cell(rows[0]["Y"])}</tr></table>'
 
 
+def _symbol(kind):
+    """The cell's symbol exactly as the gate-level schematics draw it, small, with pin names."""
+    from tritflow.schematic.model import Symbol
+    from tritflow.schematic.placement import anchors
+    from tritflow.schematic.render import _symbol as draw
+    from tritflow.schematic.vector import Vector
+    v = Vector(150, 120, font_min=12)
+    node = Symbol(kind, kind, "", x=35, y=12, width=80, height=96)
+    if kind.startswith("TIE"):
+        node.outputs = {"Y": "y"}
+    else:
+        node.inputs = {"A": "a"} if kind in {"INV", "BUF"} else {"A": "a", "B": "b"}
+        node.outputs = {"Y": "y"}
+    anchors(node)
+    draw(v, node)
+    svg = v.svg(kind)
+    return svg[svg.index("<svg"):]
+
+
 def cell_tables(cells_dir, schematics_dir):
     """Every logic cell's truth table in colour; the taped-out schematics folded underneath as one
     grid of equal-width figures, so opening them does not reflow the tables."""
@@ -73,13 +92,14 @@ def cell_tables(cells_dir, schematics_dir):
     for name, formula in FORMULA.items():
         rows = json.loads((cells_dir/name/f"{name}.truth.json").read_text())
         cards.append(f'<div class="card"><div class="t"><b>{name}</b> <span>{escape(formula)}</span></div>'
-                     f'{_truth_grid(rows)}</div>')
+                     f'<div class="sym">{_symbol(name)}</div>{_truth_grid(rows)}</div>')
         schematic = schematics_dir/f"{name}.compact.svg"
         if schematic.is_file():
             figures.append(f'<figure><figcaption>{name}</figcaption>{schematic.read_text()}</figure>')
     style = (figure_css(".tfcells") + table_css(".tfcells") +
              ".tfcells{max-width:1100px} .tfcells .cards{display:flex;flex-wrap:wrap;gap:1.2em 2em;align-items:flex-start}"
-             f".tfcells .card{{min-width:150px}} .tfcells .t{{margin-bottom:.3em}} .tfcells .t span{{color:{MUTED}}}"
+             f".tfcells .card{{min-width:150px}} .tfcells .t{{margin-bottom:.1em}} .tfcells .t span{{color:{MUTED}}}"
+             ".tfcells .sym svg{width:110px;height:auto;display:block;margin:.1em 0 .3em}"
              ".tfcells details{margin-top:1em} .tfcells summary{cursor:pointer}"
              ".tfcells .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:1em 1.5em;margin-top:.6em}"
              ".tfcells figure{margin:0} .tfcells figcaption{font-weight:600;margin-bottom:.2em}"
