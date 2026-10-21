@@ -4,6 +4,7 @@ from __future__ import annotations
 from base64 import b64encode
 from collections import OrderedDict
 from html import escape
+from io import BytesIO
 import json
 import math
 from pathlib import Path
@@ -15,6 +16,28 @@ _MAX_EDGE = 2048
 _MAX_PIXELS = 2_000_000
 _CACHE_BYTES = 16 * 1024 * 1024
 _SESSIONS = OrderedDict()
+
+
+def _encode_image(png, encoding):
+    """Compress KLayout's stippled pixels without changing any layer colours.
+
+    Lossy codecs blur one-pixel metal/poly edges and inflate these few-colour
+    drawings. Low-effort lossless WebP is smaller; retain PNG when unavailable
+    or when its original stream is already shorter (for example an empty crop).
+    """
+    if encoding == "webp":
+        from PIL import Image, features
+        if features.check("webp"):
+            try:
+                with Image.open(BytesIO(png)) as image:
+                    stream = BytesIO()
+                    image.save(stream, format="WEBP", lossless=True, method=0)
+                webp = stream.getvalue()
+                if len(webp) < len(png):
+                    return "image/webp", webp
+            except (OSError, ValueError):
+                pass  # Minimal Pillow builds can lack a working WebP encoder.
+    return "image/png", png
 
 
 def _pixel_size(width, height):
@@ -39,7 +62,7 @@ def _aspect_box(box, width, height):
 
 
 class _GdsRenderer:
-    """One real LayoutView and bounded LRU tiles for a single GDS hierarchy."""
+    """One warm LayoutView and bounded LRU crops for a single GDS hierarchy."""
 
     def __init__(self, gds_path, top=None):
         from .layout import _open_gds_view
@@ -60,27 +83,33 @@ class _GdsRenderer:
             self.cache.clear()
             self.cache_bytes = 0
 
-    def render(self, box, width, height):
-        """Return the actual crop and PNG data URL; preserve isotropic µm scale."""
+    def render(self, box, width, height, encoding="png"):
+        """Return a lossless physical crop, preserving isotropic µm scale.
+
+        PNG remains the default for standalone exports. Live clients opt into
+        lossless WebP, with automatic PNG fallback on minimal Pillow builds.
+        """
         import klayout.db as db
         from .layout import _gds_text_visibility
+        if encoding not in ("png", "webp"):
+            raise ValueError("Image encoding must be png or webp")
         width, height = _pixel_size(width, height)
         box = _aspect_box(box, width, height)
-        key = (*box, width, height)
+        key = (*box, width, height, encoding)
         with self.lock:
             if self.view is None:
                 raise RuntimeError("Viewer expired; rerun its notebook cell to reconnect")
             if key in self.cache:
                 self.cache.move_to_end(key)
                 return {**self.cache[key], "cached": True}
-            self.view.resize(width, height)
             target = db.DBox(*box)
-            self.view.zoom_box(target)
             labels = _gds_text_visibility(self.view, target)
-            # Explicit target_box avoids viewport/aspect rounding shifting coordinates.
+            # Explicit target_box sets both crop and scale; resize/zoom_box only
+            # invalidate the warm view and are unnecessary for offscreen pixels.
             png = bytes(self.view.get_pixels_with_options(width, height, 0, 0, 0, target).to_png_data())
+            mime, data = _encode_image(png, encoding)
             self.render_count += 1
-            result = {"image": "data:image/png;base64," + b64encode(png).decode(),
+            result = {"image": f"data:{mime};base64," + b64encode(data).decode(),
                       "box": box, "width": width, "height": height,
                       "render_count": self.render_count, "cached": False, "labels": labels}
             size = len(result["image"])
@@ -101,11 +130,19 @@ def _register(renderer):
         return None
     from IPython.display import JSON
     name = "tritflow.gds." + uuid4().hex
-    output.register_callback(name, lambda box, width, height: JSON(renderer.render(box, width, height)))
+    def callback(box, width, height, encoding="png"):
+        active = _SESSIONS.get(name)
+        if active is None:
+            raise RuntimeError("Viewer expired; rerun its notebook cell to reconnect")
+        return JSON(active.render(box, width, height, encoding))
+
+    output.register_callback(name, callback)
     _SESSIONS[name] = renderer
     while len(_SESSIONS) > 8:
-        _, old = _SESSIONS.popitem(last=False)
+        expired, old = _SESSIONS.popitem(last=False)
         old.close()
+        if hasattr(output, "unregister_callback"):
+            output.unregister_callback(expired)
     return name
 
 
@@ -142,6 +179,7 @@ def viewer_html(gds_path, *, top, width, height):
             for name, pair, color, _ in renderer.layers)
         config = json.dumps({"box": overview["box"], "callback": callback,
                              "width": width, "height": height,
+                             "maxEdge": _MAX_EDGE, "maxPixels": _MAX_PIXELS,
                              "background": renderer.palette[0]}).replace("<", "\\u003c")
         markup = f'''<div data-gds-viewer="1" style="max-width:{width}px;color:#f2f4f7;background:#000;
             border:1px solid #344054;font:13px sans-serif;padding:8px;box-sizing:border-box">
@@ -187,23 +225,81 @@ canvas.setAttribute('aria-label', 'GDS layout: wheel or plus/minus to zoom, arro
 canvas.style.cssText = 'display:block;width:100%;height:100%;cursor:grab;touch-action:none';
 const ctx = canvas.getContext('2d');
 let box = config.box.slice(), imageBox = box.slice(), tile = overview;
-let timer, pending = false, revision = 0, drag = null, failures = 0, liveRenders = 0;
+let timer = null, timerAt = Infinity, pending = false, revision = 0, served = 0;
+let drag = null, failures = 0, liveRenders = 0, retryAt = 0, lastRequest = -Infinity;
+let changedAt = performance.now(), cacheBytes = 0;
+let encoding = 'webp';
+const crops = new Map(), cacheLimit = 16 * 1024 * 1024;
 // Kernel availability can change during Run all. Only a non-Colab output is static.
 const live = !!(config.callback && window.google?.colab);
 function retryDelay(failed) {
-  return failed ? Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5)) : 50;
+  return failed ? Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5)) : 0;
 }
-// Two passes per view: a quick one at one pixel per CSS pixel with a margin around the view,
-// so small pans and zooms are already covered, then a sharp one at the display's pixel ratio.
-function schedule(delay, sharp = false) {
-  clearTimeout(timer); timer = setTimeout(() => render(sharp), delay);
+function pixelSize(width, height) {
+  const scale = Math.min(1, config.maxEdge / Math.max(width, height),
+    Math.sqrt(config.maxPixels / (width * height)));
+  return [Math.max(1, Math.floor(width * scale)), Math.max(1, Math.floor(height * scale))];
+}
+// Throttle, never debounce: another pointer event must not postpone an earlier
+// quick request. One in flight coalesces all further events into the latest box.
+function schedule(delay = 0, sharp = false) {
+  if (!root.isConnected || !live || pending) return;
+  const now = performance.now();
+  const due = Math.max(now + delay, retryAt, lastRequest + 32);
+  if (timer !== null && timerAt <= due) return;
+  clearTimeout(timer); timerAt = due;
+  timer = setTimeout(() => { timer = null; timerAt = Infinity; render(sharp); }, Math.max(0, due - now));
 }
 function dims() { return [box[2] - box[0], box[3] - box[1]]; }
+function request(sharp) {
+  const ratio = sharp ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+  const [width, height] = pixelSize(Math.max(1, Math.round(viewport.clientWidth * ratio)),
+    Math.max(1, Math.round(viewport.clientHeight * ratio)));
+  const [dx, dy] = dims(), cx = (box[0] + box[2]) / 2, cy = (box[1] + box[3]) / 2;
+  const w = Math.max(dx, dy * width / height), h = Math.max(dy, dx * height / width);
+  const crop = [cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2];
+  return {crop, width, height};
+}
+function cropKey(data) { return JSON.stringify([data.box, data.width, data.height]); }
+function remember(image, data) {
+  const key = cropKey(data), bytes = data.width * data.height * 4;
+  if (crops.has(key)) { cacheBytes -= crops.get(key).bytes; crops.delete(key); }
+  if (bytes > cacheLimit) return;
+  crops.set(key, {image, box:data.box, width:data.width, height:data.height, bytes});
+  cacheBytes += bytes;
+  while (crops.size > 8 || cacheBytes > cacheLimit) {
+    const oldest = crops.keys().next().value;
+    cacheBytes -= crops.get(oldest).bytes; crops.delete(oldest);
+  }
+  root.dataset.cacheBytes = cacheBytes;
+  root.dataset.cacheEntries = crops.size;
+}
+function cachedCrop(req) {
+  // A larger crop can supply a smaller view at the same or better sampling.
+  // Never reuse hidden overview labels for a view below the 1 mm text threshold.
+  for (const [key, entry] of Array.from(crops).reverse()) {
+    const b = entry.box, c = req.crop, epsilon = (c[2] - c[0]) * 1e-9;
+    if ((b[2] - b[0] <= 1000) !== (c[2] - c[0] <= 1000)) continue;
+    if (b[0] > c[0] + epsilon || b[1] > c[1] + epsilon ||
+        b[2] < c[2] - epsilon || b[3] < c[3] - epsilon) continue;
+    if (entry.width / (b[2] - b[0]) + 1e-9 < req.width / (c[2] - c[0]) ||
+        entry.height / (b[3] - b[1]) + 1e-9 < req.height / (c[3] - c[1])) continue;
+    // KLayout text has a fixed pixel size: reuse labelled views only at the
+    // same sampling, otherwise a cached label would shrink/grow with zoom.
+    if (c[2] - c[0] <= 1000 && Math.abs((b[2] - b[0]) / entry.width -
+        (c[2] - c[0]) / req.width) > (c[2] - c[0]) / req.width * 1e-6) continue;
+    crops.delete(key); crops.set(key, entry);
+    return entry;
+  }
+  return null;
+}
 function paint() {
   const [dx, dy] = dims();
-  const ratio = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = Math.max(1, Math.round(viewport.clientWidth * ratio));
-  canvas.height = Math.max(1, Math.round(viewport.clientHeight * ratio));
+  const [width, height] = pixelSize(Math.max(1, Math.round(viewport.clientWidth * Math.min(window.devicePixelRatio || 1, 2))),
+    Math.max(1, Math.round(viewport.clientHeight * Math.min(window.devicePixelRatio || 1, 2))));
+  // Resetting a canvas on every mouse event reallocates its backing store.
+  if (canvas.width !== width) canvas.width = width;
+  if (canvas.height !== height) canvas.height = height;
   ctx.fillStyle = config.background; ctx.fillRect(0, 0, canvas.width, canvas.height);
   function draw(image, bounds) {
     if (!image.complete || !image.naturalWidth) return;
@@ -222,9 +318,10 @@ function paint() {
   root.querySelector('[data-role="extent"]').textContent = dx.toFixed(2) + ' × ' + dy.toFixed(2) + ' µm';
   root.dataset.viewBox = JSON.stringify(box);
   root.dataset.liveRenders = liveRenders;
+  root.dataset.imageBox = JSON.stringify(imageBox);
 }
 function state() {
-  const waiting = live && (pending || failures > 0 || liveRenders === 0);
+  const waiting = live && (pending || served !== revision);
   status.textContent = live ? (waiting ? 'live: waiting for kernel…' : 'Live KLayout · ' + liveRenders + ' updates')
     : 'Static overview · rerun in Colab for live detail';
   root.dataset.mode = live ? 'live' : 'static';
@@ -232,37 +329,61 @@ function state() {
   root.dataset.retryCount = failures;
   root.dataset.retryDelay = failures ? retryDelay(failures) : 0;
 }
+function refine() {
+  if (drag) return;
+  const quick = request(false), sharp = request(true);
+  // A 1x display already has the final resolution; avoid its second round trip.
+  if (sharp.width > quick.width || sharp.height > quick.height)
+    schedule(Math.max(0, 120 - (performance.now() - changedAt)), true);
+}
 async function render(sharp = false) {
   if (!root.isConnected || !live || pending) return;
-  const requested = revision, [dx, dy] = dims(), margin = sharp ? 0 : 0.25;
-  const crop = [box[0] - dx * margin, box[1] - dy * margin, box[2] + dx * margin, box[3] + dy * margin];
-  const width = sharp ? canvas.width : Math.round(viewport.clientWidth * (1 + 2 * margin));
-  const height = sharp ? canvas.height : Math.round(viewport.clientHeight * (1 + 2 * margin));
-  pending = true; state();
+  // An idle timer may coincide with fresh input; always prioritise its quick view.
+  sharp = sharp && !drag && performance.now() - changedAt >= 120;
+  const requested = revision, req = request(sharp), cached = cachedCrop(req);
+  if (cached) {
+    tile = cached.image; imageBox = cached.box; served = requested; paint(); state();
+    if (!sharp) refine();
+    return;
+  }
+  pending = true; lastRequest = performance.now(); state();
   try {
     // Leave one request queued behind later notebook cells, even for minutes.
     // Timing it out would abandon a valid reply and accumulate duplicate work.
     const kernel = window.google?.colab?.kernel;
     if (!kernel?.invokeFunction) throw new Error('Kernel not connected yet');
-    const result = await kernel.invokeFunction(config.callback, [crop, width, height], {});
+    const result = await kernel.invokeFunction(config.callback, [req.crop, req.width, req.height, encoding], {});
     const data = result.data['application/json'];
-    if (!data?.image?.startsWith('data:image/png;base64,')) throw new Error('No KLayout image');
-    const next = new Image(); next.src = data.image; await next.decode();
+    if (!/^data:image\/(png|webp);base64,/.test(data?.image || '')) throw new Error('No KLayout image');
+    const next = new Image(); next.src = data.image;
+    try { await next.decode(); }
+    catch (error) {
+      if (data.image.startsWith('data:image/webp;')) encoding = 'png';
+      throw error;
+    }
     if (!root.isConnected) return;
-    // Every tile carries its own physical box, so even a stale reply stays aligned.
-    tile = next; imageBox = data.box; liveRenders++; failures = 0; paint();
+    // Every crop carries its own physical box, so even a stale reply stays aligned.
+    remember(next, data);
+    const latest = requested !== revision ? cachedCrop(request(false)) : null;
+    tile = latest ? latest.image : next; imageBox = latest ? latest.box : data.box;
+    liveRenders++; served = latest ? revision : requested;
+    failures = 0; retryAt = 0; paint();
   } catch (error) {
     failures++;
+    retryAt = performance.now() + retryDelay(failures);
   } finally {
     pending = false; state();
     if (root.isConnected && live) {
-      if (requested !== revision || failures) schedule(retryDelay(failures));
-      else if (!sharp && !drag) schedule(200, true);
+      if (requested !== revision || failures) schedule();
+      else if (!sharp) refine();
     }
   }
 }
 function changed() {
-  revision++; paint(); schedule(retryDelay(failures));
+  revision++; changedAt = performance.now();
+  const cached = cachedCrop(request(false));
+  if (cached) { tile = cached.image; imageBox = cached.box; served = revision; }
+  paint(); state(); schedule();
 }
 function zoom(factor, px = 0.5, py = 0.5) {
   const [dx, dy] = dims();
@@ -319,7 +440,8 @@ root.querySelector('[data-action="out"]').onclick = () => zoom(1 / 0.6);
 function start() {
   if (!overview.naturalWidth) return;
   viewport.insertBefore(canvas, overview); overview.style.display = 'none';
-  paint(); state(); if (live) schedule(140);
+  remember(overview, {box:config.box, width:overview.naturalWidth, height:overview.naturalHeight});
+  paint(); state(); if (live) schedule();
   new ResizeObserver(() => { if (root.isConnected) changed(); }).observe(viewport);
 }
 if (overview.complete) start(); else overview.onload = start;

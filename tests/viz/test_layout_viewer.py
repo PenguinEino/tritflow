@@ -11,7 +11,7 @@ import numpy as np
 from PIL import Image
 import pytest
 
-from tritflow.viz._gds_viewer import _GdsRenderer, _SESSIONS
+from tritflow.viz._gds_viewer import _GdsRenderer, _SESSIONS, _encode_image
 from tritflow.viz.layout import _pdk_layer_properties, gds_viewer
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -118,12 +118,60 @@ def test_busy_kernel_retries_without_permanent_static_transition(gds, monkeypatc
     assert 'live: waiting for kernel…' in script
     # Renders also run while dragging; one request at a time keeps the queue short.
     assert 'if (!root.isConnected || !live || pending) return;' in script
-    # A quick pass with a margin around the view, then a sharp pass at the pixel ratio.
-    assert 'margin = sharp ? 0 : 0.25' in script and 'schedule(200, true)' in script
-    assert 'failures++;' in script and 'failures = 0; paint();' in script
+    # Quick requests use only the viewport; idle high-DPI refinement is conditional.
+    assert 'lastRequest + 32' in script and '120 - (performance.now() - changedAt)' in script
+    assert 'sharp.width > quick.width || sharp.height > quick.height' in script
+    assert 'failures++;' in script and 'failures = 0; retryAt = 0;' in script
     assert 'Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5))' in script
-    assert 'schedule(retryDelay(failures))' in script
+    assert 'retryAt = performance.now() + retryDelay(failures)' in script
     assert 'requested !== revision || failures' in script  # Retry newest view after recovery.
+
+
+def test_live_webp_is_lossless_and_cache_separates_encodings(gds):
+    renderer = _GdsRenderer(gds)
+    try:
+        png = renderer.render([0, 0, 100, 100], 500, 500)
+        webp = renderer.render([0, 0, 100, 100], 500, 500, 'webp')
+        assert np.array_equal(pixels(png), pixels(webp))
+        assert len(webp['image']) <= len(png['image'])
+        assert renderer.render_count == 2
+        assert renderer.render([0, 0, 100, 100], 500, 500, 'webp')['cached']
+        with pytest.raises(ValueError, match='encoding'):
+            renderer.render([0, 0, 100, 100], 500, 500, 'jpeg')
+    finally:
+        renderer.close()
+
+
+def test_webp_encoder_falls_back_to_original_png(monkeypatch):
+    from PIL import features
+    stream = io.BytesIO()
+    Image.new('RGB', (10, 10), 'black').save(stream, format='PNG')
+    png = stream.getvalue()
+    monkeypatch.setattr(features, 'check', lambda name: False)
+    assert _encode_image(png, 'webp') == ('image/png', png)
+    monkeypatch.setattr(features, 'check', lambda name: True)
+    def unavailable(*args, **kwargs):
+        raise OSError('encoder unavailable')
+    monkeypatch.setattr(Image.Image, 'save', unavailable)
+    assert _encode_image(png, 'webp') == ('image/png', png)
+
+
+def test_kernel_cache_enforces_byte_limit_and_true_lru(gds, monkeypatch):
+    from tritflow.viz import _gds_viewer
+    renderer = _GdsRenderer(gds)
+    try:
+        first = renderer.render([0, 0, 100, 100], 100, 100)
+        second = renderer.render([1, 0, 101, 100], 100, 100)
+        monkeypatch.setattr(_gds_viewer, '_CACHE_BYTES',
+                            len(first['image']) + len(second['image']) + 50)
+        assert renderer.render([0, 0, 100, 100], 100, 100)['cached']
+        renderer.render([2, 0, 102, 100], 100, 100)
+        assert len(renderer.cache) == 2
+        assert renderer.cache_bytes <= _gds_viewer._CACHE_BYTES
+        assert renderer.render([0, 0, 100, 100], 100, 100)['cached']
+        assert not renderer.render([1, 0, 101, 100], 100, 100)['cached']
+    finally:
+        renderer.close()
 
 
 def test_labels_hide_at_overview_and_return_with_detail_and_static_export(tmp_path):
@@ -195,3 +243,31 @@ def test_method_cells_use_viewer_keep_download_and_validate():
             assert 'gds_viewer(' in cell['source'] and 'gds_download(' in cell['source']
             assert 'render_gds(' not in cell['source']
             assert len(cell['source'].strip().splitlines()) <= 14
+
+
+def test_expired_sessions_unregister_callbacks_and_release_rasters(gds, monkeypatch):
+    from tritflow.viz._gds_viewer import _register
+    callbacks = {}
+    module = types.ModuleType('google.colab')
+    module.output = types.SimpleNamespace(
+        register_callback=lambda name, fn: callbacks.update({name: fn}),
+        unregister_callback=lambda name: callbacks.pop(name))
+    monkeypatch.setitem(sys.modules, 'google.colab', module)
+    previous = dict(_SESSIONS)
+    _SESSIONS.clear()
+    first = _GdsRenderer(gds)
+    try:
+        expired = _register(first)
+        first.render([0, 0, 100, 100], 300, 300, 'webp')
+        for _ in range(8):
+            _register(_GdsRenderer(gds))
+        assert expired not in callbacks and len(callbacks) == 8
+        assert first.view is None and not first.cache and first.cache_bytes == 0
+        # A fourth argument opts into live compression; old three-argument callers work.
+        active = next(iter(callbacks.values()))
+        assert active([0, 0, 100, 100], 300, 300, 'webp').data['image'].startswith('data:image/')
+        assert active([0, 0, 100, 100], 300, 300).data['image'].startswith('data:image/png;')
+    finally:
+        for renderer in _SESSIONS.values():
+            renderer.close()
+        _SESSIONS.clear(); _SESSIONS.update(previous)
