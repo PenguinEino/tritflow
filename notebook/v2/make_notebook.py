@@ -94,7 +94,7 @@ with step("寸法の記録を照合") as s:
     s.done(f"{len(grid['rows'])}通り · 回路・モデル・解析コードが一致")
 inverter(spice, grid)''',
 
-"closure": '''# 3-1 1入力関数の閉包
+"closure": '''# 2-2 1入力関数の閉包
 from completeness import unary_closure, surjective_and_depends_on_both, inv, nand, nor, nany
 bases = [("INV・NAND・NOR＋定数3つ", dict(unary=(inv,), binary=(nand, nor), constants=(-1, 0, 1))),
          ("NANY＋TIEZ", dict(binary=(nany,), constants=(0,))),
@@ -103,22 +103,35 @@ closures = [unary_closure(**basis) for _, basis in bases]
 closure_view(bases, closures)
 print("NANYは2つの入力の両方に依存し、出力に−1・0・+1のすべてが現れる：", surjective_and_depends_on_both(nany))''',
 
-"cells": '''# 3-2 セルの真理値表
+"cells": '''# 2-3 セルの真理値表
 cell_tables(CELLS_DIR/"out", ROOT/"notebook/assets/schematics")''',
 
-"stdcells": '''# 3-3 スタンダードセル
+"stdcells": '''# 2-4 スタンダードセル
 import json
 cell_row(json.loads((CELLS_DIR/"out/library.json").read_text()), CELLS_DIR/"out")''',
 
-"fa_source": '''# 4-1 HDL：+ で書いた全加算器
+"latch": '''# 3-1 ラッチになる書き方はエラーになる
+latch_source = """
+module hold(input trit a, c, output reg trit y);
+  always @* begin
+    if (c == 1't1) y = a;
+  end
+endmodule
+"""
+try:
+    flow.loads(latch_source).synthesize()
+except Exception as error:
+    print(error)''',
+
+"fa_source": '''# 3-2 HDL：+ で書いた全加算器
 full_add_source = """
 module full_add_rtl(input trit a, b, cin, output trit sum, cout);
   assign {cout, sum} = a + b + cin;
 endmodule
 """''',
 
-"fa_synth": '''# 4-2 論理合成して、手でつないだ全加算器と比べる
-need("full_add_source", why="合成するHDLは、4-1に書いてあります。")
+"fa_synth": '''# 3-3 論理合成して、手でつないだ全加算器と比べる
+need("full_add_source", why="合成するHDLは、3-2に書いてあります。")
 with step("論理合成（2つの全加算器）") as s:
     full_add_rtl = flow.loads(full_add_source).synthesize()
     full_add_hand = flow.load(ROOT/"examples/full_add.tv", "full_add").synthesize()
@@ -126,22 +139,22 @@ with step("論理合成（2つの全加算器）") as s:
 cell_counts({"+ で書いた全加算器": full_add_rtl, "手でつないだ全加算器": full_add_hand})
 full_add_rtl.schematic(net_names=True, expand="*", title="", legend=False)''',
 
-"add2_source": '''# 4-3 HDL：2トリットの加算
+"add2_source": '''# 3-4 HDL：2トリットの加算
 add2_source = """
 module add2(input trit [1:0] a, b, output trit [2:0] s);
   assign s = a + b;
 endmodule
 """''',
 
-"add2_synth": '''# 4-4 論理合成し、入力の値ごとに見る
-need("add2_source", why="合成するHDLは、4-3に書いてあります。")
+"add2_synth": '''# 3-5 論理合成し、入力の値ごとに見る
+need("add2_source", why="合成するHDLは、3-4に書いてあります。")
 with step("論理合成") as s:
     add2 = flow.loads(add2_source).synthesize()
     s.done(" · ".join(f"{cell}×{n}" for cell, n in add2.report()["cells"].items())
            + f" · 全{add2.equivalence['vectors']}入力で等価")
 bus_picker(add2)''',
 
-"case_source": '''# 4-5 HDL：真理値表で書いた乗算
+"case_source": '''# 3-6 HDL：真理値表で書いた乗算
 case_source = """
 module mul_table(input trit a, b, output reg trit y);
   always @(*) begin
@@ -154,8 +167,8 @@ module mul_table(input trit a, b, output reg trit y);
 endmodule
 """''',
 
-"case_synth": '''# 4-6 論理合成して、* で書いた乗算と比べる
-need("case_source", why="合成するHDLは、4-5に書いてあります。")
+"case_synth": '''# 3-7 論理合成して、* で書いた乗算と比べる
+need("case_source", why="合成するHDLは、3-6に書いてあります。")
 with step("論理合成（真理値表と *）") as s:
     mul_table = flow.loads(case_source).synthesize()
     mul_op = flow.loads("module mul_op(input trit a, b, output trit y); assign y = a * b; endmodule\\n").synthesize()
@@ -164,7 +177,7 @@ cell_counts({"真理値表（case）": mul_table, "演算子（*）": mul_op})
 mul_table.schematic(net_names=True, expand="*", title="", legend=False)''',
 }
 
-CHAPTERS = ["00_opening.md", "01_first.md", "02_inverter.md", "03_cells.md", "04_arithmetic.md"]
+CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md"]
 
 
 def cells(ref):
