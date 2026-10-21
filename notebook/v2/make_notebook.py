@@ -30,7 +30,7 @@ from cell_views import closure_view, cell_tables, cell_row
 from tritflow import CELLS_DIR
 from tritflow.sim.sizing import sweep_dimensions, load_grid
 from tritflow import flow
-from gds_view import gds_view
+from tritflow.viz.layout import gds_viewer
 from tritflow.schematic import set_language
 set_language("ja")
 install_error_view()
@@ -70,7 +70,7 @@ with step("DRC") as s:
 with step("LVS") as s:
     lvs = lay.lvs()
     s.done("一致" if lvs["matched"] else "不一致")
-gds_view(lay.gds_path)''',
+gds_viewer(lay.gds_path)''',
 
 "spice": '''# 1-5 ポストレイアウトシミュレーション
 need("lvs", why="シミュレーションは、1-4でLVSが一致したGDSから回路を取り出して動かします。")
@@ -124,7 +124,7 @@ def cells(ref):
             for name in m[1].split()), text)
         text = re.sub(r"<!-- asset: (\S+) \| (.+?) -->", lambda m: f"<details><summary>{m[2]}</summary>\n\n"
                       f"![{m[2]}]({RAW}/{ref}/{m[1]})\n\n</details>", text)
-        text = re.sub(r"<!-- figure: (\w+) -->", lambda m: f"![図1]({RAW}/{ref}/figures/out/{m[1]}_ja.png)", text)
+        text = re.sub(r"<!-- figure: (\w+) -->", lambda m: f"![{m[1]}]({RAW}/{ref}/figures/out/{m[1]}_ja.png)", text)
         for chunk in re.split(r"\n*<!-- code: (\w+) -->\n*", text):
             if chunk in CODE:
                 out.append(("code", CODE[chunk]))
