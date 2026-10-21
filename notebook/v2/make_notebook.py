@@ -24,7 +24,7 @@ CDN = "https://cdn.jsdelivr.net/gh/PenguinEino/tritflow"
 
 PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
-from views import pick_input, stimulus, bus_picker, cell_counts
+from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view
 from inverter_views import inverter
 from cell_views import closure_view, cell_tables, cell_row
 from tritflow import CELLS_DIR
@@ -136,7 +136,7 @@ with step("論理合成") as s:
     full_add_rtl = flow.loads(full_add_source).synthesize()
     s.done(" · ".join(f"{cell}×{n}" for cell, n in full_add_rtl.report()["cells"].items())
            + f" · 全{full_add_rtl.equivalence['vectors']}入力で等価")
-full_add_rtl.schematic(net_names=True, expand="*", title="", legend=False)''',
+schematic_view(full_add_rtl.schematic(net_names=True, expand="*", title="", legend=False))''',
 
 "add2_source": '''# 3-4 HDL：2トリットの加算
 add2_source = """

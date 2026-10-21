@@ -17,7 +17,7 @@ INPUT_COLORS = ("#1baf7a", "#7b61c9", "#b8860b")
 OUTPUT_COLORS = ("#2a78d6", "#d6336c", "#0f8b8d")
 CURRENT_COLOR = "#52514e"
 SERIF = ('"Times New Roman", Times, "Nimbus Roman", "Liberation Serif", "Noto Serif JP", '
-         '"Hiragino Mincho ProN", "Yu Mincho", serif')
+         '"Noto Serif CJK JP", "Hiragino Mincho ProN", "Yu Mincho", serif')
 TRIT_TEXT = {-1: "−1", 0: "0", 1: "+1"}
 
 
@@ -43,10 +43,11 @@ def table_css(scope):
 def control_style(scope):
     """Radio-button labels and range sliders under ``scope``: thin rules, the selected choice in
     ink, like the controls of a figure rather than an app."""
-    return (f"{scope} input[type=radio]{{display:none}}"
+    return (f"{scope} input[type=radio]{{position:absolute;opacity:0;width:1px;height:1px;clip-path:inset(50%)}}"
             f"{scope} input[type=radio] + label{{display:inline-block;padding:.1em .8em;margin:0 -1px .5em 0;"
             f"border:1px solid {RULE};cursor:pointer;font-family:{SERIF};font-size:14px;color:{INK};background:#fff}}"
             f"{scope} input[type=radio]:checked + label{{background:{INK};border-color:{INK};color:#fff}}"
+            f"{scope} input[type=radio]:focus-visible + label{{outline:1px solid {INK};outline-offset:2px}}"
             f"{scope} input[type=range]{{-webkit-appearance:none;appearance:none;width:100%;height:14px;"
             f"background:transparent;margin:.2em 0}}"
             f"{scope} input[type=range]::-webkit-slider-runnable-track{{height:1px;background:{RULE}}}"

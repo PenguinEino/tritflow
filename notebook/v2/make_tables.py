@@ -8,27 +8,47 @@ through jsDelivr, since raw.githubusercontent.com sends SVG as plain text.
 """
 from html import escape
 import re
+import unicodedata
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[1]/"assets/tables"
 # Same palette and face as notebook/style.py and the paper figures.
 INK, COLOR = "#0b0b0b", {"−1": "#2a78d6", "0": "#6f6e69", "+1": "#e34948"}
-SERIF = "Times New Roman, Times, Nimbus Roman, Liberation Serif, Noto Serif JP, Hiragino Mincho ProN, serif"
+SERIF = "Times New Roman, Times, Nimbus Roman, Liberation Serif, Noto Serif JP, Noto Serif CJK JP, Hiragino Mincho ProN, serif"
 CELL_W, CELL_H, FONT = 88, 34, 18
 
 
 MONO = "Menlo, Consolas, DejaVu Sans Mono, monospace"
 
 
-def table(rows, *, header_rows=1, header_cols=0, widths=None, left=()):
+def _lines(text, available, font):
+    """Wrap a column conservatively, counting Japanese glyphs as one full em."""
+    lines, line, used = [], "", 0.0
+    for token in re.findall(r"[A-Za-z0-9_]+|.", text):
+        advance = font*sum(1 if unicodedata.east_asian_width(c) in ("W", "F") else .62 for c in token)
+        if line and used + advance > available:
+            lines.append(line)
+            line, used = "", 0.0
+        line += token
+        used += advance
+    return [*lines, line]
+
+
+def table(rows, *, header_rows=1, header_cols=0, widths=None, left=(), font=FONT, wrap=False):
     """rows: list of lists of strings, drawn booktabs-style: a rule above and below the table and
     a thin one under the header, no vertical lines; trit values in their colours. Cells written
     `like this` are set in a monospace face; columns listed in ``left`` are left-aligned."""
     columns = len(rows[0])
     widths = widths or [CELL_W]*columns
-    width, height = sum(widths), CELL_H*len(rows)+4
+    laid_out = [[_lines(text.strip("*`"), widths[c]-20, font-3 if text.startswith("`") else font)
+                 if wrap else [text.strip("*`")]
+                 for c, text in enumerate(row)] for row in rows]
+    leading = font*1.45
+    heights = [max(CELL_H, max(map(len, row))*leading+14) if wrap else CELL_H for row in laid_out]
+    width, height = sum(widths), sum(heights)+4
     parts = [f'<path d="M0,1 H{width} M0,{height-1} H{width}" stroke="{INK}" stroke-width="1.4"/>',
-             f'<path d="M0,{2+header_rows*CELL_H} H{width}" stroke="{INK}" stroke-width=".8"/>']
+             f'<path d="M0,{2+sum(heights[:header_rows])} H{width}" stroke="{INK}" stroke-width=".8"/>']
+    y = 2
     for r, row in enumerate(rows):
         x = 0
         for c, text in enumerate(row):
@@ -39,10 +59,15 @@ def table(rows, *, header_rows=1, header_cols=0, widths=None, left=()):
             code = text.startswith("`") and text.endswith("`")
             text = text.strip("`") if code else text
             anchor, tx = ("start", x+10) if c in left else ("middle", x+widths[c]/2)
-            face = f' font-family="{MONO}" font-size="{FONT-3}"' if code else f' font-size="{FONT}"'
-            parts.append(f'<text x="{tx}" y="{2+r*CELL_H+CELL_H/2+FONT*.35}"{face} xml:space="preserve" '
-                         f'text-anchor="{anchor}" fill="{color}"{" font-weight=\"700\"" if bold and not code else ""}>{escape(text)}</text>')
+            face = f' font-family="{MONO}" font-size="{font-3}"' if code else f' font-size="{font}"'
+            lines = laid_out[r][c]
+            top = y+heights[r]/2-(len(lines)-1)*leading/2+font*.35
+            spans = "".join(f'<tspan x="{tx}" y="{top+i*leading:g}">{escape(line)}</tspan>'
+                            for i, line in enumerate(lines))
+            parts.append(f'<text{face} xml:space="preserve" '
+                         f'text-anchor="{anchor}" fill="{color}"{" font-weight=\"700\"" if bold and not code else ""}>{spans}</text>')
             x += widths[c]
+        y += heights[r]
     return "".join(parts), width, height
 
 
@@ -86,7 +111,15 @@ def compact_schematic(sch=SCHEMATIC, crop=(20, -130, 360, 290), width=330):
         if not KEEP.match(content):
             return ""
         content = re.sub(r"(\d(?:\.\d+)?)e-06", r"\1u", content)
-        return match[1]+content+"</text>"
+        opening = match[1]
+        if content.startswith(("w=", "l=")):
+            # Keep the dimensions readable at the 330 px display width. Separate W and L
+            # baselines so the larger labels cannot collide.
+            opening = re.sub(r'font-size="[^"]+"', 'font-size="24.8"', opening)
+            if content.startswith("l="):
+                opening = re.sub(r'translate\(([^,]+),\s*([\d.]+)\)',
+                                 lambda m: f'translate({m[1]}, {float(m[2])+10:g})', opening)
+        return opening+content+"</text>"
     svg = re.sub(r"(<text\b[^>]*>)([^<]*)</text>", text, svg)
     svg = re.sub(r'<(?:path|rect)\b[^>]*class="l5"[^>]*/>', "", svg)
     svg = _theme_svg(svg, "INV", "light").replace("DejaVu Sans,sans-serif", SERIF)
@@ -130,7 +163,7 @@ TABLES = {
         ["`c ? x : y`", "c = +1 で x、−1 で y、0 では一致する桁を残し他は 0", "三値の選択回路"],
         ["`always @*  if  case`", "手続き的に書く組合せ回路", "条件ごとの値を選ぶ回路"],
         ["`inv g (y, a);`", "セルを直接置く", "そのセル"],
-    ], left=(0, 1, 2), widths=[250, 470, 300])),
+    ], left=(0, 1, 2), widths=[190, 260, 190], font=16, wrap=True)),
     "inv": beside(table([["A", "−1", "0", "+1"], ["Y", "+1", "0", "−1"]], header_cols=1, widths=[70, 70, 70, 70]),
                   compact_schematic()),
 }

@@ -97,13 +97,13 @@ def cell_tables(cells_dir, schematics_dir):
         if schematic.is_file():
             figures.append(f'<figure><figcaption>{name}</figcaption>{schematic.read_text()}</figure>')
     style = (figure_css(".tfcells") + table_css(".tfcells") +
-             ".tfcells{max-width:1100px} .tfcells .cards{display:flex;flex-wrap:wrap;gap:1.2em 2em;align-items:flex-start}"
-             f".tfcells .card{{min-width:150px}} .tfcells .t{{margin-bottom:.1em}} .tfcells .t span{{color:{MUTED}}}"
+             ".tfcells{max-width:1100px} .tfcells .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:1.4em;align-items:start}"
+             f".tfcells .card{{min-width:0}} .tfcells .t{{margin-bottom:.3em}} .tfcells .t span{{color:{MUTED}}}"
              ".tfcells .sym svg{width:110px;height:auto;display:block;margin:.1em 0 .3em}"
              ".tfcells details{margin-top:1em} .tfcells summary{cursor:pointer}"
-             ".tfcells .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:1em 1.5em;margin-top:.6em}"
-             ".tfcells figure{margin:0} .tfcells figcaption{font-weight:600;margin-bottom:.2em}"
-             ".tfcells figure svg{width:100%;height:auto;display:block}")
+             ".tfcells .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:1.4em 1.5em;margin-top:.6em;align-items:start}"
+             ".tfcells figure{margin:0;min-width:0} .tfcells figcaption{font-weight:600;margin-bottom:.2em}"
+             ".tfcells figure svg{width:100%;max-width:540px;height:auto;display:block;margin:0 auto}")
     display(HTML(f'<style>{style}</style><div class="tfcells"><div class="cards">{"".join(cards)}</div>'
                  f'<details><summary>テープアウトした回路図（Xschem）</summary><div class="grid">{"".join(figures)}</div>'
                  f'</details></div>'))
@@ -128,39 +128,38 @@ def _device_marks(name, x, unit, margin=3.0):
 
 
 def cell_row(library, cells_dir, *, groups=(("INV", "NAND", "NOR", "NANY"), ("BUF", "TIEP", "TIEZ", "TIEN", "FILL")),
-             gap=24.0):
-    """Every standard cell from its GDS, in rows at one common scale, with the template's rails
+             gap=8.0):
+    """Every standard cell from its GDS, wrapping at one common scale, with the template's rails
     named and every PMOS, NMOS and RR outlined. The layout is drawn a little faded so the outlines
     read first."""
     view = LayoutView(cells_dir.parent)
     template = json.loads((cells_dir.parent/"template.json").read_text())
     widths = {cell["name"]: cell["width"] for cell in library}
     height = template["height"]
-    span = max(sum(widths[n] for n in group)+gap*(len(group)-1) for group in groups)
-    unit = span/700
+    # A fixed drawing scale lets narrow outputs wrap cells without shrinking their labels.
+    unit = .75
     pad = 46*unit
     rails = template["rails"]
-    rail_labels = (f'<text x="{-6*unit:g}" y="{-sum(rails["VDD"])/2+3*unit:g}" font-size="{9*unit:g}" text-anchor="end">VDD</text>'
-                   f'<text x="{-6*unit:g}" y="{-rails["VMID"][1]+2*unit:g}" font-size="{9*unit:g}" text-anchor="end">VMID</text>'
-                   f'<text x="{-6*unit:g}" y="{-rails["VSS"][0]+7*unit:g}" font-size="{9*unit:g}" text-anchor="end">VSS</text>')
+    rail_labels = (f'<text x="{-6*unit:g}" y="{-sum(rails["VDD"])/2+3*unit:g}" font-size="{11*unit:g}" text-anchor="end">VDD</text>'
+                   f'<text x="{-6*unit:g}" y="{-rails["VMID"][1]+2*unit:g}" font-size="{11*unit:g}" text-anchor="end">VMID</text>'
+                   f'<text x="{-6*unit:g}" y="{-rails["VSS"][0]+7*unit:g}" font-size="{11*unit:g}" text-anchor="end">VSS</text>')
     pictures = []
     for group in groups:
-        x, uses, names, marks = 0.0, [], [], []
+        row = []
         for name in group:
-            uses.append(f'<use href="#tfc-{name}" transform="translate({x:g},0)"/>')
-            marks.append(_device_marks(name, x, unit))
-            cx = x+widths[name]/2
-            names.append(f'<text x="{cx:g}" y="{18*unit:g}" font-size="{10*unit:g}" text-anchor="middle" '
-                         f'font-weight="700">{name}</text><text x="{cx:g}" y="{30*unit:g}" font-size="{8*unit:g}" '
+            cx = widths[name]/2
+            label = (f'<text x="{cx:g}" y="{20*unit:g}" font-size="{14*unit:g}" text-anchor="middle" '
+                         f'font-weight="700">{name}</text><text x="{cx:g}" y="{38*unit:g}" font-size="{12*unit:g}" '
                          f'text-anchor="middle" fill="{MUTED}">{widths[name]:g} µm</text>')
-            x += widths[name]+gap
-        symbols = "".join(f'<g id="tfc-{n}">{_layer_paths(view._cell(n), unit)}</g>' for n in group)
-        pictures.append(
-            f'<svg viewBox="{-pad:g} {-height-8*unit:g} {span+pad+8*unit:g} {height+40*unit:g}" '
-            f'style="width:100%;height:auto;display:block;font-family:{SERIF}" fill="#0b0b0b">'
-            f'<defs>{_patterns(unit)}{symbols}</defs><g transform="scale(1,-1)" opacity=".55">{"".join(uses)}</g>'
-            f'{"".join(marks)}{rail_labels}{"".join(names)}</svg>')
-    display(HTML(f'<style>{figure_css(".tfrow")}</style><div class="tfrow" style="max-width:1000px">'
+            span = widths[name]+pad+8*unit
+            row.append(
+                f'<svg viewBox="{-pad:g} {-height-8*unit:g} {span:g} {height+48*unit:g}" '
+                f'style="width:{span/unit:g}px;max-width:100%;height:auto;display:block;font-family:{SERIF}" fill="#0b0b0b">'
+                f'<defs>{_patterns(unit)}</defs><g transform="scale(1,-1)" opacity=".55">{_layer_paths(view._cell(name), unit)}</g>'
+                f'{_device_marks(name, 0, unit)}{rail_labels}{label}</svg>')
+        pictures.append(f'<div class="group">{"".join(row)}</div>')
+    style = figure_css(".tfrow") + f'.tfrow .group{{display:flex;flex-wrap:wrap;gap:1em {gap/unit:g}px;align-items:start}}'
+    display(HTML(f'<style>{style}</style><div class="tfrow" style="max-width:1100px">'
                  f'<div style="border-top:1.4px solid #0b0b0b;border-bottom:1.4px solid #0b0b0b;padding:6px 0">{"".join(pictures)}</div>'
                  f'<div style="font-size:13px;margin-top:.3em">' + "　".join(
                      f'<span style="display:inline-block;width:14px;height:9px;border:1.5px dashed {c};background:{c}1a;'
