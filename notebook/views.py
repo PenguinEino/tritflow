@@ -178,6 +178,11 @@ def _buses(names):
     return {base: [bits[i] for i in sorted(bits)] for base, bits in buses.items()}
 
 
+def _signed(value):
+    """An integer as the text writes it: 0, +3, −2 (with a true minus sign)."""
+    return "0" if value == 0 else f"{value:+d}".replace("-", "−")
+
+
 def _digits(values):
     """A balanced-ternary number, high digit first, written with T for −1 as in HDL literals."""
     return "".join({-1: "T", 0: "0", 1: "1"}[v] for v in reversed(values))
@@ -217,14 +222,14 @@ def bus_picker(net, *, title=None):
         reading = {base: [int(nets[b]) for b in bits] for base, bits in outputs.items()}
         table[",".join(map(str, combo))] = {
             "nets": {n: int(v) for n, v in nets.items()},
-            "text": " · ".join(f"{base} = {number(d):+d}（{_digits(d)}）" for base, d in reading.items())}
+            "text": " · ".join(f"{base} = {_signed(number(d))}（{_digits(d)}）" for base, d in reading.items())}
     start = ",".join("0" for _ in values)
     circuit = net.schematic(inputs={n: 0 for bits in inputs.values() for n in bits}, net_names=True, expand="*",
                             title="", legend=False)
     rows = "".join(
         f'<div class="bus"><span class="name">{escape(base)}</span>' + "".join(
             f'<input type="radio" name="{key}-{base}" id="{key}-{base}-{v}" data-bus="{base}" value="{v}"'
-            f'{" checked" if v == 0 else ""}><label for="{key}-{base}-{v}">{v:+d}</label>' for v in vals) + "</div>"
+            f'{" checked" if v == 0 else ""}><label for="{key}-{base}-{v}">{_signed(v)}</label>' for v in vals) + "</div>"
         for base, vals in values.items())
     colors = json.dumps({str(k): v for k, v in TRIT_COLOR.items()})
     script = (f"<script>(function(){{const root=document.querySelector('.{key}'),table={json.dumps(table)},color={colors};"
@@ -235,9 +240,17 @@ def bus_picker(net, *, title=None):
               "root.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',draw));draw();})();</script>")
     style = (figure_css(f".{key}") + control_style(f".{key}") + f".{key}{{max-width:1080px}}"
              f".{key} .bus{{margin:.1em 0}} .{key} .name{{display:inline-block;width:2.2em;font-style:italic}}"
-             f".{key} .read{{margin:.4em 0 .2em;font-size:15px}} .{key} svg{{width:100%;height:auto;display:block}}")
+             f".{key} .read{{margin:.4em 0 .2em;font-size:15px}} .{key} .drawing{{max-width:100%;overflow-x:auto}}"
+             f".{key} .drawing svg{{width:100%;min-width:{min(1000, _drawing_width(circuit))}px;height:auto;display:block}}")
     display(HTML(f'<style>{style}</style><div class="{key}">{rows}<div class="read"></div>'
-                 f'{circuit._repr_svg_()}</div>{script}'))
+                 f'<div class="drawing" tabindex="0">{circuit._repr_svg_()}</div></div>{script}'))
+
+
+def _drawing_width(circuit):
+    """The schematic's natural width in px, so small drawings are not blown up."""
+    import re
+    match = re.search(r'<svg[^>]*\bwidth="([\d.]+)', circuit._repr_svg_())
+    return int(float(match[1])) if match else 1000
 
 
 def cell_counts(designs):
