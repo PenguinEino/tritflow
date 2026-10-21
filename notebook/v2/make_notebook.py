@@ -23,6 +23,8 @@ PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
 from views import pick_input, flow_map, stimulus
 from inverter_views import inverter
+from cell_views import closure_view, cell_tables, cell_row
+from tritflow import CELLS_DIR
 from tritflow.sim.sizing import sweep_dimensions, load_grid
 from tritflow import flow
 from tritflow.viz.layout import gds_viewer
@@ -92,9 +94,45 @@ with step("寸法の記録を照合") as s:
     grid = load_grid("INV")
     s.done(f"{len(grid['rows'])}通り · 回路・モデル・解析コードが一致")
 inverter(spice, grid)''',
+
+"closure": '''# 3-1 1入力関数の閉包
+from completeness import unary_closure, surjective_and_depends_on_both, inv, nand, nor, nany
+bases = [("INV・NAND・NOR＋定数3つ", dict(unary=(inv,), binary=(nand, nor), constants=(-1, 0, 1))),
+         ("NANY＋TIEZ", dict(binary=(nany,), constants=(0,))),
+         ("NANY＋TIEP・TIEN", dict(binary=(nany,), constants=(-1, 1)))]
+closures = [unary_closure(**basis) for _, basis in bases]
+closure_view(bases, closures)
+print("NANYは両入力に本質的に依存し、3値すべてを出す：", surjective_and_depends_on_both(nany))''',
+
+"cells": '''# 3-2 セルの真理値表
+cell_tables(CELLS_DIR/"out", ROOT/"notebook/assets/schematics")''',
+
+"stdcells": '''# 3-3 スタンダードセルとPDKの検証
+import json, shutil
+from tritflow.cells import verify
+from tritflow.cells.circuits import circuits
+library = json.loads((CELLS_DIR/"out/library.json").read_text())
+cell_row(library, CELLS_DIR/"out")
+checks = {}
+with step("各セルのDRCとLVS") as s:
+    for k, cell in enumerate(library, 1):
+        name, folder = cell["name"], BUILD/"cells"/cell["name"]
+        s.detail = f"{k}/{len(library)} · {name}"
+        folder.mkdir(parents=True, exist_ok=True)
+        drc = verify.drc(CELLS_DIR/"out"/cell["gds"], name, folder)
+        lvs = None
+        if name != "FILL":  # FILL has no devices
+            shutil.copy(CELLS_DIR/"out"/name/f"{name}.lvs.spice", folder)
+            lvs = verify.lvs(CELLS_DIR/"out"/cell["gds"], circuits()[name], folder, normalize=False)
+        checks[name] = (drc, lvs)
+    s.done(f"{len(library)}セル · DRC違反 {sum(d['items'] for d, _ in checks.values())}件 · "
+           f"LVS一致 {sum(bool(l and l['passed']) for _, l in checks.values())}/{len(library)-1}")
+with step("突き当てのDRC（全組合せ・全向き）") as s:
+    abutment = verify.drc(CELLS_DIR/"out/abutment.gds", "ABUTMENT", BUILD/"cells/abutment")
+    s.done(f"{len(library)**2*4}通りの隣接 · 違反 {abutment['items']}件")''',
 }
 
-CHAPTERS = ["00_opening.md", "01_first.md", "02_inverter.md"]
+CHAPTERS = ["00_opening.md", "01_first.md", "02_inverter.md", "03_cells.md"]
 
 
 def cells(ref):
