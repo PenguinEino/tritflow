@@ -6,6 +6,7 @@ from collections import OrderedDict
 from html import escape
 import json
 import math
+from pathlib import Path
 from threading import RLock
 from uuid import uuid4
 
@@ -108,6 +109,20 @@ def _register(renderer):
     return name
 
 
+DOWNLOAD_LIMIT = 20_000_000
+
+
+def _download_link(gds_path):
+    """The GDS itself, embedded so the viewer can hand it over without a kernel or server."""
+    path = Path(gds_path)
+    if path.stat().st_size > DOWNLOAD_LIMIT:
+        return ""
+    data = b64encode(path.read_bytes()).decode()
+    return (f'<a download="{escape(path.name, quote=True)}" href="data:application/octet-stream;base64,{data}" '
+            f'style="margin-left:auto;color:#f2f4f7;border:1px solid #667085;border-radius:4px;padding:1px 10px;'
+            f'text-decoration:none" title="{escape(path.name, quote=True)}">⬇ GDS</a>')
+
+
 def viewer_html(gds_path, *, top, width, height):
     from IPython.display import HTML
     width, height = _pixel_size(width, height)
@@ -136,6 +151,7 @@ def viewer_html(gds_path, *, top, width, height):
             <button type="button" data-action="in" aria-label="Zoom in">+</button>
             <button type="button" data-action="out" aria-label="Zoom out">−</button>
             <span data-role="status">Overview · wheel to zoom, drag to pan</span>
+            {_download_link(gds_path)}
           </div>
           <div data-role="viewport" style="position:relative;background:{renderer.palette[0]};
               width:100%;aspect-ratio:{width}/{height};overflow:hidden;touch-action:none">
