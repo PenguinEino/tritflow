@@ -26,39 +26,12 @@ def stimulus(net, limit=27):
     return vectors if len(vectors) <= limit else vectors[::max(1, len(vectors)//limit)][:limit]
 
 
-def _waveform_png(post, chosen):
-    """The post-layout inputs and outputs with their ±0.5 V bands; the stretches where the inputs equal
-    ``chosen`` are shaded. A plain image, so it shows wherever the notebook is opened."""
-    import base64, io
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from tritflow import PASS_BAND
-    from tritflow.sim.spice import signal_waveform
-
-    data, rows = post["waveforms"], post["measurements"]["rows"]
-    pins = [*post["stimulus"]["inputs"], *post["stimulus"]["outputs"]]
+def _intervals(post, chosen):
+    """The stretches of the post-layout run where the inputs equal ``chosen``, in µs."""
     hold = post["stimulus"]["hold_s"]*1e6
-    levels = post["measurements"]["ideal_volts"]
-    figure, axes = plt.subplots(len(pins), 1, figsize=(7.2, 1.5*len(pins)+.5), sharex=True, squeeze=False)
-    for axis, pin in zip(axes[:, 0], pins):
-        for volts in levels.values():
-            axis.axhspan(volts-PASS_BAND, volts+PASS_BAND, color="#6eae89", alpha=.15, lw=0)
-        for index, row in enumerate(rows):
-            if tuple(row["input_trits"]) == chosen:
-                axis.axvspan(index*hold, (index+1)*hold, color="#e8782a", alpha=.18, lw=0)
-        output = pin in post["stimulus"]["outputs"]
-        axis.plot(data["time"]*1e6, signal_waveform(data, pin), color="#1f5fa8" if output else "#5b6470", lw=1.4)
-        axis.set_yticks(sorted(levels.values()))
-        axis.set_ylabel(f"{pin} (V)")
-        axis.set_xlim(0, len(rows)*hold)
-        axis.spines[["top", "right"]].set_visible(False)
-    axes[-1, 0].set_xlabel("time (µs)")
-    figure.tight_layout()
-    buffer = io.BytesIO()
-    figure.savefig(buffer, format="png", dpi=110)
-    plt.close(figure)
-    return base64.b64encode(buffer.getvalue()).decode()
+    spans = [f"{i*hold:g}–{(i+1)*hold:g} µs" for i, row in enumerate(post["measurements"]["rows"])
+             if tuple(row["input_trits"]) == chosen]
+    return ("波形の " + "、".join(spans)) if spans else ""
 
 
 def _reading(post, chosen):
@@ -73,9 +46,9 @@ _PICKS = 0
 
 
 def pick_input(net, post):
-    """Input buttons; the schematic's net values and the shaded stretch of the post-layout
-    waveform follow the choice. Pure HTML and CSS (no widgets or scripts), so it works in Colab,
-    Jupyter and a saved copy alike."""
+    """Input buttons; the schematic's net values, the measured outputs and the matching stretch
+    of the waveform follow the choice. Pure HTML and CSS (no widgets or scripts), so it works in
+    Colab, Jupyter and a saved copy alike."""
     global _PICKS
     _PICKS += 1
     key = f"tfpick{_PICKS}"
@@ -89,15 +62,15 @@ def pick_input(net, post):
         radios.append(f'<input type="radio" name="{key}" id="{key}-{index}"{" checked" if index == start else ""}>'
                       f'<label for="{key}-{index}">{escape(label)}</label>')
         circuit = net.schematic(inputs=dict(zip(inputs, chosen)), net_names=True, expand="*", title=label)
-        panels.append(f'<div class="p{index}"><div class="reading">{escape(_reading(post, chosen))}</div>'
-                      f'{circuit._repr_svg_()}<img src="data:image/png;base64,{_waveform_png(post, chosen)}"></div>')
+        reading = " · ".join(part for part in (_reading(post, chosen), _intervals(post, chosen)) if part)
+        panels.append(f'<div class="p{index}"><div class="reading">{escape(reading)}</div>{circuit._repr_svg_()}</div>')
         rules.append(f"#{key}-{index}:checked ~ .p{index}{{display:block}}")
     style = (f".{key} input{{display:none}}"
              f".{key} label{{display:inline-block;padding:.25em .9em;margin:0 .3em .5em 0;border:1px solid #c9ccd1;"
              f"border-radius:4px;cursor:pointer}}"
              f".{key} input:checked + label{{background:#1f5fa8;color:#fff;border-color:#1f5fa8}}"
              f".{key} > div{{display:none}} .{key} .reading{{margin:.3em 0}}"
-             f".{key} svg, .{key} img{{max-width:100%;height:auto;display:block}}" + "".join(rules))
+             f".{key} svg{{max-width:100%;height:auto;display:block}}" + "".join(rules))
     display(HTML(f'<style>{style}</style><div class="{key}" style="{FONT}">{"".join(radios)}{"".join(panels)}</div>'))
 
 
