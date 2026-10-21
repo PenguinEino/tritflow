@@ -24,7 +24,7 @@ CDN = "https://cdn.jsdelivr.net/gh/PenguinEino/tritflow"
 
 PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
-from views import pick_input, flow_map, stimulus
+from views import pick_input, stimulus
 from inverter_views import inverter
 from cell_views import closure_view, cell_tables, cell_row
 from tritflow import CELLS_DIR
@@ -83,10 +83,6 @@ with step("ngspice") as s:
                               edge_s=1e-9, temperature_c=27)
     s.done("全区間で ±0.5 V の帯に入った" if post["measurements"]["passed"] else "帯に入らない区間がある")
 pick_input(net, post)''',
-
-"map": '''# 1-6 いま何が起きたか
-need("post", why="この図は、1-1から1-5までの実行結果をまとめます。")
-flow_map(net, lay, drc, lvs, extracted, post)''',
 
 "inv": '''# 2-1 INVのDC解析と寸法
 with step("ngspice（INVのDC解析）") as s:

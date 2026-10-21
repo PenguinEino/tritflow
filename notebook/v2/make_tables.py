@@ -1,4 +1,4 @@
-"""Draw the narrative's small truth tables as SVG.
+"""Draw the narrative's small truth tables and the chapter 1 flow map as SVG.
 
 Colab's Markdown drops inline styles, so an HTML table in a text cell renders at the default
 small size. An SVG keeps its size, scales cleanly and shows before any cell runs. It is served
@@ -45,6 +45,50 @@ TABLES = {
                  widths=[150, 150]),
 }
 
+
+
+TRITFLOW, OSS = "#e8782a", "#7d8794"
+
+
+def flow_map():
+    """The flow of chapter 1 in two rows: what TritFlow implements and what open-source tools do."""
+    rows = [[("三値のHDL", "TritFlow", TRITFLOW), ("論理合成", "TritFlow", TRITFLOW),
+             ("スタンダードセル", "TritFlow", TRITFLOW), ("配置配線", "TritFlow", TRITFLOW)],
+            [("DRC・LVS", "KLayout＋PDKのデッキ", OSS), ("抽出", "KLayout", OSS),
+             ("配線容量の見積もり", "TritFlow", TRITFLOW), ("回路シミュレーション", "ngspice＋PDKのモデル", OSS),
+             ("三値の判定", "TritFlow", TRITFLOW)]]
+    box_w, box_h, gap, arrow = 166, 58, 26, 26
+    width = 5*box_w+4*gap+20
+    height = 10+2*box_h+70+40
+    parts = []
+    def box(x, y, title, owner, color):
+        parts.append(f'<rect x="{x}" y="{y}" width="{box_w}" height="{box_h}" rx="7" fill="{color}1f" stroke="{color}" stroke-width="1.6"/>'
+                     f'<text x="{x+box_w/2}" y="{y+25}" font-size="15" font-weight="700" text-anchor="middle" fill="#30353b">{escape(title)}</text>'
+                     f'<text x="{x+box_w/2}" y="{y+45}" font-size="12" text-anchor="middle" fill="{color}">{escape(owner)}</text>')
+    def right(x, y):
+        parts.append(f'<path d="M{x},{y} h{gap-8}" stroke="#59606b" stroke-width="1.6"/>'
+                     f'<path d="M{x+gap-2},{y} l-8,-4 v8 z" fill="#59606b"/>')
+    for r, row in enumerate(rows):
+        y = 10+r*(box_h+70)
+        for k, (title, owner, color) in enumerate(row):
+            x = 10+k*(box_w+gap)
+            box(x, y, title, owner, color)
+            if k < len(row)-1:
+                right(x+box_w, y+box_h/2)
+    # From the end of the first row down and back to the start of the second.
+    x_end, y_mid = 10+3*(box_w+gap)+box_w/2, 10+box_h
+    parts.append(f'<path d="M{x_end},{y_mid} v{arrow} H{10+box_w/2} v{70-arrow-8}" fill="none" stroke="#59606b" stroke-width="1.6"/>'
+                 f'<path d="M{10+box_w/2},{10+box_h+70-2} l-4,-8 h8 z" fill="#59606b"/>')
+    legend_y = 10+2*box_h+70+28
+    parts.append(f'<rect x="10" y="{legend_y-11}" width="12" height="12" fill="{TRITFLOW}"/>'
+                 f'<text x="28" y="{legend_y}" font-size="13" fill="#30353b">TritFlow</text>'
+                 f'<rect x="110" y="{legend_y-11}" width="12" height="12" fill="{OSS}"/>'
+                 f'<text x="128" y="{legend_y}" font-size="13" fill="#30353b">OSS</text>')
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" '
+            f'font-family="Noto Sans CJK JP, Noto Sans, sans-serif">{"".join(parts)}</svg>\n')
+
+
+TABLES["flow_map"] = flow_map()
 
 def width(svg):
     """Display width in CSS pixels."""
