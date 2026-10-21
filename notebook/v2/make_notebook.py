@@ -153,27 +153,44 @@ with step("論理合成") as s:
            + f" · 全{add2.equivalence['vectors']}入力で等価")
 bus_picker(add2)''',
 
-"case_source": '''# 3-6 HDL：真理値表で書いた乗算
-case_source = """
-module mul_table(input trit a, b, output reg trit y);
-  always @(*) begin
-    case ({a, b})
-      2'tTT, 2't11: y = 1't1;
-      2'tT1, 2't1T: y = 1'tT;
-      default:      y = 1't0;
+"sel_source": '''# 3-6 HDL：同じ選択を書き分ける
+select_sources = {
+"?:": """
+module sel_cond(input trit [1:0] a, b, input trit op, output trit [2:0] r);
+  assign r = (op == 1't0) ? a : (op == 1't1 ? a + b : a - b);
+endmodule
+""",
+"case": """
+module sel_case(input trit [1:0] a, b, input trit op, output reg trit [2:0] r);
+  always @* begin
+    case (op)
+      1'tT: r = a - b;
+      1't0: r = a;
+      1't1: r = a + b;
     endcase
   end
 endmodule
-"""''',
+""",
+"a + op*b": """
+module sel_mul(input trit [1:0] a, b, input trit op, output trit [2:0] r);
+  assign r = a + op*b;
+endmodule
+""",
+# Not the same function: at op = 0 it keeps only the digits where a+b and a-b agree.
+"op ? a+b : a-b": """
+module sel_raw(input trit [1:0] a, b, input trit op, output trit [2:0] r);
+  assign r = op ? a + b : a - b;
+endmodule
+""",
+}''',
 
-"case_synth": '''# 3-7 論理合成して、* で書いた乗算と比べる
-need("case_source", why="合成するHDLは、3-6に書いてあります。")
-with step("論理合成（真理値表と *）") as s:
-    mul_table = flow.loads(case_source).synthesize()
-    mul_op = flow.loads("module mul_op(input trit a, b, output trit y); assign y = a * b; endmodule\\n").synthesize()
-    s.done(f"真理値表 {mul_table.report()['total_cells']}セル · * {mul_op.report()['total_cells']}セル")
-cell_counts({"真理値表（case）": mul_table, "演算子（*）": mul_op})
-mul_table.schematic(net_names=True, expand="*", title="", legend=False)''',
+"sel_synth": '''# 3-7 論理合成して比べる
+need("select_sources", why="合成するHDLは、3-6に書いてあります。")
+with step("論理合成（4通り）") as s:
+    selects = {name: flow.loads(source).synthesize() for name, source in select_sources.items()}
+    s.done(" · ".join(f"{name} {net.report()['total_cells']}セル" for name, net in selects.items()))
+cell_counts(selects)
+schematic_view(selects["a + op*b"].schematic(net_names=True, expand="*", title="", legend=False))''',
 }
 
 CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md"]
