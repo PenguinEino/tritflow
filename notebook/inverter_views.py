@@ -11,7 +11,7 @@ import json
 
 from IPython.display import HTML, display
 
-from live import FONT, DIM
+from live import FONT, DIM, control_style
 
 ON, OFF, INK = "#e8782a", "#b4b9c1", "#30353b"
 TRIT_TEXT = {-1: "−1", 0: "0", 1: "+1"}
@@ -187,14 +187,11 @@ def inverter(spice, grid):
                       f'<label for="{key}-{index}">A = {TRIT_TEXT[trit]}</label>')
         panels.append(f'<div class="p{index}">{_inverter_svg(trit)}</div>')
         rules.append(f"#{key}-{index}:checked ~ .top .p{index}{{display:block}}")
-    style = (f".{key}{{max-width:960px}} .{key} > input{{display:none}}"
-             f".{key} > label{{display:inline-block;padding:.25em 1em;margin:0 .35em .4em 0;border:1px solid #c9ccd1;"
-             f"border-radius:4px;cursor:pointer;font-size:14px}}"
-             f".{key} > input:checked + label{{background:{ON};color:#fff;border-color:{ON}}}"
+    style = (control_style(f".{key}") + f".{key}{{max-width:960px}}"
              f".{key} .top,.{key} .bottom{{display:grid;grid-template-columns:300px 1fr;gap:1.2em;align-items:center}}"
              f".{key} .bottom{{margin-top:1em;padding-top:.8em;border-top:1px solid #e3e5e8}}"
              f".{key} .sch > div{{display:none}}"
-             f".{key} .s{{display:block;font-size:13px;margin:.15em 0 .55em}} .{key} .s input{{width:100%;accent-color:{ON}}}"
+             f".{key} .s{{display:block;font-size:13px;margin:.15em 0 .45em;color:#2b2f36}}"
              f".{key} .read{{font-size:13px;color:{INK};margin-top:.3em}}"
              f"@media (max-width:720px){{.{key} .top,.{key} .bottom{{grid-template-columns:1fr}}}}" + "".join(rules))
     data = {"rows": candidates, "adopted": adopted}

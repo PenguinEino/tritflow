@@ -413,3 +413,22 @@ def install_error_view():
         shell.showtraceback((kind, value, traceback), tb_offset=tb_offset)
 
     shell.set_custom_exc((NotReady, NameError), show)
+
+
+# --- controls in the figures: quiet, print-like buttons and sliders --------------------------
+
+def control_style(scope):
+    """CSS for radio-button labels and range sliders under ``scope``: thin rules, no fill colour,
+    the selected choice in ink, like the controls of a figure rather than an app."""
+    ink, rule = "#2b2f36", "#b9bdc4"
+    return (f"{scope} input[type=radio]{{display:none}}"
+            f"{scope} input[type=radio] + label{{display:inline-block;padding:.12em .8em;margin:0 -1px .5em 0;"
+            f"border:1px solid {rule};border-radius:0;cursor:pointer;font-size:13px;color:{ink};background:#fff}}"
+            f"{scope} input[type=radio]:checked + label{{background:{ink};border-color:{ink};color:#fff}}"
+            f"{scope} input[type=range]{{-webkit-appearance:none;appearance:none;width:100%;height:14px;"
+            f"background:transparent;margin:.2em 0}}"
+            f"{scope} input[type=range]::-webkit-slider-runnable-track{{height:1px;background:{rule}}}"
+            f"{scope} input[type=range]::-moz-range-track{{height:1px;background:{rule}}}"
+            f"{scope} input[type=range]::-webkit-slider-thumb{{-webkit-appearance:none;width:9px;height:9px;"
+            f"margin-top:-4px;border-radius:50%;background:{ink};border:0}}"
+            f"{scope} input[type=range]::-moz-range-thumb{{width:9px;height:9px;border-radius:50%;background:{ink};border:0}}")
