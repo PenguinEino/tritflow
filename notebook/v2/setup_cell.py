@@ -42,7 +42,14 @@ if IN_COLAB:
             progress=f"コミット {SOURCE_REF[:7]} を取得")
         git("-C", str(ROOT), "switch", "--detach", SOURCE_REF, progress="ファイルを展開")
     if git("rev-parse", "HEAD") != SOURCE_REF or git("status", "--porcelain", "--untracked-files=no"):
-        raise RuntimeError("/content/tritflow differs from the pinned commit; connect a fresh runtime")
+        # A runtime left by another version of this notebook: move it to the pinned commit and
+        # drop the modules the kernel already imported from the old checkout.
+        git("-C", str(ROOT), "fetch", "--progress", "--depth", "1", "origin", SOURCE_REF,
+            progress=f"コミット {SOURCE_REF[:7]} に切り替え")
+        git("reset", "--hard", SOURCE_REF)
+        for name, module in list(sys.modules.items()):
+            if str(getattr(module, "__file__", "") or "").startswith(str(ROOT)):
+                del sys.modules[name]
 else:
     candidates = [Path(os.environ.get("TRITFLOW_ROOT", ".")), Path.cwd(), Path.cwd().parent]
     ROOT = next((p.resolve() for p in candidates if (p/"tritflow").is_dir() and (p/"notebook").is_dir()), None)
