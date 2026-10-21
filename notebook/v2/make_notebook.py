@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from setup_cell import SETUP
+from make_tables import TABLES, width
 
 RAW = "https://raw.githubusercontent.com/PenguinEino/tritflow"
 
@@ -120,6 +121,9 @@ def cells(ref):
     setup = "#@title 準備（最初に実行） { display-mode: \"form\" }\n" + SETUP.replace('"PINNED"', f'"{ref}"') + PREAMBLE
     for index, name in enumerate(CHAPTERS):
         text = (HERE/"narrative"/name).read_text()
+        text = re.sub(r"<!-- tables: ([\w ]+) -->", lambda m: "&emsp;&emsp;".join(
+            f'<img src="{RAW}/{ref}/notebook/assets/tables/{name}.png" width="{width(TABLES[name])}" alt="{name}">'
+            for name in m[1].split()), text)
         text = re.sub(r"<!-- asset: (\S+) \| (.+?) -->", lambda m: f"<details><summary>{m[2]}</summary>\n\n"
                       f"![{m[2]}]({RAW}/{ref}/{m[1]})\n\n</details>", text)
         text = re.sub(r"<!-- figure: (\w+) -->", lambda m: f"![図1]({RAW}/{ref}/figures/out/{m[1]}_ja.png)", text)
