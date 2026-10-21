@@ -11,27 +11,28 @@ import re
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[1]/"assets/tables"
-COLOR = {"−1": "#2f6fbf", "0": "#6b7280", "+1": "#c8423b"}
-CELL_W, CELL_H, FONT = 92, 40, 19
+# Same palette and face as notebook/style.py and the paper figures.
+INK, COLOR = "#0b0b0b", {"−1": "#2a78d6", "0": "#6f6e69", "+1": "#e34948"}
+SERIF = "Times New Roman, Times, Nimbus Roman, Liberation Serif, Noto Serif JP, Hiragino Mincho ProN, serif"
+CELL_W, CELL_H, FONT = 88, 34, 18
 
 
 def table(rows, *, header_rows=1, header_cols=0, widths=None):
-    """rows: list of lists of strings. Header cells are shaded; trit values are coloured."""
+    """rows: list of lists of strings, drawn booktabs-style: a rule above and below the table and
+    a thin one under the header, no vertical lines; trit values in their colours."""
     columns = len(rows[0])
     widths = widths or [CELL_W]*columns
-    width, height = sum(widths)+2, CELL_H*len(rows)+2
-    parts = []
+    width, height = sum(widths), CELL_H*len(rows)+4
+    parts = [f'<path d="M0,1 H{width} M0,{height-1} H{width}" stroke="{INK}" stroke-width="1.4"/>',
+             f'<path d="M0,{2+header_rows*CELL_H} H{width}" stroke="{INK}" stroke-width=".8"/>']
     for r, row in enumerate(rows):
-        x = 1
+        x = 0
         for c, text in enumerate(row):
             header = r < header_rows or c < header_cols
             bold = header or text.startswith("**")
             text = text.strip("*")
-            fill = "#f3f4f6" if header else "#ffffff"
-            color = "#30353b" if header else COLOR.get(text, "#30353b")
-            parts.append(f'<rect x="{x}" y="{1+r*CELL_H}" width="{widths[c]}" height="{CELL_H}" '
-                         f'fill="{fill}" stroke="#c9ccd1"/>')
-            parts.append(f'<text x="{x+widths[c]/2}" y="{1+r*CELL_H+CELL_H/2+FONT*.35}" font-size="{FONT}" '
+            color = INK if header else COLOR.get(text, INK)
+            parts.append(f'<text x="{x+widths[c]/2}" y="{2+r*CELL_H+CELL_H/2+FONT*.35}" font-size="{FONT}" '
                          f'text-anchor="middle" fill="{color}"{" font-weight=\"700\"" if bold else ""}>{escape(text)}</text>')
             x += widths[c]
     return "".join(parts), width, height
@@ -45,7 +46,7 @@ def svg(*tables, gap=48):
         x, height = x+w+gap, max(height, h)
     width = x-gap
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" '
-            f'font-family="Noto Sans CJK JP, Noto Sans, sans-serif">{"".join(parts)}</svg>\n')
+            f'font-family="{SERIF}">{"".join(parts)}</svg>\n')
 
 
 SCHEMATIC = Path(__file__).resolve().parents[1]/"assets/schematics/src/inv_compact.sch"
@@ -80,7 +81,7 @@ def compact_schematic(sch=SCHEMATIC, crop=(20, -130, 360, 290), width=330):
         return match[1]+content+"</text>"
     svg = re.sub(r"(<text\b[^>]*>)([^<]*)</text>", text, svg)
     svg = re.sub(r'<(?:path|rect)\b[^>]*class="l5"[^>]*/>', "", svg)
-    svg = _theme_svg(svg, "INV", "light")
+    svg = _theme_svg(svg, "INV", "light").replace("DejaVu Sans,sans-serif", SERIF)
     return re.sub(r'width="[^"]+" height="[^"]+"', f'width="{width}" height="{height}"', svg, count=1), width, height
 
 
@@ -92,7 +93,7 @@ def beside(table_parts, schematic, gap=40):
     body = svg[svg.index(">", svg.index("<svg"))+1:svg.rindex("</svg>")]
     view = re.search(r'viewBox="([^"]+)"', svg)[1]
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{tw+gap+sw}" height="{height}" '
-            f'viewBox="0 0 {tw+gap+sw} {height}" font-family="Noto Sans CJK JP, Noto Sans, sans-serif">'
+            f'viewBox="0 0 {tw+gap+sw} {height}" font-family="{SERIF}">'
             f'<g transform="translate(0,{(height-th)/2})">{inner}</g>'
             f'<svg x="{tw+gap}" y="{(height-sh)/2}" width="{sw}" height="{sh}" viewBox="{view}">{body}</svg></svg>\n')
 
