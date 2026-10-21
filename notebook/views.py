@@ -9,8 +9,8 @@ from itertools import product
 
 from IPython.display import HTML, display
 
-from style import (ACCENT, BAND, INK, INK2, MUTED, TRIT_COLOR, TRIT_TEXT, control_style, figure_css,
-                   paper_axes, paper_layout, table_css)
+from style import (ACCENT, BAND, CURRENT_COLOR, INK, INPUT_COLORS, MUTED, OUTPUT_COLORS, TRIT_TEXT, control_style,
+                   figure_css, paper_axes, paper_layout, table_css)
 
 
 def stimulus(net, limit=27):
@@ -56,8 +56,10 @@ def scope_figure(post, *, title=None):
                 figure.add_hrect(y0=level-PASS_BAND, y1=level+PASS_BAND, fillcolor=BAND, opacity=1, line_width=0,
                                  layer="below", row=row, col=1, exclude_empty_subplots=False)
             output = name in stimulus["outputs"]
+            group, palette = (stimulus["outputs"], OUTPUT_COLORS) if output else (stimulus["inputs"], INPUT_COLORS)
+            color = palette[group.index(name) % len(palette)]
             figure.add_trace(go.Scatter(x=t, y=signal_waveform(waves, name), mode="lines", name=name, showlegend=False,
-                                        line={"color": TRIT_COLOR[-1] if output else INK2, "width": 1.4},
+                                        line={"color": color, "width": 2.4},
                                         hovertemplate=f"{name} %{{y:.3f}} V<extra></extra>"), row=row, col=1)
             if output:
                 figure.add_trace(go.Scatter(
@@ -66,10 +68,11 @@ def scope_figure(post, *, title=None):
                     marker={"symbol": ["circle-open" if r["outputs"][name]["passed"] else "x" for r in rows],
                             "size": 7, "color": [INK if r["outputs"][name]["passed"] else ACCENT for r in rows],
                             "line": {"width": 1.3}}), row=row, col=1)
-            figure.update_yaxes(range=[-6.2, 6.2], tickvals=[-5, 0, 5], title_text=f"{name} (V)", row=row, col=1)
+            figure.update_yaxes(range=[-6.2, 6.2], tickvals=[-5, 0, 5], title_text=f"{name} (V)",
+                                title_font={"color": color}, row=row, col=1)
         else:
             figure.add_trace(go.Scatter(x=t, y=np.abs(np.asarray(waves["i(vdd)"]))*1e3, mode="lines", showlegend=False,
-                                        line={"color": MUTED, "width": 1.2},
+                                        line={"color": CURRENT_COLOR, "width": 2},
                                         hovertemplate="|I(VDD)| %{y:.3f} mA<extra></extra>"), row=row, col=1)
             figure.update_yaxes(title_text="|I<sub>VDD</sub>| (mA)", row=row, col=1)
     paper_axes(figure)
