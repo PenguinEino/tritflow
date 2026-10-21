@@ -8,6 +8,28 @@ from .vector import INK, SECONDARY, TRIT_COLOR, Vector
 from .model import natural
 
 
+# Legend words; the notebook switches them with set_language().
+LABELS = {
+    'en': {'cells': '{n} cells', 'branch': 'Branch', 'crossing': 'Crossing: no connection',
+           'values': 'Port values', 'wire_c': 'Port wire C', 'and_wire_c': ' / wire C'},
+    'ja': {'cells': '{n}セル', 'branch': '分岐', 'crossing': '交差（接続なし）',
+           'values': '端子の値', 'wire_c': '端子の配線容量', 'and_wire_c': '・配線容量'},
+}
+_language = 'en'
+
+
+def set_language(code):
+    """Draw legend words in ``code`` ('en' or 'ja') from now on."""
+    global _language
+    if code not in LABELS:
+        raise ValueError(f'unknown language: {code}')
+    _language = code
+
+
+def _label(key):
+    return LABELS[_language][key]
+
+
 def _rect(v,x,y,w,h,**style):
     v.path([('M',x,y),('L',x+w,y),('L',x+w,y+h),('L',x,y+h),('Z',)],**style)
 
@@ -137,7 +159,7 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
                   for n in scene.symbols for p,signal in n.outputs.items()}
     v.text(24,max(20,v.font_min+4),title,size=12,weight='bold')
     gates=sum(len(n.members) for n in scene.symbols)
-    v.text(v.width-24,max(20,v.font_min+4),f'{gates} cells',size=9,color=SECONDARY,anchor='end')
+    v.text(v.width-24,max(20,v.font_min+4),_label('cells').format(n=gates),size=9,color=SECONDARY,anchor='end')
     for frame in scene.frames:
         x0,y0,x1,y1=frame.box
         _rect(v,x0,y0,x1-x0,y1-y0,stroke='#c3c2b7',fill='#fafaf8',width=.8)
@@ -176,7 +198,7 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
         v.line((24,footer-3),(48,footer-3),width=1.2)
         v.line((36,footer-11),(36,footer-3),width=1.2)
         v.circle(36,footer-3,2.4,fill=INK,stroke=INK,width=0)
-        v.text(56,footer,'Branch',size=9,color=SECONDARY)
+        v.text(56,footer,_label('branch'),size=9,color=SECONDARY)
     if any(h.net!=s.net and h.a[1]==h.b[1] and s.a[0]==s.b[0]
            and h.a[0]<s.a[0]<h.b[0] and s.a[1]<h.a[1]<s.b[1]
            for h in horizontal for s in vertical):
@@ -184,12 +206,12 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
         v.line((offset+12,footer-11),(offset+12,footer+5),width=1.2)
         v.line((offset,footer-3),(offset+24,footer-3),stroke='white',width=5)
         v.line((offset,footer-3),(offset+24,footer-3),width=1.2)
-        v.text(offset+32,footer,'Crossing: no connection',size=9,color=SECONDARY)
+        v.text(offset+32,footer,_label('crossing'),size=9,color=SECONDARY)
     if annotated:
         baseline=64 if beside else scene.height+row_pitch
         legend_x=scene.width+8 if beside else 24
-        heading='Port values' if values is not None else 'Port wire C'
-        if values is not None and caps:heading+=' / wire C'
+        heading=_label('values') if values is not None else _label('wire_c')
+        if values is not None and caps:heading+=_label('and_wire_c')
         v.text(legend_x,baseline,heading,size=10,weight='bold')
         cell_width=(scene.width-48)/columns
         for k,signal in enumerate(visible):
