@@ -14,7 +14,7 @@
 | a = 0 | −1 | 0 | 0 |
 | a = +1 | −1 | 0 | +1 |
 
-次のHDLをGDSまで通す。書き換えてもよい。
+TritFlowのHDL（TritVerilog）で書くと、次のようになる。
 
 <!-- code: source -->
 
