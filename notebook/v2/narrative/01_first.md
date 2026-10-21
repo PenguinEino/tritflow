@@ -18,7 +18,7 @@ TritFlowのHDL（TritVerilog）で書くと、次のようになる。
 
 <!-- code: pnr -->
 
-PDKの公式デッキでDRCとLVSを行う。TritFlow用の緩和や例外は入れていない。
+PDKの公式デッキでDRCとLVSを行う。
 
 <!-- code: check -->
 
