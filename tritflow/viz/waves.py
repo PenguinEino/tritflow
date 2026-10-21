@@ -173,8 +173,9 @@ def waveform_scope(result: dict, *, title='Post-layout transient', currents=('VD
         if kind == 'v':
             y, unit, label = signal_waveform(waves, name), 'V', f'v({name})'
             for level in levels:
+                # The lane has no trace yet; without exclude_empty_subplots the band is dropped.
                 fig.add_hrect(y0=level-PASS_BAND, y1=level+PASS_BAND, fillcolor='#1f6f4a', opacity=.25,
-                              line_width=0, row=row, col=1)
+                              line_width=0, row=row, col=1, exclude_empty_subplots=False)
             fig.update_yaxes(range=[levels[0]-1.2, levels[-1]+1.2], tickvals=levels, row=row, col=1)
         else:
             y, unit, label = np.abs(np.asarray(waves[f'i({name.lower()})']))*1e3, 'mA', f'|i({name.lower()})|'

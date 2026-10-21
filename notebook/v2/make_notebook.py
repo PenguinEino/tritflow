@@ -24,7 +24,6 @@ from live import need, provides, install_error_view, LayoutView
 from views import pick_input, flow_map, stimulus
 from tritflow import flow
 from tritflow.viz.layout import gds_viewer
-from tritflow.viz.waves import waveform_scope
 from tritflow.schematic import set_language
 set_language("ja")
 install_error_view()
@@ -76,7 +75,6 @@ with step("ngspice") as s:
     post = extracted.simulate(stimulus(net), load=100e-15, hold_s=1e-6, step_s=2e-9,
                               edge_s=1e-9, temperature_c=27)
     s.done("全区間で ±0.5 V の帯に入った" if post["measurements"]["passed"] else "帯に入らない区間がある")
-waveform_scope(post, title="ポストレイアウトシミュレーション").show()
 pick_input(net, post)''',
 
 "map": '''# 1-6 いま何が起きたか
