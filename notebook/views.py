@@ -48,15 +48,22 @@ HIGHLIGHT = {"type": "rect", "xref": "x", "yref": "paper", "y0": 0, "y1": 1, "la
 
 
 def _truth_table(net, inputs, outputs, rows, chosen):
-    """Logic truth table with the chosen input row marked."""
-    from tritflow.synth import evaluate_netlist
-    head = "".join(f"<th>{escape(n)}</th>" for n in [*inputs, *outputs])
+    """Truth table with every internal net (named by the gate that drives it) between inputs
+    and outputs; the chosen input row is marked."""
+    from tritflow.synth.simulate import CELL_INPUTS, evaluate_netlist, ordered_instances
+    ports = {*inputs, *outputs}
+    inner = [(inst.name, inst.cell, net_name) for inst in ordered_instances(net)
+             for pin, net_name in inst.pins.items()
+             if pin not in CELL_INPUTS[inst.cell] and net_name not in ports]
+    head = ("".join(f'<th class="io">{escape(n)}</th>' for n in inputs)
+            + "".join(f'<th class="mid">{escape(name)}<small>{escape(cell)}</small></th>' for name, cell, _ in inner)
+            + "".join(f'<th class="io">{escape(n)}</th>' for n in outputs))
     body = []
     for vector in rows:
-        values = evaluate_netlist(net, dict(zip(inputs, vector)))
-        cells = [*vector, *(int(values[n]) for n in outputs)]
+        values = evaluate_netlist(net, dict(zip(inputs, vector)), return_all=True)
+        cells = [*vector, *(int(values[n]) for _, _, n in inner), *(int(values[n]) for n in outputs)]
         mark = ' class="on"' if vector == chosen else ""
-        body.append(f"<tr{mark}>" + "".join(f"<td>{TRIT_TEXT[v]}</td>" for v in cells) + "</tr>")
+        body.append(f"<tr{mark}>" + "".join(f'<td class="t{v+1}">{TRIT_TEXT[v]}</td>' for v in cells) + "</tr>")
     return f'<table class="tt"><tr>{head}</tr>{"".join(body)}</table>'
 
 
@@ -82,7 +89,8 @@ def pick_input(net, post, *, title="ポストレイアウトシミュレーシ�
     base = scope.to_plotly_json()["layout"].get("shapes", [])
     marks = [[{**HIGHLIGHT, "x0": i*hold, "x1": (i+1)*hold} for i, row in enumerate(rows)
               if tuple(row["input_trits"]) == chosen] for chosen in choices]
-    scope.update_layout(shapes=[*base, *marks[start]], paper_bgcolor="#0d1117")
+    scope.update_layout(shapes=[*base, *marks[start]], paper_bgcolor="#0d1117", height=min(scope.layout.height, 560))
+    scope.update_xaxes(range=[0, len(rows)*hold])
     plot = scope.to_html(include_plotlyjs="cdn", full_html=False, div_id=f"{key}-scope",
                          config={"displaylogo": False, "scrollZoom": True})
 
@@ -97,26 +105,29 @@ def pick_input(net, post, *, title="ポストレイアウトシミュレーシ�
                       f'<div class="sch">{circuit._repr_svg_()}</div>'
                       f'{_truth_table(net, inputs, outputs, table_rows, chosen)}</div></div>')
         rules.append(f"#{key}-{index}:checked ~ .p{index}{{display:block}}")
-    style = (f".{key} input{{display:none}}"
-             f".{key} label{{display:inline-block;padding:.25em .9em;margin:0 .3em .5em 0;border:1px solid #c9ccd1;"
-             f"border-radius:4px;cursor:pointer}}"
+    style = (f".{key}{{max-width:1180px}} .{key} input{{display:none}}"
+             f".{key} label{{display:inline-block;padding:.3em 1em;margin:0 .35em .5em 0;border:1px solid #c9ccd1;"
+             f"border-radius:4px;cursor:pointer;font-size:14px}}"
              f".{key} input:checked + label{{background:#e8782a;color:#fff;border-color:#e8782a}}"
-             f".{key} > div[class^=p]{{display:none}} .{key} .reading{{margin:.3em 0}}"
-             f".{key} .row{{display:flex;flex-wrap:wrap;gap:1em;align-items:flex-start}}"
-             f".{key} .sch{{flex:1 1 480px;min-width:0}} .{key} .sch svg{{max-width:100%;height:auto;display:block}}"
-             f".{key} .tt{{border-collapse:collapse;margin-top:2.2em}}"
-             f".{key} .tt td, .{key} .tt th{{border:1px solid #d5d7db;padding:.15em .7em;text-align:center}}"
-             f".{key} .tt th{{background:#f3f4f6}} .{key} .tt tr.on td{{background:#e8782a33;font-weight:700}}"
-             f".{key} .scope{{background:#0d1117;border-radius:12px;padding:8px 6px 2px;margin:.4em 0 1em;"
+             f".{key} > div[class^=p]{{display:none}} .{key} .reading{{margin:.2em 0 .6em;font-size:14px}}"
+             f".{key} .row{{display:flex;flex-wrap:wrap;gap:1.5em;align-items:center}}"
+             f".{key} .sch{{flex:3 1 520px;min-width:0}} .{key} .sch svg{{width:100%;height:auto;display:block}}"
+             f".{key} .tt{{flex:0 0 auto;border-collapse:collapse;font-size:15px}}"
+             f".{key} .tt td, .{key} .tt th{{border:1px solid #d5d7db;padding:.3em .8em;text-align:center}}"
+             f".{key} .tt th{{background:#f3f4f6;font-weight:700}} .{key} .tt th.mid{{background:#fafafa;color:#59606b;font-weight:600}}"
+             f".{key} .tt th small{{display:block;font-size:10px;font-weight:400;color:{DIM}}}"
+             f".{key} .tt td.t0{{color:#2f6fbf}} .{key} .tt td.t2{{color:#c8423b}} .{key} .tt td.t1{{color:#6b7280}}"
+             f".{key} .tt tr.on td{{background:#e8782a26;font-weight:700}}"
+             f".{key} .scope{{background:#0d1117;border-radius:12px;padding:8px 6px 2px;margin:.3em 0 1em;"
              f"box-shadow:0 0 0 1px #d5d7db, 0 6px 18px -8px rgba(13,17,23,.55)}}"
-             f".{key} .hint{{color:{DIM};margin:.2em 0}}" + "".join(rules))
+             f".{key} .hint{{color:{DIM};margin:1em 0 .2em}}" + "".join(rules))
     script = (f"<script>(function(){{var marks={json.dumps(marks)},base={json.dumps(base)};"
               f"document.querySelectorAll('input[name={key}]').forEach(function(r){{r.addEventListener('change',function(){{"
               f"var d=document.getElementById('{key}-scope');if(window.Plotly&&d)"
               f"Plotly.relayout(d,{{shapes:base.concat(marks[+r.dataset.i])}});}});}});}})();</script>")
-    display(HTML(f'<style>{style}</style><div class="{key}" style="{FONT}">'
+    display(HTML(f'<style>{style}</style><div class="{key}" style="{FONT}">{"".join(radios)}{"".join(panels)}'
                  f'<div class="hint">ドラッグで拡大、ダブルクリックで全体に戻る。下のスライダーで時間の範囲を選べる。</div>'
-                 f'<div class="scope">{plot}</div>{"".join(radios)}{"".join(panels)}</div>{script}'))
+                 f'<div class="scope">{plot}</div></div>{script}'))
 
 
 def _box(title, owner, detail):
