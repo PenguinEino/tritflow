@@ -86,3 +86,6 @@ class Scene:
     trunks: tuple[Segment, ...] = ()
     # Outer routes are kept separately so frame-boundary access is auditable.
     interconnect: tuple[Segment, ...] = ()
+    # Detailed flat RTL drawings need zoom/scroll instead of growing labels
+    # beyond the fixed gate outlines merely to fit a 1000 px overview.
+    detailed: bool = False

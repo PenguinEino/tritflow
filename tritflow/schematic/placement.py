@@ -5,7 +5,7 @@ import math
 from .model import natural
 
 
-def anchors(node, font=20):
+def anchors(node, font=20, input_pitch=32, stagger_unary=False):
     """Keep every logic gate facing right, including gates in folded rows."""
     x,y=node.x,node.y
     if node.kind in {'input','output'}:
@@ -33,7 +33,8 @@ def anchors(node, font=20):
     node.orient='right'
     node.width,node.height=(128 if len(node.label.rsplit('.',1)[-1])>4 else 96),128
     cy=y+80
-    offsets=[0] if len(node.inputs)==1 else [-16,16]
+    offsets=([-input_pitch//2 if stagger_unary else 0] if len(node.inputs)==1
+             else [-input_pitch//2,input_pitch//2])
     node.pins={p:(x,cy+off) for p,off in zip(node.inputs,offsets)}
     node.pins.update({p:(x+node.width,cy) for p in node.outputs})
     node.sides={p:'left' for p in node.inputs}|{p:'right' for p in node.outputs}
@@ -43,18 +44,22 @@ def _overlap(a,b,pad=0):
     return max(a[0]-pad,b[0])<min(a[2]+pad,b[2]) and max(a[1]-pad,b[1])<min(a[3]+pad,b[3])
 
 
-def place(nodes,driver,loads,arithmetic):
+def place(nodes,driver,loads,arithmetic, *, channel_scale=0):
     """Place standalone cells and collapsed hierarchy with local external ports.
 
     Expanded hierarchy is composed in macros.py before reaching this placer.
     The half-adder coordinates here are the single source for every copy.
+    Nonzero channel_scale unfolds generic logic into dependency columns and
+    adds routing room. Its input offsets are a full pitch from the output,
+    so a two-input gate cannot demand a forbidden half-pitch dogleg.
     """
     frames=[];placed=set();port_font=20
-    for node in nodes.values():anchors(node)
+    input_pitch=64 if channel_scale else 32
+    for node in nodes.values():anchors(node,input_pitch=input_pitch)
 
     def put(node,x,y,orient='right'):
         node.x,node.y,node.orient=int(x),int(y),orient
-        anchors(node,font=port_font);placed.add(node.key)
+        anchors(node,font=port_font,input_pitch=input_pitch);placed.add(node.key)
 
     def half(pattern,x,y):
         # Put the sign-reversal branch above the sum path. The u→c and
@@ -100,7 +105,7 @@ def place(nodes,driver,loads,arithmetic):
     # Keep external multiplier/min/max producers to the left of their full
     # adder load, including when the latter is a single collapsed block.
     base_x=1408 if external_core else 160
-    if candidates:
+    if candidates and not channel_scale:
         closed=all('block:'+m.scope in nodes for m in candidates)
         if closed:
             for k,m in enumerate(candidates):
@@ -108,7 +113,7 @@ def place(nodes,driver,loads,arithmetic):
                 put(node,base_x+192*k,200)
         else:
             for k,m in enumerate(candidates):full(m,base_x+k*1280,176)
-    if not placed:
+    if not placed and not channel_scale:
         root=arithmetic.get('')
         if root and root.module=='half_add' and all('cell:'+n in nodes for n in root.cells.values()):
             half(root,288,128)
@@ -121,11 +126,13 @@ def place(nodes,driver,loads,arithmetic):
         offset_y=160 if external_core or not placed else bottom+112
         blocks=any(n.kind=='block' for n in core)
         feedforward=len(core)>8 and len(levels)<=8
-        row_pitch=288 if blocks or feedforward else 160
-        column_pitch=320 if blocks else 256
+        row_pitch=(288 if blocks or feedforward else 160)+128*channel_scale
+        column_pitch=(320 if blocks else 256)+128*channel_scale
         fold_span=max(min(3,len(v)) for v in levels.values())*row_pitch+112
         unique=sorted(levels)
         column=0;fold=0
+        cursor_x=max(384,256+48*sum(len(loads[s])>1 for s,(k,p) in driver.items()
+                                   if nodes[k].kind=='input'))
         for level in unique:
             def aligned_y(node):
                 parents=[(nodes[driver[s][0]],driver[s][1],p)
@@ -138,9 +145,10 @@ def place(nodes,driver,loads,arithmetic):
                          for parent,out,pin in (local or parents)]
                 return sum(aligned)/len(aligned) if aligned else row_top
             group=sorted(levels[level],key=lambda n:(aligned_y(n),natural(n.key)))
-            percol=2 if len(group)>=4 and all(n.kind=='block' for n in group) else 3
+            percol=(len(group) if channel_scale else
+                    2 if len(group)>=4 and all(n.kind=='block' for n in group) else 3)
             across=math.ceil(len(group)/percol)
-            if column+across>(8 if feedforward else 4):column=0;fold+=1
+            if not channel_scale and column+across>(8 if feedforward else 4):column=0;fold+=1
             bottom_by_column={}
             for row,node in enumerate(group):
                 col=column+row//percol
@@ -148,13 +156,19 @@ def place(nodes,driver,loads,arithmetic):
                 minimum=bottom_by_column.get(col,base if col==0 else base-32)
                 desired=8*round(aligned_y(node)/8)
                 y=max(minimum,desired)
-                put(node,384+col*column_pitch,y)
+                if channel_scale:y=16+32*math.ceil((y-16)/32)
+                put(node,cursor_x if channel_scale else 384+col*column_pitch,y)
                 bottom_by_column[col]=y+max(row_pitch,node.height+32)
             column+=across
+            if channel_scale:
+                # A busy logic level needs a lane per outgoing fanout bus,
+                # not just the same fixed gap as a two-gate column.
+                buses=sum(len(loads[s])>1 for node in group for s in node.outputs.values())
+                cursor_x+=max(column_pitch,max(n.width for n in group)+128+48*buses)
 
     core_bounds=[n.box for n in nodes.values() if n.key in placed]
     span=max((b[2] for b in core_bounds),default=0)-min((b[0] for b in core_bounds),default=0)+384
-    port_font=max(20,(44/3 if len(core_bounds)<=10 else 12)*span/1000)
+    port_font=20 if channel_scale else max(20,(44/3 if len(core_bounds)<=10 else 12)*span/1000)
     for node in nodes.values():
         if node.kind in {'input','output'}:anchors(node,font=port_font)
     # External terminals follow their consumers/producers, not a bus-name sort
@@ -177,9 +191,11 @@ def place(nodes,driver,loads,arithmetic):
                 and not any(_overlap(box,b) for b in occupied))
     def port(node,preferred,orient):
         px,py=preferred
+        if channel_scale:py=32*round((py+16)/32)-16
         # Search nearby whole-grid offsets, keeping horizontal anchors aligned
         # whenever possible. Resolve unused inputs after all connected ports.
-        options=[(0,0)]+[(0,sign*d) for d in range(16,257,16) for sign in (-1,1)]
+        step=32 if channel_scale else 16
+        options=[(0,0)]+[(0,sign*d) for d in range(step,257,step) for sign in (-1,1)]
         options += [(dx,dy) for dy in (-96,96,-192,192) for dx in (-96,96,0)]
         for dx,dy in options:
             box=(px+dx,py+dy,px+dx+node.width,py+dy+32)
@@ -206,6 +222,7 @@ def place(nodes,driver,loads,arithmetic):
         else:
             ys=[nodes[k].pins[p][1] for k,p in sinks if nodes[k].x==target.x]
             cy=8*round(sum(ys)/len(ys)/8)
+            if channel_scale:cy=32*round(cy/32)
             offset=224+48*max(0,bus_count[target.x]-2) if len(sinks)>1 else node.width+64
             port(node,(tx-offset,cy-16),'right')
     for node in sorted((n for n in nodes.values() if n.kind=='output'),key=lambda n:natural(n.label)):

@@ -109,13 +109,19 @@ def _symbol(v,node):
         v.line((cx,cy-12),(cx,cy));v.line((cx,cy),(x1,cy))
         v.text(cx,cy-18,value,size=11,anchor='middle');return
     left,right=gate(v,node.kind,cx,cy)
+    input_y={p:cy+off for p,off in zip(node.inputs,[0] if len(node.inputs)==1 else [-16,16])}
     for pin,(px,py) in node.pins.items():
         if pin in node.outputs:
             end=(right,cy)
         else:
             offset=left
             if node.kind=='NOR':offset=cx-35+9*(1-(16/24)**2)
-            end=(offset,py)
+            end=(offset,input_y[pin])
+            if py!=end[1]:
+                v.line((px,py),(left-16,py))
+                v.line((left-16,py),(left-16,end[1]))
+                v.line((left-16,end[1]),end)
+                continue
         v.line((px,py),end)
 
 
@@ -152,13 +158,15 @@ def render(scene,values=None,caps=None,net_names=False,title=None,legend=True):
     # Native 11 pt text prevents small notebook figures from inheriting the
     # tiny legend font used by the old, wide publication canvases.
     small=sum(n.kind not in {'input','output'} for n in scene.symbols)<=10
-    font=max(44/3,(44/3 if small else 12)*scene.width/1000)
+    font=20 if scene.detailed else max(44/3,(44/3 if small else 12)*scene.width/1000)
     row_pitch=max(18,math.ceil(font*1.5))
     beside=annotated and scene.width+208<=1000
     columns=1 if beside else max(1,min(len(visible),int(scene.width/max(192,font*15))))
     rows=math.ceil(len(visible)/columns) if annotated else 0
     extra=row_pitch*(2+rows+(1 if caps else 0)) if annotated and not beside else 0
-    v = Vector(scene.width+(208 if beside else 0),scene.height+extra,font_min=font,stroke_min=.8*scene.width/1000)
+    v = Vector(scene.width+(208 if beside else 0),scene.height+extra,font_min=font,
+               stroke_min=.8 if scene.detailed else .8*scene.width/1000,
+               display_width_limit=scene.width*.8 if scene.detailed else 1000)
     v.net_labels={signal:_wire_name(n,p,signal,ports)
                   for n in scene.symbols for p,signal in n.outputs.items()}
     v.text(24,max(20,v.font_min+4),title,size=12,weight='bold')

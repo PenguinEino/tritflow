@@ -64,7 +64,9 @@ def assert_connections(net,scene):
             by_net[c.net].append(symbols[c.symbol].pins[c.pin])
     for signal,pins in by_net.items():
         segments=[s for s in scene.segments if s.net==signal]
-        points=set(pins)|{p for s in segments for p in (s.a,s.b)}
+        # Merging collinear branches can leave a connected four-way join in
+        # the interior of both segments. Split at its rendered junction too.
+        points=set(pins)|{p for s in segments for p in (s.a,s.b)}|set(scene.junctions.get(signal,()))
         adjacency=defaultdict(set)
         for s in segments:
             on=[p for p in points if ((s.a[0]==s.b[0]==p[0] and s.a[1]<=p[1]<=s.b[1]) or
@@ -183,12 +185,17 @@ def test_public_pnr_result_integration(tmp_path):
 @pytest.mark.parametrize('name,n',CASES)
 @pytest.mark.parametrize('expand',[None,'*'])
 def test_labels_never_overlap_with_all_overlays(name,n,expand):
-    from matplotlib.backends.backend_agg import RendererAgg
-    from matplotlib.font_manager import FontProperties
     net=circuit(name,n)
     sch=draw(net,expand=expand,net_names=True,
              inputs={p.name:1 for p in net.ports if p.dir=='input'},
              parasitics={s:100e-15 for s in net.nets()})
+    assert_labels(sch)
+
+
+def assert_labels(sch):
+    """Measure actual text glyphs against wires, symbols and other labels."""
+    from matplotlib.backends.backend_agg import RendererAgg
+    from matplotlib.font_manager import FontProperties
     renderer=RendererAgg(100,100,96)
     boxes=[]
     vector=sch._vector()
