@@ -137,14 +137,18 @@ def _wire_styles(scene,values,caps):
     return styles
 
 
-def render(scene,values=None,caps=None,net_names=False,title=None):
-    """Paint an existing scene; geometry does not depend on any overlay."""
+def render(scene,values=None,caps=None,net_names=False,title=None,legend=True):
+    """Paint an existing scene; geometry does not depend on any overlay.
+
+    ``legend=False`` leaves out the cell count, the branch/crossing key and the port legend,
+    for views that show the values elsewhere.
+    """
     caps = caps or {}
     title = scene.top if title is None else title
     ports={c.net for c in scene.connections if c.endpoint.startswith('port:')}
     visible=sorted(ports&{s.net for s in scene.segments},key=natural)
     visible=[n for n in visible if values is not None or n in caps]
-    annotated=bool(visible)
+    annotated=bool(visible) and legend
     # Native 11 pt text prevents small notebook figures from inheriting the
     # tiny legend font used by the old, wide publication canvases.
     small=sum(n.kind not in {'input','output'} for n in scene.symbols)<=10
@@ -159,7 +163,7 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
                   for n in scene.symbols for p,signal in n.outputs.items()}
     v.text(24,max(20,v.font_min+4),title,size=12,weight='bold')
     gates=sum(len(n.members) for n in scene.symbols)
-    v.text(v.width-24,max(20,v.font_min+4),_label('cells').format(n=gates),size=9,color=SECONDARY,anchor='end')
+    if legend:v.text(v.width-24,max(20,v.font_min+4),_label('cells').format(n=gates),size=9,color=SECONDARY,anchor='end')
     for frame in scene.frames:
         x0,y0,x1,y1=frame.box
         _rect(v,x0,y0,x1-x0,y1-y0,stroke='#c3c2b7',fill='#fafaf8',width=.8)
@@ -194,12 +198,12 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
     for node in scene.symbols:
         _symbol(v,node)
     footer=scene.height-16
-    if scene.junctions:
+    if legend and scene.junctions:
         v.line((24,footer-3),(48,footer-3),width=1.2)
         v.line((36,footer-11),(36,footer-3),width=1.2)
         v.circle(36,footer-3,2.4,fill=INK,stroke=INK,width=0)
         v.text(56,footer,_label('branch'),size=9,color=SECONDARY)
-    if any(h.net!=s.net and h.a[1]==h.b[1] and s.a[0]==s.b[0]
+    if legend and any(h.net!=s.net and h.a[1]==h.b[1] and s.a[0]==s.b[0]
            and h.a[0]<s.a[0]<h.b[0] and s.a[1]<h.a[1]<s.b[1]
            for h in horizontal for s in vertical):
         offset=max(132,56+4*v.font_min)

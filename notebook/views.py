@@ -24,14 +24,6 @@ def stimulus(net, limit=27):
     return vectors if len(vectors) <= limit else vectors[::max(1, len(vectors)//limit)][:limit]
 
 
-def _intervals(post, chosen):
-    """The stretches of the post-layout run where the inputs equal ``chosen``, in µs."""
-    hold = post["stimulus"]["hold_s"]*1e6
-    spans = [f"{i*hold:g}–{(i+1)*hold:g} µs" for i, row in enumerate(post["measurements"]["rows"])
-             if tuple(row["input_trits"]) == chosen]
-    return ("波形の " + "、".join(spans)) if spans else ""
-
-
 def _reading(post, chosen):
     rows = [r for r in post["measurements"]["rows"] if tuple(r["input_trits"]) == chosen]
     if not rows:
@@ -97,9 +89,8 @@ def pick_input(net, post, *, title="ポストレイアウトシミュレーシ�
         label = ", ".join(f"{name} = {TRIT_TEXT[v]}" for name, v in zip(inputs, chosen))
         radios.append(f'<input type="radio" name="{key}" id="{key}-{index}" data-i="{index}"'
                       f'{" checked" if index == start else ""}><label for="{key}-{index}">{escape(label)}</label>')
-        circuit = net.schematic(inputs=dict(zip(inputs, chosen)), net_names=True, expand="*", title=label)
-        reading = " · ".join(part for part in (_reading(post, chosen), _intervals(post, chosen)) if part)
-        panels.append(f'<div class="p{index}"><div class="reading">{escape(reading)}</div><div class="row">'
+        circuit = net.schematic(inputs=dict(zip(inputs, chosen)), net_names=True, expand="*", title="", legend=False)
+        panels.append(f'<div class="p{index}"><div class="reading">{escape(_reading(post, chosen))}</div><div class="row">'
                       f'<div class="sch">{circuit._repr_svg_()}</div>'
                       f'{_truth_table(net, inputs, outputs, table_rows, chosen)}</div></div>')
         rules.append(f"#{key}-{index}:checked ~ .p{index}{{display:block}}")
