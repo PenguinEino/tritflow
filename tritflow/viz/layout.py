@@ -97,8 +97,11 @@ def _open_gds_view(gds_path, top=None):
             background, ink, muted, rule = "#ffffff", "#223044", "#667085", "#d8dee8"
         view.max_hier_levels = 100
         view.min_hier_levels = 0
+        # Labels in KLayout's bitmap font, ignoring each text's own size: they keep one screen
+        # size at every zoom, large enough to read.
         for key, value in (("background-color", background), ("grid-visible", "false"),
-                           ("text-visible", "false"),
+                           ("text-visible", "false"), ("text-font", "0"), ("apply-text-trans", "false"),
+                           ("default-font-size", "4"),
                            ("cell-box-visible", "false")):
             view.set_config(key, value)
         return view, cell, active, (background, ink, muted, rule)
