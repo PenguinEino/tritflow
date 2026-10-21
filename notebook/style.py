@@ -12,6 +12,10 @@ RULE, GRID, BAND = "#c3c2b7", "#e1e0d9", "#ecebe6"
 TRIT_COLOR = {-1: "#2a78d6", 0: "#6f6e69", 1: "#e34948"}
 TRIT_FILL = {-1: "#cde2fb", 0: "#ecebe6", 1: "#f7d3d2"}
 ACCENT = "#eb6834"
+# Signal lanes in waveforms: inputs, then outputs (the paper figures' categorical colours).
+INPUT_COLORS = ("#1baf7a", "#7b61c9", "#b8860b")
+OUTPUT_COLORS = ("#2a78d6", "#d6336c", "#0f8b8d")
+CURRENT_COLOR = "#52514e"
 SERIF = ('"Times New Roman", Times, "Nimbus Roman", "Liberation Serif", "Noto Serif JP", '
          '"Hiragino Mincho ProN", "Yu Mincho", serif')
 TRIT_TEXT = {-1: "−1", 0: "0", 1: "+1"}

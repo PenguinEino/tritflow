@@ -97,8 +97,8 @@ def inverter(spice, grid):
     for volts in (-5, 0, 5):
         curve.add_hrect(y0=volts-PASS_BAND, y1=volts+PASS_BAND, fillcolor=BAND, opacity=1, line_width=0, layer="below")
     curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name="テープアウトした寸法", mode="lines",
-                               line={"color": MUTED, "dash": "dash", "width": 1.4}))
-    curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name="選んだ寸法", mode="lines", line={"color": INK, "width": 1.8}))
+                               line={"color": MUTED, "dash": "dash", "width": 2}))
+    curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name="選んだ寸法", mode="lines", line={"color": "#2a78d6", "width": 2.6}))
     curve.add_trace(go.Scatter(x=[0], y=[taped["dc"]["0"][0]], mode="markers", showlegend=False,
                                marker={"size": 9, "color": ACCENT, "line": {"color": "white", "width": 1}}))
     curve.update_layout(**paper_layout(height=320, legend={"orientation": "h", "y": 1.02, "x": 0, "yanchor": "bottom"},
