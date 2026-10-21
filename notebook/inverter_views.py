@@ -24,54 +24,70 @@ def _key(prefix):
     return f"{prefix}{_VIEWS}"
 
 
+def _wire(points, color, width):
+    return f'<polyline points="{" ".join(f"{x},{y}" for x, y in points)}" fill="none" stroke="{color}" stroke-width="{width}"/>'
+
+
 def _mos(x, top, kind, on, field):
-    """A MOS drawn vertically: drain/source stubs, channel, gate (bubble for PMOS)."""
-    color, width = (ON, 2.6) if on else (OFF, 1.4)
-    bottom = top+40
-    gate_x = x-22 if kind == "P" else x-16
+    """A MOS on the vertical stack at ``x``: terminals at ``top`` and ``top+40``, the channel to
+    the left, the gate plate left of it (with a bubble for PMOS), and the gate lead to x−70."""
+    color, width = (ON, 2.6) if on else (OFF, 1.6)
+    channel, plate = x-14, x-20
     parts = [
-        f'<path d="M{x},{top-10} V{top+5} H{x-10} M{x-10},{bottom-5} H{x} V{bottom+10}" stroke="{color}" stroke-width="{width}" fill="none"/>',
-        f'<path d="M{x-10},{top} V{bottom}" stroke="{color}" stroke-width="{width+1}"/>',
-        f'<path d="M{x-16},{top+4} V{bottom-4}" stroke="{INK}" stroke-width="1.6"/>',
+        _wire([(x, top), (x, top+8), (channel, top+8)], color, width),
+        _wire([(channel, top+32), (x, top+32), (x, top+40)], color, width),
+        f'<path d="M{channel},{top+4} V{top+36}" stroke="{color}" stroke-width="{width+1.2}"/>',
+        f'<path d="M{plate},{top+8} V{top+32}" stroke="{INK}" stroke-width="1.8"/>',
     ]
+    lead = plate
     if kind == "P":
-        parts.append(f'<circle cx="{x-19}" cy="{top+20}" r="3" fill="white" stroke="{INK}" stroke-width="1.4"/>')
-    parts.append(f'<path d="M{gate_x},{top+20} H{x-78}" stroke="{INK}" stroke-width="1.4"/>')
-    parts.append(f'<text x="{x+10}" y="{top+16}" font-size="12" fill="{INK}" data-f="{field}"></text>')
-    parts.append(f'<text x="{x+10}" y="{top+32}" font-size="11" fill="{ON if on else DIM}">{"オン" if on else "オフ"}</text>')
+        parts.append(f'<circle cx="{plate-4}" cy="{top+20}" r="3.5" fill="white" stroke="{INK}" stroke-width="1.5"/>')
+        lead = plate-7.5
+    parts.append(_wire([(lead, top+20), (x-70, top+20)], INK, 1.5))
+    parts.append(f'<text x="{x+12}" y="{top+25}" font-size="12" fill="{INK}" data-f="{field}"></text>')
     return "".join(parts)
 
 
 def _resistor(x, top, on, field):
-    color, width = (ON, 2.4) if on else (OFF, 1.4)
-    zig = " ".join(f"L{x+(8 if k % 2 else -8)},{top+8+k*6}" for k in range(7))
-    return (f'<path d="M{x},{top} V{top+5} {zig} L{x},{top+50} V{top+56}" stroke="{color}" stroke-width="{width}" fill="none"/>'
-            f'<text x="{x+14}" y="{top+32}" font-size="12" fill="{INK}" data-f="{field}"></text>')
+    """A zigzag resistor from ``top`` to ``top+44``."""
+    color, width = (ON, 2.4) if on else (OFF, 1.6)
+    points = [(x, top), (x, top+6)] + [(x+(7 if k % 2 else -7), top+10+k*4.6) for k in range(7)] + [(x, top+38), (x, top+44)]
+    return _wire(points, color, width) + f'<text x="{x+14}" y="{top+27}" font-size="12" fill="{INK}" data-f="{field}"></text>'
 
 
 def _inverter_svg(trit):
-    """INV at input ``trit``: conducting devices and the current path in orange. Sizes, Y and I
-    are text fields the script fills for the selected size."""
+    """INV at input ``trit``. Conducting devices and the wires between them are orange; the
+    sizes, Y and I are text fields the script fills for the selected size."""
     up, down = trit in (-1, 0), trit in (0, 1)
-    x = 170
-    a_volts = {-1: "−5 V", 0: "0 V", 1: "+5 V"}[trit]
+    x, gate = 150, 80
+    rail = lambda on: (ON, 2.4) if on else (OFF, 1.6)
     body = [
-        f'<path d="M{x-40},20 H{x+40}" stroke="{INK}" stroke-width="2"/><text x="{x+46}" y="22" font-size="12" fill="{INK}">VDD +5 V</text>',
-        f'<path d="M{x-40},392 H{x+40}" stroke="{INK}" stroke-width="2"/><text x="{x+46}" y="396" font-size="12" fill="{INK}">VSS −5 V</text>',
+        f'<path d="M{x-34},16 H{x+34}" stroke="{INK}" stroke-width="2.2"/>'
+        f'<text x="{x+40}" y="20" font-size="12" fill="{INK}">VDD</text>',
+        _wire([(x, 16), (x, 40)], *rail(up)),
         _mos(x, 40, "P", up, "mp"),
-        _resistor(x, 90, up, "rp"),
-        f'<path d="M{x},146 V206" stroke="{ON if up else OFF}" stroke-width="{2.4 if up else 1.4}"/>',
-        f'<path d="M{x},206 V266" stroke="{ON if down else OFF}" stroke-width="{2.4 if down else 1.4}"/>',
-        _resistor(x, 266, down, "rn"),
-        _mos(x, 332, "N", down, "mn"),
-        f'<circle cx="{x}" cy="206" r="3.5" fill="{INK}"/><path d="M{x},206 H{x+64}" stroke="{INK}" stroke-width="1.6"/>',
-        f'<text x="{x+70}" y="210" font-size="13" font-weight="700" fill="{INK}" data-f="y"></text>',
-        f'<path d="M{x-78},60 V352" stroke="{INK}" stroke-width="1.4"/><circle cx="{x-78}" cy="206" r="3.5" fill="{INK}"/>',
-        f'<path d="M30,206 H{x-78}" stroke="{INK}" stroke-width="1.6"/>',
-        f'<text x="18" y="196" font-size="13" font-weight="700" fill="{INK}">A = {a_volts}</text>',
-        f'<text x="{x+46}" y="38" font-size="12" fill="{ON if trit == 0 else DIM}" data-f="i"></text>',
+        _wire([(x, 80), (x, 92)], *rail(up)),
+        _resistor(x, 92, up, "rp"),
+        _wire([(x, 136), (x, 172)], *rail(up)),
+        _wire([(x, 172), (x, 208)], *rail(down)),
+        _resistor(x, 208, down, "rn"),
+        _wire([(x, 252), (x, 264)], *rail(down)),
+        _mos(x, 264, "N", down, "mn"),
+        _wire([(x, 304), (x, 328)], *rail(down)),
+        f'<path d="M{x-34},328 H{x+34}" stroke="{INK}" stroke-width="2.2"/>'
+        f'<text x="{x+40}" y="332" font-size="12" fill="{INK}">VSS</text>',
+        f'<circle cx="{x}" cy="172" r="3.2" fill="{INK}"/>',
+        _wire([(x, 172), (x+56, 172)], INK, 1.6),
+        f'<text x="{x+62}" y="168" font-size="12" fill="{INK}">Y</text>',
+        f'<text x="{x+62}" y="184" font-size="12" font-weight="700" fill="{INK}" data-f="y"></text>',
+        _wire([(gate, 60), (gate, 284)], INK, 1.5),
+        f'<circle cx="{gate}" cy="172" r="3.2" fill="{INK}"/>',
+        _wire([(28, 172), (gate, 172)], INK, 1.6),
+        f'<text x="20" y="160" font-size="12" fill="{INK}">A</text>',
+        f'<text x="20" y="190" font-size="12" font-weight="700" fill="{INK}">{ {-1: "−5 V", 0: "0 V", 1: "+5 V"}[trit] }</text>',
+        f'<text x="{x+40}" y="38" font-size="12" fill="{ON if trit == 0 else DIM}" data-f="i"></text>',
     ]
-    return f'<svg viewBox="0 0 330 410" width="330" height="410" style="background:#fff">{"".join(body)}</svg>'
+    return f'<svg viewBox="0 0 290 344" width="290" height="344">{"".join(body)}</svg>'
 
 
 def _candidate(row, transfer=None):
@@ -85,37 +101,32 @@ def _candidate(row, transfer=None):
 
 
 _SCRIPT = r"""
-const root = document.querySelector('.KEY'), data = DATA, plot = () => document.getElementById('KEY-plot');
+const root = document.querySelector('.KEY'), data = DATA;
+const curve = () => document.getElementById('KEY-curve'), cloud = () => document.getElementById('KEY-cloud');
 const main = root.querySelector('input[data-name=main]'), params = [...root.querySelectorAll('input[data-param]')];
 let index = data.adopted, trit = 0;
-function find(values) {
-  return data.rows.findIndex(r => params.every((s, k) => r[s.dataset.param] === values[k]));
-}
+const sign = v => (v >= 0 ? '+' : '') + v.toFixed(2);
 function draw() {
   const c = data.rows[index], [y, current] = c.dc[String(trit)];
   main.value = index;
-  root.querySelector('[data-out=main]').textContent = (index + 1) + ' / ' + data.rows.length
-    + (index === data.adopted ? '（テープアウトした寸法）' : '');
-  params.forEach(s => { const vals = JSON.parse(s.dataset.values); s.value = vals.indexOf(c[s.dataset.param]);
+  root.querySelector('[data-out=main]').textContent = index === data.adopted ? 'テープアウトした寸法' : (index + 1) + ' / ' + data.rows.length;
+  params.forEach(s => { s.value = JSON.parse(s.dataset.values).indexOf(c[s.dataset.param]);
     root.querySelector('[data-out=' + s.dataset.param + ']').textContent = c[s.dataset.param]; });
-  root.querySelectorAll('[data-f=mp]').forEach(e => e.textContent = 'MP ' + c.wp + '/' + c.l + ' µm');
-  root.querySelectorAll('[data-f=mn]').forEach(e => e.textContent = 'MN ' + c.wn + '/' + c.l + ' µm');
-  root.querySelectorAll('[data-f=rp]').forEach(e => e.textContent = 'RP ' + c.r + ' µm');
-  root.querySelectorAll('[data-f=rn]').forEach(e => e.textContent = 'RN ' + c.r + ' µm');
-  root.querySelectorAll('[data-f=y]').forEach(e => e.textContent = 'Y = ' + (y >= 0 ? '+' : '') + y.toFixed(2) + ' V');
-  root.querySelectorAll('[data-f=i]').forEach(e => e.textContent = 'I = ' + current.toFixed(0) + ' µA');
-  root.querySelector('.read').textContent = '最大レベル誤差 ' + c.err.toFixed(1) + ' mV · 最大静的電流 '
-    + c.cur.toFixed(0) + ' µA · ' + (c.ok ? '全入力で ±0.5 V の帯に入る' : '帯から外れる入力がある');
-  const d = plot();
-  if (window.Plotly && d) {
-    Plotly.restyle(d, {y: [c.y]}, [1]);
-    Plotly.restyle(d, {x: [[trit * 5]], y: [[y]]}, [2]);
-    Plotly.restyle(d, {x: [[c.cur]], y: [[c.err]]}, [5]);
+  const text = {mp: 'MP ' + c.wp + '/' + c.l, mn: 'MN ' + c.wn + '/' + c.l, rp: 'RP ' + c.r, rn: 'RN ' + c.r,
+                y: sign(y) + ' V', i: current.toFixed(0) + ' µA'};
+  for (const [f, t] of Object.entries(text)) root.querySelectorAll('[data-f=' + f + ']').forEach(e => e.textContent = t);
+  root.querySelector('.read').textContent = '誤差 ' + c.err.toFixed(1) + ' mV · 静的電流 ' + c.cur.toFixed(0) + ' µA'
+    + (c.ok ? '' : ' · ±0.5 V の帯から外れる入力がある');
+  if (window.Plotly && curve()) {
+    Plotly.restyle(curve(), {y: [c.y]}, [1]);
+    Plotly.restyle(curve(), {x: [[trit * 5]], y: [[y]]}, [2]);
   }
+  if (window.Plotly && cloud()) Plotly.restyle(cloud(), {x: [[c.cur]], y: [[c.err]]}, [2]);
 }
 main.addEventListener('input', () => { index = +main.value; draw(); });
 params.forEach(s => s.addEventListener('input', () => {
-  const values = params.map(p => JSON.parse(p.dataset.values)[+p.value]), found = find(values);
+  const values = params.map(p => JSON.parse(p.dataset.values)[+p.value]);
+  const found = data.rows.findIndex(r => params.every((p, k) => r[p.dataset.param] === values[k]));
   if (found >= 0) { index = found; draw(); }
   else root.querySelector('.read').textContent = 'この組合せはSPICEが収束しなかった';
 }));
@@ -125,11 +136,10 @@ draw();
 
 
 def inverter(spice, grid):
-    """The INV with input buttons, one slider over every simulated size (as in v1) and four
-    linked sliders for the individual dimensions. The schematic labels, Y and I, the transfer
-    curve, and the size's place among all candidates follow both."""
+    """Top: input buttons, the redrawn INV and its DC transfer. Bottom: the sizes — one slider over
+    every simulated size (as in v1), four linked sliders for the dimensions, and where the size
+    sits among all candidates in level error and static current."""
     import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
     from tritflow import PASS_BAND
 
     key = _key("tfinv")
@@ -138,61 +148,57 @@ def inverter(spice, grid):
     adopted = next(i for i, r in enumerate(rows) if r["is_adopted"])
     candidates = [_candidate(r, live["transfer"]["data"] if r["is_adopted"] else None) for r in rows]
     sweep = [round(v, 3) for v in live["transfer"]["data"]["v-sweep"]]
-
-    figure = make_subplots(rows=2, cols=1, row_heights=[.58, .42], vertical_spacing=.16,
-                           subplot_titles=("DC伝達特性", "全候補：最大レベル誤差と最大静的電流"))
-    for volts in (-5, 0, 5):
-        figure.add_hrect(y0=volts-PASS_BAND, y1=volts+PASS_BAND, fillcolor="#6eae89", opacity=.15,
-                         line_width=0, row=1, col=1, exclude_empty_subplots=False)
     taped = candidates[adopted]
-    figure.add_trace(go.Scatter(x=sweep, y=taped["y"], name="テープアウトした寸法", mode="lines",
-                                line={"color": "#9aa1ab", "dash": "dash", "width": 1.6}), row=1, col=1)
-    figure.add_trace(go.Scatter(x=sweep, y=taped["y"], name="選んだ寸法", mode="lines",
-                                line={"color": ON, "width": 2.4}), row=1, col=1)
-    figure.add_trace(go.Scatter(x=[0], y=[taped["dc"]["0"][0]], mode="markers", showlegend=False,
-                                marker={"size": 10, "color": ON, "line": {"color": "white", "width": 1.5}}), row=1, col=1)
-    figure.add_trace(go.Scatter(x=[c["cur"] for c in candidates], y=[c["err"] for c in candidates],
-                                mode="markers", name="候補", marker={"color": "#b4b9c1", "size": 6}), row=2, col=1)
-    figure.add_trace(go.Scatter(x=[taped["cur"]], y=[taped["err"]], mode="markers", showlegend=False,
-                                marker={"symbol": "star", "size": 13, "color": INK}), row=2, col=1)
-    figure.add_trace(go.Scatter(x=[taped["cur"]], y=[taped["err"]], mode="markers", showlegend=False,
-                                marker={"symbol": "circle-open", "size": 15, "color": ON, "line": {"width": 3}}), row=2, col=1)
-    figure.update_xaxes(title_text="A (V)", tickvals=[-5, 0, 5], row=1, col=1)
-    figure.update_yaxes(title_text="Y (V)", tickvals=[-5, 0, 5], row=1, col=1)
-    figure.update_xaxes(title_text="最大静的電流 (µA)", row=2, col=1)
-    figure.update_yaxes(title_text="誤差 (mV)", type="log", row=2, col=1)
-    figure.update_layout(template="plotly_white", height=560, width=620, margin={"t": 40, "l": 60, "r": 10, "b": 80},
-                         legend={"orientation": "h", "y": -.14, "x": 0})
-    plot = figure.to_html(include_plotlyjs="cdn", full_html=False, div_id=f"{key}-plot",
-                          config={"displaylogo": False})
+    config = {"displaylogo": False}
+
+    curve = go.Figure()
+    for volts in (-5, 0, 5):
+        curve.add_hrect(y0=volts-PASS_BAND, y1=volts+PASS_BAND, fillcolor="#6eae89", opacity=.15, line_width=0)
+    curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name="テープアウトした寸法", mode="lines",
+                               line={"color": "#9aa1ab", "dash": "dash", "width": 1.6}))
+    curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name="選んだ寸法", mode="lines", line={"color": ON, "width": 2.4}))
+    curve.add_trace(go.Scatter(x=[0], y=[taped["dc"]["0"][0]], mode="markers", showlegend=False,
+                               marker={"size": 10, "color": ON, "line": {"color": "white", "width": 1.5}}))
+    curve.update_layout(template="plotly_white", height=344, margin={"t": 30, "l": 50, "r": 10, "b": 40},
+                        xaxis={"title": "A (V)", "tickvals": [-5, 0, 5]}, yaxis={"title": "Y (V)", "tickvals": [-5, 0, 5]},
+                        legend={"orientation": "h", "y": 1.02, "x": 0, "yanchor": "bottom"})
+    cloud = go.Figure()
+    cloud.add_trace(go.Scatter(x=[c["cur"] for c in candidates], y=[c["err"] for c in candidates], mode="markers",
+                               showlegend=False, marker={"color": "#c4c8ce", "size": 6}))
+    cloud.add_trace(go.Scatter(x=[taped["cur"]], y=[taped["err"]], mode="markers", showlegend=False,
+                               marker={"symbol": "star", "size": 12, "color": INK}))
+    cloud.add_trace(go.Scatter(x=[taped["cur"]], y=[taped["err"]], mode="markers", showlegend=False,
+                               marker={"symbol": "circle-open", "size": 15, "color": ON, "line": {"width": 3}}))
+    cloud.update_layout(template="plotly_white", height=260, margin={"t": 10, "l": 55, "r": 10, "b": 40},
+                        xaxis={"title": "静的電流 (µA)"}, yaxis={"title": "誤差 (mV)", "type": "log"})
+    html = lambda figure, name: figure.to_html(include_plotlyjs="cdn", full_html=False, div_id=f"{key}-{name}", config=config)
 
     axes = grid["grid_axes"]
     params = [("wp", "MPの幅 W", axes["mp_w_um"]), ("wn", "MNの幅 W", axes["mn_w_um"]),
               ("l", "MOSの長さ L", axes["mos_l_um"]), ("r", "抵抗の長さ", axes["rr_l_um"])]
-    controls = (f'<label class="main">寸法の候補 <b data-out="main"></b><br>'
-                f'<input type="range" data-name="main" min="0" max="{len(candidates)-1}" step="1"></label>'
-                f'<div class="params">' + "".join(
-                    f'<label>{escape(text)} <b data-out="{name}"></b> µm<br><input type="range" data-param="{name}" '
-                    f'min="0" max="{len(values)-1}" step="1" data-values="{escape(json.dumps(values))}"></label>'
-                    for name, text, values in params) + "</div>")
+    sliders = (f'<label class="s">寸法の候補　<b data-out="main"></b>'
+               f'<input type="range" data-name="main" min="0" max="{len(candidates)-1}" step="1"></label>' + "".join(
+                   f'<label class="s">{escape(text)}　<b data-out="{name}"></b> µm<input type="range" data-param="{name}" '
+                   f'min="0" max="{len(values)-1}" step="1" data-values="{escape(json.dumps(values))}"></label>'
+                   for name, text, values in params) + '<div class="read"></div>')
     radios, panels, rules = [], [], []
     for index, trit in enumerate((-1, 0, 1)):
         radios.append(f'<input type="radio" name="{key}" id="{key}-{index}" data-t="{trit}"{" checked" if trit == 0 else ""}>'
                       f'<label for="{key}-{index}">A = {TRIT_TEXT[trit]}</label>')
         panels.append(f'<div class="p{index}">{_inverter_svg(trit)}</div>')
-        rules.append(f"#{key}-{index}:checked ~ .row .p{index}{{display:block}}")
-    style = (f".{key}{{max-width:1000px}} .{key} > input{{display:none}}"
-             f".{key} > label{{display:inline-block;padding:.3em 1em;margin:0 .35em .5em 0;border:1px solid #c9ccd1;"
+        rules.append(f"#{key}-{index}:checked ~ .top .p{index}{{display:block}}")
+    style = (f".{key}{{max-width:960px}} .{key} > input{{display:none}}"
+             f".{key} > label{{display:inline-block;padding:.25em 1em;margin:0 .35em .4em 0;border:1px solid #c9ccd1;"
              f"border-radius:4px;cursor:pointer;font-size:14px}}"
              f".{key} > input:checked + label{{background:{ON};color:#fff;border-color:{ON}}}"
-             f".{key} .ctl{{margin:.2em 0 .5em}} .{key} .main input{{width:100%;accent-color:{ON}}}"
-             f".{key} .main{{display:block;font-size:14px}}"
-             f".{key} .params{{display:flex;flex-wrap:wrap;gap:.4em 2em;margin-top:.5em;font-size:13px}}"
-             f".{key} .params input{{width:200px}} .{key} .read{{font-size:14px;margin:.4em 0}}"
-             f".{key} .row{{display:flex;flex-wrap:wrap;gap:1.5em;align-items:flex-start}}"
-             f".{key} .row .sch > div{{display:none}}" + "".join(rules))
+             f".{key} .top,.{key} .bottom{{display:grid;grid-template-columns:300px 1fr;gap:1.2em;align-items:center}}"
+             f".{key} .bottom{{margin-top:1em;padding-top:.8em;border-top:1px solid #e3e5e8}}"
+             f".{key} .sch > div{{display:none}}"
+             f".{key} .s{{display:block;font-size:13px;margin:.15em 0 .55em}} .{key} .s input{{width:100%;accent-color:{ON}}}"
+             f".{key} .read{{font-size:13px;color:{INK};margin-top:.3em}}"
+             f"@media (max-width:720px){{.{key} .top,.{key} .bottom{{grid-template-columns:1fr}}}}" + "".join(rules))
     data = {"rows": candidates, "adopted": adopted}
     script = "<script>(function(){" + _SCRIPT.replace("KEY", key).replace("DATA", json.dumps(data)) + "})();</script>"
-    display(HTML(f'<style>{style}</style><div class="{key}" style="{FONT}">'
-                 f'<div class="ctl">{controls}</div>{"".join(radios)}<div class="read"></div>'
-                 f'<div class="row"><div class="sch">{"".join(panels)}</div><div>{plot}</div></div></div>{script}'))
+    display(HTML(f'<style>{style}</style><div class="{key}" style="{FONT}">{"".join(radios)}'
+                 f'<div class="top"><div class="sch">{"".join(panels)}</div><div>{html(curve, "curve")}</div></div>'
+                 f'<div class="bottom"><div>{sliders}</div><div>{html(cloud, "cloud")}</div></div></div>{script}'))
