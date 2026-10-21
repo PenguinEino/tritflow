@@ -74,7 +74,7 @@ def cell_tables(cells_dir, schematics_dir):
         rows = json.loads((cells_dir/name/f"{name}.truth.json").read_text())
         cards.append(f'<div class="card"><div class="t"><b>{name}</b> <span>{escape(formula)}</span></div>'
                      f'{_truth_grid(rows)}</div>')
-        schematic = schematics_dir/f"{name}.svg"
+        schematic = schematics_dir/f"{name}.compact.svg"
         if schematic.is_file():
             figures.append(f'<figure><figcaption>{name}</figcaption>{schematic.read_text()}</figure>')
     style = (figure_css(".tfcells") + table_css(".tfcells") +
