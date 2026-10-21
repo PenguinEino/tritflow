@@ -24,7 +24,7 @@ CDN = "https://cdn.jsdelivr.net/gh/PenguinEino/tritflow"
 
 PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
-from views import pick_input, stimulus
+from views import pick_input, stimulus, bus_picker, cell_counts
 from inverter_views import inverter
 from cell_views import closure_view, cell_tables, cell_row
 from tritflow import CELLS_DIR
@@ -109,9 +109,62 @@ cell_tables(CELLS_DIR/"out", ROOT/"notebook/assets/schematics")''',
 "stdcells": '''# 3-3 スタンダードセル
 import json
 cell_row(json.loads((CELLS_DIR/"out/library.json").read_text()), CELLS_DIR/"out")''',
+
+"fa_source": '''# 4-1 HDL：+ で書いた全加算器
+full_add_source = """
+module full_add_rtl(input trit a, b, cin, output trit sum, cout);
+  assign {cout, sum} = a + b + cin;
+endmodule
+"""''',
+
+"fa_synth": '''# 4-2 論理合成して、手でつないだ全加算器と比べる
+need("full_add_source", why="合成するHDLは、4-1に書いてあります。")
+with step("論理合成（2つの全加算器）") as s:
+    full_add_rtl = flow.loads(full_add_source).synthesize()
+    full_add_hand = flow.load(ROOT/"examples/full_add.tv", "full_add").synthesize()
+    s.done(f"+ で書いたもの {full_add_rtl.report()['total_cells']}セル · 手でつないだもの {full_add_hand.report()['total_cells']}セル")
+cell_counts({"+ で書いた全加算器": full_add_rtl, "手でつないだ全加算器": full_add_hand})
+full_add_rtl.schematic(net_names=True, expand="*", title="", legend=False)''',
+
+"add2_source": '''# 4-3 HDL：2トリットの加算
+add2_source = """
+module add2(input trit [1:0] a, b, output trit [2:0] s);
+  assign s = a + b;
+endmodule
+"""''',
+
+"add2_synth": '''# 4-4 論理合成し、入力の値ごとに見る
+need("add2_source", why="合成するHDLは、4-3に書いてあります。")
+with step("論理合成") as s:
+    add2 = flow.loads(add2_source).synthesize()
+    s.done(" · ".join(f"{cell}×{n}" for cell, n in add2.report()["cells"].items())
+           + f" · 全{add2.equivalence['vectors']}入力で等価")
+bus_picker(add2)''',
+
+"case_source": '''# 4-5 HDL：真理値表で書いた乗算
+case_source = """
+module mul_table(input trit a, b, output reg trit y);
+  always @(*) begin
+    case ({a, b})
+      2'tTT, 2't11: y = 1't1;
+      2'tT1, 2't1T: y = 1'tT;
+      default:      y = 1't0;
+    endcase
+  end
+endmodule
+"""''',
+
+"case_synth": '''# 4-6 論理合成して、* で書いた乗算と比べる
+need("case_source", why="合成するHDLは、4-5に書いてあります。")
+with step("論理合成（真理値表と *）") as s:
+    mul_table = flow.loads(case_source).synthesize()
+    mul_op = flow.loads("module mul_op(input trit a, b, output trit y); assign y = a * b; endmodule\\n").synthesize()
+    s.done(f"真理値表 {mul_table.report()['total_cells']}セル · * {mul_op.report()['total_cells']}セル")
+cell_counts({"真理値表（case）": mul_table, "演算子（*）": mul_op})
+mul_table.schematic(net_names=True, expand="*", title="", legend=False)''',
 }
 
-CHAPTERS = ["00_opening.md", "01_first.md", "02_inverter.md", "03_cells.md"]
+CHAPTERS = ["00_opening.md", "01_first.md", "02_inverter.md", "03_cells.md", "04_arithmetic.md"]
 
 
 def cells(ref):

@@ -9,7 +9,8 @@ from itertools import product
 
 from IPython.display import HTML, display
 
-from style import (ACCENT, BAND, CURRENT_COLOR, INK, INPUT_COLORS, MUTED, OUTPUT_COLORS, TRIT_TEXT, control_style,
+from style import (ACCENT, BAND, CURRENT_COLOR, INK, INPUT_COLORS, MUTED, OUTPUT_COLORS, TRIT_COLOR, TRIT_TEXT,
+                   control_style,
                    figure_css, paper_axes, paper_layout, table_css)
 
 
@@ -151,3 +152,95 @@ def pick_input(net, post):
     display(HTML(f'<style>{style}</style><div class="{key}">{"".join(radios)}{"".join(panels)}'
                  f'<div class="hint">ドラッグで拡大、ダブルクリックで全体に戻る。下のスライダーで時間の範囲を選べる。</div>'
                  f'{plot}</div>{script}'))
+
+
+_BUSES = 0
+
+
+def _buses(names):
+    """Group bit-blasted port names (``a[0]``, ``a[1]``, ``cin``) into buses, low digit first."""
+    import re
+    buses = {}
+    for name in names:
+        match = re.fullmatch(r"(\w+)\[(\d+)\]", name)
+        base, index = (match[1], int(match[2])) if match else (name, 0)
+        buses.setdefault(base, {})[index] = name
+    return {base: [bits[i] for i in sorted(bits)] for base, bits in buses.items()}
+
+
+def _digits(values):
+    """A balanced-ternary number, high digit first, written with T for −1 as in HDL literals."""
+    return "".join({-1: "T", 0: "0", 1: "1"}[v] for v in reversed(values))
+
+
+def bus_picker(net, *, title=None):
+    """Integer buttons per input bus (each value in balanced ternary); the schematic's wires take
+    the colour of their trit, and the output buses are read back as integers. Everything is
+    precomputed from the synthesized netlist's logic, so the buttons work in the browser alone."""
+    import json
+    from itertools import product as cartesian
+    from tritflow.synth import evaluate_netlist
+    global _BUSES
+    _BUSES += 1
+    key = f"tfbus{_BUSES}"
+    inputs = _buses([p.name for p in net.ports if p.dir == "input"])
+    outputs = _buses([p.name for p in net.ports if p.dir == "output"])
+    values = {base: list(range(-(3**len(bits)-1)//2, (3**len(bits)-1)//2+1)) for base, bits in inputs.items()}
+
+    def trits(number, width):
+        digits = []
+        for _ in range(width):
+            digit = ((number+1) % 3)-1
+            digits.append(digit)
+            number = (number-digit)//3
+        return digits
+
+    def number(digits):
+        return sum(d*3**i for i, d in enumerate(digits))
+
+    table = {}
+    for combo in cartesian(*values.values()):
+        assignment = {}
+        for (base, bits), value in zip(inputs.items(), combo):
+            assignment.update(dict(zip(bits, trits(value, len(bits)))))
+        nets = evaluate_netlist(net, assignment, return_all=True)
+        reading = {base: [int(nets[b]) for b in bits] for base, bits in outputs.items()}
+        table[",".join(map(str, combo))] = {
+            "nets": {n: int(v) for n, v in nets.items()},
+            "text": " · ".join(f"{base} = {number(d):+d}（{_digits(d)}）" for base, d in reading.items())}
+    start = ",".join("0" for _ in values)
+    circuit = net.schematic(inputs={n: 0 for bits in inputs.values() for n in bits}, net_names=True, expand="*",
+                            title="", legend=False)
+    rows = "".join(
+        f'<div class="bus"><span class="name">{escape(base)}</span>' + "".join(
+            f'<input type="radio" name="{key}-{base}" id="{key}-{base}-{v}" data-bus="{base}" value="{v}"'
+            f'{" checked" if v == 0 else ""}><label for="{key}-{base}-{v}">{v:+d}</label>' for v in vals) + "</div>"
+        for base, vals in values.items())
+    colors = json.dumps({str(k): v for k, v in TRIT_COLOR.items()})
+    script = (f"<script>(function(){{const root=document.querySelector('.{key}'),table={json.dumps(table)},color={colors};"
+              "function draw(){const combo=[...root.querySelectorAll('.bus')].map(b=>b.querySelector('input:checked').value).join(',');"
+              "const row=table[combo];root.querySelector('.read').textContent=row.text;"
+              "root.querySelectorAll('[data-net]').forEach(e=>{const v=row.nets[e.dataset.net];if(v===undefined)return;"
+              "e.setAttribute('stroke',color[v]);if(e.tagName==='circle')e.setAttribute('fill',color[v]);});}"
+              "root.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',draw));draw();})();</script>")
+    style = (figure_css(f".{key}") + control_style(f".{key}") + f".{key}{{max-width:1080px}}"
+             f".{key} .bus{{margin:.1em 0}} .{key} .name{{display:inline-block;width:2.2em;font-style:italic}}"
+             f".{key} .read{{margin:.4em 0 .2em;font-size:15px}} .{key} svg{{width:100%;height:auto;display:block}}")
+    display(HTML(f'<style>{style}</style><div class="{key}">{rows}<div class="read"></div>'
+                 f'{circuit._repr_svg_()}</div>{script}'))
+
+
+def cell_counts(designs):
+    """Booktabs table: for each synthesized design, its cells by type, total, and the equivalence
+    check synthesis ran against the HDL."""
+    kinds = sorted({cell for net in designs.values() for cell in net.report()["cells"]})
+    head = "<tr><th></th>" + "".join(f"<th>{k}</th>" for k in kinds) + "<th>計</th><th>等価性の検証</th></tr>"
+    body = ""
+    for name, net in designs.items():
+        report = net.report()
+        check = report["equivalence"]
+        body += (f"<tr><th style='text-align:left'>{escape(name)}</th>"
+                 + "".join(f"<td>{report['cells'].get(k, '')}</td>" for k in kinds)
+                 + f"<td><b>{report['total_cells']}</b></td><td>{'全' + str(check['vectors']) + '入力で一致' if check['passed'] else '不一致'}</td></tr>")
+    display(HTML(f'<style>{figure_css(".tfcount")}{table_css(".tfcount")}</style>'
+                 f'<div class="tfcount"><table>{head}{body}</table></div>'))
