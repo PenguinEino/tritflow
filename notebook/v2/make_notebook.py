@@ -23,7 +23,6 @@ PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
 from views import pick_input, flow_map, stimulus
 from tritflow import flow
-from tritflow.viz.graph import gate_graph
 from tritflow.viz.layout import gds_viewer
 install_error_view()
 for name, cell in {"source": "1-1 HDL", "net": "1-2 合成する", "lay": "1-3 配置配線する",
@@ -45,7 +44,7 @@ with step("HDLを読み込んで合成") as s:
     net = flow.loads(source).synthesize()
     s.done(" · ".join(f"{cell}×{n}" for cell, n in net.report()["cells"].items())
            + (" · 全入力で等価" if net.equivalence["passed"] else " · 等価でない"))
-gate_graph(net, title=f"{net.top}：合成した回路").show()''',
+net.schematic(net_names=True, expand="*", title=f"{net.top}：合成した回路")''',
 
 "pnr": '''# 1-3 配置配線する
 need("net", why="配置配線する回路 net は、1-2で合成します。")
