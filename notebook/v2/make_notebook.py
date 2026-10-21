@@ -86,7 +86,7 @@ def cells(ref):
     setup = "#@title 準備（最初に実行） { display-mode: \"form\" }\n" + SETUP.replace('"PINNED"', f'"{ref}"') + PREAMBLE
     for index, name in enumerate(CHAPTERS):
         text = (HERE/"narrative"/name).read_text()
-        text = re.sub(r"<!-- figure: (\w+) -->", lambda m: f"![図1]({RAW}/{ref}/figures/out/{m[1]}.png)", text)
+        text = re.sub(r"<!-- figure: (\w+) -->", lambda m: f"![図1]({RAW}/{ref}/figures/out/{m[1]}_ja.png)", text)
         for chunk in re.split(r"\n*<!-- code: (\w+) -->\n*", text):
             if chunk in CODE:
                 out.append(("code", CODE[chunk]))
