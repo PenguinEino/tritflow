@@ -91,7 +91,7 @@ def inverter(spice, grid):
     candidates = [_candidate(r, live["transfer"]["data"] if r["is_adopted"] else None) for r in rows]
     sweep = [round(v, 3) for v in live["transfer"]["data"]["v-sweep"]]
     taped = candidates[adopted]
-    config = {"displaylogo": False}
+    config = {"displaylogo": False, "displayModeBar": False}
 
     curve = go.Figure()
     for volts in (-5, 0, 5):
@@ -132,12 +132,14 @@ def inverter(spice, grid):
         panels.append(f'<div class="p{index}">{_operating_point(trit)}</div>')
         rules.append(f"#{key}-{index}:checked ~ .top .p{index}{{display:block}}")
     style = (figure_css(f".{key}") + control_style(f".{key}") + table_css(f".{key}") + f".{key}{{max-width:960px}}"
-             f".{key} .top,.{key} .bottom{{display:grid;grid-template-columns:280px 1fr;gap:1.4em;align-items:center}}"
+             f".{key} .top,.{key} .bottom{{display:grid;grid-template-columns:280px minmax(0,1fr);gap:1.4em;align-items:center}}"
+             f".{key} .top > div,.{key} .bottom > div{{min-width:0}}"
              f".{key} .bottom{{margin-top:.8em}}"
              f".{key} .op > div{{display:none}} .{key} .op td{{text-align:left}}"
              f".{key} .s{{display:block;font-size:13px;margin:.1em 0 .45em}}"
              f".{key} .read{{font-size:13px;margin-top:.3em}}"
-             f"@media (max-width:720px){{.{key} .top,.{key} .bottom{{grid-template-columns:1fr}}}}" + "".join(rules))
+             f"@media (max-width:720px){{.{key} .top,.{key} .bottom{{grid-template-columns:1fr}}"
+             f".{key} .op{{justify-self:center}}}}" + "".join(rules))
     data = {"rows": candidates, "adopted": adopted}
     script = "<script>(function(){" + _SCRIPT.replace("KEY", key).replace("DATA", json.dumps(data)) + "})();</script>"
     display(HTML(f'<style>{style}</style><div class="{key}">{"".join(radios)}'

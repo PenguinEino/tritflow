@@ -9,7 +9,7 @@ from itertools import product
 
 from IPython.display import HTML, display
 
-from style import (ACCENT, BAND, CURRENT_COLOR, INK, INPUT_COLORS, MUTED, OUTPUT_COLORS, TRIT_COLOR, TRIT_TEXT,
+from style import (ACCENT, BAND, CURRENT_COLOR, INK, INPUT_COLORS, MUTED, OUTPUT_COLORS, SERIF, TRIT_COLOR, TRIT_TEXT,
                    control_style,
                    figure_css, paper_axes, paper_layout, table_css)
 
@@ -35,6 +35,16 @@ def _reading(post, chosen):
 _PICKS = 0
 HIGHLIGHT = {"type": "rect", "xref": "x", "yref": "paper", "y0": 0, "y1": 1, "layer": "below",
              "fillcolor": ACCENT, "opacity": .14, "line": {"width": 0}}
+
+
+def schematic_view(circuit):
+    """Keep a dense gate drawing's labels at its intended size; narrow outputs scroll locally."""
+    css = (figure_css(".tfdiagram") + ".tfdiagram{max-width:100%;overflow-x:auto}"
+           ".tfdiagram svg{display:block;width:100%;min-width:1000px;height:auto}"
+           f".tfdiagram-hint{{font-family:{SERIF};font-size:13px;color:{MUTED};margin-top:.3em}}"
+           "@media(min-width:1050px){.tfdiagram-hint{display:none}}")
+    display(HTML(f'<style>{css}</style><div class="tfdiagram" tabindex="0" aria-label="回路図（横スクロール）">'
+                 f'{circuit._repr_svg_()}</div><div class="tfdiagram-hint">横にスクロールして回路図の全体を見られる。</div>'))
 
 
 def scope_figure(post, *, title=None):
@@ -128,7 +138,7 @@ def pick_input(net, post):
               if tuple(row["input_trits"]) == chosen] for chosen in choices]
     scope.update_layout(shapes=[*base, *marks[start]])
     plot = scope.to_html(include_plotlyjs="cdn", full_html=False, div_id=f"{key}-scope",
-                         config={"displaylogo": False, "scrollZoom": True})
+                         config={"displaylogo": False, "displayModeBar": False, "scrollZoom": True})
 
     radios, panels, rules = [], [], []
     for index, chosen in enumerate(choices):
@@ -242,5 +252,6 @@ def cell_counts(designs):
         body += (f"<tr><th style='text-align:left'>{escape(name)}</th>"
                  + "".join(f"<td>{report['cells'].get(k, '')}</td>" for k in kinds)
                  + f"<td><b>{report['total_cells']}</b></td><td>{'全' + str(check['vectors']) + '入力で一致' if check['passed'] else '不一致'}</td></tr>")
-    display(HTML(f'<style>{figure_css(".tfcount")}{table_css(".tfcount")}</style>'
+    compact = '.tfcount{max-width:100%;overflow-x:auto}.tfcount th,.tfcount td{white-space:nowrap;padding:.25em .5em}'
+    display(HTML(f'<style>{figure_css(".tfcount")}{table_css(".tfcount")}{compact}</style>'
                  f'<div class="tfcount"><table>{head}{body}</table></div>'))
