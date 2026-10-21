@@ -19,6 +19,8 @@ from setup_cell import SETUP
 from make_tables import TABLES, width
 
 RAW = "https://raw.githubusercontent.com/PenguinEino/tritflow"
+# jsDelivr serves SVG as an image; raw.githubusercontent.com does not.
+CDN = "https://cdn.jsdelivr.net/gh/PenguinEino/tritflow"
 
 PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
@@ -28,7 +30,7 @@ from cell_views import closure_view, cell_tables, cell_row
 from tritflow import CELLS_DIR
 from tritflow.sim.sizing import sweep_dimensions, load_grid
 from tritflow import flow
-from tritflow.viz.layout import gds_viewer
+from gds_view import gds_view
 from tritflow.schematic import set_language
 set_language("ja")
 install_error_view()
@@ -68,7 +70,7 @@ with step("DRC") as s:
 with step("LVS") as s:
     lvs = lay.lvs()
     s.done("一致" if lvs["matched"] else "不一致")
-gds_viewer(lay.gds_path)''',
+gds_view(lay.gds_path)''',
 
 "spice": '''# 1-5 ポストレイアウトシミュレーション
 need("lvs", why="シミュレーションは、1-4でLVSが一致したGDSから回路を取り出して動かします。")
@@ -122,7 +124,7 @@ def cells(ref):
     for index, name in enumerate(CHAPTERS):
         text = (HERE/"narrative"/name).read_text()
         text = re.sub(r"<!-- tables: ([\w ]+) -->", lambda m: "&emsp;&emsp;".join(
-            f'<img src="{RAW}/{ref}/notebook/assets/tables/{name}.png" width="{width(TABLES[name])}" alt="{name}">'
+            f'<img src="{CDN}@{ref}/notebook/assets/tables/{name}.svg" width="{width(TABLES[name])}" alt="{name}">'
             for name in m[1].split()), text)
         text = re.sub(r"<!-- asset: (\S+) \| (.+?) -->", lambda m: f"<details><summary>{m[2]}</summary>\n\n"
                       f"![{m[2]}]({RAW}/{ref}/{m[1]})\n\n</details>", text)

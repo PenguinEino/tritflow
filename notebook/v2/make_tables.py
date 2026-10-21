@@ -1,10 +1,10 @@
-"""Draw the narrative's small truth tables as PNG images.
+"""Draw the narrative's small truth tables as SVG.
 
 Colab's Markdown drops inline styles, so an HTML table in a text cell renders at the default
-small size. An image keeps its size and shows before any cell runs. PNG at twice the size, since
-raw.githubusercontent.com serves SVG as plain text; the narrative sets the display width.
+small size. An SVG keeps its size, scales cleanly and shows before any cell runs. It is served
+through jsDelivr, since raw.githubusercontent.com sends SVG as plain text.
 
-    python3 notebook/v2/make_tables.py    # writes notebook/assets/tables/*.png
+    python3 notebook/v2/make_tables.py    # writes notebook/assets/tables/*.svg
 """
 from html import escape
 from pathlib import Path
@@ -47,7 +47,7 @@ TABLES = {
 
 
 def width(svg):
-    """Display width in CSS pixels (the PNG is twice this)."""
+    """Display width in CSS pixels."""
     return int(svg.split('width="', 1)[1].split('"', 1)[0])
 
 
