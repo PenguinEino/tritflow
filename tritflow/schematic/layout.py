@@ -235,11 +235,30 @@ def layout(net, expand=None, hierarchy=None, *, _macros=True):
     else:
         frames,width,height=place(nodes,driver,loads,arithmetic)
         routing_nodes=nodes;routing_frames=frames;local=[];local_trunks=[]
-    try:routed,trunks=route(routing_nodes,driver,loads,width,height,routing_frames)
-    except ValueError:
-        # Dense block fanout can need its branches before the local nets.
-        # Retry from an empty routing state, preserving the same clearances.
-        routed,trunks=route(routing_nodes,driver,loads,width,height,routing_frames,fanout_first=True)
+    # Preserve the reviewed arithmetic scene first; rerouting always starts
+    # empty. Generic cones can then gain columns/rows without moving a macro's
+    # published internal layout. Track assignment is the bounded final pass.
+    for channel_scale in range(4):
+        if channel_scale:
+            if composed:raise failure
+            frames,width,height=place(nodes,driver,loads,arithmetic,channel_scale=channel_scale)
+            routing_frames=frames
+        for fanout_first in (False,True):
+            try:
+                routed,trunks=route(routing_nodes,driver,loads,width,height,routing_frames,
+                                    fanout_first=fanout_first,reserve_feeds=bool(channel_scale),
+                                    search_limit=200000 if channel_scale else None)
+                break
+            except ValueError as exc:failure=exc
+        else:continue
+        break
+    else:
+        from .channels import channel_layout
+        routed,trunks,width,height=channel_layout(nodes,driver,loads)
+        channel_scale=4
+        notes.append('Reserved interval-coloured channel tracks after compact routing exhausted its workspace.')
+    if channel_scale:
+        notes.append(f'Expanded routing channels (spacing pass {channel_scale}); logic levels run left to right.')
     interconnect=_merge(routed) if composed else ()
     segments=_merge([*local,*routed]);trunks=(*local_trunks,*trunks)
     # Crop the drawing, rather than leaving placement's routing workspace as
@@ -265,4 +284,5 @@ def layout(net, expand=None, hierarchy=None, *, _macros=True):
     height=max((b[3] for b in bounds),default=0)+dy+footer
     visible={s.net for s in segments}
     return Scene(net.top,tuple(nodes.values()),segments,_junctions(segments),tuple(connections),{},width,height,
-                 tuple(sorted(net.nets()-visible,key=natural)),tuple(notes),frames,trunks,interconnect)
+                 tuple(sorted(net.nets()-visible,key=natural)),tuple(notes),frames,trunks,interconnect,
+                 detailed=bool(channel_scale))
