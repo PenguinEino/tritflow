@@ -128,8 +128,10 @@ def run_stages(command, **options):
             megabytes = sum(d for d, _ in files.values())/1e6
             line.detail = (f"{finished}/{len(files)} ファイル · {megabytes:.1f} MB" if len(files) > 1
                            else f"{label} · {megabytes:.1f} MB")
-        elif line and (found := re.match(r"\s*(Collecting|Downloading|Installing)\s+(\S+)", text)):
+        elif line and (found := re.match(r"\s*(Collecting|Downloading)\s+(\S+)", text)):
             line.detail = f"pip · {found[2]}"
+        elif line and text.startswith("Installing collected packages"):
+            line.detail = "pip · 展開してインストール中"
     process.wait()
     if process.returncode:
         error = subprocess.CalledProcessError(process.returncode, command, "\n".join(tail))
