@@ -17,9 +17,13 @@ SERIF = "Times New Roman, Times, Nimbus Roman, Liberation Serif, Noto Serif JP, 
 CELL_W, CELL_H, FONT = 88, 34, 18
 
 
-def table(rows, *, header_rows=1, header_cols=0, widths=None):
+MONO = "Menlo, Consolas, DejaVu Sans Mono, monospace"
+
+
+def table(rows, *, header_rows=1, header_cols=0, widths=None, left=()):
     """rows: list of lists of strings, drawn booktabs-style: a rule above and below the table and
-    a thin one under the header, no vertical lines; trit values in their colours."""
+    a thin one under the header, no vertical lines; trit values in their colours. Cells written
+    `like this` are set in a monospace face; columns listed in ``left`` are left-aligned."""
     columns = len(rows[0])
     widths = widths or [CELL_W]*columns
     width, height = sum(widths), CELL_H*len(rows)+4
@@ -32,8 +36,12 @@ def table(rows, *, header_rows=1, header_cols=0, widths=None):
             bold = header or text.startswith("**")
             text = text.strip("*")
             color = INK if header else COLOR.get(text, INK)
-            parts.append(f'<text x="{x+widths[c]/2}" y="{2+r*CELL_H+CELL_H/2+FONT*.35}" font-size="{FONT}" '
-                         f'text-anchor="middle" fill="{color}"{" font-weight=\"700\"" if bold else ""}>{escape(text)}</text>')
+            code = text.startswith("`") and text.endswith("`")
+            text = text.strip("`") if code else text
+            anchor, tx = ("start", x+10) if c in left else ("middle", x+widths[c]/2)
+            face = f' font-family="{MONO}" font-size="{FONT-3}"' if code else f' font-size="{FONT}"'
+            parts.append(f'<text x="{tx}" y="{2+r*CELL_H+CELL_H/2+FONT*.35}"{face} xml:space="preserve" '
+                         f'text-anchor="{anchor}" fill="{color}"{" font-weight=\"700\"" if bold and not code else ""}>{escape(text)}</text>')
             x += widths[c]
     return "".join(parts), width, height
 
@@ -111,6 +119,18 @@ TABLES = {
     "numbers": svg(table([["値", "−4", "−3", "−2", "−1", "0", "+1", "+2", "+3", "+4"],
                           ["3¹ 3⁰", "TT", "T0", "T1", "0T", "00", "01", "1T", "10", "11"]],
                          header_cols=1, widths=[80]+[54]*9)),
+    "syntax": svg(table([
+        ["書き方", "意味", "合成される回路"],
+        ["`~a  a & b  a | b`", "符号反転、小さいほう（min）、大きいほう（max）", "INV、NAND＋INV、NOR＋INV"],
+        ["`nany(a, b)`", "−sat(a + b)", "NANY"],
+        ["`a + b  a - b  -a`", "整数の加算、減算、符号反転", "全加算器の連鎖、各桁のINV"],
+        ["`a * b`", "整数の乗算", "1トリットの乗算器と加算器"],
+        ["`a << 1  a >> 1`", "3倍、3で割って最も近い整数に丸める", "配線のつなぎ替え（セルなし）"],
+        ["`a == b  a < b`", "比較。真は +1、偽は −1", "各桁の差と符号の判定"],
+        ["`c ? x : y`", "c = +1 で x、−1 で y、0 では一致する桁を残し他は 0", "三値の選択回路"],
+        ["`always @*  if  case`", "手続き的に書く組合せ回路", "条件ごとの値を選ぶ回路"],
+        ["`inv g (y, a);`", "セルを直接置く", "そのセル"],
+    ], left=(0, 1, 2), widths=[250, 470, 300])),
     "inv": beside(table([["A", "−1", "0", "+1"], ["Y", "+1", "0", "−1"]], header_cols=1, widths=[70, 70, 70, 70]),
                   compact_schematic()),
 }
