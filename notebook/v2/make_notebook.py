@@ -130,13 +130,12 @@ module full_add_rtl(input trit a, b, cin, output trit sum, cout);
 endmodule
 """''',
 
-"fa_synth": '''# 3-3 論理合成して、手でつないだ全加算器と比べる
+"fa_synth": '''# 3-3 論理合成する
 need("full_add_source", why="合成するHDLは、3-2に書いてあります。")
-with step("論理合成（2つの全加算器）") as s:
+with step("論理合成") as s:
     full_add_rtl = flow.loads(full_add_source).synthesize()
-    full_add_hand = flow.load(ROOT/"examples/full_add.tv", "full_add").synthesize()
-    s.done(f"+ で書いたもの {full_add_rtl.report()['total_cells']}セル · 手でつないだもの {full_add_hand.report()['total_cells']}セル")
-cell_counts({"+ で書いた全加算器": full_add_rtl, "手でつないだ全加算器": full_add_hand})
+    s.done(" · ".join(f"{cell}×{n}" for cell, n in full_add_rtl.report()["cells"].items())
+           + f" · 全{full_add_rtl.equivalence['vectors']}入力で等価")
 full_add_rtl.schematic(net_names=True, expand="*", title="", legend=False)''',
 
 "add2_source": '''# 3-4 HDL：2トリットの加算
