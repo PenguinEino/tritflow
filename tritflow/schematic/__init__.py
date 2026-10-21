@@ -78,9 +78,10 @@ class Schematic:
     capacitance_f: dict | None = None
     net_names: bool = False
     title: str | None = None
+    legend: bool = True
 
     def _vector(self):
-        return render(self.scene,self.values,self.capacitance_f,self.net_names,self.title)
+        return render(self.scene,self.values,self.capacitance_f,self.net_names,self.title,self.legend)
 
     @property
     def svg(self):
@@ -143,7 +144,8 @@ class Schematic:
         return self
 
 
-def draw(netlist, *, expand=None, inputs=None, net_names=False, parasitics=None, title=None, hierarchy=None):
+def draw(netlist, *, expand=None, inputs=None, net_names=False, parasitics=None, title=None, hierarchy=None,
+         legend=True):
     """Draw a mapped GateNetlist with default collapsed module-instance blocks.
 
     ``expand='*'`` gives the full cell view. A path or sequence such as
@@ -153,9 +155,11 @@ def draw(netlist, *, expand=None, inputs=None, net_names=False, parasitics=None,
     authoritative port aliases for modules outside the verified arithmetic set.
     Supply bit-blasted scalar trits via ``inputs={'a[0]': -1, ...}``.
     ``parasitics`` accepts a PnrResult, its report, or ``{net: farads}``.
+    ``legend=False`` drops the cell count and the keys under the drawing.
     """
     scene = layout(netlist,expand,hierarchy)
-    return Schematic(netlist,scene,_values(netlist,inputs),_caps(parasitics,netlist.nets()),bool(net_names),title)
+    return Schematic(netlist,scene,_values(netlist,inputs),_caps(parasitics,netlist.nets()),bool(net_names),title,
+                     bool(legend))
 
 
 def legend():
