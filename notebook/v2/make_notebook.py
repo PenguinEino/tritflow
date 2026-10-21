@@ -53,7 +53,7 @@ with step("HDLを読み込んで合成") as s:
     net = flow.loads(source).synthesize()
     s.done(" · ".join(f"{cell}×{n}" for cell, n in net.report()["cells"].items())
            + (" · 全入力で等価" if net.equivalence["passed"] else " · 等価でない"))
-net.schematic(net_names=True, expand="*", title="", legend=False)''',
+bus_picker(net)''',
 
 "pnr": '''# 1-3 配置配線する
 need("net", why="配置配線する回路 net は、1-2で合成します。")
@@ -136,7 +136,7 @@ with step("論理合成") as s:
     full_add_rtl = flow.loads(full_add_source).synthesize()
     s.done(" · ".join(f"{cell}×{n}" for cell, n in full_add_rtl.report()["cells"].items())
            + f" · 全{full_add_rtl.equivalence['vectors']}入力で等価")
-schematic_view(full_add_rtl.schematic(net_names=True, expand="*", title="", legend=False))''',
+bus_picker(full_add_rtl)''',
 
 "add2_source": '''# 3-4 HDL：2トリットの加算
 add2_source = """
@@ -190,7 +190,7 @@ with step("論理合成（4通り）") as s:
     selects = {name: flow.loads(source).synthesize() for name, source in select_sources.items()}
     s.done(" · ".join(f"{name} {net.report()['total_cells']}セル" for name, net in selects.items()))
 cell_counts(selects)
-schematic_view(selects["a + op*b"].schematic(net_names=True, expand="*", title="", legend=False))''',
+bus_picker(selects["a + op*b"])''',
 }
 
 CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md"]
