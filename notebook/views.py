@@ -325,6 +325,6 @@ def delay_table(cell="INV", *, ramp_s=1e-9):
     display(HTML(f'<style>{figure_css(".tfdelay")}{table_css(".tfdelay")}'
                  f'.tfdelay tr:nth-child(2) th{{border-bottom:.8px solid {INK}}} .tfdelay td:nth-child(8),.tfdelay tr:nth-child(2) th:nth-child(6){{padding-left:2em}}'
                  f'.tfdelay th[colspan]:last-child{{padding-left:2em}}</style><div class="tfdelay"><table>'
-                 f'<tr><th rowspan="2">入力</th><th rowspan="2">出力</th><th colspan="{len(loads)}">入力の中点から出力の中点までの遅延 (ns)</th>'
-                 f'<th colspan="{len(loads)}">出力が10%から90%まで変わる時間 (ns)</th></tr><tr>{head}{head}</tr>'
-                 f'{rows}</table><p><small>列は負荷容量。中点は変化前と変化後のレベルの中間。入力の変化時間は {ramp_s*1e9:g} ns。</small></p></div>'))
+                 f'<tr><th rowspan="2">入力</th><th rowspan="2">出力</th><th colspan="{len(loads)}">伝搬遅延 (ns)</th>'
+                 f'<th colspan="{len(loads)}">出力の変化時間 (ns)</th></tr><tr>{head}{head}</tr>'
+                 f'{rows}</table><p><small>伝搬遅延：入力と出力がそれぞれ変化前と変化後のレベルの中点を横切る時刻の差。出力の変化時間：出力が変化の10%から90%まで進む時間。<br>列は負荷容量。入力の変化時間は {ramp_s*1e9:g} ns。</small></p></div>'))
