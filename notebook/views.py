@@ -314,7 +314,7 @@ def delay_table(cell="INV", *, ramp_s=1e-9):
     from tritflow import ROOT
     data = json.loads((ROOT/"results/sta/propagation/tables"/f"{cell}.propagation.json").read_text())
     loads, column = data["axes"]["load_f"], data["axes"]["input_transition_s"].index(ramp_s)
-    head = "".join(f"<th>{c*1e15:g}</th>" for c in loads)
+    head = "".join(f"<th>{c*1e15:g} fF</th>" if c < 1e-12 else f"<th>{c*1e12:g} pF</th>" for c in loads)
     def arrow(a, b):
         return f"{TRIT_TEXT[a]} → {TRIT_TEXT[b]}"
     rows = "".join(
@@ -327,4 +327,4 @@ def delay_table(cell="INV", *, ramp_s=1e-9):
                  f'.tfdelay th[colspan]:last-child{{padding-left:2em}}</style><div class="tfdelay"><table>'
                  f'<tr><th rowspan="2">入力</th><th rowspan="2">出力</th><th colspan="{len(loads)}">遅延 (ns)</th>'
                  f'<th colspan="{len(loads)}">出力の変化時間 (ns)</th></tr><tr>{head}{head}</tr>'
-                 f'{rows}</table><p><small>列は負荷容量 (fF)。入力の変化時間 {ramp_s*1e9:g} ns。</small></p></div>'))
+                 f'{rows}</table><p><small>列は負荷容量。入力の変化時間は {ramp_s*1e9:g} ns。</small></p></div>'))
