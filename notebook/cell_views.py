@@ -8,6 +8,7 @@ here runs a tool; the chapter's own cells run the closure and the PDK checks.
 from html import escape
 from itertools import product
 import json
+import re
 
 from IPython.display import HTML, display
 
@@ -80,7 +81,18 @@ def _symbol(kind):
     anchors(node)
     draw(v, node)
     svg = v.svg(kind)
-    return svg[svg.index("<svg"):]
+    svg = svg[svg.index("<svg"):]
+    # Crop the canvas to the drawn strokes (and any label above them), so the symbol has no margin.
+    points = [tuple(map(float, xy)) for d in re.findall(r' d="([^"]+)"', svg)
+              for xy in re.findall(r"(-?[\d.]+) (-?[\d.]+)", d)]
+    points += [(float(x)+dx, float(y)+dy) for x, y, r in re.findall(r'cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"', svg)
+               for dx in (-float(r), float(r)) for dy in (-float(r), float(r))]
+    points += [(float(x), float(y)-12) for x, y, t in re.findall(r'<text x="([\d.]+)" y="([\d.]+)"[^>]*>([^<]+)</text>', svg)]
+    xs, ys = [p[0] for p in points], [p[1] for p in points]
+    x0, y0, w, h = min(xs)-6, min(ys)-6, max(xs)-min(xs)+12, max(ys)-min(ys)+12
+    svg = re.sub(r'width="[\d.]+" height="[\d.]+" viewBox="[^"]+"', f'width="{w*.8:g}" height="{h*.8:g}" viewBox="{x0:g} {y0:g} {w:g} {h:g}"', svg, count=1)
+    return svg.replace('<rect width="100%" height="100%" fill="white"/>',
+                       f'<rect x="{x0-4:g}" y="{y0-4:g}" width="{w+8:g}" height="{h+8:g}" fill="white"/>')
 
 
 def cell_tables(cells_dir, schematics_dir):
@@ -97,7 +109,7 @@ def cell_tables(cells_dir, schematics_dir):
     style = (figure_css(".tfcells") + table_css(".tfcells") +
              ".tfcells{max-width:1100px} .tfcells .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:1.4em;align-items:start}"
              f".tfcells .card{{min-width:0}} .tfcells .t{{margin-bottom:.3em}} .tfcells .t span{{color:{MUTED}}}"
-             ".tfcells .sym svg{width:110px;height:auto;display:block;margin:.1em 0 .3em}"
+             ".tfcells .sym{height:56px;display:flex;align-items:center;margin:.3em 0 .4em} .tfcells .sym svg{display:block}"
              ".tfcells details{margin-top:1em} .tfcells summary{cursor:pointer}"
              ".tfcells .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:1.4em 1.5em;margin-top:.6em;align-items:start}"
              ".tfcells figure{margin:0;min-width:0} .tfcells figcaption{font-weight:600;margin-bottom:.2em}"
