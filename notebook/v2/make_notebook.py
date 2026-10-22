@@ -24,7 +24,7 @@ CDN = "https://cdn.jsdelivr.net/gh/PenguinEino/tritflow"
 
 PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
-from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view, scope_figure, timing_table, wire_table
+from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view, scope_figure, timing_table, wire_table, delay_table
 from IPython.display import HTML, display
 from inverter_views import inverter
 from pnr_views import replay
@@ -240,7 +240,9 @@ with step("ngspice") as s:
 display(HTML(scope_figure(add2_post, settle=True).to_html(include_plotlyjs="cdn", full_html=False,
                                                          config={"displaylogo": False, "scrollZoom": True})))''',
 
-"sta5": '''# 5-4 三値のSTAとSPICEの比較
+"table5": '''# 5-4 INVの遅延の表
+delay_table("INV")''',
+"sta5": '''# 5-5 三値のSTAとSPICEの比較
 need("add2_post", why="比べるSPICEの結果は、5-3で求めます。")
 from tritflow.sta import analyze
 states = [dict(zip(add2_inputs, v)) for v in add2_vectors]
