@@ -24,7 +24,8 @@ CDN = "https://cdn.jsdelivr.net/gh/PenguinEino/tritflow"
 
 PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
-from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view
+from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view, scope_figure, timing_table, wire_table
+from IPython.display import HTML, display
 from inverter_views import inverter
 from pnr_views import replay
 from cell_views import closure_view, cell_tables, cell_row
@@ -37,7 +38,8 @@ set_language("ja")
 install_error_view()
 for name, cell in {"source": "1-1 HDL", "net": "1-2 合成する", "lay": "1-3 配置配線する",
                    "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション",
-                   "add2": "3-4 論理合成し、入力の値ごとに見る", "add2_layout": "4-1 配置配線する"}.items():
+                   "add2": "3-4 論理合成し、入力の値ごとに見る", "add2_layout": "4-1 配置配線する",
+                   "add2_lvs": "5-1 DRCとLVS", "add2_extracted": "5-2 抽出と配線容量", "add2_post": "5-3 ポストレイアウトシミュレーション"}.items():
     provides(name, cell)
 '''
 
@@ -194,9 +196,63 @@ replay(add2_layout)''',
 "gds2": '''# 4-3 GDS
 need("add2_layout", why="表示するGDSは、4-1で作ります。")
 gds_viewer(add2_layout.gds_path)''',
+
+"verify5": '''# 5-1 DRCとLVS
+need("add2_layout", why="検証するGDSは、4-1で作ります。")
+with step("DRC（PDKのデッキ）") as s:
+    add2_drc = add2_layout.drc()
+    s.done(f"違反 {add2_drc['violations']}件")
+with step("LVS（PDKのデッキ）") as s:
+    add2_lvs = add2_layout.lvs()
+    s.done("一致" if add2_lvs["matched"] else "不一致")''',
+
+"extract5": '''# 5-2 抽出と配線容量
+need("add2_lvs", why="抽出は、5-1でLVSが一致したGDSから行います。")
+with step("抽出と配線容量") as s:
+    add2_extracted = add2_layout.extract()
+    add2_wires = add2_layout.result.net_parasitics()
+    s.done(f"素子のネットリスト · 信号{len(add2_wires['nets'])}本に配線容量を追加")
+wire_table(add2_wires)''',
+
+"spice5": '''# 5-3 ポストレイアウトシミュレーション
+need("add2_extracted", why="シミュレーションする回路は、5-2で抽出します。")
+from tritflow.sim.postlayout import logical_nodeset
+add2_inputs = [p.name for p in add2.ports if p.dir == "input"]
+def digits(value, width=2):
+    """Balanced-ternary digits of an integer, low digit first."""
+    out = []
+    for _ in range(width):
+        digit = (value + 1) % 3 - 1
+        out.append(digit)
+        value = (value - digit)//3
+    return out
+def operands(a, b):
+    """The adder's input trits for the integers a and b, in port order."""
+    values = {f"a[{i}]": d for i, d in enumerate(digits(a))} | {f"b[{i}]": d for i, d in enumerate(digits(b))}
+    return tuple(values[p] for p in add2_inputs)
+add2_vectors = [operands(a, b) for a, b in [(0, 0), (1, 0), (-1, 0), (3, 0), (-3, 0), (4, 4), (0, 0),
+                                            (-4, -4), (4, -4), (2, 2), (0, 0)]]
+with step("ngspice") as s:
+    add2_post = add2_extracted.simulate(add2_vectors, load=100e-15, hold_s=1e-6, step_s=2e-9, edge_s=1e-9,
+                                        temperature_c=27, timeout=600,
+                                        nodeset=logical_nodeset(add2, add2_lvs["report"], add2_inputs, add2_vectors[0]))
+    s.done("全区間で ±0.5 V の帯に入った" if add2_post["measurements"]["passed"] else "帯に入らない区間がある")
+display(HTML(scope_figure(add2_post, settle=True).to_html(include_plotlyjs="cdn", full_html=False,
+                                                         config={"displaylogo": False, "scrollZoom": True})))''',
+
+"sta5": '''# 5-4 三値のSTAとSPICEの比較
+need("add2_post", why="比べるSPICEの結果は、5-3で求めます。")
+from tritflow.sta import analyze
+states = [dict(zip(add2_inputs, v)) for v in add2_vectors]
+with step("三値のSTA") as s:
+    add2_timing = analyze(add2, vector_pairs=list(zip(states, states[1:])),
+                          wire_caps={n: e["wire_capacitance_f"] for n, e in add2_wires["nets"].items()},
+                          output_load_f=100e-15, input_transition_s=1e-9)
+    s.done(f"{len(add2_timing.arrival)}出力")
+timing_table(add2_post, add2_timing)''',
 }
 
-CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md"]
+CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md", "05_verify.md"]
 
 
 def cells(ref):

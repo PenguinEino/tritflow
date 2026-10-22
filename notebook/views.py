@@ -47,9 +47,11 @@ def schematic_view(circuit):
                  f'{circuit._repr_svg_()}</div><div class="tfdiagram-hint">横にスクロールして回路図の全体を見られる。</div>'))
 
 
-def scope_figure(post, *, title=None):
+def scope_figure(post, *, title=None, settle=False):
     """Post-layout transient in the paper style: one lane per input and output with the ±0.5 V
-    bands and the checker's sample points, then the VDD current; a range slider under it."""
+    bands and the checker's sample points, then the VDD current; a range slider under it.
+    ``settle`` marks each output's slowest transition: an arrow from the input edge to where the
+    output enters its final band and stays."""
     import numpy as np
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
@@ -86,6 +88,22 @@ def scope_figure(post, *, title=None):
                                         line={"color": CURRENT_COLOR, "width": 2},
                                         hovertemplate="|I(VDD)| %{y:.3f} mA<extra></extra>"), row=row, col=1)
             figure.update_yaxes(title_text="|I<sub>VDD</sub>| (mA)", row=row, col=1)
+    if settle:
+        hold = stimulus["hold_s"]*1e6
+        for row, (kind, name) in enumerate(lanes, 1):
+            if kind != "v" or name not in stimulus["outputs"]:
+                continue
+            slow = max(((k, r["outputs"][name]) for k, r in enumerate(rows) if k and r["outputs"][name]["settling_s"]),
+                       key=lambda item: item[1]["settling_s"], default=None)
+            if slow is None:
+                continue
+            k, out = slow
+            start, delay = k*hold, out["settling_s"]*1e6
+            axis = "" if row == 1 else str(row)
+            figure.add_annotation(x=start+delay, y=out["ideal_voltage_v"], ax=start, ay=out["ideal_voltage_v"],
+                                  xref=f"x{axis}", yref=f"y{axis}", axref=f"x{axis}", ayref=f"y{axis}",
+                                  text=f"{out['settling_s']*1e9:.0f} ns", showarrow=True, arrowhead=2, arrowcolor=ACCENT,
+                                  font={"color": ACCENT, "size": 12}, bgcolor="rgba(255,255,255,.85)")
     paper_axes(figure)
     figure.update_xaxes(range=[0, len(rows)*stimulus["hold_s"]*1e6])
     figure.update_xaxes(title_text="time (µs)", rangeslider={"visible": True, "thickness": .05, "bgcolor": "#f6f5f1"},
@@ -268,3 +286,22 @@ def cell_counts(designs):
     compact = '.tfcount{max-width:100%;overflow-x:auto}.tfcount th,.tfcount td{white-space:nowrap;padding:.25em .5em}'
     display(HTML(f'<style>{figure_css(".tfcount")}{table_css(".tfcount")}{compact}</style>'
                  f'<div class="tfcount"><table>{head}{body}</table></div>'))
+
+
+def timing_table(post, timing):
+    """Booktabs table: for each output, the slowest settling time in SPICE and the STA estimate."""
+    measured = post["measurements"]["max_settling_s"]
+    rows = "".join(f"<tr><th>{escape(pin)}</th><td>{measured[pin]*1e9:.1f}</td><td>{timing.arrival[pin]*1e9:.1f}</td>"
+                   f"<td>{(timing.arrival[pin]/measured[pin]-1)*100:+.0f}%</td></tr>".replace("-", "−") for pin in measured)
+    display(HTML(f'<style>{figure_css(".tftime")}{table_css(".tftime")}</style><div class="tftime"><table>'
+                 f'<tr><th>出力</th><th>SPICE (ns)</th><th>STA (ns)</th><th>差</th></tr>{rows}</table></div>'))
+
+
+def wire_table(parasitics, *, top=8):
+    """Booktabs table of the routed nets with the largest estimated wire capacitance."""
+    nets = sorted(parasitics["nets"].items(), key=lambda item: -item[1]["wire_capacitance_f"])
+    total = sum(e["wire_capacitance_f"] for _, e in nets)
+    rows = "".join(f"<tr><th>{escape(name)}</th><td>{e['wire_capacitance_f']*1e15:.1f}</td></tr>" for name, e in nets[:top])
+    display(HTML(f'<style>{figure_css(".tfwire")}{table_css(".tfwire")}</style><div class="tfwire"><table>'
+                 f'<tr><th>ネット</th><th>配線容量 (fF)</th></tr>{rows}'
+                 f'<tr><th>全{len(nets)}ネットの合計</th><td><b>{total*1e15:.0f}</b></td></tr></table></div>'))
