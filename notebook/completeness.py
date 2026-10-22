@@ -44,3 +44,18 @@ def surjective_and_depends_on_both(function):
     depends_a = any(len({table[a, b] for a in TRITS}) > 1 for b in TRITS)
     depends_b = any(len({table[a, b] for b in TRITS}) > 1 for a in TRITS)
     return set(table.values()) == set(TRITS) and depends_a and depends_b
+
+
+def generations(*, binary=(), constants=()):
+    """For each reachable one-input function, the number of rounds of the closure it first
+    appears in: 0 for the input wire and the constants, then one more for each layer of cells."""
+    found = {TRITS: 0} | {(c, c, c): 0 for c in constants}
+    round_ = 0
+    while True:
+        round_ += 1
+        previous = dict(found)
+        for f in binary:
+            for x, y in product(previous, repeat=2):
+                found.setdefault(tuple(f(a, b) for a, b in zip(x, y, strict=True)), round_)
+        if len(found) == len(previous):
+            return found

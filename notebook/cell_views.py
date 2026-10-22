@@ -22,27 +22,25 @@ def _key(prefix):
     return f"{prefix}{_VIEWS}"
 
 
-def closure_view(bases, closures):
-    """All 27 one-input functions as columns (output at a = −1, 0, +1, top to bottom); each
-    basis is a row, and the functions it reaches are drawn in colour."""
+def closure_view(found):
+    """All 27 one-input functions as columns (output at a = −1, 0, +1, top to bottom), each with
+    the round of the construction in which it first appears; unreached ones are left blank."""
     functions = list(product((-1, 0, 1), repeat=3))
-    size = 10
+    size = 14
 
-    def column(function, reached):
-        cells = "".join(f'<rect x="0" y="{k*size}" width="{size}" height="{size-1}" rx="1.5" '
+    def column(function):
+        reached = function in found
+        cells = "".join(f'<rect x="0" y="{k*size}" width="{size}" height="{size-1.5}" rx="2" '
                         f'fill="{COLOR[v] if reached else "#efeee9"}"/>' for k, v in enumerate(function))
         return f'<svg width="{size}" height="{3*size}">{cells}</svg>'
 
-    rows = []
-    for (name, _), reached in zip(bases, closures):
-        cells = "".join(f'<td>{column(f, f in reached)}</td>' for f in functions)
-        rows.append(f'<tr><th>{escape(name)}</th>{cells}<td class="n"><b>{len(reached)}</b> / 27</td></tr>')
+    cells = "".join(f'<td>{column(f)}<div class="g">{found.get(f, "")}</div></td>' for f in functions)
     legend = " ".join(f'<span style="color:{COLOR[v]}">■</span> {TRIT_TEXT[v]}' for v in (-1, 0, 1))
-    display(HTML(f'<style>{figure_css(".tfclosure")}.tfclosure th{{text-align:left;padding-right:1em;font-weight:600;'
-                 f'white-space:nowrap}} .tfclosure td{{padding:2px 1px}} .tfclosure td.n{{padding-left:1em;white-space:nowrap}}'
-                 f'</style><div class="tfclosure"><table style="border-collapse:collapse">{"".join(rows)}</table>'
+    display(HTML(f'<style>{figure_css(".tfclosure")}.tfclosure td{{padding:2px 2px;text-align:center}}'
+                 f'.tfclosure .g{{font-size:12px;color:{MUTED}}}</style><div class="tfclosure">'
+                 f'<table style="border-collapse:collapse"><tr>{cells}</tr></table>'
                  f'<div style="color:{MUTED};font-size:13px;margin-top:.4em">各列が1入力関数（上から a = −1, 0, +1 での出力）。'
-                 f'色のついた列が、その組で作れる関数。{legend}</div></div>'))
+                 f'下の数字は、その関数が初めて現れた段（0は入力そのものと定数）。{legend}</div></div>'))
 
 
 FORMULA = {"INV": "Y = −A", "BUF": "Y = A", "NAND": "Y = −min(A, B)", "NOR": "Y = −max(A, B)",

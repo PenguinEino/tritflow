@@ -94,14 +94,12 @@ with step("寸法の記録を照合") as s:
     s.done(f"{len(grid['rows'])}通り · 回路・モデル・解析コードが一致")
 inverter(spice, grid)''',
 
-"closure": '''# 2-2 1入力関数の閉包
-from completeness import unary_closure, surjective_and_depends_on_both, inv, nand, nor, nany
-bases = [("INV・NAND・NOR＋定数3つ", dict(unary=(inv,), binary=(nand, nor), constants=(-1, 0, 1))),
-         ("NANY＋TIEZ", dict(binary=(nany,), constants=(0,))),
-         ("NANY＋TIEP・TIEN", dict(binary=(nany,), constants=(-1, 1)))]
-closures = [unary_closure(**basis) for _, basis in bases]
-closure_view(bases, closures)
-print("NANYは2つの入力の両方に依存し、出力に−1・0・+1のすべてが現れる：", surjective_and_depends_on_both(nany))''',
+"closure": '''# 2-2 NANYと ±1 の定数から作れる1入力関数
+from completeness import generations, surjective_and_depends_on_both, nany
+found = generations(binary=(nany,), constants=(-1, 1))
+print(f"作れた1入力関数：{len(found)} / 27、最も深いもので {max(found.values())} 段")
+print("NANYは2つの入力の両方に依存し、出力に−1・0・+1のすべてが現れる：", surjective_and_depends_on_both(nany))
+closure_view(found)''',
 
 "cells": '''# 2-3 セルの真理値表
 cell_tables(CELLS_DIR/"out", ROOT/"notebook/assets/schematics")''',
