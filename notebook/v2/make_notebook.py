@@ -94,9 +94,9 @@ with step("寸法の記録を照合") as s:
     s.done(f"{len(grid['rows'])}通り · 回路・モデル・解析コードが一致")
 inverter(spice, grid)''',
 
-"closure": '''# 2-2 NANYと ±1 の定数から作れる1入力関数
+"closure": '''# 2-2 NANYと +1 の定数から作れる1入力関数
 from completeness import generations, surjective_and_depends_on_both, nany
-found = generations(binary=(nany,), constants=(-1, 1))
+found = generations(binary=(nany,), constants=(1,))
 print(f"作れた1入力関数：{len(found)} / 27、最も深いもので {max(found.values())} 段")
 print("NANYは2つの入力の両方に依存し、出力に−1・0・+1のすべてが現れる：", surjective_and_depends_on_both(nany))
 closure_view(found)''',
