@@ -26,6 +26,7 @@ PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
 from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view
 from inverter_views import inverter
+from pnr_views import replay
 from cell_views import closure_view, cell_tables, cell_row
 from tritflow import CELLS_DIR
 from tritflow.sim.sizing import sweep_dimensions, load_grid
@@ -35,7 +36,8 @@ from tritflow.schematic import set_language
 set_language("ja")
 install_error_view()
 for name, cell in {"source": "1-1 HDL", "net": "1-2 合成する", "lay": "1-3 配置配線する",
-                   "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション"}.items():
+                   "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション",
+                   "add2": "3-4 論理合成し、入力の値ごとに見る", "add2_layout": "4-1 配置配線する"}.items():
     provides(name, cell)
 '''
 
@@ -176,9 +178,25 @@ with step("論理合成（4通り）") as s:
     s.done(" · ".join(f"{name} {net.report()['total_cells']}セル" for name, net in selects.items()))
 cell_counts(selects)
 bus_picker(selects["a + op*b"])''',
+
+"pnr2": '''# 4-1 配置配線する
+need("add2", why="配置配線する回路は、3-4で合成した2トリットの加算器です。")
+with step("配置配線", view=LayoutView()) as s:
+    add2_layout = add2.place_and_route(output_dir=BUILD/"add2", seed=0)
+    stats = add2_layout.stats
+    s.done(f"{stats['instance_count']}セル · {stats['row_count']}行 · {stats['die_size_um'][0]:.0f} × {stats['die_size_um'][1]:.0f} µm · "
+           f"配線長の見積もり {stats['hpwl_before_um']/1e3:.1f} → {stats['hpwl_after_um']/1e3:.1f} mm · ビア {stats['via_count']}個")''',
+
+"replay": '''# 4-2 途中経過を振り返る
+need("add2_layout", why="振り返る実行は、4-1の配置配線です。")
+replay(add2_layout)''',
+
+"gds2": '''# 4-3 GDS
+need("add2_layout", why="表示するGDSは、4-1で作ります。")
+gds_viewer(add2_layout.gds_path)''',
 }
 
-CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md"]
+CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md"]
 
 
 def cells(ref):
