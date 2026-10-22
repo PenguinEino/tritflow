@@ -108,50 +108,37 @@ cell_tables(CELLS_DIR/"out", ROOT/"notebook/assets/schematics")''',
 import json
 cell_row(json.loads((CELLS_DIR/"out/library.json").read_text()), CELLS_DIR/"out")''',
 
-"latch": '''# 3-1 ラッチになる書き方はエラーになる
-latch_source = """
-module hold(input trit a, c, output reg trit y);
-  always @* begin
-    if (c == 1't1) y = a;
-  end
-endmodule
-"""
-try:
-    flow.loads(latch_source).synthesize()
-except Exception as error:
-    print(error)''',
-
-"fa_source": '''# 3-2 HDL：+ で書いた全加算器
+"fa_source": '''# 3-1 HDL：+ で書いた全加算器
 full_add_source = """
 module full_add_rtl(input trit a, b, cin, output trit sum, cout);
   assign {cout, sum} = a + b + cin;
 endmodule
 """''',
 
-"fa_synth": '''# 3-3 論理合成する
-need("full_add_source", why="合成するHDLは、3-2に書いてあります。")
+"fa_synth": '''# 3-2 論理合成する
+need("full_add_source", why="合成するHDLは、3-1に書いてあります。")
 with step("論理合成") as s:
     full_add_rtl = flow.loads(full_add_source).synthesize()
     s.done(" · ".join(f"{cell}×{n}" for cell, n in full_add_rtl.report()["cells"].items())
            + f" · 全{full_add_rtl.equivalence['vectors']}入力で等価")
 bus_picker(full_add_rtl)''',
 
-"add2_source": '''# 3-4 HDL：2トリットの加算
+"add2_source": '''# 3-3 HDL：2トリットの加算
 add2_source = """
 module add2(input trit [1:0] a, b, output trit [2:0] s);
   assign s = a + b;
 endmodule
 """''',
 
-"add2_synth": '''# 3-5 論理合成し、入力の値ごとに見る
-need("add2_source", why="合成するHDLは、3-4に書いてあります。")
+"add2_synth": '''# 3-4 論理合成し、入力の値ごとに見る
+need("add2_source", why="合成するHDLは、3-3に書いてあります。")
 with step("論理合成") as s:
     add2 = flow.loads(add2_source).synthesize()
     s.done(" · ".join(f"{cell}×{n}" for cell, n in add2.report()["cells"].items())
            + f" · 全{add2.equivalence['vectors']}入力で等価")
 bus_picker(add2)''',
 
-"sel_source": '''# 3-6 HDL：同じ選択を書き分ける
+"sel_source": '''# 3-5 HDL：同じ選択を書き分ける
 select_sources = {
 "?:": """
 module sel_cond(input trit [1:0] a, b, input trit op, output trit [2:0] r);
@@ -182,8 +169,8 @@ endmodule
 """,
 }''',
 
-"sel_synth": '''# 3-7 論理合成して比べる
-need("select_sources", why="合成するHDLは、3-6に書いてあります。")
+"sel_synth": '''# 3-6 論理合成して比べる
+need("select_sources", why="合成するHDLは、3-5に書いてあります。")
 with step("論理合成（4通り）") as s:
     selects = {name: flow.loads(source).synthesize() for name, source in select_sources.items()}
     s.done(" · ".join(f"{name} {net.report()['total_cells']}セル" for name, net in selects.items()))
