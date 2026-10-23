@@ -1,0 +1,1275 @@
+{
+  "schema": "tritflow.chip.signoff.v1",
+  "clean": true,
+  "physical_checks_passed": true,
+  "cache_hit": false,
+  "fingerprint": "d46f2436e941ac61da3bbf795319c17b1e8aea60ba192b2f1d2f2ab097981385",
+  "inputs": {
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/tr_1um_dot4.cir": "15af9fad63c563bf95ed2e0261fc637766813ba138b9b8e2a2f95ec5ed18af9d",
+    "/home/ishi-kai/bin/klayout/klayout": "3eaadb689e3b2f0598bb200ed6567b6a5e6f5e51bc5f3256ee9cade3491045fb",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip.py": "6af7396a7e108dc3854aa78c44d679acb5ab4b1595385d8a9939b6b600555cf1",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_router.py": "7656b09f480e080e5f2d8067803b6b474a8b5bc306465674f93f7700581bb83f",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_power.py": "f51535a410d6913b16348bbb75c9bc12c1bfed98732b4c4d957d3525dcfe3e37",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/signoff.py": "8063504bb824d4313ab1e72f5bd3b584ed8e8d91bfe599a63820e72a81241a36",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/power.py": "5c05a3d775cd84d663d8a4fb7ffe28d49eceff152085045d698b40983adb5cab",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/verify.py": "4e1769b77cd25936e003e0b32e1de7d99643351e9e366f4c534f6d51fdc59f33",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_frame.py": "4909250a5fbbe0c7b8d3588bf11649545364044202c799eaaa1cedb290a1ae45",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_frame_power.py": "d8ffc820b716c0b04ee6de8b9af61c6922f37e9f2e475eb9a64dd38a530ecec9",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_frame_audit.py": "4d4e07da24b4da1a0906f8fbb0ee07e674386730dbada256dfa2d740a777f45a",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/libraries/TR-1um_frame_25x25.gds": "ba48c9dbb78060fe75294c9629714fa87f01b4fed067cc9317900970eb911b30",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_ESD_5V_ANA.sch": "566c33cd0a1b7ff1f24c8dccdc1084cc6d942af452a18b0cce60cc6ff4ba53be",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_ESD_5V_DIO.sch": "cde6f9f2bf8ac42c8278d8a8e03b70f66725ec6bccb7ae8b9d62c9a495c3be71",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_ESD_5V_VDD.sch": "a910b5e5adfdf6c96631860ccd995f9a71602428d9c4814a94fba532a8b01fba",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_ESD_5V_VSS.sch": "1066c15a90a44a858523594f9d4965364c5593d0c3da8d6247e1e6d20c0937bb",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_FRAME_GIO.sch": "8ef7d63b74158103f1b5d40a4ef991c2bc8346e90186debefeb3687de904ad45",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_FRAME.sch": "49aae1414e87765dcfe9b17f9b6b6721ea654435c0fd51d2a316c66cbdec74b4",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/summary.json": "de5004860e327834ebf6c8f26bfd999c745c6a8a6544d04442e096b49507ef16",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/b3v32check.log": "b20922044e3062034219f37b2362fd4beadb808a8ba07d5a215fd4b02cbfdcb3",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/waveform.txt": "5afb6504d351405c9c32f441cf143fd018fa80b4f1ed17d41ca649020317264b",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/b3v33check.log": "ab31f4e372e113254b6abe2840b456b632df8b68f0a62f00ab9b2526919ef372",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/ngspice.log": "ac10591ed58b8205869168eacfb9ab0cf9ea949683f30d40c6fa3811717cac38",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/tb.spice": "804be0057d45db8b2a8c0a94ffedec7f56f365bbc37d77366234db12bc888f01",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/run_IP62.drc": "07f9811a87a562ac4e0e4a13b70c5f60dd9d3ca962a8b034acb224877a3c5ebe",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/run_tile.drc": "5966f762d81e7408f245957ec1b0813caa346a5cb902fbd9e5fd9ba22dccd135",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/run.drc": "8ffc43f3ea42fedf8f6f39facfada8309cd16d089a3af1b26016526e215f56ca",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/drc.lydrc": "1e610ee59a2022e5e3da275fdf99b6717678403035ddc14f27f7ff94d02b31b8",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/04_TapeOut.drc": "56b7d1905429bf49bcc1313413e33f1fe69d87af104e287ecfa1a9981447ae6f",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/03_Electrical.drc": "497d9cd3ddbccbba68f73553618b455fecffe849b4be37f10d750030b7bde085",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/02_Device.drc": "f2a79da0cfe7f1bca89b2b00bd7576393eb302a20b8568f16f6214f4bf2729bc",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/drc_IP62.lydrc": "e5b40a257ce8e7e88e488d8b73086af15e984dc46399ec600818788317b1c1da",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/01_Basics.drc": "b8cfb0df7b6e98db833a8019b50fad3be9672b91793d215690c4e0dfb480c2ff",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/00_Layers.drc": "6f1ece6c37de872af75c4249eb02e9d211b2e13a29661dd20b95806ae72435e2",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/run_mdp.drc": "f8afffd7e1abefb6188fc69ba623bc00b72d6af0f87198aafaf0b08d3002cbed",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/10_TapeOut.drc": "cf06a1b71c5d0f492277b5c39d74457f5c8aa27fdfea70fd1a0ea37036a425cd",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/03_Check.drc": "6487168daa36b1d9765b42e461fd4d271495aeef919a41b2c937745071af7b46",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/04_Check.drc": "5a2107118f3a92377b57a220c865f75e59e589675956c70e7b35ec890e8c9d2a",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/06_Check.drc": "26fd6afb7a2fc69ba584763fece00e7e77aaa7d55c4b43acea2bc1daa4c22b20",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/02_Device.drc": "df84a871f7b9c6f1c9809deae2d8d716377596c8a400d1690949a731eeb82010",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/01_Basics.drc": "eac124d2e77929ca2b675cd6c8b6e36065a5cecf699f2ca59a532647fdea7314",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/00_Layers.drc": "32f0957029368e89a032626b3a2fb8b09930c36cc9581b62c0ad132c9d393b07",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/05_Check.drc": "1a81ef8b0ce88d435963a2f05cc253dfa786df3841de4e505a7867517aeb3911",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/07_Check.drc": "4ad62763f3ae5c9233fc8a9fd55a5ec999450362070956fcf0348060ce03d758",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/08_Check.drc": "a4dbf53e06b7993d1e54138da767990f90197a8960fcb86c8c7b63bfa9cf602d",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/IP62/09_Check.drc": "e5602d8aa07ab997a023b5d4da91437ce066f56abf71a1eca4556e1a8110eb72",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/05_Compare.lvs": "0788f066d55d284c879613d3fb125157d9458e52dd03782be89e4372a6d89e4b",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/03_Combiner.lvs": "38f081645ca9396735b685ea0acbfb36796b14df252b7c292c371dd911be6388",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/01_Extract.lvs": "5557369f863655af37590b0cc12bfb75b8b378ce8ce954cc9840866bcf32c6b1",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/run_svs.lvs": "cd96de71d0d6b9b8908bc1d49aababa3dcc7b960054d242b49cda0093c6024ca",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/02_Extract.lvs": "34b58cf32802767352a047ae9927ddf78467916d96991fe1b5e3f0a6285b464a",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/04_Custom.lvs": "bb9339879006ed5eaf3c635ad3d5d1bf3a2d732e4d2e0e74482685945b3d8cbe",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/lvs.lylvs": "1fdbec8c7f76a2f2c93584cefb8b250535f40ab41ffe5f426d14be1248eae70a",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/flatten_generated_pins.rb": "d2595646eeb7327922d2391dc649b0451dd155a920e26606db04560d42ea41f9",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/run.lvs": "bac31eb9ae01a20b70ff6723ba5bf4be00fa4a44ada377daa251e975c3a89110",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/IP62/01_Extract.lvs": "d543379e53b23937f4f3598d82144783b2573b3b2a6f261d5411d4eeecd53881",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/IP62/02_Extract.lvs": "fbd0880c4688dcbda8b7f20b2ed3c6a9cb89e425cd0dfae42dffb3b89ff27a6b",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/IP62/00_Extract.lvs": "88223f3a98b07fa68202a6fdcdb2e75bb0c07a710bc0f358671263ce2f0a5e94",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/lvs/IP62/run.lvs": "73cdf8adfb8560e9f1df2eb674392854d827b6b0f0655d886cc57f13d80db931",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/template.json": "c8d7fe0ea139088f8571281779090e8550b8ea22d0c28a0db1dd7d086b1c9042",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/all.spice": "f70c4cc12c362604eb4c679b5d4c425b68ee14591703258dbfddd1b2eaa717bb",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/TIEN/TIEN.abstract.json": "66655cdee8991aa8538fd6ae1847610efacec643a4d607d8ab034ad60507b682",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/NOR/NOR.abstract.json": "0c91172596e2ce5534c3c7788e5ae938fd727d3cd038dda4b65c4750b3e5cce5",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/INV/INV.abstract.json": "ecb8d8197310295edc73bbaab07f22a354fb028f76ff653725bab52760f14f11",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/NAND/NAND.abstract.json": "31ad9a12a3ae2562d783cb0b2f5a5700cca74d6ef6e03f1c8ae261051d268703",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/TIEP/TIEP.abstract.json": "4f6eacff791aee8fd7002d6d6c13f7f40bd82f930e5657110e9f3c3bccd1712b",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/BUF/BUF.abstract.json": "618c63ea05939b67271c45f8769dd2acb861a64c1113862402265b57920634a0",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/NANY/NANY.abstract.json": "5fcf2725ea58d2d77d775d0e5df7bf027ff2278ac652fb784f10e4316891c48f",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/TIEZ/TIEZ.abstract.json": "927499c9bc197755d536a7fbef0357303e095a3b5a10e1ec8696d862425517bb",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/FILL/FILL.abstract.json": "58466bd5be5e6d7351e9f671445d2b38e31c6069adf37086434aaecaa608d3d3",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/TIEN/TIEN.char.json": "2bf7185778e2da750ed8162aab62a08ad633d9011a8e3d19e793caf747e5d6a7",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/NOR/NOR.char.json": "c9835915991fcae9ffb827cb0491b387ca0540deb46db8e4212b1ce2a220b226",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/INV/INV.char.json": "f64d72fdebac1974f08d7ae459b0197a827c7b29618cadbe512fcb50b9e507e0",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/NAND/NAND.char.json": "5947bea6d678e9cca23ca393724baeda3534dbe23916e8d848c7128877a5dd41",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/TIEP/TIEP.char.json": "775fdc1f13dc6f072c3b046048af10a6b5b5edd53d759a9360f604fbe01c1d04",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/BUF/BUF.char.json": "186a042490bb02b23ef42e97139031cb1074e939b0034d8813721c0122051c50",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/NANY/NANY.char.json": "a2922e805f0a7931ced5f4c812661532d6d439f6029624304345f1d8c4ce4444",
+    "/home/ishi-kai/code-a-chip-v3/cells/out/TIEZ/TIEZ.char.json": "f3241772dae6ea2bc02d09b1df06ba029b65b429ce184a9c369735c7fa61ee86",
+    "/home/ishi-kai/TR-1um_MPW_Sanken/scripts/pre_check.py": "90c3adf79042d114c14d29a7c27b2f3956c03b20836096786fa202efe9fc44c8",
+    "/home/ishi-kai/TR-1um_MPW_Sanken/.github/workflows/check.yml": "fbcc5433974b8134c11d3ee2e5498023e064ee03d07ec260b2040968da1f1acb",
+    "/home/ishi-kai/TR-1um_MPW_Sanken/info.yaml": "6d05b0de0b3091ededd0bd94addc12720ef2863308e8776d6b52511b5f24bfc0"
+  },
+  "submission_ready": false,
+  "reason": "Organizer allocation of a full 2500 um slot, final bond diagram and final CI remain",
+  "top": "tr_1um_dot4",
+  "gds_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/tr_1um_dot4.gds",
+  "drawing_drc": {
+    "command": [
+      "/home/ishi-kai/bin/klayout/klayout",
+      "-b",
+      "-r",
+      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/run.drc",
+      "-rd",
+      "input=/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/tr_1um_dot4.drawing.gds",
+      "-rd",
+      "top_cell=tr_1um_dot4",
+      "-rd",
+      "report=/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/drawing_drc.lyrdb"
+    ],
+    "exit_code": 0,
+    "runtime_s": 2.7422582950093783,
+    "log_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/drawing_drc.log",
+    "clean": true,
+    "violations": 0,
+    "categories": {},
+    "report_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/drawing_drc.lyrdb",
+    "policy": "all report items, including warnings and visited items, count as failures"
+  },
+  "drawing_lvs": {
+    "matched": true,
+    "extracted": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/lvs/tr_1um_dot4.ext.spice",
+    "report": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/lvs/tr_1um_dot4.lvsdb",
+    "circuits": [
+      {
+        "layout": "INV",
+        "reference": "INV",
+        "status": "Match"
+      },
+      {
+        "layout": "NAND",
+        "reference": "NAND",
+        "status": "Match"
+      },
+      {
+        "layout": "NANY",
+        "reference": "NANY",
+        "status": "Match"
+      },
+      {
+        "layout": "NOR",
+        "reference": "NOR",
+        "status": "Match"
+      },
+      {
+        "layout": "OSS_ESD_5V_ANA",
+        "reference": "OSS_ESD_5V_ANA",
+        "status": "Match"
+      },
+      {
+        "layout": "OSS_ESD_5V_VDD",
+        "reference": "OSS_ESD_5V_VDD",
+        "status": "Match"
+      },
+      {
+        "layout": "OSS_ESD_5V_VSS",
+        "reference": "OSS_ESD_5V_VSS",
+        "status": "Match"
+      },
+      {
+        "layout": "OSS_FRAME",
+        "reference": "OSS_FRAME",
+        "status": "Match"
+      },
+      {
+        "layout": "dot4",
+        "reference": "DOT4",
+        "status": "Match"
+      },
+      {
+        "layout": "tr_1um_dot4",
+        "reference": "TR_1UM_DOT4",
+        "status": "Match"
+      }
+    ],
+    "errors": [],
+    "strict_ports": true,
+    "unused_power_formals_restored": [],
+    "unused_power_physical_evidence": {},
+    "spice_name_map": {
+      "y[0]": "tf_795b305d",
+      "y[1]": "tf_795b315d"
+    },
+    "label_normalization_gds": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/lvs/spice_named_input.gds",
+    "normalized_label_count": 4,
+    "scope": "PDK device extraction; intrinsic device parasitics; no signal-wire resistance"
+  },
+  "mdp": {
+    "command": [
+      "/home/ishi-kai/bin/klayout/klayout",
+      "-b",
+      "-r",
+      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/run_mdp.drc",
+      "-rd",
+      "input=/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/tr_1um_dot4.drawing.gds",
+      "-rd",
+      "cellname=tr_1um_dot4",
+      "-rd",
+      "output=/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/tr_1um_dot4.ip62.gds"
+    ],
+    "exit_code": 0,
+    "runtime_s": 0.8636011939961463,
+    "log_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mdp.log",
+    "output_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/tr_1um_dot4.ip62.gds",
+    "metal_preservation": {
+      "clean": true,
+      "xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "outside_stock_frame_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "stock_frame_only_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "delta_over_own_geometry_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "outside_stock_frame_polygon_count": {
+        "CO": 0,
+        "M1": 0,
+        "V1": 0,
+        "M2": 0
+      },
+      "method": "Full-chip Region XOR minus the independently reproduced stock-frame-only MDP XOR; exact zero outside it and on owned geometry",
+      "policy": "Binding integrator decision: record organizer stock-logo MDP delta; no changes to TritFlow metal"
+    },
+    "full_die_metal_preservation": {
+      "clean": false,
+      "xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "method": "independent flattened Region XOR"
+    },
+    "stock_frame_mdp": {
+      "command": [
+        "/home/ishi-kai/bin/klayout/klayout",
+        "-b",
+        "-r",
+        "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/run_mdp.drc",
+        "-rd",
+        "input=/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/stock_frame.gds",
+        "-rd",
+        "cellname=OSS_FRAME",
+        "-rd",
+        "output=/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/stock_frame.ip62.gds"
+      ],
+      "exit_code": 0,
+      "runtime_s": 0.7322457740083337,
+      "log_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/stock_frame_mdp.log"
+    }
+  },
+  "mask_drc": {
+    "command": [
+      "/home/ishi-kai/bin/klayout/klayout",
+      "-b",
+      "-r",
+      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/run_IP62.drc",
+      "-rd",
+      "input=/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/tr_1um_dot4.ip62.gds",
+      "-rd",
+      "top_cell=tr_1um_dot4",
+      "-rd",
+      "report=/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mask_drc.lyrdb"
+    ],
+    "exit_code": 0,
+    "runtime_s": 3.0078195520327426,
+    "log_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mask_drc.log",
+    "clean": true,
+    "violations": 0,
+    "categories": {},
+    "report_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mask_drc.lyrdb",
+    "policy": "all report items, including warnings and visited items, count as failures"
+  },
+  "stock_frame_policy": {
+    "stock_waivers": {
+      "clean": true,
+      "policy": "Organizer stock 63/0 polygons accepted only in the unmodified OSS_FRAME hierarchy; no TritFlow waiver geometry",
+      "stock_polygon_count": 2,
+      "stock_union_area_um2": 63400.0,
+      "stock_source_cells": [
+        {
+          "cell": "OSS_FRAME_CNR0",
+          "polygon_count": 1
+        },
+        {
+          "cell": "OSS_LOGO_TR",
+          "polygon_count": 1
+        }
+      ],
+      "frame_instances": [
+        "r0 *1 0,0"
+      ],
+      "own_polygon_count": 0,
+      "own_union_area_um2": 0.0,
+      "own_sources": []
+    },
+    "metal_preservation": {
+      "clean": true,
+      "xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "outside_stock_frame_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "stock_frame_only_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "delta_over_own_geometry_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "outside_stock_frame_polygon_count": {
+        "CO": 0,
+        "M1": 0,
+        "V1": 0,
+        "M2": 0
+      },
+      "method": "Full-chip Region XOR minus the independently reproduced stock-frame-only MDP XOR; exact zero outside it and on owned geometry",
+      "policy": "Binding integrator decision: record organizer stock-logo MDP delta; no changes to TritFlow metal"
+    },
+    "clean": true
+  },
+  "drawing_audit": {
+    "dbu_um": 0.001,
+    "top_cells": [
+      "tr_1um_dot4"
+    ],
+    "bbox_um": [
+      -1250.0,
+      -1250.0,
+      1250.0,
+      1250.0
+    ],
+    "waiver_polygon_count": 2,
+    "waiver_area_um2": 63400.0,
+    "frame_cells": [
+      "OSS_FRAME"
+    ],
+    "stock_waivers": {
+      "clean": true,
+      "policy": "Organizer stock 63/0 polygons accepted only in the unmodified OSS_FRAME hierarchy; no TritFlow waiver geometry",
+      "stock_polygon_count": 2,
+      "stock_union_area_um2": 63400.0,
+      "stock_source_cells": [
+        {
+          "cell": "OSS_FRAME_CNR0",
+          "polygon_count": 1
+        },
+        {
+          "cell": "OSS_LOGO_TR",
+          "polygon_count": 1
+        }
+      ],
+      "frame_instances": [
+        "r0 *1 0,0"
+      ],
+      "own_polygon_count": 0,
+      "own_union_area_um2": 0.0,
+      "own_sources": []
+    }
+  },
+  "mpw_precheck": {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/scripts/pre_check.py",
+      "--top",
+      "tr_1um_dot4",
+      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/src/tr_1um_dot4.gds"
+    ],
+    "exit_code": 0,
+    "runtime_s": 0.08702373097185045,
+    "log_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/mpw_precheck.log",
+    "clean": true,
+    "template_copy": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template",
+    "drawing_sha256": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd"
+  },
+  "self_checks": {
+    "connectivity": {
+      "clean": true,
+      "errors": [],
+      "checked_nets": 58,
+      "metal_islands": 14003,
+      "power_aliases": {},
+      "method": "flattened GDS metal islands + via union-find"
+    },
+    "stock_frame": {
+      "clean": true,
+      "xor_area_um2": {},
+      "text_differences": [],
+      "method": "Every layer and transformed text of the complete stock OSS_FRAME hierarchy"
+    }
+  },
+  "dc_current_check": {
+    "passed": true,
+    "max_utilization": 0.7480360683534744,
+    "worst_by_kind": {
+      "M1_step": {
+        "kind": "M1_step",
+        "net": "VSS",
+        "width_um": 4.0,
+        "limit_a": 0.001,
+        "current_a": 0.0007470360683534743,
+        "upper_bound_a": 0.0007480360683534743,
+        "utilization": 0.7480360683534744,
+        "endpoints": [
+          [
+            "M1",
+            -786.4,
+            413.0
+          ],
+          [
+            "M1",
+            -696.0,
+            413.0
+          ]
+        ]
+      },
+      "M2_field": {
+        "kind": "M2_field",
+        "net": "VSS",
+        "width_um": 14.0,
+        "limit_a": 0.017266666666666666,
+        "current_a": 0.0066531838699480286,
+        "upper_bound_a": 0.006654183869948029,
+        "utilization": 0.3853774442054843,
+        "endpoints": [
+          [
+            "M2",
+            -260,
+            -943
+          ],
+          [
+            "M2",
+            -230.0,
+            -943.0
+          ]
+        ]
+      },
+      "TC": {
+        "kind": "TC",
+        "net": "VSS",
+        "x_um": 840.0,
+        "y_um": 791.7,
+        "limit_a": 0.00078,
+        "current_a": 0.0005338790309927788,
+        "upper_bound_a": 0.0005348790309927788,
+        "utilization": 0.6857423474266395,
+        "endpoints": [
+          [
+            "M1",
+            837.1,
+            791.7
+          ],
+          [
+            "M2",
+            842.3,
+            791.7
+          ]
+        ]
+      }
+    },
+    "limits": {
+      "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+      "page": 17,
+      "tables": [
+        "I-3-1",
+        "I-3-3"
+      ],
+      "M1_field": {
+        "width_um": 2.0,
+        "current_a": 0.0009
+      },
+      "M2_field": {
+        "width_um": 3.0,
+        "current_a": 0.0037
+      },
+      "M1_step": {
+        "width_um": 2.0,
+        "current_a": 0.0005
+      },
+      "TC": {
+        "cut_um": 1.4,
+        "current_a": 0.00078,
+        "instantaneous_current_a": 0.0078
+      },
+      "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+    },
+    "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off.",
+    "defined": true,
+    "target_max_utilization": 0.8,
+    "margin_to_limit": 0.25196393164652564,
+    "reserved_margin_met": true,
+    "per_supply": {
+      "VDD": {
+        "current_envelope_a": 0.019361589536717433,
+        "auxiliary_leakage_budget_a": 1e-06,
+        "max_utilization": 0.6882451392739153,
+        "reserve": 0.3117548607260847,
+        "worst_branch": {
+          "kind": "M1_step",
+          "net": "VDD",
+          "width_um": 40.0,
+          "limit_a": 0.01,
+          "current_a": 0.006881451392739153,
+          "upper_bound_a": 0.006882451392739153,
+          "utilization": 0.6882451392739153,
+          "endpoints": [
+            [
+              "M1",
+              600.0,
+              725.3
+            ],
+            [
+              "M1",
+              600.0,
+              969.2
+            ]
+          ]
+        },
+        "worst_by_kind": {
+          "M1_step": {
+            "kind": "M1_step",
+            "net": "VDD",
+            "width_um": 40.0,
+            "limit_a": 0.01,
+            "current_a": 0.006881451392739153,
+            "upper_bound_a": 0.006882451392739153,
+            "utilization": 0.6882451392739153,
+            "endpoints": [
+              [
+                "M1",
+                600.0,
+                725.3
+              ],
+              [
+                "M1",
+                600.0,
+                969.2
+              ]
+            ]
+          },
+          "M2_field": {
+            "kind": "M2_field",
+            "net": "VDD",
+            "width_um": 16.0,
+            "limit_a": 0.019733333333333335,
+            "current_a": 0.0044697785642044225,
+            "upper_bound_a": 0.004470778564204423,
+            "utilization": 0.22655972453738626,
+            "endpoints": [
+              [
+                "M2",
+                -426.4,
+                540.45
+              ],
+              [
+                "M2",
+                -426.4,
+                595.0
+              ]
+            ]
+          },
+          "TC": {
+            "kind": "TC",
+            "net": "VDD",
+            "x_um": -182.6,
+            "y_um": 725.3,
+            "limit_a": 0.00078,
+            "current_a": 0.0004531213454406213,
+            "upper_bound_a": 0.00045412134544062135,
+            "utilization": 0.5822068531290018,
+            "endpoints": [
+              [
+                "M1",
+                -200.0,
+                725.3
+              ],
+              [
+                "M2",
+                -182.6,
+                705.0
+              ]
+            ]
+          }
+        },
+        "pad_injection_a": [
+          {
+            "node": [
+              "M2",
+              -616.0,
+              1040.0
+            ],
+            "current_a": 0.0012337068135106057
+          },
+          {
+            "node": [
+              "M2",
+              -608.0,
+              1040.0
+            ],
+            "current_a": 0.0012396945157917489
+          },
+          {
+            "node": [
+              "M2",
+              -600.0,
+              1040.0
+            ],
+            "current_a": 0.0012389948392612217
+          },
+          {
+            "node": [
+              "M2",
+              -592.0,
+              1040.0
+            ],
+            "current_a": 0.0012396945157893485
+          },
+          {
+            "node": [
+              "M2",
+              -584.0,
+              1040.0
+            ],
+            "current_a": 0.0012337068135106057
+          },
+          {
+            "node": [
+              "M2",
+              -216.0,
+              1040.0
+            ],
+            "current_a": 0.001255354858275202
+          },
+          {
+            "node": [
+              "M2",
+              -208.0,
+              1040.0
+            ],
+            "current_a": 0.0012614476276921174
+          },
+          {
+            "node": [
+              "M2",
+              -200.0,
+              1040.0
+            ],
+            "current_a": 0.0012607356738304867
+          },
+          {
+            "node": [
+              "M2",
+              -192.0,
+              1040.0
+            ],
+            "current_a": 0.0012614476276921174
+          },
+          {
+            "node": [
+              "M2",
+              -184.0,
+              1040.0
+            ],
+            "current_a": 0.0012553548582728013
+          },
+          {
+            "node": [
+              "M2",
+              584.0,
+              1040.0
+            ],
+            "current_a": 0.001372449304150425
+          },
+          {
+            "node": [
+              "M2",
+              592.0,
+              1040.0
+            ],
+            "current_a": 0.0013791103825660004
+          },
+          {
+            "node": [
+              "M2",
+              600.0,
+              1040.0
+            ],
+            "current_a": 0.0013783320205137113
+          },
+          {
+            "node": [
+              "M2",
+              608.0,
+              1040.0
+            ],
+            "current_a": 0.0013791103825660004
+          },
+          {
+            "node": [
+              "M2",
+              616.0,
+              1040.0
+            ],
+            "current_a": 0.001372449304150425
+          }
+        ]
+      },
+      "VMID": {
+        "current_envelope_a": 2.1009408000000002e-10,
+        "auxiliary_leakage_budget_a": 1e-06,
+        "max_utilization": 0.001282320633435896,
+        "reserve": 0.9987176793665641,
+        "worst_branch": {
+          "kind": "TC",
+          "net": "VMID",
+          "x_um": 1040.0,
+          "y_um": 200.0,
+          "limit_a": 0.00078,
+          "current_a": 2.1009407999888822e-10,
+          "upper_bound_a": 1.0002100940799988e-06,
+          "utilization": 0.001282320633435896,
+          "endpoints": [
+            [
+              "M1",
+              1040.0,
+              200.0
+            ],
+            [
+              "M2",
+              1040.0,
+              200.0
+            ]
+          ]
+        },
+        "worst_by_kind": {
+          "M1_step": {
+            "kind": "M1_step",
+            "net": "VMID",
+            "width_um": 3.4,
+            "limit_a": 0.00085,
+            "current_a": 2.100940799988882e-10,
+            "upper_bound_a": 1.0002100940799988e-06,
+            "utilization": 0.0011767177577411752,
+            "endpoints": [
+              [
+                "M1",
+                906.0,
+                200.0
+              ],
+              [
+                "M1",
+                930.0,
+                200.0
+              ]
+            ]
+          },
+          "M2_field": {
+            "kind": "M2_field",
+            "net": "VMID",
+            "width_um": 3.4,
+            "limit_a": 0.004193333333333334,
+            "current_a": 2.1009407999889253e-10,
+            "upper_bound_a": 1.0002100940799988e-06,
+            "utilization": 0.00023852386981240034,
+            "endpoints": [
+              [
+                "M2",
+                875.4,
+                732.0
+              ],
+              [
+                "M2",
+                875.4,
+                738.2
+              ]
+            ]
+          },
+          "TC": {
+            "kind": "TC",
+            "net": "VMID",
+            "x_um": 1040.0,
+            "y_um": 200.0,
+            "limit_a": 0.00078,
+            "current_a": 2.1009407999888822e-10,
+            "upper_bound_a": 1.0002100940799988e-06,
+            "utilization": 0.001282320633435896,
+            "endpoints": [
+              [
+                "M1",
+                1040.0,
+                200.0
+              ],
+              [
+                "M2",
+                1040.0,
+                200.0
+              ]
+            ]
+          }
+        },
+        "pad_injection_a": [
+          {
+            "node": [
+              "M2",
+              1040.0,
+              200.0
+            ],
+            "current_a": 2.1009407999888822e-10
+          }
+        ]
+      },
+      "VSS": {
+        "current_envelope_a": 0.01936158976632673,
+        "auxiliary_leakage_budget_a": 1e-06,
+        "max_utilization": 0.7480360683534744,
+        "reserve": 0.25196393164652564,
+        "worst_branch": {
+          "kind": "M1_step",
+          "net": "VSS",
+          "width_um": 4.0,
+          "limit_a": 0.001,
+          "current_a": 0.0007470360683534743,
+          "upper_bound_a": 0.0007480360683534743,
+          "utilization": 0.7480360683534744,
+          "endpoints": [
+            [
+              "M1",
+              -786.4,
+              413.0
+            ],
+            [
+              "M1",
+              -696.0,
+              413.0
+            ]
+          ]
+        },
+        "worst_by_kind": {
+          "M1_step": {
+            "kind": "M1_step",
+            "net": "VSS",
+            "width_um": 4.0,
+            "limit_a": 0.001,
+            "current_a": 0.0007470360683534743,
+            "upper_bound_a": 0.0007480360683534743,
+            "utilization": 0.7480360683534744,
+            "endpoints": [
+              [
+                "M1",
+                -786.4,
+                413.0
+              ],
+              [
+                "M1",
+                -696.0,
+                413.0
+              ]
+            ]
+          },
+          "M2_field": {
+            "kind": "M2_field",
+            "net": "VSS",
+            "width_um": 14.0,
+            "limit_a": 0.017266666666666666,
+            "current_a": 0.0066531838699480286,
+            "upper_bound_a": 0.006654183869948029,
+            "utilization": 0.3853774442054843,
+            "endpoints": [
+              [
+                "M2",
+                -260,
+                -943
+              ],
+              [
+                "M2",
+                -230.0,
+                -943.0
+              ]
+            ]
+          },
+          "TC": {
+            "kind": "TC",
+            "net": "VSS",
+            "x_um": 840.0,
+            "y_um": 791.7,
+            "limit_a": 0.00078,
+            "current_a": 0.0005338790309927788,
+            "upper_bound_a": 0.0005348790309927788,
+            "utilization": 0.6857423474266395,
+            "endpoints": [
+              [
+                "M1",
+                837.1,
+                791.7
+              ],
+              [
+                "M2",
+                842.3,
+                791.7
+              ]
+            ]
+          }
+        },
+        "pad_injection_a": [
+          {
+            "node": [
+              "M2",
+              -230.0,
+              -1040.0
+            ],
+            "current_a": -0.009845090474912176
+          },
+          {
+            "node": [
+              "M2",
+              -170.0,
+              -1040.0
+            ],
+            "current_a": -0.009516499267661368
+          }
+        ]
+      },
+      "ESD_VDD": {
+        "current_envelope_a": 1e-06,
+        "max_utilization": 0.002222222222222222,
+        "reserve": 0.9977777777777778,
+        "worst_by_kind": {
+          "M1_step": {
+            "kind": "M1_step",
+            "net": "ESD_VDD",
+            "upper_bound_a": 1e-06,
+            "limit_a": 0.00045000000000000004,
+            "utilization": 0.002222222222222222
+          },
+          "M2_field": {
+            "kind": "M2_field",
+            "net": "ESD_VDD",
+            "upper_bound_a": 1e-06,
+            "limit_a": 0.017266666666666666,
+            "utilization": 5.791505791505791e-05
+          },
+          "TC": {
+            "kind": "TC",
+            "net": "ESD_VDD",
+            "upper_bound_a": 1e-06,
+            "limit_a": 0.00078,
+            "utilization": 0.001282051282051282
+          }
+        },
+        "scope": "Entire measured-leakage budget on each minimum-width M1 path, each 14 um ESD ring lane and every standard TC; no core load"
+      }
+    },
+    "pad_cut_checks": [
+      {
+        "pad": "P01",
+        "net": "VDD",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 0.019362589536717434,
+        "limit_a": 0.039,
+        "utilization": 0.49647665478762654,
+        "reserve": 0.5035233452123735
+      },
+      {
+        "pad": "P02",
+        "net": "VDD",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 0.019362589536717434,
+        "limit_a": 0.039,
+        "utilization": 0.49647665478762654,
+        "reserve": 0.5035233452123735
+      },
+      {
+        "pad": "P08",
+        "net": "VSS",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 0.01936258976632673,
+        "limit_a": 0.039,
+        "utilization": 0.49647666067504437,
+        "reserve": 0.5035233393249556
+      },
+      {
+        "pad": "P13",
+        "net": "VMID",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 1.0002100940799999e-06,
+        "limit_a": 0.039,
+        "utilization": 2.5646412668717945e-05,
+        "reserve": 0.9999743535873313
+      },
+      {
+        "pad": "P15",
+        "net": "VDD",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 0.019362589536717434,
+        "limit_a": 0.039,
+        "utilization": 0.49647665478762654,
+        "reserve": 0.5035233452123735
+      },
+      {
+        "pad": "P16",
+        "net": "ESD_VDD",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 1e-06,
+        "limit_a": 0.039,
+        "utilization": 2.564102564102564e-05,
+        "reserve": 0.9999743589743589
+      }
+    ],
+    "imported_model_geometry_verified": true,
+    "esd_leakage": {
+      "passed": true,
+      "biases_v": [
+        -5,
+        0,
+        5
+      ],
+      "temperature_c": 27,
+      "measured_supply_a": {
+        "i(VESD)": [
+          -2.397838736124418e-10,
+          -1.852434901275786e-10,
+          -6.730353775581269e-11
+        ],
+        "i(VDD)": [
+          -3.15202130209698e-11,
+          -3.15202130209698e-11,
+          -3.15202130209698e-11
+        ],
+        "i(VSS)": [
+          9.253423593819861e-11,
+          1.475834907061696e-10,
+          1.976016126747635e-10
+        ],
+        "i(VMID)": [
+          6.289514838585254e-12,
+          6.289514838585254e-12,
+          6.289514838585254e-12
+        ],
+        "i(VPATTERN)": [
+          1.724803358566259e-10,
+          6.289069760379184e-11,
+          -1.050673767365655e-10
+        ]
+      },
+      "max_total_absolute_current_a": 5.426081732668214e-10,
+      "conservative_budget_a_per_supply": 1e-06,
+      "scope": "Independent ESD clamps at all three pad levels; three VDD ANA pads and VMID included. No core current, package or transient model.",
+      "models": "Pinned ESD MPE/MNE, W/L=500/2 um, from stock frame schematics",
+      "ngspice_sha256": "286c4763f50f039298535c064f4d36e8e485e6aced850caee9c7db0d9ec84e6f",
+      "model_sha256": {
+        "models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+        "models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+        "models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311",
+        "models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+        "ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec"
+      }
+    },
+    "pad_cut_rating": "780 uA * (minimum cut width / 1.4 um); conservative linear-width engineering interpretation, no published 70 um pad rating",
+    "frame_scope": "Unchanged slotted VSS M2 ring, its two M2 pad fingers, every added feeder and TC, and existing macro distribution; no package/contact/transient EM qualification"
+  },
+  "mask_lvs": {
+    "defined": false,
+    "matched": null,
+    "reason": "Inspected MPW workflow defines drawing LVS before MDP; no post-MDP LVS stage"
+  },
+  "provenance": {
+    "pdk_root": "/home/ishi-kai/pdk/TR-1um-pinned",
+    "pdk_commit": "5d963db9d44e192d37a0489c208bfccf2e2f690c",
+    "frame": {
+      "source": "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/libraries/TR-1um_frame_25x25.gds",
+      "sha256": "ba48c9dbb78060fe75294c9629714fa87f01b4fed067cc9317900970eb911b30",
+      "cell": "OSS_FRAME",
+      "modification": null,
+      "pad_master": "OSS_ESD_5V_ANA",
+      "pad_count": 16,
+      "ESD": true,
+      "stock_16_pin_package": true,
+      "unmodified": true,
+      "ESD_VDD_separate": true,
+      "ESD_VDD_v": 5.0,
+      "VSS_substrate_v": -5.0,
+      "dc_leakage": {
+        "passed": true,
+        "biases_v": [
+          -5,
+          0,
+          5
+        ],
+        "temperature_c": 27,
+        "measured_supply_a": {
+          "i(VESD)": [
+            -2.397838736124418e-10,
+            -1.852434901275786e-10,
+            -6.730353775581269e-11
+          ],
+          "i(VDD)": [
+            -3.15202130209698e-11,
+            -3.15202130209698e-11,
+            -3.15202130209698e-11
+          ],
+          "i(VSS)": [
+            9.253423593819861e-11,
+            1.475834907061696e-10,
+            1.976016126747635e-10
+          ],
+          "i(VMID)": [
+            6.289514838585254e-12,
+            6.289514838585254e-12,
+            6.289514838585254e-12
+          ],
+          "i(VPATTERN)": [
+            1.724803358566259e-10,
+            6.289069760379184e-11,
+            -1.050673767365655e-10
+          ]
+        },
+        "max_total_absolute_current_a": 5.426081732668214e-10,
+        "conservative_budget_a_per_supply": 1e-06,
+        "scope": "Independent ESD clamps at all three pad levels; three VDD ANA pads and VMID included. No core current, package or transient model.",
+        "models": "Pinned ESD MPE/MNE, W/L=500/2 um, from stock frame schematics",
+        "ngspice_sha256": "286c4763f50f039298535c064f4d36e8e485e6aced850caee9c7db0d9ec84e6f",
+        "model_sha256": {
+          "models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+          "models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+          "models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311",
+          "models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+          "ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec"
+        }
+      }
+    },
+    "rule_sha256": {
+      "libs.tech/klayout/tech/drc/run_IP62.drc": "07f9811a87a562ac4e0e4a13b70c5f60dd9d3ca962a8b034acb224877a3c5ebe",
+      "libs.tech/klayout/tech/drc/run_tile.drc": "5966f762d81e7408f245957ec1b0813caa346a5cb902fbd9e5fd9ba22dccd135",
+      "libs.tech/klayout/tech/drc/run.drc": "8ffc43f3ea42fedf8f6f39facfada8309cd16d089a3af1b26016526e215f56ca",
+      "libs.tech/klayout/tech/drc/drc.lydrc": "1e610ee59a2022e5e3da275fdf99b6717678403035ddc14f27f7ff94d02b31b8",
+      "libs.tech/klayout/tech/drc/04_TapeOut.drc": "56b7d1905429bf49bcc1313413e33f1fe69d87af104e287ecfa1a9981447ae6f",
+      "libs.tech/klayout/tech/drc/03_Electrical.drc": "497d9cd3ddbccbba68f73553618b455fecffe849b4be37f10d750030b7bde085",
+      "libs.tech/klayout/tech/drc/02_Device.drc": "f2a79da0cfe7f1bca89b2b00bd7576393eb302a20b8568f16f6214f4bf2729bc",
+      "libs.tech/klayout/tech/drc/drc_IP62.lydrc": "e5b40a257ce8e7e88e488d8b73086af15e984dc46399ec600818788317b1c1da",
+      "libs.tech/klayout/tech/drc/01_Basics.drc": "b8cfb0df7b6e98db833a8019b50fad3be9672b91793d215690c4e0dfb480c2ff",
+      "libs.tech/klayout/tech/drc/00_Layers.drc": "6f1ece6c37de872af75c4249eb02e9d211b2e13a29661dd20b95806ae72435e2",
+      "libs.tech/klayout/tech/drc/run_mdp.drc": "f8afffd7e1abefb6188fc69ba623bc00b72d6af0f87198aafaf0b08d3002cbed",
+      "libs.tech/klayout/tech/lvs/05_Compare.lvs": "0788f066d55d284c879613d3fb125157d9458e52dd03782be89e4372a6d89e4b",
+      "libs.tech/klayout/tech/lvs/03_Combiner.lvs": "38f081645ca9396735b685ea0acbfb36796b14df252b7c292c371dd911be6388",
+      "libs.tech/klayout/tech/lvs/01_Extract.lvs": "5557369f863655af37590b0cc12bfb75b8b378ce8ce954cc9840866bcf32c6b1",
+      "libs.tech/klayout/tech/lvs/run_svs.lvs": "cd96de71d0d6b9b8908bc1d49aababa3dcc7b960054d242b49cda0093c6024ca",
+      "libs.tech/klayout/tech/lvs/02_Extract.lvs": "34b58cf32802767352a047ae9927ddf78467916d96991fe1b5e3f0a6285b464a",
+      "libs.tech/klayout/tech/lvs/04_Custom.lvs": "bb9339879006ed5eaf3c635ad3d5d1bf3a2d732e4d2e0e74482685945b3d8cbe",
+      "libs.tech/klayout/tech/lvs/lvs.lylvs": "1fdbec8c7f76a2f2c93584cefb8b250535f40ab41ffe5f426d14be1248eae70a",
+      "libs.tech/klayout/tech/lvs/flatten_generated_pins.rb": "d2595646eeb7327922d2391dc649b0451dd155a920e26606db04560d42ea41f9",
+      "libs.tech/klayout/tech/lvs/run.lvs": "bac31eb9ae01a20b70ff6723ba5bf4be00fa4a44ada377daa251e975c3a89110",
+      "libs.tech/klayout/tech/drc/IP62/10_TapeOut.drc": "cf06a1b71c5d0f492277b5c39d74457f5c8aa27fdfea70fd1a0ea37036a425cd",
+      "libs.tech/klayout/tech/drc/IP62/03_Check.drc": "6487168daa36b1d9765b42e461fd4d271495aeef919a41b2c937745071af7b46",
+      "libs.tech/klayout/tech/drc/IP62/04_Check.drc": "5a2107118f3a92377b57a220c865f75e59e589675956c70e7b35ec890e8c9d2a",
+      "libs.tech/klayout/tech/drc/IP62/06_Check.drc": "26fd6afb7a2fc69ba584763fece00e7e77aaa7d55c4b43acea2bc1daa4c22b20",
+      "libs.tech/klayout/tech/drc/IP62/02_Device.drc": "df84a871f7b9c6f1c9809deae2d8d716377596c8a400d1690949a731eeb82010",
+      "libs.tech/klayout/tech/drc/IP62/01_Basics.drc": "eac124d2e77929ca2b675cd6c8b6e36065a5cecf699f2ca59a532647fdea7314",
+      "libs.tech/klayout/tech/drc/IP62/00_Layers.drc": "32f0957029368e89a032626b3a2fb8b09930c36cc9581b62c0ad132c9d393b07",
+      "libs.tech/klayout/tech/drc/IP62/05_Check.drc": "1a81ef8b0ce88d435963a2f05cc253dfa786df3841de4e505a7867517aeb3911",
+      "libs.tech/klayout/tech/drc/IP62/07_Check.drc": "4ad62763f3ae5c9233fc8a9fd55a5ec999450362070956fcf0348060ce03d758",
+      "libs.tech/klayout/tech/drc/IP62/08_Check.drc": "a4dbf53e06b7993d1e54138da767990f90197a8960fcb86c8c7b63bfa9cf602d",
+      "libs.tech/klayout/tech/drc/IP62/09_Check.drc": "e5602d8aa07ab997a023b5d4da91437ce066f56abf71a1eca4556e1a8110eb72",
+      "libs.tech/klayout/tech/lvs/IP62/01_Extract.lvs": "d543379e53b23937f4f3598d82144783b2573b3b2a6f261d5411d4eeecd53881",
+      "libs.tech/klayout/tech/lvs/IP62/02_Extract.lvs": "fbd0880c4688dcbda8b7f20b2ed3c6a9cb89e425cd0dfae42dffb3b89ff27a6b",
+      "libs.tech/klayout/tech/lvs/IP62/00_Extract.lvs": "88223f3a98b07fa68202a6fdcdb2e75bb0c07a710bc0f358671263ce2f0a5e94",
+      "libs.tech/klayout/tech/lvs/IP62/run.lvs": "73cdf8adfb8560e9f1df2eb674392854d827b6b0f0655d886cc57f13d80db931"
+    },
+    "binary_sha256": "3eaadb689e3b2f0598bb200ed6567b6a5e6f5e51bc5f3256ee9cade3491045fb",
+    "source_sha256": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd"
+  },
+  "runtime_s": 49.65033499401761,
+  "summary_path": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/signoff.summary.json",
+  "artifacts": {
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mask_drc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/drawing_drc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mask_drc.lyrdb": "159156d5098563317a410d20fa14641c19bdc2b950744f444c7fa04d4999ca4e",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/tr_1um_dot4.ip62.gds": "b5acaaa97f905947d23ca75fde9e32afba816ac24db48287c737c17a1260db7e",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/stock_frame.ip62.gds": "46d0f95c25d759372ba1cf7043277b85d01f7cdc58637c0502ac72942fb4c071",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/tr_1um_dot4.drawing.gds": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mdp.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/stock_frame_mdp.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/stock_frame.gds": "6a8adeb9e150bbd951cf9131c64e01b00d39de5360a1bad88e4c44f1745e023b",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/drawing_drc.lyrdb": "af186f2325539f05f635a713d363f1d2ad47dafbd8133e58f76d0bd2c369b824",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/.gitignore": "9bcb9b58502065da397d490fbadc663f4d05b36ede66132eec495e3d46e3f3fd",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/info.yaml": "6d05b0de0b3091ededd0bd94addc12720ef2863308e8776d6b52511b5f24bfc0",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/mpw_precheck.log": "9f04a4c202f403d3bb04309f32e9b3e2057c93a5e8df30f21f539d9939bffb5a",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/LICENSE": "6863509ccf02291e916f566f36f0e0ed5d218d55a0c08d8abadad6f55aa9540d",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/README.md": "86ac0affa51e3ec3a99e46402ab5153d5d4968d06ff41c260c1f721e8c37d2b9",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/lvs/tr_1um_dot4.ext.spice": "867dd41cad1c9292b2bbf599d5d9fa6ced5c203e5be7f72630596902575d07be",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/lvs/reference.spice": "c4a7a206c2404d3464dfdb5e42590a333dc15220a8c527a5e2ba19f46198194c",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/lvs/tr_1um_dot4.lvsdb": "797fb886b09cbb5d19c85e8a5fd62d2c4f476ecc5f36c7b05ea61dacf5f5f190",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/lvs/spice_named_input.gds": "fbed242b52c9d95f24f9c9947030d648aa71a5ee75d71d43ff83e7ef53e68442",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/lvs/klayout.log": "0f00695e415557cdc5df79f22745e4998283450d7280a71b1fa38494ca336436",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/run_IP62.drc": "07f9811a87a562ac4e0e4a13b70c5f60dd9d3ca962a8b034acb224877a3c5ebe",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/run_tile.drc": "5966f762d81e7408f245957ec1b0813caa346a5cb902fbd9e5fd9ba22dccd135",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/run.drc": "8ffc43f3ea42fedf8f6f39facfada8309cd16d089a3af1b26016526e215f56ca",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/drc.lydrc": "1e610ee59a2022e5e3da275fdf99b6717678403035ddc14f27f7ff94d02b31b8",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/04_TapeOut.drc": "56b7d1905429bf49bcc1313413e33f1fe69d87af104e287ecfa1a9981447ae6f",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/03_Electrical.drc": "497d9cd3ddbccbba68f73553618b455fecffe849b4be37f10d750030b7bde085",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/02_Device.drc": "f2a79da0cfe7f1bca89b2b00bd7576393eb302a20b8568f16f6214f4bf2729bc",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/drc_IP62.lydrc": "e5b40a257ce8e7e88e488d8b73086af15e984dc46399ec600818788317b1c1da",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/01_Basics.drc": "b8cfb0df7b6e98db833a8019b50fad3be9672b91793d215690c4e0dfb480c2ff",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/00_Layers.drc": "6f1ece6c37de872af75c4249eb02e9d211b2e13a29661dd20b95806ae72435e2",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/run_mdp.drc": "f8afffd7e1abefb6188fc69ba623bc00b72d6af0f87198aafaf0b08d3002cbed",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/05_Compare.lvs": "0788f066d55d284c879613d3fb125157d9458e52dd03782be89e4372a6d89e4b",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/03_Combiner.lvs": "38f081645ca9396735b685ea0acbfb36796b14df252b7c292c371dd911be6388",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/01_Extract.lvs": "5557369f863655af37590b0cc12bfb75b8b378ce8ce954cc9840866bcf32c6b1",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/run_svs.lvs": "cd96de71d0d6b9b8908bc1d49aababa3dcc7b960054d242b49cda0093c6024ca",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/02_Extract.lvs": "34b58cf32802767352a047ae9927ddf78467916d96991fe1b5e3f0a6285b464a",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/04_Custom.lvs": "bb9339879006ed5eaf3c635ad3d5d1bf3a2d732e4d2e0e74482685945b3d8cbe",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/lvs.lylvs": "1fdbec8c7f76a2f2c93584cefb8b250535f40ab41ffe5f426d14be1248eae70a",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/flatten_generated_pins.rb": "d2595646eeb7327922d2391dc649b0451dd155a920e26606db04560d42ea41f9",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/run.lvs": "bac31eb9ae01a20b70ff6723ba5bf4be00fa4a44ada377daa251e975c3a89110",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/10_TapeOut.drc": "cf06a1b71c5d0f492277b5c39d74457f5c8aa27fdfea70fd1a0ea37036a425cd",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/03_Check.drc": "6487168daa36b1d9765b42e461fd4d271495aeef919a41b2c937745071af7b46",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/04_Check.drc": "5a2107118f3a92377b57a220c865f75e59e589675956c70e7b35ec890e8c9d2a",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/06_Check.drc": "26fd6afb7a2fc69ba584763fece00e7e77aaa7d55c4b43acea2bc1daa4c22b20",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/02_Device.drc": "df84a871f7b9c6f1c9809deae2d8d716377596c8a400d1690949a731eeb82010",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/01_Basics.drc": "eac124d2e77929ca2b675cd6c8b6e36065a5cecf699f2ca59a532647fdea7314",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/00_Layers.drc": "32f0957029368e89a032626b3a2fb8b09930c36cc9581b62c0ad132c9d393b07",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/05_Check.drc": "1a81ef8b0ce88d435963a2f05cc253dfa786df3841de4e505a7867517aeb3911",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/07_Check.drc": "4ad62763f3ae5c9233fc8a9fd55a5ec999450362070956fcf0348060ce03d758",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/08_Check.drc": "a4dbf53e06b7993d1e54138da767990f90197a8960fcb86c8c7b63bfa9cf602d",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/drc/IP62/09_Check.drc": "e5602d8aa07ab997a023b5d4da91437ce066f56abf71a1eca4556e1a8110eb72",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/IP62/01_Extract.lvs": "d543379e53b23937f4f3598d82144783b2573b3b2a6f261d5411d4eeecd53881",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/IP62/02_Extract.lvs": "fbd0880c4688dcbda8b7f20b2ed3c6a9cb89e425cd0dfae42dffb3b89ff27a6b",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/IP62/00_Extract.lvs": "88223f3a98b07fa68202a6fdcdb2e75bb0c07a710bc0f358671263ce2f0a5e94",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/pdk/libs.tech/klayout/tech/lvs/IP62/run.lvs": "73cdf8adfb8560e9f1df2eb674392854d827b6b0f0655d886cc57f13d80db931",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/docs/info.md": "0c008cb303b4d778da8ac2a6f62e4302829fecd9dd46861d53789ccc6a194dff",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/docs/OpenSUSI-MPW_SUBMIT.png": "f087612d1993e8b50bf3a0b4567b8517e1c53bbb330bc79746ad86b9ec484866",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/docs/OpenSUSI-MPW-TEG.png": "cb0edbd86b5e0a327e421b4384d6732566f5dd434c8b8dcf99dc4846a321a296",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/docs/OpenSUSI-MPW.png": "c7c77edfa8611a61afaa73c7ddc516b9087400fcaf674f2175fa87682d14e501",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/docs/OpenSUSI-MPW.pptx": "f2a8e141ca50a86ac1e2d50adfe625c27c198b30cac6b1a8b3c98f86da486459",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/src/tr_1um_sanken.sch": "4bcd040e4f716391aaff469103cf6ab606f99d437f8716a8f91f3367d17a044f",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/src/tr_1um_sanken.extracted": "39052bad8b13dd09e9be57bb09581898a7ba351b3238c2f7542c384bb3e80a55",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/src/tr_1um_sanken.gds": "c8fdf68f5c8fe8278cba3f1e931d64c6f6ae864d2f482405d60f16b4c9ac766f",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/src/tr_1um_sanken.cir": "4ccfe3b50c60092d5c4d3568d8792f10a3efdac842d0e36db99a566dc521b340",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/src/tr_1um_dot4.gds": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/scripts/read_info.py": "0002214369fbb1c66e008562c3ebe2594ee8b910edb1a1bb64cef497f8b83b72",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/scripts/pre_check.py": "90c3adf79042d114c14d29a7c27b2f3956c03b20836096786fa202efe9fc44c8",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/src/simulation/tr_1um_sanken.spice": "4ccfe3b50c60092d5c4d3568d8792f10a3efdac842d0e36db99a566dc521b340",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/.github/workflows/check.yml": "fbcc5433974b8134c11d3ee2e5498023e064ee03d07ec260b2040968da1f1acb",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/.github/actions/checkout-pdk/action.yml": "7a4386277bd9130f1cd9a6c850c9dd6022185bfc7a9e8a88ed7a371ba41b9f0e",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/.github/actions/setup-klayout/action.yml": "14c82d0219440c23e38ad52f8be4e47d15065559ee26beee9f57bf1ef7b8fe4c"
+  }
+}

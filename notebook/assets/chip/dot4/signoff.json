@@ -8,266 +8,346 @@
     1692.0,
     1206.0
   ],
+  "macro_gds_sha256": "cc6ddfa80b69154923481f24bdf812e950d41fc26cfa8d5898956e3ff4093acb",
   "pdk_commit": "5d963db9d44e192d37a0489c208bfccf2e2f690c",
+  "frame": {
+    "source": "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/libraries/TR-1um_frame_25x25.gds",
+    "sha256": "ba48c9dbb78060fe75294c9629714fa87f01b4fed067cc9317900970eb911b30",
+    "cell": "OSS_FRAME",
+    "modification": null,
+    "pad_master": "OSS_ESD_5V_ANA",
+    "pad_count": 16,
+    "ESD": true,
+    "stock_16_pin_package": true,
+    "unmodified": true,
+    "ESD_VDD_separate": true,
+    "ESD_VDD_v": 5.0,
+    "VSS_substrate_v": -5.0,
+    "dc_leakage": {
+      "passed": true,
+      "biases_v": [
+        -5,
+        0,
+        5
+      ],
+      "temperature_c": 27,
+      "measured_supply_a": {
+        "i(VESD)": [
+          -2.397838736124418e-10,
+          -1.852434901275786e-10,
+          -6.730353775581269e-11
+        ],
+        "i(VDD)": [
+          -3.15202130209698e-11,
+          -3.15202130209698e-11,
+          -3.15202130209698e-11
+        ],
+        "i(VSS)": [
+          9.253423593819861e-11,
+          1.475834907061696e-10,
+          1.976016126747635e-10
+        ],
+        "i(VMID)": [
+          6.289514838585254e-12,
+          6.289514838585254e-12,
+          6.289514838585254e-12
+        ],
+        "i(VPATTERN)": [
+          1.724803358566259e-10,
+          6.289069760379184e-11,
+          -1.050673767365655e-10
+        ]
+      },
+      "max_total_absolute_current_a": 5.426081732668214e-10,
+      "conservative_budget_a_per_supply": 1e-06,
+      "scope": "Independent ESD clamps at all three pad levels; three VDD ANA pads and VMID included. No core current, package or transient model.",
+      "models": "Pinned ESD MPE/MNE, W/L=500/2 um, from stock frame schematics",
+      "ngspice_sha256": "286c4763f50f039298535c064f4d36e8e485e6aced850caee9c7db0d9ec84e6f",
+      "model_sha256": {
+        "models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+        "models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+        "models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311",
+        "models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+        "ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec"
+      }
+    }
+  },
   "die_um": [
     2500.0,
     2500.0
   ],
-  "pad_count": 17,
+  "pad_count": 16,
   "pad_map": [
     {
       "pad": "P01",
+      "frame_pin": "P1",
       "net": "VDD",
       "center_um": [
-        -890.0,
-        1100.0
+        -200.0,
+        1040.0
       ],
       "type": "power",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -930.0,
-        1060.0,
-        -850.0,
-        1140.0
+        -240,
+        1000,
+        -160,
+        1080
       ]
     },
     {
       "pad": "P02",
+      "frame_pin": "P2",
       "net": "VDD",
       "center_um": [
-        -78.0,
-        1100.0
+        -600.0,
+        1040.0
       ],
       "type": "power",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -118.0,
-        1060.0,
-        -38.0,
-        1140.0
+        -640,
+        1000,
+        -560,
+        1080
       ]
     },
     {
       "pad": "P03",
-      "net": "VDD",
+      "frame_pin": "P3",
+      "net": "x1",
       "center_um": [
-        890.0,
-        1100.0
+        -1040.0,
+        600.0
       ],
-      "type": "power",
+      "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        850.0,
-        1060.0,
-        930.0,
-        1140.0
+        -1080,
+        560,
+        -1000,
+        640
       ]
     },
     {
       "pad": "P04",
-      "net": "VSS",
+      "frame_pin": "P4",
+      "net": "x0",
       "center_um": [
-        -700.0,
-        1100.0
+        -1040.0,
+        200.0
       ],
-      "type": "power",
+      "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -740.0,
-        1060.0,
-        -660.0,
-        1140.0
+        -1080,
+        160,
+        -1000,
+        240
       ]
     },
     {
       "pad": "P05",
-      "net": "VSS",
+      "frame_pin": "P5",
+      "net": "w3",
       "center_um": [
-        140.0,
-        1100.0
+        -1040.0,
+        -200.0
       ],
-      "type": "power",
+      "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        100.0,
-        1060.0,
-        180.0,
-        1140.0
+        -1080,
+        -240,
+        -1000,
+        -160
       ]
     },
     {
       "pad": "P06",
-      "net": "VSS",
+      "frame_pin": "P6",
+      "net": "w2",
       "center_um": [
-        732.0,
-        1100.0
+        -1040.0,
+        -600.0
       ],
-      "type": "power",
+      "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        692.0,
-        1060.0,
-        772.0,
-        1140.0
+        -1080,
+        -640,
+        -1000,
+        -560
       ]
     },
     {
       "pad": "P07",
-      "net": "VMID",
+      "frame_pin": "P7",
+      "net": "w0",
       "center_um": [
-        0.0,
-        -1100.0
+        -600.0,
+        -1040.0
       ],
-      "type": "power",
+      "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -40.0,
-        -1140.0,
-        40.0,
-        -1060.0
+        -640,
+        -1080,
+        -560,
+        -1000
       ]
     },
     {
       "pad": "P08",
-      "net": "w0",
+      "frame_pin": "VSS",
+      "net": "VSS",
       "center_um": [
-        -1020.0,
-        -594.0
+        -200.0,
+        -1040.0
       ],
-      "type": "signal",
+      "type": "power",
+      "master": "OSS_ESD_5V_VSS",
       "opening_um": [
-        -1060.0,
-        -634.0,
-        -980.0,
-        -554.0
+        -240,
+        -1080,
+        -160,
+        -1000
       ]
     },
     {
       "pad": "P09",
+      "frame_pin": "P9",
       "net": "x3",
       "center_um": [
-        -1020.0,
-        -444.0
+        200.0,
+        -1040.0
       ],
       "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -1060.0,
-        -484.0,
-        -980.0,
-        -404.0
+        160,
+        -1080,
+        240,
+        -1000
       ]
     },
     {
       "pad": "P10",
+      "frame_pin": "P10",
       "net": "w1",
       "center_um": [
-        -1020.0,
-        -294.0
+        600.0,
+        -1040.0
       ],
       "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -1060.0,
-        -334.0,
-        -980.0,
-        -254.0
+        560,
+        -1080,
+        640,
+        -1000
       ]
     },
     {
       "pad": "P11",
-      "net": "w2",
+      "frame_pin": "P11",
+      "net": "y[1]",
       "center_um": [
-        -1020.0,
-        -144.0
+        1040.0,
+        -600.0
       ],
       "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -1060.0,
-        -184.0,
-        -980.0,
-        -104.0
+        1000,
+        -640,
+        1080,
+        -560
       ]
     },
     {
       "pad": "P12",
-      "net": "w3",
+      "frame_pin": "P12",
+      "net": "y[0]",
       "center_um": [
-        -1020.0,
-        6.0
+        1040.0,
+        -200.0
       ],
       "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -1060.0,
-        -34.0,
-        -980.0,
-        46.0
+        1000,
+        -240,
+        1080,
+        -160
       ]
     },
     {
       "pad": "P13",
-      "net": "x0",
+      "frame_pin": "P13",
+      "net": "VMID",
       "center_um": [
-        -1020.0,
-        174.0
+        1040.0,
+        200.0
       ],
-      "type": "signal",
+      "type": "power",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -1060.0,
-        134.0,
-        -980.0,
-        214.0
+        1000,
+        160,
+        1080,
+        240
       ]
     },
     {
       "pad": "P14",
-      "net": "x1",
+      "frame_pin": "P14",
+      "net": "x2",
       "center_um": [
-        -1020.0,
-        366.0
+        1040.0,
+        600.0
       ],
       "type": "signal",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -1060.0,
-        326.0,
-        -980.0,
-        406.0
+        1000,
+        560,
+        1080,
+        640
       ]
     },
     {
       "pad": "P15",
-      "net": "x2",
+      "frame_pin": "P15",
+      "net": "VDD",
       "center_um": [
-        -1020.0,
-        558.0
+        600.0,
+        1040.0
       ],
-      "type": "signal",
+      "type": "power",
+      "master": "OSS_ESD_5V_ANA",
       "opening_um": [
-        -1060.0,
-        518.0,
-        -980.0,
-        598.0
+        560,
+        1000,
+        640,
+        1080
       ]
     },
     {
       "pad": "P16",
-      "net": "y[1]",
+      "frame_pin": "VDD",
+      "net": "ESD_VDD",
       "center_um": [
-        1020.0,
-        -594.0
+        200.0,
+        1040.0
       ],
-      "type": "signal",
+      "type": "power",
+      "master": "OSS_ESD_5V_VDD",
       "opening_um": [
-        980.0,
-        -634.0,
-        1060.0,
-        -554.0
-      ]
-    },
-    {
-      "pad": "P17",
-      "net": "y[0]",
-      "center_um": [
-        1020.0,
-        -402.0
-      ],
-      "type": "signal",
-      "opening_um": [
-        980.0,
-        -442.0,
-        1060.0,
-        -362.0
+        160,
+        1000,
+        240,
+        1080
       ]
     }
   ],
@@ -300,7 +380,42 @@
         "CO": 0.0,
         "M1": 0.0,
         "V1": 0.0,
+        "M2": 0.001508
+      },
+      "outside_stock_frame_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
         "M2": 0.0
+      },
+      "stock_frame_only_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "delta_over_own_geometry_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "outside_stock_frame_polygon_count": {
+        "CO": 0,
+        "M1": 0,
+        "V1": 0,
+        "M2": 0
+      },
+      "method": "Full-chip Region XOR minus the independently reproduced stock-frame-only MDP XOR; exact zero outside it and on owned geometry",
+      "policy": "Binding integrator decision: record organizer stock-logo MDP delta; no changes to TritFlow metal"
+    },
+    "full_die_metal_preservation": {
+      "clean": false,
+      "xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
       },
       "method": "independent flattened Region XOR"
     }
@@ -315,16 +430,64 @@
     "matched": null,
     "reason": "Inspected MPW workflow defines drawing LVS before MDP; no post-MDP LVS stage"
   },
-  "mpw_precheck": {
-    "command": [
-      "/usr/bin/python3",
-      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/9a72c73975832d0d/pre_check.py",
-      "--top",
-      "tr_1um_dot4",
-      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/9a72c73975832d0d/tr_1um_dot4.drawing.gds"
-    ],
-    "exit_code": 0,
-    "runtime_s": 0.07234361401060596,
+  "stock_frame_policy": {
+    "stock_waivers": {
+      "clean": true,
+      "policy": "Organizer stock 63/0 polygons accepted only in the unmodified OSS_FRAME hierarchy; no TritFlow waiver geometry",
+      "stock_polygon_count": 2,
+      "stock_union_area_um2": 63400.0,
+      "stock_source_cells": [
+        {
+          "cell": "OSS_FRAME_CNR0",
+          "polygon_count": 1
+        },
+        {
+          "cell": "OSS_LOGO_TR",
+          "polygon_count": 1
+        }
+      ],
+      "frame_instances": [
+        "r0 *1 0,0"
+      ],
+      "own_polygon_count": 0,
+      "own_union_area_um2": 0.0,
+      "own_sources": []
+    },
+    "metal_preservation": {
+      "clean": true,
+      "xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "outside_stock_frame_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "stock_frame_only_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "delta_over_own_geometry_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "outside_stock_frame_polygon_count": {
+        "CO": 0,
+        "M1": 0,
+        "V1": 0,
+        "M2": 0
+      },
+      "method": "Full-chip Region XOR minus the independently reproduced stock-frame-only MDP XOR; exact zero outside it and on owned geometry",
+      "policy": "Binding integrator decision: record organizer stock-logo MDP delta; no changes to TritFlow metal"
+    },
     "clean": true
   },
   "drawing_audit": {
@@ -338,18 +501,723 @@
       1250.0,
       1250.0
     ],
-    "waiver_polygon_count": 0,
-    "waiver_area_um2": 0.0,
+    "waiver_polygon_count": 2,
+    "waiver_area_um2": 63400.0,
     "frame_cells": [
-      "OSS_FRAME_TEG"
-    ]
+      "OSS_FRAME"
+    ],
+    "stock_waivers": {
+      "clean": true,
+      "policy": "Organizer stock 63/0 polygons accepted only in the unmodified OSS_FRAME hierarchy; no TritFlow waiver geometry",
+      "stock_polygon_count": 2,
+      "stock_union_area_um2": 63400.0,
+      "stock_source_cells": [
+        {
+          "cell": "OSS_FRAME_CNR0",
+          "polygon_count": 1
+        },
+        {
+          "cell": "OSS_LOGO_TR",
+          "polygon_count": 1
+        }
+      ],
+      "frame_instances": [
+        "r0 *1 0,0"
+      ],
+      "own_polygon_count": 0,
+      "own_union_area_um2": 0.0,
+      "own_sources": []
+    }
   },
-  "dc_current_max_utilization": 0.7305371178833738,
+  "mpw_precheck": {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/scripts/pre_check.py",
+      "--top",
+      "tr_1um_dot4",
+      "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template/src/tr_1um_dot4.gds"
+    ],
+    "exit_code": 0,
+    "runtime_s": 0.08702373097185045,
+    "clean": true,
+    "template_copy": "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/signoff/runs/d46f2436e941ac61/mpw_template",
+    "drawing_sha256": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd"
+  },
+  "dc_current_check": {
+    "passed": true,
+    "max_utilization": 0.7480360683534744,
+    "worst_by_kind": {
+      "M1_step": {
+        "kind": "M1_step",
+        "net": "VSS",
+        "width_um": 4.0,
+        "limit_a": 0.001,
+        "current_a": 0.0007470360683534743,
+        "upper_bound_a": 0.0007480360683534743,
+        "utilization": 0.7480360683534744,
+        "endpoints": [
+          [
+            "M1",
+            -786.4,
+            413.0
+          ],
+          [
+            "M1",
+            -696.0,
+            413.0
+          ]
+        ]
+      },
+      "M2_field": {
+        "kind": "M2_field",
+        "net": "VSS",
+        "width_um": 14.0,
+        "limit_a": 0.017266666666666666,
+        "current_a": 0.0066531838699480286,
+        "upper_bound_a": 0.006654183869948029,
+        "utilization": 0.3853774442054843,
+        "endpoints": [
+          [
+            "M2",
+            -260,
+            -943
+          ],
+          [
+            "M2",
+            -230.0,
+            -943.0
+          ]
+        ]
+      },
+      "TC": {
+        "kind": "TC",
+        "net": "VSS",
+        "x_um": 840.0,
+        "y_um": 791.7,
+        "limit_a": 0.00078,
+        "current_a": 0.0005338790309927788,
+        "upper_bound_a": 0.0005348790309927788,
+        "utilization": 0.6857423474266395,
+        "endpoints": [
+          [
+            "M1",
+            837.1,
+            791.7
+          ],
+          [
+            "M2",
+            842.3,
+            791.7
+          ]
+        ]
+      }
+    },
+    "limits": {
+      "source": "OS00_\u30ea\u30d5\u30a1\u30ec\u30f3\u30b9\u30de\u30cb\u30e5\u30a2\u30eb_rev1.1.pdf",
+      "page": 17,
+      "tables": [
+        "I-3-1",
+        "I-3-3"
+      ],
+      "M1_field": {
+        "width_um": 2.0,
+        "current_a": 0.0009
+      },
+      "M2_field": {
+        "width_um": 3.0,
+        "current_a": 0.0037
+      },
+      "M1_step": {
+        "width_um": 2.0,
+        "current_a": 0.0005
+      },
+      "TC": {
+        "cut_um": 1.4,
+        "current_a": 0.00078,
+        "instantaneous_current_a": 0.0078
+      },
+      "scope": "Published width/cut-specific limits; no lifetime/temperature derating supplied. Linear metal-width scaling is an engineering interpretation."
+    },
+    "scope": "DC power-network envelope only, linear width scaling; conservative M1 step rating used on all M1. No contact/signal/internal-cell or transient EM qualification; not sign-off.",
+    "defined": true,
+    "target_max_utilization": 0.8,
+    "margin_to_limit": 0.25196393164652564,
+    "reserved_margin_met": true,
+    "per_supply": {
+      "VDD": {
+        "current_envelope_a": 0.019361589536717433,
+        "auxiliary_leakage_budget_a": 1e-06,
+        "max_utilization": 0.6882451392739153,
+        "reserve": 0.3117548607260847,
+        "worst_branch": {
+          "kind": "M1_step",
+          "net": "VDD",
+          "width_um": 40.0,
+          "limit_a": 0.01,
+          "current_a": 0.006881451392739153,
+          "upper_bound_a": 0.006882451392739153,
+          "utilization": 0.6882451392739153,
+          "endpoints": [
+            [
+              "M1",
+              600.0,
+              725.3
+            ],
+            [
+              "M1",
+              600.0,
+              969.2
+            ]
+          ]
+        },
+        "worst_by_kind": {
+          "M1_step": {
+            "kind": "M1_step",
+            "net": "VDD",
+            "width_um": 40.0,
+            "limit_a": 0.01,
+            "current_a": 0.006881451392739153,
+            "upper_bound_a": 0.006882451392739153,
+            "utilization": 0.6882451392739153,
+            "endpoints": [
+              [
+                "M1",
+                600.0,
+                725.3
+              ],
+              [
+                "M1",
+                600.0,
+                969.2
+              ]
+            ]
+          },
+          "M2_field": {
+            "kind": "M2_field",
+            "net": "VDD",
+            "width_um": 16.0,
+            "limit_a": 0.019733333333333335,
+            "current_a": 0.0044697785642044225,
+            "upper_bound_a": 0.004470778564204423,
+            "utilization": 0.22655972453738626,
+            "endpoints": [
+              [
+                "M2",
+                -426.4,
+                540.45
+              ],
+              [
+                "M2",
+                -426.4,
+                595.0
+              ]
+            ]
+          },
+          "TC": {
+            "kind": "TC",
+            "net": "VDD",
+            "x_um": -182.6,
+            "y_um": 725.3,
+            "limit_a": 0.00078,
+            "current_a": 0.0004531213454406213,
+            "upper_bound_a": 0.00045412134544062135,
+            "utilization": 0.5822068531290018,
+            "endpoints": [
+              [
+                "M1",
+                -200.0,
+                725.3
+              ],
+              [
+                "M2",
+                -182.6,
+                705.0
+              ]
+            ]
+          }
+        },
+        "pad_injection_a": [
+          {
+            "node": [
+              "M2",
+              -616.0,
+              1040.0
+            ],
+            "current_a": 0.0012337068135106057
+          },
+          {
+            "node": [
+              "M2",
+              -608.0,
+              1040.0
+            ],
+            "current_a": 0.0012396945157917489
+          },
+          {
+            "node": [
+              "M2",
+              -600.0,
+              1040.0
+            ],
+            "current_a": 0.0012389948392612217
+          },
+          {
+            "node": [
+              "M2",
+              -592.0,
+              1040.0
+            ],
+            "current_a": 0.0012396945157893485
+          },
+          {
+            "node": [
+              "M2",
+              -584.0,
+              1040.0
+            ],
+            "current_a": 0.0012337068135106057
+          },
+          {
+            "node": [
+              "M2",
+              -216.0,
+              1040.0
+            ],
+            "current_a": 0.001255354858275202
+          },
+          {
+            "node": [
+              "M2",
+              -208.0,
+              1040.0
+            ],
+            "current_a": 0.0012614476276921174
+          },
+          {
+            "node": [
+              "M2",
+              -200.0,
+              1040.0
+            ],
+            "current_a": 0.0012607356738304867
+          },
+          {
+            "node": [
+              "M2",
+              -192.0,
+              1040.0
+            ],
+            "current_a": 0.0012614476276921174
+          },
+          {
+            "node": [
+              "M2",
+              -184.0,
+              1040.0
+            ],
+            "current_a": 0.0012553548582728013
+          },
+          {
+            "node": [
+              "M2",
+              584.0,
+              1040.0
+            ],
+            "current_a": 0.001372449304150425
+          },
+          {
+            "node": [
+              "M2",
+              592.0,
+              1040.0
+            ],
+            "current_a": 0.0013791103825660004
+          },
+          {
+            "node": [
+              "M2",
+              600.0,
+              1040.0
+            ],
+            "current_a": 0.0013783320205137113
+          },
+          {
+            "node": [
+              "M2",
+              608.0,
+              1040.0
+            ],
+            "current_a": 0.0013791103825660004
+          },
+          {
+            "node": [
+              "M2",
+              616.0,
+              1040.0
+            ],
+            "current_a": 0.001372449304150425
+          }
+        ]
+      },
+      "VMID": {
+        "current_envelope_a": 2.1009408000000002e-10,
+        "auxiliary_leakage_budget_a": 1e-06,
+        "max_utilization": 0.001282320633435896,
+        "reserve": 0.9987176793665641,
+        "worst_branch": {
+          "kind": "TC",
+          "net": "VMID",
+          "x_um": 1040.0,
+          "y_um": 200.0,
+          "limit_a": 0.00078,
+          "current_a": 2.1009407999888822e-10,
+          "upper_bound_a": 1.0002100940799988e-06,
+          "utilization": 0.001282320633435896,
+          "endpoints": [
+            [
+              "M1",
+              1040.0,
+              200.0
+            ],
+            [
+              "M2",
+              1040.0,
+              200.0
+            ]
+          ]
+        },
+        "worst_by_kind": {
+          "M1_step": {
+            "kind": "M1_step",
+            "net": "VMID",
+            "width_um": 3.4,
+            "limit_a": 0.00085,
+            "current_a": 2.100940799988882e-10,
+            "upper_bound_a": 1.0002100940799988e-06,
+            "utilization": 0.0011767177577411752,
+            "endpoints": [
+              [
+                "M1",
+                906.0,
+                200.0
+              ],
+              [
+                "M1",
+                930.0,
+                200.0
+              ]
+            ]
+          },
+          "M2_field": {
+            "kind": "M2_field",
+            "net": "VMID",
+            "width_um": 3.4,
+            "limit_a": 0.004193333333333334,
+            "current_a": 2.1009407999889253e-10,
+            "upper_bound_a": 1.0002100940799988e-06,
+            "utilization": 0.00023852386981240034,
+            "endpoints": [
+              [
+                "M2",
+                875.4,
+                732.0
+              ],
+              [
+                "M2",
+                875.4,
+                738.2
+              ]
+            ]
+          },
+          "TC": {
+            "kind": "TC",
+            "net": "VMID",
+            "x_um": 1040.0,
+            "y_um": 200.0,
+            "limit_a": 0.00078,
+            "current_a": 2.1009407999888822e-10,
+            "upper_bound_a": 1.0002100940799988e-06,
+            "utilization": 0.001282320633435896,
+            "endpoints": [
+              [
+                "M1",
+                1040.0,
+                200.0
+              ],
+              [
+                "M2",
+                1040.0,
+                200.0
+              ]
+            ]
+          }
+        },
+        "pad_injection_a": [
+          {
+            "node": [
+              "M2",
+              1040.0,
+              200.0
+            ],
+            "current_a": 2.1009407999888822e-10
+          }
+        ]
+      },
+      "VSS": {
+        "current_envelope_a": 0.01936158976632673,
+        "auxiliary_leakage_budget_a": 1e-06,
+        "max_utilization": 0.7480360683534744,
+        "reserve": 0.25196393164652564,
+        "worst_branch": {
+          "kind": "M1_step",
+          "net": "VSS",
+          "width_um": 4.0,
+          "limit_a": 0.001,
+          "current_a": 0.0007470360683534743,
+          "upper_bound_a": 0.0007480360683534743,
+          "utilization": 0.7480360683534744,
+          "endpoints": [
+            [
+              "M1",
+              -786.4,
+              413.0
+            ],
+            [
+              "M1",
+              -696.0,
+              413.0
+            ]
+          ]
+        },
+        "worst_by_kind": {
+          "M1_step": {
+            "kind": "M1_step",
+            "net": "VSS",
+            "width_um": 4.0,
+            "limit_a": 0.001,
+            "current_a": 0.0007470360683534743,
+            "upper_bound_a": 0.0007480360683534743,
+            "utilization": 0.7480360683534744,
+            "endpoints": [
+              [
+                "M1",
+                -786.4,
+                413.0
+              ],
+              [
+                "M1",
+                -696.0,
+                413.0
+              ]
+            ]
+          },
+          "M2_field": {
+            "kind": "M2_field",
+            "net": "VSS",
+            "width_um": 14.0,
+            "limit_a": 0.017266666666666666,
+            "current_a": 0.0066531838699480286,
+            "upper_bound_a": 0.006654183869948029,
+            "utilization": 0.3853774442054843,
+            "endpoints": [
+              [
+                "M2",
+                -260,
+                -943
+              ],
+              [
+                "M2",
+                -230.0,
+                -943.0
+              ]
+            ]
+          },
+          "TC": {
+            "kind": "TC",
+            "net": "VSS",
+            "x_um": 840.0,
+            "y_um": 791.7,
+            "limit_a": 0.00078,
+            "current_a": 0.0005338790309927788,
+            "upper_bound_a": 0.0005348790309927788,
+            "utilization": 0.6857423474266395,
+            "endpoints": [
+              [
+                "M1",
+                837.1,
+                791.7
+              ],
+              [
+                "M2",
+                842.3,
+                791.7
+              ]
+            ]
+          }
+        },
+        "pad_injection_a": [
+          {
+            "node": [
+              "M2",
+              -230.0,
+              -1040.0
+            ],
+            "current_a": -0.009845090474912176
+          },
+          {
+            "node": [
+              "M2",
+              -170.0,
+              -1040.0
+            ],
+            "current_a": -0.009516499267661368
+          }
+        ]
+      },
+      "ESD_VDD": {
+        "current_envelope_a": 1e-06,
+        "max_utilization": 0.002222222222222222,
+        "reserve": 0.9977777777777778,
+        "worst_by_kind": {
+          "M1_step": {
+            "kind": "M1_step",
+            "net": "ESD_VDD",
+            "upper_bound_a": 1e-06,
+            "limit_a": 0.00045000000000000004,
+            "utilization": 0.002222222222222222
+          },
+          "M2_field": {
+            "kind": "M2_field",
+            "net": "ESD_VDD",
+            "upper_bound_a": 1e-06,
+            "limit_a": 0.017266666666666666,
+            "utilization": 5.791505791505791e-05
+          },
+          "TC": {
+            "kind": "TC",
+            "net": "ESD_VDD",
+            "upper_bound_a": 1e-06,
+            "limit_a": 0.00078,
+            "utilization": 0.001282051282051282
+          }
+        },
+        "scope": "Entire measured-leakage budget on each minimum-width M1 path, each 14 um ESD ring lane and every standard TC; no core load"
+      }
+    },
+    "pad_cut_checks": [
+      {
+        "pad": "P01",
+        "net": "VDD",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 0.019362589536717434,
+        "limit_a": 0.039,
+        "utilization": 0.49647665478762654,
+        "reserve": 0.5035233452123735
+      },
+      {
+        "pad": "P02",
+        "net": "VDD",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 0.019362589536717434,
+        "limit_a": 0.039,
+        "utilization": 0.49647665478762654,
+        "reserve": 0.5035233452123735
+      },
+      {
+        "pad": "P08",
+        "net": "VSS",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 0.01936258976632673,
+        "limit_a": 0.039,
+        "utilization": 0.49647666067504437,
+        "reserve": 0.5035233393249556
+      },
+      {
+        "pad": "P13",
+        "net": "VMID",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 1.0002100940799999e-06,
+        "limit_a": 0.039,
+        "utilization": 2.5646412668717945e-05,
+        "reserve": 0.9999743535873313
+      },
+      {
+        "pad": "P15",
+        "net": "VDD",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 0.019362589536717434,
+        "limit_a": 0.039,
+        "utilization": 0.49647665478762654,
+        "reserve": 0.5035233452123735
+      },
+      {
+        "pad": "P16",
+        "net": "ESD_VDD",
+        "cut_um": 70.0,
+        "upper_bound_current_a": 1e-06,
+        "limit_a": 0.039,
+        "utilization": 2.564102564102564e-05,
+        "reserve": 0.9999743589743589
+      }
+    ],
+    "imported_model_geometry_verified": true,
+    "esd_leakage": {
+      "passed": true,
+      "biases_v": [
+        -5,
+        0,
+        5
+      ],
+      "temperature_c": 27,
+      "measured_supply_a": {
+        "i(VESD)": [
+          -2.397838736124418e-10,
+          -1.852434901275786e-10,
+          -6.730353775581269e-11
+        ],
+        "i(VDD)": [
+          -3.15202130209698e-11,
+          -3.15202130209698e-11,
+          -3.15202130209698e-11
+        ],
+        "i(VSS)": [
+          9.253423593819861e-11,
+          1.475834907061696e-10,
+          1.976016126747635e-10
+        ],
+        "i(VMID)": [
+          6.289514838585254e-12,
+          6.289514838585254e-12,
+          6.289514838585254e-12
+        ],
+        "i(VPATTERN)": [
+          1.724803358566259e-10,
+          6.289069760379184e-11,
+          -1.050673767365655e-10
+        ]
+      },
+      "max_total_absolute_current_a": 5.426081732668214e-10,
+      "conservative_budget_a_per_supply": 1e-06,
+      "scope": "Independent ESD clamps at all three pad levels; three VDD ANA pads and VMID included. No core current, package or transient model.",
+      "models": "Pinned ESD MPE/MNE, W/L=500/2 um, from stock frame schematics",
+      "ngspice_sha256": "286c4763f50f039298535c064f4d36e8e485e6aced850caee9c7db0d9ec84e6f",
+      "model_sha256": {
+        "models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+        "models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+        "models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311",
+        "models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+        "ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec"
+      }
+    },
+    "pad_cut_rating": "780 uA * (minimum cut width / 1.4 um); conservative linear-width engineering interpretation, no published 70 um pad rating",
+    "frame_scope": "Unchanged slotted VSS M2 ring, its two M2 pad fingers, every added feeder and TC, and existing macro distribution; no package/contact/transient EM qualification"
+  },
+  "dc_current_max_utilization": 0.7480360683534744,
   "dc_current_reserved_margin_met": true,
   "physical_checks_passed": true,
   "clean": true,
   "submission_ready": false,
-  "reason": "Custom TEG pad/bond allocation and ESD/power/package approval still required",
-  "gds_sha256": "3eebb7d03dcb7cd82817662b40d2b4f4055fb7fd6742b3f00e5017c6938ae7d4",
-  "mask_gds_sha256": "83031303a28f8c776b3dc2df00b7473fe551b4328251fad4f97fff02dbf0c397"
+  "reason": "Organizer allocation of a full 2500 um slot, final bond diagram and final CI remain",
+  "gds_sha256": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd",
+  "mask_gds_sha256": "b5acaaa97f905947d23ca75fde9e32afba816ac24db48287c737c17a1260db7e"
 }

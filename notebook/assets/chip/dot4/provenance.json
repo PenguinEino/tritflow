@@ -1,33 +1,167 @@
 {
-  "generated_utc": "2026-10-23T07:57:05.543510+00:00",
-  "project_commit": "7033ce7d894f1057a901fcb065ed84f239455126",
+  "generated_utc": "2026-10-23T14:52:23.628508+00:00",
+  "project_commit": "036e9c3418f09ba30037a8b2a623a2ea5702a3fc",
   "pdk_commit": "5d963db9d44e192d37a0489c208bfccf2e2f690c",
   "frame": {
     "source": "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/libraries/TR-1um_frame_25x25.gds",
     "sha256": "ba48c9dbb78060fe75294c9629714fa87f01b4fed067cc9317900970eb911b30",
-    "cell": "OSS_FRAME_TEG",
-    "modification": "Peripheral OSS_PAD_TEG instances replace the copied OSS_PAD16 bank; unchanged pinned seal ring",
-    "pad_master": "OSS_PAD_TEG",
-    "pad_count": 17,
-    "ESD": false,
-    "stock_16_pin_package": false
+    "cell": "OSS_FRAME",
+    "modification": null,
+    "pad_master": "OSS_ESD_5V_ANA",
+    "pad_count": 16,
+    "ESD": true,
+    "stock_16_pin_package": true,
+    "unmodified": true,
+    "ESD_VDD_separate": true,
+    "ESD_VDD_v": 5.0,
+    "VSS_substrate_v": -5.0,
+    "dc_leakage": {
+      "passed": true,
+      "biases_v": [
+        -5,
+        0,
+        5
+      ],
+      "temperature_c": 27,
+      "measured_supply_a": {
+        "i(VESD)": [
+          -2.397838736124418e-10,
+          -1.852434901275786e-10,
+          -6.730353775581269e-11
+        ],
+        "i(VDD)": [
+          -3.15202130209698e-11,
+          -3.15202130209698e-11,
+          -3.15202130209698e-11
+        ],
+        "i(VSS)": [
+          9.253423593819861e-11,
+          1.475834907061696e-10,
+          1.976016126747635e-10
+        ],
+        "i(VMID)": [
+          6.289514838585254e-12,
+          6.289514838585254e-12,
+          6.289514838585254e-12
+        ],
+        "i(VPATTERN)": [
+          1.724803358566259e-10,
+          6.289069760379184e-11,
+          -1.050673767365655e-10
+        ]
+      },
+      "max_total_absolute_current_a": 5.426081732668214e-10,
+      "conservative_budget_a_per_supply": 1e-06,
+      "scope": "Independent ESD clamps at all three pad levels; three VDD ANA pads and VMID included. No core current, package or transient model.",
+      "models": "Pinned ESD MPE/MNE, W/L=500/2 um, from stock frame schematics",
+      "ngspice_sha256": "286c4763f50f039298535c064f4d36e8e485e6aced850caee9c7db0d9ec84e6f",
+      "model_sha256": {
+        "models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+        "models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+        "models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311",
+        "models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+        "ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec"
+      }
+    }
   },
   "build_options": {
     "seed": 0,
     "anneal_steps": 600,
     "rows": null,
     "current_margin": 0.2,
+    "frame": "OSS_FRAME",
     "mpw_template": "/home/ishi-kai/TR-1um_MPW_Sanken"
   },
+  "stock_frame_policy": {
+    "stock_waivers": {
+      "clean": true,
+      "policy": "Organizer stock 63/0 polygons accepted only in the unmodified OSS_FRAME hierarchy; no TritFlow waiver geometry",
+      "stock_polygon_count": 2,
+      "stock_union_area_um2": 63400.0,
+      "stock_source_cells": [
+        {
+          "cell": "OSS_FRAME_CNR0",
+          "polygon_count": 1
+        },
+        {
+          "cell": "OSS_LOGO_TR",
+          "polygon_count": 1
+        }
+      ],
+      "frame_instances": [
+        "r0 *1 0,0"
+      ],
+      "own_polygon_count": 0,
+      "own_union_area_um2": 0.0,
+      "own_sources": []
+    },
+    "metal_preservation": {
+      "clean": true,
+      "xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "outside_stock_frame_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "stock_frame_only_xor_area_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.001508
+      },
+      "delta_over_own_geometry_um2": {
+        "CO": 0.0,
+        "M1": 0.0,
+        "V1": 0.0,
+        "M2": 0.0
+      },
+      "outside_stock_frame_polygon_count": {
+        "CO": 0,
+        "M1": 0,
+        "V1": 0,
+        "M2": 0
+      },
+      "method": "Full-chip Region XOR minus the independently reproduced stock-frame-only MDP XOR; exact zero outside it and on owned geometry",
+      "policy": "Binding integrator decision: record organizer stock-logo MDP delta; no changes to TritFlow metal"
+    },
+    "clean": true
+  },
   "qualification_inputs_sha256": {
-    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/tr_1um_dot4.cir": "0a6d40f037f0fa201c921c952bd7c090fc6d71e2c88d744901b785a29134503e",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/tr_1um_dot4.cir": "15af9fad63c563bf95ed2e0261fc637766813ba138b9b8e2a2f95ec5ed18af9d",
     "/home/ishi-kai/bin/klayout/klayout": "3eaadb689e3b2f0598bb200ed6567b6a5e6f5e51bc5f3256ee9cade3491045fb",
-    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip.py": "1151b3b74d42980a96a22e84d5fd3140afcb4fe1c93f3f425f1cf88cec871464",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip.py": "6af7396a7e108dc3854aa78c44d679acb5ab4b1595385d8a9939b6b600555cf1",
     "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_router.py": "7656b09f480e080e5f2d8067803b6b474a8b5bc306465674f93f7700581bb83f",
-    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_power.py": "a3f4b62fa2d91ba5408071cdb5786f30cf2ef96401ba6d62f192737efe262a8c",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_power.py": "f51535a410d6913b16348bbb75c9bc12c1bfed98732b4c4d957d3525dcfe3e37",
     "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/signoff.py": "8063504bb824d4313ab1e72f5bd3b584ed8e8d91bfe599a63820e72a81241a36",
     "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/power.py": "5c05a3d775cd84d663d8a4fb7ffe28d49eceff152085045d698b40983adb5cab",
     "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/verify.py": "4e1769b77cd25936e003e0b32e1de7d99643351e9e366f4c534f6d51fdc59f33",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_frame.py": "4909250a5fbbe0c7b8d3588bf11649545364044202c799eaaa1cedb290a1ae45",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_frame_power.py": "d8ffc820b716c0b04ee6de8b9af61c6922f37e9f2e475eb9a64dd38a530ecec9",
+    "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/chip_frame_audit.py": "4d4e07da24b4da1a0906f8fbb0ee07e674386730dbada256dfa2d740a777f45a",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/libraries/TR-1um_frame_25x25.gds": "ba48c9dbb78060fe75294c9629714fa87f01b4fed067cc9317900970eb911b30",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_ESD_5V_ANA.sch": "566c33cd0a1b7ff1f24c8dccdc1084cc6d942af452a18b0cce60cc6ff4ba53be",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_ESD_5V_DIO.sch": "cde6f9f2bf8ac42c8278d8a8e03b70f66725ec6bccb7ae8b9d62c9a495c3be71",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_ESD_5V_VDD.sch": "a910b5e5adfdf6c96631860ccd995f9a71602428d9c4814a94fba532a8b01fba",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_ESD_5V_VSS.sch": "1066c15a90a44a858523594f9d4965364c5593d0c3da8d6247e1e6d20c0937bb",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_FRAME_GIO.sch": "8ef7d63b74158103f1b5d40a4ef991c2bc8346e90186debefeb3687de904ad45",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/xschem/TR-1um_frame/OSS_FRAME.sch": "49aae1414e87765dcfe9b17f9b6b6721ea654435c0fd51d2a316c66cbdec74b4",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+    "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/spice/models/ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/summary.json": "de5004860e327834ebf6c8f26bfd999c745c6a8a6544d04442e096b49507ef16",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/b3v32check.log": "b20922044e3062034219f37b2362fd4beadb808a8ba07d5a215fd4b02cbfdcb3",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/waveform.txt": "5afb6504d351405c9c32f441cf143fd018fa80b4f1ed17d41ca649020317264b",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/b3v33check.log": "ab31f4e372e113254b6abe2840b456b632df8b68f0a62f00ab9b2526919ef372",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/ngspice.log": "ac10591ed58b8205869168eacfb9ab0cf9ea949683f30d40c6fa3811717cac38",
+    "/home/ishi-kai/code-a-chip-v3/notebook/assets/chip/dot4/.work/chip/esd_dc/tb.spice": "804be0057d45db8b2a8c0a94ffedec7f56f365bbc37d77366234db12bc888f01",
     "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/run_IP62.drc": "07f9811a87a562ac4e0e4a13b70c5f60dd9d3ca962a8b034acb224877a3c5ebe",
     "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/run_tile.drc": "5966f762d81e7408f245957ec1b0813caa346a5cb902fbd9e5fd9ba22dccd135",
     "/home/ishi-kai/pdk/TR-1um-pinned/libs.tech/klayout/tech/drc/run.drc": "8ffc43f3ea42fedf8f6f39facfada8309cd16d089a3af1b26016526e215f56ca",
@@ -124,23 +258,20 @@
     "libs.tech/klayout/tech/lvs/IP62/run.lvs": "73cdf8adfb8560e9f1df2eb674392854d827b6b0f0655d886cc57f13d80db931"
   },
   "source_sha256": {
-    "notebook/assets/chip/dot4/build.py": "ce34a0c37573a02a5ac6429e854e1c082fdebfd7e7ebd6db6e350f92724d5151",
+    "notebook/assets/chip/dot4/build.py": "889fbd4d12cf534c09995df53feeb1b79e61337449535b6dc988c61fc70a326a",
     "notebook/assets/chip/dot4/verify.py": "82c697687c9797b0cc3ee3b9cf241531e9e03e9fca22db8270920be9a1e01d7f",
-    "notebook/reuse.py": "e224c852cc15eadd8a0b73bbcb48b678ded99178290d220ddf59ad2f1719a0b8",
+    "notebook/assets/chip/dot4/frame_verify.py": "88f366795d4d9e6c8ff50de5c8c5e388a8f9208f5b1e1ab27e1bd251e0c61fb3",
     "notebook/assets/chip/dot4/dot4.tv": "f11f61812dd3bca77b510e14b49efa543c12fe7b713696e13dba3ed43705a0ca",
     "notebook/assets/chip/dot4/dot4_fixed.tv": "bc8381fff1b28e3532b3b54cd697116d97389b9e1cfa38db86ed5cc4ffa92c1f",
-    "notebook/assets/chip/dot4/reuse_before_english.py": "2a6d91f5d12d9117113b824cc9351f70ae0faedf99c09ae3e6d5f75c10eaffa3"
+    "notebook/assets/chip/dot4/reuse_before_english.py": "2a6d91f5d12d9117113b824cc9351f70ae0faedf99c09ae3e6d5f75c10eaffa3",
+    "notebook/reuse.py": "e224c852cc15eadd8a0b73bbcb48b678ded99178290d220ddf59ad2f1719a0b8",
+    "tritflow/pnr/chip_frame_power.py": "d8ffc820b716c0b04ee6de8b9af61c6922f37e9f2e475eb9a64dd38a530ecec9",
+    "tritflow/pnr/chip.py": "6af7396a7e108dc3854aa78c44d679acb5ab4b1595385d8a9939b6b600555cf1",
+    "tritflow/pnr/chip_frame_audit.py": "4d4e07da24b4da1a0906f8fbb0ee07e674386730dbada256dfa2d740a777f45a",
+    "tritflow/pnr/chip_power.py": "f51535a410d6913b16348bbb75c9bc12c1bfed98732b4c4d957d3525dcfe3e37",
+    "tritflow/pnr/chip_frame.py": "4909250a5fbbe0c7b8d3588bf11649545364044202c799eaaa1cedb290a1ae45",
+    "tritflow/pnr/chip_router.py": "7656b09f480e080e5f2d8067803b6b474a8b5bc306465674f93f7700581bb83f"
   },
-  "published_artifacts_sha256": {
-    "dot4.json": "26a1ae940a0c359b785a84ca2267cc7cc14f221ad584bae1938fdc4bb26f8272",
-    "pad_map.json": "c9eb61437a08c894f48a46b2bc51ebcd9e9a7033a714e69b1daefbea4905eb50",
-    "signoff.json": "2960c0fce31aa88a10407a4a81c87b8d5c935beadf4c3c4070344e128a7c2e41",
-    "evidence.zip": "fa4a9fc50ed146246ea5637a396dc2c26b91d5e7b0ad96827ccd8ea7c6e67187",
-    "tr_1um_dot4.gds": "3eebb7d03dcb7cd82817662b40d2b4f4055fb7fd6742b3f00e5017c6938ae7d4",
-    "tr_1um_dot4.cir": "0a6d40f037f0fa201c921c952bd7c090fc6d71e2c88d744901b785a29134503e",
-    "tr_1um_dot4.ip62.gds": "83031303a28f8c776b3dc2df00b7473fe551b4328251fad4f97fff02dbf0c397"
-  },
-  "scope": "Device/port LVS on drawing; unmodified pinned drawing and mask decks; no mask LVS stage defined.",
   "producer_source_sha256": {
     "notebook/assets/chip/dot4/build.py": "ce34a0c37573a02a5ac6429e854e1c082fdebfd7e7ebd6db6e350f92724d5151",
     "notebook/assets/chip/dot4/verify.py": "82c697687c9797b0cc3ee3b9cf241531e9e03e9fca22db8270920be9a1e01d7f",
@@ -148,12 +279,25 @@
     "notebook/assets/chip/dot4/dot4.tv": "f11f61812dd3bca77b510e14b49efa543c12fe7b713696e13dba3ed43705a0ca",
     "notebook/assets/chip/dot4/dot4_fixed.tv": "bc8381fff1b28e3532b3b54cd697116d97389b9e1cfa38db86ed5cc4ffa92c1f"
   },
-  "presentation_revision": {
-    "kind": "English presentation labels only; original electrical evidence retained",
-    "original_source_paths": {
-      "notebook/reuse.py": "notebook/assets/chip/dot4/reuse_before_english.py"
-    },
-    "base_commit": "11ca6f75e3fe761e38b370a1260fb34219f448b4",
-    "validation": "notebook/v3/test_language.py::test_reuse_translation_preserves_the_recorded_producer"
-  }
+  "producer_source_sha256_scope": "Historical pre-English helper archive only; current build sources are in source_sha256",
+  "published_artifacts_sha256": {
+    "frame_verify.py": "88f366795d4d9e6c8ff50de5c8c5e388a8f9208f5b1e1ab27e1bd251e0c61fb3",
+    "dot4.json": "26a1ae940a0c359b785a84ca2267cc7cc14f221ad584bae1938fdc4bb26f8272",
+    "pad_map.json": "c186195b27e4a6f3feeb305a4967dc946922246ef088d2b3633b917229ea98d9",
+    "tr_1um_dot4.png": "d9a2059ea4f1589d5180a2e08c58ab1caa9095ffd4bb84095c611eb58b64cb7e",
+    "tr_1um_dot4.ip62.gds": "b5acaaa97f905947d23ca75fde9e32afba816ac24db48287c737c17a1260db7e",
+    "evidence.zip": "5cf0a956a846d1d127cbba848627f242807ad7a079a2620a802249fe87220777",
+    "build.py": "889fbd4d12cf534c09995df53feeb1b79e61337449535b6dc988c61fc70a326a",
+    "native_signoff.json": "8807992207b14649d88d7655ff44a85fd37af4cd3a545d27d5ea7419526113a8",
+    "signoff.json": "fbe9b2d77d477b5aa9c0473705c7c4b26cdaf1b341e17823cb9a4bdef3dee66a",
+    "verify.py": "82c697687c9797b0cc3ee3b9cf241531e9e03e9fca22db8270920be9a1e01d7f",
+    "reuse_before_english.py": "2a6d91f5d12d9117113b824cc9351f70ae0faedf99c09ae3e6d5f75c10eaffa3",
+    "reuse_validation.json": "80ce5feb09ce21880967b2e3404c19b4a5d7dede29d2ec6f9f0fdafdebe66892",
+    "tr_1um_dot4.gds": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd",
+    "dot4.tv": "f11f61812dd3bca77b510e14b49efa543c12fe7b713696e13dba3ed43705a0ca",
+    "dot4_fixed.tv": "bc8381fff1b28e3532b3b54cd697116d97389b9e1cfa38db86ed5cc4ffa92c1f",
+    "tr_1um_dot4.cir": "15af9fad63c563bf95ed2e0261fc637766813ba138b9b8e2a2f95ec5ed18af9d",
+    "README.md": "4fc9824a0b91184e5ad7ff3b9fa886ea3d745520b7cdd8220b3ab3b515d15c5f"
+  },
+  "scope": "Stock-deck zero-item drawing/mask DRC; strict device/port LVS including frame ESD; own-waiver absence; exact MDP preservation outside independent stock-frame delta; DC envelope reserve. No mask LVS stage defined."
 }

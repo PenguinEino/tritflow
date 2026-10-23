@@ -27,13 +27,23 @@ def test_recorded_top_has_clean_native_decks_strict_ports_and_real_pads():
     assert report["mdp"]["metal_preservation"]["clean"]
     assert report["dc_current_reserved_margin_met"]
     assert report["dc_current_max_utilization"] <= 0.8
-    assert report["drawing_audit"]["waiver_polygon_count"] == 0
+    assert report["drawing_audit"]["stock_waivers"]["stock_polygon_count"] == 2
+    assert report["drawing_audit"]["stock_waivers"]["own_polygon_count"] == 0
     assert report["mask_lvs"]["matched"] is None
     assert not report["submission_ready"]
     assert report["pad_map"] == read("pad_map.json")
-    assert len(report["pad_map"]) == report["pad_count"] == 17
-    assert {p["net"] for p in report["pad_map"]} == set(report["port_directions"]) | {"VDD", "VMID", "VSS"}
-    for name, key in (("tr_1um_dot4.gds", "gds_sha256"), ("tr_1um_dot4.ip62.gds", "mask_gds_sha256")):
+    assert len(report["pad_map"]) == report["pad_count"] == 16
+    assert {p["net"] for p in report["pad_map"]} == set(report["port_directions"]) | {
+        "VDD",
+        "VMID",
+        "VSS",
+        "ESD_VDD",
+    }
+    assert report["frame"]["cell"] == "OSS_FRAME"
+    for name, key in (
+        ("tr_1um_dot4.gds", "gds_sha256"),
+        ("tr_1um_dot4.ip62.gds", "mask_gds_sha256"),
+    ):
         assert sha256((ASSETS / name).read_bytes()).hexdigest() == report[key]
     layout = db.Layout()
     layout.read(str(ASSETS / "tr_1um_dot4.gds"))
