@@ -757,7 +757,7 @@ def main(argv=None):
         for name, evaluation in evaluations.items():
             documents[name].metadata["tritflow_chapter6"] = evaluation
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        if args.output.exists() and {p.name for p in args.output.iterdir()} - (FILES | {"tritflow_tr1um.ipynb"}):
+        if args.output.exists() and {p.name for p in args.output.iterdir()} - FILES:
             raise ValueError("output contains files outside this builder's allowlist")
         with tempfile.TemporaryDirectory(prefix=".tritflow-package-", dir=args.output.parent) as temporary:
             staging = Path(temporary)
