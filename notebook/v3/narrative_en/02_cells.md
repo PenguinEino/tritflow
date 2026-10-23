@@ -21,7 +21,13 @@ No rail supplies 0 V to the output; it is established solely by the balance $R_u
 
 The DC analysis uses ngspice and the PDK models for 90 sets of dimensions, including the taped-out dimensions.
 
-Sizing trades off middle-level accuracy, delay, area and static current. The MOS gate length is the minimum 1 µm for drive strength and area; the RR width is the minimum 2.8 µm. At an input of 0 V, the output is 0 V when $R_u = R_d$, or $r_{on,P} + R_{RP} = r_{on,N} + R_{RN}$. Because hole mobility is lower than electron mobility, the PMOS is wider than the NMOS to match their on-resistances and cancel the output offset. The middle-level noise-margin target is an output within ±0.5 V for inputs from −1 to +1 V. The RR length is 30 µm to keep the static current of the complete taped-out chip within the power-wire and via current limits. The MOS dimensions were retained when RR was lengthened, leaving an offset of several tens of mV at an input of 0 V, well within the ±0.5 V acceptance band.
+Sizing trades off middle-level accuracy, delay, area and static current.
+
+- **Target**: as the middle-level noise margin, an output within ±0.5 V for inputs from −1 to +1 V.
+- **Gate length**: the minimum 1 µm, for drive strength and area.
+- **PMOS and NMOS widths**: at an input of 0 V, the output is 0 V when $R_u = R_d$, or $r_{on,P} + R_{RP} = r_{on,N} + R_{RN}$. Because hole mobility is lower than electron mobility, the PMOS is wider than the NMOS to match their on-resistances and cancel the output offset.
+- **RR width**: the minimum 2.8 µm.
+- **RR length**: 30 µm, to keep the static current of the complete taped-out chip within the power-wire and via current limits. The MOS dimensions were retained when RR was lengthened, leaving an offset of several tens of mV at an input of 0 V, well within the ±0.5 V acceptance band.
 
 The adopted PMOS and NMOS widths are 13.5 µm and 5 µm. The PDK's zero-bias resistance equation gives 10.835 kΩ for each RR. A linear MOS resistance approximation using mobility, oxide thickness and threshold voltage gives $r_{on,P}=0.492$ kΩ and $r_{on,N}=0.399$ kΩ. The RR-to-on-resistance ratios are 22.0 and 27.2, respectively. Substituting into the divider equations gives
 
