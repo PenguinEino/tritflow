@@ -168,6 +168,26 @@ TABLES = {
                   compact_schematic()),
 }
 
+# English variants retain the same values and drawing rules. Keep TABLES unchanged for v2/ja.
+TABLES_EN = {
+    **TABLES,
+    "numbers": svg(table([["Value", "−4", "−3", "−2", "−1", "0", "+1", "+2", "+3", "+4"],
+                          ["3¹ 3⁰", "TT", "T0", "T1", "0T", "00", "01", "1T", "10", "11"]],
+                         header_cols=1, widths=[80]+[54]*9)),
+    "syntax": svg(table([
+        ["Syntax", "Meaning", "Synthesized circuit"],
+        ["`~a  a & b  a | b`", "Negation, minimum (min), maximum (max)", "INV, NAND + INV, NOR + INV"],
+        ["`nany(a, b)`", "−sat(a + b)", "NANY"],
+        ["`a + b  a - b  -a`", "Integer addition, subtraction, negation", "Full-adder chain; INV per digit"],
+        ["`a * b`", "Integer multiplication", "One-trit multipliers and adders"],
+        ["`a << 1  a >> 1`", "Multiply by 3; divide by 3 and round to the nearest integer", "Rewiring (no cells)"],
+        ["`a == b  a < b`", "Comparison: true +1, false −1", "Per-digit differences and sign detection"],
+        ["`c ? x : y`", "x for c = +1, y for −1; at 0, retain matching digits and set others to 0", "Ternary selector"],
+        ["`always @*  if  case`", "Procedural combinational logic", "Conditional value selectors"],
+        ["`inv g (y, a);`", "Direct cell instantiation", "The specified cell"],
+    ], left=(0, 1, 2), widths=[190, 260, 190], font=16, wrap=True)),
+}
+
 
 
 def width(svg):
@@ -180,3 +200,6 @@ if __name__ == "__main__":
     for name, svg in TABLES.items():
         (OUT/f"{name}.svg").write_text(svg)
         print(OUT/f"{name}.svg", width(svg))
+    for name, svg in TABLES_EN.items():
+        (OUT/f"{name}_en.svg").write_text(svg)
+        print(OUT/f"{name}_en.svg", width(svg))

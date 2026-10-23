@@ -11,7 +11,7 @@ picture for this replay.
 from html import escape
 import json
 
-from live import LayoutView, _layer_paths, _patterns, _style
+from live import LayoutView, _layer_paths, _patterns, _style, _text
 from style import ACCENT, INK, MUTED, RULE, control_style, figure_css
 
 _VIEWS = 0
@@ -77,10 +77,10 @@ def replay(lay, *, width=600):
              f'<line x1="{x0}" y1="{low}" x2="{x1}" y2="{low}" stroke="{MUTED}"/><line x1="{x0}" y1="{top}" x2="{x0}" y2="{low}" stroke="{MUTED}"/>'
              f'<text x="{x0}" y="{low+16}" font-size="11" fill="{MUTED}">0</text>'
              f'<text x="{x1}" y="{low+16}" font-size="11" fill="{MUTED}" text-anchor="end">{max(steps)-1}</text>'
-             f'<text x="{(x0+x1)/2}" y="{low+28}" font-size="11" fill="{MUTED}" text-anchor="middle">焼きなましの段</text>'
+             f'<text x="{(x0+x1)/2}" y="{low+28}" font-size="11" fill="{MUTED}" text-anchor="middle">{_text("焼きなましの段", "Annealing step")}</text>'
              f'<text x="{x0-6}" y="{sy(lengths[0])+4:.1f}" font-size="11" fill="{MUTED}" text-anchor="end">{lengths[0]:.1f}</text>'
              f'<text x="{x0-6}" y="{sy(lengths[-1])+4:.1f}" font-size="11" fill="{MUTED}" text-anchor="end">{lengths[-1]:.1f}</text>'
-             f'<text x="{x0}" y="{top-2}" font-size="11" fill="{MUTED}">配線長の見積もり (mm)</text>'
+             f'<text x="{x0}" y="{top-2}" font-size="11" fill="{MUTED}">{_text("配線長の見積もり", "Estimated wire length")} (mm)</text>'
              f'<circle class="dot" r="4" fill="{ACCENT}"/></svg>')
     frames = {"steps": steps, "hpwl": lengths, "nets": order, "points": [[sx(s), sy(v)] for s, v in zip(steps, lengths)]}
     script = (f"<script>(function(){{const root=document.querySelector('.{key}'),f={json.dumps(frames)};"
@@ -89,9 +89,11 @@ def replay(lay, *, width=600):
               "const k=v-P+1;root.querySelectorAll('.n').forEach(g=>{const i=+g.dataset.i;g.style.display=i<k?'':'none';"
               "g.style.filter=i===k-1&&k<N?'drop-shadow(0 0 3px "+ACCENT+")':'';g.style.opacity=i===k-1&&k<N?1:.9;});"
               "const i=Math.min(v,P-1);dot.setAttribute('cx',f.points[i][0]);dot.setAttribute('cy',f.points[i][1]);"
-              "cap.textContent=v<P?((v===P-1?'配置：採用した配置':'配置：焼きなまし '+f.steps[v]+' 段')+' · 配線長の見積もり '+f.hpwl[v].toFixed(2)+' mm')"
-              ":('配線：'+k+' / '+N+' 本 · '+f.nets[k-1]);}"
-              "slider.max=P+N-1;slider.addEventListener('input',()=>show(+slider.value));slider.value=P+N-1;show(P+N-1);})();</script>")
+              + _text("cap.textContent=v<P?((v===P-1?'配置：採用した配置':'配置：焼きなまし '+f.steps[v]+' 段')+' · 配線長の見積もり '+f.hpwl[v].toFixed(2)+' mm')"
+                      ":('配線：'+k+' / '+N+' 本 · '+f.nets[k-1]);}",
+                      "cap.textContent=v<P?((v===P-1?'Placement: accepted placement':'Placement: annealing step '+f.steps[v]+'')+' · Estimated wire length '+f.hpwl[v].toFixed(2)+' mm')"
+                      ":('Routing: '+k+' / '+N+' nets · '+f.nets[k-1]);}")
+              + "slider.max=P+N-1;slider.addEventListener('input',()=>show(+slider.value));slider.value=P+N-1;show(P+N-1);})();</script>")
     style = (figure_css(f".{key}") + control_style(f".{key}") +
              f".{key}{{max-width:1100px}} .{key} .row{{display:flex;flex-wrap:wrap;gap:1.2em;align-items:flex-start}}"
              f".{key} .lay{{width:100%;max-width:{width}px;height:auto;flex:1 1 420px}} .{key} .curve{{width:320px;max-width:100%}}"
