@@ -1,0 +1,494 @@
+{
+ "top": "dot4",
+ "ports": [
+  {
+   "name": "w0",
+   "dir": "input"
+  },
+  {
+   "name": "w1",
+   "dir": "input"
+  },
+  {
+   "name": "w2",
+   "dir": "input"
+  },
+  {
+   "name": "w3",
+   "dir": "input"
+  },
+  {
+   "name": "x0",
+   "dir": "input"
+  },
+  {
+   "name": "x1",
+   "dir": "input"
+  },
+  {
+   "name": "x2",
+   "dir": "input"
+  },
+  {
+   "name": "x3",
+   "dir": "input"
+  },
+  {
+   "name": "y[1]",
+   "dir": "output"
+  },
+  {
+   "name": "y[0]",
+   "dir": "output"
+  }
+ ],
+ "instances": [
+  {
+   "name": "g0",
+   "cell": "NAND",
+   "pins": {
+    "A": "w0",
+    "B": "x0",
+    "Y": "_n0"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g1",
+   "cell": "NOR",
+   "pins": {
+    "A": "w0",
+    "B": "x0",
+    "Y": "_n1"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g2",
+   "cell": "INV",
+   "pins": {
+    "A": "_n1",
+    "Y": "_n2"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g3",
+   "cell": "NAND",
+   "pins": {
+    "A": "_n0",
+    "B": "_n2",
+    "Y": "_n3"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g4",
+   "cell": "INV",
+   "pins": {
+    "A": "_n3",
+    "Y": "_n4"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g5",
+   "cell": "NAND",
+   "pins": {
+    "A": "w1",
+    "B": "x1",
+    "Y": "_n5"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g6",
+   "cell": "NOR",
+   "pins": {
+    "A": "w1",
+    "B": "x1",
+    "Y": "_n6"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g7",
+   "cell": "INV",
+   "pins": {
+    "A": "_n6",
+    "Y": "_n7"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g8",
+   "cell": "NAND",
+   "pins": {
+    "A": "_n5",
+    "B": "_n7",
+    "Y": "_n8"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g9",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n3",
+    "B": "_n8",
+    "Y": "_n9"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g10",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n8",
+    "B": "_n9",
+    "Y": "_n10"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g11",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n4",
+    "B": "_n10",
+    "Y": "_n11"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g12",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n9",
+    "B": "_n11",
+    "Y": "_n12"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g13",
+   "cell": "INV",
+   "pins": {
+    "A": "_n12",
+    "Y": "_n13"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g14",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n13",
+    "B": "_n11",
+    "Y": "_n14"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g15",
+   "cell": "INV",
+   "pins": {
+    "A": "_n14",
+    "Y": "_n15"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g16",
+   "cell": "NAND",
+   "pins": {
+    "A": "w2",
+    "B": "x2",
+    "Y": "_n16"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g17",
+   "cell": "NOR",
+   "pins": {
+    "A": "w2",
+    "B": "x2",
+    "Y": "_n17"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g18",
+   "cell": "INV",
+   "pins": {
+    "A": "_n17",
+    "Y": "_n18"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g19",
+   "cell": "NAND",
+   "pins": {
+    "A": "_n16",
+    "B": "_n18",
+    "Y": "_n19"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g20",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n14",
+    "B": "_n19",
+    "Y": "_n20"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g21",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n19",
+    "B": "_n20",
+    "Y": "_n21"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g22",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n15",
+    "B": "_n21",
+    "Y": "_n22"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g23",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n20",
+    "B": "_n22",
+    "Y": "_n23"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g24",
+   "cell": "INV",
+   "pins": {
+    "A": "_n23",
+    "Y": "_n24"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g25",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n24",
+    "B": "_n22",
+    "Y": "_n25"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g26",
+   "cell": "INV",
+   "pins": {
+    "A": "_n25",
+    "Y": "_n26"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g27",
+   "cell": "NAND",
+   "pins": {
+    "A": "w3",
+    "B": "x3",
+    "Y": "_n27"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g28",
+   "cell": "NOR",
+   "pins": {
+    "A": "w3",
+    "B": "x3",
+    "Y": "_n28"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g29",
+   "cell": "INV",
+   "pins": {
+    "A": "_n28",
+    "Y": "_n29"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g30",
+   "cell": "NAND",
+   "pins": {
+    "A": "_n27",
+    "B": "_n29",
+    "Y": "_n30"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g31",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n25",
+    "B": "_n30",
+    "Y": "_n31"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g32",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n30",
+    "B": "_n31",
+    "Y": "_n32"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g33",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n26",
+    "B": "_n32",
+    "Y": "_n33"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g34",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n22",
+    "B": "_n33",
+    "Y": "_n34"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g35",
+   "cell": "INV",
+   "pins": {
+    "A": "_n34",
+    "Y": "_n35"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g36",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n11",
+    "B": "_n35",
+    "Y": "_n36"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g37",
+   "cell": "INV",
+   "pins": {
+    "A": "_n11",
+    "Y": "_n37"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g38",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n35",
+    "B": "_n36",
+    "Y": "_n38"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g39",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n37",
+    "B": "_n38",
+    "Y": "_n39"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g40",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n36",
+    "B": "_n39",
+    "Y": "_n40"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g41",
+   "cell": "INV",
+   "pins": {
+    "A": "_n40",
+    "Y": "_n41"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g42",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n41",
+    "B": "_n39",
+    "Y": "y[1]"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g43",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n31",
+    "B": "_n33",
+    "Y": "_n43"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g44",
+   "cell": "INV",
+   "pins": {
+    "A": "_n43",
+    "Y": "_n44"
+   },
+   "hier": ""
+  },
+  {
+   "name": "g45",
+   "cell": "NANY",
+   "pins": {
+    "A": "_n44",
+    "B": "_n33",
+    "Y": "y[0]"
+   },
+   "hier": ""
+  }
+ ]
+}
