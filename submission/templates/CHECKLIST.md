@@ -37,7 +37,7 @@ README and IEEE page. Its author, reference and tool-version guidance remains
 applicable. The FAQ's Python-3.7 installation example is historical, not a tool
 version mandate. The rules do not impose a numerical payload-size limit,
 require an abstract or pitch, require final GDS, or set a ten-minute runtime
-limit; our static outputs and 8 MiB budget are reviewer conveniences.
+limit; our static outputs and 12 MiB budget are reviewer conveniences.
 
 Before filing, rebuild the completed English primary and Japanese companion,
 inspect their saved figures, run the builder's `--check --require-final`, and

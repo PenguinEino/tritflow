@@ -21,7 +21,7 @@ The source notebooks, bootstrap, PDK and other streams' paths are not edited.
 Only `submission/ISSCC27/submitted_notebooks/TritFlow/` belongs in the eventual
 official-repository PR. The bilingual payload has nine files: both notebooks,
 README, ABSTRACT, PITCH, CHECKLIST, LICENSE, NOTICE and build-info.json. A Japanese
-preview has eight. The complete payload must fit the self-imposed 8 MiB budget.
+preview has eight. The complete payload must fit the self-imposed 12 MiB budget (two languages).
 
 The first cell of each packaged notebook contains the exact team identity from
 `team.json`, which follows `docs/author.md`, recommended runtime versions and
