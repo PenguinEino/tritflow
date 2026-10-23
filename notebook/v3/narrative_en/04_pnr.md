@@ -14,7 +14,7 @@ The cost is the sum of the half-perimeter lengths of the bounding boxes around e
 
 ### 4.3 Routing: Maze Search
 
-Routing uses horizontal M1 in the channels and vertical M2 over cells. A* search connects each net's terminals on the routing grid. Nets with more terminals and greater extent are routed first. If a net fails, all routing is removed, the failed net is moved to the front, and the remaining order is changed before retrying (up to 3 times). Vertical M2 power trunks supply the rails in each row.
+Routing uses horizontal M1 in the channels and vertical M2 over cells. A* search connects each net's terminals on the routing grid. Nets with more terminals and greater extent are routed first. If a net fails, all routing is removed, the failed net is moved to the front, and the remaining order is changed before retrying. If 8 attempts, including the first, fail, the routing channels are widened and routing starts again (up to 5 times). Vertical M2 power trunks supply the rails in each row.
 
 During execution, the figure shows placement and routing progress. At completion, a slider replays recorded placement snapshots followed by nets in routing order.
 

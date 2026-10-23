@@ -78,7 +78,7 @@ DOI: [10.1007/s10470-016-0733-1](https://doi.org/10.1007/s10470-016-0733-1).
 
 ### [WANG2021]
 
-Xiaoyuan Wang, Pengfei Zhou, Jason K. Eshraghian, Chih-Yang Lin,
+Xiao-Yuan Wang, Peng-Fei Zhou, Jason K. Eshraghian, Chih-Yang Lin,
 Herbert Ho-Ching Iu, Ting-Chang Chang, and Sung-Mo Kang. “High-Density
 Memristor-CMOS Ternary Logic Family.” **IEEE Transactions on Circuits and Systems I:
 Regular Papers**, 68(1), 264–274, January 2021 (early access 2020).
