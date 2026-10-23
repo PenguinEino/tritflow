@@ -12,7 +12,7 @@ from IPython.display import HTML, display
 from live import _text
 from style import (ACCENT, BAND, CURRENT_COLOR, INK, INPUT_COLORS, MUTED, OUTPUT_COLORS, SERIF, TRIT_COLOR, TRIT_TEXT,
                    control_style,
-                   figure_css, paper_axes, paper_layout, table_css)
+                   figure_css, paper_axes, paper_layout, RULE, table_css)
 
 
 def stimulus(net, limit=27):
@@ -113,7 +113,8 @@ def scope_figure(post, *, title=None, settle=False):
                                   font={"color": ACCENT, "size": 12}, bgcolor="rgba(255,255,255,.85)")
     paper_axes(figure)
     figure.update_xaxes(range=[0, len(rows)*stimulus["hold_s"]*1e6])
-    figure.update_xaxes(title_text="time (µs)", rangeslider={"visible": True, "thickness": .05, "bgcolor": "#f6f5f1"},
+    figure.update_xaxes(title_text="time (µs)", rangeslider={"visible": True, "thickness": .06, "bgcolor": "#f6f5f1",
+                                                              "bordercolor": RULE, "borderwidth": 1},
                         row=len(lanes), col=1)
     figure.update_layout(**paper_layout(height=150*len(lanes)+110, hovermode="x unified",
                                         margin={"t": 40 if title else 15, "l": 70, "r": 15, "b": 40},
