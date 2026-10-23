@@ -144,44 +144,28 @@ with step("論理合成") as s:
            + f" · 全{add2.equivalence['vectors']}入力で等価")
 bus_picker(add2)''',
 
-"sel_source": '''# 3-5 HDL：同じ選択を書き分ける
+"sel_source": '''# 3-5 HDL：同じ選択を2通りに書く
 select_sources = {
-"?:": """
-module sel_cond(input trit [1:0] a, b, input trit op, output trit [2:0] r);
-  assign r = (op == 1't0) ? a : (op == 1't1 ? a + b : a - b);
+"(op == 1't1) ? a : b": """
+module sel_cmp(input trit a, b, op, output trit r);
+  assign r = (op == 1't1) ? a : b;
 endmodule
 """,
-"case": """
-module sel_case(input trit [1:0] a, b, input trit op, output reg trit [2:0] r);
-  always @* begin
-    case (op)
-      1'tT: r = a - b;
-      1't0: r = a;
-      1't1: r = a + b;
-    endcase
-  end
-endmodule
-""",
-"a + op*b": """
-module sel_mul(input trit [1:0] a, b, input trit op, output trit [2:0] r);
-  assign r = a + op*b;
-endmodule
-""",
-# Not the same function: at op = 0 it keeps only the digits where a+b and a-b agree.
-"op ? a+b : a-b": """
-module sel_raw(input trit [1:0] a, b, input trit op, output trit [2:0] r);
-  assign r = op ? a + b : a - b;
+"op ? a : b": """
+module sel_raw(input trit a, b, op, output trit r);
+  assign r = op ? a : b;
 endmodule
 """,
 }''',
 
 "sel_synth": '''# 3-6 論理合成して比べる
 need("select_sources", why="合成するHDLは、3-5に書いてあります。")
-with step("論理合成（4通り）") as s:
+with step("論理合成（2通り）") as s:
     selects = {name: flow.loads(source).synthesize() for name, source in select_sources.items()}
     s.done(" · ".join(f"{name} {net.report()['total_cells']}セル" for name, net in selects.items()))
 cell_counts(selects)
-bus_picker(selects["a + op*b"])''',
+for net in selects.values():
+    bus_picker(net)''',
 
 "pnr2": '''# 4-1 配置配線する
 need("add2", why="配置配線する回路は、3-4で合成した2トリットの加算器です。")
