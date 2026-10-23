@@ -13,7 +13,7 @@ import re
 from IPython.display import HTML, display
 
 from live import _layer_paths, _patterns, LayoutView, layer_legend
-from style import MUTED, RULE, SERIF, TRIT_COLOR as COLOR, TRIT_TEXT, figure_css, table_css
+from style import INK, MUTED, RULE, SERIF, TRIT_COLOR as COLOR, TRIT_TEXT, figure_css, table_css
 _VIEWS = 0
 
 
@@ -24,26 +24,26 @@ def _key(prefix):
 
 
 def closure_view(found):
-    """Booktabs table of the construction, one row per round: the one-input functions that first
-    appear in it, each written as its outputs at a = −1, 0, +1, and the running count out of 27."""
-    names = {(-1, 0, 1): "a", (1, 0, -1): "−a", (1, 1, 1): "定数 +1", (0, 0, 0): "定数 0", (-1, -1, -1): "定数 −1"}
+    """The first steps of the construction as a truth table, one row per function: how it is
+    wired from the input a, the constant +1 and earlier rows, its outputs at a = −1, 0, +1, and
+    the round in which it first appears."""
+    from completeness import TRITS, nany
+    a, plus = TRITS, (1, 1, 1)
+    minus = tuple(map(nany, plus, plus))
+    steps = [("a", a), ("+1", plus), ("NANY(a, a)", tuple(map(nany, a, a))),
+             ("NANY(+1, +1)", minus), ("NANY(a, +1)", tuple(map(nany, a, plus))),
+             ("NANY(+1, NANY(+1, +1))", tuple(map(nany, plus, minus)))]
 
-    def function(f):
-        digits = ", ".join(f'<span style="color:{COLOR[v]}">{TRIT_TEXT[v]}</span>' for v in f)
-        name = f' <span class="n">{names[f]}</span>' if f in names else ""
-        return f'<span class="f">({digits}){name}</span>'
+    def cell(v):
+        return f'<td class="t{v+1}">{TRIT_TEXT[v]}</td>'
 
-    rounds = sorted(set(found.values()))
-    total, rows = 0, []
-    for r in rounds:
-        new = sorted((f for f, g in found.items() if g == r), key=lambda f: (f not in names, f))
-        total += len(new)
-        rows.append(f'<tr><td>{r}</td><td class="l">{" ".join(function(f) for f in new)}</td><td>{total} / 27</td></tr>')
+    head = ('<tr><th rowspan="2">段</th><th rowspan="2">作り方</th><th colspan="3">a</th></tr>'
+            '<tr>' + "".join(f"<th>{TRIT_TEXT[v]}</th>" for v in TRITS) + "</tr>")
+    rows = "".join(f'<tr><td>{found[f]}</td><td class="l">{name}</td>{"".join(cell(v) for v in f)}</tr>'
+                   for name, f in steps)
     display(HTML(f'<style>{figure_css(".tfclosure")}{table_css(".tfclosure")}'
-                 f'.tfclosure td.l{{text-align:left;line-height:1.9}} .tfclosure .f{{white-space:nowrap;margin-right:1.1em}}'
-                 f'.tfclosure .n{{color:{MUTED};font-size:12.5px}}</style><div class="tfclosure"><table>'
-                 f'<tr><th>段</th><th>新しく作れた1入力関数<small>a = −1, 0, +1 のときの出力</small></th><th>累計</th></tr>'
-                 f'{"".join(rows)}</table></div>'))
+                 f'.tfclosure td.l{{text-align:left}} .tfclosure tr:nth-child(2) th{{border-bottom:.8px solid {INK}}}'
+                 f'</style><div class="tfclosure"><table>{head}{rows}</table></div>'))
 
 
 FORMULA = {"INV": "Y = −A", "BUF": "Y = A", "NAND": "Y = −min(A, B)", "NOR": "Y = −max(A, B)",
