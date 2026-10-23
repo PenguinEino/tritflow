@@ -23,6 +23,20 @@ from IPython.display import HTML, display
 SPINNER = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
 FONT = "font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"
 GREEN, RED, CYAN, DIM = "#1a9c4a", "#d0342c", "#0b8fb3", "#8a8f98"
+_language = "ja"
+
+
+def set_language(code):
+    """Select notebook presentation labels ('ja' or 'en'); circuit data is unchanged."""
+    global _language
+    if code not in ("ja", "en"):
+        raise ValueError(f"unknown language: {code}")
+    _language = code
+
+
+def _text(japanese, english):
+    """Shared language lookup for the live log and notebook views."""
+    return english if _language == "en" else japanese
 
 
 def _line(mark, color, title, detail, seconds):
@@ -78,10 +92,11 @@ Step = Line
 def describe(event):
     """One line of real progress for a placement or routing event."""
     if event["kind"] == "place":
-        return f"焼きなまし {event['step']}/{event['steps']} · 配線長 {event['hpwl']/1e3:.2f} mm"
+        return f"{_text('焼きなまし', 'Annealing')} {event['step']}/{event['steps']} · {_text('配線長', 'HPWL')} {event['hpwl']/1e3:.2f} mm"
     if event["kind"] == "route":
-        retry = f" · やり直し{event['attempt']}回目" if event["attempt"] else ""
-        return f"配線 {event['done']}/{event['total']} 本 · {event['net']}{retry}"
+        retry = _text(f" · やり直し{event['attempt']}回目", f" · retry {event['attempt']}") if event["attempt"] else ""
+        return _text(f"配線 {event['done']}/{event['total']} 本 · {event['net']}{retry}",
+                     f"Routing {event['done']}/{event['total']} nets · {event['net']}{retry}")
     return event.get("text", "")
 
 
@@ -130,13 +145,13 @@ def run_stages(command, **options):
             finished = sum(1 for d, t in files.values() if t and d >= t)
             megabytes = sum(d for d, _ in files.values())/1e6
             # After the last download the installer unpacks; say so instead of a frozen counter.
-            unpacking = " · 展開中" if expected > 1 and finished >= expected else ""
-            line.detail = (f"{finished}/{max(expected, len(files))} ファイル · {megabytes:.1f} MB{unpacking}" if expected > 1
+            unpacking = _text(" · 展開中", " · unpacking") if expected > 1 and finished >= expected else ""
+            line.detail = (f"{finished}/{max(expected, len(files))} {_text('ファイル', 'files')} · {megabytes:.1f} MB{unpacking}" if expected > 1
                            else f"{label} · {megabytes:.1f} MB")
         elif line and (found := re.match(r"\s*(Collecting|Downloading)\s+(\S+)", text)):
             line.detail = f"pip · {found[2]}"
         elif line and text.startswith("Installing collected packages"):
-            line.detail = "pip · 展開してインストール中"
+            line.detail = _text("pip · 展開してインストール中", "pip · unpacking and installing")
     process.wait()
     if process.returncode:
         error = subprocess.CalledProcessError(process.returncode, command, "\n".join(tail))
@@ -157,7 +172,7 @@ def _klayout_progress():
         match = re.match(r'"([^"]+)" in: ([\w.]+):\d+', text)
         if match:
             count += 1
-            return f"KLayout · 処理 {count} · {match[2]}"
+            return f"KLayout · {_text('処理', 'operation')} {count} · {match[2]}"
     return parse
 
 
@@ -192,7 +207,8 @@ def _streamed_tools(report):
         else:
             parse, launched = _ngspice_progress(options.get("cwd")), list(command)
         # Both tools are silent for a few seconds while they load decks or the operating point.
-        report("KLayout · 起動中" if "klayout" in name else "ngspice · 動作点を計算中")
+        report(_text("KLayout · 起動中", "KLayout · starting") if "klayout" in name
+               else _text("ngspice · 動作点を計算中", "ngspice · solving operating point"))
         timeout, check = options.pop("timeout", None), options.pop("check", False)
         options.pop("capture_output"), options.pop("text")
         process = subprocess.Popen(launched, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -263,6 +279,9 @@ def _patterns(unit):
 
 LAYER_NAMES = {(140, 0): "Nウェル", (3, 1): "P拡散", (3, 2): "N拡散", (3, 3): "拡散抵抗", (8, 1): "ゲートポリ",
                (8, 2): "抵抗ポリ", (11, 0): "コンタクト", (13, 0): "M1", (19, 0): "ビア（V1）", (20, 0): "M2"}
+LAYER_NAMES_EN = {(140, 0): "N-well", (3, 1): "P diffusion", (3, 2): "N diffusion", (3, 3): "Diffusion resistor",
+                  (8, 1): "Gate poly", (8, 2): "Resistor poly", (11, 0): "Contact", (13, 0): "M1",
+                  (19, 0): "Via (V1)", (20, 0): "M2"}
 
 
 def layer_legend(shapes, unit, *, opacity=1):
@@ -276,7 +295,7 @@ def layer_legend(shapes, unit, *, opacity=1):
         box = [(0, 0), (w, 0), (w, h), (0, h)]
         items.append(f'<span style="white-space:nowrap;margin-right:1em"><svg viewBox="{-unit:g} {-unit:g} {w+2*unit:g} {h+2*unit:g}" '
                      f'style="width:20px;height:13px;vertical-align:middle;margin-right:4px"><defs>{_patterns(unit)}</defs>'
-                     f'<g opacity="{opacity}">{_layer_paths([(style, box)], unit)}</g></svg>{LAYER_NAMES[style[0]]}</span>')
+                     f'<g opacity="{opacity}">{_layer_paths([(style, box)], unit)}</g></svg>{_text(LAYER_NAMES[style[0]], LAYER_NAMES_EN[style[0]])}</span>')
     return "".join(items)
 
 
@@ -328,13 +347,14 @@ class LayoutView:
     def add(self, event):
         if event["kind"] == "place":
             self.placements, self.routes = event["placements"], {}
-            self.caption = f"配置 {event['step']}/{event['steps']} · 配線長 {event['hpwl']/1e3:.2f} mm"
+            self.caption = f"{_text('配置', 'Placement')} {event['step']}/{event['steps']} · {_text('配線長', 'HPWL')} {event['hpwl']/1e3:.2f} mm"
         elif event["kind"] == "route":
             if event["done"] == 1:
                 self.routes = {}
             self.routes[event["net"]] = event["segments"]
             self.newest = event["net"] if event["done"] < event["total"] else None
-            self.caption = f"配線 {event['done']}/{event['total']} 本 · {event['net']}"
+            self.caption = _text(f"配線 {event['done']}/{event['total']} 本 · {event['net']}",
+                                 f"Routing {event['done']}/{event['total']} nets · {event['net']}")
         self.version += 1
 
     def svg(self, width=760):
@@ -387,7 +407,7 @@ class NotReady(Exception):
     """A cell ran before the cell that makes what it needs."""
 
     def __init__(self, first, why):
-        super().__init__(f"先に「{first}」を実行してください。{why}")
+        super().__init__(_text(f"先に「{first}」を実行してください。{why}", f'Run "{first}" first. {why}'))
         self.first, self.why = first, why
 
 
@@ -405,15 +425,16 @@ def need(*names, why=""):
     namespace = get_ipython().user_ns
     for name in names:
         if name not in namespace:
-            raise NotReady(PRODUCERS.get(name, f"{name} を作るセル"), why)
+            raise NotReady(PRODUCERS.get(name, _text(f"{name} を作るセル", f"the cell that defines {name}")), why)
 
 
 def _box(first, why):
     return HTML(
         f'<div style="{FONT};border-left:4px solid {RED};background:rgba(208,52,44,.07);'
         f'padding:.6em 1em;margin:.3em 0">'
-        f'<div style="color:{RED};font-weight:700">✗ このセルはまだ実行できません</div>'
-        f'<div style="margin-top:.3em">先に <b>「{escape(first)}」</b> を実行してください。</div>'
+        f'<div style="color:{RED};font-weight:700">✗ {_text("このセルはまだ実行できません", "This cell is not ready")}</div>'
+        + _text(f'<div style="margin-top:.3em">先に <b>「{escape(first)}」</b> を実行してください。</div>',
+                f'<div style="margin-top:.3em">Run <b>{escape(first)}</b> first.</div>')
         + (f'<div style="color:{DIM}">{escape(why)}</div>' if why else "") + '</div>')
 
 
@@ -431,7 +452,7 @@ def install_error_view():
             return
         missing = re.search(r"name '(\w+)' is not defined", str(value))
         if missing and missing[1] in PRODUCERS:
-            display(_box(PRODUCERS[missing[1]], f"このセルは {missing[1]} を使います。"))
+            display(_box(PRODUCERS[missing[1]], _text(f"このセルは {missing[1]} を使います。", f"This cell uses {missing[1]}.")))
         shell.showtraceback((kind, value, traceback), tb_offset=tb_offset)
 
     shell.set_custom_exc((NotReady, NameError), show)

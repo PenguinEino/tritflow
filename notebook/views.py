@@ -9,6 +9,7 @@ from itertools import product
 
 from IPython.display import HTML, display
 
+from live import _text
 from style import (ACCENT, BAND, CURRENT_COLOR, INK, INPUT_COLORS, MUTED, OUTPUT_COLORS, SERIF, TRIT_COLOR, TRIT_TEXT,
                    control_style,
                    figure_css, paper_axes, paper_layout, table_css)
@@ -27,9 +28,12 @@ def stimulus(net, limit=27):
 def _reading(post, chosen):
     rows = [r for r in post["measurements"]["rows"] if tuple(r["input_trits"]) == chosen]
     if not rows:
-        return "この入力の組合せはSPICEで流していない。回路図の値は論理値。"
-    return "、".join(f"{pin} = {value['voltage_v']:+.2f} V（理想 {value['ideal_voltage_v']:+.0f} V）"
-                    for pin, value in rows[0]["outputs"].items())
+        return _text("この入力の組合せはSPICEで流していない。回路図の値は論理値。",
+                     "This input combination was not simulated in SPICE. The schematic shows logic values.")
+    return _text("、", ", ").join(
+        _text(f"{pin} = {value['voltage_v']:+.2f} V（理想 {value['ideal_voltage_v']:+.0f} V）",
+              f"{pin} = {value['voltage_v']:+.2f} V (ideal {value['ideal_voltage_v']:+.0f} V)")
+        for pin, value in rows[0]["outputs"].items())
 
 
 _PICKS = 0
@@ -43,8 +47,8 @@ def schematic_view(circuit):
            ".tfdiagram svg{display:block;width:100%;min-width:1000px;height:auto}"
            f".tfdiagram-hint{{font-family:{SERIF};font-size:13px;color:{MUTED};margin-top:.3em}}"
            "@media(min-width:1050px){.tfdiagram-hint{display:none}}")
-    display(HTML(f'<style>{css}</style><div class="tfdiagram" tabindex="0" aria-label="回路図（横スクロール）">'
-                 f'{circuit._repr_svg_()}</div><div class="tfdiagram-hint">横にスクロールして回路図の全体を見られる。</div>'))
+    display(HTML(f'<style>{css}</style><div class="tfdiagram" tabindex="0" aria-label="{_text("回路図（横スクロール）", "Schematic (horizontal scroll)")}">'
+                 f'{circuit._repr_svg_()}</div><div class="tfdiagram-hint">{_text("横にスクロールして回路図の全体を見られる。", "Scroll horizontally to view the full schematic.")}</div>'))
 
 
 def scope_figure(post, *, title=None, settle=False):
@@ -192,7 +196,7 @@ def pick_input(net, post):
               f"var d=document.getElementById('{key}-scope');if(window.Plotly&&d)"
               f"Plotly.relayout(d,{{shapes:base.concat(marks[+r.dataset.i])}});}});}});}})();</script>")
     display(HTML(f'<style>{style}</style><div class="{key}">{"".join(radios)}{"".join(panels)}'
-                 f'<div class="hint">ドラッグで拡大、ダブルクリックで全体に戻る。下のスライダーで時間の範囲を選べる。</div>'
+                 f'<div class="hint">{_text("ドラッグで拡大、ダブルクリックで全体に戻る。下のスライダーで時間の範囲を選べる。", "Drag to zoom; double-click to reset. Use the slider below to select a time range.")}</div>'
                  f'{plot}</div>{script}'))
 
 
@@ -254,7 +258,8 @@ def bus_picker(net, *, title=None):
         reading = {base: [int(nets[b]) for b in bits] for base, bits in outputs.items()}
         table[",".join(map(str, combo))] = {
             "nets": {n: int(v) for n, v in nets.items()},
-            "text": " · ".join(f"{base} = {_signed(number(d))}（{_digits(d)}）" for base, d in reading.items())}
+            "text": " · ".join(_text(f"{base} = {_signed(number(d))}（{_digits(d)}）",
+                                      f"{base} = {_signed(number(d))} ({_digits(d)})") for base, d in reading.items())}
     start = ",".join("0" for _ in values)
     circuit = net.schematic(inputs={n: 0 for bits in inputs.values() for n in bits}, net_names=True, expand="*",
                             title="", legend=False)
@@ -289,14 +294,17 @@ def cell_counts(designs):
     """Booktabs table: for each synthesized design, its cells by type, total, and the equivalence
     check synthesis ran against the HDL."""
     kinds = sorted({cell for net in designs.values() for cell in net.report()["cells"]})
-    head = "<tr><th></th>" + "".join(f"<th>{k}</th>" for k in kinds) + "<th>計</th><th>等価性の検証</th></tr>"
+    head = ("<tr><th></th>" + "".join(f"<th>{k}</th>" for k in kinds)
+            + f"<th>{_text('計', 'Total')}</th><th>{_text('等価性の検証', 'Equivalence check')}</th></tr>")
     body = ""
     for name, net in designs.items():
         report = net.report()
         check = report["equivalence"]
+        result = (_text('全' + str(check['vectors']) + '入力で一致', f"All {check['vectors']} input vectors match")
+                  if check['passed'] else _text('不一致', 'Mismatch'))
         body += (f"<tr><th style='text-align:left'>{escape(name)}</th>"
                  + "".join(f"<td>{report['cells'].get(k, '')}</td>" for k in kinds)
-                 + f"<td><b>{report['total_cells']}</b></td><td>{'全' + str(check['vectors']) + '入力で一致' if check['passed'] else '不一致'}</td></tr>")
+                 + f"<td><b>{report['total_cells']}</b></td><td>{result}</td></tr>")
     compact = '.tfcount{max-width:100%;overflow-x:auto}.tfcount th,.tfcount td{white-space:nowrap;padding:.25em .5em}'
     display(HTML(f'<style>{figure_css(".tfcount")}{table_css(".tfcount")}{compact}</style>'
                  f'<div class="tfcount"><table>{head}{body}</table></div>'))
@@ -308,7 +316,7 @@ def timing_table(post, timing):
     rows = "".join(f"<tr><th>{escape(pin)}</th><td>{measured[pin]*1e9:.1f}</td><td>{timing.arrival[pin]*1e9:.1f}</td>"
                    f"<td>{(timing.arrival[pin]/measured[pin]-1)*100:+.0f}%</td></tr>".replace("-", "−") for pin in measured)
     display(HTML(f'<style>{figure_css(".tftime")}{table_css(".tftime")}</style><div class="tftime"><table>'
-                 f'<tr><th>出力</th><th>SPICE (ns)</th><th>STA (ns)</th><th>差</th></tr>{rows}</table></div>'))
+                 f'<tr><th>{_text("出力", "Output")}</th><th>SPICE (ns)</th><th>STA (ns)</th><th>{_text("差", "Difference")}</th></tr>{rows}</table></div>'))
 
 
 def wire_table(parasitics, *, top=8):
@@ -317,8 +325,8 @@ def wire_table(parasitics, *, top=8):
     total = sum(e["wire_capacitance_f"] for _, e in nets)
     rows = "".join(f"<tr><th>{escape(name)}</th><td>{e['wire_capacitance_f']*1e15:.1f}</td></tr>" for name, e in nets[:top])
     display(HTML(f'<style>{figure_css(".tfwire")}{table_css(".tfwire")}</style><div class="tfwire"><table>'
-                 f'<tr><th>ネット</th><th>配線容量 (fF)</th></tr>{rows}'
-                 f'<tr><th>全{len(nets)}ネットの合計</th><td><b>{total*1e15:.0f}</b></td></tr></table></div>'))
+                 f'<tr><th>{_text("ネット", "Net")}</th><th>{_text("配線容量", "Wire capacitance")} (fF)</th></tr>{rows}'
+                 f'<tr><th>{_text(f"全{len(nets)}ネットの合計", f"Total over {len(nets)} nets")}</th><td><b>{total*1e15:.0f}</b></td></tr></table></div>'))
 
 
 def delay_table(cell="INV", *, ramp_s=1e-9):
@@ -339,9 +347,12 @@ def delay_table(cell="INV", *, ramp_s=1e-9):
     display(HTML(f'<style>{figure_css(".tfdelay")}{table_css(".tfdelay")}'
                  f'.tfdelay tr:nth-child(2) th{{border-bottom:.8px solid {INK}}} .tfdelay td:nth-child(8),.tfdelay tr:nth-child(2) th:nth-child(6){{padding-left:2em}}'
                  f'.tfdelay th[colspan]:last-child{{padding-left:2em}}</style><div class="tfdelay"><table>'
-                 f'<tr><th rowspan="2">入力</th><th rowspan="2">出力</th><th colspan="{len(loads)}">伝搬遅延 (ns)</th>'
-                 f'<th colspan="{len(loads)}">出力の変化時間 (ns)</th></tr><tr>{head}{head}</tr>'
-                 f'{rows}</table><p><small>伝搬遅延：入力と出力がそれぞれ変化前と変化後のレベルの中点を横切る時刻の差。出力の変化時間：出力が変化の10%から90%まで進む時間。<br>列は負荷容量。入力の変化時間は {ramp_s*1e9:g} ns。SPICEの条件：ngspiceの過渡解析、{MODELS}、{data['conditions']['temperature_c']:g} °C、電源 +5 / 0 / −5 V。</small></p></div>'))
+                 f'<tr><th rowspan="2">{_text("入力", "Input")}</th><th rowspan="2">{_text("出力", "Output")}</th><th colspan="{len(loads)}">{_text("伝搬遅延", "Propagation delay")} (ns)</th>'
+                 f'<th colspan="{len(loads)}">{_text("出力の変化時間", "Output slew")} (ns)</th></tr><tr>{head}{head}</tr>'
+                 f'{rows}</table><p><small>' + _text(
+                     f'伝搬遅延：入力と出力がそれぞれ変化前と変化後のレベルの中点を横切る時刻の差。出力の変化時間：出力が変化の10%から90%まで進む時間。<br>列は負荷容量。入力の変化時間は {ramp_s*1e9:g} ns。SPICEの条件：ngspiceの過渡解析、{MODELS}、{data["conditions"]["temperature_c"]:g} °C、電源 +5 / 0 / −5 V。',
+                     f'Propagation delay: time between input and output crossings of their respective transition midpoints. Output slew: output transition time from 10% to 90%.<br>Columns are load capacitances. Input slew: {ramp_s*1e9:g} ns. SPICE conditions: ngspice transient analysis, {_models()}, {data["conditions"]["temperature_c"]:g} °C, supplies +5 / 0 / −5 V.')
+                 + '</small></p></div>'))
 
 
 def note(text):
@@ -356,21 +367,33 @@ def _signed_v(v):
 MODELS = "TR-1um（IP62）の公称のSPICEモデル（コーナーなし）"
 
 
+def _models():
+    return _text(MODELS, "TR-1um (IP62) nominal SPICE models (no corners)")
+
+
 def transient_conditions(post, *, load_f):
     """One line under a transient run: the deck's actual temperature, rails, stimulus and load,
     and the inputs held at one value (their lanes are left out of scope_figure)."""
     bench = post["stimulus"]
     rails = " / ".join(_signed_v(bench['supplies_v'][r]) for r in ("VDD", "VMID", "VSS"))
-    text = (f"シミュレーション条件：ngspiceの過渡解析、{MODELS}、{bench['temperature_c']:g} °C、"
+    text = _text(f"シミュレーション条件：ngspiceの過渡解析、{MODELS}、{bench['temperature_c']:g} °C、"
             f"電源 {rails}。入力は理想電圧源で、値を {bench['hold_s']*1e6:g} µs ずつ保ち、{bench['edge_s']*1e9:g} ns で直線的に切り替える。"
-            f"出力の負荷 {load_f*1e15:g} fF、内部の配線容量は抽出値。時間刻み {bench['step_s']*1e9:g} ns。")
+            f"出力の負荷 {load_f*1e15:g} fF、内部の配線容量は抽出値。時間刻み {bench['step_s']*1e9:g} ns。",
+            f"Simulation conditions: ngspice transient analysis, {_models()}, {bench['temperature_c']:g} °C, "
+            f"supplies {rails}. Ideal input voltage sources hold each value for {bench['hold_s']*1e6:g} µs "
+            f"with linear {bench['edge_s']*1e9:g} ns transitions. Output load: {load_f*1e15:g} fF; "
+            f"internal wire capacitance from extraction. Time step: {bench['step_s']*1e9:g} ns.")
     fixed = _fixed_inputs(post)
     if fixed:
-        text += "、".join(f"{name} = {_signed_v(v)}" for name, v in fixed.items()) + " は全区間で一定のため、波形を省いた。"
+        values = _text("、", ", ").join(f"{name} = {_signed_v(v)}" for name, v in fixed.items())
+        text += _text(values + " は全区間で一定のため、波形を省いた。",
+                      " Fixed throughout (waveforms omitted): " + values + ".")
     note(text)
 
 
 def dc_conditions(*, start_v=-5.0, stop_v=5.0, step_v=0.1, temperature_c=27.0):
     """One line under a DC sweep of a cell input."""
-    note(f"シミュレーション条件：ngspiceのDC解析、{MODELS}、{temperature_c:g} °C、電源 +5 / 0 / −5 V。"
-          f"入力を {_signed_v(start_v)} から {_signed_v(stop_v)} まで {step_v:g} V 刻みで掃引し、出力は無負荷。")
+    note(_text(f"シミュレーション条件：ngspiceのDC解析、{MODELS}、{temperature_c:g} °C、電源 +5 / 0 / −5 V。"
+               f"入力を {_signed_v(start_v)} から {_signed_v(stop_v)} まで {step_v:g} V 刻みで掃引し、出力は無負荷。",
+               f"Simulation conditions: ngspice DC analysis, {_models()}, {temperature_c:g} °C, supplies +5 / 0 / −5 V. "
+               f"Input sweep: {_signed_v(start_v)} to {_signed_v(stop_v)} in {step_v:g} V steps; unloaded output."))
