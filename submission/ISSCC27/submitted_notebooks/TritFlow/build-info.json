@@ -1,6 +1,6 @@
 {
-  "created_utc": "2026-10-23T13:16:31.568792+00:00",
-  "packaging_commit": "d14970667c65c279d8f47efeb391e89507c6939b",
+  "created_utc": "2026-10-23T16:30:43.427507+00:00",
+  "packaging_commit": "794188fce800d0c095d12b6e661821f14a7f8022",
   "tracked_working_changes_at_packaging": [],
   "packaging_tools": {
     "Pillow": "10.2.0",
@@ -15,11 +15,11 @@
   "raw_executions_not_in_payload": {
     "tritflow_en.ipynb": {
       "path": "submission/.build/submission_capture/tritflow_en/executed.raw.ipynb",
-      "sha256": "7b9563e26ab33dcff5aede79d759d7297a387dbd0cb8b97f0f275abbae7b96f4"
+      "sha256": "2d6e622fd1b3455c4fd8767c1c973aca8d8383c35210990ae3e6e77075afe2bd"
     },
     "tritflow_ja.ipynb": {
       "path": "submission/.build/submission_capture/tritflow_ja/executed.raw.ipynb",
-      "sha256": "dae4a39dad098524a9d85b34e108af499f99b9784c69d7147b630a08e2ea1786"
+      "sha256": "58ab688ee5376e388b4eb5ac4b1d45ab590c19fff063f7cae013fc16b041371a"
     }
   },
   "manifest_scope": "files excludes build-info.json itself; total_bytes includes it",
@@ -29,18 +29,18 @@
   "notebooks": {
     "tritflow_en.ipynb": {
       "source_path": "notebook/v3/tritflow_en.ipynb",
-      "source_sha256": "4d15c46508908a764c6f27bd63ee17bacd54596f1602faef681d54e35d30276e",
+      "source_sha256": "19f0dbb575e2c71ad220c59ae3bd2afd52dc1ce0370c5c99df62d43c2f6b7f81",
       "capture": {
-        "source_sha256": "4d15c46508908a764c6f27bd63ee17bacd54596f1602faef681d54e35d30276e",
-        "elapsed_s": 52.48444010701496,
+        "source_sha256": "19f0dbb575e2c71ad220c59ae3bd2afd52dc1ce0370c5c99df62d43c2f6b7f81",
+        "elapsed_s": 50.825753011973575,
         "renderer": "png",
         "completed": true,
         "source_path": "notebook/v3/tritflow_en.ipynb",
-        "started_utc": "2026-10-23T13:14:17.028815+00:00",
-        "completed_utc": "2026-10-23T13:15:09.513403+00:00"
+        "started_utc": "2026-10-23T16:28:09.453378+00:00",
+        "completed_utc": "2026-10-23T16:29:00.279185+00:00"
       },
-      "pinned_source_commit": "d14970667c65c279d8f47efeb391e89507c6939b",
-      "source_commit_at_execution": "d14970667c65c279d8f47efeb391e89507c6939b",
+      "pinned_source_commit": "794188fce800d0c095d12b6e661821f14a7f8022",
+      "source_commit_at_execution": "794188fce800d0c095d12b6e661821f14a7f8022",
       "runtime_tools": {
         "python": "3.12.3",
         "packages": {
@@ -129,10 +129,10 @@
               "hpwl_after_um": 710.5,
               "hpwl_improvement_pct": 20.213363279056708,
               "runtime_s": {
-                "placement": 0.005363539967220277,
-                "routing": 0.00400226900819689,
-                "export_and_verification": 1.1865024330327287,
-                "total": 1.195868242008146
+                "placement": 0.00520839897217229,
+                "routing": 0.003844822000246495,
+                "export_and_verification": 0.9863445540540852,
+                "total": 0.995397775026504
               }
             },
             "drc": {
@@ -457,10 +457,10 @@
               "hpwl_after_um": 24299.5,
               "hpwl_improvement_pct": 39.37628640928086,
               "runtime_s": {
-                "placement": 0.07394645496970043,
-                "routing": 0.25132489402312785,
-                "export_and_verification": 1.8884892989881337,
-                "total": 2.405149316007737
+                "placement": 0.07334256696049124,
+                "routing": 0.23893053201027215,
+                "export_and_verification": 1.8917472020257264,
+                "total": 2.391804062994197
               }
             },
             "drc": {
@@ -1233,9 +1233,9 @@
           },
           "scope": "Public pinned PDK; numerical interconnect assumptions are separately labelled."
         },
-        "source_ref": "d14970667c65c279d8f47efeb391e89507c6939b",
-        "runtime_commit_at_end": "d14970667c65c279d8f47efeb391e89507c6939b",
-        "runtime_commit": "d14970667c65c279d8f47efeb391e89507c6939b",
+        "source_ref": "794188fce800d0c095d12b6e661821f14a7f8022",
+        "runtime_commit_at_end": "794188fce800d0c095d12b6e661821f14a7f8022",
+        "runtime_commit": "794188fce800d0c095d12b6e661821f14a7f8022",
         "tracked_working_changes_at_execution": [],
         "untracked_runtime_sources_at_execution": []
       },
@@ -1668,128 +1668,121 @@
                 "P01",
                 "VDD",
                 "power",
-                "-890.0",
-                "1100.0"
+                "-200.0",
+                "1040.0"
               ],
               [
                 "P02",
                 "VDD",
                 "power",
-                "-78.0",
-                "1100.0"
+                "-600.0",
+                "1040.0"
               ],
               [
                 "P03",
-                "VDD",
-                "power",
-                "890.0",
-                "1100.0"
+                "x1",
+                "input",
+                "-1040.0",
+                "600.0"
               ],
               [
                 "P04",
-                "VSS",
-                "power",
-                "-700.0",
-                "1100.0"
+                "x0",
+                "input",
+                "-1040.0",
+                "200.0"
               ],
               [
                 "P05",
-                "VSS",
-                "power",
-                "140.0",
-                "1100.0"
+                "w3",
+                "input",
+                "-1040.0",
+                "-200.0"
               ],
               [
                 "P06",
-                "VSS",
-                "power",
-                "732.0",
-                "1100.0"
+                "w2",
+                "input",
+                "-1040.0",
+                "-600.0"
               ],
               [
                 "P07",
-                "VMID",
-                "power",
-                "0.0",
-                "-1100.0"
+                "w0",
+                "input",
+                "-600.0",
+                "-1040.0"
               ],
               [
                 "P08",
-                "w0",
-                "input",
-                "-1020.0",
-                "-594.0"
+                "VSS",
+                "power",
+                "-200.0",
+                "-1040.0"
               ],
               [
                 "P09",
                 "x3",
                 "input",
-                "-1020.0",
-                "-444.0"
+                "200.0",
+                "-1040.0"
               ],
               [
                 "P10",
                 "w1",
                 "input",
-                "-1020.0",
-                "-294.0"
+                "600.0",
+                "-1040.0"
               ],
               [
                 "P11",
-                "w2",
-                "input",
-                "-1020.0",
-                "-144.0"
+                "y[1]",
+                "output",
+                "1040.0",
+                "-600.0"
               ],
               [
                 "P12",
-                "w3",
-                "input",
-                "-1020.0",
-                "6.0"
+                "y[0]",
+                "output",
+                "1040.0",
+                "-200.0"
               ],
               [
                 "P13",
-                "x0",
-                "input",
-                "-1020.0",
-                "174.0"
+                "VMID",
+                "power",
+                "1040.0",
+                "200.0"
               ],
               [
                 "P14",
-                "x1",
+                "x2",
                 "input",
-                "-1020.0",
-                "366.0"
+                "1040.0",
+                "600.0"
               ],
               [
                 "P15",
-                "x2",
-                "input",
-                "-1020.0",
-                "558.0"
+                "VDD",
+                "power",
+                "600.0",
+                "1040.0"
               ],
               [
                 "P16",
-                "y[1]",
-                "output",
-                "1020.0",
-                "-594.0"
-              ],
-              [
-                "P17",
-                "y[0]",
-                "output",
-                "1020.0",
-                "-402.0"
+                "ESD_VDD",
+                "power",
+                "200.0",
+                "1040.0"
               ]
             ]
           }
         ]
       },
       "release": {
-        "default_ref": "1787215eef23a62ba6f32d32685519e2a220a4dd",
-        "commit": "1787215eef23a62ba6f32d32685519e2a220a4dd",
+        "default_ref": "e20285092edae03af7a263e99f60fb907dcdaddc",
+        "commit": "e20285092edae03af7a263e99f60fb907dcdaddc",
         "matches_source_notebook": true,
         "missing_required_helpers": [],
         "compatible": true
@@ -1802,18 +1795,18 @@
     },
     "tritflow_ja.ipynb": {
       "source_path": "notebook/v3/tritflow_ja.ipynb",
-      "source_sha256": "2ddebc77e1ec6edb7402b7288dbe061e08c9c6c75244159d5f95dc2c5cc77955",
+      "source_sha256": "b7ae510bdcf3d09134420a1188e88a36f463e823d82a0e02e4b35083917da98d",
       "capture": {
-        "source_sha256": "2ddebc77e1ec6edb7402b7288dbe061e08c9c6c75244159d5f95dc2c5cc77955",
-        "elapsed_s": 52.03969539096579,
+        "source_sha256": "b7ae510bdcf3d09134420a1188e88a36f463e823d82a0e02e4b35083917da98d",
+        "elapsed_s": 51.07432097097626,
         "renderer": "png",
         "completed": true,
         "source_path": "notebook/v3/tritflow_ja.ipynb",
-        "started_utc": "2026-10-23T13:15:24.661099+00:00",
-        "completed_utc": "2026-10-23T13:16:16.700904+00:00"
+        "started_utc": "2026-10-23T16:29:15.095325+00:00",
+        "completed_utc": "2026-10-23T16:30:06.169681+00:00"
       },
-      "pinned_source_commit": "d14970667c65c279d8f47efeb391e89507c6939b",
-      "source_commit_at_execution": "d14970667c65c279d8f47efeb391e89507c6939b",
+      "pinned_source_commit": "794188fce800d0c095d12b6e661821f14a7f8022",
+      "source_commit_at_execution": "794188fce800d0c095d12b6e661821f14a7f8022",
       "runtime_tools": {
         "python": "3.12.3",
         "packages": {
@@ -1902,10 +1895,10 @@
               "hpwl_after_um": 710.5,
               "hpwl_improvement_pct": 20.213363279056708,
               "runtime_s": {
-                "placement": 0.005203735025133938,
-                "routing": 0.0039933849475346506,
-                "export_and_verification": 0.9841086720116436,
-                "total": 0.9933057919843122
+                "placement": 0.005395766987930983,
+                "routing": 0.0040823129820637405,
+                "export_and_verification": 0.9832155710319057,
+                "total": 0.9926936510019004
               }
             },
             "drc": {
@@ -2230,10 +2223,10 @@
               "hpwl_after_um": 24299.5,
               "hpwl_improvement_pct": 39.37628640928086,
               "runtime_s": {
-                "placement": 0.07713266101200134,
-                "routing": 0.2452044879901223,
-                "export_and_verification": 1.9951849060016684,
-                "total": 2.5249647670425475
+                "placement": 0.07318194198887795,
+                "routing": 0.2430205310229212,
+                "export_and_verification": 1.8335755509906448,
+                "total": 2.3383302399888635
               }
             },
             "drc": {
@@ -3006,9 +2999,9 @@
           },
           "scope": "Public pinned PDK; numerical interconnect assumptions are separately labelled."
         },
-        "source_ref": "d14970667c65c279d8f47efeb391e89507c6939b",
-        "runtime_commit_at_end": "d14970667c65c279d8f47efeb391e89507c6939b",
-        "runtime_commit": "d14970667c65c279d8f47efeb391e89507c6939b",
+        "source_ref": "794188fce800d0c095d12b6e661821f14a7f8022",
+        "runtime_commit_at_end": "794188fce800d0c095d12b6e661821f14a7f8022",
+        "runtime_commit": "794188fce800d0c095d12b6e661821f14a7f8022",
         "tracked_working_changes_at_execution": [],
         "untracked_runtime_sources_at_execution": []
       },
@@ -3149,11 +3142,11 @@
               [
                 "項数 N",
                 "セル数",
-                "|I(VDD)| (mA・x=0)",
-                "|I(VSS)| (mA・x=0)",
-                "静的電力 (mW・x=0)",
+                "|I(VDD)| (mA・ x=0)",
+                "|I(VSS)| (mA・ x=0)",
+                "静的電力 (mW・ x=0)",
                 "時間平均 (mW)",
-                "静的/セル (mW・x=0)",
+                "静的/セル (mW・ x=0)",
                 "平均/セル (mW)",
                 "DCの範囲 (mW)",
                 "保持時間 (µs/区間)"
@@ -3214,11 +3207,11 @@
               [
                 "N",
                 "出力",
-                "STA・配線容量なし (ns)",
-                "STA・配線容量あり (ns)",
+                "STA・ (配線容量なし ns)",
+                "STA・ (配線容量あり ns)",
                 "増加率 (%)",
-                "SPICE・配線容量なし (ns)",
-                "SPICE・配線容量あり (ns)",
+                "SPICE・ (配線容量なし ns)",
+                "SPICE・ (配線容量あり ns)",
                 "増加率 (%)",
                 "STAの誤差 (%)"
               ],
@@ -3374,7 +3367,7 @@
               ],
               [
                 "SPICE 入力状態",
-                "11 / 81 (sampled states)"
+                "11 / 81 (一部の入力状態)"
               ],
               [
                 "出力レベル・整定",
@@ -3422,8 +3415,8 @@
                 "PASS"
               ],
               [
-                "Submission ready",
-                "False"
+                "提出準備",
+                "未完了"
               ]
             ]
           },
@@ -3440,129 +3433,122 @@
               [
                 "P01",
                 "VDD",
-                "power",
-                "-890.0",
-                "1100.0"
+                "電源",
+                "-200.0",
+                "1040.0"
               ],
               [
                 "P02",
                 "VDD",
-                "power",
-                "-78.0",
-                "1100.0"
+                "電源",
+                "-600.0",
+                "1040.0"
               ],
               [
                 "P03",
-                "VDD",
-                "power",
-                "890.0",
-                "1100.0"
+                "x1",
+                "入力",
+                "-1040.0",
+                "600.0"
               ],
               [
                 "P04",
-                "VSS",
-                "power",
-                "-700.0",
-                "1100.0"
+                "x0",
+                "入力",
+                "-1040.0",
+                "200.0"
               ],
               [
                 "P05",
-                "VSS",
-                "power",
-                "140.0",
-                "1100.0"
+                "w3",
+                "入力",
+                "-1040.0",
+                "-200.0"
               ],
               [
                 "P06",
-                "VSS",
-                "power",
-                "732.0",
-                "1100.0"
+                "w2",
+                "入力",
+                "-1040.0",
+                "-600.0"
               ],
               [
                 "P07",
-                "VMID",
-                "power",
-                "0.0",
-                "-1100.0"
+                "w0",
+                "入力",
+                "-600.0",
+                "-1040.0"
               ],
               [
                 "P08",
-                "w0",
-                "input",
-                "-1020.0",
-                "-594.0"
+                "VSS",
+                "電源",
+                "-200.0",
+                "-1040.0"
               ],
               [
                 "P09",
                 "x3",
-                "input",
-                "-1020.0",
-                "-444.0"
+                "入力",
+                "200.0",
+                "-1040.0"
               ],
               [
                 "P10",
                 "w1",
-                "input",
-                "-1020.0",
-                "-294.0"
+                "入力",
+                "600.0",
+                "-1040.0"
               ],
               [
                 "P11",
-                "w2",
-                "input",
-                "-1020.0",
-                "-144.0"
+                "y[1]",
+                "出力",
+                "1040.0",
+                "-600.0"
               ],
               [
                 "P12",
-                "w3",
-                "input",
-                "-1020.0",
-                "6.0"
+                "y[0]",
+                "出力",
+                "1040.0",
+                "-200.0"
               ],
               [
                 "P13",
-                "x0",
-                "input",
-                "-1020.0",
-                "174.0"
+                "VMID",
+                "電源",
+                "1040.0",
+                "200.0"
               ],
               [
                 "P14",
-                "x1",
-                "input",
-                "-1020.0",
-                "366.0"
+                "x2",
+                "入力",
+                "1040.0",
+                "600.0"
               ],
               [
                 "P15",
-                "x2",
-                "input",
-                "-1020.0",
-                "558.0"
+                "VDD",
+                "電源",
+                "600.0",
+                "1040.0"
               ],
               [
                 "P16",
-                "y[1]",
-                "output",
-                "1020.0",
-                "-594.0"
-              ],
-              [
-                "P17",
-                "y[0]",
-                "output",
-                "1020.0",
-                "-402.0"
+                "ESD_VDD",
+                "電源",
+                "200.0",
+                "1040.0"
               ]
             ]
           }
         ]
       },
       "release": {
-        "default_ref": "1787215eef23a62ba6f32d32685519e2a220a4dd",
-        "commit": "1787215eef23a62ba6f32d32685519e2a220a4dd",
+        "default_ref": "e20285092edae03af7a263e99f60fb907dcdaddc",
+        "commit": "e20285092edae03af7a263e99f60fb907dcdaddc",
         "matches_source_notebook": true,
         "missing_required_helpers": [],
         "compatible": true
@@ -3630,20 +3616,20 @@
       "sha256": "0877c7906d385846374686c612a2a3f98964248ba41496983bbd6ff02fb48c06"
     },
     "tritflow_ja.ipynb": {
-      "bytes": 4833968,
-      "sha256": "3968e0bcce65a5146154f541db53e291c65c6ca4dd2d4f6851d80fa311d535eb"
+      "bytes": 4969227,
+      "sha256": "2721b2b03bc1f7f5bd348538b70b994b0faddc6e7c763a3c2e5355f8464b37cc"
     },
     "LICENSE": {
       "bytes": 11358,
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     "README.md": {
-      "bytes": 12604,
-      "sha256": "ab344cccaf6afc68076460a8e3ec3f355fcecb3ad7390ecfcc7ba5290402234e"
+      "bytes": 6124,
+      "sha256": "d56f8fbbbedccc732c71e75b244793e3b675cfe2373995673e938e9fe73d539f"
     },
     "tritflow_en.ipynb": {
-      "bytes": 5254750,
-      "sha256": "379b1f091994b3fd39bcdc2b1e51a442498bb3980889d255e37064d8e7ecd808"
+      "bytes": 5387872,
+      "sha256": "559a286238323a70b8e1d70fd6781e79922e745804803112554a03bfad48bf3e"
     },
     "PITCH.md": {
       "bytes": 723,
@@ -3656,5 +3642,5 @@
   "png_outputs": 40,
   "embedded_paper_figures": 12,
   "html_tables": 28,
-  "total_bytes": 10267237
+  "total_bytes": 10528873
 }
