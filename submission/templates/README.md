@@ -17,9 +17,7 @@ Attendance/poster confirmation: **{{ATTENDANCE}}**
 Read the saved schematics, tables, routed layouts and waveforms without a
 kernel. Rerun for input selectors, sizing controls, routing replay and waveform
 zoom. [Abstract](ABSTRACT.md), [pitch](PITCH.md), [official-rules checklist](CHECKLIST.md)
-and [build information](build-info.json) accompany the notebook. The build
-record identifies each notebook's source hash, immutable bootstrap pin, actual
-execution commit, runtime versions and captured results.
+and [build information](build-info.json) accompany the notebook.
 
 ## Why ternary, and what is new
 
@@ -36,26 +34,14 @@ from binary-encoded logic. TritFlow keeps every signal a single three-level wire
 - **Results**: a dot product with one-trit weights and activations scaled to 16 terms (area, delay, wire load, STA
   accuracy, static power), an edit-and-rerun cell and an MPW-framed top.
 
-## Concept and method
-
-TritFlow implements balanced-ternary logic directly on the open OpenSUSI TR-1um
-PDK. A trit takes −1, 0 or +1, represented by −5, 0 or +5 V. The cell library
-comes from the author's taped-out 1-trit multiply-add circuit. A ternary-weight
-dot product is the running design: the notebook explains its gates, writes
-arithmetic in a Verilog-like HDL, checks synthesis equivalence, places and
-routes cells, exports GDS, runs the PDK drawing-DRC and LVS decks, and simulates
-the extracted devices with estimated wire capacitance in ngspice. Ternary STA
-is compared with output settling times measured against the ±0.5 V bands.
-
 ## Results from this execution
 
 {{RESULTS}}
 
 Logical input coverage and analog stimulus coverage are separate checks.
-The numbers above are generated from outputs of the executed evidence cell;
-no storyboard or hand-entered performance measurements feed this document.
 
-{{CHAPTER6_RESULTS}}
+Chapter 6 of the saved notebooks ({{CHAPTER6_LINKS}}) contains the scaling,
+power, timing, HDL-edit and framed-chip results with their conditions.
 
 ## Run in Colab
 
@@ -65,9 +51,6 @@ Open the primary notebook, connect a Python CPU runtime and choose **Runtime →
 Run all**. Its setup cell obtains the full immutable `SOURCE_REF` from GitHub,
 installs the open EDA tools and verifies the PDK archive checksum. Local files
 and recorded campaigns are validated against the source and PDK before use.
-The badge names the notebook's bootstrap pin; if the compatibility note below
-reports a mismatch, publish a compatible source pin before sharing that badge
-as the final reproduction entry point. No moving release tag is assumed.
 
 {{RUNTIME}}
 
@@ -75,21 +58,7 @@ as the final reproduction entry point. No moving release tag is assumed.
 
 For local execution, use the complete source checkout with the documented EDA
 installation and pinned PDK. Open the corresponding `notebook/v3/` notebook,
-or set `TRITFLOW_ROOT` to the checkout before running this copy. Cell, schematic
-and characterization assets are in the source repository; the submission
-folder omits tool distributions, PDK files and raw simulation trees. The
-builder's default work directory is `submission/.build/submission_capture/`.
-
-<details><summary>Source compatibility and execution provenance</summary>
-
-{{RELEASE_STATUS}}
-
-Observed execution source: {{SOURCE_LINK}}. Working-tree changes at packaging
-are recorded separately; a commit ID does not establish a clean checkout.
-Each notebook records its own runtime versions at execution. Export-library
-versions describe packaging, including when a matching raw capture is reused.
-
-</details>
+or set `TRITFLOW_ROOT` to the checkout before running this copy.
 
 ## Limits
 
@@ -120,13 +89,3 @@ distributions are not included or relicensed here.
 The notebook includes its technical bibliography. Previous Code-a-Chip
 submissions were consulted for presentation and folder structure; no notebook
 cells or code were copied from those submissions.
-
-## Filing
-
-Copy **only this directory** to `ISSCC27/submitted_notebooks/TritFlow/` in a
-fork of the [official repository](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io).
-File the PR before **October 31, 2026, 11:59 AM Pacific Time**, and monitor
-organizer feedback. Run `python3 submission/build_submission.py --check
---require-final` in the source checkout before filing. The package's 12 MiB
-budget is a local convenience, not an official limit. This builder does not
-commit, push or open the submission PR.

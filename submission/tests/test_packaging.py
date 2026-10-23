@@ -21,7 +21,9 @@ from results import chapter6, result_values
 def fixture_notebook(tmp_path, name='source.ipynb', evaluation=False):
     """Explicit unit evidence; actual EDA is checked on the generated payload."""
     source = tmp_path/name
-    cells = [nbformat.v4.new_markdown_cell('# Unit fixture', id='intro'),
+    team = json.loads((ROOT/'submission/team.json').read_text())
+    opening = '# Unit fixture\n\n' + '\n'.join(author['name'] for author in team['authors'])
+    cells = [nbformat.v4.new_markdown_cell(opening, id='intro'),
              nbformat.v4.new_code_cell("print('unit fixture')", id='code')]
     if evaluation:
         cells += [nbformat.v4.new_markdown_cell('## 6. Evaluation', id='evaluation-heading'),
@@ -97,10 +99,19 @@ def test_bilingual_package_hashes_budget_top_identity_and_allowlist(tmp_path, mo
     assert info['total_bytes'] == sum(p.stat().st_size for p in target.iterdir())
     for name, source in sources.items():
         doc = nbformat.read(target/name, as_version=4)
-        assert team['authors'][0]['email'] in doc.cells[0].source
-        assert doc.cells[1].source == '# Unit fixture'
+        front = doc.cells[1].source
+        assert 'Apache-2.0' in front and 'Recommended: Python 3.12' in front
+        assert '| Author |' not in front and '# TritFlow' not in front
+        assert team['authors'][0]['name'] not in front
+        assert doc.cells[0].source == nbformat.read(source, as_version=4).cells[0].source
         assert info['notebooks'][name]['source_sha256'] == builder.digest(source)
-    assert '12345' in (target/'README.md').read_text()
+        assert info['notebooks'][name]['evaluation']['tables'][0]['rows'][1] == ['2', '12345']
+    readme = (target/'README.md').read_text()
+    assert '12345' not in readme
+    assert 'Chapter 6' in readme and '[English](tritflow_en.ipynb)' in readme
+    assert '[Japanese](tritflow_ja.ipynb)' in readme
+    assert 'Concept and method' not in readme and '12 MiB' not in readme
+    assert 'submission/.build/submission_capture' not in readme and 'From executed cell' not in readme
     assert '{{' not in (target/'ABSTRACT.md').read_text()
     assert (target/'LICENSE').read_bytes() == (ROOT/'LICENSE').read_bytes()
     assert (target/'NOTICE').read_bytes() == (ROOT/'NOTICE').read_bytes()
@@ -118,6 +129,8 @@ def test_preview_is_not_submission_ready_and_placeholders_are_rejected(tmp_path,
     assert not info['submission_ready'] and info['file_count'] == 8
     assert any('English' in reason for reason in info['readiness_notes'])
     assert any('chapter 6' in reason for reason in info['readiness_notes'])
+    readme = (tmp_path/'preview/README.md').read_text()
+    assert '[Japanese](tritflow_ja.ipynb)' in readme and 'tritflow_en.ipynb' not in readme
     team['authors'][0]['name'] = '[AUTHOR_NAME]'
     with pytest.raises(ValueError, match='placeholders'):
         builder.package({'tritflow_ja.ipynb':document}, {'tritflow_ja.ipynb':source}, tmp_path/'bad', team, {})
@@ -177,20 +190,20 @@ def test_results_are_derived_from_execution_and_failures_cannot_be_claimed():
                 'equivalence':{'passed':True, 'vectors':81},
                 'drc':{'violations':0}, 'lvs':{'matched':True},
                 'measurements':{'passed':True, 'rows':[{}, {}, {}], 'max_settling_s':{'y':20e-9}}}}}
-    values = result_values(evidence, {})
+    values = result_values(evidence)
     assert '17 cells' in values['RESULTS_SENTENCE'] and '81 input vectors' in values['RESULTS_SENTENCE']
     assert '3 stimulus intervals' in values['RESULTS_SENTENCE']
-    assert '20.0 ns' in values['RESULTS'] and 'no chapter 6' in values['CHAPTER6_RESULTS']
+    assert '20.0 ns' in values['RESULTS']
     evidence['designs']['dot4']['measurements']['passed'] = False
     with pytest.raises(ValueError, match='post-layout'):
-        result_values(evidence, {})
+        result_values(evidence)
 
 
-def test_future_chapter6_results_use_executed_tables_without_fixed_cell_ids(tmp_path):
+def test_chapter6_retains_executed_tables_for_manifest_and_readiness(tmp_path):
     document, _ = fixture_notebook(tmp_path, evaluation=True)
     evaluation = chapter6(document)
     assert evaluation['executed_cell_ids'] == ['future-evaluation']
-    assert '12345' in result_values({}, evaluation)['CHAPTER6_RESULTS']
+    assert evaluation['tables'][0]['rows'][1] == ['2', '12345']
     document.cells[-1].execution_count = None
     with pytest.raises(ValueError, match='unexecuted'):
         chapter6(document)
