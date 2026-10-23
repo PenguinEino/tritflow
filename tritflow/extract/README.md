@@ -87,7 +87,7 @@ rails. Signal/connected rail metal remains measured from actual geometry.
 
 ### Reviewed IP62 data (Phase 4)
 
-`parameter_audit()` / `results/pdk_parameters.json` distinguish published facts
+`parameter_audit()` distinguishes published facts
 from assumptions, including document pages and hashes. OS00 rev1.1 p17 supplies
 M1/M2/stepped-M1 width-specific current limits and 780 µA per TC cut (7.8 mA
 instantaneous ceiling). The IR result's `em_check` compares estimated DC branch

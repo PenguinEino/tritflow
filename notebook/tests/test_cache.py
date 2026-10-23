@@ -75,11 +75,11 @@ def test_real_abstract_pin_obstruction_manifest_and_publication_invalidate(tmp_p
     shutil.copytree(root/"cells/out/INV", clone/"cells/out/INV")
     for name in ("library.json", "generation.json"):
         shutil.copy2(root/f"cells/out/{name}", clone/f"cells/out/{name}")
-    for name in ("setup_pins.json", "tritflow_tr1um.ipynb"):
-        shutil.copy2(root/f"notebook/{name}", clone/f"notebook/{name}")
+    shutil.copy2(root/"notebook/setup_pins.json", clone/"notebook/setup_pins.json")
     initial_without_prose = module.runtime_fingerprint(clone, PDK_ROOT)
     # The generated notebook is prose and presentation, not an experiment input.
-    (clone/"notebook/tritflow_tr1um.ipynb").write_text("{}")
+    (clone/"notebook/v3").mkdir()
+    (clone/"notebook/v3/tritflow_en.ipynb").write_text("{}")
     assert module.runtime_fingerprint(clone, PDK_ROOT) == initial_without_prose
     def fingerprint(): return module.runtime_fingerprint(clone, PDK_ROOT)
     initial = fingerprint()
