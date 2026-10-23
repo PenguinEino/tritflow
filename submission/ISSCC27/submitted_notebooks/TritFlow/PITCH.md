@@ -1,9 +1,8 @@
 # Three-sentence pitch
 
-TritFlow turns a Verilog-like description of balanced-ternary arithmetic into
-a routed layout, drawing-DRC and LVS results, and extracted transistor-level
-waveforms on OpenSUSI TR-1um. Starting from the author's taped-out cell
-designs, the notebook connects hand estimates of the middle voltage, static
-power and carry delay with interactive SPICE results. Readers can change
-cell dimensions, inspect routing, edit a circuit and run the same open flow
-on their own design.
+TritFlow turns balanced-ternary HDL into routed GDS on the open OpenSUSI TR-1um
+PDK, using cells from the author's taped-out 1-trit multiply-add circuit.
+A ternary-weight dot product connects the HDL, synthesis, physical verification
+and extracted SPICE results in one interactive notebook.
+Readers can inspect the saved evidence, change the circuit and rerun the open
+flow in Colab, with logical coverage and nominal analog limits stated explicitly.
