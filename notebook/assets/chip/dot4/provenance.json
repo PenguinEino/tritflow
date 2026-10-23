@@ -126,9 +126,10 @@
   "source_sha256": {
     "notebook/assets/chip/dot4/build.py": "ce34a0c37573a02a5ac6429e854e1c082fdebfd7e7ebd6db6e350f92724d5151",
     "notebook/assets/chip/dot4/verify.py": "82c697687c9797b0cc3ee3b9cf241531e9e03e9fca22db8270920be9a1e01d7f",
-    "notebook/reuse.py": "2a6d91f5d12d9117113b824cc9351f70ae0faedf99c09ae3e6d5f75c10eaffa3",
+    "notebook/reuse.py": "e224c852cc15eadd8a0b73bbcb48b678ded99178290d220ddf59ad2f1719a0b8",
     "notebook/assets/chip/dot4/dot4.tv": "f11f61812dd3bca77b510e14b49efa543c12fe7b713696e13dba3ed43705a0ca",
-    "notebook/assets/chip/dot4/dot4_fixed.tv": "bc8381fff1b28e3532b3b54cd697116d97389b9e1cfa38db86ed5cc4ffa92c1f"
+    "notebook/assets/chip/dot4/dot4_fixed.tv": "bc8381fff1b28e3532b3b54cd697116d97389b9e1cfa38db86ed5cc4ffa92c1f",
+    "notebook/assets/chip/dot4/reuse_before_english.py": "2a6d91f5d12d9117113b824cc9351f70ae0faedf99c09ae3e6d5f75c10eaffa3"
   },
   "published_artifacts_sha256": {
     "dot4.json": "26a1ae940a0c359b785a84ca2267cc7cc14f221ad584bae1938fdc4bb26f8272",
@@ -139,5 +140,20 @@
     "tr_1um_dot4.cir": "0a6d40f037f0fa201c921c952bd7c090fc6d71e2c88d744901b785a29134503e",
     "tr_1um_dot4.ip62.gds": "83031303a28f8c776b3dc2df00b7473fe551b4328251fad4f97fff02dbf0c397"
   },
-  "scope": "Device/port LVS on drawing; unmodified pinned drawing and mask decks; no mask LVS stage defined."
+  "scope": "Device/port LVS on drawing; unmodified pinned drawing and mask decks; no mask LVS stage defined.",
+  "producer_source_sha256": {
+    "notebook/assets/chip/dot4/build.py": "ce34a0c37573a02a5ac6429e854e1c082fdebfd7e7ebd6db6e350f92724d5151",
+    "notebook/assets/chip/dot4/verify.py": "82c697687c9797b0cc3ee3b9cf241531e9e03e9fca22db8270920be9a1e01d7f",
+    "notebook/reuse.py": "2a6d91f5d12d9117113b824cc9351f70ae0faedf99c09ae3e6d5f75c10eaffa3",
+    "notebook/assets/chip/dot4/dot4.tv": "f11f61812dd3bca77b510e14b49efa543c12fe7b713696e13dba3ed43705a0ca",
+    "notebook/assets/chip/dot4/dot4_fixed.tv": "bc8381fff1b28e3532b3b54cd697116d97389b9e1cfa38db86ed5cc4ffa92c1f"
+  },
+  "presentation_revision": {
+    "kind": "English presentation labels only; original electrical evidence retained",
+    "original_source_paths": {
+      "notebook/reuse.py": "notebook/assets/chip/dot4/reuse_before_english.py"
+    },
+    "base_commit": "11ca6f75e3fe761e38b370a1260fb34219f448b4",
+    "validation": "notebook/v3/test_language.py::test_reuse_translation_preserves_the_recorded_producer"
+  }
 }

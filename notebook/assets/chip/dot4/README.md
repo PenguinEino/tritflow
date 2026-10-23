@@ -48,3 +48,5 @@ The macro is the programmable chapter 3–5 dot4 (46 cells), with eight independ
 Rebuild with `TR1UM_PDK=~/pdk/TR-1um-pinned python3 notebook/assets/chip/dot4/build.py --mpw-template ~/TR-1um_MPW_Sanken`. All generated files remain in this directory.
 
 Notebook view: `from reuse import shuttle_view; shuttle_view()`. This opens the recorded GDS and the pad table without rerunning qualification.
+
+The English edition adds presentation labels to `notebook/reuse.py`. The exact source used for this recorded chip is retained as `reuse_before_english.py`. In `provenance.json`, `producer_source_sha256` retains the original source hashes; `source_sha256` verifies the packaged sources, including both that archive and the translated helper. The language tests compare their Python syntax trees after removing language lookups. No GDS, circuit, model, pad map or native verification evidence was regenerated for this presentation change.
