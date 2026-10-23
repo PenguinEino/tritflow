@@ -337,11 +337,13 @@ class LayoutView:
         self.version += 1
 
     def svg(self, width=760):
-        if not self.placements:
+        # The router thread keeps adding nets while a frame is drawn: draw from one snapshot.
+        placements, routes = list(self.placements), dict(self.routes)
+        if not placements:
             return ""
-        xs = [v for p in self.placements for v in (p["x"], p["x"]+p["width"])]
-        ys = [v for p in self.placements for v in (p["y"], p["y"]+p["height"])]
-        for route in self.routes.values():
+        xs = [v for p in placements for v in (p["x"], p["x"]+p["width"])]
+        ys = [v for p in placements for v in (p["y"], p["y"]+p["height"])]
+        for route in routes.values():
             for _, a, b, c, d in route["wires"]:
                 xs += [a, c]
                 ys += [b, d]
@@ -349,16 +351,16 @@ class LayoutView:
         x0, x1, y0, y1 = min(xs)-pad, max(xs)+pad, min(ys)-pad, max(ys)+pad
         unit = max(x1-x0, y1-y0)/400
         # Each cell type is drawn once and reused; MY mirrors it about the cell's own width.
-        cells = sorted({p["cell"] for p in self.placements})
+        cells = sorted({p["cell"] for p in placements})
         symbols = "".join(f'<g id="tf-{name}">{_layer_paths(self._cell(name), unit)}</g>' for name in cells)
         uses = "".join(
             f'<use href="#tf-{p["cell"]}" transform="translate({p["x"]+p["width"]:g},{p["y"]:g}) scale(-1,1)"/>'
             if p["orient"] == "MY" else f'<use href="#tf-{p["cell"]}" transform="translate({p["x"]:g},{p["y"]:g})"/>'
-            for p in self.placements)
+            for p in placements)
         from tritflow.viz.layers import WIRE_WIDTH, VIA_SIZE
         m1, v1, m2 = _style()[7], _style()[8], _style()[9]
         wires, newest = [], []
-        for net, route in self.routes.items():
+        for net, route in routes.items():
             target = newest if net == self.newest else wires
             for layer, a, b, c, d in route["wires"]:
                 half = WIRE_WIDTH[layer]/2
