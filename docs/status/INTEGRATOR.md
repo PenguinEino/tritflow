@@ -66,3 +66,6 @@
   EN 01a167b0-ea8f-7b10-89ed-4bb6768b308b (worktree `~/code-a-chip-v3-en`, branch `notebook-v3-en`, merge into notebook-v3),
   REFS 01a167b0-eaed-76d0-adda-75b348a57352 (`docs/references.md`, web search),
   SUBMIT 01a167b0-eb26-78a0-a6ee-b3ae10edb1ea (`submission/` for v3, EN primary + JA companion).
+- 10-23 chapter 6 split: SCALE 01a167b3-f64c-7c03-91d2-8f8461d4bb5c (scaling data, `notebook/scale_views.py`),
+  SHUTTLE 01a167b3-f6b2-7460-bcb5-6588a7575056 (`notebook/reuse.py`, dot4 MPW top); V3 resumed with phase 2
+  narrowed to integrating chapter 6 (narrative + builder cells).
