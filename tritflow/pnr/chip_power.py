@@ -26,7 +26,7 @@ def _via_array(vias, net, x, y, width, height):
             )
 
 
-def _power_header(data, macro_pins, core, margin, *, distribution_only=False):
+def _power_header(data, macro_pins, core, margin):
     """Three M2 distribution bars, M1 bank fingers, and parallel M1 pad feeds.
 
     Long common links use M2. M1 pad feeders split the total rail current into
@@ -169,15 +169,6 @@ def _power_header(data, macro_pins, core, margin, *, distribution_only=False):
         }
         main_bars[rail] = bar
         power["straps"].append(bar)
-    if distribution_only:
-        return [], {
-            "rail_current_envelope_a": totals,
-            "M2_width_um": widths,
-            "bar_y_um": bars,
-            "reserve": margin,
-            "M1_step_limit_a_per_um": 0.00025,
-            "M2_field_limit_a_per_um": 3.7e-3 / 3,
-        }
     requests = []
     for rail, preferred in zip(RAILS, (-150.0, 650.0, 150.0)):
         if rail == "VMID":

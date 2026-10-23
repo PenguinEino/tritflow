@@ -264,11 +264,11 @@
     "notebook/assets/chip/dot4/dot4.tv": "f11f61812dd3bca77b510e14b49efa543c12fe7b713696e13dba3ed43705a0ca",
     "notebook/assets/chip/dot4/dot4_fixed.tv": "bc8381fff1b28e3532b3b54cd697116d97389b9e1cfa38db86ed5cc4ffa92c1f",
     "notebook/assets/chip/dot4/reuse_before_english.py": "2a6d91f5d12d9117113b824cc9351f70ae0faedf99c09ae3e6d5f75c10eaffa3",
-    "notebook/reuse.py": "e224c852cc15eadd8a0b73bbcb48b678ded99178290d220ddf59ad2f1719a0b8",
-    "tritflow/pnr/chip_frame_power.py": "d8ffc820b716c0b04ee6de8b9af61c6922f37e9f2e475eb9a64dd38a530ecec9",
+    "notebook/reuse.py": "69ab369e7fffe822b9d6a05e2f17a2ca3da1bbfd1de0c6ab5fb407d5f21c91b8",
+    "tritflow/pnr/chip_frame_power.py": "f25b12e9acb6c04e91ea710864ec26d3fccd31a30f1e950a0b1fd2ad537abbdb",
     "tritflow/pnr/chip.py": "6af7396a7e108dc3854aa78c44d679acb5ab4b1595385d8a9939b6b600555cf1",
     "tritflow/pnr/chip_frame_audit.py": "4d4e07da24b4da1a0906f8fbb0ee07e674386730dbada256dfa2d740a777f45a",
-    "tritflow/pnr/chip_power.py": "f51535a410d6913b16348bbb75c9bc12c1bfed98732b4c4d957d3525dcfe3e37",
+    "tritflow/pnr/chip_power.py": "a3f4b62fa2d91ba5408071cdb5786f30cf2ef96401ba6d62f192737efe262a8c",
     "tritflow/pnr/chip_frame.py": "4909250a5fbbe0c7b8d3588bf11649545364044202c799eaaa1cedb290a1ae45",
     "tritflow/pnr/chip_router.py": "7656b09f480e080e5f2d8067803b6b474a8b5bc306465674f93f7700581bb83f"
   },
@@ -299,5 +299,29 @@
     "tr_1um_dot4.cir": "15af9fad63c563bf95ed2e0261fc637766813ba138b9b8e2a2f95ec5ed18af9d",
     "README.md": "4fc9824a0b91184e5ad7ff3b9fa886ea3d745520b7cdd8220b3ab3b515d15c5f"
   },
-  "scope": "Stock-deck zero-item drawing/mask DRC; strict device/port LVS including frame ESD; own-waiver absence; exact MDP preservation outside independent stock-frame delta; DC envelope reserve. No mask LVS stage defined."
+  "scope": "Stock-deck zero-item drawing/mask DRC; strict device/port LVS including frame ESD; own-waiver absence; exact MDP preservation outside independent stock-frame delta; DC envelope reserve. No mask LVS stage defined.",
+  "qualification_inputs_sha256_scope": "Historical inputs for unchanged native_signoff.json and evidence.zip; current implementation hashes are in source_sha256. FIXSCALE rebuild verification is recorded separately without republishing the chip artifacts.",
+  "fixscale_rebuild_verification": {
+    "verified_utc": "2026-10-23T15:43:27.832998+00:00",
+    "scope": "Rebuilt only the OSS_FRAME wrapper from the archived seed-0 macro; native drawing/mask DRC, strict LVS and DC reserve rerun. Default die/frame precheck rerun; archived organizer-template precheck unchanged.",
+    "regression_test": "tests/pnr/test_chip_frame.py::test_stock_chip_rebuild_preserves_recorded_geometry",
+    "report_path": "tests/build/fixscale/rebuild/test_stock_chip_rebuild_preser0/chip/signoff/signoff.summary.json",
+    "report_sha256": "3582b6824f2b0bcbb305d355c83ce20b9e9ccda9a29bd547bb39b5ece63bd291",
+    "source_sha256": {
+      "tritflow/pnr/chip_power.py": "a3f4b62fa2d91ba5408071cdb5786f30cf2ef96401ba6d62f192737efe262a8c",
+      "tritflow/pnr/chip_frame_power.py": "f25b12e9acb6c04e91ea710864ec26d3fccd31a30f1e950a0b1fd2ad537abbdb"
+    },
+    "macro_gds_sha256": "cc6ddfa80b69154923481f24bdf812e950d41fc26cfa8d5898956e3ff4093acb",
+    "drawing_gds_sha256": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd",
+    "drawing_byte_identical": true,
+    "mask_identical_after_disabling_gds_timestamps": true,
+    "power_geometry_and_header_identical": true,
+    "published_artifacts_unchanged": true,
+    "drawing_drc_violations": 0,
+    "mask_drc_violations": 0,
+    "strict_lvs_matched": true,
+    "dc_max_utilization": 0.7480360683534744,
+    "stock_frame_policy_clean": true
+  },
+  "current_source_sha256_scope": "Current rebuild/view sources. FIXSCALE restores chip power and isolates frame distribution; the concurrent VISFIX notebook/reuse.py change localizes display labels only. Archived qualification inputs and published artifacts retain their original hashes."
 }
