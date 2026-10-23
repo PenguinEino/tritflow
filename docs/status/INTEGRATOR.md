@@ -53,3 +53,12 @@
   now pins X (SOURCE_REF = full SHA of HEAD); validate + build_submission + tests; commit Y (notebook only);
   (3) tag colab-v0 -> Y, push. The campaign manifest hashes the notebook without its SOURCE_REF line
   (notebook/cache.py notebook_hash), so step 2 does not invalidate recorded experiments.
+
+## State 2026-10-23 (notebook v3)
+- Review against Code-a-Chip criteria → v3 on branch `notebook-v3`, worktree `~/code-a-chip-v3`
+  (decisions: `docs/notebook-v3/STORYBOARD.md`). dot4 carries ch. 3–5; ch. 6 gathers results.
+- Work is done by the V3 codex stream (gpt-6.1-sol, reasoning effort max, brief `briefs/V3.md`,
+  session 01a167ae-d5f7-75f2-b52c-f179b59c74a4, log `~/code-a-chip-v3/logs/V3.log`). Launch/resume from
+  `~/code-a-chip-v3` with `codex exec [resume ID] -C ~/code-a-chip-v3 -m gpt-6.1-sol -c model_reasoning_effort=max`.
+  The integrator reviews, polishes Japanese text with yomiyasu and commits.
+- Open: first fresh-Colab run stalled in 5-3 (ngspice-42 vs local 46); second run pending.
