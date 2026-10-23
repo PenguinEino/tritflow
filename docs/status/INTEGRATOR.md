@@ -62,3 +62,7 @@
   `~/code-a-chip-v3` with `codex exec [resume ID] -C ~/code-a-chip-v3 -m gpt-6.1-sol -c model_reasoning_effort=max`.
   The integrator reviews, polishes Japanese text with yomiyasu and commits.
 - Open: first fresh-Colab run stalled in 5-3 (ngspice-42 vs local 46); second run pending.
+- 10-23 parallel streams (all gpt-6.1-sol, effort max; launcher `logs/launch.sh STREAM WORKDIR [--search]`):
+  EN 01a167b0-ea8f-7b10-89ed-4bb6768b308b (worktree `~/code-a-chip-v3-en`, branch `notebook-v3-en`, merge into notebook-v3),
+  REFS 01a167b0-eaed-76d0-adda-75b348a57352 (`docs/references.md`, web search),
+  SUBMIT 01a167b0-eb26-78a0-a6ee-b3ae10edb1ea (`submission/` for v3, EN primary + JA companion).
