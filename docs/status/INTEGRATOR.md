@@ -84,3 +84,16 @@
   its own stamp); (4) `--check --require-final`; commit the payload.
 - Open: author approval to update main (then switch Colab badges in README and the English opening to
   main and redo steps 1-4); the PR to sscs-ose is the author's action on 10-30.
+
+## State 2026-10-24 (release candidate 2)
+- Since RC1: stock OSS_FRAME dot4 top (FRAME, FIXSCALE), sliders, ch. 2.1 list, ch. 4 retry counts,
+  opening lead + early flow figure, shorter submission README (README_TRIM), visual fixes (VISFIX),
+  Wang 2021 spelling. Reports: ACCEPTED, LINKS, NUMBERS, VISUAL, VISFIX, FIXSCALE, README_TRIM.
+- Codex streams: gpt-6-astra xhigh, service tier priority (logs/launch.sh, logs/resume.sh).
+- Release procedure, corrected (the one-step pin failed twice): (1) commit all source and narrative
+  changes, W; (2) make_notebook --lang ja/en --ref W, commit X — X now holds the current notebooks;
+  (3) make_notebook --ref X, commit Y — identical to X's notebooks up to the stamp; (4) at Y,
+  `TRITFLOW_REF=$(git rev-parse HEAD) python3 submission/build_submission.py`, then
+  `--check --require-final`, commit the payload. Recorded campaigns hash source files
+  (results/dot_scaling.json, dot4 provenance): never edit a hashed file without checking.
+- Open: author decision on the delivery month (ref. 16 says around February 2027; text says January).
