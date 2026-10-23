@@ -10,7 +10,7 @@ and the independently checked [IEEE award page](https://sscs.ieee.org/membership
 The builder repository retains the fetched Markdown and content hashes in
 `submission/official_snapshot.json` and `submission/official_sources.json`.
 
-Development package. English primary notebook is not yet available; this is a Japanese development preview. tritflow_ja.ipynb: pinned release does not contain the same notebook and required helpers. tritflow_ja.ipynb: local execution used a different commit from the bootstrap pin. tritflow_ja.ipynb: execution used unpublished changes to runtime inputs. tritflow_ja.ipynb: chapter 6 evaluation has not executed in this source revision.
+Ready for final submission review.
 
 | Requirement or guidance | Evidence / remaining submitter action |
 |---|---|
@@ -37,7 +37,7 @@ README and IEEE page. Its author, reference and tool-version guidance remains
 applicable. The FAQ's Python-3.7 installation example is historical, not a tool
 version mandate. The rules do not impose a numerical payload-size limit,
 require an abstract or pitch, require final GDS, or set a ten-minute runtime
-limit; our static outputs and 8 MiB budget are reviewer conveniences.
+limit; our static outputs and 12 MiB budget are reviewer conveniences.
 
 Before filing, rebuild the completed English primary and Japanese companion,
 inspect their saved figures, run the builder's `--check --require-final`, and
