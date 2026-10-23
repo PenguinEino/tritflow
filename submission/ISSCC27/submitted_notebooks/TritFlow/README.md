@@ -163,7 +163,7 @@ From executed cell `c62`:
 
 ## Run in Colab
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/28b0f02a3e38ed5a9b81c9c6d9710d9a611275b7/notebook/v3/tritflow_en.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/d14970667c65c279d8f47efeb391e89507c6939b/notebook/v3/tritflow_en.ipynb)
 
 Open the primary notebook, connect a Python CPU runtime and choose **Runtime →
 Run all**. Its setup cell obtains the full immutable `SOURCE_REF` from GitHub,
@@ -186,9 +186,9 @@ builder's default work directory is `submission/.build/submission_capture/`.
 
 <details><summary>Source compatibility and execution provenance</summary>
 
-Immutable source commit `8f77584a7d39be94b475fb4f2ddfc9be4a9ea190` matches the packaged notebook, allowing its commit-stamp line (local git-object check).
+Immutable source commit `1787215eef23a62ba6f32d32685519e2a220a4dd` matches the packaged notebook, allowing its commit-stamp line (local git-object check).
 
-Observed execution source: [28b0f02a3e38ed5a9b81c9c6d9710d9a611275b7](https://github.com/PenguinEino/tritflow/tree/28b0f02a3e38ed5a9b81c9c6d9710d9a611275b7). Working-tree changes at packaging
+Observed execution source: [d14970667c65c279d8f47efeb391e89507c6939b](https://github.com/PenguinEino/tritflow/tree/d14970667c65c279d8f47efeb391e89507c6939b). Working-tree changes at packaging
 are recorded separately; a commit ID does not establish a clean checkout.
 Each notebook records its own runtime versions at execution. Export-library
 versions describe packaging, including when a matching raw capture is reused.
