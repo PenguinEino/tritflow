@@ -126,11 +126,16 @@ def release_status(source):
         def identity(raw):
             # Stamping the containing implementation commit must not require
             # a notebook to contain its own Git hash (an impossible fixed point).
+            # The stamp also appears in pinned asset URLs, so every occurrence
+            # of the notebook's own SOURCE_REF is normalized.
             document=json.loads(raw)
             for cell in document["cells"]:
                 cell["source"] = "".join(cell["source"])
-                if "SOURCE_REF = " in cell["source"]:
-                    cell["source"]=re.sub(r'(?m)^SOURCE_REF = .*', 'SOURCE_REF = "<implementation commit>"',cell["source"])
+            stamp=re.search(r'SOURCE_REF = os.environ.get\("TRITFLOW_REF", "([0-9a-f]{40})"\)',
+                            "".join(cell["source"] for cell in document["cells"]))
+            for cell in document["cells"]:
+                if stamp:
+                    cell["source"]=cell["source"].replace(stamp[1], "<implementation commit>")
             return document
         info["matches_source_notebook"]=(not notebook.returncode and identity(notebook.stdout)==identity(Path(source).read_bytes()))
         for name in ("notebook/runtime_support.py", "notebook/views.py", "tritflow/flow.py", "notebook/setup_pins.json"):
