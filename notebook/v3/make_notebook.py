@@ -32,6 +32,8 @@ PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
 from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view, scope_figure, timing_table, wire_table, delay_table, transient_conditions, dc_conditions, note
 from IPython.display import HTML, display
+import plotly.io as pio
+pio.renderers.default = "colab"
 from inverter_views import inverter
 from pnr_views import replay
 from cell_views import closure_view, cell_tables, cell_row
@@ -45,7 +47,9 @@ install_error_view()
 for name, cell in {"source": "1-1 HDL", "net": "1-2 合成する", "lay": "1-3 配置配線する",
                    "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション",
                    "dot4": "3-8 論理合成する", "dot4_layout": "4-1 配置配線する",
-                   "dot4_lvs": "5-1 DRCとLVS", "dot4_extracted": "5-2 抽出と配線容量", "dot4_post": "5-3 ポストレイアウトシミュレーション"}.items():
+                   "dot4_lvs": "5-1 DRCとLVS", "dot4_extracted": "5-2 抽出と配線容量", "dot4_post": "5-3 ポストレイアウトシミュレーション",
+                   "dot_scaling": "6-1 積和の規模と面積",
+                   "reuse_source": "6-4 HDLを変更する"}.items():
     provides(name, cell)
 '''
 
@@ -104,6 +108,28 @@ with step("ngspice（INVのDC解析）") as s:
 with step("寸法の記録を照合") as s:
     grid = load_grid("INV")
     s.done(f"{len(grid['rows'])}通り · 回路・モデル・解析コードが一致")
+from predictions import divider, rail_power
+from tritflow import PDK_ROOT
+from style import figure_css, table_css
+inv_hand = divider(grid["rows"][grid["adopted_index"]]["dimensions"], PDK_ROOT)
+upper, lower = inv_hand["upper"], inv_hand["lower"]
+resistances = [upper["rr_ohm"], upper["ron_ohm"], lower["ron_ohm"],
+               upper["total_ohm"], lower["total_ohm"]]
+comparison = [("V<sub>Y</sub> (V)", inv_hand["output_v"], zero["output_v"]["Y"], "+.3f"),
+              ("I (mA)", inv_hand["current_a"]*1e3, abs(zero["rail_current_a"]["VDD"])*1e3, ".3f"),
+              ("P (mW)", inv_hand["power_w"]*1e3,
+               rail_power(zero, grid["conditions"]["supplies_v"])*1e3, ".3f")]
+display(HTML('<style>'+figure_css('.inv-estimate')+table_css('.inv-estimate')+'</style>'
+    + '<div class="inv-estimate"><table><tr>'
+    + ''.join(f'<th>{label}<small>kΩ</small></th>' for label in
+              ('R<sub>RR</sub>', 'r<sub>on,P</sub>', 'r<sub>on,N</sub>', 'R<sub>u</sub>', 'R<sub>d</sub>'))
+    + '<th>R<sub>RR</sub>/r<sub>on,P</sub></th><th>R<sub>RR</sub>/r<sub>on,N</sub></th></tr><tr>'
+    + ''.join(f'<td>{r/1e3:.3f}</td>' for r in resistances)
+    + f'<td>{upper["rr_ohm"]/upper["ron_ohm"]:.1f}</td><td>{lower["rr_ohm"]/lower["ron_ohm"]:.1f}</td></tr></table>'
+    + '<table style="margin-top:1em"><tr><th>入力0 V</th><th>抵抗による近似</th><th>SPICE</th></tr>'
+    + ''.join(f'<tr><td>{label}</td><td>{estimate:{fmt}}</td><td>{measured:{fmt}}</td></tr>'
+              for label, estimate, measured, fmt in comparison)
+    + '</table></div>'))
 inverter(spice, grid)
 dc_conditions()''',
 
@@ -231,8 +257,8 @@ def operands(x):
     return tuple(values[p] for p in dot4_inputs)
 dot4_vectors = [operands(x) for x in activations]
 with step("ngspice") as s:
-    dot4_post = dot4_extracted.simulate(dot4_vectors, load=100e-15, hold_s=1e-6, step_s=2e-9, edge_s=1e-9,
-                                        temperature_c=27, timeout=600,
+    dot4_post = dot4_extracted.simulate(dot4_vectors, load=100e-15, hold_s=1e-6, step_s=5e-9, edge_s=1e-9,
+                                        temperature_c=27, timeout=600, workdir=BUILD/"dot4"/"postlayout",
                                         nodeset=logical_nodeset(dot4, dot4_lvs["report"], dot4_inputs, dot4_vectors[0]))
     s.done("全区間で ±0.5 V の帯に入った" if dot4_post["measurements"]["passed"] else "帯に入らない区間がある")
 display(HTML(scope_figure(dot4_post, settle=True).to_html(include_plotlyjs="cdn", full_html=False,
@@ -252,12 +278,95 @@ with step("三値のSTA") as s:
     s.done(f"{len(dot4_timing.arrival)}出力")
 timing_table(dot4_post, dot4_timing)
 note("STAの条件：5-3と同じ入力の列、出力の負荷 100 fF、入力の変化時間 1 ns、配線容量は5-2の抽出値。")''',
+
+"scale6": '''# 6-1 積和の規模と面積（記録済み）
+from scale_views import load_scaling, scaling_table, synthesis_table
+RECOMPUTE_SCALING = False #@param {type:"boolean"}
+dot_scaling = load_scaling(recompute=RECOMPUTE_SCALING)
+display(synthesis_table(dot_scaling), scaling_table(dot_scaling))
+for attempt in dot_scaling.get("optional_attempts", []):
+    stage = "配置配線が未完了" if not attempt.get("pnr") else "検証が未完了"
+    note(f"追加試行 N={attempt['n']} は{stage}のため、以下の比較には含めない。")
+for row in dot_scaling["rows"]:
+    options = row["conditions"].get("pnr_options", {})
+    if options:
+        note(f"N={row['n']}で既定値から変更した配置配線条件："
+             f"行間チャネルの配線トラック {options['channel_tracks']}本、"
+             f"M1の幅1 µm当たりの許容電流 {options['current_density_a_per_um']*1e3:g} mA。")
+conditions = dot_scaling["conditions"]
+holds = "、".join(f"N={row['n']}: {row['conditions']['hold_s']*1e6:g} µs"
+                  for row in dot_scaling["rows"])
+note(f"記録の条件：ngspice-{dot_scaling['provenance']['simulator']['version']}、"
+     f"PDK {dot_scaling['provenance']['pdk']['qualified_commit'][:7]}、"
+     f"{conditions['temperature_c']:g} °C、電源 +5 / 0 / −5 V。"
+     f"出力負荷 {conditions['load_f']*1e15:g} fF、入力の変化時間 {conditions['edge_s']*1e9:g} ns、"
+     f"最大時間刻み {conditions['step_s']*1e9:g} ns。各状態の保持時間は {holds}。")''',
+
+"power6": '''# 6-2 静的電流と電力（記録済み）
+need("dot_scaling", why="表示する記録は、6-1で読み込みます。")
+from scale_views import power_table, power_figure
+power_plot = power_figure(dot_scaling)
+power_plot.update_yaxes(title_text="供給電力 (mW)")
+display(power_table(dot_scaling), power_plot)''',
+
+"timing6": '''# 6-3 STAとSPICE（記録済み）
+need("dot_scaling", why="比較する記録は、6-1で読み込みます。")
+from scale_views import timing_table as scaling_timing_table, scaling_figure, layout_penalty_table
+display(scaling_figure(dot_scaling), scaling_timing_table(dot_scaling), layout_penalty_table(dot_scaling))''',
+
+"reuse_source": '''# 6-4 HDLを変更する
+reuse_source = """
+module dot4_fixed(input trit x0, x1, x2, x3, output trit [1:0] y);
+  assign y = x0 - x1 + x2 + x3;
+endmodule
+"""''',
+
+"reuse6": '''# 6-5 変更したHDLから全工程を実行する
+need("reuse_source", why="実行するHDLは、6-4に書いてあります。")
+from reuse import run
+reuse_result = run(reuse_source, output_dir=BUILD/"reuse", step_s=5e-9,
+                   exhaustive_limit=27, sample_size=11)''',
+
+"shuttle6": '''# 6-6 MPWフレームとパッドを付けたdot4（記録済み）
+from reuse import shuttle_view
+dot4_chip = shuttle_view(ROOT/"notebook/assets/chip/dot4")''',
 }
 
-CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md", "05_verify.md"]
+CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md", "05_verify.md", "06_results.md"]
 
 # Presentation literals and cell-title comments only; HDL and executable expressions are shared.
 ENGLISH = {
+    "入力0 V": "Input 0 V",
+    "抵抗による近似": "Resistive estimate",
+    "積和の規模と面積": "Dot-product size and area",
+    "静的電流と電力": "Static current and power",
+    "STAとSPICE": "STA and SPICE",
+    "HDLを変更する": "Edit HDL",
+    "変更したHDLから全工程を実行する": "Run the full flow on the edited HDL",
+    "MPWフレームとパッドを付けたdot4": "dot4 with MPW frame and pads",
+    "（記録済み）": " (recorded)",
+    "表示する記録は、6-1で読み込みます。": "The recorded data is loaded in 6-1.",
+    "比較する記録は、6-1で読み込みます。": "The recorded data for comparison is loaded in 6-1.",
+    "実行するHDLは、6-4に書いてあります。": "The HDL to run is defined in 6-4.",
+    "供給電力 (mW)": "Supply power (mW)",
+    "配置配線が未完了": "incomplete at place and route",
+    "検証が未完了": "incomplete at verification",
+    "追加試行 N=": "Optional attempt N=",
+    " は": " is ",
+    "のため、以下の比較には含めない。": "; excluded from the comparisons below.",
+    "で既定値から変更した配置配線条件：": " place and route overrides: ",
+    "行間チャネルの配線トラック ": "inter-row channel tracks ",
+    "本、": ", ",
+    "M1の幅1 µm当たりの許容電流 ": "permitted current per 1 µm of M1 width ",
+    "記録の条件：ngspice-": "Recorded conditions: ngspice-",
+    " °C、電源 +5 / 0 / −5 V。": " °C, supplies +5 / 0 / −5 V. ",
+    "出力負荷 ": "Output load ",
+    " fF、入力の変化時間 ": " fF, input slew ",
+    " ns、": " ns, ",
+    "最大時間刻み ": "maximum time step ",
+    " ns。各状態の保持時間は ": " ns. Hold time per state: ",
+    "、": ", ",
+    "。": ".",
     "準備（最初に実行）": "Setup (run first)",
     "GitHubからソースを取得": "Fetch source from GitHub",
     "コミット ": "Commit ",
@@ -379,6 +488,9 @@ def cells(ref, lang="ja"):
 
     for index, name in enumerate(CHAPTERS):
         text = (narrative/name).read_text()
+        unknown = set(re.findall(r"<!-- code: (\w+) -->", text)) - CODE.keys()
+        if unknown:
+            raise ValueError(f"{name}: undefined code cells: {', '.join(sorted(unknown))}")
         text = re.sub(r"<!-- tables: ([\w ]+) -->", lambda m: "&emsp;&emsp;".join(
             f'<img src="{CDN}@{ref}/notebook/assets/tables/{name}{suffix}.svg" width="{width(tables[name])}" alt="{name}">'
             for name in m[1].split()), text)
@@ -409,6 +521,7 @@ def main():
           "cells": [{"cell_type": kind, "id": f"c{i}", "metadata": {}, "source": source,
                      **({"execution_count": None, "outputs": []} if kind == "code" else {})}
                     for i, (kind, source) in enumerate(cells(ref, args.lang))]}
+    output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(nb, ensure_ascii=False, indent=1) + "\n")
     print(output, ref)
 

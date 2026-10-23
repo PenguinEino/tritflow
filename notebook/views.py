@@ -357,7 +357,8 @@ def delay_table(cell="INV", *, ramp_s=1e-9):
 
 def note(text):
     """A small muted line under an output: the conditions it was computed under."""
-    display(HTML(f'<p style="font-family:{SERIF};font-size:12.5px;color:{MUTED};margin:.4em 0 0">{text}</p>'))
+    style = f"font-family:{SERIF};font-size:12.5px;color:{MUTED};margin:.4em 0 0"
+    display(HTML(f'<p class="tf-note" style="{escape(style, quote=True)}">{text}</p>'))
 
 
 def _signed_v(v):

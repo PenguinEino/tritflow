@@ -20,11 +20,13 @@ Binary delay is often measured at the output crossing of half the supply voltage
 
 The weights are fixed at w = (+1, −1, +1, +1), and x follows a sequence that produces carries in the sum. This corresponds to inference with fixed trained weights and changing inputs. Simulation uses the netlist with wire capacitance added. An arrow marks the delay of the slowest transition at each output.
 
+Synthesis equivalence covers all 6561 input combinations; this post-layout SPICE run covers 11 intervals with one fixed weight vector.
+
 <!-- code: spice5 -->
 
 ### 5.4 Ternary STA
 
-SPICE is accurate but time-consuming. Static timing analysis (STA) instead looks up previously characterized cell delays and propagates arrival times through the netlist from inputs to outputs. Binary STA distinguishes two transitions, rising and falling. Ternary logic has six directed transitions between −1, 0 and +1, with different cell delays for each.
+Transient SPICE resolves analog behavior but takes longer than table-based timing analysis. Static timing analysis (STA) instead looks up previously characterized cell delays and propagates arrival times through the netlist from inputs to outputs. Binary STA distinguishes two transitions, rising and falling. Ternary logic has six directed transitions between −1, 0 and +1, with different cell delays for each.
 
 TritFlow's ternary STA uses SPICE-characterized tables of propagation delay and output slew for each cell, indexed by input transition type, input slew and load capacitance. Propagation delay is the time difference between input and output crossings of the midpoints between their respective initial and final levels. Output slew is the time from 10% to 90% of the output transition and supplies the input-slew estimate for the next stage. At circuit outputs, the time from the midpoint crossing to entry into the ±0.5 V band is added, matching the delay definition in section 5.3. The INV table below uses an input slew of 1 ns.
 
@@ -34,4 +36,4 @@ INV has one input, so its table has six transition rows. Two-input cells have ta
 
 <!-- code: sta5 -->
 
-This completes the path from HDL to verified GDS and its timing. Chapter 6 evaluates area, delay and power as the dot-product size changes.
+This completes the path from HDL to verified GDS and its timing. Chapter 6 evaluates area, delay and static power against dot-product term count, reruns the flow after an HDL change, and presents a shuttle top-level layout.

@@ -4,7 +4,7 @@ Chapter 2 established that TritFlow's cell basis can implement arbitrary ternary
 
 ### 3.1 Values and Numbers
 
-A signal value, or trit, is −1, 0 or +1, corresponding to −5 V, 0 V or +5 V. In conditions, these denote false, unknown and true. Vectors such as `trit [1:0] a` represent balanced-ternary integers, with digit $i$ weighted by $3^i$. Literals use T for −1: `2'tT1`, for example, represents −1·3 + 1 = −2. Two trits represent −4 through +4 without a sign bit. Negation simply negates every digit.
+A signal value, or trit, is −1, 0 or +1, corresponding to −5 V, 0 V or +5 V. In conditions, these denote false, unknown and true. Unknown is the valid trit 0 at a physical 0 V, distinct from Verilog's undefined X and high-impedance Z. Vectors such as `trit [1:0] a` represent balanced-ternary integers, with digit $i$ weighted by $3^i$. Literals use T for −1: `2'tT1`, for example, represents −1·3 + 1 = −2. Two trits represent −4 through +4 without a sign bit. Negation simply negates every digit.
 
 <!-- tables: numbers -->
 
@@ -23,7 +23,7 @@ Logic synthesis proceeds through the following stages.
 1. Elaboration: parse the HDL and elaborate module hierarchy, parameters and `generate` constructs into an expression intermediate representation. Procedures in `always @*` are converted to static single assignment, updating each signal's current value on every assignment. Branches in `if` and `case` become value selections.
 2. Mapping: replace each operation with a fixed circuit structure. Addition and subtraction use carry chains of half adders and full adders verified in the taped-out circuits. Comparisons saturate per-digit differences and determine the sign from the most significant digit. Equality tests and `case` labels use per-digit equality detectors. Selection is described in section 3.5.
 3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic. Binary complement laws, such as $x \wedge \bar{x} = 0$, do not hold for 0 (unknown) and are not used. This is why `a & ~a` in chapter 1 retains two INV cells and one NAND. The synthesized netlist is not guaranteed to be minimal.
-4. Fanout control: limit each cell output to four input loads, distributing additional loads through BUF trees.
+4. Fanout control: limit each cell output to four input loads by default, leaving margin below the eight receivers verified in nominal load tests; distribute additional loads through BUF trees.
 5. Equivalence checking: verify that the synthesized netlist implements the same function as the HDL (section 3.6).
 
 ### 3.4 Arithmetic: `+` and `*`
@@ -66,10 +66,10 @@ Every synthesis run checks that the synthesized netlist implements the same func
 
 ### 3.7 Dot Product with Ternary Weights
 
-The matrix products in BitNet b1.58, introduced at the start, consist of repeated dot products of ternary weights $w_i$ and inputs $x_i$, $y = \sum_i w_i x_i$. The taped-out one-trit multiply-accumulate circuit underlying TritFlow's cells ($X + A \times B + C_{in} = S + 3\,C_{out}$) corresponds to one term of this dot product. Here, the `*` and `+` operations from section 3.4 describe a four-term dot product, dot4. Each product ranges from −1 to +1, and the four-term sum ranges from −4 to +4, so two trits suffice for output y.
+The matrix products in [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764), introduced at the start, consist of repeated dot products of ternary weights $w_i$ and inputs $x_i$, $y = \sum_i w_i x_i$. BitNet b1.58 uses 8-bit inputs; here, the inputs are restricted to one trit. The taped-out one-trit multiply-accumulate circuit underlying TritFlow's cells ($X + A \times B + C_{in} = S + 3\,C_{out}$) corresponds to one term of this dot product. Here, the `*` and `+` operations from section 3.4 describe a four-term dot product, dot4. Each product ranges from −1 to +1, and the four-term sum ranges from −4 to +4, so two trits suffice for output y.
 
 <!-- code: dot4_source -->
 
 <!-- code: dot4_synth -->
 
-Each of the four products maps to 2 NAND, 1 NOR and 1 INV. The remaining NANY and INV cells form one full adder and two half adders for the sum. Chapters 4 and 5 place and route dot4, verify it, and run post-layout simulation. Chapter 6 evaluates area, delay and power as the dot-product size changes.
+Each of the four products maps to 2 NAND, 1 NOR and 1 INV. The remaining NANY and INV cells form one full adder and two half adders for the sum. Chapters 4 and 5 place and route dot4, verify it, and run post-layout simulation. Chapter 6 evaluates area, delay and static power against dot-product size, then demonstrates HDL changes and integration into a shuttle top-level layout.
