@@ -37,8 +37,8 @@ def closure_view(found):
     def cell(v):
         return f'<td class="t{v+1}">{TRIT_TEXT[v]}</td>'
 
-    head = ('<tr><th rowspan="2">段</th><th rowspan="2">作り方</th><th colspan="3">a</th></tr>'
-            '<tr>' + "".join(f"<th>{TRIT_TEXT[v]}</th>" for v in TRITS) + "</tr>")
+    head = ('<tr><th rowspan="2">段</th><th rowspan="2">作り方<small>入力は a</small></th><th colspan="3">出力</th></tr>'
+            '<tr>' + "".join(f"<th>a = {TRIT_TEXT[v]}</th>" for v in TRITS) + "</tr>")
     rows = "".join(f'<tr><td>{found[f]}</td><td class="l">{name}</td>{"".join(cell(v) for v in f)}</tr>'
                    for name, f in steps)
     display(HTML(f'<style>{figure_css(".tfclosure")}{table_css(".tfclosure")}'
