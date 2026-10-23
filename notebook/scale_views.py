@@ -39,10 +39,10 @@ LABELS_EN = {
     "平均/セル<small>mW</small>": "Average/cell<small>mW</small>",
     "DCの範囲<small>mW</small>": "DC range<small>mW</small>", "保持時間<small>µs/区間</small>": "Hold time<small>µs/interval</small>",
     "積和の静的電流と電力": "Dot-product static current and power",
-    "STA・容量なし<small>ns</small>": "STA, no wire C<small>ns</small>",
-    "STA・容量あり<small>ns</small>": "STA, with wire C<small>ns</small>",
-    "SPICE・容量なし<small>ns</small>": "SPICE, no wire C<small>ns</small>",
-    "SPICE・容量あり<small>ns</small>": "SPICE, with wire C<small>ns</small>",
+    "STA・配線容量なし<small>ns</small>": "STA, no wire C<small>ns</small>",
+    "STA・配線容量あり<small>ns</small>": "STA, with wire C<small>ns</small>",
+    "SPICE・配線容量なし<small>ns</small>": "SPICE, no wire C<small>ns</small>",
+    "SPICE・配線容量あり<small>ns</small>": "SPICE, with wire C<small>ns</small>",
     "増加率<small>%</small>": "Increase<small>%</small>", "配線容量による整定時間の増加": "Settling-time increase from wire capacitance",
     "ダイ面積": "Die area", "STA（配線容量あり）": "STA (with wire C)", "STA（配線容量なし）": "STA (no wire C)",
     "積和の項数 N": "Dot-product terms N", "ダイ面積 (mm²)": "Die area (mm²)",
@@ -58,8 +58,8 @@ LABELS_EN = {
         "Error = (STA / SPICE − 1) × 100. Each output's maximum settling time uses the same 10 input transitions, excluding the initial state. STA estimates this sequence; it is not an upper bound over all input transitions.",
     "P = −Σ(Vrail × Irail)。電源は+5 / 0 / −5 V、IrailはSPICEの電圧源に流れ込む向きを正とする。静的電力とDCの範囲は独立した動作点解析。時間平均は11区間の供給電力波形の積分から求める。入力駆動源の電力は含めず、スイッチング分のエネルギーは分離していない。":
         "P = −Σ(Vrail × Irail), with +5 / 0 / −5 V supplies and Irail positive into each SPICE voltage source. Static power and the DC range use separate operating-point analyses. Time-average power integrates supply power over 11 intervals. Input-source power is excluded; switching-only energy is not separated.",
-    "同じ入力遷移の集合について出力別の最大整定時間を比較する。素子の寄生容量と100 fFの出力負荷は両方に含む。SPICEで配線容量を除く比較はN=4のみ。配線容量は形状からの推定値である。":
-        "Each output's maximum settling time uses the same input transitions. Both cases include intrinsic device capacitance and the 100 fF output load. The SPICE comparison without wire C is available only for N=4. Wire capacitance is estimated from geometry.",
+    "同じ入力遷移の集合について出力別の最大整定時間を比較する。STAの誤差 = (STA / SPICE − 1) × 100（ともに配線容量あり）。素子の寄生容量と100 fFの出力負荷は両方に含む。SPICEで配線容量を除く比較はN=4のみ。配線容量は形状からの推定値である。":
+        "Each output's maximum settling time uses the same input transitions. STA error = (STA / SPICE − 1) × 100, with wire C in both. Both cases include intrinsic device capacitance and the 100 fF output load. The SPICE comparison without wire C is available only for N=4. Wire capacitance is estimated from geometry.",
 }
 
 
@@ -183,18 +183,22 @@ def power_table(data):
 
 
 def layout_penalty_table(data):
-    """Wire-C penalty with identical intrinsic devices and output test capacitance."""
+    """Wire-C penalty and matched STA error with identical devices and test loads."""
     rows = []
     for row in _rows(data):
+        comparisons = {item["output"]: item for item in row.get("timing_comparison", [])}
         for item in row.get("layout_penalty", []):
             sta, spice = item["sta"], item["spice"]
             rows.append([row["n"], item["output"], _number(sta["device_only_s"], 1e9, 1),
                          _number(sta["wire_c_s"], 1e9, 1), _number(sta["increase_percent"], precision=1),
                          _number(spice["device_only_s"], 1e9, 1), _number(spice["wire_c_s"], 1e9, 1),
-                         _number(spice["increase_percent"], precision=1)])
-    return _table(["N", "出力", "STA・容量なし<small>ns</small>", "STA・容量あり<small>ns</small>",
-                   "増加率<small>%</small>", "SPICE・容量なし<small>ns</small>", "SPICE・容量あり<small>ns</small>", "増加率<small>%</small>"], rows,
-                  "同じ入力遷移の集合について出力別の最大整定時間を比較する。素子の寄生容量と100 fFの出力負荷は両方に含む。"
+                         _number(spice["increase_percent"], precision=1),
+                         _number(comparisons.get(item["output"], {}).get("signed_error_percent"), precision=1)])
+    return _table(["N", "出力", "STA・配線容量なし<small>ns</small>", "STA・配線容量あり<small>ns</small>",
+                   "増加率<small>%</small>", "SPICE・配線容量なし<small>ns</small>", "SPICE・配線容量あり<small>ns</small>",
+                   "増加率<small>%</small>", "STAの誤差<small>%</small>"], rows,
+                  "同じ入力遷移の集合について出力別の最大整定時間を比較する。"
+                  "STAの誤差 = (STA / SPICE − 1) × 100（ともに配線容量あり）。素子の寄生容量と100 fFの出力負荷は両方に含む。"
                   "SPICEで配線容量を除く比較はN=4のみ。配線容量は形状からの推定値である。", label="配線容量による整定時間の増加")
 
 

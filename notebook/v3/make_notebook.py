@@ -281,6 +281,7 @@ note("STAの条件：5-3と同じ入力の列、出力の負荷 100 fF、入力�
 
 "scale6": '''# 6-1 積和の規模と面積（記録済み）
 from scale_views import load_scaling, scaling_table, synthesis_table
+# 全掃引は長時間かかる（N=16の解析とN=32の配置配線試行を含む）。
 RECOMPUTE_SCALING = False #@param {type:"boolean"}
 dot_scaling = load_scaling(recompute=RECOMPUTE_SCALING)
 display(synthesis_table(dot_scaling), scaling_table(dot_scaling))
@@ -311,8 +312,8 @@ display(power_table(dot_scaling), power_plot)''',
 
 "timing6": '''# 6-3 STAとSPICE（記録済み）
 need("dot_scaling", why="比較する記録は、6-1で読み込みます。")
-from scale_views import timing_table as scaling_timing_table, scaling_figure, layout_penalty_table
-display(scaling_figure(dot_scaling), scaling_timing_table(dot_scaling), layout_penalty_table(dot_scaling))''',
+from scale_views import scaling_figure, layout_penalty_table
+display(scaling_figure(dot_scaling), layout_penalty_table(dot_scaling))''',
 
 "reuse_source": '''# 6-4 HDLを変更する
 reuse_source = """
@@ -336,6 +337,7 @@ CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.
 
 # Presentation literals and cell-title comments only; HDL and executable expressions are shared.
 ENGLISH = {
+    "全掃引は長時間かかる（N=16の解析とN=32の配置配線試行を含む）。": "The full campaign takes a long time (N=16 analysis and the N=32 routing attempt).",
     "入力0 V": "Input 0 V",
     "抵抗による近似": "Resistive estimate",
     "積和の規模と面積": "Dot-product size and area",
