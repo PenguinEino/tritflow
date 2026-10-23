@@ -48,13 +48,21 @@ def control_style(scope):
             f"border:1px solid {RULE};cursor:pointer;font-family:{SERIF};font-size:14px;color:{INK};background:#fff}}"
             f"{scope} input[type=radio]:checked + label{{background:{INK};border-color:{INK};color:#fff}}"
             f"{scope} input[type=radio]:focus-visible + label{{outline:1px solid {INK};outline-offset:2px}}"
-            f"{scope} input[type=range]{{-webkit-appearance:none;appearance:none;width:100%;height:14px;"
-            f"background:transparent;margin:.2em 0}}"
-            f"{scope} input[type=range]::-webkit-slider-runnable-track{{height:1px;background:{RULE}}}"
-            f"{scope} input[type=range]::-moz-range-track{{height:1px;background:{RULE}}}"
-            f"{scope} input[type=range]::-webkit-slider-thumb{{-webkit-appearance:none;width:9px;height:9px;"
-            f"margin-top:-4px;border-radius:50%;background:{INK};border:0}}"
-            f"{scope} input[type=range]::-moz-range-thumb{{width:9px;height:9px;border-radius:50%;background:{INK};border:0}}")
+            # A slider reads as one only with a visible groove and a grabbable knob: a 4 px
+            # rounded track and a 16 px knob with a white ring, accented while hovered or dragged.
+            f"{scope} input[type=range]{{-webkit-appearance:none;appearance:none;width:100%;height:20px;"
+            f"background:transparent;margin:.3em 0;cursor:pointer}}"
+            f"{scope} input[type=range]::-webkit-slider-runnable-track{{height:4px;border-radius:2px;background:{RULE}}}"
+            f"{scope} input[type=range]::-moz-range-track{{height:4px;border-radius:2px;background:{RULE}}}"
+            f"{scope} input[type=range]::-webkit-slider-thumb{{-webkit-appearance:none;box-sizing:border-box;width:16px;height:16px;"
+            f"margin-top:-6px;border-radius:50%;background:{INK};border:2px solid #fff;box-shadow:0 0 0 1px {INK2},0 1px 3px rgba(0,0,0,.35)}}"
+            f"{scope} input[type=range]::-moz-range-thumb{{box-sizing:border-box;width:16px;height:16px;border-radius:50%;background:{INK};"
+            f"border:2px solid #fff;box-shadow:0 0 0 1px {INK2},0 1px 3px rgba(0,0,0,.35)}}"
+            f"{scope} input[type=range]:hover::-webkit-slider-thumb,{scope} input[type=range]:active::-webkit-slider-thumb"
+            f"{{background:{ACCENT}}}"
+            f"{scope} input[type=range]:hover::-moz-range-thumb,{scope} input[type=range]:active::-moz-range-thumb"
+            f"{{background:{ACCENT}}}"
+            f"{scope} input[type=range]:focus-visible{{outline:1px solid {INK};outline-offset:2px}}")
 
 
 def paper_layout(**extra):
