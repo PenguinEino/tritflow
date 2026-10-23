@@ -17,7 +17,7 @@ class Tables(HTMLParser):
         elif tag == "tr" and self.rows is not None:
             self.row = []
         elif tag in ("td", "th") and self.row is not None:
-            self.value = []
+            self.value, self.header = [], tag == "th"
 
     def handle_data(self, data):
         if self.value is not None:
@@ -25,7 +25,12 @@ class Tables(HTMLParser):
 
     def handle_endtag(self, tag):
         if tag in ("td", "th") and self.value is not None:
-            self.row.append(" ".join("".join(self.value).split()))
+            parts = [" ".join(p.split()) for p in self.value if p.strip()]
+            # A header's second text run is its unit line, e.g. "Die area" + "mm²".
+            if self.header and len(parts) > 1:
+                self.row.append(f"{parts[0]} ({' '.join(parts[1:])})")
+            else:
+                self.row.append(" ".join("".join(self.value).split()))
             self.value = None
         elif tag == "tr" and self.row is not None:
             self.rows.append(self.row)
