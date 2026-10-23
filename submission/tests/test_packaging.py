@@ -215,7 +215,7 @@ def test_actual_payload_has_readable_evidence_and_exact_bilingual_manifests():
     assert 'tritflow_ja.ipynb' in info['notebooks']
     for name in info['notebooks']:
         document = nbformat.read(builder.DESTINATION/name, as_version=4)
-        assert document.cells[0].id == 'submission-identity'
+        assert document.cells[1].id == 'submission-identity'
         for cell in document.cells:
             for output in cell.get('outputs', []):
                 data = output.get('data', {})
