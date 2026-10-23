@@ -21,6 +21,21 @@ and [build information](build-info.json) accompany the notebook. The build
 record identifies each notebook's source hash, immutable bootstrap pin, actual
 execution commit, runtime versions and captured results.
 
+## Why ternary, and what is new
+
+Ternary-weight neural networks (e.g. BitNet b1.58) reduce the products of their linear
+layers to sign selection, but open design flows build ternary arithmetic from binary-encoded
+logic. TritFlow keeps every signal a single three-level wire from HDL to GDS:
+
+- **Cells**: native three-level CMOS cells (−5, 0, +5 V, three power rails) adapted from the
+  author's 1-trit multiply-add circuit taped out on the first OpenSUSI-MPW run; the notebook
+  derives their functional completeness and checks the divider-held zero level against SPICE.
+- **Flow**: a Verilog-like ternary HDL, equivalence-checked synthesis, a two-metal placer and
+  router for three rails, PDK drawing DRC/LVS, extraction and post-layout ngspice.
+- **Timing**: a ternary STA over six level transitions, compared with SPICE settling.
+- **Results**: a ternary-weight dot product scaled to 16 terms (area, delay, wire load, STA
+  accuracy, static power), an edit-and-rerun cell and an MPW-framed top.
+
 ## Concept and method
 
 TritFlow implements balanced-ternary logic directly on the open OpenSUSI TR-1um
