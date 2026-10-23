@@ -12,7 +12,7 @@ from pathlib import Path
 
 from .layout import layout
 from .model import Scene
-from .render import metadata, render, set_language
+from .render import get_language, metadata, render, set_language
 
 _UNSET = object()
 
@@ -168,4 +168,4 @@ def legend():
     return SymbolLegend()
 
 
-__all__ = ['draw','legend','Schematic','set_language']
+__all__ = ['draw','legend','Schematic','set_language','get_language']

@@ -7,16 +7,19 @@ from pathlib import Path
 
 import pytest
 
-from tritflow.viz._gds_viewer import _SCRIPT
+from tritflow.viz._gds_viewer import _LABELS, _SCRIPT
+from tritflow.viz.layout import _TEXT_LABEL_SPAN_UM
 
 quickjs = pytest.importorskip('quickjs')
 
 
 class Browser:
-    def __init__(self, *, ratio=1, live=True):
+    def __init__(self, *, ratio=1, live=True, language="en"):
         self.context = quickjs.Context()
         self.context.eval(Path(__file__).with_name('viewer_browser_harness.js').read_text())
         self.context.eval(f'window.devicePixelRatio = {ratio};')
+        self.context.eval(f'config.labels = {json.dumps(_LABELS[language])};'
+                          f'config.labelSpanUm = {_TEXT_LABEL_SPAN_UM};')
         if not live:
             self.context.eval('delete window.google;')
         self.context.eval(_SCRIPT)
@@ -162,13 +165,26 @@ def test_static_fallback_and_detached_outputs_do_not_request():
 def test_labelled_cache_does_not_rescale_fixed_size_text_or_cross_threshold():
     browser = Browser()
     browser.run('crops.clear(); cacheBytes = 0;')
-    browser.run('remember(fakeOverview, {box:[0,0,900,630], width:1400, height:980});')
+    browser.run('remember(fakeOverview, {box:[0,0,125,87.5], width:1400, height:980});')
     # Reusing this higher-resolution crop would halve the font size.
-    assert browser.run('cachedCrop({crop:[0,0,900,630],width:700,height:490}) === null')
-    assert browser.run('cachedCrop({crop:[0,0,900,630],width:1400,height:980}) !== null')
+    assert browser.run('cachedCrop({crop:[0,0,125,87.5],width:700,height:490}) === null')
+    assert browser.run('cachedCrop({crop:[0,0,125,87.5],width:1400,height:980}) !== null')
     browser.run('crops.clear(); cacheBytes = 0;')
-    browser.run('remember(fakeOverview, {box:[0,0,2000,1400], width:1400, height:980});')
-    assert browser.run('cachedCrop({crop:[100,100,1000,730],width:500,height:350}) === null')
+    browser.run('remember(fakeOverview, {box:[0,0,554,388], width:1400, height:980});')
+    assert browser.run('cachedCrop({crop:[100,100,225,187.5],width:300,height:210}) === null')
+
+
+def test_japanese_status_survives_static_live_and_waiting_updates():
+    status = 'elements[\'[data-role="status"]\'].textContent'
+    browser = Browser(live=False, language="ja")
+    assert browser.run(status) == _LABELS["ja"]["static"]
+    browser = Browser(language="ja")
+    assert browser.run(status) == _LABELS["ja"]["live"].format(count=0)
+    browser.run("event('wheel', {deltaY:-1000});")
+    browser.advance(0)
+    assert browser.run(status) == _LABELS["ja"]["waiting"]
+    browser.reply()
+    assert browser.run(status) == _LABELS["ja"]["live"].format(count=1)
 
 
 def test_browser_without_webp_decode_recovers_with_png():

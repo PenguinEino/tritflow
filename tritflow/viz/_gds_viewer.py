@@ -17,6 +17,25 @@ _MAX_PIXELS = 2_000_000
 _CACHE_BYTES = 16 * 1024 * 1024
 _SESSIONS = OrderedDict()
 
+_LABELS = {
+    "en": {
+        "fit": "Fit", "zoom_in": "Zoom in", "zoom_out": "Zoom out",
+        "overview": "Overview · wheel to zoom, drag to pan",
+        "image": "KLayout overview", "coords": "Coordinates in µm", "legend": "TR-1um layer legend",
+        "canvas": "GDS layout: wheel or plus/minus to zoom, arrows to pan, 0 to fit",
+        "waiting": "live: waiting for kernel…", "live": "Live KLayout · {count} updates",
+        "static": "Static overview · rerun in Colab for live detail",
+    },
+    "ja": {
+        "fit": "全体表示", "zoom_in": "拡大", "zoom_out": "縮小",
+        "overview": "全体表示 · ホイールで拡大・縮小、ドラッグで移動",
+        "image": "KLayoutによる全体図", "coords": "座標の単位：µm", "legend": "TR-1umの層の凡例",
+        "canvas": "GDS：ホイールまたは＋・−で拡大・縮小、矢印キーで移動、0で全体表示",
+        "waiting": "詳細表示：カーネルの応答待ち…", "live": "KLayout詳細表示 · 更新{count}回",
+        "static": "静止画像 · Colabで再実行すると拡大時に詳細を描画する",
+    },
+}
+
 
 def _encode_image(png, encoding):
     """Compress KLayout's stippled pixels without changing any layer colours.
@@ -160,8 +179,15 @@ def _download_link(gds_path):
             f'text-decoration:none" title="{escape(path.name, quote=True)}">⬇ GDS</a>')
 
 
-def viewer_html(gds_path, *, top, width, height):
+def viewer_html(gds_path, *, top, width, height, language=None):
     from IPython.display import HTML
+    from tritflow.schematic import get_language
+    from .layout import _TEXT_LABEL_SPAN_UM
+
+    language = get_language() if language is None else language
+    if language not in _LABELS:
+        raise ValueError(f"unknown language: {language}")
+    labels = _LABELS[language]
     width, height = _pixel_size(width, height)
     if width < 320 or height < 200:
         raise ValueError("Viewer must be at least 320 × 200 pixels")
@@ -180,28 +206,29 @@ def viewer_html(gds_path, *, top, width, height):
         config = json.dumps({"box": overview["box"], "callback": callback,
                              "width": width, "height": height,
                              "maxEdge": _MAX_EDGE, "maxPixels": _MAX_PIXELS,
-                             "background": renderer.palette[0]}).replace("<", "\\u003c")
+                             "labelSpanUm": _TEXT_LABEL_SPAN_UM, "labels": labels,
+                             "background": renderer.palette[0]}, ensure_ascii=False).replace("<", "\\u003c")
         markup = f'''<div data-gds-viewer="1" style="max-width:{width}px;color:#f2f4f7;background:#000;
             border:1px solid #344054;font:13px sans-serif;padding:8px;box-sizing:border-box">
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
             <strong>{escape(renderer.name)} · KLayout / TR-1um</strong>
-            <button type="button" data-action="fit">Fit</button>
-            <button type="button" data-action="in" aria-label="Zoom in">+</button>
-            <button type="button" data-action="out" aria-label="Zoom out">−</button>
-            <span data-role="status">Overview · wheel to zoom, drag to pan</span>
+            <button type="button" data-action="fit">{labels['fit']}</button>
+            <button type="button" data-action="in" aria-label="{labels['zoom_in']}">+</button>
+            <button type="button" data-action="out" aria-label="{labels['zoom_out']}">−</button>
+            <span data-role="status">{labels['overview']}</span>
             {_download_link(gds_path)}
           </div>
           <div data-role="viewport" style="position:relative;background:{renderer.palette[0]};
               width:100%;aspect-ratio:{width}/{height};overflow:hidden;touch-action:none">
-            <img data-gds-overview="1" alt="{escape(renderer.name, quote=True)} — KLayout overview"
+            <img data-gds-overview="1" alt="{escape(renderer.name, quote=True)} — {labels['image']}"
                  src="{overview['image']}" style="display:block;width:100%;height:100%">
             <span data-role="scale" style="position:absolute;bottom:12px;left:14px;border-bottom:3px solid white;
                 color:white;text-shadow:0 1px 3px black;text-align:center;pointer-events:none"></span>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px">
-            <span data-role="coords">Coordinates in µm</span><span data-role="extent"></span>
+            <span data-role="coords">{labels['coords']}</span><span data-role="extent"></span>
           </div>
-          <details style="margin-top:6px"><summary>TR-1um layer legend</summary>
+          <details style="margin-top:6px"><summary>{labels['legend']}</summary>
             <div style="display:flex;flex-wrap:wrap;gap:6px 14px;padding-top:6px">{legend}</div>
           </details>
           <script>(function(){{const config={config};{_SCRIPT}}})();</script>
@@ -219,9 +246,10 @@ const root = document.currentScript.parentElement;
 const viewport = root.querySelector('[data-role="viewport"]');
 const overview = root.querySelector('[data-gds-overview]');
 const status = root.querySelector('[data-role="status"]');
+const labels = config.labels;
 const canvas = document.createElement('canvas');
 canvas.tabIndex = 0;
-canvas.setAttribute('aria-label', 'GDS layout: wheel or plus/minus to zoom, arrows to pan, 0 to fit');
+canvas.setAttribute('aria-label', labels.canvas);
 canvas.style.cssText = 'display:block;width:100%;height:100%;cursor:grab;touch-action:none';
 const ctx = canvas.getContext('2d');
 let box = config.box.slice(), imageBox = box.slice(), tile = overview;
@@ -276,17 +304,17 @@ function remember(image, data) {
 }
 function cachedCrop(req) {
   // A larger crop can supply a smaller view at the same or better sampling.
-  // Never reuse hidden overview labels for a view below the 1 mm text threshold.
+  // Use the same physical text threshold as the KLayout renderer.
   for (const [key, entry] of Array.from(crops).reverse()) {
     const b = entry.box, c = req.crop, epsilon = (c[2] - c[0]) * 1e-9;
-    if ((b[2] - b[0] <= 1000) !== (c[2] - c[0] <= 1000)) continue;
+    if ((b[2] - b[0] <= config.labelSpanUm) !== (c[2] - c[0] <= config.labelSpanUm)) continue;
     if (b[0] > c[0] + epsilon || b[1] > c[1] + epsilon ||
         b[2] < c[2] - epsilon || b[3] < c[3] - epsilon) continue;
     if (entry.width / (b[2] - b[0]) + 1e-9 < req.width / (c[2] - c[0]) ||
         entry.height / (b[3] - b[1]) + 1e-9 < req.height / (c[3] - c[1])) continue;
     // KLayout text has a fixed pixel size: reuse labelled views only at the
     // same sampling, otherwise a cached label would shrink/grow with zoom.
-    if (c[2] - c[0] <= 1000 && Math.abs((b[2] - b[0]) / entry.width -
+    if (c[2] - c[0] <= config.labelSpanUm && Math.abs((b[2] - b[0]) / entry.width -
         (c[2] - c[0]) / req.width) > (c[2] - c[0]) / req.width * 1e-6) continue;
     crops.delete(key); crops.set(key, entry);
     return entry;
@@ -322,8 +350,8 @@ function paint() {
 }
 function state() {
   const waiting = live && (pending || served !== revision);
-  status.textContent = live ? (waiting ? 'live: waiting for kernel…' : 'Live KLayout · ' + liveRenders + ' updates')
-    : 'Static overview · rerun in Colab for live detail';
+  status.textContent = live ? (waiting ? labels.waiting : labels.live.replace('{count}', liveRenders))
+    : labels.static;
   root.dataset.mode = live ? 'live' : 'static';
   root.dataset.waiting = waiting ? '1' : '0';
   root.dataset.retryCount = failures;

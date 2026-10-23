@@ -19,11 +19,16 @@ _language = 'en'
 
 
 def set_language(code):
-    """Draw legend words in ``code`` ('en' or 'ja') from now on."""
+    """Draw schematic legends and GDS viewer controls in ``code`` ('en' or 'ja')."""
     global _language
     if code not in LABELS:
         raise ValueError(f'unknown language: {code}')
     _language = code
+
+
+def get_language():
+    """Return the drawing language selected by the notebook's existing setup."""
+    return _language
 
 
 def _label(key):

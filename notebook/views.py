@@ -109,7 +109,12 @@ def scope_figure(post, *, title=None, settle=False):
             axis = "" if row == 1 else str(row)
             figure.add_annotation(x=start+delay, y=out["ideal_voltage_v"], ax=start, ay=out["ideal_voltage_v"],
                                   xref=f"x{axis}", yref=f"y{axis}", axref=f"x{axis}", ayref=f"y{axis}",
-                                  text=f"{out['settling_s']*1e9:.0f} ns", showarrow=True, arrowhead=2, arrowcolor=ACCENT,
+                                  text="", showarrow=True, arrowhead=2, arrowcolor=ACCENT)
+            # Short delays leave no space inside the arrow for its time label.
+            figure.add_annotation(x=start+delay/2, y=out["ideal_voltage_v"],
+                                  xref=f"x{axis}", yref=f"y{axis}",
+                                  text=f"{out['settling_s']*1e9:.0f} ns", showarrow=False,
+                                  yshift=10, yanchor="bottom", xanchor="center",
                                   font={"color": ACCENT, "size": 12}, bgcolor="rgba(255,255,255,.85)")
     paper_axes(figure)
     figure.update_xaxes(range=[0, len(rows)*stimulus["hold_s"]*1e6])
@@ -264,6 +269,8 @@ def bus_picker(net, *, title=None):
     start = ",".join("0" for _ in values)
     circuit = net.schematic(inputs={n: 0 for bits in inputs.values() for n in bits}, net_names=True, expand="*",
                             title="", legend=False)
+    drawing_width = _drawing_width(circuit)
+    dense = drawing_width > 1080
     rows = "".join(
         f'<div class="bus"><span class="name">{escape(base)}</span>' + "".join(
             f'<input type="radio" name="{key}-{base}" id="{key}-{base}-{v}" data-bus="{base}" value="{v}"'
@@ -279,9 +286,12 @@ def bus_picker(net, *, title=None):
     style = (figure_css(f".{key}") + control_style(f".{key}") + f".{key}{{max-width:1080px}}"
              f".{key} .bus{{margin:.1em 0}} .{key} .name{{display:inline-block;width:2.2em;font-style:italic}}"
              f".{key} .read{{margin:.4em 0 .2em;font-size:15px}} .{key} .drawing{{max-width:100%;overflow-x:auto}}"
-             f".{key} .drawing svg{{width:100%;min-width:{min(1000, _drawing_width(circuit))}px;height:auto;display:block}}")
+             f".{key} .drawing svg{{width:100%;min-width:{drawing_width if dense else min(1000, drawing_width)}px;height:auto;display:block}}"
+             f".{key} .hint{{color:{MUTED};font-size:13px;margin-top:.3em}}")
+    hint = (f'<div class="hint">{_text("横にスクロールして回路図の全体を見られる。", "Scroll horizontally to view the full schematic.")}</div>'
+            if dense else "")
     display(HTML(f'<style>{style}</style><div class="{key}">{rows}<div class="read"></div>'
-                 f'<div class="drawing" tabindex="0">{circuit._repr_svg_()}</div></div>{script}'))
+                 f'<div class="drawing" tabindex="0">{circuit._repr_svg_()}</div>{hint}</div>{script}'))
 
 
 def _drawing_width(circuit):

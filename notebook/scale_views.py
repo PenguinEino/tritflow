@@ -89,13 +89,15 @@ def _rows(data):
 
 
 def _table(headings, rows, note, *, label):
-    """Booktabs HTML follows notebook/style.py and scrolls within narrow outputs."""
+    """Wrap headings so recorded columns fit, with local scrolling as a fallback."""
     scope = ".tfscale"
     css = (figure_css(scope) + table_css(scope) +
            ".tfscale{max-width:100%;overflow-x:auto;padding:4px 0 8px}"
-           ".tfscale th,.tfscale td{white-space:nowrap}"
+           ".tfscale table{max-width:100%}"
+           ".tfscale th{white-space:normal;word-break:keep-all} .tfscale td{white-space:nowrap}"
+           "@media(max-width:850px){.tfscale th,.tfscale td{padding-left:.3em;padding-right:.3em}}"
            f".tfscale p{{font-size:12px;color:{MUTED};margin:.55em 0 0;max-width:1000px}}")
-    header = "".join(f"<th>{_label(title)}</th>" for title in headings)
+    header = "".join("<th>" + _label(title).replace("・", "・<wbr>") + "</th>" for title in headings)
     body = "".join("<tr>" + "".join(f"<td>{escape(str(value))}</td>" for value in row) + "</tr>" for row in rows)
     return HTML(f'<style>{css}</style><div class="tfscale" role="group" aria-label="{escape(_label(label))}">'
                 f"<table><thead><tr>{header}</tr></thead><tbody>{body}</tbody></table><p>{escape(_label(note))}</p></div>")
@@ -234,7 +236,7 @@ def scaling_figure(data):
     figure.update_xaxes(type="log", tickvals=sizes, ticktext=[str(n) for n in sizes], title_text=_label("積和の項数 N"))
     figure.update_yaxes(title_text=_label("ダイ面積 (mm²)"), rangemode="tozero", row=1, col=1)
     figure.update_yaxes(title_text=_label("最大整定時間 (ns)"), rangemode="tozero", row=1, col=2)
-    figure.update_layout(**paper_layout(height=370, width=940,
+    figure.update_layout(**paper_layout(height=370,
                                         margin={"t": 45, "b": 55, "l": 62, "r": 22},
                                         legend={"orientation": "h", "x": 0, "y": 1.15, "font": {"size": 13}}))
     return figure
