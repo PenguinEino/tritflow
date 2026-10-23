@@ -14,7 +14,7 @@ Increasing the term count adds multiplier circuits and adder circuits for the re
 
 ### 6.2 Static and Time-Average Power
 
-INV, NAND, NOR and NANY maintain 0 V through resistive division between VDD and VSS, drawing current even without input transitions. Static power is calculated from DC operating points for states in the recorded input sequence. With current defined as positive into each SPICE voltage source, circuit power is $P = -\sum_r V_r I_r$, including both positive and negative supply contributions.
+States that hold 0 V by resistive division draw static current even without input transitions. NANY also has zero-output states in which VMID clamps conduct while the VDD and VSS transistor stacks are cut off. Static power is calculated from DC operating points for states in the recorded input sequence. With current defined as positive into each SPICE voltage source, circuit power is $P = -\sum_r V_r I_r$, including both positive and negative supply contributions.
 
 Time-average supply power is the integral of instantaneous power over all hold intervals, divided by the total duration. It includes state-dependent static consumption and transition consumption; switching-only energy is not separated. Power from the input voltage sources is excluded.
 
@@ -27,6 +27,8 @@ The number of conducting divider paths depends on the input state, so static pow
 Each circuit uses an input sequence that generates and clears positive and negative carries. The four-term sequence differs from chapter 5. STA conditions on the fixed weights. STA and SPICE use identical input transitions, output load, input slew and wire capacitance. The reported delay is each output's maximum settling time over that sequence, not a guaranteed worst case over all input transitions.
 
 The effect of wire capacitance is evaluated by removing only the estimated wire capacitance from the same extracted circuit. STA compares both cases at every size; SPICE compares them for four terms. Both cases retain intrinsic device capacitance and the 100 fF output load.
+
+At N=16, some NANY loads exceed the 2 pF characterization limit, reaching 2.862 pF, so STA extrapolates linearly in load capacitance.
 
 <!-- code: timing6 -->
 
@@ -50,7 +52,7 @@ The top-level layout adds probe pads, power routing and the PDK MPW frame to dot
 
 ### 6.6 Conclusion
 
-TritFlow connects balanced-ternary HDL to a native three-voltage cell netlist, place and route, PDK DRC/LVS and post-layout simulation. Its dot-product application evaluates area, delay and static power against circuit size and compares cell-table STA estimates with simulation. Future work will compare measurements of the taped-out cells with the models and incorporate the results into the cells and design flow.
+TritFlow connects balanced-ternary HDL to a native three-voltage cell netlist, place and route, PDK DRC/LVS and post-layout simulation. In this implementation with two routing metal layers, area and settling time grow faster than the number of terms. Static power is set by resistive division used to hold 0 V, so practical efficiency requires a different way to maintain that level. Future work will compare measurements of the taped-out cells with the models and incorporate the results into the cells and design flow.
 
 ### References
 
