@@ -89,8 +89,21 @@ Pacific. No official numerical size or ten-minute runtime limit is invented.
   official-source hashes, actual payload evidence, offline HTML execution,
   rejection of blank plots, transparent/opaque PNG pixel equality and final
   readiness without mutating captured evidence.
-- Final provenance-enabled execution/export is being checked; final byte count
-  and command results are recorded below when it finishes.
+- Final provenance-enabled build and `--check` both pass. Payload: **8 files,
+  3,913,064 bytes (3.732 MiB)**; 26 executed code cells, 46 saved outputs,
+  14 native PNG outputs, 6 embedded Markdown figures and 5 HTML tables.
+  Final EDA/kernel capture took **44.94 s** locally; this is not a Colab or
+  installation-inclusive benchmark. `submission/.build/verified-build.log`
+  records the final build; native evidence and raw execution stay in
+  `submission/.build/submission_capture/tritflow_ja/`.
+- Captured source notebook SHA-256:
+  `90f3d62a16ab5c52ef4222374cbaeff7b1eab0d969e309059019c0e2b5b20781`.
+  Execution start/end commit both
+  `4361c38e1506621346e8e0a48f26f126899e335e`; bootstrap pin remains
+  `71ba7253326c140441893f6be2752803d8fb51c9`. PDK qualified/checkout commit
+  both `5d963db9d44e192d37a0489c208bfccf2e2f690c`; **40 model/deck hashes**
+  are captured. The final validation reports **21 passed in 7.96 s** and
+  `git diff --check -- submission docs/status/SUBMIT.md` passes.
 - Extra packages installed: **none** (the existing build requirements suffice).
 
 ```sh
@@ -107,6 +120,10 @@ PYTHONDONTWRITEBYTECODE=1 python3 submission/build_submission.py \
 ```
 
 ## Handoff / interface requests
+
+SUBMIT implementation and the permitted Japanese development build are
+complete. `submission_ready` is intentionally **false**, for the inputs and
+release-qualification reasons below; this is not a final filing artifact.
 
 No changes to `docs/interfaces.md` are requested and no user input is required.
 EN and chapter 6 remain owned by their respective streams. Rebuild after their

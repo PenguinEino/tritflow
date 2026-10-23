@@ -286,7 +286,7 @@ OpenSUSI, Tokai Rika, and contributors. **TR-1um Open Source PDK project
 [pinned source](https://github.com/OpenSUSI/TR-1um/tree/5d963db9d44e192d37a0489c208bfccf2e2f690c).
 
 - **Supports:** The public TR-1um process collateral, PCells, models, DRC/LVS decks, and Apache-2.0 PDK source used by this notebook.
-- **Use:** `notebook/v3/narrative/00_opening.md`, paragraph 2; `01_first.md`, DRC/LVS step; `02_cells.md`, §§2.1 and 2.4; `04_pnr.md`, process layers; `05_verify.md`, §§5.1–5.2, all under `notebook/v3/narrative/`.
+- **Use:** `notebook/v3/narrative/00_opening.md`, paragraph 2; `notebook/v3/narrative/01_first.md`, DRC/LVS step; `notebook/v3/narrative/02_cells.md`, §§2.1 and 2.4; `notebook/v3/narrative/04_pnr.md`, process layers; `notebook/v3/narrative/05_verify.md`, §§5.1–5.2.
 - **Verification / limits:** README/license and live commit identity checked; full SHA matches `notebook/setup_pins.json`. This is a pinned development snapshot, **not** release v1.2609.0. Repository availability alone does not prove a particular generated design is accepted by the foundry; use TritFlow's own DRC/LVS results for that design.
 
 ### [TR1UMREL2026] — public release provenance
@@ -364,7 +364,7 @@ source snapshot `8a60b97868cad008ff21fefca5da13dcd06063f8`, 24 September 2026 (U
 [pinned submission description](https://github.com/PenguinEino/opensusi-tr10-balanced-ternary-logic/blob/8a60b97868cad008ff21fefca5da13dcd06063f8/submission/README.md).
 
 - **Supports:** Original ±5 V balanced-ternary gates and the one-trit multiply-add slice, with Xschem schematics, KLayout layouts, extraction, and simulation collateral.
-- **Use:** `notebook/v3/narrative/00_opening.md`, paragraphs 2–3; `02_cells.md`, §§2.1, 2.3–2.4; `03_hdl.md`, §§3.4 and 3.7, all under `notebook/v3/narrative/`.
+- **Use:** `notebook/v3/narrative/00_opening.md`, paragraphs 2–3; `notebook/v3/narrative/02_cells.md`, §§2.1, 2.3–2.4; `notebook/v3/narrative/03_hdl.md`, §§3.4 and 3.7.
 - **Verification / limits:** Public README/submission contents and snapshot checked; author identity follows `docs/author.md`. That design cites PDK dev `9ef2ac3`, whereas the notebook uses [TR1UM2026]. Do not erase this provenance difference or treat submitted SPICE results as measured silicon.
 
 ### [KLAYOUT2026]
@@ -376,7 +376,7 @@ Editor**, version 0.30.6, 2026. KLayout software.
 [source release](https://github.com/KLayout/klayout/releases/tag/v0.30.6).
 
 - **Supports:** Scriptable GDS/PCell layout generation and the DRC/LVS engine used with the PDK's own rule decks.
-- **Use:** `notebook/v3/narrative/01_first.md`, GDS/verification steps; `02_cells.md`, §2.4; `04_pnr.md`; `05_verify.md`, §§5.1–5.2, all under `notebook/v3/narrative/`.
+- **Use:** `notebook/v3/narrative/01_first.md`, GDS/verification steps; `notebook/v3/narrative/02_cells.md`, §2.4; `notebook/v3/narrative/04_pnr.md`, §§4.1–4.3; `notebook/v3/narrative/05_verify.md`, §§5.1–5.2.
 - **Verification / limits:** Official features and version checked against `notebook/setup_pins.json`. Release notes give 7 February 2026; GitHub's release publication timestamp is 10 February 2026. KLayout is GPL-2.0-or-later, separate from TritFlow's Apache-2.0 code. A tool citation does not independently validate generated layouts or extraction.
 
 ### [NGSPICE42]
@@ -387,7 +387,7 @@ Holger Vogt, Giles Atkinson, and Paolo Nenzi. **Ngspice User's Manual**, version
 [release manual](https://sourceforge.net/projects/ngspice/files/ng-spice-rework/old-releases/42/ngspice-42-manual.pdf/download).
 
 - **Supports:** The ngspice circuit simulator's device-model, operating-point, DC, and transient-analysis facilities.
-- **Use:** `notebook/v3/narrative/01_first.md`, SPICE step; `02_cells.md`, §2.1; `05_verify.md`, simulation/timing discussion, all under `notebook/v3/narrative/`.
+- **Use:** `notebook/v3/narrative/01_first.md`, SPICE step; `notebook/v3/narrative/02_cells.md`, §2.1; `notebook/v3/narrative/05_verify.md`, §§5.2–5.4.
 - **Verification / limits:** Version-42 PDF title page, author list, and date checked directly. Cite **42**, matching `notebook/setup_pins.json` (`42+ds-3build1` package), rather than the older development environment's 46 or the current latest release. TritFlow's ±0.5 V settling-band definition and geometric wire-capacitance estimate are project methods, not ngspice-standard signoff definitions.
 
 ## 7. Balanced ternary arithmetic and historical context
