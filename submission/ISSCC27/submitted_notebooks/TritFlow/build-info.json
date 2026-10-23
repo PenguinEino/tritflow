@@ -1,23 +1,28 @@
 {
-  "schema_version": 1,
-  "created_utc": "2026-10-20T02:04:04.536392+00:00",
-  "source_notebook_sha256": "787f3c4f7237feb0cf9506b36ed85bc316273a879b73f50ba9993a2559151a1d",
-  "source_commit_at_bootstrap": "4f702252cfc701c6538b640dfaeba2d97063b349",
-  "packaging_commit": "49db430a469387616b528b8a8c30c6a17670be7b",
-  "tracked_working_changes_at_packaging": [],
-  "capture": {
-    "source_sha256": "787f3c4f7237feb0cf9506b36ed85bc316273a879b73f50ba9993a2559151a1d",
-    "elapsed_s": 68.56825243900676,
-    "renderer": "png",
-    "completed": true
-  },
-  "tools": {
-    "numpy": "2.4.3",
-    "scipy": "1.17.1",
-    "plotly": "7.1.0",
-    "klayout": "0.30.6",
-    "lark": "1.3.1",
-    "matplotlib": "3.10.8",
+  "created_utc": "2026-10-23T08:13:43.503820+00:00",
+  "packaging_commit": "4361c38e1506621346e8e0a48f26f126899e335e",
+  "tracked_working_changes_at_packaging": [
+    "docs/references.md",
+    "notebook/v3/make_notebook.py",
+    "notebook/v3/narrative/00_opening.md",
+    "notebook/v3/narrative/03_hdl.md",
+    "notebook/v3/narrative/05_verify.md",
+    "submission/ISSCC27/submitted_notebooks/TritFlow/ABSTRACT.md",
+    "submission/ISSCC27/submitted_notebooks/TritFlow/CHECKLIST.md",
+    "submission/ISSCC27/submitted_notebooks/TritFlow/PITCH.md",
+    "submission/ISSCC27/submitted_notebooks/TritFlow/README.md",
+    "submission/ISSCC27/submitted_notebooks/TritFlow/build-info.json",
+    "submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_tr1um.ipynb",
+    "submission/README.md",
+    "submission/build_submission.py",
+    "submission/official_sources.json",
+    "submission/templates/ABSTRACT.md",
+    "submission/templates/CHECKLIST.md",
+    "submission/templates/PITCH.md",
+    "submission/templates/README.md",
+    "submission/tests/test_packaging.py"
+  ],
+  "packaging_tools": {
     "Pillow": "10.2.0",
     "nbformat": "5.10.4",
     "nbclient": "0.10.4",
@@ -25,82 +30,1449 @@
     "choreographer": "1.4.0",
     "CairoSVG": "2.8.2",
     "python": "3.12.3",
-    "ngspice": "ngspice-42",
-    "klayout_binary": "KLayout 0.30.9",
-    "static_export_browser": "Google Chrome 152.0.7977.64"
+    "browser": "Google Chrome 152.0.7977.64"
   },
-  "tools_observation": "packaging environment; the raw capture does not store a separate version snapshot",
-  "official_rules_commit": "a502a6ba01260d3492df9137dddae0bb5fabeb3c",
-  "release": {
-    "default_ref": "7e3ea1dca8048f998c222d977dfbbb7123ae971b",
-    "commit": "7e3ea1dca8048f998c222d977dfbbb7123ae971b",
-    "matches_source_notebook": true,
-    "missing_required_helpers": [],
-    "compatible": true
+  "raw_executions_not_in_payload": {
+    "tritflow_ja.ipynb": {
+      "path": "submission/.build/submission_capture/tritflow_ja/executed.raw.ipynb",
+      "sha256": "69c37729c8839b9d27bb2e6fb136494d26ff885136cb6134de685d6b1ba85b6d"
+    }
   },
-  "colab_verified": true,
-  "captured_revision_colab_verified": false,
-  "colab_verification": {
-    "publish": true,
-    "publication_reason": "Round-13 complete first Run all (no other Colab sessions).",
-    "commit": "839adbf19f7590221d18d171adaaddb95c8fd27a",
-    "date_utc": "2026-10-19",
-    "platform": "free Google Colab CPU",
-    "run_all_seconds_including_setup": 299.3,
-    "passed_code_cells": 35,
-    "run_all_attempts": 1,
-    "first_attempt_completed": true,
-    "initial_setup_attempt_seconds": null,
-    "timing_scope": "Single Run all in a fresh runtime, including setup.",
-    "notebook_sha256": "46ea0d2c518a2f051b009de019d2fe1cae115398dca51481bc824fd3cd08a1bf",
-    "scope": "Default run with labelled recorded campaigns; first-attempt completion in a fresh free runtime.",
-    "report": "docs/status/colab/round13.md",
-    "evidence_sha256": {
-      "logs/colab/round13-timing.json": "aa5c7b80edc8fc03d809f8d8e095abd28bc3782f0e954ba8bf31a58808e87cf4",
-      "logs/colab/round13-cells.json": "f85bb33d19bebce78d083ba76a7ccaf453b7dcd1bcdb8210e1c3a4ff4d8f81e1"
-    },
-    "passed": true
-  },
-  "colab_verification_scope": "colab_verified describes the exact named run and its retry/timing qualifications in colab_verification. captured_revision_colab_verified separately checks commit and notebook bytes; later presentation edits have local execution evidence.",
-  "team_fields_completed": true,
-  "identity_fields_completed": true,
-  "raw_execution_not_in_payload": "build/submission_capture/executed.raw.ipynb",
   "manifest_scope": "files excludes build-info.json itself; total_bytes includes it",
-  "code_cells": 38,
-  "saved_outputs": 150,
-  "png_outputs": 13,
-  "embedded_paper_figures": 8,
-  "html_tables": 29,
-  "files": {
-    "tritflow_tr1um.ipynb": {
-      "bytes": 7356126,
-      "sha256": "7a20423f2769a0e2e9925ce2891b0504a3cd180a6bc85d0b2249e12d0ce4d0bd"
+  "team_fields_completed": true,
+  "schema_version": 3,
+  "primary_notebook": "tritflow_ja.ipynb",
+  "notebooks": {
+    "tritflow_ja.ipynb": {
+      "source_path": "notebook/v3/tritflow_ja.ipynb",
+      "source_sha256": "90f3d62a16ab5c52ef4222374cbaeff7b1eab0d969e309059019c0e2b5b20781",
+      "capture": {
+        "source_sha256": "90f3d62a16ab5c52ef4222374cbaeff7b1eab0d969e309059019c0e2b5b20781",
+        "elapsed_s": 44.9378273159964,
+        "renderer": "png",
+        "completed": true,
+        "source_path": "notebook/v3/tritflow_ja.ipynb",
+        "started_utc": "2026-10-23T08:12:48.529631+00:00",
+        "completed_utc": "2026-10-23T08:13:33.467521+00:00"
+      },
+      "pinned_source_commit": "71ba7253326c140441893f6be2752803d8fb51c9",
+      "source_commit_at_execution": "4361c38e1506621346e8e0a48f26f126899e335e",
+      "runtime_tools": {
+        "python": "3.12.3",
+        "packages": {
+          "numpy": "2.4.3",
+          "scipy": "1.17.1",
+          "plotly": "7.1.0",
+          "klayout": "0.30.6",
+          "lark": "1.3.1",
+          "matplotlib": "3.10.8"
+        },
+        "tools": {
+          "KLayout": "KLayout 0.30.9",
+          "ngspice": "******\n** ngspice-42 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2023, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Sun Mar 31 20:15:14 UTC 2024\n******"
+        }
+      },
+      "results": {
+        "schema_version": 1,
+        "designs": {
+          "first": {
+            "report": {
+              "top": "sel_raw",
+              "cells": {
+                "BUF": 1,
+                "INV": 11,
+                "NAND": 6,
+                "NANY": 6,
+                "NOR": 5,
+                "TIEN": 1,
+                "TIEP": 1,
+                "TIEZ": 1
+              },
+              "total_cells": 32,
+              "logic_depth": 12,
+              "hierarchy": {
+                "<top>": {
+                  "BUF": 1,
+                  "INV": 11,
+                  "NAND": 6,
+                  "NANY": 6,
+                  "NOR": 5,
+                  "TIEN": 1,
+                  "TIEP": 1,
+                  "TIEZ": 1
+                }
+              },
+              "max_fanout": 4,
+              "fanout_limit": 4,
+              "equivalence": {
+                "passed": true,
+                "mode": "exhaustive",
+                "vectors": 27,
+                "seed": null
+              }
+            },
+            "equivalence": {
+              "passed": true,
+              "mode": "exhaustive",
+              "vectors": 27,
+              "seed": null
+            },
+            "layout": {
+              "die_size_um": [
+                348.0,
+                366.0
+              ],
+              "die_area_um2": 127368.0,
+              "wirelength_um": {
+                "M1": 486.0,
+                "M2": 856.0
+              },
+              "via_count": 17,
+              "power_via_count": 80,
+              "utilization": 0.3730921424533635,
+              "instance_count": 3,
+              "row_count": 2,
+              "net_count": 4,
+              "spans_per_row": 1,
+              "channel_tracks": 4,
+              "aspect_ratio": 1.0517241379310345,
+              "anneal_steps": 600,
+              "routed_nets": 4,
+              "library_mock": false,
+              "max_supply_drop_v": 0.0009822376713558899,
+              "bypass_tracks_per_side": 0,
+              "hpwl_before_um": 890.5,
+              "hpwl_after_um": 710.5,
+              "hpwl_improvement_pct": 20.213363279056708,
+              "runtime_s": {
+                "placement": 0.004922234977129847,
+                "routing": 0.003636250039562583,
+                "export_and_verification": 0.9824531420017593,
+                "total": 0.9910116270184517
+              }
+            },
+            "drc": {
+              "clean": true,
+              "violations": 0
+            },
+            "lvs": {
+              "matched": true,
+              "strict_ports": true,
+              "scope": "PDK device extraction; intrinsic device parasitics; no signal-wire resistance"
+            },
+            "measurements": {
+              "passed": true,
+              "rows": [
+                {
+                  "input_trits": [
+                    -1
+                  ],
+                  "previous_trits": null,
+                  "check_s": 9.989999999999999e-07,
+                  "outputs": {
+                    "y": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.999999684138354,
+                      "error_v": 3.158616461718111e-07,
+                      "passed": true,
+                      "settling_s": 0.0
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -3.165116536592174e-10,
+                    "VMID": 0.0,
+                    "VSS": 3.0651166015140627e-10
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    0
+                  ],
+                  "previous_trits": [
+                    -1
+                  ],
+                  "check_s": 1.999e-06,
+                  "outputs": {
+                    "y": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.04353923343494259,
+                      "error_v": -0.04353923343494259,
+                      "passed": true,
+                      "settling_s": 4.2504111142125564e-09
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.0012358381489848806,
+                    "VMID": 0.0,
+                    "VSS": 0.0012454681941890923
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1
+                  ],
+                  "previous_trits": [
+                    0
+                  ],
+                  "check_s": 2.999e-06,
+                  "outputs": {
+                    "y": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.999999678073668,
+                      "error_v": 3.219263318143817e-07,
+                      "passed": true,
+                      "settling_s": 1.822459426024553e-08
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": 2.0546759874269063e-07,
+                    "VMID": 0.0,
+                    "VSS": 1.6332887904389455e-06
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    0
+                  ],
+                  "previous_trits": [
+                    1
+                  ],
+                  "check_s": 3.999e-06,
+                  "outputs": {
+                    "y": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.043539233434943134,
+                      "error_v": -0.043539233434943134,
+                      "passed": true,
+                      "settling_s": 6.188898910883777e-09
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.001248080067500769,
+                    "VMID": 0.0,
+                    "VSS": 0.0012523918209074527
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    -1
+                  ],
+                  "previous_trits": [
+                    0
+                  ],
+                  "check_s": 4.999e-06,
+                  "outputs": {
+                    "y": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.999999684138356,
+                      "error_v": 3.158616443954543e-07,
+                      "passed": true,
+                      "settling_s": 9.959560475437644e-09
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": 7.842343675722952e-07,
+                    "VMID": 0.0,
+                    "VSS": -3.6144042242282035e-07
+                  },
+                  "passed": true
+                }
+              ],
+              "ideal_volts": {
+                "-1": -5.0,
+                "0": 0.0,
+                "1": 5.0
+              },
+              "max_error_v": 0.043539233434943134,
+              "max_settling_s": {
+                "y": 1.822459426024553e-08
+              },
+              "unsettled": 0,
+              "sample_step_s": 2e-09
+            },
+            "stimulus": {
+              "netlist": "TritFlow ternary testbench\n*\n.parameters vthMP\t= 0\n.parameters vthMN \t= 0\n.parameters vthMPE      = 0\n.parameters vthMNE      = 0\n.parameters magRR       = 1\n.parameters magRS       = 1 \n.parameters magCSIO     = 1 \n.include \"$TR1UM_PDK/libs.tech/spice/models/models_IP62_cap_v5p1.lib\"\n.include \"$TR1UM_PDK/libs.tech/spice/models/models_IP62_diode_v2.lib\"\n.include \"$TR1UM_PDK/libs.tech/spice/models/models_IP62_mos_v2.lib\"\n.include \"$TR1UM_PDK/libs.tech/spice/models/models_IP62_res_v5.lib\"\n* Created by KLayout\n*** My special header ***\n\n* cell first\n* pin VDD\n* pin VSS\n* pin a\n* pin y\n.SUBCKT first VDD VSS a y VMID\n* cell instance $1 r0 *1 174,30\nX_ex_1 VDD a n_ex_I5 VSS INV\n* cell instance $2 r0 *1 66,30\nX_ex_2 VDD n_ex_I4 y VSS INV\n* cell instance $4 m90 *1 246,198\nX_ex_4 VDD a n_ex_I5 n_ex_I4 VSS NAND\n* Estimated lumped wire C to substrate (node 0); not signoff PEX\nCtfwire0 VDD 0 5.157307988e-13\nCtfwire1 a 0 5.91010534e-14\nCtfwire2 y 0 3.24428482e-14\nCtfwire3 VSS 0 4.092279062e-13\nCtfwire4 n_ex_I5 0 4.90745912e-14\nCtfwire5 n_ex_I4 0 3.6612953e-14\n.ends first\n\n* cell NAND\n* pin VDD\n* pin A\n* pin B\n* pin Y\n* pin VSS\n.SUBCKT NAND VDD A B Y VSS\n* device instance $1 r0 *1 26,100 PMOS\nXM_ex_1 n_ex_4 A VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u\n* device instance $2 r0 *1 41,100 PMOS\nXM_ex_2 n_ex_4 B VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u\n* device instance $3 r0 *1 26,28 NMOS\nXM_ex_3 n_ex_17 A n_ex_6 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u\n* device instance $4 r0 *1 41,28 NMOS\nXM_ex_4 VSS B n_ex_17 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u\n* device instance $5 r0 *1 96,54 F_RR\nXR_ex_5 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n* device instance $6 r0 *1 96,84 F_RR\nXR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n.ENDS NAND\n\n* cell INV\n* pin VDD\n* pin A\n* pin Y\n* pin VSS\n.SUBCKT INV VDD A Y VSS\n* device instance $1 r0 *1 19.2,56 PMOS\nXM_ex_1 n_ex_5 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u\n* device instance $2 r0 *1 19.2,26 NMOS\nXM_ex_2 n_ex_6 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u\n* device instance $3 r0 *1 70,44 F_RR\nXR_ex_3 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n* device instance $4 r0 *1 70,57 F_RR\nXR_ex_4 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n.ENDS INV\n\n.temp 27\n.options rshunt=1e12\nVDD VDD 0 5\nVMID VMID 0 0\nVSS VSS 0 -5\nXdut VDD VSS a y VMID first\nVin0 a 0 DC -5 PWL(0 -5 1e-06 -5 1.001e-06 0 2e-06 0 2.001e-06 5 3e-06 5 3.001e-06 0 4e-06 0 4.001e-06 -5)\nCload0 y 0 1e-13\n.nodeset v(y)=-5",
+              "commands": "tran 2e-09 5e-06 0 2e-09",
+              "probes": [
+                "v(a)",
+                "v(y)",
+                "i(vdd)",
+                "i(vmid)",
+                "i(vss)"
+              ],
+              "vectors": [
+                [
+                  -1
+                ],
+                [
+                  0
+                ],
+                [
+                  1
+                ],
+                [
+                  0
+                ],
+                [
+                  -1
+                ]
+              ],
+              "inputs": [
+                "a"
+              ],
+              "outputs": [
+                "y"
+              ],
+              "hold_s": 1e-06,
+              "edge_s": 1e-09,
+              "step_s": 2e-09,
+              "supplies_v": {
+                "VDD": 5.0,
+                "VMID": 0.0,
+                "VSS": -5.0
+              },
+              "temperature_c": 27,
+              "signal_names": {
+                "a": "a",
+                "y": "y"
+              }
+            }
+          },
+          "full_add": {
+            "report": {
+              "top": "full_add_rtl",
+              "cells": {
+                "INV": 5,
+                "NANY": 11
+              },
+              "total_cells": 16,
+              "logic_depth": 12,
+              "hierarchy": {
+                "<top>": {
+                  "INV": 5,
+                  "NANY": 11
+                }
+              },
+              "max_fanout": 3,
+              "fanout_limit": 4,
+              "equivalence": {
+                "passed": true,
+                "mode": "exhaustive",
+                "vectors": 27,
+                "seed": null
+              }
+            },
+            "equivalence": {
+              "passed": true,
+              "mode": "exhaustive",
+              "vectors": 27,
+              "seed": null
+            }
+          },
+          "mul": {
+            "report": {
+              "top": "mul",
+              "cells": {
+                "INV": 1,
+                "NAND": 2,
+                "NOR": 1
+              },
+              "total_cells": 4,
+              "logic_depth": 3,
+              "hierarchy": {
+                "<top>": {
+                  "INV": 1,
+                  "NAND": 2,
+                  "NOR": 1
+                }
+              },
+              "max_fanout": 2,
+              "fanout_limit": 4,
+              "equivalence": {
+                "passed": true,
+                "mode": "exhaustive",
+                "vectors": 9,
+                "seed": null
+              }
+            },
+            "equivalence": {
+              "passed": true,
+              "mode": "exhaustive",
+              "vectors": 9,
+              "seed": null
+            }
+          },
+          "dot4": {
+            "report": {
+              "top": "dot4",
+              "cells": {
+                "INV": 13,
+                "NAND": 8,
+                "NANY": 21,
+                "NOR": 4
+              },
+              "total_cells": 46,
+              "logic_depth": 26,
+              "hierarchy": {
+                "<top>": {
+                  "INV": 13,
+                  "NAND": 8,
+                  "NANY": 21,
+                  "NOR": 4
+                }
+              },
+              "max_fanout": 4,
+              "fanout_limit": 4,
+              "equivalence": {
+                "passed": true,
+                "mode": "exhaustive",
+                "vectors": 6561,
+                "seed": null
+              }
+            },
+            "equivalence": {
+              "passed": true,
+              "mode": "exhaustive",
+              "vectors": 6561,
+              "seed": null
+            },
+            "layout": {
+              "die_size_um": [
+                1692.0,
+                1206.0
+              ],
+              "die_area_um2": 2040552.0,
+              "wirelength_um": {
+                "M1": 17778.0,
+                "M2": 22664.5
+              },
+              "via_count": 329,
+              "power_via_count": 600,
+              "utilization": 0.4308246004022441,
+              "instance_count": 46,
+              "row_count": 6,
+              "net_count": 54,
+              "spans_per_row": 4,
+              "channel_tracks": 8,
+              "aspect_ratio": 1.4029850746268657,
+              "anneal_steps": 600,
+              "routed_nets": 54,
+              "library_mock": false,
+              "max_supply_drop_v": 0.009499262030151218,
+              "bypass_tracks_per_side": 0,
+              "hpwl_before_um": 40082.5,
+              "hpwl_after_um": 24299.5,
+              "hpwl_improvement_pct": 39.37628640928086,
+              "runtime_s": {
+                "placement": 0.07249824597965926,
+                "routing": 0.2715081560309045,
+                "export_and_verification": 1.8018183069652878,
+                "total": 2.3345707369735464
+              }
+            },
+            "drc": {
+              "clean": true,
+              "violations": 0
+            },
+            "lvs": {
+              "matched": true,
+              "strict_ports": true,
+              "scope": "PDK device extraction; intrinsic device parasitics; no signal-wire resistance"
+            },
+            "measurements": {
+              "passed": true,
+              "rows": [
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "previous_trits": null,
+                  "check_s": 9.989999999999999e-07,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.0418330345976958,
+                      "error_v": -0.0418330345976958,
+                      "passed": true,
+                      "settling_s": 0.0
+                    },
+                    "y[0]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.04183067288288032,
+                      "error_v": -0.04183067288288032,
+                      "passed": true,
+                      "settling_s": 0.0
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.01634786733821497,
+                    "VMID": -2.1009376745902928e-10,
+                    "VSS": 0.01634786756507571
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "check_s": 1.999e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.041838723910842715,
+                      "error_v": -0.041838723910842715,
+                      "passed": true,
+                      "settling_s": 0.0
+                    },
+                    "y[0]": {
+                      "ideal_trit": 1,
+                      "ideal_voltage_v": 5.0,
+                      "voltage_v": 4.999997607753535,
+                      "error_v": -2.3922464649217545e-06,
+                      "passed": true,
+                      "settling_s": 2.2588741699089675e-07
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.006728312448751642,
+                    "VMID": 5.408358704748656e-07,
+                    "VSS": 0.0067276378942532095
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    1,
+                    -1,
+                    0,
+                    0
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0
+                  ],
+                  "check_s": 2.999e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": 1,
+                      "ideal_voltage_v": 5.0,
+                      "voltage_v": 4.999997607764276,
+                      "error_v": -2.392235724180125e-06,
+                      "passed": true,
+                      "settling_s": 1.314638675211322e-07
+                    },
+                    "y[0]": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.999924598037376,
+                      "error_v": 7.540196262389998e-05,
+                      "passed": true,
+                      "settling_s": 2.0703738135814063e-07
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.002963586234636965,
+                    "VMID": 1.284404670996988e-05,
+                    "VSS": 0.0029539495151279845
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    1
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    1,
+                    -1,
+                    0,
+                    0
+                  ],
+                  "check_s": 3.999e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": 1,
+                      "ideal_voltage_v": 5.0,
+                      "voltage_v": 4.999997607791673,
+                      "error_v": -2.392208327428591e-06,
+                      "passed": true,
+                      "settling_s": 0.0
+                    },
+                    "y[0]": {
+                      "ideal_trit": 1,
+                      "ideal_voltage_v": 5.0,
+                      "voltage_v": 4.999997562659051,
+                      "error_v": -2.437340948624467e-06,
+                      "passed": true,
+                      "settling_s": 8.845033410732852e-08
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.0033090206384661686,
+                    "VMID": -1.0217172671022995e-06,
+                    "VSS": 0.0033125748846568924
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    -1,
+                    -1
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    1
+                  ],
+                  "check_s": 4.999e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.999861366541736,
+                      "error_v": 0.000138633458264259,
+                      "passed": true,
+                      "settling_s": 1.210832168538741e-07
+                    },
+                    "y[0]": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.9999865447553296,
+                      "error_v": 1.345524467044612e-05,
+                      "passed": true,
+                      "settling_s": 8.938593948618449e-08
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.0033198366828082046,
+                    "VMID": 2.1414458866837269e-07,
+                    "VSS": 0.003318537265836704
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    -1,
+                    -1
+                  ],
+                  "check_s": 5.9990000000000005e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.041810068212795634,
+                      "error_v": -0.041810068212795634,
+                      "passed": true,
+                      "settling_s": 3.134921852211666e-08
+                    },
+                    "y[0]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.04180841038800482,
+                      "error_v": -0.04180841038800482,
+                      "passed": true,
+                      "settling_s": 2.4573886506493597e-08
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.016340638176345762,
+                    "VMID": -3.3852470304365306e-07,
+                    "VSS": 0.016345062165233376
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "check_s": 6.999e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.041821859804535955,
+                      "error_v": -0.041821859804535955,
+                      "passed": true,
+                      "settling_s": 0.0
+                    },
+                    "y[0]": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.999941304372521,
+                      "error_v": 5.869562747928825e-05,
+                      "passed": true,
+                      "settling_s": 2.0554438477215867e-07
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.007155643392726839,
+                    "VMID": 1.0954661205357986e-06,
+                    "VSS": 0.007154445356441295
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    0,
+                    0
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0
+                  ],
+                  "check_s": 7.998999999999999e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.99986045790377,
+                      "error_v": 0.00013954209623001645,
+                      "passed": true,
+                      "settling_s": 1.2248013359208103e-07
+                    },
+                    "y[0]": {
+                      "ideal_trit": 1,
+                      "ideal_voltage_v": 5.0,
+                      "voltage_v": 4.999997607753395,
+                      "error_v": -2.392246605253945e-06,
+                      "passed": true,
+                      "settling_s": 2.2737605037523632e-07
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.002959022737156601,
+                    "VMID": -4.443146925834672e-06,
+                    "VSS": 0.002953430793314971
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    0
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    0,
+                    0
+                  ],
+                  "check_s": 8.999e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": 1,
+                      "ideal_voltage_v": 5.0,
+                      "voltage_v": 4.999997607765633,
+                      "error_v": -2.3922343670434998e-06,
+                      "passed": true,
+                      "settling_s": 1.3352803799667448e-07
+                    },
+                    "y[0]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.0417862960412513,
+                      "error_v": -0.0417862960412513,
+                      "passed": true,
+                      "settling_s": 1.1704342130503495e-07
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.006248938272867271,
+                    "VMID": -9.874042922090223e-06,
+                    "VSS": 0.006275490251060857
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    -1,
+                    0
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    0
+                  ],
+                  "check_s": 9.998999999999999e-06,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": -1,
+                      "ideal_voltage_v": -5.0,
+                      "voltage_v": -4.999861804082397,
+                      "error_v": 0.00013819591760277916,
+                      "passed": true,
+                      "settling_s": 1.209780531744745e-07
+                    },
+                    "y[0]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.041808867383552564,
+                      "error_v": -0.041808867383552564,
+                      "passed": true,
+                      "settling_s": 0.0
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.0062656661995723695,
+                    "VMID": 2.7562986139315136e-07,
+                    "VSS": 0.006263519360799432
+                  },
+                  "passed": true
+                },
+                {
+                  "input_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0
+                  ],
+                  "previous_trits": [
+                    1,
+                    -1,
+                    1,
+                    1,
+                    -1,
+                    1,
+                    -1,
+                    0
+                  ],
+                  "check_s": 1.0999e-05,
+                  "outputs": {
+                    "y[1]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.04181007534235946,
+                      "error_v": -0.04181007534235946,
+                      "passed": true,
+                      "settling_s": 3.127469187315694e-08
+                    },
+                    "y[0]": {
+                      "ideal_trit": 0,
+                      "ideal_voltage_v": 0.0,
+                      "voltage_v": -0.04181629780193582,
+                      "error_v": -0.04181629780193582,
+                      "passed": true,
+                      "settling_s": 0.0
+                    }
+                  },
+                  "rail_current_a": {
+                    "VDD": -0.016331767889542236,
+                    "VMID": -4.0308801283022855e-06,
+                    "VSS": 0.016334019458026292
+                  },
+                  "passed": true
+                }
+              ],
+              "ideal_volts": {
+                "-1": -5.0,
+                "0": 0.0,
+                "1": 5.0
+              },
+              "max_error_v": 0.041838723910842715,
+              "max_settling_s": {
+                "y[1]": 1.3352803799667448e-07,
+                "y[0]": 2.2737605037523632e-07
+              },
+              "unsettled": 0,
+              "sample_step_s": 2e-09
+            },
+            "stimulus": {
+              "netlist": "TritFlow ternary testbench\n*\n.parameters vthMP\t= 0\n.parameters vthMN \t= 0\n.parameters vthMPE      = 0\n.parameters vthMNE      = 0\n.parameters magRR       = 1\n.parameters magRS       = 1 \n.parameters magCSIO     = 1 \n.include \"$TR1UM_PDK/libs.tech/spice/models/models_IP62_cap_v5p1.lib\"\n.include \"$TR1UM_PDK/libs.tech/spice/models/models_IP62_diode_v2.lib\"\n.include \"$TR1UM_PDK/libs.tech/spice/models/models_IP62_mos_v2.lib\"\n.include \"$TR1UM_PDK/libs.tech/spice/models/models_IP62_res_v5.lib\"\n* net tf_795b305d = y[0]\n* net tf_795b315d = y[1]\n* Created by KLayout\n*** My special header ***\n\n* cell dot4\n* pin VDD\n* pin VMID\n* pin VSS\n* pin tf_795b305d\n* pin tf_795b315d\n* pin w0\n* pin w1\n* pin w2\n* pin w3\n* pin x0\n* pin x1\n* pin x2\n* pin x3\n.SUBCKT dot4 VDD VMID VSS tf_795b305d tf_795b315d w0 w1 w2 w3 x0 x1 x2 x3\n* cell instance $1 r0 *1 78,246\nX_ex_1 VDD w0 x0 n_ex_I78 VSS NOR\n* cell instance $2 m90 *1 390,246\nX_ex_2 VMID n_ex_I210 n_ex_I191 VDD n_ex_I212 VSS NANY\n* cell instance $3 m90 *1 672,1014\nX_ex_3 VMID n_ex_I200 n_ex_I190 VDD tf_795b305d VSS NANY\n* cell instance $4 m90 *1 654,54\nX_ex_4 VMID n_ex_I191 n_ex_I207 VDD n_ex_I210 VSS NANY\n* cell instance $5 m90 *1 1188,54\nX_ex_5 VMID n_ex_I204 n_ex_I188 VDD n_ex_I209 VSS NANY\n* cell instance $6 m90 *1 390,1014\nX_ex_6 VMID n_ex_I200 n_ex_I210 VDD n_ex_I208 VSS NANY\n* cell instance $7 m90 *1 1080,438\nX_ex_7 VMID n_ex_I206 n_ex_I186 VDD n_ex_I207 VSS NANY\n* cell instance $8 m90 *1 1080,822\nX_ex_8 VMID n_ex_I199 n_ex_I185 VDD n_ex_I206 VSS NANY\n* cell instance $9 m90 *1 798,630\nX_ex_9 VMID n_ex_I176 n_ex_I184 VDD n_ex_I205 VSS NANY\n* cell instance $10 m90 *1 1488,54\nX_ex_10 VMID n_ex_I188 n_ex_I193 VDD n_ex_I204 VSS NANY\n* cell instance $11 m90 *1 1050,1014\nX_ex_11 VMID n_ex_I178 n_ex_I201 VDD n_ex_I203 VSS NANY\n* cell instance $12 m90 *1 1626,246\nX_ex_12 VMID n_ex_I194 n_ex_I181 VDD tf_795b315d VSS NANY\n* cell instance $13 m90 *1 1596,1014\nX_ex_13 VMID n_ex_I193 n_ex_I180 VDD n_ex_I201 VSS NANY\n* cell instance $14 m90 *1 264,438\nX_ex_14 VMID n_ex_I212 n_ex_I179 VDD n_ex_I200 VSS NANY\n* cell instance $15 r0 *1 630,822\nX_ex_15 VMID n_ex_I203 n_ex_I178 VDD n_ex_I199 VSS NANY\n* cell instance $16 r0 *1 1458,822\nX_ex_16 VMID n_ex_I193 n_ex_I205 VDD n_ex_I198 VSS NANY\n* cell instance $17 r0 *1 1290,822\nX_ex_17 VMID n_ex_I205 n_ex_I176 VDD n_ex_I197 VSS NANY\n* cell instance $18 r0 *1 1020,246\nX_ex_18 VMID n_ex_I200 n_ex_I206 VDD n_ex_I196 VSS NANY\n* cell instance $19 r0 *1 966,630\nX_ex_19 VMID n_ex_I206 n_ex_I203 VDD n_ex_I195 VSS NANY\n* cell instance $20 r0 *1 1374,438\nX_ex_20 VMID n_ex_I209 n_ex_I173 VDD n_ex_I194 VSS NANY\n* cell instance $21 r0 *1 1050,1014\nX_ex_21 VMID n_ex_I197 n_ex_I172 VDD n_ex_I193 VSS NANY\n* cell instance $22 r0 *1 1290,246\nX_ex_22 VMID n_ex_I194 n_ex_I204 VDD n_ex_I192 VSS NANY\n* cell instance $23 m90 *1 222,1014\nX_ex_23 VDD w3 x3 n_ex_I149 VSS NOR\n* cell instance $24 m90 *1 642,246\nX_ex_24 VDD w1 x1 n_ex_I148 VSS NOR\n* cell instance $25 m90 *1 234,630\nX_ex_25 VDD w2 x2 n_ex_I147 VSS NOR\n* cell instance $26 r0 *1 108,54\nX_ex_26 VDD w0 x0 n_ex_I65 VSS NAND\n* cell instance $27 m90 *1 360,54\nX_ex_27 VDD n_ex_I78 n_ex_I91 VSS INV\n* cell instance $29 m90 *1 360,822\nX_ex_29 VDD n_ex_I147 n_ex_I90 VSS INV\n* cell instance $30 m90 *1 624,438\nX_ex_30 VDD n_ex_I207 n_ex_I179 VSS INV\n* cell instance $31 m90 *1 1566,630\nX_ex_31 VDD n_ex_I198 n_ex_I180 VSS INV\n* cell instance $32 m90 *1 780,1014\nX_ex_32 VDD n_ex_I208 n_ex_I190 VSS INV\n* cell instance $33 m90 *1 1458,630\nX_ex_33 VDD n_ex_I193 n_ex_I173 VSS INV\n* cell instance $34 m90 *1 1020,54\nX_ex_34 VDD n_ex_I196 n_ex_I188 VSS INV\n* cell instance $35 m90 *1 1188,438\nX_ex_35 VDD n_ex_I195 n_ex_I186 VSS INV\n* cell instance $36 r0 *1 1320,1014\nX_ex_36 VDD n_ex_I201 n_ex_I185 VSS INV\n* cell instance $37 r0 *1 912,246\nX_ex_37 VDD n_ex_I148 n_ex_I82 VSS INV\n* cell instance $38 r0 *1 1080,822\nX_ex_38 VDD n_ex_I184 n_ex_I172 VSS INV\n* cell instance $39 r0 *1 264,438\nX_ex_39 VDD n_ex_I149 n_ex_I80 VSS INV\n* cell instance $40 r0 *1 1488,54\nX_ex_40 VDD n_ex_I192 n_ex_I181 VSS INV\n* cell instance $41 m90 *1 768,438\nX_ex_41 VDD n_ex_I60 n_ex_I82 n_ex_I176 VSS NAND\n* cell instance $42 m90 *1 252,822\nX_ex_42 VDD w3 x3 n_ex_I63 VSS NAND\n* cell instance $43 r0 *1 234,630\nX_ex_43 VDD w2 x2 n_ex_I62 VSS NAND\n* cell instance $44 r0 *1 654,54\nX_ex_44 VDD n_ex_I65 n_ex_I91 n_ex_I184 VSS NAND\n* cell instance $45 r0 *1 642,246\nX_ex_45 VDD w1 x1 n_ex_I60 VSS NAND\n* cell instance $46 r0 *1 486,822\nX_ex_46 VDD n_ex_I62 n_ex_I90 n_ex_I178 VSS NAND\n* cell instance $47 r0 *1 486,630\nX_ex_47 VDD n_ex_I63 n_ex_I80 n_ex_I191 VSS NAND\n* Estimated lumped wire C to substrate (node 0); not signoff PEX\nCtfwire0 VDD 0 6.4129176742e-12\nCtfwire1 VMID 0 4.0945750496e-12\nCtfwire2 tf_795b315d 0 8.6664287e-14\nCtfwire3 tf_795b305d 0 2.355676246e-13\nCtfwire4 w0 0 6.01361606e-14\nCtfwire5 w1 0 9.50152306e-14\nCtfwire6 w2 0 7.09639186e-14\nCtfwire7 w3 0 1.023551302e-13\nCtfwire8 x0 0 9.8050981e-14\nCtfwire9 x1 0 1.50664715e-13\nCtfwire10 x2 0 9.1358363e-14\nCtfwire11 x3 0 1.635508374e-13\nCtfwire12 VSS 0 5.0436697634e-12\nCtfwire13 n_ex_I212 0 7.12003814e-14\nCtfwire14 n_ex_I210 0 1.927186232e-13\nCtfwire15 n_ex_I209 0 1.227470118e-13\nCtfwire16 n_ex_I208 0 1.069148104e-13\nCtfwire17 n_ex_I207 0 1.475312142e-13\nCtfwire18 n_ex_I206 0 1.86844557e-13\nCtfwire19 n_ex_I205 0 1.987976452e-13\nCtfwire20 n_ex_I204 0 1.386289952e-13\nCtfwire21 n_ex_I203 0 1.486560168e-13\nCtfwire22 n_ex_I201 0 1.222400138e-13\nCtfwire23 n_ex_I200 0 3.086427654e-13\nCtfwire24 n_ex_I199 0 9.43104454e-14\nCtfwire25 n_ex_I198 0 6.36326024e-14\nCtfwire26 n_ex_I197 0 1.085887454e-13\nCtfwire27 n_ex_I196 0 7.46652344e-14\nCtfwire28 n_ex_I195 0 6.30196784e-14\nCtfwire29 n_ex_I194 0 1.523064616e-13\nCtfwire30 n_ex_I193 0 2.568872066e-13\nCtfwire31 n_ex_I192 0 6.11809064e-14\nCtfwire32 n_ex_I191 0 1.757713398e-13\nCtfwire33 n_ex_I190 0 4.45814966e-14\nCtfwire34 n_ex_I188 0 1.416882368e-13\nCtfwire35 n_ex_I186 0 4.45814966e-14\nCtfwire36 n_ex_I185 0 8.05280746e-14\nCtfwire37 n_ex_I184 0 1.424038328e-13\nCtfwire38 n_ex_I181 0 1.44300867e-13\nCtfwire39 n_ex_I180 0 9.9045471e-14\nCtfwire40 n_ex_I179 0 7.47311846e-14\nCtfwire41 n_ex_I178 0 1.163268194e-13\nCtfwire42 n_ex_I176 0 1.755513758e-13\nCtfwire43 n_ex_I173 0 4.74301786e-14\nCtfwire44 n_ex_I172 0 8.1417951e-14\nCtfwire45 n_ex_I149 0 8.9394533e-14\nCtfwire46 n_ex_I148 0 7.0453045e-14\nCtfwire47 n_ex_I147 0 5.5864425e-14\nCtfwire48 n_ex_I91 0 7.21405952e-14\nCtfwire49 n_ex_I90 0 5.38770032e-14\nCtfwire50 n_ex_I82 0 7.47774336e-14\nCtfwire51 n_ex_I80 0 6.12931056e-14\nCtfwire52 n_ex_I78 0 4.9236101e-14\nCtfwire53 n_ex_I65 0 7.25840502e-14\nCtfwire54 n_ex_I63 0 8.74793686e-14\nCtfwire55 n_ex_I62 0 4.43869742e-14\nCtfwire56 n_ex_I60 0 3.45801902e-14\n.ends dot4\n\n* cell NANY\n* pin VMID\n* pin B\n* pin A\n* pin VDD\n* pin Y\n* pin VSS\n.SUBCKT NANY VMID B A VDD Y VSS\n* device instance $1 r0 *1 41,100 PMOS\nXM_ex_1 n_ex_30 B n_ex_44 VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u\n* device instance $2 r0 *1 26,100 PMOS\nXM_ex_2 n_ex_44 A VDD VDD PMOS L=1u W=34u AS=95.2p AD=95.2p PS=73.6u PD=73.6u\n* device instance $3 r0 *1 56,100 PMOS\nXM_ex_3 n_ex_8 A Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u\n* device instance $4 r0 *1 71,100 PMOS\nXM_ex_4 n_ex_10 B Y VDD PMOS L=1u W=14u AS=39.2p AD=39.2p PS=33.6u PD=33.6u\n* device instance $5 r0 *1 26,27 NMOS\nXM_ex_5 n_ex_17 A n_ex_6 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u\n* device instance $6 r0 *1 41,27 NMOS\nXM_ex_6 VSS B n_ex_17 VSS NMOS L=1u W=11u AS=30.8p AD=30.8p PS=27.6u PD=27.6u\n* device instance $7 r0 *1 56,27 NMOS\nXM_ex_7 n_ex_8 B VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u\n* device instance $8 r0 *1 71,27 NMOS\nXM_ex_8 n_ex_10 A VMID VSS NMOS L=1u W=8u AS=22.4p AD=22.4p PS=21.6u PD=21.6u\n* device instance $9 r0 *1 118.5,54 F_RR\nXR_ex_9 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n* device instance $10 r0 *1 118.5,84 F_RR\nXR_ex_10 n_ex_30 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n.ENDS NANY\n\n* cell NOR\n* pin VDD\n* pin A\n* pin B\n* pin Y\n* pin VSS\n.SUBCKT NOR VDD A B Y VSS\n* device instance $1 r0 *1 26,100 PMOS\nXM_ex_1 n_ex_17 A VDD VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u\n* device instance $2 r0 *1 41,100 PMOS\nXM_ex_2 n_ex_4 B n_ex_17 VDD PMOS L=1u W=37u AS=103.6p AD=103.6p PS=79.6u PD=79.6u\n* device instance $3 r0 *1 26,28 NMOS\nXM_ex_3 n_ex_5 A VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u\n* device instance $4 r0 *1 41,28 NMOS\nXM_ex_4 n_ex_5 B VSS VSS NMOS L=1u W=6.5u AS=18.2p AD=18.2p PS=18.6u PD=18.6u\n* device instance $5 r0 *1 96,54 F_RR\nXR_ex_5 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n* device instance $6 r0 *1 96,84 F_RR\nXR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n.ENDS NOR\n\n* cell INV\n* pin VDD\n* pin A\n* pin Y\n* pin VSS\n.SUBCKT INV VDD A Y VSS\n* device instance $1 r0 *1 19.2,56 PMOS\nXM_ex_1 n_ex_5 A VDD VDD PMOS L=1u W=13.5u AS=37.8p AD=37.8p PS=32.6u PD=32.6u\n* device instance $2 r0 *1 19.2,26 NMOS\nXM_ex_2 n_ex_6 A VSS VSS NMOS L=1u W=5u AS=14p AD=14p PS=15.6u PD=15.6u\n* device instance $3 r0 *1 70,44 F_RR\nXR_ex_3 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n* device instance $4 r0 *1 70,57 F_RR\nXR_ex_4 n_ex_5 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n.ENDS INV\n\n* cell NAND\n* pin VDD\n* pin A\n* pin B\n* pin Y\n* pin VSS\n.SUBCKT NAND VDD A B Y VSS\n* device instance $1 r0 *1 26,100 PMOS\nXM_ex_1 n_ex_4 A VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u\n* device instance $2 r0 *1 41,100 PMOS\nXM_ex_2 n_ex_4 B VDD VDD PMOS L=1u W=19u AS=53.2p AD=53.2p PS=43.6u PD=43.6u\n* device instance $3 r0 *1 26,28 NMOS\nXM_ex_3 n_ex_17 A n_ex_6 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u\n* device instance $4 r0 *1 41,28 NMOS\nXM_ex_4 VSS B n_ex_17 VSS NMOS L=1u W=13u AS=36.4p AD=36.4p PS=31.6u PD=31.6u\n* device instance $5 r0 *1 96,54 F_RR\nXR_ex_5 n_ex_6 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n* device instance $6 r0 *1 96,84 F_RR\nXR_ex_6 n_ex_4 Y VDD F_RR R=10.7142857143 L=30u W=2.8u A=84p P=65.6u m=1\n.ENDS NAND\n\n.temp 27\n.options rshunt=1e12\nVDD VDD 0 5\nVMID VMID 0 0\nVSS VSS 0 -5\nXdut VDD VMID VSS tf_795b305d tf_795b315d w0 w1 w2 w3 x0 x1 x2 x3 dot4\nVin0 w0 0 DC 5 PWL(0 5 1e-06 5 1.001e-06 5 2e-06 5 2.001e-06 5 3e-06 5 3.001e-06 5 4e-06 5 4.001e-06 5 5e-06 5 5.001e-06 5 6e-06 5 6.001e-06 5 7e-06 5 7.001e-06 5 8e-06 5 8.001e-06 5 9e-06 5 9.001e-06 5 1e-05 5 1.0001e-05 5)\nVin1 w1 0 DC -5 PWL(0 -5 1e-06 -5 1.001e-06 -5 2e-06 -5 2.001e-06 -5 3e-06 -5 3.001e-06 -5 4e-06 -5 4.001e-06 -5 5e-06 -5 5.001e-06 -5 6e-06 -5 6.001e-06 -5 7e-06 -5 7.001e-06 -5 8e-06 -5 8.001e-06 -5 9e-06 -5 9.001e-06 -5 1e-05 -5 1.0001e-05 -5)\nVin2 w2 0 DC 5 PWL(0 5 1e-06 5 1.001e-06 5 2e-06 5 2.001e-06 5 3e-06 5 3.001e-06 5 4e-06 5 4.001e-06 5 5e-06 5 5.001e-06 5 6e-06 5 6.001e-06 5 7e-06 5 7.001e-06 5 8e-06 5 8.001e-06 5 9e-06 5 9.001e-06 5 1e-05 5 1.0001e-05 5)\nVin3 w3 0 DC 5 PWL(0 5 1e-06 5 1.001e-06 5 2e-06 5 2.001e-06 5 3e-06 5 3.001e-06 5 4e-06 5 4.001e-06 5 5e-06 5 5.001e-06 5 6e-06 5 6.001e-06 5 7e-06 5 7.001e-06 5 8e-06 5 8.001e-06 5 9e-06 5 9.001e-06 5 1e-05 5 1.0001e-05 5)\nVin4 x0 0 DC 0 PWL(0 0 1e-06 0 1.001e-06 5 2e-06 5 2.001e-06 5 3e-06 5 3.001e-06 5 4e-06 5 4.001e-06 -5 5e-06 -5 5.001e-06 0 6e-06 0 6.001e-06 0 7e-06 0 7.001e-06 -5 8e-06 -5 8.001e-06 5 9e-06 5 9.001e-06 -5 1e-05 -5 1.0001e-05 0)\nVin5 x1 0 DC 0 PWL(0 0 1e-06 0 1.001e-06 0 2e-06 0 2.001e-06 -5 3e-06 -5 3.001e-06 -5 4e-06 -5 4.001e-06 5 5e-06 5 5.001e-06 0 6e-06 0 6.001e-06 5 7e-06 5 7.001e-06 5 8e-06 5 8.001e-06 -5 9e-06 -5 9.001e-06 5 1e-05 5 1.0001e-05 0)\nVin6 x2 0 DC 0 PWL(0 0 1e-06 0 1.001e-06 0 2e-06 0 2.001e-06 0 3e-06 0 3.001e-06 5 4e-06 5 4.001e-06 -5 5e-06 -5 5.001e-06 0 6e-06 0 6.001e-06 0 7e-06 0 7.001e-06 0 8e-06 0 8.001e-06 5 9e-06 5 9.001e-06 -5 1e-05 -5 1.0001e-05 0)\nVin7 x3 0 DC 0 PWL(0 0 1e-06 0 1.001e-06 0 2e-06 0 2.001e-06 0 3e-06 0 3.001e-06 5 4e-06 5 4.001e-06 -5 5e-06 -5 5.001e-06 0 6e-06 0 6.001e-06 0 7e-06 0 7.001e-06 0 8e-06 0 8.001e-06 0 9e-06 0 9.001e-06 0 1e-05 0 1.0001e-05 0)\nCload0 tf_795b315d 0 1e-13\nCload1 tf_795b305d 0 1e-13\n.nodeset v(tf_795b315d)=0\n.nodeset v(tf_795b305d)=0\n.nodeset v(xdut.n_ex_I65)=0\n.nodeset v(xdut.n_ex_I78)=-5\n.nodeset v(xdut.n_ex_I60)=5\n.nodeset v(xdut.n_ex_I148)=0\n.nodeset v(xdut.n_ex_I62)=0\n.nodeset v(xdut.n_ex_I147)=-5\n.nodeset v(xdut.n_ex_I63)=0\n.nodeset v(xdut.n_ex_I149)=-5\n.nodeset v(xdut.n_ex_I91)=5\n.nodeset v(xdut.n_ex_I82)=0\n.nodeset v(xdut.n_ex_I90)=5\n.nodeset v(xdut.n_ex_I80)=5\n.nodeset v(xdut.n_ex_I184)=0\n.nodeset v(xdut.n_ex_I176)=0\n.nodeset v(xdut.n_ex_I178)=0\n.nodeset v(xdut.n_ex_I191)=0\n.nodeset v(xdut.n_ex_I172)=0\n.nodeset v(xdut.n_ex_I205)=0\n.nodeset v(xdut.n_ex_I197)=0\n.nodeset v(xdut.n_ex_I193)=0\n.nodeset v(xdut.n_ex_I198)=0\n.nodeset v(xdut.n_ex_I173)=0\n.nodeset v(xdut.n_ex_I180)=0\n.nodeset v(xdut.n_ex_I201)=0\n.nodeset v(xdut.n_ex_I185)=0\n.nodeset v(xdut.n_ex_I203)=0\n.nodeset v(xdut.n_ex_I199)=0\n.nodeset v(xdut.n_ex_I206)=0\n.nodeset v(xdut.n_ex_I195)=0\n.nodeset v(xdut.n_ex_I186)=0\n.nodeset v(xdut.n_ex_I207)=0\n.nodeset v(xdut.n_ex_I179)=0\n.nodeset v(xdut.n_ex_I210)=0\n.nodeset v(xdut.n_ex_I212)=0\n.nodeset v(xdut.n_ex_I200)=0\n.nodeset v(xdut.n_ex_I196)=0\n.nodeset v(xdut.n_ex_I208)=0\n.nodeset v(xdut.n_ex_I188)=0\n.nodeset v(xdut.n_ex_I190)=0\n.nodeset v(xdut.n_ex_I204)=0\n.nodeset v(xdut.n_ex_I209)=0\n.nodeset v(xdut.n_ex_I194)=0\n.nodeset v(xdut.n_ex_I192)=0\n.nodeset v(xdut.n_ex_I181)=0",
+              "commands": "tran 2e-09 1.1e-05 0 2e-09",
+              "probes": [
+                "v(w0)",
+                "v(w1)",
+                "v(w2)",
+                "v(w3)",
+                "v(x0)",
+                "v(x1)",
+                "v(x2)",
+                "v(x3)",
+                "v(tf_795b315d)",
+                "v(tf_795b305d)",
+                "i(vdd)",
+                "i(vmid)",
+                "i(vss)"
+              ],
+              "vectors": [
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  1,
+                  -1,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  1,
+                  -1,
+                  1,
+                  1
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  -1,
+                  1,
+                  -1,
+                  -1
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  0,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  -1,
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  1,
+                  -1,
+                  1,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  -1,
+                  1,
+                  -1,
+                  0
+                ],
+                [
+                  1,
+                  -1,
+                  1,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              ],
+              "inputs": [
+                "w0",
+                "w1",
+                "w2",
+                "w3",
+                "x0",
+                "x1",
+                "x2",
+                "x3"
+              ],
+              "outputs": [
+                "y[1]",
+                "y[0]"
+              ],
+              "hold_s": 1e-06,
+              "edge_s": 1e-09,
+              "step_s": 2e-09,
+              "supplies_v": {
+                "VDD": 5.0,
+                "VMID": 0.0,
+                "VSS": -5.0
+              },
+              "temperature_c": 27,
+              "signal_names": {
+                "w0": "w0",
+                "w1": "w1",
+                "w2": "w2",
+                "w3": "w3",
+                "x0": "x0",
+                "x1": "x1",
+                "x2": "x2",
+                "x3": "x3",
+                "y[0]": "tf_795b305d",
+                "y[1]": "tf_795b315d"
+              }
+            },
+            "sta_arrival_s": {
+              "y[1]": 1.207137914682853e-07,
+              "y[0]": 2.1993392907463366e-07
+            }
+          }
+        },
+        "runtime": {
+          "python": "3.12.3",
+          "packages": {
+            "numpy": "2.4.3",
+            "scipy": "1.17.1",
+            "plotly": "7.1.0",
+            "klayout": "0.30.6",
+            "lark": "1.3.1",
+            "matplotlib": "3.10.8"
+          },
+          "tools": {
+            "KLayout": "KLayout 0.30.9",
+            "ngspice": "******\n** ngspice-42 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2023, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Sun Mar 31 20:15:14 UTC 2024\n******"
+          }
+        },
+        "pdk": {
+          "root": "$TR1UM_PDK",
+          "qualified_commit": "5d963db9d44e192d37a0489c208bfccf2e2f690c",
+          "checkout_commit": "5d963db9d44e192d37a0489c208bfccf2e2f690c",
+          "setup_pins_sha256": "e2d1ee29a7de8c4acf7b07d87f3154b36f3ab4273f025ad6036e5dcdfea59165",
+          "consumed_sha256": {
+            "libs.tech/spice/models/ip62_models": "219ca479adc7d6d960f83e18e0081da153a479f34615333d74c946869bc4c6ec",
+            "libs.tech/spice/models/models_IP62_cap_v5p1.lib": "265c1e2b5228381633ec936f208101b64a0538905c41bdf53e760df10f347bed",
+            "libs.tech/spice/models/models_IP62_diode_v2.lib": "37c19bd4f6d631a5862f2b6aeda62e5eb73ed15fe0de9932296a81a144f1550f",
+            "libs.tech/spice/models/models_IP62_mos_v2.lib": "251864d489d0e15a3081871763af29e1bbc8654ae55662bede40e0a7bbac1400",
+            "libs.tech/spice/models/models_IP62_res_v5.lib": "0d6e2e4b7739fd68946c746830ed8896f4ec5ee98e984fdb5c8dd1116ad78311",
+            "libs.tech/klayout/tech/lvs/01_Extract.lvs": "5557369f863655af37590b0cc12bfb75b8b378ce8ce954cc9840866bcf32c6b1",
+            "libs.tech/klayout/tech/lvs/02_Extract.lvs": "34b58cf32802767352a047ae9927ddf78467916d96991fe1b5e3f0a6285b464a",
+            "libs.tech/klayout/tech/lvs/03_Combiner.lvs": "38f081645ca9396735b685ea0acbfb36796b14df252b7c292c371dd911be6388",
+            "libs.tech/klayout/tech/lvs/04_Custom.lvs": "bb9339879006ed5eaf3c635ad3d5d1bf3a2d732e4d2e0e74482685945b3d8cbe",
+            "libs.tech/klayout/tech/lvs/05_Compare.lvs": "0788f066d55d284c879613d3fb125157d9458e52dd03782be89e4372a6d89e4b",
+            "libs.tech/klayout/tech/lvs/IP62/00_Extract.lvs": "88223f3a98b07fa68202a6fdcdb2e75bb0c07a710bc0f358671263ce2f0a5e94",
+            "libs.tech/klayout/tech/lvs/IP62/01_Extract.lvs": "d543379e53b23937f4f3598d82144783b2573b3b2a6f261d5411d4eeecd53881",
+            "libs.tech/klayout/tech/lvs/IP62/02_Extract.lvs": "fbd0880c4688dcbda8b7f20b2ed3c6a9cb89e425cd0dfae42dffb3b89ff27a6b",
+            "libs.tech/klayout/tech/lvs/IP62/run.lvs": "73cdf8adfb8560e9f1df2eb674392854d827b6b0f0655d886cc57f13d80db931",
+            "libs.tech/klayout/tech/lvs/flatten_generated_pins.rb": "d2595646eeb7327922d2391dc649b0451dd155a920e26606db04560d42ea41f9",
+            "libs.tech/klayout/tech/lvs/lvs.lylvs": "1fdbec8c7f76a2f2c93584cefb8b250535f40ab41ffe5f426d14be1248eae70a",
+            "libs.tech/klayout/tech/lvs/run.lvs": "bac31eb9ae01a20b70ff6723ba5bf4be00fa4a44ada377daa251e975c3a89110",
+            "libs.tech/klayout/tech/lvs/run_svs.lvs": "cd96de71d0d6b9b8908bc1d49aababa3dcc7b960054d242b49cda0093c6024ca",
+            "libs.tech/klayout/tech/drc/00_Layers.drc": "6f1ece6c37de872af75c4249eb02e9d211b2e13a29661dd20b95806ae72435e2",
+            "libs.tech/klayout/tech/drc/01_Basics.drc": "b8cfb0df7b6e98db833a8019b50fad3be9672b91793d215690c4e0dfb480c2ff",
+            "libs.tech/klayout/tech/drc/02_Device.drc": "f2a79da0cfe7f1bca89b2b00bd7576393eb302a20b8568f16f6214f4bf2729bc",
+            "libs.tech/klayout/tech/drc/03_Electrical.drc": "497d9cd3ddbccbba68f73553618b455fecffe849b4be37f10d750030b7bde085",
+            "libs.tech/klayout/tech/drc/04_TapeOut.drc": "56b7d1905429bf49bcc1313413e33f1fe69d87af104e287ecfa1a9981447ae6f",
+            "libs.tech/klayout/tech/drc/IP62/00_Layers.drc": "32f0957029368e89a032626b3a2fb8b09930c36cc9581b62c0ad132c9d393b07",
+            "libs.tech/klayout/tech/drc/IP62/01_Basics.drc": "eac124d2e77929ca2b675cd6c8b6e36065a5cecf699f2ca59a532647fdea7314",
+            "libs.tech/klayout/tech/drc/IP62/02_Device.drc": "df84a871f7b9c6f1c9809deae2d8d716377596c8a400d1690949a731eeb82010",
+            "libs.tech/klayout/tech/drc/IP62/03_Check.drc": "6487168daa36b1d9765b42e461fd4d271495aeef919a41b2c937745071af7b46",
+            "libs.tech/klayout/tech/drc/IP62/04_Check.drc": "5a2107118f3a92377b57a220c865f75e59e589675956c70e7b35ec890e8c9d2a",
+            "libs.tech/klayout/tech/drc/IP62/05_Check.drc": "1a81ef8b0ce88d435963a2f05cc253dfa786df3841de4e505a7867517aeb3911",
+            "libs.tech/klayout/tech/drc/IP62/06_Check.drc": "26fd6afb7a2fc69ba584763fece00e7e77aaa7d55c4b43acea2bc1daa4c22b20",
+            "libs.tech/klayout/tech/drc/IP62/07_Check.drc": "4ad62763f3ae5c9233fc8a9fd55a5ec999450362070956fcf0348060ce03d758",
+            "libs.tech/klayout/tech/drc/IP62/08_Check.drc": "a4dbf53e06b7993d1e54138da767990f90197a8960fcb86c8c7b63bfa9cf602d",
+            "libs.tech/klayout/tech/drc/IP62/09_Check.drc": "e5602d8aa07ab997a023b5d4da91437ce066f56abf71a1eca4556e1a8110eb72",
+            "libs.tech/klayout/tech/drc/IP62/10_TapeOut.drc": "cf06a1b71c5d0f492277b5c39d74457f5c8aa27fdfea70fd1a0ea37036a425cd",
+            "libs.tech/klayout/tech/drc/drc.lydrc": "1e610ee59a2022e5e3da275fdf99b6717678403035ddc14f27f7ff94d02b31b8",
+            "libs.tech/klayout/tech/drc/drc_IP62.lydrc": "e5b40a257ce8e7e88e488d8b73086af15e984dc46399ec600818788317b1c1da",
+            "libs.tech/klayout/tech/drc/run.drc": "8ffc43f3ea42fedf8f6f39facfada8309cd16d089a3af1b26016526e215f56ca",
+            "libs.tech/klayout/tech/drc/run_IP62.drc": "07f9811a87a562ac4e0e4a13b70c5f60dd9d3ca962a8b034acb224877a3c5ebe",
+            "libs.tech/klayout/tech/drc/run_mdp.drc": "f8afffd7e1abefb6188fc69ba623bc00b72d6af0f87198aafaf0b08d3002cbed",
+            "libs.tech/klayout/tech/drc/run_tile.drc": "5966f762d81e7408f245957ec1b0813caa346a5cb902fbd9e5fd9ba22dccd135"
+          },
+          "scope": "Public pinned PDK; numerical interconnect assumptions are separately labelled."
+        },
+        "source_ref": "71ba7253326c140441893f6be2752803d8fb51c9",
+        "runtime_commit_at_end": "4361c38e1506621346e8e0a48f26f126899e335e",
+        "runtime_commit": "4361c38e1506621346e8e0a48f26f126899e335e",
+        "tracked_working_changes_at_execution": [
+          "docs/references.md",
+          "notebook/v3/make_notebook.py",
+          "notebook/v3/narrative/00_opening.md",
+          "notebook/v3/narrative/03_hdl.md",
+          "notebook/v3/narrative/05_verify.md",
+          "submission/ISSCC27/submitted_notebooks/TritFlow/ABSTRACT.md",
+          "submission/ISSCC27/submitted_notebooks/TritFlow/CHECKLIST.md",
+          "submission/ISSCC27/submitted_notebooks/TritFlow/PITCH.md",
+          "submission/ISSCC27/submitted_notebooks/TritFlow/README.md",
+          "submission/ISSCC27/submitted_notebooks/TritFlow/build-info.json",
+          "submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_tr1um.ipynb",
+          "submission/README.md",
+          "submission/build_submission.py",
+          "submission/official_sources.json",
+          "submission/templates/ABSTRACT.md",
+          "submission/templates/CHECKLIST.md",
+          "submission/templates/PITCH.md",
+          "submission/templates/README.md",
+          "submission/tests/test_packaging.py"
+        ],
+        "untracked_runtime_sources_at_execution": [
+          "examples/dot_scaling.py",
+          "notebook/scale_views.py",
+          "notebook/v3/narrative/06_results.md",
+          "results/dot_scaling.json",
+          "results/dot_scaling/.gitignore",
+          "results/dot_scaling/dot2/capacitance.json.gz",
+          "results/dot_scaling/dot2/dc_state_000_ngspice.log.gz",
+          "results/dot_scaling/dot2/dc_state_000_tb.spice.gz",
+          "results/dot_scaling/dot2/dc_state_001_ngspice.log.gz",
+          "results/dot_scaling/dot2/dc_state_001_tb.spice.gz",
+          "results/dot_scaling/dot2/dc_state_002_ngspice.log.gz",
+          "results/dot_scaling/dot2/dc_state_002_tb.spice.gz",
+          "results/dot_scaling/dot2/dc_state_003_ngspice.log.gz",
+          "results/dot_scaling/dot2/dc_state_003_tb.spice.gz",
+          "results/dot_scaling/dot2/dc_state_004_ngspice.log.gz",
+          "results/dot_scaling/dot2/dc_state_004_tb.spice.gz",
+          "results/dot_scaling/dot2/dot2.drc.lyrdb.gz",
+          "results/dot_scaling/dot2/dot2.gds.gz",
+          "results/dot_scaling/dot2/dot2.json.gz",
+          "results/dot_scaling/dot2/dot2.pnr.json.gz",
+          "results/dot_scaling/dot2/dot2.tv.gz",
+          "results/dot_scaling/dot2/lvs_extracted.spice.gz",
+          "results/dot_scaling/dot2/lvs_report.lvsdb.gz",
+          "results/dot_scaling/dot2/post_measurements.json.gz",
+          "results/dot_scaling/dot2/post_ngspice.log.gz",
+          "results/dot_scaling/dot2/post_tb.spice.gz",
+          "results/dot_scaling/dot2/postlayout.spice.gz",
+          "results/dot_scaling/dot2/sta.json.gz",
+          "results/dot_scaling/dot2/static.json.gz",
+          "results/dot_scaling/dot2/vectors.json.gz",
+          "results/dot_scaling/dot4/capacitance.json.gz",
+          "results/dot_scaling/dot4/dc_state_000_ngspice.log.gz",
+          "results/dot_scaling/dot4/dc_state_000_tb.spice.gz",
+          "results/dot_scaling/dot4/dc_state_001_ngspice.log.gz",
+          "results/dot_scaling/dot4/dc_state_001_tb.spice.gz",
+          "results/dot_scaling/dot4/dc_state_002_ngspice.log.gz",
+          "results/dot_scaling/dot4/dc_state_002_tb.spice.gz",
+          "results/dot_scaling/dot4/dc_state_003_ngspice.log.gz",
+          "results/dot_scaling/dot4/dc_state_003_tb.spice.gz",
+          "results/dot_scaling/dot4/dc_state_004_ngspice.log.gz",
+          "results/dot_scaling/dot4/dc_state_004_tb.spice.gz",
+          "results/dot_scaling/dot4/dc_state_005_ngspice.log.gz",
+          "results/dot_scaling/dot4/dc_state_005_tb.spice.gz",
+          "results/dot_scaling/dot4/dc_state_006_ngspice.log.gz",
+          "results/dot_scaling/dot4/dc_state_006_tb.spice.gz",
+          "results/dot_scaling/dot4/dot4.drc.lyrdb.gz",
+          "results/dot_scaling/dot4/dot4.gds.gz",
+          "results/dot_scaling/dot4/dot4.json.gz",
+          "results/dot_scaling/dot4/dot4.pnr.json.gz",
+          "results/dot_scaling/dot4/dot4.tv.gz",
+          "results/dot_scaling/dot4/lvs_extracted.spice.gz",
+          "results/dot_scaling/dot4/lvs_report.lvsdb.gz",
+          "results/dot_scaling/dot4/post_measurements.json.gz",
+          "results/dot_scaling/dot4/post_ngspice.log.gz",
+          "results/dot_scaling/dot4/post_tb.spice.gz",
+          "results/dot_scaling/dot4/postlayout.spice.gz",
+          "results/dot_scaling/dot4/sta.json.gz",
+          "results/dot_scaling/dot4/static.json.gz",
+          "results/dot_scaling/dot4/vectors.json.gz",
+          "results/dot_scaling/dot8/capacitance.json.gz",
+          "results/dot_scaling/dot8/dc_state_000_ngspice.log.gz",
+          "results/dot_scaling/dot8/dc_state_000_tb.spice.gz",
+          "results/dot_scaling/dot8/dc_state_001_ngspice.log.gz",
+          "results/dot_scaling/dot8/dc_state_001_tb.spice.gz",
+          "results/dot_scaling/dot8/dc_state_002_ngspice.log.gz",
+          "results/dot_scaling/dot8/dc_state_002_tb.spice.gz",
+          "results/dot_scaling/dot8/dc_state_003_ngspice.log.gz",
+          "results/dot_scaling/dot8/dc_state_003_tb.spice.gz",
+          "results/dot_scaling/dot8/dc_state_004_ngspice.log.gz",
+          "results/dot_scaling/dot8/dc_state_004_tb.spice.gz",
+          "results/dot_scaling/dot8/dc_state_005_ngspice.log.gz",
+          "results/dot_scaling/dot8/dc_state_005_tb.spice.gz",
+          "results/dot_scaling/dot8/dc_state_006_ngspice.log.gz",
+          "results/dot_scaling/dot8/dc_state_006_tb.spice.gz",
+          "results/dot_scaling/dot8/dot8.drc.lyrdb.gz",
+          "results/dot_scaling/dot8/dot8.gds.gz",
+          "results/dot_scaling/dot8/dot8.json.gz",
+          "results/dot_scaling/dot8/dot8.pnr.json.gz",
+          "results/dot_scaling/dot8/dot8.tv.gz",
+          "results/dot_scaling/dot8/lvs_extracted.spice.gz",
+          "results/dot_scaling/dot8/lvs_report.lvsdb.gz",
+          "results/dot_scaling/dot8/post_measurements.json.gz",
+          "results/dot_scaling/dot8/post_ngspice.log.gz",
+          "results/dot_scaling/dot8/post_tb.spice.gz",
+          "results/dot_scaling/dot8/postlayout.spice.gz",
+          "results/dot_scaling/dot8/sta.json.gz",
+          "results/dot_scaling/dot8/static.json.gz",
+          "results/dot_scaling/dot8/vectors.json.gz",
+          "results/dot_scaling/floorplan_trials.log",
+          "results/dot_scaling/floorplan_trials32.log",
+          "results/dot_scaling/routing_trial.log",
+          "results/dot_scaling/routing_trial2.log",
+          "results/dot_scaling/routing_trial32.log",
+          "results/dot_scaling/routing_trial32b.log",
+          "results/dot_scaling/run.log"
+        ]
+      },
+      "evaluation": {
+        "present": false,
+        "executed_cell_ids": [],
+        "tables": []
+      },
+      "release": {
+        "default_ref": "71ba7253326c140441893f6be2752803d8fb51c9",
+        "commit": "71ba7253326c140441893f6be2752803d8fb51c9",
+        "matches_source_notebook": false,
+        "missing_required_helpers": [],
+        "compatible": false
+      },
+      "code_cells": 26,
+      "saved_outputs": 46,
+      "png_outputs": 14,
+      "embedded_paper_figures": 6,
+      "html_tables": 5
+    }
+  },
+  "official_rules_commit": "a502a6ba01260d3492df9137dddae0bb5fabeb3c",
+  "official_rules_checked_date": "2026-10-23",
+  "official_sources_sha256": "d82cfc73c05c4862b6e3c2d8c80f740cb0b09db12e3ad883637c16b2e5ed67e1",
+  "recommended_runtime": {
+    "pdk_repository": "https://github.com/OpenSUSI/TR-1um",
+    "pdk_commit": "5d963db9d44e192d37a0489c208bfccf2e2f690c",
+    "pdk_archive_sha256": "003010a0f64fafb96acf5a0d18614c096d8faf6ade29e13af4bde54d85262769",
+    "klayout_version": "0.30.6",
+    "klayout_deb": {
+      "24.04": {
+        "url": "https://www.klayout.org/downloads/Ubuntu-24/klayout_0.30.6-1_amd64.deb",
+        "sha256": "1e921676d218e43e5bf39d1b36f510df889ec42d7e7f601b4b5ee1a16d84d41f"
+      }
     },
+    "ubuntu_snapshot": "20261019T000000Z",
+    "docker_image": "ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac",
+    "ubuntu_dependency_lock": {
+      "24.04": "ubuntu-24.04-lock.json"
+    },
+    "pip_wheel": {
+      "version": "25.2",
+      "url": "https://files.pythonhosted.org/packages/b7/3f/945ef7ab14dc4f9d7f40288d2df998d1837ee0888ec3659c813487572faa/pip-25.2-py3-none-any.whl",
+      "sha256": "6d67a2b4e7f14d8b31b8b52648866fa717f45a1eb70e83002f4331d07e953717"
+    },
+    "ngspice_package": {
+      "version": "42+ds-3build1",
+      "upstream_version": "42",
+      "architectures": [
+        "amd64",
+        "arm64"
+      ]
+    },
+    "ngspice_dependency_locks": {
+      "amd64": "ngspice-24.04-amd64-lock.json",
+      "arm64": "ngspice-24.04-arm64-lock.json"
+    }
+  },
+  "recommended_runtime_sha256": "e2d1ee29a7de8c4acf7b07d87f3154b36f3ab4273f025ad6036e5dcdfea59165",
+  "submission_ready": false,
+  "readiness_notes": [
+    "English primary notebook is not yet available; this is a Japanese development preview.",
+    "tritflow_ja.ipynb: pinned release does not contain the same notebook and required helpers.",
+    "tritflow_ja.ipynb: local execution used a different commit from the bootstrap pin.",
+    "tritflow_ja.ipynb: execution used unpublished changes to runtime inputs.",
+    "tritflow_ja.ipynb: chapter 6 evaluation has not executed in this source revision."
+  ],
+  "colab_verified": false,
+  "colab_verification_scope": "This package records local execution of v3; historical v1 Colab evidence is not promoted to v3.",
+  "files": {
     "CHECKLIST.md": {
-      "bytes": 5166,
-      "sha256": "f793a189ede5716ced42037ea2d1b91edc08ad6cc5d8bf65fe041d3340dbd060"
+      "bytes": 4524,
+      "sha256": "3163b9167d35765510fafba5d2da6ede372cc4c75073593e8fe034eb7e190d2b"
     },
     "NOTICE": {
       "bytes": 842,
       "sha256": "7630ddc3e330372ca17a712384c28b95adda04fe7c6e19ebe8aa35e587090738"
     },
     "ABSTRACT.md": {
-      "bytes": 774,
-      "sha256": "6aabf160ab24f986ec738bbd4d66522717d79e0c9b9c4da8ea174f2027f3cd2a"
+      "bytes": 1107,
+      "sha256": "701a1ffbe67ee9035161af9a96e2ff81c83ae473e5ce3ae155dfa1243efaa956"
+    },
+    "tritflow_ja.ipynb": {
+      "bytes": 3815846,
+      "sha256": "b00f69d8da34cb8d7c9e7e4bf8b1838a578d7a4961abb2974379df5f65268fe8"
     },
     "LICENSE": {
       "bytes": 11358,
       "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
     },
     "README.md": {
-      "bytes": 7850,
-      "sha256": "37d9ed81432262fd50ea69295e0fd95a51e66a27b02100e541147af14f4d25f3"
+      "bytes": 8175,
+      "sha256": "0860ce6f225ef516330a21cbb48fa908300ad7a2fb73e09dc5ba25c57b280383"
     },
     "PITCH.md": {
-      "bytes": 497,
-      "sha256": "51b46f0cb9983e229f4a5551e459d69e2008626fe6a2a5135b6b034a911cabe0"
+      "bytes": 475,
+      "sha256": "47ccb84dcad5ce7bd546c83c6e205de8e3ae42fb647aa0388f1b2facb5fe81c9"
     }
   },
   "file_count": 8,
-  "total_bytes": 7386768
+  "code_cells": 26,
+  "saved_outputs": 46,
+  "png_outputs": 14,
+  "embedded_paper_figures": 6,
+  "html_tables": 5,
+  "total_bytes": 3913064
 }

@@ -1,118 +1,117 @@
-# TritFlow — balanced-ternary HDL to GDS
+# TritFlow — balanced-ternary HDL to GDS on OpenSUSI TR-1um
 
-IEEE SSCS Code-a-Chip, ISSCC 2027. Author information follows `docs/author.md`
-in the source repository.
-
-Team: {{TEAM_NAME}}
+IEEE SSCS Code-a-Chip, ISSCC 2027. Team: {{TEAM_NAME}}
 
 {{AUTHORS_TABLE}}
 
 {{AUTHOR_DETAILS}}
 
 Designated representative: **{{REPRESENTATIVE}}**.
-Attendance/poster confirmation: **{{ATTENDANCE}}**.
+Attendance/poster confirmation: **{{ATTENDANCE}}**
 {{ASSET_RIGHTS}}
 
-Read [tritflow_tr1um.ipynb](tritflow_tr1um.ipynb) directly: its tables, layout,
-schematics and plots have saved outputs. Saved animation views are still
-frames; rerun for interactive figures. [Abstract](ABSTRACT.md),
-[three-sentence pitch](PITCH.md), and [requirements checklist](CHECKLIST.md)
-are included. [build-info.json](build-info.json) records source hashes, tools,
-capture conditions and the automatically measured package size.
-Captured bootstrap source commit: {{SOURCE_LINK}}. Any tracked working-tree
-changes observed at packaging are recorded separately; a commit ID alone is
-not an assertion that the whole working tree was clean.
+{{PACKAGE_STATUS}}
 
-## Reproduce
+{{NOTEBOOKS}}
+
+Read the saved schematics, tables, routed layouts and waveforms without a
+kernel. Rerun for input selectors, sizing controls, routing replay and waveform
+zoom. [Abstract](ABSTRACT.md), [pitch](PITCH.md), [official-rules checklist](CHECKLIST.md)
+and [build information](build-info.json) accompany the notebook. The build
+record identifies each notebook's source hash, immutable bootstrap pin, actual
+execution commit, runtime versions and captured results.
+
+## Concept and method
+
+TritFlow implements balanced-ternary logic directly on the open OpenSUSI TR-1um
+PDK. A trit takes −1, 0 or +1, represented by −5, 0 or +5 V. The cell library
+comes from the author's taped-out 1-trit multiply-add circuit. A ternary-weight
+dot product is the running design: the notebook explains its gates, writes
+arithmetic in a Verilog-like HDL, checks synthesis equivalence, places and
+routes cells, exports GDS, runs the PDK drawing-DRC and LVS decks, and simulates
+the extracted devices with estimated wire capacitance in ngspice. Ternary STA
+is compared with output settling times measured against the ±0.5 V bands.
+
+## Results from this execution
+
+{{RESULTS}}
+
+Logical input coverage and analog stimulus coverage are separate checks.
+The numbers above are generated from outputs of the executed evidence cell;
+no storyboard or hand-entered performance measurements feed this document.
+
+{{CHAPTER6_RESULTS}}
+
+## Run in Colab
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)]({{COLAB_URL}})
+
+Open the primary notebook, connect a Python CPU runtime and choose **Runtime →
+Run all**. Its setup cell obtains the full immutable `SOURCE_REF` from GitHub,
+installs the open EDA tools and verifies the PDK archive checksum. Local files
+and recorded campaigns are validated against the source and PDK before use.
+The badge names the notebook's bootstrap pin; if the compatibility note below
+reports a mismatch, publish a compatible source pin before sharing that badge
+as the final reproduction entry point. No moving release tag is assumed.
+
+{{RUNTIME}}
 
 {{COLAB_RUN_NOTE}}
 
-<details><summary>Source reference for this saved notebook</summary>
+For local execution, use the complete source checkout with the documented EDA
+installation and pinned PDK. Open the corresponding `notebook/v3/` notebook,
+or set `TRITFLOW_ROOT` to the checkout before running this copy. Cell, schematic
+and characterization assets are in the source repository; the submission
+folder omits tool distributions, PDK files and raw simulation trees. The
+builder's default work directory is `submission/.build/submission_capture/`.
+
+<details><summary>Source compatibility and execution provenance</summary>
 
 {{RELEASE_STATUS}}
 
+Observed execution source: {{SOURCE_LINK}}. Working-tree changes at packaging
+are recorded separately; a commit ID does not establish a clean checkout.
+Each notebook records its own runtime versions at execution. Export-library
+versions describe packaging, including when a matching raw capture is reused.
+
 </details>
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/colab-v0/notebook/tritflow_tr1um.ipynb)
+## Limits
 
-The notebook's first cell shallow-clones
-[PenguinEino/tritflow](https://github.com/PenguinEino/tritflow) at `colab-v0`
-into `/content/tritflow`, prints the resolved commit and installs it editably.
-`TRITFLOW_REF` can select another tag/branch. The release tag must exist before
-using that badge. The bootstrap installs ngspice, the pinned official KLayout
-binary/Python dependencies and a checksum-verified PDK archive at commit
-`5d963db9d44e192d37a0489c208bfccf2e2f690c`.
-The saved outputs in this package were executed locally. The Colab note names
-the tested revision and successful retry; its timer excludes the initial setup
-attempt. It does not establish uninterrupted first-attempt installation.
-This setup preserves Colab's scientific packages, checks minimum versions and
-live/disk consistency, and prints actual KLayout/ngspice versions. Only KLayout
-and Lark wheels are pinned; pip uses `--no-deps`. If an earlier installation
-left mixed versions loaded, follow the explicit restart-once message, then
-rerun setup/imports. Chapter cells report missing/failed prerequisites before
-using results. Appendix B records setup and rerun details.
+The results cover nominal model conditions and the documented input sequences;
+exhaustive HDL equivalence does not establish exhaustive transistor-level
+transition or PVT coverage. Wire capacitance is a geometry-based estimate,
+without a calibrated PEX deck, signal-wire resistance or coupling extraction.
+The cells use static current to establish ternary levels. Drawing DRC and LVS
+verify their stated geometry and connectivity scope; a routed core alone does
+not establish padframe, ESD, mask signoff or manufacturing readiness. Silicon
+measurements of the taped-out source cells remain future work. This project
+makes no performance or energy-efficiency claim against binary logic.
 
-For a local run, use the complete TritFlow checkout and its documented PDK and
-EDA tools. Open `notebook/tritflow_tr1um.ipynb`, or set `TRITFLOW_ROOT` to that
-checkout before running this copy. The checkout contains the cell/example/SVG
-assets; the notebook regenerates all design outputs and caches. No pre-existing
-`build/` directory or taped-out reference checkout is required. The submitted
-folder deliberately omits source, PDKs, tool installations, raw waveforms and
-large generated trees; they are fetched or regenerated by the notebook.
+## License and references
 
-A fresh session regenerates the opening adder and selected editable circuit.
-The repeated four-design matrix uses a committed, provenance-checked archive
-of native evidence and waveform/measurement JSON; missing/stale records cause
-computation. Recorded checks and their producer tools are labelled explicitly. Controlled wiring comparisons use identical
-extracted devices with/without estimated wire C; the authored schematic remains
-the independent LVS reference. It does not exhaust every directed transition or
-PVT condition. Wire C and rail-IR scope come from the SIM records; this is not
-calibrated signoff PEX. Required published data is checked against the current source and pinned PDK;
-a mismatch stops execution rather than displaying an old result.
-One disclosed compatibility proof accepts the added optional schematic delegate
-only if deleting that exact method recovers the complete recorded mapping-file
-SHA; all other bytes and physical inputs must match. Those remain recorded runs.
-Physical output is a core layout, without padframe/ESD or silicon qualification.
-Static PNG outputs need no JavaScript or local files to read. Per-stage wall
-and CPU times are generated at the end. Set `TRITFLOW_FORCE_RUN=1` before Run
-all to bypass stage caches; expensive committed characterization/sizing/scaling
-campaigns remain recorded evidence, validated by consumed-source/PDK hashes.
-The synthesis chapter shows SCHEM's public hierarchical and flat half-adder
-drawings with settled trits. The post-layout chapter annotates the same scene
-with the public PNR net-parasitics wire-C report; it excludes receiving-pin C.
-
-## License and provenance
-
-The TritFlow notebook/code is offered under **Apache-2.0**; the full license is
-included as [LICENSE](LICENSE), matching the source project's license.
-[NOTICE](NOTICE) preserves the source project's attribution notices.
-External tools and the OpenSUSI PDK retain their own licenses; this folder does
-not relicense or bundle their distributions. OpenSUSI TR-1um is Apache-2.0.
-The schematic images derive from the linked historical reference project.
-Einosuke Okazaki (岡崎 英之介) is its author and releases the derived assets in
-this repository under **Apache-2.0**, as explicitly authorized for this submission.
-
-Technical sources and reused material:
+Notebook, code and derived schematic assets are **Apache-2.0**. [LICENSE](LICENSE)
+is the complete license and [NOTICE](NOTICE) preserves attribution. Einosuke
+Okazaki (岡崎 英之介), author of the historical schematics, releases the derived assets
+under Apache-2.0. External tools and the PDK retain their own licenses; their
+distributions are not included or relicensed here.
 
 - [TritFlow source and reproduction guide](https://github.com/PenguinEino/tritflow).
 - [OpenSUSI TR-1um PDK](https://github.com/OpenSUSI/TR-1um).
-- [Historical balanced-ternary schematics and arithmetic](https://github.com/PenguinEino/opensusi-tr10-balanced-ternary-logic).
+- [Author's taped-out balanced-ternary cells and multiply-add](https://github.com/PenguinEino/opensusi-tr10-balanced-ternary-logic).
 - [KLayout](https://www.klayout.de/), [ngspice](https://ngspice.sourceforge.io/),
-  [Plotly](https://plotly.com/python/), [Lark](https://github.com/lark-parser/lark).
+  [Plotly](https://plotly.com/python/) and [Lark](https://github.com/lark-parser/lark).
 
-Past Code-a-Chip submissions were reviewed for packaging structure; no code or
-notebook cells were copied from them. Tool versions observed in the packaging
-environment are generated into `build-info.json` and the notebook front matter;
-the bootstrap separately records the recommended runtime pins.
+The notebook includes its technical bibliography. Previous Code-a-Chip
+submissions were consulted for presentation and folder structure; no notebook
+cells or code were copied from those submissions.
 
-## Filing scope
+## Filing
 
-Copy **only this directory** to
-`ISSCC27/submitted_notebooks/TritFlow/` in the official repository fork.
-Open the PR by **October 31, 2026, 11:59 AM Pacific Time**, then monitor organizer
-feedback. Do not copy the surrounding builder, tests or source repository.
-The team must designate one attending representative and, if selected, arrange
-the poster and required reimbursement documentation. No PR has been opened by
-this packaging task. Author and attendance information in `submission/team.json`
-follows the confirmed `docs/author.md` record. Rerun
-`python3 submission/build_submission.py` to regenerate the package.
+Copy **only this directory** to `ISSCC27/submitted_notebooks/TritFlow/` in a
+fork of the [official repository](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io).
+File the PR before **October 31, 2026, 11:59 AM Pacific Time**, and monitor
+organizer feedback. Run `python3 submission/build_submission.py --check
+--require-final` in the source checkout before filing. The package's 8 MiB
+budget is a local convenience, not an official limit. This builder does not
+commit, push or open the submission PR.

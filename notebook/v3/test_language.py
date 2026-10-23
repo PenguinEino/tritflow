@@ -60,11 +60,14 @@ def test_both_editions_have_the_same_cell_structure_and_local_assets():
     english = builder.cells("PIN", "en")
     assert [kind for kind, _ in japanese] == [kind for kind, _ in english]
     assert builder.cells("PIN") == japanese
-    assert all(not CJK.search(source) for _, source in english)
     for kind, source in english:
         if kind == "code":
             compile(source, "English cell", "exec")
+            assert not CJK.search(source)
         else:
+            # Keep the author's exact name and the original titles of Japanese references.
+            prose = source.split("### References", 1)[0].replace("岡崎 英之介", "")
+            assert not CJK.search(prose)
             for path in re.findall(r"/PIN/(.*?\.png)", source):
                 assert (builder.ROOT/path).is_file(), path
             for path in re.findall(r"@PIN/([^\"]+\.svg)", source):
@@ -73,6 +76,16 @@ def test_both_editions_have_the_same_cell_structure_and_local_assets():
     assert 'set_notebook_language("en")' in setup
     assert 'set_language("en")' in setup
     assert 'TRITFLOW_NOTEBOOK_LANGUAGE"] = "en"' in setup
+
+
+def test_colab_entry_point_and_original_bibliography_are_preserved():
+    opening = (HERE/"narrative_en/00_opening.md").read_text()
+    assert "blob/notebook-v3-en/notebook/v3/tritflow_en.ipynb" in opening
+    assert "Run all takes about 7 minutes on a fresh Colab runtime (setup about 2 minutes)." in opening
+    japanese = (HERE/"narrative/06_results.md").read_text().split("### 参考文献\n\n", 1)[1]
+    english = (HERE/"narrative_en/06_results.md").read_text().split("### References\n\n", 1)[1]
+    without_link_labels = lambda text: re.sub(r"\[[^\]]+\]\(([^)]+)\)", r"[](\1)", text)
+    assert without_link_labels(japanese) == without_link_labels(english)
 
 
 @pytest.mark.parametrize("name", builder.CHAPTERS)
@@ -131,3 +144,75 @@ def test_simulation_conditions_keep_the_actual_values_in_both_languages(monkeypa
     live.set_language("ja")
     views.transient_conditions(post, load_f=100e-15)
     assert output[-1] == japanese
+
+
+def test_note_font_names_are_one_valid_html_style_attribute(monkeypatch):
+    from html.parser import HTMLParser
+    from style import SERIF, MUTED
+
+    output = []
+    monkeypatch.setattr(views, "display", lambda html: output.append(html.data))
+    views.note("Recorded conditions: 27 °C, 100 fF.")
+
+    class Paragraph(HTMLParser):
+        def handle_starttag(self, tag, attrs):
+            if tag == "p":
+                self.attrs = dict(attrs)
+
+    paragraph = Paragraph()
+    paragraph.feed(output[0])
+    assert paragraph.attrs == {"class": "tf-note", "style": f"font-family:{SERIF};font-size:12.5px;color:{MUTED};margin:.4em 0 0"}
+
+
+def test_scaling_views_translate_labels_and_preserve_every_series():
+    import json
+    import scale_views
+
+    data = json.loads((builder.ROOT/"results/dot_scaling.json").read_text())
+    tables = [scale_views.synthesis_table, scale_views.scaling_table, scale_views.power_table,
+              scale_views.timing_table, scale_views.layout_penalty_table]
+    japanese = [table(data).data for table in tables]
+    plots = [scale_views.scaling_figure(data), scale_views.power_figure(data)]
+    live.set_language("en")
+    assert all(not CJK.search(table(data).data) for table in tables)
+    for original, view in zip(plots, [scale_views.scaling_figure, scale_views.power_figure]):
+        english = view(data)
+        assert not CJK.search(english.to_json())
+        assert [(list(t.x), list(t.y)) for t in english.data] == [(list(t.x), list(t.y)) for t in original.data]
+    power = scale_views.power_figure(data)
+    assert power.layout.legend.y < 0 and power.layout.margin.b >= 100
+    live.set_language("ja")
+    assert [table(data).data for table in tables] == japanese
+
+
+def test_reuse_translation_preserves_the_recorded_producer():
+    import hashlib
+    import json
+
+    folder = builder.ROOT/"notebook/assets/chip/dot4"
+    provenance = json.loads((folder/"provenance.json").read_text())
+    original = (folder/"reuse_before_english.py").read_bytes()
+    assert hashlib.sha256(original).hexdigest() == provenance["producer_source_sha256"]["notebook/reuse.py"]
+
+    class WithoutLabels(ast.NodeTransformer):
+        def visit_FunctionDef(self, node):
+            return None if node.name == "_label" else self.generic_visit(node)
+
+        def visit_Assign(self, node):
+            if any(isinstance(target, ast.Name) and target.id == "LABELS_EN" for target in node.targets):
+                return None
+            return self.generic_visit(node)
+
+        def visit_ImportFrom(self, node):
+            if node.module == "live":
+                node.names = [alias for alias in node.names if alias.name != "_text"]
+            return node
+
+        def visit_Call(self, node):
+            if isinstance(node.func, ast.Name) and node.func.id in ("_text", "_label"):
+                return self.visit(node.args[0])
+            return self.generic_visit(node)
+
+    current = (builder.ROOT/"notebook/reuse.py").read_text()
+    normalized = WithoutLabels().visit(ast.parse(current))
+    assert ast.dump(normalized) == ast.dump(ast.parse(original))
