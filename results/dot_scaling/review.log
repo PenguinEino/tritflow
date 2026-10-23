@@ -1,0 +1,11 @@
+dot16: sta_device_only
+dot4: sta_device_only
+dot2: sta_device_only
+dot8: sta_device_only
+dot4: device_only_spice
+dot16: retry SPICE with a documented 1.25 us hold
+N=2: complete; cells=15; SPICE=simulated; passed=True
+N=4: complete; cells=46; SPICE=simulated; passed=True
+N=8: complete; cells=122; SPICE=simulated; passed=True
+N=16: complete; cells=315; SPICE=simulated; passed=True
+N=32: failed; cells=675; SPICE=not reached; passed=False

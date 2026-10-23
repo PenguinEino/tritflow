@@ -1,0 +1,32 @@
+dot8: synthesis
+dot2: synthesis
+dot16: synthesis
+dot4: synthesis
+dot2: pnr
+dot4: pnr
+dot8: pnr
+dot16: pnr
+dot2: extraction
+dot2: sta
+dot2: spice
+dot4: extraction
+dot4: sta
+dot4: spice
+dot2: static
+dot32: synthesis
+dot32: pnr
+dot8: extraction
+dot8: sta
+dot8: spice
+dot4: static
+dot16: extraction
+dot16: sta
+dot16: spice
+dot8: static
+dot32: RoutingFailure: Routing failed for nets _n164, _n201, w26: no legal maze path; exhausted 3 floorplan attempts. Congested connection region: x=0..417 µm, y=15..7035 µm. Nearby occupied nets: _n0, _n1, _n104, _n105, _n138, _n139, _n149, _n150. Try more rows (rows=...) or channel tracks (channel_tracks=...); check cell pin-access obstructions.
+dot16: static
+N=2: complete; cells=15; SPICE=simulated; passed=True
+N=4: complete; cells=46; SPICE=simulated; passed=True
+N=8: complete; cells=122; SPICE=simulated; passed=True
+N=16: complete; cells=315; SPICE=not_simulated; passed=False
+N=32: failed; cells=675; SPICE=not reached; passed=False
