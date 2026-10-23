@@ -36,12 +36,25 @@ LABELS_EN = {
     "HDLを読み込んで合成": "Parse HDL and synthesize", "配置配線": "Place and route",
     "DRC（PDKのデッキ）": "DRC (PDK deck)", "LVS（PDKのデッキ）": "LVS (PDK deck)",
     "抽出と配線容量": "Extraction and wire capacitance", "ngspice（ポストレイアウト）": "ngspice (post-layout)",
+    "全入力状態": "exhaustive states", "一部の入力状態": "sampled states",
+    "全入力が0の状態から始め、反射型三値グレイコード順（桁の値は0、−1、+1）で全入力状態を調べる。全入力遷移を網羅する検証ではない。":
+        "All states in reflected ternary Gray order (digits 0, -1, +1), starting at zero; not exhaustive transition coverage.",
+    "全入力が0の状態、全入力が−1の状態と+1の状態、符号が交互の状態、1入力だけを変えた状態を状態数の上限まで選び、残りは重複のない疑似乱数で補う。全入力状態・全入力遷移を網羅する検証ではない。":
+        "Zero, rail corners, alternating signs, single-input excursions until the budget, then unique pseudorandom states. Not exhaustive state/transition coverage.",
+    "提出準備": "Submission ready", "未完了": "False", "完了": "True",
+    "電源": "power", "入力": "input", "出力": "output",
+    "提出には、シャトル運営者による2500 µm角の領域の割り当て、最終ボンディング図の合意、最終CIによる確認が必要である。":
+        "Organizer allocation of a full 2500 um slot, final bond diagram and final CI remain",
+    "カスタムTEGのパッドとボンディングの割り当て、およびESD・電源・パッケージの承認がまだ必要である。":
+        "Custom TEG pad/bond allocation and ESD/power/package approval still required",
 }
 
 
 def _label(text):
     """Localize presentation labels without changing HDL, stimuli or recorded evidence."""
-    return _text(text, LABELS_EN.get(text, text))
+    text = str(text)
+    japanese = next((ja for ja, en in LABELS_EN.items() if en == text), text)
+    return _text(japanese, LABELS_EN.get(text, text))
 
 
 DOT4_SOURCE = """module dot4(input trit w0, w1, w2, w3, x0, x1, x2, x3,
@@ -154,7 +167,7 @@ def summary_view(summary):
             [_label("マクロ寸法 (µm)"), f"{w:g} × {h:g}"],
             [_label("DRC 違反"), summary["drc_violations"]],
             ["LVS", _label("一致") if summary["lvs_matched"] else _label("不一致")],
-            [_label("SPICE 入力状態"), f"{plan['unique_states']} / {plan['total_states']} ({plan['mode']})"],
+            [_label("SPICE 入力状態"), f"{plan['unique_states']} / {plan['total_states']} ({_label(plan['mode'])})"],
             [_label("出力レベル・整定"), "PASS" if summary["post_passed"] else "FAIL"],
             [_label("最大出力誤差 (V)"), f"{summary['max_error_v']:.4f}"]]
     for pin, value in summary["max_settling_s"].items():
@@ -253,7 +266,7 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
     expected = _oracle(circuit, inputs)
     guesses = logical_nodeset(net, lvs["report"], inputs, plan["vectors"][0])
     with step(_label("ngspice（ポストレイアウト）")) as s:
-        s.detail = _text(f"{plan['unique_states']}入力状態 · {plan['mode']}", f"{plan['unique_states']} input states · {plan['mode']}")
+        s.detail = _text(f"{plan['unique_states']}入力状態 · {_label(plan['mode'])}", f"{plan['unique_states']} input states · {plan['mode']}")
         post = extracted.simulate(plan["vectors"], expected=expected, load=load_f, hold_s=hold_s,
                                   step_s=step_s, edge_s=edge_s, temperature_c=temperature_c,
                                   timeout=timeout, workdir=out / "spice", nodeset=guesses)
@@ -276,7 +289,7 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
         from tritflow.viz.layout import gds_viewer
         from views import note, scope_figure, transient_conditions
         display(summary_view(summary))
-        note(plan["method"])
+        note(_label(plan["method"]))
         display(gds_viewer(layout.gds_path, top=net.top))
         display(scope_figure(post, title=net.top, settle=True))
         transient_conditions(post, load_f=load_f)
@@ -299,14 +312,14 @@ def shuttle_view(directory=None):
                     ["Drawing LVS", _label("一致") if report["drawing_lvs"]["matched"] else _label("不一致")],
                     [_label("Mask DRC 違反"), report["mask_drc"]["violations"]],
                     ["MPW precheck", "PASS" if report["mpw_precheck"]["clean"] else "FAIL"],
-                    ["Submission ready", report["submission_ready"]]], key="tfshuttlechecks"))
+                    [_label("Submission ready"), _label(report["submission_ready"])]], key="tfshuttlechecks"))
     directions = report["port_directions"]
     rows = [["Pad", "信号 / 電源", "方向", "X (µm)", "Y (µm)"]]
-    rows += [[p["pad"], p["net"], directions.get(p["net"], "power"), *p["center_um"]]
+    rows += [[p["pad"], p["net"], _label(directions.get(p["net"], "power")), *p["center_um"]]
              for p in report["pad_map"]]
     display(_table(rows, key="tfshuttlepads"))
     from views import note
-    note(report["reason"])
+    note(_label(report["reason"]))
     return report
 
 

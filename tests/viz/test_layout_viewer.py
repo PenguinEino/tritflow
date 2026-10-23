@@ -127,6 +127,24 @@ def test_busy_kernel_retries_without_permanent_static_transition(gds, monkeypatc
     assert 'requested !== revision || failures' in script  # Retry newest view after recovery.
 
 
+def test_viewer_inherits_notebook_drawing_language_and_allows_override(gds, monkeypatch):
+    from tritflow.schematic import get_language, set_language
+    monkeypatch.setitem(sys.modules, 'google.colab', None)
+    original = get_language()
+    try:
+        set_language('ja')
+        html = gds_viewer(gds, width=500, height=300).data
+        assert '全体表示' in html and '座標の単位：µm' in html and 'TR-1umの層の凡例' in html
+        assert 'Static overview' not in html and 'Coordinates in' not in html
+        english = gds_viewer(gds, width=500, height=300, language='en').data
+        assert 'Static overview' in english and 'Coordinates in µm' in english
+        assert get_language() == 'ja'
+        with pytest.raises(ValueError, match='unknown language'):
+            gds_viewer(gds, language='de')
+    finally:
+        set_language(original)
+
+
 def test_live_webp_is_lossless_and_cache_separates_encodings(gds):
     renderer = _GdsRenderer(gds)
     try:
@@ -188,6 +206,10 @@ def test_labels_hide_at_overview_and_return_with_detail_and_static_export(tmp_pa
     try:
         overview = renderer.render([0, 0, 3000, 3000], 600, 600)
         assert overview['labels'] is False
+        # The notebook's first circuit is only 554 µm wide, but its rail names
+        # are still too dense for overview labels.
+        assert renderer.render([0, 0, 554, 388], 1000, 700)['labels'] is False
+        overview = renderer.render([0, 0, 3000, 3000], 600, 600)
         renderer.view.set_config('text-visible', 'true')
         with_labels = np.array(Image.open(io.BytesIO(bytes(
             renderer.view.get_pixels_with_options(600, 600, 0, 0, 0, db.DBox(*overview['box'])).to_png_data()))).convert('RGB'))
