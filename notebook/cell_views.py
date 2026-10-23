@@ -12,7 +12,7 @@ import re
 
 from IPython.display import HTML, display
 
-from live import _layer_paths, _patterns, LayoutView, layer_legend
+from live import _layer_paths, _patterns, _text, LayoutView, layer_legend
 from style import INK, MUTED, RULE, SERIF, TRIT_COLOR as COLOR, TRIT_TEXT, figure_css, table_css
 _VIEWS = 0
 
@@ -37,8 +37,9 @@ def closure_view(found):
     def cell(v):
         return f'<td class="t{v+1}">{TRIT_TEXT[v]}</td>'
 
-    head = ('<tr><th rowspan="2">段</th><th rowspan="2">作り方<small>入力は a</small></th><th colspan="3">出力</th></tr>'
-            '<tr>' + "".join(f"<th>a = {TRIT_TEXT[v]}</th>" for v in TRITS) + "</tr>")
+    head = (_text('<tr><th rowspan="2">段</th><th rowspan="2">作り方<small>入力は a</small></th><th colspan="3">出力</th></tr>',
+                  '<tr><th rowspan="2">Depth</th><th rowspan="2">Construction<small>input a</small></th><th colspan="3">Output</th></tr>')
+            + '<tr>' + "".join(f"<th>a = {TRIT_TEXT[v]}</th>" for v in TRITS) + "</tr>")
     rows = "".join(f'<tr><td>{found[f]}</td><td class="l">{name}</td>{"".join(cell(v) for v in f)}</tr>'
                    for name, f in steps)
     display(HTML(f'<style>{figure_css(".tfclosure")}{table_css(".tfclosure")}'
@@ -117,7 +118,7 @@ def cell_tables(cells_dir, schematics_dir):
              ".tfcells figure{margin:0;min-width:0} .tfcells figcaption{font-weight:600;margin-bottom:.2em}"
              ".tfcells figure svg{width:100%;max-width:540px;height:auto;display:block;margin:0 auto}")
     display(HTML(f'<style>{style}</style><div class="tfcells"><div class="cards">{"".join(cards)}</div>'
-                 f'<details><summary>テープアウトした回路図（Xschem）</summary><div class="grid">{"".join(figures)}</div>'
+                 f'<details><summary>{_text("テープアウトした回路図（Xschem）", "Taped-out schematics (Xschem)")}</summary><div class="grid">{"".join(figures)}</div>'
                  f'</details></div>'))
 
 
@@ -178,5 +179,7 @@ def cell_row(library, cells_dir, *, groups=(("INV", "NAND", "NOR", "NANY"), ("BU
                  f'<div style="font-size:13px;margin-top:.1em">' + "　".join(
                      f'<span style="display:inline-block;width:14px;height:9px;border:1.5px dashed {c};background:{c}1a;'
                      f'vertical-align:middle;margin-right:4px"></span>{label}' for c, label in DEVICE.values()) +
-                 f'</div><div style="color:{MUTED};font-size:13px;margin-top:.2em">同じ縮尺。高さはすべて {height:g} µm、幅は '
-                 f'{template["grid"]:g} µm の倍数。</div></div>'))
+                 f'</div><div style="color:{MUTED};font-size:13px;margin-top:.2em">' + _text(
+                     f'同じ縮尺。高さはすべて {height:g} µm、幅は {template["grid"]:g} µm の倍数。',
+                     f'Common scale. All cells are {height:g} µm high; widths are multiples of {template["grid"]:g} µm.')
+                 + '</div></div>'))

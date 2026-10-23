@@ -1,15 +1,17 @@
-"""Build the v3 Japanese notebook from the narrative files and the code cells below.
+"""Build v3 in Japanese (default) or English from one set of code cells.
 
 Each narrative file is Markdown; a line ``<!-- code: NAME -->`` places code cell NAME there, and
 ``<!-- figure: NAME -->`` places figures/out/NAME.png from the pinned commit.
 
-    python3 notebook/v3/make_notebook.py [--ref COMMIT]   # default: HEAD
+    python3 notebook/v3/make_notebook.py [--lang ja|en] [--ref COMMIT]
 """
 import argparse
+from io import StringIO
 import json
 import re
 import subprocess
 import sys
+import tokenize
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -17,7 +19,10 @@ HERE = Path(__file__).resolve().parent
 # The setup cell and the table pictures are shared with v2.
 sys.path.insert(0, str(HERE.parent/"v2"))
 from setup_cell import SETUP
-from make_tables import TABLES, width
+from make_tables import TABLES, TABLES_EN, width
+
+sys.path.insert(0, str(HERE.parent))
+from localization import localize_source, translate_text
 
 RAW = "https://raw.githubusercontent.com/PenguinEino/tritflow"
 # jsDelivr serves SVG as an image; raw.githubusercontent.com does not.
@@ -251,42 +256,161 @@ note("STAの条件：5-3と同じ入力の列、出力の負荷 100 fF、入力�
 
 CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md", "05_verify.md"]
 
+# Presentation literals and cell-title comments only; HDL and executable expressions are shared.
+ENGLISH = {
+    "準備（最初に実行）": "Setup (run first)",
+    "GitHubからソースを取得": "Fetch source from GitHub",
+    "コミット ": "Commit ",
+    " を取得": " · fetch",
+    " に切り替え": " · switch",
+    "ファイルを展開": "Check out files",
+    "ツールを確認": "Check tools",
+    "合成するHDLは、1-1に書いてあります。": "The HDL to synthesize is defined in 1-1.",
+    "配置配線する回路 net は、1-2で合成します。": "The netlist net is synthesized in 1-2.",
+    "DRCとLVSは、1-3で作ったGDSを調べます。": "DRC and LVS check the GDS generated in 1-3.",
+    "シミュレーションは、1-4でLVSが一致したGDSから回路を取り出して動かします。": "Simulation uses the circuit extracted from the LVS-matched GDS in 1-4.",
+    "合成するHDLは、3-1に書いてあります。": "The HDL to synthesize is defined in 3-1.",
+    "合成するHDLは、3-3に書いてあります。": "The HDL to synthesize is defined in 3-3.",
+    "合成するHDLは、3-5に書いてあります。": "The HDL to synthesize is defined in 3-5.",
+    "合成するHDLは、3-7に書いてあります。": "The HDL to synthesize is defined in 3-7.",
+    "配置配線する回路は、3-8で合成した積和です。": "The dot-product netlist is synthesized in 3-8.",
+    "表示するGDSは、4-1で作ります。": "The GDS to display is generated in 4-1.",
+    "検証するGDSは、4-1で作ります。": "The GDS to verify is generated in 4-1.",
+    "抽出は、5-1でLVSが一致したGDSから行います。": "Extraction uses the LVS-matched GDS from 5-1.",
+    "シミュレーションする回路は、5-2で抽出します。": "The circuit to simulate is extracted in 5-2.",
+    "比べるSPICEの結果は、5-3で求めます。": "The SPICE results for comparison are computed in 5-3.",
+    "STAの条件：5-3と同じ入力の列、出力の負荷 100 fF、入力の変化時間 1 ns、配線容量は5-2の抽出値。":
+        "STA conditions: input sequence from 5-3, output load 100 fF, input slew 1 ns, wire capacitance extracted in 5-2.",
+    "HDLを読み込んで合成": "Parse HDL and synthesize",
+    "全入力で等価": "equivalent for all inputs",
+    "等価でない": "not equivalent",
+    "全区間で ±0.5 V の帯に入った": "within the ±0.5 V band in every interval",
+    "帯に入らない区間がある": "outside the band in some intervals",
+    "ngspice（INVのDC解析）": "ngspice (INV DC analysis)",
+    "INVのDC解析と寸法": "INV DC analysis and sizing",
+    "入力 0 V：Y = ": "Input 0 V: Y = ",
+    "寸法の記録を照合": "Check recorded sizing data",
+    "通り · 回路・モデル・解析コードが一致": " candidates · schematic, models and analysis code match",
+    "NANYと +1 の定数から作れる1入力関数": "Unary functions from NANY and the +1 constant",
+    "作れた1入力関数：": "Unary functions constructed: ",
+    "、最も深いもので ": "; maximum depth ",
+    " 段": " stages",
+    "NANYは2つの入力の両方に依存し、出力に−1・0・+1のすべてが現れる：":
+        "NANY depends on both inputs and takes all three output values (−1, 0, +1):",
+    "セルの真理値表": "Cell truth tables",
+    "スタンダードセル": "Standard cells",
+    "HDL：+ で書いた全加算器": "HDL: full adder using +",
+    "HDL：* で書いた1トリットの積": "HDL: one-trit product using *",
+    "HDL：同じ選択を2通りに書く": "HDL: two descriptions of selection",
+    "HDL：三値重みの4項の積和": "HDL: four-term dot product with ternary weights",
+    "論理合成して比べる": "Synthesize and compare",
+    "論理合成（2通り）": "Logic synthesis (two descriptions)",
+    "論理合成する": "Logic synthesis",
+    "合成する": "Logic synthesis",
+    "論理合成": "Logic synthesis",
+    "配置配線する": "Place and route",
+    "配置配線": "Place and route",
+    "DRCとLVS": "DRC and LVS",
+    "DRC（PDKのデッキ）": "DRC (PDK deck)",
+    "LVS（PDKのデッキ）": "LVS (PDK deck)",
+    "ポストレイアウトシミュレーション": "Post-layout simulation",
+    "抽出と配線容量": "Extraction and wire capacitance",
+    "INVの遅延の表": "INV delay table",
+    "三値のSTAとSPICEの比較": "Ternary STA and SPICE comparison",
+    "三値のSTA": "Ternary STA",
+    "不一致": "Mismatch",
+    "一致": "Matched",
+    "違反 ": "Violations: ",
+    "件": "",
+    "素子のネットリスト · ": "Device netlist · ",
+    "本に配線容量を追加": " signal nets",
+    "信号": "Wire capacitance added to ",
+    "配線長の見積もり ": "Estimated wire length ",
+    "配線 ": "Routed nets: ",
+    "本": "",
+    "ビア ": "Vias: ",
+    "個": "",
+    "セル": " cells",
+    "行": " rows",
+    " · 全": " · all ",
+    "入力で等価": " input vectors equivalent",
+    "出力": " outputs",
+}
 
-def cells(ref):
+
+def code_source(source, lang):
+    """Translate presentation literals and title comments, preserving executable tokens."""
+    if lang == "ja":
+        return source
+    source = localize_source(source, ENGLISH)
+    tokens = [token._replace(string=translate_text(token.string, ENGLISH))
+              if token.type == tokenize.COMMENT else token
+              for token in tokenize.generate_tokens(StringIO(source).readline)]
+    source = tokenize.untokenize(tokens)
+    if re.search(r"[ぁ-んァ-ヶ一-龠]", source):
+        raise ValueError("Missing English code-cell translation:\n" + source)
+    return source
+
+
+def cells(ref, lang="ja"):
+    if lang not in ("ja", "en"):
+        raise ValueError(f"unknown language: {lang}")
     out = []
-    setup = "#@title 準備（最初に実行） { display-mode: \"form\" }\n" + SETUP.replace('"PINNED"', f'"{ref}"') + PREAMBLE
+    setup = SETUP.replace('"PINNED"', f'"{ref}"')
+    setup = setup.replace("from live import step, run_stages",
+                          f'from live import step, run_stages, set_language as set_notebook_language\nset_notebook_language("{lang}")')
+    setup = setup.replace('os.environ["TRITFLOW_NOTEBOOK_LANGUAGE"] = "ja"',
+                          f'os.environ["TRITFLOW_NOTEBOOK_LANGUAGE"] = "{lang}"')
+    setup = ('#@title 準備（最初に実行） { display-mode: "form" }\n' + setup
+             + PREAMBLE.replace('set_language("ja")', f'set_language("{lang}")'))
+    narrative = HERE/("narrative_en" if lang == "en" else "narrative")
+    tables, suffix = (TABLES_EN, "_en") if lang == "en" else (TABLES, "")
+
+    def figure(match):
+        name = match[1]
+        path = f"figures/out/{name}{'_ja' if lang == 'ja' else ''}.png"
+        # The Japanese flow map has no published English counterpart; its translated vector
+        # labels and raster live here so EN does not edit the figure stream's files.
+        if lang == "en" and name == "fig_flow_map":
+            path = "notebook/v3/assets/fig_flow_map.png"
+        if not (ROOT/path).is_file():
+            raise FileNotFoundError(path)
+        return f"![{name}]({RAW}/{ref}/{path})"
+
     for index, name in enumerate(CHAPTERS):
-        text = (HERE/"narrative"/name).read_text()
+        text = (narrative/name).read_text()
         text = re.sub(r"<!-- tables: ([\w ]+) -->", lambda m: "&emsp;&emsp;".join(
-            f'<img src="{CDN}@{ref}/notebook/assets/tables/{name}.svg" width="{width(TABLES[name])}" alt="{name}">'
+            f'<img src="{CDN}@{ref}/notebook/assets/tables/{name}{suffix}.svg" width="{width(tables[name])}" alt="{name}">'
             for name in m[1].split()), text)
         text = re.sub(r"<!-- asset: (\S+) \| (.+?) -->", lambda m: f"<details><summary>{m[2]}</summary>\n\n"
                       f"![{m[2]}]({RAW}/{ref}/{m[1]})\n\n</details>", text)
-        text = re.sub(r"<!-- figure: (\w+) -->", lambda m: f"![{m[1]}]({RAW}/{ref}/figures/out/{m[1]}_ja.png)", text)
+        text = re.sub(r"<!-- figure: (\w+) -->", figure, text)
         for chunk in re.split(r"\n*<!-- code: (\w+) -->\n*", text):
             if chunk in CODE:
-                out.append(("code", CODE[chunk]))
+                out.append(("code", code_source(CODE[chunk], lang)))
             elif chunk.strip():
                 out.append(("markdown", chunk.strip()))
         if index == 0:
-            out.append(("code", setup))
+            out.append(("code", code_source(setup, lang)))
     return out
 
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--lang", choices=("ja", "en"), default="ja")
     parser.add_argument("--ref", default="HEAD")
-    parser.add_argument("--out", default=str(HERE/"tritflow_ja.ipynb"))
+    parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     ref = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", args.ref], text=True).strip()
+    output = args.out or HERE/f"tritflow_{args.lang}.ipynb"
     nb = {"nbformat": 4, "nbformat_minor": 5,
           "metadata": {"kernelspec": {"name": "python3", "display_name": "Python 3", "language": "python"},
-                       "language_info": {"name": "python"}, "colab": {"name": "tritflow_ja.ipynb"}},
+                       "language_info": {"name": "python"}, "colab": {"name": f"tritflow_{args.lang}.ipynb"}},
           "cells": [{"cell_type": kind, "id": f"c{i}", "metadata": {}, "source": source,
                      **({"execution_count": None, "outputs": []} if kind == "code" else {})}
-                    for i, (kind, source) in enumerate(cells(ref))]}
-    Path(args.out).write_text(json.dumps(nb, ensure_ascii=False, indent=1) + "\n")
-    print(args.out, ref)
+                    for i, (kind, source) in enumerate(cells(ref, args.lang))]}
+    output.write_text(json.dumps(nb, ensure_ascii=False, indent=1) + "\n")
+    print(output, ref)
 
 
 if __name__ == "__main__":

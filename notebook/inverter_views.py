@@ -11,6 +11,7 @@ import json
 
 from IPython.display import HTML, display
 
+from live import _text
 from style import (ACCENT, BAND, INK, MUTED, TRIT_TEXT, control_style, figure_css, paper_layout,
                    table_css)
 
@@ -25,11 +26,11 @@ def _key(prefix):
 
 def _operating_point(trit):
     """Which devices conduct at input ``trit``, and fields the script fills for the chosen size."""
-    on = lambda state: "オン" if state else "オフ"
+    on = lambda state: _text("オン", "On") if state else _text("オフ", "Off")
     rows = [("MP", on(trit in (-1, 0)), "mp"), ("MN", on(trit in (0, 1)), "mn"),
             ("RP, RN", "", "r"), ("Y", "", "y"), ("I<sub>VDD</sub>", "", "i")]
     body = "".join(f'<tr><th>{name}</th><td>{state}</td><td data-f="{field}"></td></tr>' for name, state, field in rows)
-    return f'<table><tr><th></th><th>状態</th><th>値</th></tr>{body}</table>'
+    return f'<table><tr><th></th><th>{_text("状態", "State")}</th><th>{_text("値", "Value")}</th></tr>{body}</table>'
 
 
 def _candidate(row, transfer=None):
@@ -76,6 +77,14 @@ root.querySelectorAll('input[name=KEY]').forEach(r => r.addEventListener('change
 draw();
 """
 
+SCRIPT_LABELS = {
+    "テープアウトした寸法": "Taped-out dimensions",
+    "最大誤差 ": "Max. error ",
+    "最大静的電流 ": "Max. static current ",
+    "（±0.5 V の帯から外れる入力がある）": " (some inputs fall outside the ±0.5 V band)",
+    "この組合せはSPICEが収束しなかった": "SPICE did not converge for this combination",
+}
+
 
 def inverter(spice, grid):
     """Top: input buttons, the operating point (which devices conduct, Y and I) and the DC transfer.
@@ -96,9 +105,9 @@ def inverter(spice, grid):
     curve = go.Figure()
     for volts in (-5, 0, 5):
         curve.add_hrect(y0=volts-PASS_BAND, y1=volts+PASS_BAND, fillcolor=BAND, opacity=1, line_width=0, layer="below")
-    curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name="テープアウトした寸法", mode="lines",
+    curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name=_text("テープアウトした寸法", "Taped-out dimensions"), mode="lines",
                                line={"color": MUTED, "dash": "dash", "width": 2}))
-    curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name="選んだ寸法", mode="lines", line={"color": "#2a78d6", "width": 2.6}))
+    curve.add_trace(go.Scatter(x=sweep, y=taped["y"], name=_text("選んだ寸法", "Selected dimensions"), mode="lines", line={"color": "#2a78d6", "width": 2.6}))
     curve.add_trace(go.Scatter(x=[0], y=[taped["dc"]["0"][0]], mode="markers", showlegend=False,
                                marker={"size": 9, "color": ACCENT, "line": {"color": "white", "width": 1}}))
     curve.update_layout(**paper_layout(height=320, legend={"orientation": "h", "y": 1.02, "x": 0, "yanchor": "bottom"},
@@ -113,14 +122,14 @@ def inverter(spice, grid):
     cloud.add_trace(go.Scatter(x=[taped["cur"]], y=[taped["err"]], mode="markers", showlegend=False,
                                marker={"symbol": "circle-open", "size": 14, "color": ACCENT, "line": {"width": 2}}))
     cloud.update_layout(**paper_layout(height=250, margin={"t": 10, "l": 60, "r": 10, "b": 45}))
-    cloud.update_xaxes(title_text="最大静的電流 (µA)")
-    cloud.update_yaxes(title_text="最大誤差 (mV)", type="log")
+    cloud.update_xaxes(title_text=_text("最大静的電流 (µA)", "Max. static current (µA)"))
+    cloud.update_yaxes(title_text=_text("最大誤差 (mV)", "Max. error (mV)"), type="log")
     html = lambda figure, name: figure.to_html(include_plotlyjs="cdn", full_html=False, div_id=f"{key}-{name}", config=config)
 
     axes = grid["grid_axes"]
-    params = [("wp", "MPの幅 W", axes["mp_w_um"]), ("wn", "MNの幅 W", axes["mn_w_um"]),
-              ("l", "MOSの長さ L", axes["mos_l_um"]), ("r", "抵抗の長さ", axes["rr_l_um"])]
-    sliders = (f'<label class="s">寸法の候補　<b data-out="main"></b>'
+    params = [("wp", _text("MPの幅 W", "MP width W"), axes["mp_w_um"]), ("wn", _text("MNの幅 W", "MN width W"), axes["mn_w_um"]),
+              ("l", _text("MOSの長さ L", "MOS length L"), axes["mos_l_um"]), ("r", _text("抵抗の長さ", "Resistor length"), axes["rr_l_um"])]
+    sliders = (f'<label class="s">{_text("寸法の候補　", "Sizing candidate ")}<b data-out="main"></b>'
                f'<input type="range" data-name="main" min="0" max="{len(candidates)-1}" step="1"></label>' + "".join(
                    f'<label class="s">{escape(text)}　<b data-out="{name}"></b> µm<input type="range" data-param="{name}" '
                    f'min="0" max="{len(values)-1}" step="1" data-values="{escape(json.dumps(values))}"></label>'
@@ -141,7 +150,10 @@ def inverter(spice, grid):
              f"@media (max-width:720px){{.{key} .top,.{key} .bottom{{grid-template-columns:1fr}}"
              f".{key} .op{{justify-self:center}}}}" + "".join(rules))
     data = {"rows": candidates, "adopted": adopted}
-    script = "<script>(function(){" + _SCRIPT.replace("KEY", key).replace("DATA", json.dumps(data)) + "})();</script>"
+    script = _SCRIPT
+    for japanese, english in SCRIPT_LABELS.items():
+        script = script.replace(japanese, _text(japanese, english))
+    script = "<script>(function(){" + script.replace("KEY", key).replace("DATA", json.dumps(data)) + "})();</script>"
     display(HTML(f'<style>{style}</style><div class="{key}">{"".join(radios)}'
                  f'<div class="top"><div class="op">{"".join(panels)}</div><div>{html(curve, "curve")}</div></div>'
                  f'<div class="bottom"><div>{sliders}</div><div>{html(cloud, "cloud")}</div></div></div>{script}'))
