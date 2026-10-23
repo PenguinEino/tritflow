@@ -71,7 +71,7 @@ def markdown_table(rows):
     return "\n".join([line(rows[0]), line(["---"]*width), *(line(row) for row in rows[1:])])
 
 
-def result_values(evidence, evaluation):
+def result_values(evidence):
     """Keep exhaustive logic coverage distinct from the sampled analog campaign."""
     designs = evidence.get("designs", {})
     dot = designs.get("dot4", {})
@@ -113,11 +113,4 @@ def result_values(evidence, evaluation):
                     rows.append([f"STA estimate, {pin}", f"{dot['sta_arrival_s'][pin]*1e9:.1f} ns"])
     summary = markdown_table([["Executed check", "Result"], *rows]) if rows else "No dot-product result is present in this executed revision."
     sentence = "; ".join(sentences) + "." if sentences else "This executed revision contains no dot-product result."
-    tables = evaluation.get("tables", [])
-    chapter = "\n\n".join("From executed cell `"+table["cell_id"]+"`:\n\n"+markdown_table(table["rows"])
-                             for table in tables)
-    if not chapter:
-        chapter = ("Chapter 6 executed without a tabular evaluation summary; no scaling or power numbers are quoted here."
-                   if evaluation.get("executed_cell_ids") else
-                   "This executed revision contains no chapter 6 evaluation; scaling and power results are not reported here.")
-    return {"RESULTS":summary, "RESULTS_SENTENCE":sentence, "CHAPTER6_RESULTS":chapter}
+    return {"RESULTS":summary, "RESULTS_SENTENCE":sentence}

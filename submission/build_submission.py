@@ -72,15 +72,13 @@ def author_details(team):
         for k in ("status", "github") if author.get(k)) for author in team["authors"])
 
 
-def render_readme(team, release_text="See build-info.json for source compatibility.", source_commit=None, values=None):
+def render_readme(team, values=None):
     text = read_template("README.md")
     for key, value in {"TEAM_NAME":team["team_name"], "AUTHORS_TABLE":authors_table(team),
                        "REPRESENTATIVE":team["representative"], "ATTENDANCE":team["attendance_and_poster"],
-                       "ASSET_RIGHTS":team["asset_rights_confirmation"],"RELEASE_STATUS":release_text,
+                       "ASSET_RIGHTS":team["asset_rights_confirmation"],
                        "AUTHOR_DETAILS":author_details(team),
-                       "COLAB_RUN_NOTE":"Saved outputs were executed locally; this v3 package has no claimed real-Colab Run-all verification.",
-                       "SOURCE_LINK":f'[{source_commit}](https://github.com/PenguinEino/tritflow/tree/{source_commit})'
-                           if source_commit else "see build-info.json (commit print unavailable)"}.items():
+                       "COLAB_RUN_NOTE":"Saved outputs were executed locally; this v3 package has no claimed real-Colab Run-all verification."}.items():
         text = text.replace("{{"+key+"}}",str(value))
     return render(text, values or preview_values())
 
@@ -97,7 +95,7 @@ def preview_values():
     """Honest defaults for template previews, never numerical result stand-ins."""
     return {"RESULTS":"No executed result record was supplied for this preview.",
             "RESULTS_SENTENCE":"Numerical results are generated only from an executed notebook.",
-            "CHAPTER6_RESULTS":"This executed revision contains no chapter 6 evaluation; scaling and power results are not reported here.",
+            "CHAPTER6_LINKS":"links available when packaged",
             "PACKAGE_STATUS":"Development preview; inspect build-info.json before filing.",
             "NOTEBOOKS":"Notebook links are generated when the package is built.",
             "COLAB_URL":"https://colab.research.google.com/", "RUNTIME":"Recommended runtime pins are in notebook/setup_pins.json.",
@@ -466,11 +464,12 @@ def validate(document, source, require_evidence=False, require_static=True):
         capture = document.metadata.get("tritflow_submission_capture", {})
         if not capture.get("completed") or capture.get("source_sha256") != digest(source):
             raise ValueError("source notebook changed or execution was incomplete")
-        if document.cells[0].id == "submission-identity":
-            if has_placeholders(document.cells[0].source) or "{{" in document.cells[0].source:
-                raise ValueError("placeholder in notebook author information")
+        front = [cell for cell in document.cells[:2] if cell.id == "submission-identity"]
+        if front and (has_placeholders(front[0].source) or "{{" in front[0].source):
+            raise ValueError("placeholder in notebook author information")
         from results import result_values, chapter6
-        result_values(evidence, chapter6(document))
+        result_values(evidence)
+        chapter6(document)
     return {"code_cells":len(code),"saved_outputs":len(outputs),"png_outputs":images,
             "embedded_paper_figures":embedded,"html_tables":tables}
 
@@ -586,13 +585,16 @@ def package(documents, sources, destination, team, info):
                   "evaluation":evaluation, "release":release}
         info["notebooks"][name] = record
     primary_record = info["notebooks"][primary]
-    values.update(result_values(primary_record["results"], primary_record["evaluation"]))
+    values.update(result_values(primary_record["results"]))
     blockers = readiness(info["notebooks"])
     info["submission_ready"] = not blockers
     info["readiness_notes"] = blockers
     values["PACKAGE_STATUS"] = "Ready for final submission review." if not blockers else "Development package. " + " ".join(blockers)
     values["NOTEBOOKS"] = "\n\n".join(
         f"[{('English primary' if name.endswith('_en.ipynb') else 'Japanese companion' if primary != name else 'Japanese development preview')}]({name}) — executed with saved outputs."
+        for name in documents)
+    values["CHAPTER6_LINKS"] = ", ".join(
+        f"[{('English' if name.endswith('_en.ipynb') else 'Japanese')}]({name})"
         for name in documents)
     ref = primary_record["pinned_source_commit"]
     source_path = primary_record["source_path"]
@@ -601,17 +603,19 @@ def package(documents, sources, destination, team, info):
                          f"ngspice {pins['ngspice_package']['upstream_version']} "
                          f"(Ubuntu package {pins['ngspice_package']['version']}); "
                          f"OpenSUSI TR-1um `{pins['pdk_commit']}`. "
-                         "Use the Python packages installed by the notebook bootstrap; exact observed versions for each execution are in build-info.json.")
+                         "Use the Python packages installed by the notebook bootstrap.")
     info["colab_verified"] = False
     info["colab_verification_scope"] = "This package records local execution of v3; historical v1 Colab evidence is not promoted to v3."
     for name, document in documents.items():
         record = info["notebooks"][name]
-        front = "# TritFlow — balanced-ternary HDL to GDS\n\n" + authors_table(team)
-        front += "\n\n"+author_details(team)
-        front += f"\n\nTeam: {team['team_name']}. Representative: {team['representative']}.\n\n"
-        front += "**Apache-2.0.** " + team["asset_rights_confirmation"]
-        front += "\n\n"+values["PACKAGE_STATUS"]+"\n\n"+values["RUNTIME"]
-        document.cells.insert(0, nbformat.v4.new_markdown_cell(front, id="submission-identity"))
+        # The call asks for names at the top, not a separate author table.
+        # Preserve the source opening's title and authors without repeating them.
+        opening = document.cells[0]
+        if opening.cell_type != "markdown" or any(author["name"] not in opening.source for author in team["authors"]):
+            raise ValueError("team members must be named in the source notebook opening")
+        front = "**License: Apache-2.0.**\n\n" + values["RUNTIME"]
+        # License and tool versions follow the title and authors.
+        document.cells.insert(1, nbformat.v4.new_markdown_cell(front, id="submission-identity"))
         references = ("## Submission references and reuse\n\n"
                       "- [TritFlow source](https://github.com/PenguinEino/tritflow).\n"
                       "- [OpenSUSI TR-1um PDK](https://github.com/OpenSUSI/TR-1um).\n"
@@ -632,8 +636,7 @@ def package(documents, sources, destination, team, info):
         document.metadata["license"] = {"name":"Apache-2.0", "url":"https://www.apache.org/licenses/LICENSE-2.0"}
         record.update(validate(document, sources[name], require_evidence=True))
         nbformat.write(document, destination/name)
-    (destination/"README.md").write_text(render_readme(team, release_notice(primary_record["release"]),
-                                                      primary_record["source_commit_at_execution"], values))
+    (destination/"README.md").write_text(render_readme(team, values))
     for name in ("ABSTRACT.md", "PITCH.md", "CHECKLIST.md"):
         (destination/name).write_text(render(read_template(name), values))
     for name in ("LICENSE", "NOTICE"):
@@ -687,8 +690,8 @@ def check(destination, sources=None):
         metrics = validate(document, source, require_evidence=True)
         if any(record[k] != value for k, value in metrics.items()):
             raise ValueError(f"notebook evidence count mismatch: {name}")
-        if document.cells[0].id != "submission-identity" or "| Author |" not in document.cells[0].source:
-            raise ValueError("team members must be at the top of each notebook")
+        if document.cells[1].id != "submission-identity":
+            raise ValueError("missing submission front matter")
         if captured_evidence(document) != record["results"]:
             raise ValueError(f"executed results differ from manifest: {name}")
         for cell in document.cells:
