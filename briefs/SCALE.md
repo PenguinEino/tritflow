@@ -28,3 +28,11 @@ in `views.py`), Japanese labels, e.g. `scaling_table(data)`, `scaling_figure(dat
 STA vs SPICE), `power_table(data)`. Render them to PNG with headless Chrome and look at them.
 Report the numbers and anything surprising (e.g. delay or power growth) in the status file; V3 writes
 the chapter text from it.
+
+## Additions from the juror-eye review (integrator, 2026-10-23)
+
+- Layout penalty: per N, ternary STA with and without the extracted wire capacitance (cheap); and, for
+  N = 4 only, post-layout SPICE with device-only netlist vs with wire C.
+- Power: state the sign convention; report static power at all-zero activations (sum over VDD and VSS
+  sources), the average supply power over the simulated vectors and hold time, and separate switching
+  energy per transition only if it is cleanly measurable; otherwise say it is not separated.
