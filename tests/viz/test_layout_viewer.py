@@ -233,16 +233,17 @@ def test_registered_callback_json_and_independent_sessions(gds, monkeypatch):
         _SESSIONS.clear(); _SESSIONS.update(previous)
 
 
-def test_method_cells_use_viewer_keep_download_and_validate():
+def test_v3_layout_cells_use_viewer_and_validate():
     import importlib.util
     spec = importlib.util.spec_from_file_location('viewer_validation', ROOT/'notebook/validate_notebook.py')
     module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
-    document = module.validate(ROOT/'notebook/tritflow_tr1um.ipynb')
-    for cell in document['cells']:
-        if cell['id'] in ('method-pnr', 'method-custom_layout', 'method-shuttle'):
-            assert 'gds_viewer(' in cell['source'] and 'gds_download(' in cell['source']
-            assert 'render_gds(' not in cell['source']
-            assert len(cell['source'].strip().splitlines()) <= 14
+    document = module.validate(ROOT/'notebook/v3/tritflow_en.ipynb')
+    views = [cell['source'] for cell in document['cells']
+             if cell['cell_type'] == 'code' and 'gds_viewer(' in cell['source']]
+    assert len(views) == 2
+    assert any('gds_viewer(lay.gds_path)' in source for source in views)
+    assert any('gds_viewer(dot4_layout.gds_path)' in source for source in views)
+    assert all('render_gds(' not in source for source in views)
 
 
 def test_expired_sessions_unregister_callbacks_and_release_rasters(gds, monkeypatch):

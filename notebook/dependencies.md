@@ -54,7 +54,8 @@ code cell. Qualification dates, Python boundaries and measured deltas are
 recorded in `docs/status/PIN.md`.
 
 The final notebook must be generated *after* the implementation commit exists:
-`python3 notebook/make_notebook.py` stamps that full SHA into SOURCE_REF. Ship
+`python3 notebook/v3/make_notebook.py --lang en` and the corresponding
+`--lang ja` command stamp that full SHA into SOURCE_REF. Ship
 this generated notebook in the submission payload. Use signed annotated tags
 `isscc2027-v1.0.0`, `isscc2027-v1.0.1`, etc.; never move or reuse a published tag.
 Runtime updates require changed locks and a new qualified source commit. A tag alone is never the notebook's executable identity.
