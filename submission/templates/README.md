@@ -127,6 +127,6 @@ Copy **only this directory** to `ISSCC27/submitted_notebooks/TritFlow/` in a
 fork of the [official repository](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io).
 File the PR before **October 31, 2026, 11:59 AM Pacific Time**, and monitor
 organizer feedback. Run `python3 submission/build_submission.py --check
---require-final` in the source checkout before filing. The package's 8 MiB
+--require-final` in the source checkout before filing. The package's 12 MiB
 budget is a local convenience, not an official limit. This builder does not
 commit, push or open the submission PR.
