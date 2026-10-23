@@ -24,7 +24,7 @@ CDN = "https://cdn.jsdelivr.net/gh/PenguinEino/tritflow"
 
 PREAMBLE = '''
 from live import need, provides, install_error_view, LayoutView
-from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view, scope_figure, timing_table, wire_table, delay_table
+from views import pick_input, stimulus, bus_picker, cell_counts, schematic_view, scope_figure, timing_table, wire_table, delay_table, transient_conditions, dc_conditions, note
 from IPython.display import HTML, display
 from inverter_views import inverter
 from pnr_views import replay
@@ -86,7 +86,8 @@ with step("ngspice") as s:
     post = extracted.simulate(stimulus(net), load=100e-15, hold_s=1e-6, step_s=2e-9,
                               edge_s=1e-9, temperature_c=27)
     s.done("全区間で ±0.5 V の帯に入った" if post["measurements"]["passed"] else "帯に入らない区間がある")
-pick_input(net, post)''',
+pick_input(net, post)
+transient_conditions(post, load_f=100e-15)''',
 
 "inv": '''# 2-1 INVのDC解析と寸法
 with step("ngspice（INVのDC解析）") as s:
@@ -96,7 +97,8 @@ with step("ngspice（INVのDC解析）") as s:
 with step("寸法の記録を照合") as s:
     grid = load_grid("INV")
     s.done(f"{len(grid['rows'])}通り · 回路・モデル・解析コードが一致")
-inverter(spice, grid)''',
+inverter(spice, grid)
+dc_conditions()''',
 
 "closure": '''# 2-2 NANYと +1 の定数から作れる1入力関数
 from completeness import generations, surjective_and_depends_on_both, nany
@@ -238,7 +240,8 @@ with step("ngspice") as s:
                                         nodeset=logical_nodeset(add2, add2_lvs["report"], add2_inputs, add2_vectors[0]))
     s.done("全区間で ±0.5 V の帯に入った" if add2_post["measurements"]["passed"] else "帯に入らない区間がある")
 display(HTML(scope_figure(add2_post, settle=True).to_html(include_plotlyjs="cdn", full_html=False,
-                                                         config={"displaylogo": False, "scrollZoom": True})))''',
+                                                         config={"displaylogo": False, "scrollZoom": True})))
+transient_conditions(add2_post, load_f=100e-15)''',
 
 "table5": '''# 5-4 INVの遅延の表
 delay_table("INV")''',
@@ -251,7 +254,8 @@ with step("三値のSTA") as s:
                           wire_caps={n: e["wire_capacitance_f"] for n, e in add2_wires["nets"].items()},
                           output_load_f=100e-15, input_transition_s=1e-9)
     s.done(f"{len(add2_timing.arrival)}出力")
-timing_table(add2_post, add2_timing)''',
+timing_table(add2_post, add2_timing)
+note("STAの条件：5-3と同じ入力の列、出力の負荷 100 fF、入力の変化時間 1 ns、配線容量は5-2の抽出値。")''',
 }
 
 CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md", "05_verify.md"]

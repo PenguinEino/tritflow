@@ -327,4 +327,31 @@ def delay_table(cell="INV", *, ramp_s=1e-9):
                  f'.tfdelay th[colspan]:last-child{{padding-left:2em}}</style><div class="tfdelay"><table>'
                  f'<tr><th rowspan="2">入力</th><th rowspan="2">出力</th><th colspan="{len(loads)}">伝搬遅延 (ns)</th>'
                  f'<th colspan="{len(loads)}">出力の変化時間 (ns)</th></tr><tr>{head}{head}</tr>'
-                 f'{rows}</table><p><small>伝搬遅延：入力と出力がそれぞれ変化前と変化後のレベルの中点を横切る時刻の差。出力の変化時間：出力が変化の10%から90%まで進む時間。<br>列は負荷容量。入力の変化時間は {ramp_s*1e9:g} ns。</small></p></div>'))
+                 f'{rows}</table><p><small>伝搬遅延：入力と出力がそれぞれ変化前と変化後のレベルの中点を横切る時刻の差。出力の変化時間：出力が変化の10%から90%まで進む時間。<br>列は負荷容量。入力の変化時間は {ramp_s*1e9:g} ns。SPICEの条件：ngspiceの過渡解析、{MODELS}、{data['conditions']['temperature_c']:g} °C、電源 +5 / 0 / −5 V。</small></p></div>'))
+
+
+def note(text):
+    """A small muted line under an output: the conditions it was computed under."""
+    display(HTML(f'<p style="font-family:{SERIF};font-size:12.5px;color:{MUTED};margin:.4em 0 0">{text}</p>'))
+
+
+def _signed_v(v):
+    return "0 V" if v == 0 else f"{v:+g} V".replace("-", "−")
+
+
+MODELS = "TR-1um（IP62）の公称のSPICEモデル（コーナーなし）"
+
+
+def transient_conditions(post, *, load_f):
+    """One line under a transient run: the deck's actual temperature, rails, stimulus and load."""
+    bench = post["stimulus"]
+    rails = " / ".join(_signed_v(bench['supplies_v'][r]) for r in ("VDD", "VMID", "VSS"))
+    note(f"シミュレーション条件：ngspiceの過渡解析、{MODELS}、{bench['temperature_c']:g} °C、"
+          f"電源 {rails}。入力は理想電圧源で、値を {bench['hold_s']*1e6:g} µs ずつ保ち、{bench['edge_s']*1e9:g} ns で直線的に切り替える。"
+          f"出力の負荷 {load_f*1e15:g} fF、内部の配線容量は抽出値。時間刻み {bench['step_s']*1e9:g} ns。")
+
+
+def dc_conditions(*, start_v=-5.0, stop_v=5.0, step_v=0.1, temperature_c=27.0):
+    """One line under a DC sweep of a cell input."""
+    note(f"シミュレーション条件：ngspiceのDC解析、{MODELS}、{temperature_c:g} °C、電源 +5 / 0 / −5 V。"
+          f"入力を {_signed_v(start_v)} から {_signed_v(stop_v)} まで {step_v:g} V 刻みで掃引し、出力は無負荷。")

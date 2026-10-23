@@ -12,7 +12,7 @@ import re
 
 from IPython.display import HTML, display
 
-from live import _layer_paths, _patterns, LayoutView
+from live import _layer_paths, _patterns, LayoutView, layer_legend
 from style import MUTED, RULE, SERIF, TRIT_COLOR as COLOR, TRIT_TEXT, figure_css, table_css
 _VIEWS = 0
 
@@ -24,24 +24,26 @@ def _key(prefix):
 
 
 def closure_view(found):
-    """All 27 one-input functions as columns (output at a = −1, 0, +1, top to bottom), each with
-    the round of the construction in which it first appears; unreached ones are left blank."""
-    functions = list(product((-1, 0, 1), repeat=3))
-    size = 14
+    """Booktabs table of the construction, one row per round: the one-input functions that first
+    appear in it, each written as its outputs at a = −1, 0, +1, and the running count out of 27."""
+    names = {(-1, 0, 1): "a", (1, 0, -1): "−a", (1, 1, 1): "定数 +1", (0, 0, 0): "定数 0", (-1, -1, -1): "定数 −1"}
 
-    def column(function):
-        reached = function in found
-        cells = "".join(f'<rect x="0" y="{k*size}" width="{size}" height="{size-1.5}" rx="2" '
-                        f'fill="{COLOR[v] if reached else "#efeee9"}"/>' for k, v in enumerate(function))
-        return f'<svg width="{size}" height="{3*size}">{cells}</svg>'
+    def function(f):
+        digits = ", ".join(f'<span style="color:{COLOR[v]}">{TRIT_TEXT[v]}</span>' for v in f)
+        name = f' <span class="n">{names[f]}</span>' if f in names else ""
+        return f'<span class="f">({digits}){name}</span>'
 
-    cells = "".join(f'<td>{column(f)}<div class="g">{found.get(f, "")}</div></td>' for f in functions)
-    legend = " ".join(f'<span style="color:{COLOR[v]}">■</span> {TRIT_TEXT[v]}' for v in (-1, 0, 1))
-    display(HTML(f'<style>{figure_css(".tfclosure")}.tfclosure td{{padding:2px 2px;text-align:center}}'
-                 f'.tfclosure .g{{font-size:12px;color:{MUTED}}}</style><div class="tfclosure">'
-                 f'<table style="border-collapse:collapse"><tr>{cells}</tr></table>'
-                 f'<div style="color:{MUTED};font-size:13px;margin-top:.4em">各列が1入力関数（上から a = −1, 0, +1 での出力）。'
-                 f'下の数字は、その関数が初めて現れた段（0は入力そのものと定数）。{legend}</div></div>'))
+    rounds = sorted(set(found.values()))
+    total, rows = 0, []
+    for r in rounds:
+        new = sorted((f for f, g in found.items() if g == r), key=lambda f: (f not in names, f))
+        total += len(new)
+        rows.append(f'<tr><td>{r}</td><td class="l">{" ".join(function(f) for f in new)}</td><td>{total} / 27</td></tr>')
+    display(HTML(f'<style>{figure_css(".tfclosure")}{table_css(".tfclosure")}'
+                 f'.tfclosure td.l{{text-align:left;line-height:1.9}} .tfclosure .f{{white-space:nowrap;margin-right:1.1em}}'
+                 f'.tfclosure .n{{color:{MUTED};font-size:12.5px}}</style><div class="tfclosure"><table>'
+                 f'<tr><th>段</th><th>新しく作れた1入力関数<small>a = −1, 0, +1 のときの出力</small></th><th>累計</th></tr>'
+                 f'{"".join(rows)}</table></div>'))
 
 
 FORMULA = {"INV": "Y = −A", "BUF": "Y = A", "NAND": "Y = −min(A, B)", "NOR": "Y = −max(A, B)",
@@ -153,10 +155,11 @@ def cell_row(library, cells_dir, *, groups=(("INV", "NAND", "NOR", "NANY"), ("BU
     rail_labels = (f'<text x="{-6*unit:g}" y="{-sum(rails["VDD"])/2+3*unit:g}" font-size="{11*unit:g}" text-anchor="end">VDD</text>'
                    f'<text x="{-6*unit:g}" y="{-rails["VMID"][1]+2*unit:g}" font-size="{11*unit:g}" text-anchor="end">VMID</text>'
                    f'<text x="{-6*unit:g}" y="{-rails["VSS"][0]+7*unit:g}" font-size="{11*unit:g}" text-anchor="end">VSS</text>')
-    pictures = []
+    pictures, drawn = [], []
     for group in groups:
         row = []
         for name in group:
+            drawn += view._cell(name)
             cx = widths[name]/2
             label = (f'<text x="{cx:g}" y="{20*unit:g}" font-size="{14*unit:g}" text-anchor="middle" '
                          f'font-weight="700">{name}</text><text x="{cx:g}" y="{38*unit:g}" font-size="{12*unit:g}" '
@@ -171,7 +174,8 @@ def cell_row(library, cells_dir, *, groups=(("INV", "NAND", "NOR", "NANY"), ("BU
     style = figure_css(".tfrow") + f'.tfrow .group{{display:flex;flex-wrap:wrap;gap:1em {gap/unit:g}px;align-items:start}}'
     display(HTML(f'<style>{style}</style><div class="tfrow" style="max-width:1100px">'
                  f'<div style="border-top:1.4px solid #0b0b0b;border-bottom:1.4px solid #0b0b0b;padding:6px 0">{"".join(pictures)}</div>'
-                 f'<div style="font-size:13px;margin-top:.3em">' + "　".join(
+                 f'<div style="font-size:13px;margin-top:.4em;line-height:1.9">{layer_legend(drawn, unit, opacity=.55)}</div>'
+                 f'<div style="font-size:13px;margin-top:.1em">' + "　".join(
                      f'<span style="display:inline-block;width:14px;height:9px;border:1.5px dashed {c};background:{c}1a;'
                      f'vertical-align:middle;margin-right:4px"></span>{label}' for c, label in DEVICE.values()) +
                  f'</div><div style="color:{MUTED};font-size:13px;margin-top:.2em">同じ縮尺。高さはすべて {height:g} µm、幅は '

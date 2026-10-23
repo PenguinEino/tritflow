@@ -260,6 +260,25 @@ def _patterns(unit):
     return "".join(defs)
 
 
+LAYER_NAMES = {(140, 0): "Nウェル", (3, 1): "P拡散", (3, 2): "N拡散", (3, 3): "拡散抵抗", (8, 1): "ゲートポリ",
+               (8, 2): "抵抗ポリ", (11, 0): "コンタクト", (13, 0): "M1", (19, 0): "ビア（V1）", (20, 0): "M2"}
+
+
+def layer_legend(shapes, unit, *, opacity=1):
+    """One swatch per drawn layer, hatched and outlined exactly as in the drawings."""
+    used = {style for style, _ in shapes}
+    items = []
+    for style in _style():
+        if style not in used:
+            continue
+        w, h = 18*unit, 11*unit
+        box = [(0, 0), (w, 0), (w, h), (0, h)]
+        items.append(f'<span style="white-space:nowrap;margin-right:1em"><svg viewBox="{-unit:g} {-unit:g} {w+2*unit:g} {h+2*unit:g}" '
+                     f'style="width:20px;height:13px;vertical-align:middle;margin-right:4px"><defs>{_patterns(unit)}</defs>'
+                     f'<g opacity="{opacity}">{_layer_paths([(style, box)], unit)}</g></svg>{LAYER_NAMES[style[0]]}</span>')
+    return "".join(items)
+
+
 def _layer_paths(shapes, unit):
     """One <path> per layer holding all its polygons; hatched fill, outline in the layer color."""
     by_style = {}
