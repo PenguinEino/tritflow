@@ -48,8 +48,9 @@ def schematic_view(circuit):
 
 
 def scope_figure(post, *, title=None, settle=False):
-    """Post-layout transient in the paper style: one lane per input and output with the ±0.5 V
-    bands and the checker's sample points, then the VDD current; a range slider under it.
+    """Post-layout transient in the paper style: one lane per changing input and per output with
+    the ±0.5 V bands and the checker's sample points, then the VDD current; a range slider under it.
+    Inputs held at one value for the whole run get no lane; transient_conditions lists them.
     ``settle`` marks each output's slowest transition: an arrow from the input edge to where the
     output enters its final band and stays."""
     import numpy as np
@@ -59,7 +60,9 @@ def scope_figure(post, *, title=None, settle=False):
     from tritflow.sim.spice import signal_waveform
 
     stimulus, waves = post["stimulus"], post["waveforms"]
-    lanes = [("v", p) for p in stimulus["inputs"]] + [("v", p) for p in stimulus["outputs"]] + [("i", "VDD")]
+    fixed = _fixed_inputs(post)
+    lanes = ([("v", p) for p in stimulus["inputs"] if p not in fixed] + [("v", p) for p in stimulus["outputs"]]
+             + [("i", "VDD")])
     t = np.asarray(waves["time"])*1e6
     rows = post["measurements"]["rows"]
     figure = make_subplots(rows=len(lanes), cols=1, shared_xaxes=True, vertical_spacing=.035)
@@ -112,6 +115,17 @@ def scope_figure(post, *, title=None, settle=False):
                                         margin={"t": 40 if title else 15, "l": 70, "r": 15, "b": 40},
                                         title={"text": title, "font": {"size": 15}, "x": 0} if title else None))
     return figure
+
+
+def _fixed_inputs(post):
+    """Inputs that keep one value through the whole transient, with that value in volts."""
+    from tritflow.sim.spice import signal_waveform
+    fixed = {}
+    for name in post["stimulus"]["inputs"]:
+        wave = signal_waveform(post["waveforms"], name)
+        if max(wave) - min(wave) < 1.0:
+            fixed[name] = round(float(wave[0]))
+    return fixed
 
 
 def _truth_table(net, inputs, outputs, rows, chosen):
@@ -343,12 +357,17 @@ MODELS = "TR-1um（IP62）の公称のSPICEモデル（コーナーなし）"
 
 
 def transient_conditions(post, *, load_f):
-    """One line under a transient run: the deck's actual temperature, rails, stimulus and load."""
+    """One line under a transient run: the deck's actual temperature, rails, stimulus and load,
+    and the inputs held at one value (their lanes are left out of scope_figure)."""
     bench = post["stimulus"]
     rails = " / ".join(_signed_v(bench['supplies_v'][r]) for r in ("VDD", "VMID", "VSS"))
-    note(f"シミュレーション条件：ngspiceの過渡解析、{MODELS}、{bench['temperature_c']:g} °C、"
-          f"電源 {rails}。入力は理想電圧源で、値を {bench['hold_s']*1e6:g} µs ずつ保ち、{bench['edge_s']*1e9:g} ns で直線的に切り替える。"
-          f"出力の負荷 {load_f*1e15:g} fF、内部の配線容量は抽出値。時間刻み {bench['step_s']*1e9:g} ns。")
+    text = (f"シミュレーション条件：ngspiceの過渡解析、{MODELS}、{bench['temperature_c']:g} °C、"
+            f"電源 {rails}。入力は理想電圧源で、値を {bench['hold_s']*1e6:g} µs ずつ保ち、{bench['edge_s']*1e9:g} ns で直線的に切り替える。"
+            f"出力の負荷 {load_f*1e15:g} fF、内部の配線容量は抽出値。時間刻み {bench['step_s']*1e9:g} ns。")
+    fixed = _fixed_inputs(post)
+    if fixed:
+        text += "、".join(f"{name} = {_signed_v(v)}" for name, v in fixed.items()) + " は全区間で一定のため、波形を省いた。"
+    note(text)
 
 
 def dc_conditions(*, start_v=-5.0, stop_v=5.0, step_v=0.1, temperature_c=27.0):
