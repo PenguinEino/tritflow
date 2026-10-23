@@ -3,6 +3,7 @@
 from hashlib import sha256
 import importlib
 import json
+from pathlib import Path
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
 
@@ -30,6 +31,54 @@ def frame_mask(tmp_path):
         path = tmp_path / "stock_frame.ip62.gds"
         path.write_bytes(archive.read(name))
     return path
+
+
+def recorded_macro(tmp_path):
+    """Reuse the qualified seed-0 macro; only rebuild its stock-frame wrapper."""
+    macro = tmp_path / "macro"
+    macro.mkdir()
+    with ZipFile(ASSETS / "evidence.zip") as archive:
+        for name in ("dot4.gds", "dot4.pnr.json"):
+            (macro / name).write_bytes(archive.read(".work/macro/" + name))
+    data = json.loads((macro / "dot4.pnr.json").read_text())
+    return PnrResult(
+        macro / "dot4.gds",
+        macro / "dot4.pnr.json",
+        data["stats"],
+        data,
+        GateNetlist.load(ASSETS / "dot4.json"),
+    )
+
+
+def test_stock_chip_rebuild_preserves_recorded_geometry(tmp_path):
+    """Separate frame power code must reproduce the qualified drawing and mask."""
+    result = recorded_macro(tmp_path)
+    before_macro = result.gds_path.read_bytes(), result.json_path.read_bytes()
+    full = result.to_chip(
+        frame="OSS_FRAME", output_dir=tmp_path / "chip", force_signoff=True
+    )
+    assert full.report["clean"] and full.report["drawing_lvs"]["strict_ports"]
+    expected = read("provenance.json")["published_artifacts_sha256"]
+    assert sha256(full.gds_path.read_bytes()).hexdigest() == expected["tr_1um_dot4.gds"]
+    assert full.gds_path.read_bytes() == (ASSETS / "tr_1um_dot4.gds").read_bytes()
+    # The native MDP deck writes build timestamps; compare its GDS with only
+    # those timestamps disabled. The published drawing above is byte-exact.
+    masks = []
+    for source in (Path(full.report["mdp"]["output_path"]), ASSETS / "tr_1um_dot4.ip62.gds"):
+        layout = db.Layout()
+        layout.read(str(source))
+        options = db.SaveLayoutOptions()
+        options.gds2_write_timestamps = False
+        normalized = tmp_path / f"mask{len(masks)}.gds"
+        layout.write(str(normalized), options)
+        masks.append(normalized.read_bytes())
+    assert masks[0] == masks[1]
+    with ZipFile(ASSETS / "evidence.zip") as archive:
+        recorded = json.loads(archive.read(".work/chip/tr_1um_dot4.chip.json"))
+    assert full.data["power_header"] == recorded["power_header"]
+    for key in ("rails", "straps", "vias", "pins"):
+        assert full.data["power"][key] == recorded["power"][key]
+    assert (result.gds_path.read_bytes(), result.json_path.read_bytes()) == before_macro
 
 
 def test_stock_chip_uses_sixteen_real_pads_and_separate_esd_vdd():
@@ -157,19 +206,7 @@ def test_native_failed_own_waiver_check_preserves_previous_exports(
     tmp_path, monkeypatch
 ):
     """Run real decks: inherited markers cannot authorize one of our own."""
-    macro = tmp_path / "macro"
-    macro.mkdir()
-    with ZipFile(ASSETS / "evidence.zip") as archive:
-        for name in ("dot4.gds", "dot4.pnr.json"):
-            (macro / name).write_bytes(archive.read(".work/macro/" + name))
-    data = json.loads((macro / "dot4.pnr.json").read_text())
-    result = PnrResult(
-        macro / "dot4.gds",
-        macro / "dot4.pnr.json",
-        data["stats"],
-        data,
-        GateNetlist.load(ASSETS / "dot4.json"),
-    )
+    result = recorded_macro(tmp_path)
     output = tmp_path / "chip"
     output.mkdir()
     previous = {
