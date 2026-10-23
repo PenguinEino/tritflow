@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "<stdin>", line 9, in <module>
+  File "/home/ishi-kai/code-a-chip-v3/tritflow/flow.py", line 104, in place_and_route
+    result = place_and_route(self, library, output_dir=output_dir, **options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/flow.py", line 178, in place_and_route
+    result = place_and_route(netlist, library, output_dir=out, rows=rows, seed=seed,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/flow.py", line 178, in place_and_route
+    result = place_and_route(netlist, library, output_dir=out, rows=rows, seed=seed,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/flow.py", line 141, in place_and_route
+    row_count, spans, tracks, plan, core_width = _floorplan_choice(
+                                                 ^^^^^^^^^^^^^^^^^^
+  File "/home/ishi-kai/code-a-chip-v3/tritflow/pnr/flow.py", line 89, in _floorplan_choice
+    raise ValueError("No legal floorplan: check rows, channel tracks and cell current capacity")
+ValueError: No legal floorplan: check rows, channel tracks and cell current capacity
