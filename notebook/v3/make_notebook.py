@@ -226,8 +226,8 @@ def operands(x):
     return tuple(values[p] for p in dot4_inputs)
 dot4_vectors = [operands(x) for x in activations]
 with step("ngspice") as s:
-    dot4_post = dot4_extracted.simulate(dot4_vectors, load=100e-15, hold_s=1e-6, step_s=2e-9, edge_s=1e-9,
-                                        temperature_c=27, timeout=600,
+    dot4_post = dot4_extracted.simulate(dot4_vectors, load=100e-15, hold_s=1e-6, step_s=5e-9, edge_s=1e-9,
+                                        temperature_c=27, timeout=600, workdir=BUILD/"dot4"/"postlayout",
                                         nodeset=logical_nodeset(dot4, dot4_lvs["report"], dot4_inputs, dot4_vectors[0]))
     s.done("全区間で ±0.5 V の帯に入った" if dot4_post["measurements"]["passed"] else "帯に入らない区間がある")
 display(HTML(scope_figure(dot4_post, settle=True).to_html(include_plotlyjs="cdn", full_html=False,
