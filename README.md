@@ -2,9 +2,9 @@
 
 TritFlow turns a Verilog-like balanced-ternary HDL into a layout on the open [OpenSUSI TR-1um PDK](https://github.com/OpenSUSI/TR-1um). The notebook follows synthesis, standard cells, two-metal placement and routing, PDK DRC/LVS, and extracted ngspice simulation, using −5/0/+5 V for the three trit values. It develops a four-term dot product, compares recorded area, timing and power across sizes, and includes an editable HDL experiment.
 
-**English** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/main/notebook/v3/tritflow_en.ipynb)
+**English** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/notebook-v3/notebook/v3/tritflow_en.ipynb)
 
-**日本語** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/main/notebook/v3/tritflow_ja.ipynb)
+**日本語** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/notebook-v3/notebook/v3/tritflow_ja.ipynb)
 
 Choose **Runtime → Run all** in Colab. Setup installs the pinned tools and PDK; larger scaling studies and the framed chip are recorded results. Wire capacitance is estimated from geometry. The notebook states the measurement conditions and limits.
 

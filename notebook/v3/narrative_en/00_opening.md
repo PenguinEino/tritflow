@@ -3,7 +3,7 @@
 Einosuke Okazaki (岡崎 英之介)<br>
 Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/notebook-v3-en/notebook/v3/tritflow_en.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/notebook-v3/notebook/v3/tritflow_en.ipynb)
 
 Run all takes about 7 minutes on a fresh Colab runtime (setup about 2 minutes).
 

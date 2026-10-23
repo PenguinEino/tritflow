@@ -69,3 +69,5 @@
 - 10-23 chapter 6 split: SCALE 01a167b3-f64c-7c03-91d2-8f8461d4bb5c (scaling data, `notebook/scale_views.py`),
   SHUTTLE 01a167b3-f6b2-7460-bcb5-6588a7575056 (`notebook/reuse.py`, dot4 MPW top); V3 resumed with phase 2
   narrowed to integrating chapter 6 (narrative + builder cells).
+- 10-23 night: main stays at v1 until the author approves updating it. Colab badges (README, English opening)
+  point to branch notebook-v3 meanwhile; switch them to main when main is updated.
