@@ -14,7 +14,7 @@ At an input of ±5 V, only one MOS transistor conducts, pulling Y to its rail. A
 
 $$V_Y = V_{SS} + (V_{DD}-V_{SS})\frac{R_d}{R_u+R_d},\qquad I = \frac{V_{DD}-V_{SS}}{R_u+R_d}$$
 
-No rail supplies 0 V to the output; it is established solely by the balance $R_u = R_d$, with continuous static current $I$. With the dimensions below, the resistance of each diffusion resistor (PDK device RR) exceeds the approximated MOS on-resistance by a factor of at least 20, so the ratio of the two identically shaped resistors dominates the zero level rather than MOS variation.
+No rail supplies 0 V to the output; it is established solely by the balance $R_u = R_d$, with continuous static current $I$. With the dimensions below, the resistance of each RR exceeds the approximated MOS on-resistance by a factor of at least 20, so the ratio of the two identically shaped resistors dominates the zero level rather than MOS variation.
 
 
 #### SPICE Simulation

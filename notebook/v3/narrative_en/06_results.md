@@ -24,7 +24,7 @@ The number of conducting divider paths depends on the input state, so static pow
 
 ### 6.3 STA and SPICE
 
-Each circuit uses an input sequence that generates and clears positive and negative carries. The four-term sequence differs from chapter 5. STA conditions on the fixed weights. STA and SPICE use identical input transitions, output load, input slew and wire capacitance. The reported delay is each output's maximum settling time over that sequence, not a guaranteed worst case over all input transitions.
+Each circuit uses an input sequence that generates and clears positive and negative carries. The four-term sequence differs from chapter 5. STA uses the same fixed weights. STA and SPICE use identical input transitions, output load, input slew and wire capacitance. The reported delay is each output's maximum settling time over that sequence, not a guaranteed worst case over all input transitions.
 
 The effect of wire capacitance is evaluated by removing only the estimated wire capacitance from the same extracted circuit. STA compares both cases at every size; SPICE compares them for four terms. Both cases retain intrinsic device capacitance and the 100 fF output load.
 
