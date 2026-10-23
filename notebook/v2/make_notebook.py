@@ -64,7 +64,8 @@ need("net", why="配置配線する回路 net は、1-2で合成します。")
 with step("配置配線", view=LayoutView()) as s:
     lay = net.place_and_route(output_dir=BUILD/net.top, seed=0)
     width, height = lay.stats["die_size_um"]
-    s.done(f"{lay.stats['instance_count']}セル · {width:.0f} × {height:.0f} µm · 配線 {lay.stats['routed_nets']}本")''',
+    s.done(f"{lay.stats['instance_count']}セル · {width:.0f} × {height:.0f} µm · 配線 {lay.stats['routed_nets']}本",
+           picture=replay(lay))''',
 
 "check": '''# 1-4 DRCとLVS
 need("lay", why="DRCとLVSは、1-3で作ったGDSを調べます。")
@@ -173,13 +174,10 @@ with step("配置配線", view=LayoutView()) as s:
     add2_layout = add2.place_and_route(output_dir=BUILD/"add2", seed=0)
     stats = add2_layout.stats
     s.done(f"{stats['instance_count']}セル · {stats['row_count']}行 · {stats['die_size_um'][0]:.0f} × {stats['die_size_um'][1]:.0f} µm · "
-           f"配線長の見積もり {stats['hpwl_before_um']/1e3:.1f} → {stats['hpwl_after_um']/1e3:.1f} mm · ビア {stats['via_count']}個")''',
+           f"配線長の見積もり {stats['hpwl_before_um']/1e3:.1f} → {stats['hpwl_after_um']/1e3:.1f} mm · ビア {stats['via_count']}個",
+           picture=replay(add2_layout))''',
 
-"replay": '''# 4-2 途中経過を振り返る
-need("add2_layout", why="振り返る実行は、4-1の配置配線です。")
-replay(add2_layout)''',
-
-"gds2": '''# 4-3 GDS
+"gds2": '''# 4-2 GDS
 need("add2_layout", why="表示するGDSは、4-1で作ります。")
 gds_viewer(add2_layout.gds_path)''',
 

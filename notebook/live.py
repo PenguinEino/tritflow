@@ -38,16 +38,17 @@ class Line:
     """One status line, redrawn by a background thread until :meth:`close`."""
 
     def __init__(self, title, view=None):
-        self.title, self.detail, self.summary, self.view = title, "", "", view
+        self.title, self.detail, self.summary, self.view, self.final = title, "", "", view, None
         self.handle = display(_line(SPINNER[0], CYAN, title, "", 0.0), display_id=True)
         self.picture = display(HTML(""), display_id=True) if view else None
         self.started, self.stop = time.monotonic(), threading.Event()
         self.ticker = threading.Thread(target=self._redraw, daemon=True)
         self.ticker.start()
 
-    def done(self, summary):
-        """Set the closing summary shown after the check mark."""
-        self.summary = summary
+    def done(self, summary, picture=None):
+        """Set the closing summary shown after the check mark, and optionally the HTML that
+        replaces the live picture once the step has finished."""
+        self.summary, self.final = summary, picture
 
     def _redraw(self):
         frame, drawn = 0, -1
@@ -68,7 +69,7 @@ class Line:
         else:
             self.handle.update(_line("✗", RED, self.title, f"{type(error).__name__}: {error}"[:160], seconds))
         if self.view:
-            self.picture.update(HTML(self.view.svg()))
+            self.picture.update(HTML(self.final if self.final is not None and error is None else self.view.svg()))
 
 
 Step = Line
