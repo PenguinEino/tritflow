@@ -4,13 +4,12 @@ The run keeps snapshots of the annealing (``history``, every 25 steps) and the o
 nets were routed. The replay draws the real cell GDS once as reusable symbols, one group of
 ``<use>`` per placement snapshot, and one group per routed net; a slider shows snapshots, then
 nets one by one with the newest in orange, beside the wire-length curve of the annealing. It works
-in the browser alone; nothing is rerun.
+in the browser alone; nothing is rerun. Every place-and-route step ends by swapping its live
+picture for this replay.
 """
 
 from html import escape
 import json
-
-from IPython.display import HTML, display
 
 from live import LayoutView, _layer_paths, _patterns, _style
 from style import ACCENT, INK, MUTED, RULE, control_style, figure_css
@@ -43,7 +42,7 @@ def _uses(placements):
 
 
 def replay(lay, *, width=600):
-    """Slider over the run: annealing snapshots, then the nets in routing order."""
+    """HTML of a slider over the run: annealing snapshots, then the nets in routing order."""
     global _VIEWS
     _VIEWS += 1
     key = f"tfpnr{_VIEWS}"
@@ -97,5 +96,5 @@ def replay(lay, *, width=600):
              f".{key}{{max-width:1100px}} .{key} .row{{display:flex;flex-wrap:wrap;gap:1.2em;align-items:flex-start}}"
              f".{key} .lay{{width:100%;max-width:{width}px;height:auto;flex:1 1 420px}} .{key} .curve{{width:320px;max-width:100%}}"
              f".{key} .cap{{font-size:14px;margin:.2em 0 .4em}}")
-    display(HTML(f'<style>{style}</style><div class="{key}"><input type="range" min="0" step="1">'
-                 f'<div class="cap"></div><div class="row">{svg}{curve}</div></div>{script}'))
+    return (f'<style>{style}</style><div class="{key}"><input type="range" min="0" step="1">'
+            f'<div class="cap"></div><div class="row">{svg}{curve}</div></div>{script}')
