@@ -46,7 +46,7 @@ SPICE covers all states when the total is at most 27. Otherwise, it selects 11 s
 
 ### 6.5 Shuttle Top-Level Layout
 
-The top-level layout adds probe pads, power routing and the PDK MPW frame to dot4. It is the circuit with weight inputs used in chapters 3–5, distinct from the fixed-weight circuit in section 6.4. Its custom probe-pad arrangement requires shuttle-operator approval of the pad map, package, electrostatic discharge (ESD) provisions and supply conditions.
+The top-level layout adds pads, power routing and the PDK's stock MPW frame to dot4. It is the circuit with weight inputs used in chapters 3–5, distinct from the fixed-weight circuit in section 6.4. The frame's electrostatic discharge (ESD) supply shares VSS with the circuit's VSS (−5 V) and takes VDD at +5 V from a separate terminal. The −5 to +5 V ternary signals then stay within the ESD supply range, so the stock pads are used as they are. The taped-out chip uses the same connection. Submission requires the shuttle operator to allocate a 2500 µm square slot and agree on the bond diagram.
 
 <!-- code: shuttle6 -->
 
