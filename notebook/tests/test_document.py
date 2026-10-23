@@ -1,57 +1,32 @@
-"""The submission draft is a reproducible, executable Python notebook document."""
+"""Both v3 editions must build reproducibly and keep their runtime assets."""
 
 import importlib.util
 from pathlib import Path
+import re
 import subprocess
 import sys
 
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location("tritflow_notebook_validation", ROOT/"notebook/validate_notebook.py")
+spec = importlib.util.spec_from_file_location("tritflow_notebook_validation", ROOT / "notebook/validate_notebook.py")
 validation = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(validation)
 
 
-def test_notebook_chapters_code_and_generator_reproducibility():
-    path = ROOT/"notebook/tritflow_tr1um.ipynb"
-    before = path.read_bytes()
+@pytest.mark.parametrize("language", ["en", "ja"])
+def test_notebook_chapters_code_and_generator_reproducibility(language, tmp_path):
+    path = ROOT / "notebook/v3" / f"tritflow_{language}.ipynb"
     document = validation.validate(path)
-    assert "lay.extract()" in "\n".join(c["source"] for c in document["cells"])
-    subprocess.run([sys.executable, str(ROOT/"notebook/make_notebook.py")], check=True)
-    assert path.read_bytes() == before
-
-
-def test_truth_tables_are_rendered_as_html_and_required_results_have_no_todo_fallback():
-    import json
-    document = json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())
-    source = "\n".join(c["source"] for c in document["cells"] if c["cell_type"] == "code")
-    assert "display(truth_table_html" not in source
-    assert source.count('details_html(') >= 4
-    assert 'truth_table_html(custom' in source and 'truth_table_html(fa.design)' in source
-    assert "TODO SIM" not in source and "TODO CELLS" not in source
-    assert "TRITFLOW_FORCE_RUN" in source
-    assert "device_mapping" in source and "ordered-pair/orientation abutments" in source
-    author = (ROOT/"docs/author.md").read_text()
-    block = author[author.index("- Name:"):].split("\n\n",1)[0]
-    assert block in document["cells"][0]["source"]
-
-
-def test_colab_note_matches_the_latest_published_verification():
-    import json
-    document=json.loads((ROOT/"notebook/tritflow_tr1um.ipynb").read_text())
-    intro=document["cells"][0]["source"]
-    record=json.loads((ROOT/"notebook/colab_verified.json").read_text())
-    assert len(record["commit"]) == 40 and record["passed_code_cells"] >= 34
-    report=(ROOT/record["report"]).read_text()
-    assert record["passed"] is True and record["commit"] in report
-    assert f'{record["run_all_seconds_including_setup"]:.1f} s' in report
-    assert record["publish"] is True and record['first_attempt_completed'] is True
-    assert record['run_all_attempts'] == 1
-    assert record["commit"][:7] in intro and 'including setup' in intro
-    assert 'If Run all stops after setup, choose Run all again.' in intro
-    assert all(text not in intro for text in ("Run all ≈", "384.1 s", "842afe2"))
-    assert intro.count('top-level HDL lines') == 1
-    assert all(text not in intro for text in ("Release TODO","predates","unverified","content-keyed","TRITFLOW_FORCE_RUN"))
-    appendix=next(c["source"] for c in document["cells"] if c["source"].startswith("## Appendix B."))
-    assert "TRITFLOW_REF" in appendix and "TRITFLOW_FORCE_RUN" in appendix
-    assert "recorded" in appendix and "842afe2" not in appendix
+    code = "\n".join("".join(cell["source"]) for cell in document["cells"] if cell["cell_type"] == "code")
+    assert "dot4_layout.extract()" in code and "dot4_extracted.simulate(" in code
+    ref = re.search(r'SOURCE_REF = os.environ.get\("TRITFLOW_REF", "([0-9a-f]{40})"\)', code)[1]
+    output = tmp_path / path.name
+    subprocess.run([sys.executable, str(ROOT / "notebook/v3/make_notebook.py"),
+                    "--lang", language, "--ref", ref, "--out", str(output)], check=True)
+    assert output.read_bytes() == path.read_bytes()
+    for cell in document["cells"]:
+        if cell["cell_type"] == "markdown":
+            text = "".join(cell["source"])
+            for asset in re.findall(rf"(?:/{ref}/|@{ref}/)([^\s\"<>\)]+\.(?:png|svg))", text):
+                assert (ROOT / asset).is_file(), asset

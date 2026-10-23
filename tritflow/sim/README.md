@@ -133,7 +133,7 @@ inputs only. Solver failures retain null unavailable metrics and diagnostics.
 otherwise only the authorized result cache persists. `timeout` is per ngspice
 invocation, in seconds. Published source/layout/extraction files are never changed.
 
-### Chapter 7 adder scaling and output loading
+### Optional adder scaling and output loading
 
 ```sh
 python3 examples/adder_scaling.py --jobs 2
@@ -144,7 +144,7 @@ python3 examples/adder_scaling.py --load-only
 The producer uses public HDL/synthesis and `pnr.place_and_route`, real cells,
 normal PDK DRC, strict PDK LVS, actual-GDS wire C, pre/post ngspice and IR solving.
 Artifacts live in `build/adder_scaling/adderN/postlayout/`; the portable result
-matrix is `results/adder_scaling.json`. Each size has both signs of carry
+matrix is written by the producer; no earlier adder/load records are bundled. Each size has both signs of carry
 assertion and release through every digit, plus overflow/zero/opposite/alternating
 states. The carry metric takes the worst of COUT and the most-significant SUM
 endpoint on those four transitions. N=1 also checks all 27 states. Static power
@@ -154,8 +154,8 @@ over those states, not an exhaustive all-input maximum for N>1. IR uses the
 separate per-cell rail-current envelope; it does not feed back into SPICE.
 
 `tritflow.sim.scaling.load_scaling()` and
-`tritflow.sim.load_sweep.load_sweep_results()` are fast reads of the published
-measurements, with no simulator/PNR work. `scaling_figure()` and
+`tritflow.sim.load_sweep.load_sweep_results()` read the caller's produced measurements, with no simulator/PNR work. Run the adder/load
+producer first; the old notebook records are no longer distributed. `scaling_figure()` and
 `load_sweep_figure()` in `tritflow.viz.scaling` return Plotly figures. The producer
 validates source/model/code and output hashes before reusing expensive results;
 rerun it after cell changes. Cached measured datasets retain their provenance
@@ -175,9 +175,10 @@ load, PVT, or silicon guarantee is implied.
 `results['fits']` and `tritflow.sim.scaling.fit_scaling(results)` provide OLS
 carry-delay/trit and representative DC-power/cell fits, with a free intercept,
 residuals and R². `tritflow.viz.scaling.scaling_fit_figure(results)` returns the
-chapter-7 figure; the producer writes `results/adder_scaling_fit.html`.
+corresponding figure; the producer writes an HTML copy.
 The static-power fit describes this adder cell mix at documented DC states.
 Resistive dividers consume power while inputs are held; clock reduction alone
 does not eliminate that bias current. Fits do not measure switching energy or
-establish PVT bounds. `results/phase4_comparison.json` compares the saved Phase 3
-records against requalified layouts; the IP62 audit is `results/pdk_parameters.json`.
+establish PVT bounds. For the v3 notebook campaign, see `results/dot_scaling.json`,
+`examples/dot_scaling.py` and `notebook/scale_views.py`. The IP62 assumptions
+remain available through `tritflow.extract.technology.parameter_audit()`.

@@ -72,7 +72,7 @@ def test_rejects_unexecuted_changed_failed_or_reordered_evidence(tmp_path):
 
 
 def test_native_svg_gallery_is_embedded_without_local_assets():
-    svg = (ROOT/'notebook/assets/schematics/INV.svg').read_bytes()
+    svg = (ROOT/'notebook/assets/schematics/INV.compact.svg').read_bytes()
     html = f'<img src="data:image/svg+xml;base64,{b64encode(svg).decode()}" alt="INV taped-out schematic">'
     output, = builder.gallery_outputs(html)
     assert output.data['image/svg+xml'].encode() == svg

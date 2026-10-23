@@ -16,8 +16,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-# The setup cell and the table pictures are shared with v2.
-sys.path.insert(0, str(HERE.parent/"v2"))
+# The setup cell and table pictures live beside this builder.
+sys.path.insert(0, str(HERE))
 from setup_cell import SETUP
 from make_tables import TABLES, TABLES_EN, width
 
