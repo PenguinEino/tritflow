@@ -24,6 +24,10 @@ async def _snapshots(items, directory):
             # executing notebook. Other remote scripts are refused.
             html = re.sub(r'<script[^>]*src="https://cdn\.plot\.ly/[^"]+"[^>]*></script>',
                           '<script src="plotly.min.js"></script>', html)
+            # Plotly's notebook renderer also loads MathJax from a CDN; the
+            # figures have no TeX labels, so the snapshot does without it.
+            html = re.sub(r'<script[^>]*src="https://cdnjs\.cloudflare\.com/ajax/libs/mathjax/[^"]+"[^>]*></script>',
+                          '', html)
             if re.search(r'<(?:script|img)[^>]*src=["\']https?://', html):
                 raise ValueError("static HTML depends on an unbundled remote asset")
             page = directory/f"view-{index}.html"
