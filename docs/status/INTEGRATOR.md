@@ -71,3 +71,16 @@
   narrowed to integrating chapter 6 (narrative + builder cells).
 - 10-23 night: main stays at v1 until the author approves updating it. Colab badges (README, English opening)
   point to branch notebook-v3 meanwhile; switch them to main when main is updated.
+
+## State 2026-10-23 late (v3 release candidate)
+- Branch notebook-v3 (worktree ~/code-a-chip-v3) is the submission source; main still v1 (author: wait).
+  Chapters 0-6 in Japanese and English; v1/v2 removed (CLEANUP). Reviews are done by Claude itself.
+- Release candidate: notebooks pinned to 8f77584; fresh-Colab Run all passed (en 372 s, ja 447 s,
+  docs/status/colab/v3-release-2026-10-23); payload c62518d, `build_submission.py --check --require-final`
+  passes (submission_ready true), 9.9 MB.
+- Release procedure: (1) commit implementation W; (2) make_notebook --lang ja/en pins W, commit X;
+  (3) at HEAD, `TRITFLOW_REF=$(git rev-parse HEAD) python3 submission/build_submission.py` (the gate needs
+  the execution commit to equal the evidence source_ref; the pinned W must hold the same notebook up to
+  its own stamp); (4) `--check --require-final`; commit the payload.
+- Open: author approval to update main (then switch Colab badges in README and the English opening to
+  main and redo steps 1-4); the PR to sscs-ose is the author's action on 10-30.
