@@ -96,4 +96,7 @@
   `TRITFLOW_REF=$(git rev-parse HEAD) python3 submission/build_submission.py`, then
   `--check --require-final`, commit the payload. Recorded campaigns hash source files
   (results/dot_scaling.json, dot4 provenance): never edit a hashed file without checking.
-- Open: author decision on the delivery month (ref. 16 says around February 2027; text says January).
+- Delivery month: January 2027 stays. The organizer told the author delivery within January 2027 is
+  likely (provisional), so the text is unchanged.
+- COLAB_RC2 (fresh Colab, notebooks e202850, pin 163b137): ja and en passed on the first VM, 31 code
+  cells each, no warnings; ch. 6 scaling and the 16-pad stock frame displayed (docs/status/COLAB_RC2.md).
