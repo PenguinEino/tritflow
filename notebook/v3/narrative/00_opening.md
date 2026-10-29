@@ -9,9 +9,13 @@ TritFlowは、三つの電圧レベルをそのまま扱うCMOSセルを用い�
 
 重みを−1・0・+1の三値に絞った大規模言語モデル[BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764)の線形層では、重みとの積が入力、その符号反転、0のいずれかとなり、積和を加算と減算で実行できる（入力は8ビット）。三値のデータを三値のまま計算する回路は、改めて意味を持ち始めている。それでも、こうした計算を担っているのは二値の回路である。三値の論理回路には[CNTFETによるシミュレーション](https://doi.org/10.1109/TNANO.2009.2036845)、[メモリスタによるシミュレーション](https://doi.org/10.1007/s10470-016-0733-1)と[試作](https://doi.org/10.1109/TCSI.2020.3027693)、[CMOSによる試作](https://doi.org/10.1038/s41928-019-0272-8)の研究がある。設計ツールは、[ゲートの回路網を生成するRTL合成](https://doi.org/10.1109/ACCESS.2025.3597293)、三値を二値で符号化するもの（[MRCS](https://github.com/aiunderstand/MixedRadixCircuitSynthesis/tree/0865cee1f49fe9a803b4910b570f4e96e514c61b)、[Takahe](https://github.com/Zaneham/takahe/blob/e7123ea60269922acb283d576678a3aabe51f4f4/designs/setun70_physical.sv)）、[三値の重みを固定ROM構造に実装するもの](https://doi.org/10.48550/arXiv.2608.26206)にとどまる。製造可能なオープンソースPDK上で、三つの電圧レベルをそのまま扱うCMOSセルを用い、三値のHDLからGDSまでを通す設計フローは、我々の知る限り報告されていない。
 
-TritFlowの土台は[OpenSUSI TR-1um](https://github.com/OpenSUSI/TR-1um/tree/5d963db9d44e192d37a0489c208bfccf2e2f690c)である。TR-1umは、日本で初めて商用ファブが公開したオープンソースPDKとして[発表された](https://ishi-kai.org/information/seminar/2025/10/30/DecEvent_1213.html)。扱うのは平衡三値である。各桁は−1・0・+1のいずれかをとり、桁の重みは3のべき（1, 3, 9, …）である。回路の上ではそれぞれ−5 V・0 V・+5 Vに対応する。
+本ノートブックでは、この設計フローをTritFlowとして、[日本の商用ファブが公開したオープンソースPDK](https://ishi-kai.org/information/seminar/2025/10/30/DecEvent_1213.html)である[OpenSUSI TR-1um](https://github.com/OpenSUSI/TR-1um/tree/5d963db9d44e192d37a0489c208bfccf2e2f690c)の上で実現する。TritFlowは、著者がテープアウトした三値論理回路をスタンダードセルにして、三値の専用HDLから論理合成、配置配線、PDKのDRC/LVS、ポストレイアウトシミュレーションまでを一つのフローで行う。
 
-TritFlowのスタンダードセルの元になった三値回路は、TR-1umを使うOpenSUSI-MPWの初回シャトル（2026年、OpenSUSI-TR10）で、著者がすでにテープアウトしている。この回路は $X + A \times B + C_{in} = \mathrm{Sum} + 3\,C_{out}$ を満たす[1トリットの積和回路](https://github.com/PenguinEino/opensusi-tr10-balanced-ternary-logic/tree/8a60b97868cad008ff21fefca5da13dcd06063f8)であり、3章以降で扱うdot4の1項にあたる。チップは2027年1月に届く。採択されれば、2月のISSCCでTritFlowを発表し、元になったセルの最初の実測結果を合わせて報告する。そしてTritFlowで設計した回路を、次のOpenSUSIシャトルで製造する。設計、製造、実測、報告を一巡させることで、TritFlowとTR-1umが、Code-a-Chipの掲げる三つの価値を備えることを実証する。
+扱うのは平衡三値である。各桁は−1・0・+1のいずれかをとり、桁の重みは3のべき（1, 3, 9, …）である。回路の上ではそれぞれ−5 V・0 V・+5 Vに対応する。
+
+スタンダードセルの元になった三値回路は、TR-1umを使うOpenSUSI-MPWの初回シャトル（2026年、OpenSUSI-TR10）でテープアウトした、$X + A \times B + C_{in} = \mathrm{Sum} + 3\,C_{out}$ を満たす[1トリットの積和回路](https://github.com/PenguinEino/opensusi-tr10-balanced-ternary-logic/tree/8a60b97868cad008ff21fefca5da13dcd06063f8)であり、3章以降で扱うdot4の1項にあたる。チップは2027年1月に届く。採択されれば、2月のISSCCでTritFlowを発表し、元になったセルの最初の実測結果を合わせて報告する。そしてTritFlowで設計した回路を、次のOpenSUSIシャトルで製造する。
+
+設計、製造、実測、報告を一巡させることで、TritFlowとTR-1umが、Code-a-Chipの掲げる三つの価値を実現できることを実証する。そして、日本における半導体設計の民主化を大きく前進させることを目指す。
 
 **再現性**　後に続く研究者がTritFlowを中身まで理解し、自分で作り直し、説明できること。そのためにTritFlowはセルの回路、論理合成のアルゴリズム、配置配線のいずれも、読んで追える単純さに保ちながら、PDKのDRC/LVSとポストレイアウトSPICEで検証したコアのGDSを出力するように設計した。本ノートブックは各段がなぜそう動くのかを説明し、その場で動かして確かめられるようにしている。セルは実際に製造し実測する回路をもとにしているため、理解した内容をシリコンの実測と突き合わせることもできる（1〜5章）。
 
