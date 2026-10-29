@@ -196,7 +196,8 @@ def test_reuse_translation_preserves_the_recorded_producer():
 
     class WithoutLabels(ast.NodeTransformer):
         def visit_FunctionDef(self, node):
-            return None if node.name == "_label" else self.generic_visit(node)
+            # shuttle_view only displays the recorded snapshot; it does not produce it.
+            return None if node.name in ("_label", "shuttle_view") else self.generic_visit(node)
 
         def visit_Assign(self, node):
             if any(isinstance(target, ast.Name) and target.id == "LABELS_EN" for target in node.targets):
@@ -215,4 +216,4 @@ def test_reuse_translation_preserves_the_recorded_producer():
 
     current = (builder.ROOT/"notebook/reuse.py").read_text()
     normalized = WithoutLabels().visit(ast.parse(current))
-    assert ast.dump(normalized) == ast.dump(ast.parse(original))
+    assert ast.dump(normalized) == ast.dump(WithoutLabels().visit(ast.parse(original)))
