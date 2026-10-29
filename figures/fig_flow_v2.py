@@ -11,7 +11,7 @@ from matplotlib.patches import ConnectionPatch, FancyArrowPatch
 
 from tritflow import CELLS_DIR, ROOT, flow
 
-CHIP = ROOT / "notebook/assets/chip/dot4/tr_1um_dot4.gds"
+CHIP = ROOT / "figures/full_add_chip"   # the same full adder in the stock frame (build.py there)
 from tritflow.viz.layers import LAYER_STYLE, MATPLOTLIB_HATCH
 
 import paperstyle as style
@@ -39,7 +39,7 @@ TEXT = {
            "pnr": "Place & route", "pnr_note": "DRC {drc}, LVS {lvs}", "match": "match", "mismatch": "mismatch",
            "zoom_note": ["magnified: transistors,", "M1, M2 and vias"],
            "spice": "Post-layout SPICE", "spice_note": ["extracted devices + wire C", "three levels, ±0.5 V bands"],
-           "chip": "MPW top", "chip_note": ["dot4 in the stock OSS_FRAME", "2.5 mm square, 16 pads"]},
+           "chip": "MPW top", "chip_note": ["in the stock OSS_FRAME, 2.5 mm", "DRC {drc}, LVS {lvs}"]},
     "ja": {"hdl": "三値のHDL（TritVerilog）", "hdl_note": ["全加算器：a + b + cin = sum + 3·cout", "半加算器2個で組む"],
            "synth": "合成", "synth_note": "{n}セル（{counts}）。a = b = cin = +1 のとき",
            "synth_note2": "1 + 1 + 1 = 0 + 3·(+1)（赤 +1、青 −1、灰 0）",
@@ -47,7 +47,7 @@ TEXT = {
            "pnr": "配置配線", "pnr_note": "DRC {drc}件、LVS {lvs}", "match": "一致", "mismatch": "不一致",
            "zoom_note": ["拡大：トランジスタ、", "M1・M2とビア"],
            "spice": "ポストレイアウトSPICE", "spice_note": ["抽出した素子＋配線容量", "3つのレベル、±0.5 Vの帯"],
-           "chip": "MPWのフレームに載せたGDS", "chip_note": ["dot4を標準のOSS_FRAMEに", "2.5 mm角、パッド16個"]},
+           "chip": "MPWのフレームに載せたGDS", "chip_note": ["標準のOSS_FRAME、2.5 mm角", "DRC {drc}件、LVS {lvs}"]},
 }
 
 
@@ -172,9 +172,12 @@ def make(lang="en"):
     ax.text(0.05, 6.0, "sum", fontsize=6, color=style.BLUE)
     ax.text(0.8, 6.0, "cout", fontsize=6, color=style.ORANGE)
 
-    # The same flow, applied to dot4 and placed in the organizer's pad frame.
-    ax = panel(fig, [0.785, low, 0.205, height], T["chip"], T["chip_note"])
-    draw_gds(ax, CHIP, line=0.05)
+    # The same full adder, placed in the organizer's stock pad frame.
+    chip = json.loads((CHIP/"summary.json").read_text())
+    note = [T["chip_note"][0], T["chip_note"][1].format(
+        drc=chip["drawing_drc"]["violations"], lvs=T["match"] if chip["drawing_lvs"]["matched"] else T["mismatch"])]
+    ax = panel(fig, [0.785, low, 0.205, height], T["chip"], note)
+    draw_gds(ax, CHIP/"tr_1um_full_add.gds", line=0.05)
 
     middle = low+height/2
     # From the end of the top row, around the right margin and back to the start of the bottom row.
