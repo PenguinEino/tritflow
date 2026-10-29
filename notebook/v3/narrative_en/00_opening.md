@@ -7,7 +7,7 @@ Information and Communication Engineering Course, Department of Monozukuri Engin
 
 Run all takes about 7 minutes on a fresh Colab runtime (setup about 2 minutes).
 
-TritFlow is a design flow from ternary HDL to GDS on OpenSUSI TR-1um, built on CMOS cells that handle three voltage levels directly. This notebook takes a four-term dot product, dot4, through logic synthesis, two-metal place and route, DRC/LVS, post-layout simulation and ternary timing analysis, then edits its HDL and reruns the same flow.
+TritFlow is a design flow from ternary HDL to GDS on OpenSUSI TR-1um, built on CMOS cells that handle three voltage levels directly. The running example is dot4, a circuit that computes the four-term dot product of ternary weights $w_i$ and inputs $x_i$, $y = \sum_{i=0}^{3} w_i x_i$. This notebook takes dot4 through logic synthesis, two-metal place and route, DRC/LVS, post-layout simulation and ternary timing analysis, then edits its HDL and reruns the same flow.
 
 <!-- figure: fig_flow_v2 -->
 
