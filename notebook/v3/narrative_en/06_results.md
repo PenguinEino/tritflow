@@ -4,7 +4,7 @@ Chapter 5 verified the four-term dot product dot4 with post-layout simulation an
 
 ### 6.1 Dot-Product Size and Area
 
-The evaluated circuit is a dot product of one-trit weights and inputs, $y = \sum_{i=0}^{N-1} w_i x_i$. The output uses the minimum number of trits needed to represent $-N$ through $+N$. Weights remain HDL inputs but are fixed in simulation to repetitions of $(+1, -1, +1, +1)$. Addition uses the same HDL form as section 3.7, without structural changes for different term counts.
+The evaluated circuit is a dot product of one-trit weights and inputs, y = w<sub>0</sub>x<sub>0</sub> + … + w<sub>N−1</sub>x<sub>N−1</sub>. The output uses the minimum number of trits needed to represent −N through +N. Weights remain HDL inputs but are fixed in simulation to repetitions of (+1, −1, +1, +1). Addition uses the same HDL form as section 3.7, without structural changes for different term counts.
 
 The tables present recorded place and route and verification results. Area is measured from the routed die outline.
 
@@ -14,7 +14,7 @@ Increasing the term count adds multiplier circuits and adder circuits for the re
 
 ### 6.2 Static and Time-Average Power
 
-States that hold 0 V by resistive division draw static current even without input transitions. NANY also has zero-output states in which VMID clamps conduct while the VDD and VSS transistor stacks are cut off. Static power is calculated from DC operating points for states in the recorded input sequence. With current defined as positive into each SPICE voltage source, circuit power is $P = -\sum_r V_r I_r$, including both positive and negative supply contributions.
+States that hold 0 V by resistive division draw static current even without input transitions. NANY also has zero-output states in which VMID clamps conduct while the VDD and VSS transistor stacks are cut off. Static power is calculated from DC operating points for states in the recorded input sequence. With current defined as positive into each SPICE voltage source, circuit power is P = −Σ<sub>r</sub> V<sub>r</sub>I<sub>r</sub>, including both positive and negative supply contributions.
 
 Time-average supply power is the integral of instantaneous power over all hold intervals, divided by the total duration. It includes state-dependent static consumption and transition consumption. Power from the input voltage sources is excluded.
 
@@ -36,7 +36,7 @@ For dot4 in chapter 5, STA underestimates SPICE by about 10% at y[1] and 3% at y
 
 ### 6.4 Editing HDL and Rerunning the Flow
 
-Making inference weights HDL constants allows logic synthesis to simplify the corresponding multiplier circuits. The following circuit fixes dot4's weights to $(+1, -1, +1, +1)$. After changes to the expression and port declarations, the same execution cell runs logic synthesis through post-layout simulation.
+Making inference weights HDL constants allows logic synthesis to simplify the corresponding multiplier circuits. The following circuit fixes dot4's weights to (+1, −1, +1, +1). After changes to the expression and port declarations, the same execution cell runs logic synthesis through post-layout simulation.
 
 <!-- code: reuse_source -->
 

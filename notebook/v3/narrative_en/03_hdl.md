@@ -4,7 +4,7 @@ Chapter 2 established that TritFlow's cell basis can implement arbitrary ternary
 
 ### 3.1 Values and Numbers
 
-A signal value, or trit, is −1, 0 or +1, corresponding to −5 V, 0 V or +5 V. In conditions, these denote false, unknown and true. Unknown is the valid trit 0 at a physical 0 V, distinct from Verilog's undefined X and high-impedance Z. Vectors such as `trit [1:0] a` represent balanced-ternary integers, with digit $i$ weighted by $3^i$. Literals use T for −1: `2'tT1`, for example, represents −1·3 + 1 = −2. Two trits represent −4 through +4 without a sign bit. Negation simply negates every digit.
+A signal value, or trit, is −1, 0 or +1, corresponding to −5 V, 0 V or +5 V. In conditions, these denote false, unknown and true. Unknown is the valid trit 0 at a physical 0 V, distinct from Verilog's undefined X and high-impedance Z. Vectors such as `trit [1:0] a` represent balanced-ternary integers, with digit i weighted by 3<sup>i</sup>. Literals use T for −1: `2'tT1`, for example, represents −1·3 + 1 = −2. Two trits represent −4 through +4 without a sign bit. Negation simply negates every digit.
 
 <!-- tables: numbers -->
 
@@ -22,13 +22,13 @@ Logic synthesis proceeds through the following stages.
 
 1. Elaboration: parse the HDL and elaborate module hierarchy, parameters and `generate` constructs into an expression intermediate representation. Procedures in `always @*` are converted to static single assignment, updating each signal's current value on every assignment. Branches in `if` and `case` become value selections.
 2. Mapping: replace each operation with a fixed circuit structure. Addition and subtraction use carry chains of half adders and full adders verified in the taped-out circuits. Comparisons saturate per-digit differences and determine the sign from the most significant digit. Equality tests and `case` labels use per-digit equality detectors. Selection is described in section 3.5.
-3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic, such as $-(-x) = x$, $\min(x, x) = x$, $\min(x, +1) = x$, $\max(x, +1) = +1$, $\mathrm{NANY}(x, 0) = -x$, $\min(-a, -b) = -\max(a, b)$.
+3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic, such as −(−x) = x, min(x, x) = x, min(x, +1) = x, max(x, +1) = +1, NANY(x, 0) = −x, min(−a, −b) = −max(a, b).
 4. Fanout control: SPICE simulation confirmed correct levels with eight identical cells on one output. With margin, each cell output drives at most four inputs by default, and additional loads are distributed through BUF trees.
 5. Equivalence checking: verify that the synthesized netlist implements the same function as the HDL (section 3.6).
 
 ### 3.4 Arithmetic: `+` and `*`
 
-The sum of two one-trit values ranges from −2 to +2 and requires a carry. For example, 1 + 1 = 2 = 3·1 + (−1), giving a sum digit of −1 and a carry of +1. A full adder satisfies $a + b + c_{in} = s + 3\,c_{out}$. TritFlow maps HDL `+` to the full-adder structure verified in the taped-out circuits (11 NANY and 5 INV cells), connecting carry chains for multiple digits.
+The sum of two one-trit values ranges from −2 to +2 and requires a carry. For example, 1 + 1 = 2 = 3·1 + (−1), giving a sum digit of −1 and a carry of +1. A full adder satisfies a + b + c<sub>in</sub> = s + 3c<sub>out</sub>. TritFlow maps HDL `+` to the full-adder structure verified in the taped-out circuits (11 NANY and 5 INV cells), connecting carry chains for multiple digits.
 
 <!-- code: fa_source -->
 
@@ -66,7 +66,7 @@ Every synthesis run checks that the synthesized netlist implements the same func
 
 ### 3.7 Dot Product with Ternary Weights
 
-The matrix products in [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764), introduced at the start, consist of repeated dot products of ternary weights $w_i$ and inputs $x_i$, $y = \sum_i w_i x_i$. BitNet b1.58 uses 8-bit inputs; here, the inputs are restricted to one trit. The taped-out one-trit multiply-accumulate circuit underlying TritFlow's cells ($X + A \times B + C_{in} = S + 3\,C_{out}$) corresponds to one term of this dot product. Here, the `*` and `+` operations from section 3.4 describe a four-term dot product, dot4. Each product ranges from −1 to +1, and the four-term sum ranges from −4 to +4, so two trits suffice for output y.
+The matrix products in [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764), introduced at the start, consist of repeated dot products of ternary weights w<sub>i</sub> and inputs x<sub>i</sub>, y = Σ<sub>i</sub> w<sub>i</sub>x<sub>i</sub>. BitNet b1.58 uses 8-bit inputs; here, the inputs are restricted to one trit. The taped-out one-trit multiply-accumulate circuit underlying TritFlow's cells (X + A × B + C<sub>in</sub> = S + 3C<sub>out</sub>) corresponds to one term of this dot product. Here, the `*` and `+` operations from section 3.4 describe a four-term dot product, dot4. Each product ranges from −1 to +1, and the four-term sum ranges from −4 to +4, so two trits suffice for output y.
 
 <!-- code: dot4_source -->
 

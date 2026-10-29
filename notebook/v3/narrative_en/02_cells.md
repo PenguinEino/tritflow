@@ -21,11 +21,11 @@ Sizing trades off middle-level accuracy, delay, area and static current.
 
 - **Target**: as the middle-level noise margin, an output within ±0.5 V for inputs from −1 to +1 V.
 - **Gate length**: the minimum 1 µm, for drive strength and area.
-- **PMOS and NMOS widths**: at an input of 0 V, the output is 0 V when the upper on-resistance plus RR, $r_{on,P} + R_{RP}$, equals the lower $r_{on,N} + R_{RN}$. Because hole mobility is lower than electron mobility, the PMOS is wider than the NMOS to match their on-resistances and cancel the output offset.
+- **PMOS and NMOS widths**: at an input of 0 V, the output is 0 V when the upper on-resistance plus RR, r<sub>on,P</sub> + R<sub>RP</sub>, equals the lower r<sub>on,N</sub> + R<sub>RN</sub>. Because hole mobility is lower than electron mobility, the PMOS is wider than the NMOS to match their on-resistances and cancel the output offset.
 - **RR width**: the minimum 2.8 µm.
 - **RR length**: 30 µm, to keep the static current of the complete taped-out chip within the power-wire and via current limits. The MOS dimensions were retained when RR was lengthened, leaving an offset of several tens of mV at an input of 0 V, well within the ±0.5 V acceptance band.
 
-The adopted PMOS and NMOS widths are 13.5 µm and 5 µm. The PDK's zero-bias resistance equation gives 10.835 kΩ for each RR. A linear MOS resistance approximation using mobility, oxide thickness and threshold voltage gives $r_{on,P}=0.492$ kΩ and $r_{on,N}=0.399$ kΩ. The RR-to-on-resistance ratios are 22.0 and 27.2, respectively, so the ratio of the two identically shaped resistors, rather than MOS variation, sets the zero level. With $R_u = r_{on,P} + R_{RP}$ above Y and $R_d = r_{on,N} + R_{RN}$ below Y, the divider gives
+The adopted PMOS and NMOS widths are 13.5 µm and 5 µm. The PDK's zero-bias resistance equation gives 10.835 kΩ for each RR. A linear MOS resistance approximation using mobility, oxide thickness and threshold voltage gives r<sub>on,P</sub> = 0.492 kΩ and r<sub>on,N</sub> = 0.399 kΩ. The RR-to-on-resistance ratios are 22.0 and 27.2, respectively, so the ratio of the two identically shaped resistors, rather than MOS variation, sets the zero level. With R<sub>u</sub> = r<sub>on,P</sub> + R<sub>RP</sub> above Y and R<sub>d</sub> = r<sub>on,N</sub> + R<sub>RN</sub> below Y, the divider gives
 
 $$V_Y = V_{SS} + (V_{DD}-V_{SS})\frac{R_d}{R_u+R_d} \simeq -0.021\ \mathrm{V},\qquad I = \frac{V_{DD}-V_{SS}}{R_u+R_d} \simeq 0.443\ \mathrm{mA}$$
 
@@ -39,8 +39,8 @@ Logic synthesis replaces HDL logic with combinations of library cells. To implem
 
 In ternary logic, NANY and the constant cell TIEP, defined below, form a complete basis.
 
-- **NANY**: a two-input cell defined in TritFlow. It clips the sum of its inputs to the range −1 to +1, then negates it. $\mathrm{NANY}(a, b) = -\mathrm{sat}(a+b)$
-- **sat**: the function that clips to the range −1 to +1. $\mathrm{sat}(x) = \max(-1, \min(+1, x))$
+- **NANY**: a two-input cell defined in TritFlow. It clips the sum of its inputs to the range −1 to +1, then negates it. NANY(a, b) = −sat(a + b)
+- **sat**: the function that clips to the range −1 to +1. sat(x) = max(−1, min(+1, x))
 - **TIEP, TIEZ, TIEN**: constant cells that output +1, 0 and −1, named after the binary tie cells (TIEHI, TIELO). Either TIEP or TIEN suffices for completeness.
 
 Słupecki's criterion (1939) establishes completeness for a ternary function basis satisfying both conditions below.
@@ -52,7 +52,7 @@ NANY itself satisfies condition 2. Since NANY(a, 0) = −a, changing a can chang
 
 <!-- code: closure -->
 
-NANY alone is not complete. Since $\mathrm{NANY}(0, 0) = 0$, any network of NANY cells produces 0 when all inputs are 0. It cannot construct a function that produces a nonzero output at a = 0, or a +1 or −1 constant. Adding one nonzero constant removes this restriction. The remaining constants follow from $\mathrm{NANY}(+1, +1) = -1$ and $\mathrm{NANY}(+1, -1) = 0$, so only one constant-cell type is required. TritFlow uses this property to map arbitrary truth tables to cells (chapter 3).
+NANY alone is not complete. Since NANY(0, 0) = 0, any network of NANY cells produces 0 when all inputs are 0. It cannot construct a function that produces a nonzero output at a = 0, or a +1 or −1 constant. Adding one nonzero constant removes this restriction. The remaining constants follow from NANY(+1, +1) = −1 and NANY(+1, −1) = 0, so only one constant-cell type is required. TritFlow uses this property to map arbitrary truth tables to cells (chapter 3).
 
 ### 2.3 Standard-Cell Library
 
