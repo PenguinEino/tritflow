@@ -99,7 +99,7 @@ def preview_values():
             "PACKAGE_STATUS":"Development preview; inspect build-info.json before filing.",
             "NOTEBOOKS":"Notebook links are generated when the package is built.",
             "COLAB_URL":"https://colab.research.google.com/", "RUNTIME":"Recommended runtime pins are in notebook/setup_pins.json.",
-            "RULES_DATE": "2026-10-23", "RULES_COMMIT":"a502a6ba01260d3492df9137dddae0bb5fabeb3c"}
+            "RULES_DATE": "2026-10-29", "RULES_COMMIT":"611b9d712ced9dd67b8aa0855ede44717579adbf"}
 
 
 def tool_version(command):

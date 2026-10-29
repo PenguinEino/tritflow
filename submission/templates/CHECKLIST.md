@@ -31,9 +31,9 @@ The builder repository retains the fetched Markdown and content hashes in
 | Final circuit layout is encouraged, not required | Saved real routed-core GDS views and PDK drawing-DRC/LVS evidence are included |
 | Membership is encouraged, not required | No membership or applicant grant-category assumption |
 
-The checked `howtoapply.md` still names **ISSCC26** and **November 27, 2025**.
-Those event and deadline instructions are superseded by the current root
-README and IEEE page. Its author, reference and tool-version guidance remains
+The checked `howtoapply.md` states no deadline and still names the **ISSCC26**
+folder. That folder instruction is superseded by the current root README and
+IEEE page. Its author, reference and tool-version guidance remains
 applicable. The FAQ's Python-3.7 installation example is historical, not a tool
 version mandate. The rules do not impose a numerical payload-size limit,
 require an abstract or pitch, require final GDS, or set a ten-minute runtime

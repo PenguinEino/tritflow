@@ -175,7 +175,7 @@ def test_pitch_three_sentences_and_rules_from_current_snapshot():
     checklist = builder.read_template('CHECKLIST.md')
     assert '2026-10-31 at 11:59 AM Pacific' in checklist
     assert 'ISSCC27/submitted_notebooks/TritFlow/' in checklist
-    assert 'superseded' in checklist and '2025' in checklist
+    assert 'superseded' in checklist and 'ISSCC26' in checklist
     from hashlib import sha256
     rules = json.loads((ROOT/'submission/official_sources.json').read_text())
     snapshot = json.loads((ROOT/'submission/official_snapshot.json').read_text())
