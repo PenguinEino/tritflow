@@ -100,3 +100,7 @@
   likely (provisional), so the text is unchanged.
 - COLAB_RC2 (fresh Colab, notebooks e202850, pin 163b137): ja and en passed on the first VM, 31 code
   cells each, no warnings; ch. 6 scaling and the 16-pad stock frame displayed (docs/status/COLAB_RC2.md).
+- 2026-10-29: after every push of pinned notebooks, warm the CDN: request every
+  `cdn.jsdelivr.net/gh/PenguinEino/tritflow@<pin>/...` URL in both notebooks and the payload and require
+  HTTP 200. jsDelivr's first fetch of a just-pushed commit can fail, and an image (inv.svg) then showed
+  as missing in Colab until a later request succeeded.
