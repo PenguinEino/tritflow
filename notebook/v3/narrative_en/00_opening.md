@@ -5,7 +5,14 @@ Information and Communication Engineering Course, Department of Monozukuri Engin
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/notebook-v3/notebook/v3/tritflow_en.ipynb)
 
-Run all takes 6 to 8 minutes on a fresh Colab runtime, including setup. The tools are Python 3.12, OpenSUSI TR-1um (commit 5d963db), KLayout 0.30.6 and ngspice 42; the first cell also installs the Python packages at pinned versions.
+**Runtime**
+
+- Run time: 6 to 8 minutes for Run all on a fresh Colab runtime, including setup
+- Python: 3.12
+- PDK: OpenSUSI TR-1um (commit 5d963db)
+- KLayout: 0.30.6
+- ngspice: 42
+- Python packages: installed at pinned versions by the first cell
 
 TritFlow is a design flow from ternary HDL to GDS on OpenSUSI TR-1um, built on CMOS cells that handle three voltage levels directly. This notebook runs ternary HDL through logic synthesis, two-metal place and route, GDS output, DRC/LVS, post-layout simulation and ternary timing analysis in order.
 

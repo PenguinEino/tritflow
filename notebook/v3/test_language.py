@@ -81,7 +81,7 @@ def test_both_editions_have_the_same_cell_structure_and_local_assets():
 def test_colab_entry_point_and_original_bibliography_are_preserved():
     opening = (HERE/"narrative_en/00_opening.md").read_text()
     assert "blob/notebook-v3/notebook/v3/tritflow_en.ipynb" in opening
-    assert "Run all takes 6 to 8 minutes on a fresh Colab runtime, including setup." in opening
+    assert "- Run time: 6 to 8 minutes for Run all on a fresh Colab runtime, including setup" in opening
     japanese = (HERE/"narrative/06_results.md").read_text().split("### 参考文献\n\n", 1)[1]
     english = (HERE/"narrative_en/06_results.md").read_text().split("### References\n\n", 1)[1]
     without_link_labels = lambda text: re.sub(r"\[[^\]]+\]\(([^)]+)\)", r"[](\1)", text)

@@ -3,9 +3,16 @@
 Einosuke Okazaki (岡崎 英之介)<br>
 Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
 
-TritFlowは、三つの電圧レベルをそのまま扱うCMOSセルを用い、三値のHDLからGDSまでをOpenSUSI TR-1umの上で通す設計フローである。本ノートブックでは三値のHDLから論理合成、2層メタルの配置配線、GDSの出力、DRC/LVS、ポストレイアウトシミュレーション、三値のタイミング解析までを順に実行する。
+**実行環境**
 
-新しいColabのランタイムでRun allすると、セットアップを含めて6〜8分かかる。使用するツールはPython 3.12、OpenSUSI TR-1um（commit 5d963db）、KLayout 0.30.6、ngspice 42で、Pythonのパッケージも最初のセルが固定したバージョンで入れる。
+- 所要時間：新しいColabのランタイムでRun all、セットアップを含めて6〜8分
+- Python：3.12
+- PDK：OpenSUSI TR-1um（commit 5d963db）
+- KLayout：0.30.6
+- ngspice：42
+- Pythonのパッケージ：最初のセルが固定したバージョンで導入
+
+TritFlowは、三つの電圧レベルをそのまま扱うCMOSセルを用い、三値のHDLからGDSまでをOpenSUSI TR-1umの上で通す設計フローである。本ノートブックでは三値のHDLから論理合成、2層メタルの配置配線、GDSの出力、DRC/LVS、ポストレイアウトシミュレーション、三値のタイミング解析までを順に実行する。
 
 <!-- figure: fig_flow_v2 -->
 
