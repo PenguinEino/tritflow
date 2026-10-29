@@ -41,12 +41,7 @@ LABELS_EN = {
         "All states in reflected ternary Gray order (digits 0, -1, +1), starting at zero; not exhaustive transition coverage.",
     "全入力が0の状態、全入力が−1の状態と+1の状態、符号が交互の状態、1入力だけを変えた状態を状態数の上限まで選び、残りは重複のない疑似乱数で補う。全入力状態・全入力遷移を網羅する検証ではない。":
         "Zero, rail corners, alternating signs, single-input excursions until the budget, then unique pseudorandom states. Not exhaustive state/transition coverage.",
-    "提出準備": "Submission ready", "未完了": "False", "完了": "True",
     "電源": "power", "入力": "input", "出力": "output",
-    "提出には、シャトル運営者による2500 µm角の領域の割り当て、最終ボンディング図の合意、最終CIによる確認が必要である。":
-        "Organizer allocation of a full 2500 um slot, final bond diagram and final CI remain",
-    "カスタムTEGのパッドとボンディングの割り当て、およびESD・電源・パッケージの承認がまだ必要である。":
-        "Custom TEG pad/bond allocation and ESD/power/package approval still required",
 }
 
 
@@ -307,19 +302,19 @@ def shuttle_view(directory=None):
     if sha256(gds.read_bytes()).hexdigest() != report["gds_sha256"]:
         raise ValueError("Recorded dot4 GDS hash does not match its signoff record")
     display(gds_viewer(gds, top=report["top"]))
-    display(_table([["検査（記録済み）", "結果"],
-                    [_label("Drawing DRC 違反"), report["drawing_drc"]["violations"]],
-                    ["Drawing LVS", _label("一致") if report["drawing_lvs"]["matched"] else _label("不一致")],
-                    [_label("Mask DRC 違反"), report["mask_drc"]["violations"]],
-                    ["MPW precheck", "PASS" if report["mpw_precheck"]["clean"] else "FAIL"],
-                    [_label("Submission ready"), _label(report["submission_ready"])]], key="tfshuttlechecks"))
+    checks = _table([["検査（記録済み）", "結果"],
+                     [_label("Drawing DRC 違反"), report["drawing_drc"]["violations"]],
+                     ["Drawing LVS", _label("一致") if report["drawing_lvs"]["matched"] else _label("不一致")],
+                     [_label("Mask DRC 違反"), report["mask_drc"]["violations"]],
+                     ["MPW precheck", "PASS" if report["mpw_precheck"]["clean"] else "FAIL"]], key="tfshuttlechecks")
     directions = report["port_directions"]
     rows = [["Pad", "信号 / 電源", "方向", "X (µm)", "Y (µm)"]]
     rows += [[p["pad"], p["net"], _label(directions.get(p["net"], "power")), *p["center_um"]]
              for p in report["pad_map"]]
-    display(_table(rows, key="tfshuttlepads"))
-    from views import note
-    note(_label(report["reason"]))
+    pads = _table(rows, key="tfshuttlepads")
+    # The checks and the pad map side by side; they wrap below each other on a narrow screen.
+    display(HTML('<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">'
+                 f'{checks.data}{pads.data}</div>'))
     return report
 
 

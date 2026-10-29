@@ -44,14 +44,13 @@ def test_shuttle_localizes_display_and_returns_unchanged_signoff(monkeypatch):
     original = json.loads((folder / "signoff.json").read_text())
     assert reuse.shuttle_view() == original
     html = "".join(captured)
-    for label in ("提出準備", "未完了", "電源", "入力", "出力", "ボンディング図"):
+    for label in ("検査（記録済み）", "電源", "入力", "出力"):
         assert label in html
-    for label in ("Submission ready", ">power<", ">input<", ">output<", original["reason"]):
+    for label in (">power<", ">input<", ">output<", "提出準備", "ボンディング図", original["reason"]):
         assert label not in html
-    assert "2500" in html and "CI" in html
+    # Checks and pad map share one flex row.
+    assert html.count("display:flex") == 1 and "tfshuttlechecks" in html and "tfshuttlepads" in html
     assert reuse._label("unrecognized future signoff reason") == "unrecognized future signoff reason"
-    live.set_language("en")
-    assert reuse._label(original["reason"]) == original["reason"]
 
 
 def test_settling_arrow_keeps_measured_endpoints_with_separate_text():
