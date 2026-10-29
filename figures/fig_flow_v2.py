@@ -10,6 +10,8 @@ from matplotlib.collections import PolyCollection
 from matplotlib.patches import ConnectionPatch, FancyArrowPatch
 
 from tritflow import CELLS_DIR, ROOT, flow
+
+CHIP = ROOT / "notebook/assets/chip/dot4/tr_1um_dot4.gds"
 from tritflow.viz.layers import LAYER_STYLE, MATPLOTLIB_HATCH
 
 import paperstyle as style
@@ -36,14 +38,16 @@ TEXT = {
            "cell": "Standard cell", "cell_note": ["NANY, from the taped-out", "circuit; 3 rails"],
            "pnr": "Place & route", "pnr_note": "DRC {drc}, LVS {lvs}", "match": "match", "mismatch": "mismatch",
            "zoom_note": ["magnified: transistors,", "M1, M2 and vias"],
-           "spice": "Post-layout SPICE", "spice_note": ["extracted devices + wire C", "three levels, ±0.5 V bands"]},
+           "spice": "Post-layout SPICE", "spice_note": ["extracted devices + wire C", "three levels, ±0.5 V bands"],
+           "chip": "MPW top", "chip_note": ["dot4 in the stock OSS_FRAME", "2.5 mm square, 16 pads"]},
     "ja": {"hdl": "三値のHDL（TritVerilog）", "hdl_note": ["全加算器：a + b + cin = sum + 3·cout", "半加算器2個で組む"],
            "synth": "合成", "synth_note": "{n}セル（{counts}）。a = b = cin = +1 のとき",
            "synth_note2": "1 + 1 + 1 = 0 + 3·(+1)（赤 +1、青 −1、灰 0）",
            "cell": "スタンダードセル", "cell_note": ["NANY。テープアウトした", "回路から。電源レール3本"],
            "pnr": "配置配線", "pnr_note": "DRC {drc}件、LVS {lvs}", "match": "一致", "mismatch": "不一致",
            "zoom_note": ["拡大：トランジスタ、", "M1・M2とビア"],
-           "spice": "ポストレイアウトシミュレーション", "spice_note": ["抽出した素子＋配線容量", "3つのレベル、±0.5 Vの帯"]},
+           "spice": "ポストレイアウトSPICE", "spice_note": ["抽出した素子＋配線容量", "3つのレベル、±0.5 Vの帯"],
+           "chip": "MPWのフレームに載せたGDS", "chip_note": ["dot4を標準のOSS_FRAMEに", "2.5 mm角、パッド16個"]},
 }
 
 
@@ -123,9 +127,9 @@ def make(lang="en"):
 
     # Bottom row: the cell it is built from, the routed layout, and the extracted circuit running.
     low, height = 0.11, 0.29
-    ax = panel(fig, [0.01, low, 0.16, height], T["cell"], T["cell_note"])
+    ax = panel(fig, [0.01, low, 0.15, height], T["cell"], T["cell_note"])
     draw_gds(ax, CELLS_DIR/"out/NANY/NANY.gds", line=0.35)
-    ax = panel(fig, [0.21, low, 0.2, height], T["pnr"],
+    ax = panel(fig, [0.2, low, 0.15, height], T["pnr"],
                [f"{pnr['die'][0]:.0f} × {pnr['die'][1]:.0f} µm, M1 + M2",
                 T["pnr_note"].format(drc=drc_items, lvs=T["match"] if lvs["matched"] else T["mismatch"])])
     box = draw_gds(ax, B/"full_add.gds", line=0.08)
@@ -133,7 +137,7 @@ def make(lang="en"):
     size = 0.28*box.width()
     x0, y0 = box.right-0.03*box.width()-size, box.bottom+0.35*box.height()
     ax.add_patch(plt.Rectangle((x0, y0), size, size, fill=False, ec="#eb6834", lw=0.9, zorder=10))
-    zoom = panel(fig, [0.43, low, 0.2, height], "", T["zoom_note"])
+    zoom = panel(fig, [0.365, low, 0.15, height], "", T["zoom_note"])
     draw_gds(zoom, B/"full_add.gds", line=0.25)
     zoom.set_xlim(x0, x0+size)
     zoom.set_ylim(y0, y0+size)
@@ -148,7 +152,7 @@ def make(lang="en"):
     fig.add_artist(ConnectionPatch((x0+size, y0), (0, 0), "data", "axes fraction", axesA=ax, axesB=zoom,
                                    color="#eb6834", lw=0.6, ls=":"))
 
-    ax = panel(fig, [0.7, low, 0.25, height], T["spice"], T["spice_note"])
+    ax = panel(fig, [0.56, low, 0.165, height], T["spice"], T["spice_note"])
     z = np.load(B/"postlayout/post/waveforms.npz")
     t = z["time"]*1e6
     window = t <= 4.2
@@ -165,6 +169,10 @@ def make(lang="en"):
     ax.text(0.05, 6.0, "sum", fontsize=6, color=style.BLUE)
     ax.text(0.8, 6.0, "cout", fontsize=6, color=style.ORANGE)
 
+    # The same flow, applied to dot4 and placed in the organizer's pad frame.
+    ax = panel(fig, [0.785, low, 0.205, height], T["chip"], T["chip_note"])
+    draw_gds(ax, CHIP, line=0.05)
+
     middle = low+height/2
     # From the end of the top row, around the right margin and back to the start of the bottom row.
     turn = 0.537
@@ -174,8 +182,9 @@ def make(lang="en"):
                               solid_capstyle="round"))
     # shrinkA=0: the arrow continues the line without a gap at the corner.
     arrow(fig, (0.03, turn), (0.03, low+height+0.085), shrinkA=0)
-    arrow(fig, (0.175, middle), (0.205, middle))
-    arrow(fig, (0.645, middle), (0.69, middle))
+    arrow(fig, (0.165, middle), (0.195, middle))
+    arrow(fig, (0.522, middle), (0.553, middle))
+    arrow(fig, (0.752, middle), (0.782, middle))
     return style.save(fig, "fig_flow_v2" + ("" if lang == "en" else f"_{lang}"))
 
 
