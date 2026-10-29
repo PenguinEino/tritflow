@@ -60,7 +60,7 @@ power, timing, HDL-edit and framed-chip results with their conditions.
 
 ## Run in Colab
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/1104e9d27f2b4e938f1ae68b9e8427f2bbfa25a2/notebook/v3/tritflow_en.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/a3c9484e40a8831d3c258f97cbf726122585540e/notebook/v3/tritflow_en.ipynb)
 
 Open the primary notebook, connect a Python CPU runtime and choose **Runtime →
 Run all**. Its setup cell obtains the full immutable `SOURCE_REF` from GitHub,
