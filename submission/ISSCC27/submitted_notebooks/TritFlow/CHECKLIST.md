@@ -1,11 +1,11 @@
 # Official requirements and submission checklist
 
-Rechecked **2026-10-23**, official default-branch head
-`a502a6ba01260d3492df9137dddae0bb5fabeb3c`. Sources: [root README](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/a502a6ba01260d3492df9137dddae0bb5fabeb3c/README.md),
-[FAQ](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/a502a6ba01260d3492df9137dddae0bb5fabeb3c/FAQ.md),
-[How to Apply](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/a502a6ba01260d3492df9137dddae0bb5fabeb3c/howtoapply.md),
-[ISSCC27 instructions](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/a502a6ba01260d3492df9137dddae0bb5fabeb3c/ISSCC27/README.md),
-[submission-folder instructions](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/a502a6ba01260d3492df9137dddae0bb5fabeb3c/ISSCC27/submitted_notebooks/README.md),
+Rechecked **2026-10-29**, official default-branch head
+`611b9d712ced9dd67b8aa0855ede44717579adbf`. Sources: [root README](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/README.md),
+[FAQ](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/FAQ.md),
+[How to Apply](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/howtoapply.md),
+[ISSCC27 instructions](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/ISSCC27/README.md),
+[submission-folder instructions](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/ISSCC27/submitted_notebooks/README.md),
 and the independently checked [IEEE award page](https://sscs.ieee.org/membership/awards/ieee-sscs-code-a-chip-travel-grant-awards/).
 The builder repository retains the fetched Markdown and content hashes in
 `submission/official_snapshot.json` and `submission/official_sources.json`.
@@ -31,9 +31,9 @@ Ready for final submission review.
 | Final circuit layout is encouraged, not required | Saved real routed-core GDS views and PDK drawing-DRC/LVS evidence are included |
 | Membership is encouraged, not required | No membership or applicant grant-category assumption |
 
-The checked `howtoapply.md` still names **ISSCC26** and **November 27, 2025**.
-Those event and deadline instructions are superseded by the current root
-README and IEEE page. Its author, reference and tool-version guidance remains
+The checked `howtoapply.md` states no deadline and still names the **ISSCC26**
+folder. That folder instruction is superseded by the current root README and
+IEEE page. Its author, reference and tool-version guidance remains
 applicable. The FAQ's Python-3.7 installation example is historical, not a tool
 version mandate. The rules do not impose a numerical payload-size limit,
 require an abstract or pitch, require final GDS, or set a ten-minute runtime
