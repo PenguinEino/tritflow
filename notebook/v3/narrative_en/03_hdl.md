@@ -22,7 +22,7 @@ Logic synthesis proceeds through the following stages.
 
 1. Elaboration: parse the HDL and elaborate module hierarchy, parameters and `generate` constructs into an expression intermediate representation. Procedures in `always @*` are converted to static single assignment, updating each signal's current value on every assignment. Branches in `if` and `case` become value selections.
 2. Mapping: replace each operation with a fixed circuit structure. Addition and subtraction use carry chains of half adders and full adders verified in the taped-out circuits. Comparisons saturate per-digit differences and determine the sign from the most significant digit. Equality tests and `case` labels use per-digit equality detectors. Selection is described in section 3.5.
-3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic. Binary complement laws, such as $x \wedge \bar{x} = 0$, do not hold for 0 (unknown) and are not used. This is why `a & ~a` in chapter 1 retains two INV cells and one NAND. The synthesized netlist is not guaranteed to be minimal.
+3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic.
 4. Fanout control: limit each cell output to four input loads by default, leaving margin below the eight receivers verified in nominal load tests; distribute additional loads through BUF trees.
 5. Equivalence checking: verify that the synthesized netlist implements the same function as the HDL (section 3.6).
 
