@@ -22,8 +22,8 @@ Logic synthesis proceeds through the following stages.
 
 1. Elaboration: parse the HDL and elaborate module hierarchy, parameters and `generate` constructs into an expression intermediate representation. Procedures in `always @*` are converted to static single assignment, updating each signal's current value on every assignment. Branches in `if` and `case` become value selections.
 2. Mapping: replace each operation with a fixed circuit structure. Addition and subtraction use carry chains of half adders and full adders verified in the taped-out circuits. Comparisons saturate per-digit differences and determine the sign from the most significant digit. Equality tests and `case` labels use per-digit equality detectors. Selection is described in section 3.5.
-3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic.
-4. Fanout control: limit each cell output to four input loads by default, leaving margin below the eight receivers verified in nominal load tests; distribute additional loads through BUF trees.
+3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic, such as $-(-x) = x$, $\min(x, x) = x$, $\min(x, +1) = x$, $\max(x, +1) = +1$, $\mathrm{NANY}(x, 0) = -x$, $\min(-a, -b) = -\max(a, b)$.
+4. Fanout control: SPICE simulation confirmed correct levels with eight identical cells on one output. With margin, each cell output drives at most four inputs by default, and additional loads are distributed through BUF trees.
 5. Equivalence checking: verify that the synthesized netlist implements the same function as the HDL (section 3.6).
 
 ### 3.4 Arithmetic: `+` and `*`
