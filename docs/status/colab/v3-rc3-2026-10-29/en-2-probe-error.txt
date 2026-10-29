@@ -1,0 +1,24 @@
+
+[colab] A new version of Colab CLI is available: 0.7.5 (current: 0.7.4)
+[colab] Run 'colab update' to update.
+[colab] To silence this check, set "enable_update_check": false in ~/.config/colab-cli/settings.json
+
+---------------------------------------------------------------------------CalledProcessError                        Traceback (most recent call last)/tmp/ipykernel_2871/1368843711.py in <cell line: 0>()
+     16     "source_commit": git("rev-parse", "HEAD"),
+     17     "source_dirty": git("status", "--porcelain", "--untracked-files=no"),
+---> 18     "pdk_commit": subprocess.check_output(["git", "-C", str(PDK_ROOT), "rev-parse", "HEAD"], text=True).strip(),
+     19     "tool_versions": tools,
+     20     "first": {"drc_violations": drc["violations"], "lvs_matched": lvs["matched"], "spice_passed": post["measurements"]["passed"]},
+/usr/lib/python3.13/subprocess.py in check_output(timeout, *popenargs, **kwargs)
+    471         kwargs['input'] = empty
+    472 
+--> 473     return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+    474                **kwargs).stdout
+    475 
+/usr/lib/python3.13/subprocess.py in run(input, capture_output, timeout, check, *popenargs, **kwargs)
+    576         retcode = process.poll()
+    577         if check and retcode:
+--> 578             raise CalledProcessError(retcode, process.args,
+    579                                      output=stdout, stderr=stderr)
+    580     return CompletedProcess(process.args, retcode, stdout, stderr)
+CalledProcessError: Command '['git', '-C', '/content/tritflow-runtime/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c', 'rev-parse', 'HEAD']' returned non-zero exit status 128.
