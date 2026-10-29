@@ -3,7 +3,7 @@
 Einosuke Okazaki (岡崎 英之介)<br>
 Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
 
-TritFlowは、三つの電圧レベルをそのまま扱うCMOSセルを用い、三値のHDLからGDSまでをOpenSUSI TR-1umの上で通す設計フローである。本ノートブックの題材は、三値の重み w<sub>i</sub> と入力 x<sub>i</sub> の4項の内積 y = w<sub>0</sub>x<sub>0</sub> + … + w<sub>3</sub>x<sub>3</sub> を計算する回路dot4である。dot4を論理合成、2層メタルの配置配線、DRC/LVS、ポストレイアウトシミュレーション、三値のタイミング解析の順に通し、HDLを書き換えて同じフローを再実行する。
+TritFlowは、三つの電圧レベルをそのまま扱うCMOSセルを用い、三値のHDLからGDSまでをOpenSUSI TR-1umの上で通す設計フローである。本ノートブックでは三値のHDLから論理合成、2層メタルの配置配線、DRC/LVS、ポストレイアウトシミュレーション、三値のタイミング解析までを順に実行する。
 
 <!-- figure: fig_flow_v2 -->
 
