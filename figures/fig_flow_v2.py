@@ -145,6 +145,9 @@ def make(lang="en"):
     zoom.set_xticks([])
     zoom.set_yticks([])
     for spine in zoom.spines.values():
+        # paperstyle hides the top and right spines of plots; the magnified view needs all four.
+        spine.set_visible(True)
+        spine.set_zorder(20)
         spine.set_edgecolor("#eb6834")
         spine.set_linewidth(0.9)
     fig.add_artist(ConnectionPatch((x0+size, y0+size), (0, 1), "data", "axes fraction", axesA=ax, axesB=zoom,
