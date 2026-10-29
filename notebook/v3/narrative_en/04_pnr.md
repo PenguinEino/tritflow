@@ -23,5 +23,3 @@ During execution, the figure shows placement and routing progress. At completion
 The resulting GDS is shown below.
 
 <!-- code: gds2 -->
-
-This completes the path from a cell netlist to GDS. The next chapter verifies the GDS against PDK rules and evaluates its delay with post-layout simulation.

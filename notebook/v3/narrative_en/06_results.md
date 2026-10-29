@@ -6,7 +6,7 @@ Chapter 5 verified the four-term dot product dot4 with post-layout simulation an
 
 The evaluated circuit is a dot product of one-trit weights and inputs, $y = \sum_{i=0}^{N-1} w_i x_i$. The output uses the minimum number of trits needed to represent $-N$ through $+N$. Weights remain HDL inputs but are fixed in simulation to repetitions of $(+1, -1, +1, +1)$. Addition uses the same HDL form as section 3.7, without structural changes for different term counts.
 
-The tables present recorded place and route and verification results. Area is measured from the routed die outline. Wire capacitance uses the estimate in section 5.2, rather than PDK-calibrated parasitic extraction. Loading verifies the identities of the source, cells, PDK and simulator. Recalculation requires an explicit switch.
+The tables present recorded place and route and verification results. Area is measured from the routed die outline.
 
 <!-- code: scale6 -->
 
@@ -16,15 +16,15 @@ Increasing the term count adds multiplier circuits and adder circuits for the re
 
 States that hold 0 V by resistive division draw static current even without input transitions. NANY also has zero-output states in which VMID clamps conduct while the VDD and VSS transistor stacks are cut off. Static power is calculated from DC operating points for states in the recorded input sequence. With current defined as positive into each SPICE voltage source, circuit power is $P = -\sum_r V_r I_r$, including both positive and negative supply contributions.
 
-Time-average supply power is the integral of instantaneous power over all hold intervals, divided by the total duration. It includes state-dependent static consumption and transition consumption; switching-only energy is not separated. Power from the input voltage sources is excluded.
+Time-average supply power is the integral of instantaneous power over all hold intervals, divided by the total duration. It includes state-dependent static consumption and transition consumption. Power from the input voltage sources is excluded.
 
 <!-- code: power6 -->
 
-The number of conducting divider paths depends on the input state, so static power varies even at a fixed term count. Time-average power depends on the hold time and input sequence. These area, delay and power measurements characterize this ternary implementation; they do not establish an advantage over a binary implementation.
+The number of conducting divider paths depends on the input state, so static power varies even at a fixed term count. Time-average power depends on the hold time and input sequence.
 
 ### 6.3 STA and SPICE
 
-Each circuit uses an input sequence that generates and clears positive and negative carries. The four-term sequence differs from chapter 5. STA uses the same fixed weights. STA and SPICE use identical input transitions, output load, input slew and wire capacitance. The reported delay is each output's maximum settling time over that sequence, not a guaranteed worst case over all input transitions.
+Each circuit uses an input sequence that generates and clears positive and negative carries. The four-term sequence differs from chapter 5. STA uses the same fixed weights. STA and SPICE use identical input transitions, output load, input slew and wire capacitance. The reported delay is each output's maximum settling time over that sequence.
 
 The effect of wire capacitance is evaluated by removing only the estimated wire capacitance from the same extracted circuit. STA compares both cases at every size; SPICE compares them for four terms. Both cases retain intrinsic device capacitance and the 100 fF output load.
 
@@ -40,13 +40,13 @@ Making inference weights HDL constants allows logic synthesis to simplify the co
 
 <!-- code: reuse_source -->
 
-SPICE covers all states when the total is at most 27. Otherwise, it selects 11 states from the zero input, all −1 and all +1 inputs, alternating signs, and single-input ±1 excursions. Sampled verification does not cover every input state or transition. Expected outputs come from evaluating the HDL, independently of the synthesized netlist.
+SPICE covers all states when the total is at most 27. Otherwise, it selects 11 states from the zero input, all −1 and all +1 inputs, alternating signs, and single-input ±1 excursions. Expected outputs come from evaluating the HDL, independently of the synthesized netlist.
 
 <!-- code: reuse6 -->
 
 ### 6.5 Shuttle Top-Level Layout
 
-The top-level layout adds pads, power routing and the PDK's stock MPW frame to dot4. It is the circuit with weight inputs used in chapters 3–5, distinct from the fixed-weight circuit in section 6.4. The frame's electrostatic discharge (ESD) supply shares VSS with the circuit's VSS (−5 V) and takes VDD at +5 V from a separate terminal. The −5 to +5 V ternary signals then stay within the ESD supply range, so the stock pads are used as they are. The taped-out chip uses the same connection. Submission requires the shuttle operator to allocate a 2500 µm square slot and agree on the bond diagram.
+The top-level layout adds pads, power routing and the PDK's stock MPW frame to dot4. It is the circuit with weight inputs used in chapters 3–5, distinct from the fixed-weight circuit in section 6.4. The frame's electrostatic discharge (ESD) supply shares VSS with the circuit's VSS (−5 V) and takes VDD at +5 V from a separate terminal. The −5 to +5 V ternary signals then stay within the ESD supply range, so the stock pads are used as they are. The taped-out chip uses the same connection.
 
 <!-- code: shuttle6 -->
 

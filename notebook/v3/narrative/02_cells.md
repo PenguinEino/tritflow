@@ -29,7 +29,7 @@ TritFlowのINVはVDDとVSSの間にPMOS、拡散抵抗（PDKのデバイス名RR
 
 $$V_Y = V_{SS} + (V_{DD}-V_{SS})\frac{R_d}{R_u+R_d} \simeq -0.021\ \mathrm{V},\qquad I = \frac{V_{DD}-V_{SS}}{R_u+R_d} \simeq 0.443\ \mathrm{mA}$$
 
-となる。SPICEの −0.040 V、0.407 mAとの差は、近似がRRの電圧・基板バイアス依存とMOSの非線形性を省いていることによる。これらの近似値はSPICEの電流に合わせて調整したものではない。
+となる。SPICEの −0.040 V、0.407 mAとの差は、近似がRRの電圧・基板バイアス依存とMOSの非線形性を省いていることによる。
 
 <!-- code: inv -->
 

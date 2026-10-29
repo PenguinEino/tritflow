@@ -29,7 +29,7 @@ The adopted PMOS and NMOS widths are 13.5 µm and 5 µm. The PDK's zero-bias res
 
 $$V_Y = V_{SS} + (V_{DD}-V_{SS})\frac{R_d}{R_u+R_d} \simeq -0.021\ \mathrm{V},\qquad I = \frac{V_{DD}-V_{SS}}{R_u+R_d} \simeq 0.443\ \mathrm{mA}$$
 
-The difference from SPICE's −0.040 V and 0.407 mA follows from omitting RR voltage/substrate-bias dependence and MOS nonlinearity. These approximations were not fitted to the SPICE current.
+The difference from SPICE's −0.040 V and 0.407 mA follows from omitting RR voltage/substrate-bias dependence and MOS nonlinearity.
 
 <!-- code: inv -->
 

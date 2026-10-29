@@ -72,4 +72,4 @@ The matrix products in [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764)
 
 <!-- code: dot4_synth -->
 
-Each of the four products maps to 2 NAND, 1 NOR and 1 INV. The remaining NANY and INV cells form one full adder and two half adders for the sum. Chapters 4 and 5 place and route dot4, verify it, and run post-layout simulation. Chapter 6 evaluates area, delay and static power against dot-product size, then demonstrates HDL changes and integration into a shuttle top-level layout.
+Each of the four products maps to 2 NAND, 1 NOR and 1 INV. The remaining NANY and INV cells form one full adder and two half adders for the sum.

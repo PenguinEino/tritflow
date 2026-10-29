@@ -20,8 +20,6 @@ Binary delay is often measured at the output crossing of half the supply voltage
 
 The weights are fixed at w = (+1, −1, +1, +1), and x follows a sequence that produces carries in the sum. This corresponds to inference with fixed trained weights and changing inputs. Simulation uses the netlist with wire capacitance added. An arrow marks the delay of the slowest transition at each output.
 
-Synthesis equivalence covers all 6561 input combinations; this post-layout SPICE run covers 11 intervals with one fixed weight vector.
-
 <!-- code: spice5 -->
 
 ### 5.4 Ternary STA
@@ -35,5 +33,3 @@ TritFlow's ternary STA uses SPICE-characterized tables of propagation delay and 
 INV has one input, so its table has six transition rows. Two-input cells have tables for each value of the other input and for simultaneous transitions on both inputs. STA and SPICE are compared using the input sequence from section 5.3.
 
 <!-- code: sta5 -->
-
-This completes the path from HDL to verified GDS and its timing. Chapter 6 evaluates area, delay and static power against dot-product term count, reruns the flow after an HDL change, and presents a shuttle top-level layout.

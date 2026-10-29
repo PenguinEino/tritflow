@@ -29,5 +29,3 @@ Post-layout simulation includes wire capacitance estimated from the GDS. A terna
 The flow is summarized below.
 
 <!-- figure: fig_flow_map -->
-
-This completes the first pass through the flow. The following chapters examine its design, starting in chapter 2 with the most basic cell, INV.
