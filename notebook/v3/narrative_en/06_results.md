@@ -52,7 +52,15 @@ The top-level layout adds pads, power routing and the PDK's stock MPW frame to d
 
 ### 6.6 Conclusion
 
-TritFlow connects balanced-ternary HDL to a native three-voltage cell netlist, place and route, PDK DRC/LVS and post-layout simulation. In this implementation with two routing metal layers, area and settling time grow faster than the number of terms. Static power is set by resistive division used to hold 0 V, so practical efficiency requires a different way to maintain that level. Future work will compare measurements of the taped-out cells with the models and incorporate the results into the cells and design flow.
+TritFlow connects ternary HDL, logic synthesis onto ternary standard cells derived from taped-out circuits, two-metal place and route, PDK DRC/LVS, post-layout simulation and ternary STA into one flow, and outputs a top-level layout in the PDK's stock MPW frame. Every stage runs in this notebook, and an edited HDL yields verified GDS through the same flow.
+
+The ternary circuits underlying the cells have already been taped out on OpenSUSI-TR10, and the chips arrive in January 2027. Their measurements will be compared with the cells and models, and a circuit designed with TritFlow will be fabricated on the next OpenSUSI shuttle.
+
+Ternary computing dates back to Setun in 1958, and ternary logic circuits are still studied on many device technologies. Most of this work, however, stops at simulations or prototypes of individual circuits; to our knowledge, there has been no means for anyone to design ternary circuits and send them to fabrication. TritFlow turns ternary HDL into manufacturable GDS with only a public PDK and a notebook running in a browser. Ternary logic becomes something one can write, submit to a shuttle and measure, rather than only read about in papers.
+
+This was possible only because of open-source PDKs and MPW shuttles. Commercial design tools and cell libraries assume binary logic, and Liberty cannot represent ternary cells. Because the PDK's rules and models are public, the cells and the flow could be built from scratch and verified with the PDK's official decks. As a result, a KOSEN student could design ternary circuits that mainstream tools do not handle and take them to fabrication. Democratizing chip design means not only making the same binary flow cheaper to use, but enabling anyone to design and fabricate new kinds of circuits. TritFlow's cells, flow and notebook are released under Apache-2.0 as a starting point for subsequent research and shuttles.
+
+The next task is how 0 V is produced. The current cells produce 0 V by resistive division, so static current flows whenever they output 0, and this sets the static power. Extending circuits that hold 0 V without current, like NANY's clamp to VMID, to the other cells is the first step toward practical efficiency. Alongside this come place-and-route improvements that curb the area and settling time growing faster than the term count with two routing layers, and calibration of the cell models against measurements.
 
 ### References
 
