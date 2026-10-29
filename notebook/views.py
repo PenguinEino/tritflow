@@ -376,11 +376,11 @@ def _signed_v(v):
     return "0 V" if v == 0 else f"{v:+g} V".replace("-", "−")
 
 
-MODELS = "TR-1um（IP62）の公称のSPICEモデル（コーナーなし）"
+MODELS = "TR-1um IP62の公称のSPICEモデル"
 
 
 def _models():
-    return _text(MODELS, "TR-1um (IP62) nominal SPICE models (no corners)")
+    return _text(MODELS, "TR-1um IP62 nominal SPICE models")
 
 
 def transient_conditions(post, *, load_f):

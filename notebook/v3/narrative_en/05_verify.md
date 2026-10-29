@@ -24,9 +24,9 @@ The weights are fixed at w = (+1, −1, +1, +1), and x follows a sequence that p
 
 ### 5.4 Ternary STA
 
-Transient SPICE resolves analog behavior but takes longer than table-based timing analysis. Static timing analysis (STA) instead looks up previously characterized cell delays and propagates arrival times through the netlist from inputs to outputs. Binary STA distinguishes two transitions, rising and falling. Ternary logic has six directed transitions between −1, 0 and +1, with different cell delays for each.
+Binary STA distinguishes two transitions, rising and falling. Ternary logic has six directed transitions between −1, 0 and +1, with different cell delays for each.
 
-TritFlow's ternary STA uses SPICE-characterized tables of propagation delay and output slew for each cell, indexed by input transition type, input slew and load capacitance. Propagation delay is the time difference between input and output crossings of the midpoints between their respective initial and final levels. Output slew is the time from 10% to 90% of the output transition and supplies the input-slew estimate for the next stage. At circuit outputs, the time from the midpoint crossing to entry into the ±0.5 V band is added, matching the delay definition in section 5.3. The INV table below uses an input slew of 1 ns.
+TritFlow's ternary STA uses SPICE-characterized tables of propagation delay and output slew for each cell, indexed by input transition type, input slew and load capacitance. Propagation delay is the time difference between input and output crossings of the midpoints between their respective initial and final levels. At circuit outputs, the time from the midpoint crossing to entry into the ±0.5 V band is added, matching the delay definition in section 5.3. The INV table below uses an input slew of 1 ns.
 
 <!-- code: table5 -->
 

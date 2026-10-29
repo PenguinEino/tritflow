@@ -29,13 +29,13 @@ LABELS_EN = {
     "マクロ寸法 (µm)": "Macro size (µm)", "DRC 違反": "DRC violations", "一致": "Matched", "不一致": "Mismatch",
     "SPICE 入力状態": "SPICE input states", "出力レベル・整定": "Output level and settling",
     "最大出力誤差 (V)": "Max. output error (V)", "定数重みの合成によるセル削減": "Cell reduction from constant weights",
-    "検査（記録済み）": "Check (recorded)", "Drawing DRC 違反": "Drawing DRC violations", "Mask DRC 違反": "Mask DRC violations",
+    "検査": "Check", "Drawing DRC 違反": "Drawing DRC violations", "Mask DRC 違反": "Mask DRC violations",
     "信号 / 電源": "Signal / supply", "方向": "Direction", "6章のHDLセル": "Chapter 6 HDL cell",
-    "6章のHDLセル（修正後に再実行）": "Chapter 6 HDL cell (edit and rerun)",
+    "6章のHDLセルを修正して再実行": "Edit the chapter 6 HDL cell and rerun",
     "編集したTritVerilogのソースを使います。": "This run uses the edited TritVerilog source.",
     "HDLを読み込んで合成": "Parse HDL and synthesize", "配置配線": "Place and route",
-    "DRC（PDKのデッキ）": "DRC (PDK deck)", "LVS（PDKのデッキ）": "LVS (PDK deck)",
-    "抽出と配線容量": "Extraction and wire capacitance", "ngspice（ポストレイアウト）": "ngspice (post-layout)",
+    
+    "抽出と配線容量": "Extraction and wire capacitance", "ポストレイアウトシミュレーション": "Post-layout simulation",
     "全入力状態": "exhaustive states", "一部の入力状態": "sampled states",
     "全入力が0の状態から始め、反射型三値グレイコード順（桁の値は0、−1、+1）で全入力状態を調べる。全入力遷移を網羅する検証ではない。":
         "All states in reflected ternary Gray order (digits 0, -1, +1), starting at zero; not exhaustive transition coverage.",
@@ -228,7 +228,7 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
             s.done(_text(f"{net.report()['total_cells']}セル · 等価性 {net.equivalence['vectors']}入力で一致",
                          f"{net.report()['total_cells']} cells · equivalent over {net.equivalence['vectors']} input vectors"))
     except HDLError as error:
-        display(_box(_label("6章のHDLセル（修正後に再実行）"), str(error)))
+        display(_box(_label("6章のHDLセルを修正して再実行"), str(error)))
         return None
 
     out = Path(output_dir or ROOT / "build/reuse" / net.top).expanduser().resolve()
@@ -243,12 +243,12 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
         from pnr_views import replay
         s.done(_text(f"{layout.stats['row_count']}行 · 配線 {layout.stats['routed_nets']}本",
                      f"{layout.stats['row_count']} rows · {layout.stats['routed_nets']} routed nets"), picture=replay(layout))
-    with step(_label("DRC（PDKのデッキ）")) as s:
+    with step("DRC") as s:
         drc = layout.drc()
         if not drc["clean"]:
             raise RuntimeError(f"DRC violations: {drc['violations']}")
         s.done(_text(f"違反 {drc['violations']}件", f"Violations: {drc['violations']}"))
-    with step(_label("LVS（PDKのデッキ）")) as s:
+    with step("LVS") as s:
         lvs = layout.lvs()
         if not lvs["matched"]:
             raise RuntimeError(f"LVS mismatch: {lvs.get('errors', [])}")
@@ -260,7 +260,7 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
                      f"Lumped wire capacitance on {len(extracted.capacitance['nets'])} nets"))
     expected = _oracle(circuit, inputs)
     guesses = logical_nodeset(net, lvs["report"], inputs, plan["vectors"][0])
-    with step(_label("ngspice（ポストレイアウト）")) as s:
+    with step(_label("ポストレイアウトシミュレーション")) as s:
         s.detail = _text(f"{plan['unique_states']}入力状態 · {_label(plan['mode'])}", f"{plan['unique_states']} input states · {plan['mode']}")
         post = extracted.simulate(plan["vectors"], expected=expected, load=load_f, hold_s=hold_s,
                                   step_s=step_s, edge_s=edge_s, temperature_c=temperature_c,
@@ -302,7 +302,7 @@ def shuttle_view(directory=None):
     if sha256(gds.read_bytes()).hexdigest() != report["gds_sha256"]:
         raise ValueError("Recorded dot4 GDS hash does not match its signoff record")
     display(gds_viewer(gds, top=report["top"]))
-    checks = _table([["検査（記録済み）", "結果"],
+    checks = _table([["検査", "結果"],
                      [_label("Drawing DRC 違反"), report["drawing_drc"]["violations"]],
                      ["Drawing LVS", _label("一致") if report["drawing_lvs"]["matched"] else _label("不一致")],
                      [_label("Mask DRC 違反"), report["mask_drc"]["violations"]],

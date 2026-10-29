@@ -44,7 +44,7 @@ def test_shuttle_localizes_display_and_returns_unchanged_signoff(monkeypatch):
     original = json.loads((folder / "signoff.json").read_text())
     assert reuse.shuttle_view() == original
     html = "".join(captured)
-    for label in ("検査（記録済み）", "電源", "入力", "出力"):
+    for label in ("検査", "電源", "入力", "出力"):
         assert label in html
     for label in (">power<", ">input<", ">output<", "提出準備", "ボンディング図", original["reason"]):
         assert label not in html

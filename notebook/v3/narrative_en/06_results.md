@@ -10,17 +10,13 @@ The tables present recorded place and route and verification results. Area is me
 
 <!-- code: scale6 -->
 
-Increasing the term count adds multiplier circuits and adder circuits for the required sum width. Die area also includes power and signal routing, so it does not grow in direct proportion to term count.
-
 ### 6.2 Static and Time-Average Power
 
-States that hold 0 V by resistive division draw static current even without input transitions. NANY also has zero-output states in which VMID clamps conduct while the VDD and VSS transistor stacks are cut off. Static power is calculated from DC operating points for states in the recorded input sequence. With current defined as positive into each SPICE voltage source, circuit power is P = −Σ<sub>r</sub> V<sub>r</sub>I<sub>r</sub>, including both positive and negative supply contributions.
+States that hold 0 V by resistive division draw static current even without input transitions. NANY also has zero-output states in which VMID clamps conduct while the VDD and VSS transistor stacks are cut off. Static power is calculated from DC operating points for states in the recorded input sequence.
 
-Time-average supply power is the integral of instantaneous power over all hold intervals, divided by the total duration. It includes state-dependent static consumption and transition consumption. Power from the input voltage sources is excluded.
+Time-average supply power excludes the power from the input voltage sources.
 
 <!-- code: power6 -->
-
-The number of conducting divider paths depends on the input state, so static power varies even at a fixed term count. Time-average power depends on the hold time and input sequence.
 
 ### 6.3 STA and SPICE
 
@@ -31,8 +27,6 @@ The effect of wire capacitance is evaluated by removing only the estimated wire 
 At N=16, some NANY loads exceed the 2 pF characterization limit, reaching 2.862 pF, so STA extrapolates linearly in load capacitance.
 
 <!-- code: timing6 -->
-
-For dot4 in chapter 5, STA underestimates SPICE by about 10% at y[1] and 3% at y[0]. Across sizes, the error sign varies with circuit size and output. STA uses cell tables for the specified input transitions and does not resolve the complete analog waveform, including intermediate glitches. SPICE settling time includes the time needed to re-enter the acceptance band after a glitch, so STA cannot be treated as an upper bound on delay.
 
 ### 6.4 Editing HDL and Rerunning the Flow
 

@@ -139,7 +139,7 @@ def test_simulation_conditions_keep_the_actual_values_in_both_languages(monkeypa
     for value in ("27 °C", "+5 V / 0 V / −5 V", "1 µs", "1 ns", "100 fF", "2 ns", "w0 = +5 V"):
         assert value in english
         assert value in japanese
-    assert "no corners" in english
+    assert "nominal SPICE models" in english
     assert "Fixed throughout (waveforms omitted)" in english
     live.set_language("ja")
     views.transient_conditions(post, load_f=100e-15)
@@ -212,7 +212,12 @@ def test_reuse_translation_preserves_the_recorded_producer():
         def visit_Call(self, node):
             if isinstance(node.func, ast.Name) and node.func.id in ("_text", "_label"):
                 return self.visit(node.args[0])
-            return self.generic_visit(node)
+            node = self.generic_visit(node)
+            # Progress-step and error-box titles are display text, not producer logic.
+            if isinstance(node.func, ast.Name) and node.func.id in ("step", "_box") and node.args \
+                    and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                node.args[0] = ast.Constant("")
+            return node
 
     current = (builder.ROOT/"notebook/reuse.py").read_text()
     normalized = WithoutLabels().visit(ast.parse(current))

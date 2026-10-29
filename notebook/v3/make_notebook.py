@@ -101,7 +101,7 @@ pick_input(net, post)
 transient_conditions(post, load_f=100e-15)''',
 
 "inv": '''# 2-1 INVのDC解析と寸法
-with step("ngspice（INVのDC解析）") as s:
+with step("INVのDC解析") as s:
     spice = sweep_dimensions("INV", [], workdir=BUILD/"inv")
     zero = next(r for r in spice["rows"][0]["dc"] if r["input_trits"] == [0])
     s.done(f"入力 0 V：Y = {zero['output_v']['Y']:+.3f} V · {abs(zero['rail_current_a']['VDD'])*1e3:.3f} mA")
@@ -193,7 +193,7 @@ endmodule
 
 "sel_synth": '''# 3-6 論理合成して比べる
 need("select_sources", why="合成するHDLは、3-5に書いてあります。")
-with step("論理合成（2通り）") as s:
+with step("論理合成") as s:
     selects = {name: flow.loads(source).synthesize() for name, source in select_sources.items()}
     s.done(" · ".join(f"{name} {net.report()['total_cells']}セル" for name, net in selects.items()))
 cell_counts(selects)
@@ -229,10 +229,10 @@ gds_viewer(dot4_layout.gds_path)''',
 
 "verify5": '''# 5-1 DRCとLVS
 need("dot4_layout", why="検証するGDSは、4-1で作ります。")
-with step("DRC（PDKのデッキ）") as s:
+with step("DRC") as s:
     dot4_drc = dot4_layout.drc()
     s.done(f"違反 {dot4_drc['violations']}件")
-with step("LVS（PDKのデッキ）") as s:
+with step("LVS") as s:
     dot4_lvs = dot4_layout.lvs()
     s.done("一致" if dot4_lvs["matched"] else "不一致")''',
 
@@ -279,7 +279,7 @@ with step("三値のSTA") as s:
 timing_table(dot4_post, dot4_timing)
 note("STAの条件：5-3と同じ入力の列、出力の負荷 100 fF、入力の変化時間 1 ns、配線容量は5-2の抽出値。")''',
 
-"scale6": '''# 6-1 積和の規模と面積（記録済み）
+"scale6": '''# 6-1 積和の規模と面積
 from scale_views import load_scaling, scaling_table, synthesis_table
 # 全掃引は長時間かかる（N=16の解析とN=32の配置配線試行を含む）。
 RECOMPUTE_SCALING = False #@param {type:"boolean"}
@@ -303,14 +303,14 @@ note(f"記録の条件：ngspice-{dot_scaling['provenance']['simulator']['versio
      f"出力負荷 {conditions['load_f']*1e15:g} fF、入力の変化時間 {conditions['edge_s']*1e9:g} ns、"
      f"最大時間刻み {conditions['step_s']*1e9:g} ns。各状態の保持時間は {holds}。")''',
 
-"power6": '''# 6-2 静的電流と電力（記録済み）
+"power6": '''# 6-2 静的電流と電力
 need("dot_scaling", why="表示する記録は、6-1で読み込みます。")
 from scale_views import power_table, power_figure
 power_plot = power_figure(dot_scaling)
 power_plot.update_yaxes(title_text="供給電力 (mW)")
 display(power_table(dot_scaling), power_plot)''',
 
-"timing6": '''# 6-3 STAとSPICE（記録済み）
+"timing6": '''# 6-3 STAとSPICE
 need("dot_scaling", why="比較する記録は、6-1で読み込みます。")
 from scale_views import scaling_figure, layout_penalty_table
 display(scaling_figure(dot_scaling), layout_penalty_table(dot_scaling))''',
@@ -328,7 +328,7 @@ from reuse import run
 reuse_result = run(reuse_source, output_dir=BUILD/"reuse", step_s=5e-9,
                    exhaustive_limit=27, sample_size=11)''',
 
-"shuttle6": '''# 6-6 MPWフレームとパッドを付けたdot4（記録済み）
+"shuttle6": '''# 6-6 MPWフレームとパッドを付けたdot4
 from reuse import shuttle_view
 dot4_chip = shuttle_view(ROOT/"notebook/assets/chip/dot4")''',
 }
@@ -346,7 +346,7 @@ ENGLISH = {
     "HDLを変更する": "Edit HDL",
     "変更したHDLから全工程を実行する": "Run the full flow on the edited HDL",
     "MPWフレームとパッドを付けたdot4": "dot4 with MPW frame and pads",
-    "（記録済み）": " (recorded)",
+    
     "表示する記録は、6-1で読み込みます。": "The recorded data is loaded in 6-1.",
     "比較する記録は、6-1で読み込みます。": "The recorded data for comparison is loaded in 6-1.",
     "実行するHDLは、6-4に書いてあります。": "The HDL to run is defined in 6-4.",
@@ -369,7 +369,7 @@ ENGLISH = {
     " ns。各状態の保持時間は ": " ns. Hold time per state: ",
     "、": ", ",
     "。": ".",
-    "準備（最初に実行）": "Setup (run first)",
+    "準備": "Setup",
     "GitHubからソースを取得": "Fetch source from GitHub",
     "コミット ": "Commit ",
     " を取得": " · fetch",
@@ -397,7 +397,7 @@ ENGLISH = {
     "等価でない": "not equivalent",
     "全区間で ±0.5 V の帯に入った": "within the ±0.5 V band in every interval",
     "帯に入らない区間がある": "outside the band in some intervals",
-    "ngspice（INVのDC解析）": "ngspice (INV DC analysis)",
+    "INVのDC解析": "INV DC analysis",
     "INVのDC解析と寸法": "INV DC analysis and sizing",
     "入力 0 V：Y = ": "Input 0 V: Y = ",
     "寸法の記録を照合": "Check recorded sizing data",
@@ -415,15 +415,15 @@ ENGLISH = {
     "HDL：同じ選択を2通りに書く": "HDL: two descriptions of selection",
     "HDL：三値重みの4項の積和": "HDL: four-term dot product with ternary weights",
     "論理合成して比べる": "Synthesize and compare",
-    "論理合成（2通り）": "Logic synthesis (two descriptions)",
+    "論理合成": "Logic synthesis",
     "論理合成する": "Logic synthesis",
     "合成する": "Logic synthesis",
     "論理合成": "Logic synthesis",
     "配置配線する": "Place and route",
     "配置配線": "Place and route",
     "DRCとLVS": "DRC and LVS",
-    "DRC（PDKのデッキ）": "DRC (PDK deck)",
-    "LVS（PDKのデッキ）": "LVS (PDK deck)",
+    
+    
     "ポストレイアウトシミュレーション": "Post-layout simulation",
     "抽出と配線容量": "Extraction and wire capacitance",
     "INVの遅延の表": "INV delay table",
@@ -472,7 +472,7 @@ def cells(ref, lang="ja"):
                           f'from live import step, run_stages, set_language as set_notebook_language\nset_notebook_language("{lang}")')
     setup = setup.replace('os.environ["TRITFLOW_NOTEBOOK_LANGUAGE"] = "ja"',
                           f'os.environ["TRITFLOW_NOTEBOOK_LANGUAGE"] = "{lang}"')
-    setup = ('#@title 準備（最初に実行） { display-mode: "form" }\n' + setup
+    setup = ('#@title 準備 { display-mode: "form" }\n' + setup
              + PREAMBLE.replace('set_language("ja")', f'set_language("{lang}")'))
     narrative = HERE/("narrative_en" if lang == "en" else "narrative")
     tables, suffix = (TABLES_EN, "_en") if lang == "en" else (TABLES, "")
