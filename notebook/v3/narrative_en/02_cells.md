@@ -37,7 +37,7 @@ The difference from SPICE's −0.040 V and 0.407 mA follows from omitting RR vol
 
 Logic synthesis replaces HDL logic with combinations of library cells. To implement arbitrary logic, the cell basis must be **functionally complete**: connecting those cells must be sufficient to construct every logic function. In binary logic, NAND alone is complete.
 
-In ternary logic, NANY and a +1 constant cell (TIEP) form a complete basis. A −1 constant cell (TIEN) can be used instead. NANY saturates the sum of its two inputs to the range −1 to +1 (sat), then negates it: $\mathrm{NANY}(a, b) = -\mathrm{sat}(a+b)$.
+In ternary logic, NANY and a +1 constant cell, TIEP, form a complete basis. NANY is a two-input cell defined in TritFlow: it clips the sum of its inputs to the range −1 to +1 and then negates it. With the clipping function $\mathrm{sat}(x) = \max(-1, \min(+1, x))$, $\mathrm{NANY}(a, b) = -\mathrm{sat}(a+b)$. The constant cells are named after the tie cells (TIEHI, TIELO) that supply constants in binary standard-cell libraries; the final P, Z and N stand for +1, 0 and −1. A −1 constant cell, TIEN, can be used instead.
 
 Słupecki's criterion (1939) establishes completeness for a ternary function basis satisfying both conditions below.
 
