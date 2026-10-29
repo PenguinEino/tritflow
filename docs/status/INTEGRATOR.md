@@ -102,5 +102,5 @@
   cells each, no warnings; ch. 6 scaling and the 16-pad stock frame displayed (docs/status/COLAB_RC2.md).
 - 2026-10-29: after every push of pinned notebooks, warm the CDN: request every
   `cdn.jsdelivr.net/gh/PenguinEino/tritflow@<pin>/...` URL in both notebooks and the payload and require
-  HTTP 200. jsDelivr's first fetch of a just-pushed commit can fail, and an image (inv.svg) then showed
+  HTTP 200, retrying every 10 s (observed: 403 for about a minute after a push, then 200). jsDelivr's first fetch of a just-pushed commit fails, and an image (inv.svg) then showed
   as missing in Colab until a later request succeeded.
