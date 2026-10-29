@@ -24,7 +24,7 @@ Each circuit uses an input sequence that generates and clears positive and negat
 
 The effect of wire capacitance is evaluated by removing only the estimated wire capacitance from the same extracted circuit. STA compares both cases at every size; SPICE compares them for four terms. Both cases retain intrinsic device capacitance and the 100 fF output load.
 
-At N=16, some NANY loads exceed the 2 pF characterization limit, reaching 2.862 pF. For loads beyond the table, the delay is read from the straight line through the table's two largest-load points.
+At N=16, some NANY loads exceed the 2 pF characterization limit, reaching 2.862 pF, so STA linearly extrapolates the delay along the load axis.
 
 <!-- code: timing6 -->
 
