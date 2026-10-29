@@ -21,14 +21,14 @@ As in Verilog, the assignment destination determines the expression width. Short
 Logic synthesis proceeds through the following stages.
 
 1. Elaboration: parse the HDL and elaborate module hierarchy, parameters and `generate` constructs into an expression intermediate representation. Procedures in `always @*` are converted to static single assignment, updating each signal's current value on every assignment. Branches in `if` and `case` become value selections.
-2. Mapping: replace each operation with a fixed circuit structure. Addition and subtraction use carry chains of half adders and full adders verified in the taped-out circuits. Comparisons saturate per-digit differences and determine the sign from the most significant digit. Equality tests and `case` labels use per-digit equality detectors. Selection is described in section 3.5.
+2. Mapping: replace each operation with a fixed circuit structure. Addition and subtraction use carry chains of half adders and full adders with the same structure as the taped-out circuits. Comparisons saturate per-digit differences and determine the sign from the most significant digit. Equality tests and `case` labels use per-digit equality detectors. Selection is described in section 3.5.
 3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic, such as −(−x) = x, min(x, x) = x, min(x, +1) = x, max(x, +1) = +1, NANY(x, 0) = −x, min(−a, −b) = −max(a, b).
 4. Fanout control: SPICE simulation confirmed correct levels with eight identical cells on one output. With margin, each cell output drives at most four inputs by default, and additional loads are distributed through BUF trees.
-5. Equivalence checking: verify that the synthesized netlist implements the same function as the HDL (section 3.6).
+5. Equivalence checking: verify that the synthesized netlist implements the same function as the HDL.
 
 ### 3.4 Arithmetic: `+` and `*`
 
-The sum of two one-trit values ranges from −2 to +2 and requires a carry. For example, 1 + 1 = 2 = 3·1 + (−1), giving a sum digit of −1 and a carry of +1. A full adder satisfies a + b + c<sub>in</sub> = s + 3c<sub>out</sub>. TritFlow maps HDL `+` to the full-adder structure verified in the taped-out circuits (11 NANY and 5 INV cells), connecting carry chains for multiple digits.
+The sum of two one-trit values ranges from −2 to +2 and requires a carry. For example, 1 + 1 = 2 = 3·1 + (−1), giving a sum digit of −1 and a carry of +1. A full adder satisfies a + b + c<sub>in</sub> = s + 3c<sub>out</sub>. TritFlow maps HDL `+` to a full adder with the same structure as the taped-out circuit (11 NANY and 5 INV cells), connecting carry chains for multiple digits.
 
 <!-- code: fa_source -->
 

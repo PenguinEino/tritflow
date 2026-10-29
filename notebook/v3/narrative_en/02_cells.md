@@ -17,11 +17,11 @@ At an input of ±5 V, only one MOS transistor conducts, pulling Y to its rail. A
 
 The DC analysis uses ngspice and the PDK models for 90 sets of dimensions, including the taped-out dimensions.
 
-Sizing trades off middle-level accuracy, delay, area and static current.
+The taped-out dimensions trade off middle-level accuracy, delay, area and static current. TritFlow's cells keep these dimensions unchanged so that they can be compared with measurements. The grid in the figure also contains dimensions with both smaller error and smaller static current.
 
 - **Target**: as the middle-level noise margin, an output within ±0.5 V for inputs from −1 to +1 V.
 - **Gate length**: the minimum 1 µm, for drive strength and area.
-- **PMOS and NMOS widths**: at an input of 0 V, the output is 0 V when the upper on-resistance plus RR, r<sub>on,P</sub> + R<sub>RP</sub>, equals the lower r<sub>on,N</sub> + R<sub>RN</sub>. Because hole mobility is lower than electron mobility, the PMOS is wider than the NMOS to match their on-resistances and cancel the output offset.
+- **PMOS and NMOS widths**: at an input of 0 V, the output is 0 V when the upper on-resistance plus RR, r<sub>on,P</sub> + R<sub>RP</sub>, equals the lower r<sub>on,N</sub> + R<sub>RN</sub>. Because hole mobility is lower than electron mobility, the PMOS is wider than the NMOS to bring their on-resistances closer and reduce the output offset.
 - **RR width**: the minimum 2.8 µm.
 - **RR length**: 30 µm, to keep the static current of the complete taped-out chip within the power-wire and via current limits. The MOS dimensions were retained when RR was lengthened, leaving an offset of several tens of mV at an input of 0 V, well within the ±0.5 V acceptance band.
 
@@ -52,7 +52,7 @@ NANY itself satisfies condition 2. Since NANY(a, 0) = −a, changing a can chang
 
 <!-- code: closure -->
 
-NANY alone is not complete. Since NANY(0, 0) = 0, any network of NANY cells produces 0 when all inputs are 0. It cannot construct a function that produces a nonzero output at a = 0, or a +1 or −1 constant. Adding one nonzero constant removes this restriction. The remaining constants follow from NANY(+1, +1) = −1 and NANY(+1, −1) = 0, so only one constant-cell type is required. TritFlow uses this property to map arbitrary truth tables to cells (chapter 3).
+NANY alone is not complete. Since NANY(0, 0) = 0, any network of NANY cells produces 0 when all inputs are 0. It cannot construct a function that produces a nonzero output at a = 0, or a +1 or −1 constant. Adding one nonzero constant removes this restriction. The remaining constants follow from NANY(+1, +1) = −1 and NANY(+1, −1) = 0, so only one constant-cell type is required. TritFlow uses this property to map arbitrary truth tables to cells.
 
 ### 2.3 Standard-Cell Library
 

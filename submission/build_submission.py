@@ -613,8 +613,8 @@ def package(documents, sources, destination, team, info):
         opening = document.cells[0]
         if opening.cell_type != "markdown" or any(author["name"] not in opening.source for author in team["authors"]):
             raise ValueError("team members must be named in the source notebook opening")
-        front = "**License: Apache-2.0.**\n\n" + values["RUNTIME"]
-        # License and tool versions follow the title and authors.
+        front = "**License: Apache-2.0.**"
+        # The license follows the title and authors; the opening text already states the tool versions.
         document.cells.insert(1, nbformat.v4.new_markdown_cell(front, id="submission-identity"))
         references = ("## Submission references and reuse\n\n"
                       "- [TritFlow source](https://github.com/PenguinEino/tritflow).\n"

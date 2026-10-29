@@ -100,7 +100,7 @@ def test_bilingual_package_hashes_budget_top_identity_and_allowlist(tmp_path, mo
     for name, source in sources.items():
         doc = nbformat.read(target/name, as_version=4)
         front = doc.cells[1].source
-        assert 'Apache-2.0' in front and 'Recommended: Python 3.12' in front
+        assert front == '**License: Apache-2.0.**'
         assert '| Author |' not in front and '# TritFlow' not in front
         assert team['authors'][0]['name'] not in front
         assert doc.cells[0].source == nbformat.read(source, as_version=4).cells[0].source

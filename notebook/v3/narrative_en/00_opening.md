@@ -5,7 +5,7 @@ Information and Communication Engineering Course, Department of Monozukuri Engin
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/notebook-v3/notebook/v3/tritflow_en.ipynb)
 
-Run all takes about 7 minutes on a fresh Colab runtime (setup about 2 minutes).
+Run all takes 6 to 8 minutes on a fresh Colab runtime, including setup. The tools are Python 3.12, OpenSUSI TR-1um (commit 5d963db), KLayout 0.30.6 and ngspice 42; the first cell also installs the Python packages at pinned versions.
 
 TritFlow is a design flow from ternary HDL to GDS on OpenSUSI TR-1um, built on CMOS cells that handle three voltage levels directly. This notebook runs ternary HDL through logic synthesis, two-metal place and route, GDS output, DRC/LVS, post-layout simulation and ternary timing analysis in order.
 
@@ -17,8 +17,8 @@ This notebook implements that flow as TritFlow on [OpenSUSI TR-1um](https://gith
 
 The OpenSUSI-TR10 chips arrive in January 2027; if selected, the author will present TritFlow at ISSCC in February together with the first measurements of its cells. A circuit designed with TritFlow will be fabricated on the next OpenSUSI shuttle. Completing this cycle of design, fabrication, measurement and reporting with TritFlow will demonstrate that TR-1um is capable enough to deliver the three values Code-a-Chip promotes. Through this cycle, the project aims to substantially advance the democratization of chip design in Japan.
 
-**Reproducibility.** Subsequent researchers should be able to understand, reconstruct and explain TritFlow. Its cell circuits, logic synthesis algorithms, and place and route algorithms are kept simple enough to follow while producing core GDS verified by PDK DRC/LVS and post-layout SPICE. This notebook explains each stage and makes it executable in place. Because the cells are based on circuits being fabricated and measured, the explanations can also be checked against silicon measurements (chapters 1–5).
+**Reproducibility.** Subsequent researchers should be able to understand, reconstruct and explain TritFlow. Its cell circuits, logic synthesis algorithms, and place and route algorithms are kept simple enough to follow while producing core GDS verified by PDK DRC/LVS and post-layout SPICE. This notebook explains each stage and makes it executable in place. Because the cells are based on circuits being fabricated and measured, the explanations can also be checked against silicon measurements.
 
-**Reusability.** That understanding provides a basis for extending TritFlow. Editing the HDL regenerates a verified core through the same flow. For dot4, the notebook also shows the top-level layout in an MPW frame. The simple structure also allows cells to be added and synthesis or place and route algorithms to be replaced. The cells, flow and notebook are released under Apache-2.0 as a starting point for subsequent research and shuttle submissions (chapter 6).
+**Reusability.** That understanding provides a basis for extending TritFlow. Editing the HDL regenerates a verified core through the same flow. For dot4, the notebook also shows the top-level layout in an MPW frame. The simple structure also allows cells to be added and synthesis or place and route algorithms to be replaced. The cells, flow and notebook are released under Apache-2.0 as a starting point for subsequent research and shuttle submissions.
 
 **Education.** The progression from understanding to extension also provides a learning path. Every stage runs interactively in the notebook and presents figures and quantitative results, allowing readers who know basic CMOS logic and an HDL to follow the full path from HDL to GDS. The same flow connects to fabrication and measurement.
