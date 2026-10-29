@@ -491,3 +491,13 @@ not a systematic review, exhaustive patent search, or reproduction of outside fl
 - No independently sourced guarantee of January 2027 delivery, measurement before ISSCC, or “Japan's first OpenMPW service” was found. The current issuer announcement instead gives a February delivery estimate.
 - Citations do not establish TritFlow's benchmark counts, ±0.5 V criterion, STA error, layout area, timing, power, or silicon behavior. Those claims require the notebook's generated data and clearly distinguished simulation/submission/measurement status.
 - No narrative, notebook generator, setup pin, shared interface, or other stream's file was edited by REFS. Editors should insert the chosen references at the locations above and assemble the final bibliography in `notebook/v3/narrative/06_results.md`, “参考文献”.
+
+### [SETUN2011] — historical balanced-ternary computer (added 2026-10-29)
+
+Nikolay P. Brusentsov and José Ramil Alvarez. “Ternary Computers: The Setun and the Setun 70.”
+In *Perspectives on Soviet and Russian Computing (SoRuCom 2011)*, IFIP AICT 357, Springer, 74–80, 2011.
+DOI: [10.1007/978-3-642-22816-2_10](https://doi.org/10.1007/978-3-642-22816-2_10) (metadata checked via doi.org).
+
+- **Supports:** Setun, built at Moscow State University in 1958, used balanced ternary.
+- **Use:** opening paragraph 2, right after the balanced-ternary definition. The sentence claims only the number system, not Setun's circuit implementation.
+- 2026-10-29: the opening cites prior ternary circuits as examples (LIN2011, WANG2021, JEONG2019); KHALID2016 was dropped from the notebook bibliography.
