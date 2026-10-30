@@ -331,9 +331,19 @@ reuse_result = run(reuse_source, output_dir=BUILD/"reuse", step_s=5e-9,
 "shuttle6": '''# 6-6 MPWフレームとパッドを付けたdot4
 from reuse import shuttle_view
 dot4_chip = shuttle_view(ROOT/"notebook/assets/chip/dot4")''',
+
+"playground": '''# 7-1 Playground
+playground_source = """
+module add2(input trit [1:0] a, b, output trit [2:0] s);
+  assign s = a + b;
+endmodule
+"""
+from reuse import run
+playground = run(playground_source, output_dir=BUILD/"playground", step_s=5e-9,
+                 exhaustive_limit=27, sample_size=11)''',
 }
 
-CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md", "05_verify.md", "06_results.md"]
+CHAPTERS = ["00_opening.md", "01_first.md", "02_cells.md", "03_hdl.md", "04_pnr.md", "05_verify.md", "06_results.md", "07_playground.md"]
 
 # Presentation literals and cell-title comments only; HDL and executable expressions are shared.
 ENGLISH = {

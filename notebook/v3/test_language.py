@@ -66,7 +66,7 @@ def test_both_editions_have_the_same_cell_structure_and_local_assets():
             assert not CJK.search(source)
         else:
             # Keep the author's exact name and the original titles of Japanese references.
-            prose = source.split("### References", 1)[0].replace("岡崎 英之介", "")
+            prose = source.split("## References", 1)[0].replace("岡崎 英之介", "")
             assert not CJK.search(prose)
             for path in re.findall(r"/PIN/(.*?\.png)", source):
                 assert (builder.ROOT/path).is_file(), path
@@ -82,8 +82,8 @@ def test_colab_entry_point_and_original_bibliography_are_preserved():
     opening = (HERE/"narrative_en/00_opening.md").read_text()
     assert "blob/notebook-v3/notebook/v3/tritflow_en.ipynb" in opening
     assert "- Run time: 6 to 8 minutes for Run all on a fresh Colab runtime, including setup" in opening
-    japanese = (HERE/"narrative/06_results.md").read_text().split("### 参考文献\n\n", 1)[1]
-    english = (HERE/"narrative_en/06_results.md").read_text().split("### References\n\n", 1)[1]
+    japanese = (HERE/"narrative/07_playground.md").read_text().split("## 参考文献\n\n", 1)[1]
+    english = (HERE/"narrative_en/07_playground.md").read_text().split("## References\n\n", 1)[1]
     without_link_labels = lambda text: re.sub(r"\[[^\]]+\]\(([^)]+)\)", r"[](\1)", text)
     assert without_link_labels(japanese) == without_link_labels(english)
 

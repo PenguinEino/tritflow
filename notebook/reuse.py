@@ -31,7 +31,7 @@ LABELS_EN = {
     "最大出力誤差 (V)": "Max. output error (V)", "定数重みの合成によるセル削減": "Cell reduction from constant weights",
     "検査": "Check", "Drawing DRC 違反": "Drawing DRC violations", "Mask DRC 違反": "Mask DRC violations",
     "信号 / 電源": "Signal / supply", "方向": "Direction", "6章のHDLセル": "Chapter 6 HDL cell",
-    "6章のHDLセルを修正して再実行": "Edit the chapter 6 HDL cell and rerun",
+    "HDLを修正して再実行": "Edit the HDL and rerun",
     "編集したTritVerilogのソースを使います。": "This run uses the edited TritVerilog source.",
     "HDLを読み込んで合成": "Parse HDL and synthesize", "配置配線": "Place and route",
     
@@ -228,7 +228,7 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
             s.done(_text(f"{net.report()['total_cells']}セル · 等価性 {net.equivalence['vectors']}入力で一致",
                          f"{net.report()['total_cells']} cells · equivalent over {net.equivalence['vectors']} input vectors"))
     except HDLError as error:
-        display(_box(_label("6章のHDLセルを修正して再実行"), str(error)))
+        display(_box(_label("HDLを修正して再実行"), str(error)))
         return None
 
     out = Path(output_dir or ROOT / "build/reuse" / net.top).expanduser().resolve()
