@@ -230,6 +230,10 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
     except HDLError as error:
         display(_box(_label("HDLを修正して再実行"), str(error)))
         return None
+    # With show, each stage's view follows its step line, in flow order.
+    if show:
+        from views import bus_picker
+        bus_picker(net)
 
     out = Path(output_dir or ROOT / "build/reuse" / net.top).expanduser().resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -253,11 +257,17 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
         if not lvs["matched"]:
             raise RuntimeError(f"LVS mismatch: {lvs.get('errors', [])}")
         s.done(_label("一致"))
+    if show:
+        from tritflow.viz.layout import gds_viewer
+        display(gds_viewer(layout.gds_path, top=net.top))
     with step(_label("抽出と配線容量")) as s:
         extracted = layout.extract()
         (out / "postlayout.spice").write_text(extracted.spice)
         s.done(_text(f"{len(extracted.capacitance['nets'])}ネットの集中配線容量",
                      f"Lumped wire capacitance on {len(extracted.capacitance['nets'])} nets"))
+    if show:
+        from views import wire_table
+        wire_table(layout.result.net_parasitics())
     expected = _oracle(circuit, inputs)
     guesses = logical_nodeset(net, lvs["report"], inputs, plan["vectors"][0])
     with step(_label("ポストレイアウトシミュレーション")) as s:
@@ -281,12 +291,10 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
     (out / "summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n")
     (out / "measurements.json").write_text(json.dumps(measured, indent=2, allow_nan=False) + "\n")
     if show:
-        from tritflow.viz.layout import gds_viewer
         from views import note, scope_figure, transient_conditions
-        display(summary_view(summary))
-        note(_label(plan["method"]))
-        display(gds_viewer(layout.gds_path, top=net.top))
         display(scope_figure(post, title=net.top, settle=True))
+        note(_label(plan["method"]))
+        display(summary_view(summary))
         transient_conditions(post, load_f=load_f)
     return ReuseResult(circuit, net, layout, drc, lvs, extracted, post, summary)
 

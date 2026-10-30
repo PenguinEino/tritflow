@@ -209,6 +209,12 @@ def test_reuse_translation_preserves_the_recorded_producer():
                 node.names = [alias for alias in node.names if alias.name != "_text"]
             return node
 
+        def visit_If(self, node):
+            # ``if show:`` blocks only display results; they do not produce the record.
+            if isinstance(node.test, ast.Name) and node.test.id == "show":
+                return None
+            return self.generic_visit(node)
+
         def visit_Call(self, node):
             if isinstance(node.func, ast.Name) and node.func.id in ("_text", "_label"):
                 return self.visit(node.args[0])
