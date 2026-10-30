@@ -15,14 +15,14 @@ HERE = Path(__file__).resolve().parent
 
 
 def validate(path):
-    """Require chapters 1–6, unique cell IDs, and compilable output-free code."""
+    """Require chapters 1–7, unique cell IDs, and compilable output-free code."""
     document = json.loads(Path(path).read_text())
     assert document["nbformat"] == 4 and document["nbformat_minor"] == 5
     ids = [cell["id"] for cell in document["cells"]]
     assert len(ids) == len(set(ids))
     source = lambda cell: "".join(cell["source"])
     markdown = "\n".join(source(cell) for cell in document["cells"] if cell["cell_type"] == "markdown")
-    assert re.findall(r"(?m)^## (\d+)\.", markdown) == [str(n) for n in range(1, 7)]
+    assert re.findall(r"(?m)^## (\d+)\.", markdown) == [str(n) for n in range(1, 8)]
     for index, cell in enumerate(document["cells"]):
         if cell["cell_type"] == "code":
             assert cell["execution_count"] is None and cell["outputs"] == []
@@ -36,7 +36,7 @@ def main():
     parser.add_argument("--language", choices=("en", "ja"), default="en")
     args = parser.parse_args()
     document = validate(HERE / "v3" / f"tritflow_{args.language}.ipynb")
-    print(f"Validated {len(document['cells'])} cells and chapters 1–6 ({args.language})")
+    print(f"Validated {len(document['cells'])} cells and chapters 1–7 ({args.language})")
     if args.execute:
         os.environ["TRITFLOW_NOTEBOOK_HEADLESS"] = "1"
         namespace = {"__name__": "__notebook__"}
