@@ -64,8 +64,9 @@ def table(rows, *, header_rows=1, header_cols=0, widths=None, left=(), font=FONT
             top = y+heights[r]/2-(len(lines)-1)*leading/2+font*.35
             spans = "".join(f'<tspan x="{tx}" y="{top+i*leading:g}">{escape(line)}</tspan>'
                             for i, line in enumerate(lines))
+            weight_attr = ' font-weight="700"' if bold and not code else ''
             parts.append(f'<text{face} xml:space="preserve" '
-                         f'text-anchor="{anchor}" fill="{color}"{" font-weight=\"700\"" if bold and not code else ""}>{spans}</text>')
+                         f'text-anchor="{anchor}" fill="{color}"{weight_attr}>{spans}</text>')
             x += widths[c]
         y += heights[r]
     return "".join(parts), width, height
@@ -97,15 +98,21 @@ def compact_schematic(sch=SCHEMATIC, crop=(20, -130, 360, 290), width=330):
     from export_schematics import _theme_svg
     x0, y0, x1, y1 = crop
     height = round(width*(y1-y0)/(x1-x0))
-    with tempfile.TemporaryDirectory() as work:
-        rc, raw = Path(work)/"xschemrc", Path(work)/"out.svg"
-        rc.write_text(f"set XSCHEM_LIBRARY_PATH {{{Path.home()}/pdk/TR-1um-pinned/libs.tech/xschem:"
-                      "/usr/local/share/xschem/xschem_library}\nset dark_colorscheme 0\nset transparent_svg 0\n"
-                      "set color_ps 1\n")
-        subprocess.run(["xschem", "-r", "-x", "--rcfile", str(rc), "--command",
-                        f"xschem set text_svg 1; xschem print svg {{{raw}}} {width*2} {height*2} {x0} {y0} {x1} {y1}; exit",
-                        str(sch)], check=True, capture_output=True, timeout=45)
-        svg = raw.read_text()
+    try:
+        with tempfile.TemporaryDirectory() as work:
+            rc, raw = Path(work)/"xschemrc", Path(work)/"out.svg"
+            rc.write_text(f"set XSCHEM_LIBRARY_PATH {{{Path.home()}/pdk/TR-1um-pinned/libs.tech/xschem:"
+                          "/usr/local/share/xschem/xschem_library}\nset dark_colorscheme 0\nset transparent_svg 0\n"
+                          "set color_ps 1\n")
+            subprocess.run(["xschem", "-r", "-x", "--rcfile", str(rc), "--command",
+                            f"xschem set text_svg 1; xschem print svg {{{raw}}} {width*2} {height*2} {x0} {y0} {x1} {y1}; exit",
+                            str(sch)], check=True, capture_output=True, timeout=45)
+            svg = raw.read_text()
+    except (FileNotFoundError, subprocess.SubprocessError):
+        cached = OUT/"inv.svg"
+        if cached.is_file():
+            return cached.read_text(), width, height
+        raise
     def text(match):
         content = match[2]
         if not KEEP.match(content):
