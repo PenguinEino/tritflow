@@ -1,4 +1,4 @@
-# TritFlow：日本発のオープンソースPDKで、平衡三値HDLからGDSまで
+# TritFlow：日本初の商用オープンソースPDKで、平衡三値HDLからGDSまで
 
 Einosuke Okazaki (岡崎 英之介)<br>
 Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
@@ -22,7 +22,7 @@ TritFlowが扱うのは**平衡三値**（Balanced Ternary）である。各桁�
 
 本ノートブックでは、日本で初めて商用の半導体ファブが公開したオープンソースPDK「[OpenSUSI TR-1um](https://github.com/OpenSUSI/TR-1um/tree/5d963db9d44e192d37a0489c208bfccf2e2f690c)（東海理化）」を採用し、この三値設計フローを実証する。TritFlowのセルライブラリは、[著者が設計・テープアウトした三値論理回路](https://github.com/PenguinEino/opensusi-tr10-balanced-ternary-logic/tree/8a60b97868cad008ff21fefca5da13dcd06063f8)（2026年、第1回OpenSUSI-MPWシャトル「OpenSUSI-TR10」）の回路トポロジーと素子寸法をそのままスタンダードセル化したものである。三値専用HDL「TritVerilog」の記述から論理合成、配置配線、DRC/LVS検証、ポストレイアウトSPICEシミュレーションまでを1つのパイプラインとして完結させている。
 
-OpenSUSI-TR10で製造した実チップは2027年1月に納品予定であり、本提案が採択された暁には、2月のISSCC会場においてTritFlowのデモとともに、三値セルの実測結果を報告する。さらにTritFlowを用いて設計した三値論理回路は、次回のOpenSUSIシャトルにて製造を行う。「設計・製造・実測・学会報告」のサイクルを一気通貫で完結させることで、日本発のオープンソースPDKであるTR-1umがIEEE SSCS Code-a-Chipの掲げる価値を実現するに足るポテンシャルを持つことを証明し、日本におけるオープン半導体エコシステムと設計の民主化を強く前進させる。
+OpenSUSI-TR10で製造した実チップは2027年1月に納品予定であり、本提案が採択された暁には、2月のISSCC会場においてTritFlowのデモとともに、三値セルの実測結果を報告する。さらにTritFlowを用いて設計した三値論理回路は、次回のOpenSUSIシャトルにて製造を行う。「設計・製造・実測・学会報告」のサイクルを一気通貫で完結させることで、日本初の商用オープンソースPDKであるTR-1umがIEEE SSCS Code-a-Chipの掲げる価値を実現するに足るポテンシャルを持つことを証明し、日本におけるオープン半導体エコシステムと設計の民主化を強く前進させる。
 
 **再現性**（Reproducibility）　後に続く研究者や技術者、そして学習者がTritFlowの動作原理を隅々まで理解し、自らの手で再構築・検証できるように設計されている。そのために、セルの内部回路、論理合成アルゴリズム、配置配線の手法はいずれも、コードを読んで明快に追える直感的な見通しの良さを重視した。同時に、PDK公式のDRC/LVSデッキを完全にパスし、ポストレイアウトシミュレーションで動作確認された実際に製造可能なGDSを出力する。ノートブック内の各セルは各処理段が「なぜそのように動作するのか」を物理的・理論的な背景とともに説明し、読者がその場でパラメータを変えて即座に検証できるように構成されている。さらに、セルの回路と素子寸法はテープアウトした回路と同じであるため、シミュレーション結果を将来の実測データと直接突き合わせることができる。
 

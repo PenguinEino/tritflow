@@ -43,7 +43,7 @@ TritFlow's logic synthesis is implemented in Python and builds the netlist in fi
 
 The sum of two one-trit values ranges from (−1) + (−1) = −2 to (+1) + (+1) = +2, so a carry is needed. For example, 1 + 1 = 2 = 3·1 + (−1), so the digit's sum is −1 and the carry into the next digit is +1.
 
-A ternary full adder takes inputs a and b and the carry c<sub>in</sub> from the lower digit and satisfies a + b + c<sub>in</sub> = s + 3c<sub>out</sub>. TritFlow's logic synthesis expands HDL `+` into a full adder with the same structure as the taped-out circuit (11 NANY and 5 INV). A half adder is 5 NANY and 2 INV. Multi-digit addition chains them through the carries (ripple carry).
+A ternary full adder takes inputs a and b and the carry c<sub>in</sub> from the lower digit and satisfies a + b + c<sub>in</sub> = s + 3c<sub>out</sub>. TritFlow's logic synthesis expands HDL `+` into a full adder with the same structure as the taped-out circuit (11 NANY and 5 INV). A half adder is 5 NANY and 2 INV. Multi-digit addition chains them through the carries.
 
 <!-- code: fa_source -->
 
