@@ -45,3 +45,11 @@ The top-level layout adds pads, power routing and the PDK's stock MPW frame to t
 <!-- code: shuttle6 -->
 
 ### 6.6 Conclusion
+
+This notebook demonstrated TritFlow, an automated design flow for ternary integrated circuits, on OpenSUSI TR-1um, an open-source PDK released by a commercial semiconductor fab in Japan.
+
+- **A pipeline from a dedicated ternary HDL to GDS**: from a TritVerilog description, the flow runs logic synthesis with simplification by ternary identities, two-metal place and route, GDS output, DRC/LVS with the PDK's official decks, wire-capacitance estimation and post-layout simulation in one pass.
+- **A ternary timing model and STA**: delay is defined from the six state transitions and settling time, and a ternary static timing analysis that estimates delay without SPICE was built and compared with post-layout SPICE.
+- **A link to real silicon**: the standard cells keep the circuits and device sizes of the taped-out design, so they can be compared directly with measurements of the chips arriving in January 2027. A full-chip layout for the MPW shuttle is also generated automatically and passes DRC, LVS and the organizer's precheck.
+
+TritFlow is a first step toward learning balanced-ternary logic circuits that may be applied to ternary computation such as BitNet. All source code, the cell library and the design flow are released under Apache-2.0, giving researchers and students interested in ternary circuits a starting point for trying their own designs. We hope that this work, which completes the cycle from design to fabrication and measurement on TR-1um and the OpenSUSI shuttles, Japan's open-source semiconductor infrastructure, helps open-source chip design grow in Japan.
