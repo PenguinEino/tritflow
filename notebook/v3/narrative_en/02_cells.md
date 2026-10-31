@@ -58,12 +58,16 @@ Why is NANY alone not complete, so that a constant cell is needed? Since NANY(0,
 
 ### 2.3 Standard-Cell Library
 
-The TritFlow standard cells are shown below. INV, NAND, NOR and NANY implement the taped-out circuits. INV, NAND and NOR are unnecessary for completeness but reduce the number of cells needed for negation, min and max. BUF distributes an output to many inputs; TIEP, TIEZ and TIEN supply constants. Each cell includes its symbol for subsequent schematics. An output bubble denotes negation; NAND and NOR use the binary symbol shapes. NANY uses Σ for the input sum, which is saturated to −1 through +1 and then negated. TIE symbols carry their constant value above them.
+The standard cells TritFlow provides are listed below. The four main logic gates, INV, NAND, NOR and NANY, are the very circuits taped out on OpenSUSI-TR10. NAND and NOR are not required for completeness, but they are provided to reduce the logic depth of the netlist and to optimize area and delay. In addition, the library has a buffer, BUF (two INV stages in series), for driving high-fanout signals, and constant cells (TIEP/TIEZ/TIEN).
+
+In each cell's schematic symbol, the open circle at the output means negation (NOT), and NAND and NOR follow the familiar binary symbol shapes. NANY uses its own symbol, combining a summer (Σ) with saturation and negation.
 
 <!-- code: cells -->
 
 ### 2.4 Standard-Cell Layout
 
-Cells abut in horizontal rows to connect their power rails. All cells therefore require a common height and aligned power rails. INV, NAND, NOR and NANY retain the circuits and device dimensions of the taped-out designs within this common template. Three rails, VDD, VMID and VSS, cross each cell. Signal pins occupy fixed M1 heights accessible by vias from M2 above. Cells may be mirrored horizontally.
+Automatic place and route (P&R) requires every cell to follow strict geometric rules. TritFlow's cell library uses a common row height (cell height) of **132 µm** and a placement and routing grid pitch of **6 µm** for all cells.
+
+Three first-metal (M1) power rails run horizontally through each cell, from the top **VDD (+5 V, 8 µm wide)**, **VMID (0 V, 4 µm wide)** and **VSS (−5 V, 4 µm wide)**. Abutting the cells side by side without gaps connects the power rails and the N-well continuously. Input and output signal pins are placed as M1 landings on the routing grid so that second-metal (M2) wires running across them can reach them easily through vias (V1). Cells may be placed in their normal orientation (R0) and also mirrored left to right (MY).
 
 <!-- code: stdcells -->
