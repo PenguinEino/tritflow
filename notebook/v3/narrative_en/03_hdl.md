@@ -6,7 +6,7 @@ Chapter 2 confirmed that TritFlow's cell library is functionally complete and ca
 
 A signal value, or trit, is −1, 0 or +1, corresponding to −5 V, 0 V or +5 V. In conditions, these values mean false, unknown and true. Unknown is the valid trit 0 at a physical 0 V, unlike Verilog's undefined value X or high impedance Z.
 
-A vector of trits (for example `trit [1:0] a;`) represents an integer in **balanced ternary**. Counting from the least significant digit, digit i has weight 3<sup>i</sup>. In numeric literals, the value −1 is written `T` (or lowercase `t`); for example, `2'tT1` represents −1·3 + 1 = −2. Two trits represent exactly the nine integers from −4 to +4.
+A vector of trits (for example `trit [1:0] a;`) represents an integer in **balanced ternary**. Counting from the least significant digit, digit i has weight 3<sup>i</sup>. In numeric literals, the value −1 is written `T` (or lowercase `t`); for example, `2'tT1` represents −1·3 + 1 = −2. In general, n trits represent exactly the 3<sup>n</sup> integers from −(3<sup>n</sup> − 1)/2 to +(3<sup>n</sup> − 1)/2; two trits give the nine integers from −4 to +4.
 
 Balanced ternary has advantages that binary representations (such as two's complement) lack.
 
