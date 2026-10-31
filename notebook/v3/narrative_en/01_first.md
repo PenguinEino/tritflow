@@ -1,6 +1,6 @@
 ## 1. First Circuit: `a & ~a` to GDS
 
-This chapter takes `a & ~a`, a compact logic circuit that still shows what is characteristic of ternary logic, through TritFlow's whole flow (from the HDL description through logic synthesis, place and route, DRC/LVS and post-layout SPICE simulation) in one pass. Later chapters explain each stage in detail, one by one.
+This chapter runs `a & ~a`, a small circuit that already behaves in a distinctly ternary way, through the whole TritFlow flow in one pass: HDL description, logic synthesis, place and route, DRC/LVS and post-layout SPICE simulation. Later chapters explain each stage in turn.
 
 In binary logic, the AND of an input a and its inverse, `a & ~a`, is always false (0), and the circuit degenerates into a constant tied to ground. In balanced ternary logic, it does not.
 
@@ -22,7 +22,7 @@ The HDL description is parsed and converted into a netlist of ternary standard c
 
 ### 1.3 Place and Route
 
-From the synthesized gate netlist, the cells are placed automatically following the TR-1um PDK design rules and connected on two routing layers (M1/M2). The cells are lined up so that the three power rails running horizontally through them (from the top, VDD = +5 V, VMID = 0 V, VSS = −5 V) abut without gaps, and the signal wires are routed over short distances.
+The placer arranges the cells of the synthesized netlist according to the TR-1um design rules, and the router connects them on two metal layers (M1/M2). The cells are lined up so that the three power rails running horizontally through them (from the top, VDD = +5 V, VMID = 0 V, VSS = −5 V) abut without gaps, and the signal wires are routed over short distances.
 
 <!-- code: pnr -->
 

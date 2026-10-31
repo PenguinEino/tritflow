@@ -4,7 +4,7 @@ Chapter 5 verified the four-term dot-product circuit with post-layout simulation
 
 ### 6.1 Dot-Product Size and Area
 
-The evaluated circuit is the dot product of ternary weights and inputs, y = w<sub>0</sub>x<sub>0</sub> + … + w<sub>N−1</sub>x<sub>N−1</sub>, with the term count N = 2, 4, 8 and 16.
+The test circuit is the dot product of ternary weights and inputs, y = w<sub>0</sub>x<sub>0</sub> + … + w<sub>N−1</sub>x<sub>N−1</sub>, with N = 2, 4, 8 and 16 terms.
 
 The output y uses the minimum number of digits that represents −N through +N (2 trits for N = 2 and 4, 3 trits for N = 8, 4 trits for N = 16). The weights remain HDL inputs but are fixed in simulation to repetitions of (+1, −1, +1, +1). Addition is synthesized from the same HDL form as section 3.7, without structural changes for different term counts.
 
@@ -22,7 +22,7 @@ Static power is obtained with SPICE from the DC operating points of the states i
 
 ### 6.3 STA and SPICE
 
-For each circuit size, an input sequence that generates and clears positive and negative carries is applied, and with the weights fixed, the delay predicted by ternary STA is compared with the transient delay from SPICE. The four-term sequence differs from chapter 5. STA and SPICE receive the same input transitions, input slew, output load and wire capacitance. The compared delay is each output's maximum settling time over the sequence.
+For each size, with the weights fixed, an input sequence that creates and clears positive and negative carries is applied, and the delay predicted by ternary STA is compared with the transient delay from SPICE. The four-term sequence differs from chapter 5. STA and SPICE receive the same input transitions, input slew, output load and wire capacitance. The compared delay is each output's maximum settling time over the sequence.
 
 The effect of wire capacitance on delay is also compared. Device parasitics and the 100 fF output load are kept in both cases, and only the estimated wire capacitance is removed. STA is compared at every size and SPICE at four terms.
 

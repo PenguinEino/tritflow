@@ -1,12 +1,12 @@
 ## 4. Place and Route
 
-From the cell connectivity (netlist) synthesized in chapter 3, the cells are placed following the geometric rules of the TR-1um PDK and connected with two metal layers to generate GDS. This chapter looks at TritFlow's place-and-route tool, using the four-term dot-product circuit synthesized in section 3.7.
+Place and route turns the netlist synthesized in chapter 3 into GDS: it places the cells under the geometric rules of the TR-1um PDK and connects them with two metal layers. This chapter looks at TritFlow's place-and-route tool, using the four-term dot-product circuit synthesized in section 3.7.
 
 ### 4.1 Why a Custom Place and Route Tool
 
 Place and route is a geometric connection problem that does not depend on signal values, so in principle binary EDA tools (such as OpenROAD) could be reused. For TR-1um, a port to LibreLane is in fact being attempted ([luyanaa/TR-1um](https://github.com/luyanaa/TR-1um)).
 
-Applying existing binary EDA tools to ternary design as they are, however, faces three technical obstacles.
+Using existing binary EDA tools unchanged for ternary design, however, runs into three technical obstacles.
 
 1. **Routing layers (two metals)**: TR-1um is a 1 µm process, and only two metal layers, the first (M1) and second (M2), are available for routing. With two layers, power distribution and signal routing compete for the same layers.
 2. **Three power rails and the limits of Liberty**: every ternary cell must carry three power rails, VDD (+5 V), VMID (0 V) and VSS (−5 V), continuously without gaps. Liberty, the standard format for describing cell characteristics, cannot describe ternary logic or transition characteristics.
@@ -16,7 +16,7 @@ To solve these problems, TritFlow implements its own lightweight place-and-route
 
 ### 4.2 Placement: Simulated Annealing
 
-Placement uses rows, in which cells line up horizontally, alternating with channels, the routing passages.
+Placement alternates rows of cells with routing channels between them.
 
 1. **Initial placement**: from the circuit's inputs toward its outputs, following signal flow, each cell is packed into the currently shortest row.
 2. **Improvement by simulated annealing**: starting from the initial placement, 600 annealing steps improve the placement gradually. Each step randomly performs one of the following three moves. A move that lowers the cost is accepted, and one that raises it is accepted with a temperature-dependent probability; the temperature decreases as the steps proceed.

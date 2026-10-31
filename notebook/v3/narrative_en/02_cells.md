@@ -15,7 +15,7 @@ At an input of ±5 V, only one MOS transistor conducts, pulling Y to its rail. A
 
 #### SPICE Simulation
 
-The DC analysis uses ngspice and the PDK models for 90 device sizings, including the taped-out sizing.
+The figure shows a DC analysis with ngspice and the PDK models over 90 device sizings, including the taped-out one.
 
 The taped-out dimensions trade off middle-level accuracy, delay, area and static current. TritFlow's cells keep these dimensions unchanged so that they can be compared with measurements. The grid in the figure also contains dimensions with both smaller error and smaller static current.
 

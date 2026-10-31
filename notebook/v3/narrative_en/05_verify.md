@@ -1,6 +1,6 @@
 ## 5. Verification and Timing
 
-The GDS of the dot-product circuit generated in chapter 4 is checked with the PDK's official physical-verification decks, and its function and speed are evaluated by post-layout simulation that includes wire capacitance. In addition, a ternary static timing analysis (STA), which estimates delay without SPICE, is compared with SPICE.
+This chapter checks the dot-product GDS from chapter 4 with the PDK's official physical-verification decks, then evaluates its function and speed by post-layout simulation that includes wire capacitance. It also compares a ternary static timing analysis (STA), which estimates delay without SPICE, against SPICE.
 
 ### 5.1 DRC and LVS
 
@@ -13,7 +13,7 @@ The official KLayout decks of the OpenSUSI TR-1um PDK check whether the finished
 
 ### 5.2 Extraction and Wire Capacitance
 
-The current OpenSUSI TR-1um PDK has no official deck for parasitic extraction (PEX). TritFlow therefore includes a way to estimate each net's wire capacitance to the substrate from the wiring geometry of the LVS-matched GDS.
+The current OpenSUSI TR-1um PDK has no official deck for parasitic extraction (PEX). TritFlow therefore estimates each net's wire capacitance to the substrate from the wiring geometry of the LVS-matched GDS.
 
 The estimate takes the area and perimeter of the M1 and M2 shapes and computes wire capacitance assuming the following values, which are not calibrated against the PDK.
 
