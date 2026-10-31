@@ -18,31 +18,38 @@ Balanced ternary has advantages that binary representations (such as two's compl
 
 ### 3.2 Syntax
 
-The table lists TritVerilog's combinational constructs and their synthesis mappings.
+The table below summarizes TritVerilog's main operators and constructs and the cell netlist each is replaced by in logic synthesis.
 
 <!-- tables: syntax -->
 
-As in Verilog, the assignment destination determines the expression width. Shorter operands are zero-extended; excess high digits are discarded.
+Widths follow Verilog: operations use the digit width of the assignment destination. Operands shorter than the destination are padded with zeros in the upper digits, and upper digits that do not fit are discarded.
 
 ### 3.3 Synthesis Stages
 
-Logic synthesis proceeds through the following stages.
+TritFlow's logic synthesis is implemented in Python and builds the netlist in five stages.
 
-1. Elaboration: parse the HDL and elaborate module hierarchy, parameters and `generate` constructs into an expression intermediate representation. Procedures in `always @*` are converted to static single assignment, updating each signal's current value on every assignment. Branches in `if` and `case` become value selections.
-2. Mapping: replace each operation with a fixed circuit structure. Addition and subtraction use carry chains of half adders and full adders with the same structure as the taped-out circuits. Comparisons saturate per-digit differences and determine the sign from the most significant digit. Equality tests and `case` labels use per-digit equality detectors. Selection is described in section 3.5.
-3. Optimization: fold constants, share common subexpressions, remove unused logic, and simplify using identities valid in ternary logic, such as −(−x) = x, min(x, x) = x, min(x, +1) = x, max(x, +1) = +1, NANY(x, 0) = −x, min(−a, −b) = −max(a, b).
-4. Fanout control: SPICE simulation confirmed correct levels with eight identical cells on one output. With margin, each cell output drives at most four inputs by default, and additional loads are distributed through BUF trees.
-5. Equivalence checking: verify that the synthesized netlist implements the same function as the HDL.
+1. **Elaboration**: parse the TritVerilog source and elaborate module hierarchy, parameters (`parameter`) and `generate` into an expression intermediate representation. Procedural assignments in `always @*` become static single assignment (SSA), which updates each signal's current value at every assignment, and `if` and `case` branches become value selections.
+2. **Mapping**: replace each operation with a fixed cell structure. Addition and subtraction become carry chains of full and half adders with the same structure as the taped-out circuits, comparisons saturate per-digit differences and decide the sign from the most significant digit, and equality (`==`) and `case` labels use per-digit equality detectors. Selection is described in section 3.5.
+3. **Optimization**: fold constants, share common subexpressions, remove unused logic, and simplify with the following identities that hold in ternary logic.
+   - Double negation: −(−x) = x
+   - Idempotence: min(x, x) = x, max(x, x) = x
+   - min and max with constants: min(x, +1) = x, min(x, −1) = −1, max(x, +1) = +1, max(x, −1) = x
+   - NANY with a 0 input: NANY(x, 0) = −x
+   - De Morgan's laws: min(−a, −b) = −max(a, b), max(−a, −b) = −min(a, b)
+4. **Fanout control**: too many inputs on one output slow its transitions and lengthen settling time. SPICE simulation confirmed correct levels with eight identical cells on one output. With margin, each cell output drives at most four inputs by default, and additional loads are distributed through BUF trees.
+5. **Equivalence checking**: verify that the synthesized netlist implements the same function as the HDL, as described in section 3.6.
 
 ### 3.4 Arithmetic: `+` and `*`
 
-The sum of two one-trit values ranges from −2 to +2 and requires a carry. For example, 1 + 1 = 2 = 3·1 + (−1), giving a sum digit of −1 and a carry of +1. A full adder satisfies a + b + c<sub>in</sub> = s + 3c<sub>out</sub>. TritFlow maps HDL `+` to a full adder with the same structure as the taped-out circuit (11 NANY and 5 INV cells), connecting carry chains for multiple digits.
+The sum of two one-trit values ranges from (−1) + (−1) = −2 to (+1) + (+1) = +2, so a carry is needed. For example, 1 + 1 = 2 = 3·1 + (−1), so the digit's sum is −1 and the carry into the next digit is +1.
+
+A ternary full adder takes inputs a and b and the carry c<sub>in</sub> from the lower digit and satisfies a + b + c<sub>in</sub> = s + 3c<sub>out</sub>. TritFlow's logic synthesis expands HDL `+` into a full adder with the same structure as the taped-out circuit (11 NANY and 5 INV). A half adder is 5 NANY and 2 INV. Multi-digit addition chains them through the carries (ripple carry).
 
 <!-- code: fa_source -->
 
 <!-- code: fa_synth -->
 
-The product of two one-trit values is −1, 0 or +1 and produces no carry. It is x for w = +1, −x for w = −1, and 0 for w = 0. TritFlow maps HDL `*` to the taped-out multiplier structure (2 NAND, 1 NOR and 1 INV).
+The product of two one-trit values is −1, 0 or +1 and produces no carry. The product of a weight w and an input x is x for w = +1, −x for w = −1 and 0 for w = 0. Logic synthesis expands HDL `*` into the same structure as the taped-out multiplier (2 NAND, 1 NOR and 1 INV).
 
 <!-- code: mul_source -->
 
@@ -50,27 +57,27 @@ The product of two one-trit values is −1, 0 or +1 and produces no carry. It is
 
 ### 3.5 Selection: Mapping Conditional Logic
 
-Conditional constructs (`if`, `case` and `?:`) map to selectors that pass one candidate value to the output. Binary conditions are 0 or 1, so AND and OR can implement a selector. A ternary condition can itself be −1, 0 or +1, requiring a defined output for condition 0. Synthesis chooses between two selector structures according to whether the condition can be 0.
+Conditional constructs (`if`, `case` and `?:`) become selectors (multiplexers) that pass one candidate to the output according to a condition. Binary conditions are 0 or 1, so AND and OR can implement a selector. A ternary condition can itself be 0 (unknown), so the output for a 0 condition must also be defined. Logic synthesis chooses between two kinds of selector depending on whether the condition can be 0.
 
 The following two descriptions select output r from one-trit inputs a, b and op: a for op = +1 and b for op = −1.
 
 <!-- code: sel_source -->
 
-The first uses the comparison `op == 1't1` as its condition. Its result s is either true (+1) or false (−1), never 0. At op = 0, the comparison is false and selects b. When the condition cannot be 0, r can use the same structure as a binary AND/OR selector:
+**A comparison as the condition (`op == 1't1`)**　Let s be the comparison result. s is true (+1) or false (−1), never 0. For op = 0 the comparison is false, so b is selected. When the condition cannot be 0, output r can be built with the same form as binary AND-OR selection:
 
 $$r = \max\bigl(\min(s,\ a),\ \min(-s,\ b)\bigr)$$
 
-For s = +1, min(s, a) is a and min(−s, b) is −1, so max selects a. For s = −1, the same argument selects b. NAND, NOR and INV implement min, max and negation. A `case` statement uses the same structure with label equality as its condition.
+For s = +1, min(s, a) is a and min(−s, b) is −1, so max leaves a. For s = −1, b remains in the same way. NAND, NOR and INV build min, max and negation. A `case` statement takes the same form when label matches are used as conditions.
 
-The second description uses op directly, so op = 0 remains possible. TritVerilog defines this case to return the common value if a and b agree, and 0 otherwise. Multiple-trit values are compared digit by digit. This behavior uses a ternary selector (MUX3) with one input for each of the three condition values.
+**The value itself as the condition (`op`)**　The case op = 0 remains. TritVerilog defines the output for this case as the shared value if a and b are equal, and 0 otherwise; multi-trit values are compared digit by digit. This behavior uses a ternary selector with one input for each of the condition's three values (MUX3).
 
 <!-- code: sel_synth -->
 
-The second circuit is larger because it requires MUX3. Synthesis uses the first structure only after proving in the intermediate representation that the condition cannot be 0.
+The second description needs MUX3 and is therefore larger than the first. Logic synthesis uses the first form after confirming on the intermediate representation that the condition cannot be 0.
 
 ### 3.6 Equivalence Checking
 
-Every synthesis run checks that the synthesized netlist implements the same function as the HDL. The HDL is evaluated using integer and truth-table semantics; the netlist is independently evaluated using cell truth tables. Their outputs are compared for all combinations with up to 12 input trits, or for 100,000 random combinations beyond that. The synthesis summaries reporting equivalence over all input vectors refer to this check.
+Every synthesis run automatically checks that the synthesized netlist implements the same function as the HDL. The HDL semantics (integer and truth-table rules) and the netlist (each cell's truth table) are evaluated separately, and every output is compared. Inputs of up to 12 trits are checked exhaustively (at most 3<sup>12</sup> = 531,441 combinations); larger inputs use 100,000 random combinations from a fixed seed. The "equivalent over all … inputs" results shown so far come from this check.
 
 ### 3.7 Dot Product with Ternary Weights
 
@@ -80,4 +87,4 @@ The matrix products in [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764)
 
 <!-- code: dot4_synth -->
 
-Each of the four products maps to 2 NAND, 1 NOR and 1 INV. The remaining NANY and INV cells form one full adder and two half adders for the sum.
+Each of the four products maps to 2 NAND, 1 NOR and 1 INV (16 cells in total), and the sum is one full adder and two half adders (21 NANY and 9 INV).

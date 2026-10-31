@@ -1,6 +1,13 @@
 ## 7. Playground
 
-Edit the TritVerilog in the cell below and run it to go through logic synthesis, place and route, GDS output, DRC/LVS, wire-capacitance extraction and post-layout simulation in one pass. The default is a two-trit adder.
+In this chapter, readers can write their own ternary circuits in TritVerilog and try the whole TritFlow flow.
+
+Edit the TritVerilog in the cell below and run it to go through logic synthesis, place and route, GDS output, DRC/LVS, wire-capacitance estimation and post-layout simulation in one pass, with the schematic, layout and waveforms shown. The default is a two-trit adder (`add2`). For example, the following circuits can be written:
+
+- selectors: `op == 1't1 ? a : b` or `case` statements
+- a ternary ALU: combinations of addition `+`, subtraction `-`, AND `&`, OR `|` and negation `~`
+- circuits that instantiate cells such as NANY directly
+- dot-product circuits with other term counts or widths
 
 <!-- code: playground -->
 

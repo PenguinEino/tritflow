@@ -1,4 +1,4 @@
-# TritFlow：オープンソースPDK TR-1umで、三値のHDLからGDSへ
+# TritFlow：日本発のオープンソースPDKで、平衡三値HDLからGDSまで
 
 Einosuke Okazaki (岡崎 英之介)<br>
 Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan

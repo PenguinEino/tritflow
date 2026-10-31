@@ -1,4 +1,4 @@
-# TritFlow: Ternary HDL to GDS with the Open-Source TR-1um PDK
+# TritFlow: Balanced-Ternary HDL to GDS on an Open-Source PDK from Japan
 
 Einosuke Okazaki (岡崎 英之介)<br>
 Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan

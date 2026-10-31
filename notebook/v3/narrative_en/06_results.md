@@ -4,7 +4,7 @@ Chapter 5 verified the four-term dot-product circuit with post-layout simulation
 
 ### 6.1 Dot-Product Size and Area
 
-The evaluated circuit is a dot product of one-trit weights and inputs, y = w<sub>0</sub>x<sub>0</sub> + … + w<sub>N−1</sub>x<sub>N−1</sub>. The output uses the minimum number of trits needed to represent −N through +N. Weights remain HDL inputs but are fixed in simulation to repetitions of (+1, −1, +1, +1). Addition uses the same HDL form as section 3.7, without structural changes for different term counts.
+The evaluated circuit is a dot product of one-trit weights and inputs, y = w<sub>0</sub>x<sub>0</sub> + … + w<sub>N−1</sub>x<sub>N−1</sub>. The term counts are N = 2, 4, 8 and 16. The output uses the minimum number of trits needed to represent −N through +N (2 trits for N = 2 and 4, 3 for N = 8, 4 for N = 16). Weights remain HDL inputs but are fixed in simulation to repetitions of (+1, −1, +1, +1). Addition uses the same HDL form as section 3.7, without structural changes for different term counts.
 
 The tables present recorded place and route and verification results. Area is measured from the routed die outline.
 
