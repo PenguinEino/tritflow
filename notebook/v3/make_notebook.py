@@ -339,6 +339,10 @@ if not (mpw_template/"scripts/pre_check.py").is_file():
                     str(mpw_template)], check=True)
     subprocess.run(["git", "-C", str(mpw_template), "checkout", "-q",
                     "b3dab389ddaac1056c93bf5704230c6d2f52d5b2"], check=True)
+# The precheck runs in a child Python; give it the same KLayout module as this kernel.
+import os, pya
+os.environ["PYTHONPATH"] = os.pathsep.join(filter(None, [str(Path(pya.__file__).resolve().parents[1]),
+                                                         os.environ.get("PYTHONPATH")]))
 with step("MPWフレームに載せて検証") as s:
     dot4_chip = dot4_layout.result.to_chip(frame="OSS_FRAME", pdk_root=dot4_layout.settings.pdk,
                                            klayout_binary=dot4_layout.settings.klayout,
