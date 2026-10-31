@@ -1,10 +1,18 @@
 ## 3. HDL and Logic Synthesis
 
-Chapter 2 established that TritFlow's cell basis can implement arbitrary ternary logic. This chapter introduces TritVerilog, the HDL used to describe circuits, and logic synthesis, which maps it to cell netlists. TritVerilog extends Verilog's combinational constructs to ternary values. Each construct is introduced with its synthesis mapping.
+Chapter 2 confirmed that TritFlow's cell library is functionally complete and can cover any ternary logic. This chapter looks at TritVerilog, the dedicated HDL for ternary circuits, and at the logic synthesis engine that converts a description into a netlist of standard cells. TritVerilog extends the syntax of the industry-standard Verilog HDL naturally to ternary values, so ternary digital circuits can be designed with an intuitive grammar.
 
 ### 3.1 Values and Numbers
 
-A signal value, or trit, is −1, 0 or +1, corresponding to −5 V, 0 V or +5 V. In conditions, these denote false, unknown and true. Unknown is the valid trit 0 at a physical 0 V, distinct from Verilog's undefined X and high-impedance Z. Vectors such as `trit [1:0] a` represent balanced-ternary integers, with digit i weighted by 3<sup>i</sup>. Literals use T for −1: `2'tT1`, for example, represents −1·3 + 1 = −2. Two trits represent −4 through +4 without a sign bit. Negation simply negates every digit.
+A signal value, or trit, is −1, 0 or +1, corresponding to −5 V, 0 V or +5 V. In conditions, these values mean false, unknown and true. Unknown is the valid trit 0 at a physical 0 V, unlike Verilog's undefined value X or high impedance Z.
+
+A vector of trits (for example `trit [1:0] a;`) represents an integer in **balanced ternary**. Counting from the least significant digit, digit i has weight 3<sup>i</sup>. In numeric literals, the value −1 is written `T` (or lowercase `t`); for example, `2'tT1` represents −1·3 + 1 = −2. Two trits represent exactly the nine integers from −4 to +4.
+
+Balanced ternary has advantages that binary representations (such as two's complement) lack.
+
+- **No sign bit**: because −1 is included symmetrically, positive numbers, zero and negative numbers share one symmetric format without a dedicated sign bit.
+- **Negation completes at once**: negating a number (−a) only flips the sign of every digit (T ↔ 1). There is no carry propagation, unlike two's complement, which inverts every bit and then adds 1 to the least significant bit.
+- **Truncation rounds to the nearest value**: because every digit is −1, 0 or +1, dropping lower digits leaves an error within half the weight of the dropped digits, symmetric between positive and negative. TritVerilog's `a >> 1` (divide by 3 and round to the nearest integer) achieves this rounding by simply dropping the least significant digit.
 
 <!-- tables: numbers -->
 
