@@ -20,14 +20,14 @@ from style import ACCENT, INK, MUTED, TRIT_COLOR, figure_css, paper_axes, paper_
 ROOT = Path(__file__).resolve().parents[1]
 
 LABELS_EN = {
-    "積和の記録が未完了、または計算条件が変更されている。": "The dot-product record is incomplete or its calculation conditions have changed.",
+    "内積の記録が未完了、または計算条件が変更されている。": "The dot-product record is incomplete or its calculation conditions have changed.",
     "項数 N": "Terms N", "セル数": "Cells", "ダイ寸法<small>mm × mm</small>": "Die size<small>mm × mm</small>",
     "ダイ面積<small>mm²</small>": "Die area<small>mm²</small>", "行数": "Rows",
     "実配線長<small>mm</small>": "Routed length<small>mm</small>", "信号ビア": "Signal vias",
-    "配置配線<small>s</small>": "Place and route<small>s</small>", "積和の規模と配置配線": "Dot-product size and place and route",
+    "配置配線<small>s</small>": "Place and route<small>s</small>", "内積の規模と配置配線": "Dot-product size and place and route",
     "出力桁数": "Output trits", "検証入力数": "Input vectors checked", "等価性": "Equivalence",
     "全入力": "Exhaustive", "乱数": "Random", "未検証": "Unchecked", "等価": "Equivalent",
-    "一致": "Matched", "不一致": "Mismatch", "積和の論理合成": "Dot-product logic synthesis",
+    "一致": "Matched", "不一致": "Mismatch", "内積の論理合成": "Dot-product logic synthesis",
     "未完了": "Incomplete", "計算中": "Running", "未実施": "Not run", "合格": "Pass", "不合格": "Fail",
     "出力": "Output", "STAの誤差<small>%</small>": "STA error<small>%</small>",
     "STAとポストレイアウトSPICE": "STA and post-layout SPICE",
@@ -38,14 +38,14 @@ LABELS_EN = {
     "静的/セル<small>mW・x=0</small>": "Static/cell<small>mW · x=0</small>",
     "平均/セル<small>mW</small>": "Average/cell<small>mW</small>",
     "DCの範囲<small>mW</small>": "DC range<small>mW</small>", "保持時間<small>µs/区間</small>": "Hold time<small>µs/interval</small>",
-    "積和の静的電流と電力": "Dot-product static current and power",
+    "内積の静的電流と電力": "Dot-product static current and power",
     "STA・配線容量なし<small>ns</small>": "STA, no wire C<small>ns</small>",
     "STA・配線容量あり<small>ns</small>": "STA, with wire C<small>ns</small>",
     "SPICE・配線容量なし<small>ns</small>": "SPICE, no wire C<small>ns</small>",
     "SPICE・配線容量あり<small>ns</small>": "SPICE, with wire C<small>ns</small>",
     "増加率<small>%</small>": "Increase<small>%</small>", "配線容量による整定時間の増加": "Settling-time increase from wire capacitance",
     "ダイ面積": "Die area", "STA（配線容量あり）": "STA (with wire C)", "STA（配線容量なし）": "STA (no wire C)",
-    "積和の項数 N": "Dot-product terms N", "ダイ面積 (mm²)": "Die area (mm²)",
+    "内積の項数 N": "Dot-product terms N", "ダイ面積 (mm²)": "Die area (mm²)",
     "最大整定時間 (ns)": "Max. settling time (ns)", "測定した入力状態の範囲": "Observed DC state range",
     "x=0（重み固定）": "x=0 (fixed weights)", "時間平均（11区間）": "Time average (11 intervals)",
     "静的電力 (mW)": "Static power (mW)",
@@ -76,7 +76,7 @@ def load_scaling(path=None, *, recompute=False, sizes=(2, 4, 8, 16, 32)):
 
     data = run_scaling(sizes, result=Path(path or RESULT)) if recompute else json.loads(Path(path or RESULT).read_text())
     if data.get("schema_version") != 1 or not data.get("complete") or data.get("stale"):
-        raise ValueError(_label("積和の記録が未完了、または計算条件が変更されている。"))
+        raise ValueError(_label("内積の記録が未完了、または計算条件が変更されている。"))
     return verify_record(data)
 
 
@@ -123,7 +123,7 @@ def scaling_table(data):
     return _table(["項数 N", "セル数", "ダイ寸法<small>mm × mm</small>", "ダイ面積<small>mm²</small>", "行数",
                    "HPWL<small>mm</small>", "実配線長<small>mm</small>", "信号ビア", "配置配線<small>s</small>", "DRC / LVS"], rows,
                   "seed 0。HPWLは配置後のセル端子間の見積もり。実配線長とビア数は信号配線のみ。"
-                  "配置配線時間はPDKのDRCを含み、LVSを含まない。DRC欄は違反件数。", label="積和の規模と配置配線")
+                  "配置配線時間はPDKのDRCを含み、LVSを含まない。DRC欄は違反件数。", label="内積の規模と配置配線")
 
 
 def synthesis_table(data):
@@ -138,7 +138,7 @@ def synthesis_table(data):
         rows.append([row["n"], row.get("output_trits", "—"), *[synth.get("cells", {}).get(name, 0) for name in names],
                      f"{mode} {eq.get('vectors', 0):,}", result])
     return _table(["項数 N", "出力桁数", *[escape(name) for name in names], "検証入力数", "等価性"], rows,
-                  "重みと入力は各1トリット。乱数検証はseed 0。出力桁数は−N〜+Nを表す最小値。", label="積和の論理合成")
+                  "重みと入力は各1トリット。乱数検証はseed 0。出力桁数は−N〜+Nを表す最小値。", label="内積の論理合成")
 
 
 def timing_table(data):
@@ -181,7 +181,7 @@ def power_table(data):
                    "DCの範囲<small>mW</small>", "保持時間<small>µs/区間</small>"], rows,
                   "P = −Σ(Vrail × Irail)。電源は+5 / 0 / −5 V、IrailはSPICEの電圧源に流れ込む向きを正とする。"
                   "静的電力とDCの範囲は独立した動作点解析。時間平均は11区間の供給電力波形の積分から求める。"
-                  "入力駆動源の電力は含めず、スイッチング分のエネルギーは分離していない。", label="積和の静的電流と電力")
+                  "入力駆動源の電力は含めず、スイッチング分のエネルギーは分離していない。", label="内積の静的電流と電力")
 
 
 def layout_penalty_table(data):
@@ -233,7 +233,7 @@ def scaling_figure(data):
     figure.add_trace(go.Scatter(x=sizes, y=pre, mode="lines+markers", name=_label("STA（配線容量なし）"),
                                 line={"color": MUTED, "width": 2, "dash": "dot"}, marker={"symbol": "triangle-up-open", "size": 8}), row=1, col=2)
     paper_axes(figure)
-    figure.update_xaxes(type="log", tickvals=sizes, ticktext=[str(n) for n in sizes], title_text=_label("積和の項数 N"))
+    figure.update_xaxes(type="log", tickvals=sizes, ticktext=[str(n) for n in sizes], title_text=_label("内積の項数 N"))
     figure.update_yaxes(title_text=_label("ダイ面積 (mm²)"), rangemode="tozero", row=1, col=1)
     figure.update_yaxes(title_text=_label("最大整定時間 (ns)"), rangemode="tozero", row=1, col=2)
     figure.update_layout(**paper_layout(height=370,
@@ -271,7 +271,7 @@ def power_figure(data):
     figure.update_layout(**paper_layout(height=410, width=700,
                                         legend={"orientation": "h", "x": 0, "y": -.3, "yanchor": "top"},
                                         margin={"t": 25, "b": 120, "l": 62, "r": 22}))
-    figure.update_xaxes(type="log", tickvals=sizes, ticktext=[str(n) for n in sizes], title_text=_label("積和の項数 N"))
+    figure.update_xaxes(type="log", tickvals=sizes, ticktext=[str(n) for n in sizes], title_text=_label("内積の項数 N"))
     figure.update_yaxes(title_text=_label("静的電力 (mW)"), rangemode="tozero")
     return figure
 

@@ -1,6 +1,6 @@
 ## 5. Verification and Timing
 
-This chapter verifies the GDS from chapter 4 against PDK rules and checks function and delay with post-layout simulation. It then compares ternary static timing analysis, which estimates delay without simulating the circuit in SPICE, against SPICE. The circuit remains the dot4 dot product.
+This chapter verifies the GDS from chapter 4 against PDK rules and checks function and delay with post-layout simulation. It then compares ternary static timing analysis, which estimates delay without simulating the circuit in SPICE, against SPICE. The circuit remains the same dot-product circuit.
 
 ### 5.1 DRC and LVS
 

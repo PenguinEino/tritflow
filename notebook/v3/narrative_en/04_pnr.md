@@ -1,6 +1,6 @@
 ## 4. Place and Route
 
-This chapter places and routes the cell netlist from chapter 3 on TR-1um to produce GDS. The circuit is the dot4 dot product from section 3.7.
+This chapter places and routes the cell netlist from chapter 3 on TR-1um to produce GDS. The circuit is the four-term dot-product circuit from section 3.7.
 
 ### 4.1 Why a Custom Place and Route Tool
 

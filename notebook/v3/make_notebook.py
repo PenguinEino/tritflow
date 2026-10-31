@@ -48,7 +48,7 @@ for name, cell in {"source": "1-1 HDL", "net": "1-2 合成する", "lay": "1-3 �
                    "lvs": "1-4 DRCとLVS", "post": "1-5 ポストレイアウトシミュレーション",
                    "dot4": "3-8 論理合成する", "dot4_layout": "4-1 配置配線する",
                    "dot4_lvs": "5-1 DRCとLVS", "dot4_extracted": "5-2 抽出と配線容量", "dot4_post": "5-3 ポストレイアウトシミュレーション",
-                   "dot_scaling": "6-1 積和の規模と面積",
+                   "dot_scaling": "6-1 内積の規模と面積",
                    "reuse_source": "6-4 HDLを変更する"}.items():
     provides(name, cell)
 '''
@@ -200,7 +200,7 @@ cell_counts(selects)
 for net in selects.values():
     bus_picker(net)''',
 
-"dot4_source": '''# 3-7 HDL：三値重みの4項の積和
+"dot4_source": '''# 3-7 HDL：三値重みの4項の内積
 dot4_source = """
 module dot4(input trit w0, w1, w2, w3, x0, x1, x2, x3, output trit [1:0] y);
   assign y = w0*x0 + w1*x1 + w2*x2 + w3*x3;
@@ -215,7 +215,7 @@ with step("論理合成") as s:
            + f" · 全{dot4.equivalence['vectors']}入力で等価")''',
 
 "pnr2": '''# 4-1 配置配線する
-need("dot4", why="配置配線する回路は、3-8で合成した積和です。")
+need("dot4", why="配置配線する回路は、3-8で合成した内積です。")
 with step("配置配線", view=LayoutView()) as s:
     dot4_layout = dot4.place_and_route(output_dir=BUILD/"dot4", seed=0)
     stats = dot4_layout.stats
@@ -279,7 +279,7 @@ with step("三値のSTA") as s:
 timing_table(dot4_post, dot4_timing)
 note("STAの条件：5-3と同じ入力の列、出力の負荷 100 fF、入力の変化時間 1 ns、配線容量は5-2の抽出値。")''',
 
-"scale6": '''# 6-1 積和の規模と面積
+"scale6": '''# 6-1 内積の規模と面積
 from scale_views import load_scaling, scaling_table, synthesis_table
 # 全掃引は長時間かかる（N=16の解析とN=32の配置配線試行を含む）。
 RECOMPUTE_SCALING = False #@param {type:"boolean"}
@@ -328,7 +328,7 @@ from reuse import run
 reuse_result = run(reuse_source, output_dir=BUILD/"reuse", step_s=5e-9,
                    exhaustive_limit=27, sample_size=11)''',
 
-"shuttle6": '''# 6-6 MPWフレームとパッドを付けたdot4
+"shuttle6": '''# 6-6 MPWフレームとパッドを付けた内積回路
 need("dot4_layout", why="フレームに載せるdot4は、4-1で配置配線します。")
 import subprocess
 from reuse import chip_view
@@ -366,12 +366,12 @@ ENGLISH = {
     "全掃引は長時間かかる（N=16の解析とN=32の配置配線試行を含む）。": "The full campaign takes a long time (N=16 analysis and the N=32 routing attempt).",
     "入力0 V": "Input 0 V",
     "抵抗による近似": "Resistive estimate",
-    "積和の規模と面積": "Dot-product size and area",
+    "内積の規模と面積": "Dot-product size and area",
     "静的電流と電力": "Static current and power",
     "STAとSPICE": "STA and SPICE",
     "HDLを変更する": "Edit HDL",
     "変更したHDLから全工程を実行する": "Run the full flow on the edited HDL",
-    "MPWフレームとパッドを付けたdot4": "dot4 with MPW frame and pads",
+    "MPWフレームとパッドを付けた内積回路": "Dot-product circuit with MPW frame and pads",
     "フレームに載せるdot4は、4-1で配置配線します。": "The dot4 placed in the frame is routed in 4-1.",
     "MPWフレームに載せて検証": "Place in the MPW frame and verify",
     "µm · パッド": "µm · ",
@@ -416,7 +416,7 @@ ENGLISH = {
     "合成するHDLは、3-3に書いてあります。": "The HDL to synthesize is defined in 3-3.",
     "合成するHDLは、3-5に書いてあります。": "The HDL to synthesize is defined in 3-5.",
     "合成するHDLは、3-7に書いてあります。": "The HDL to synthesize is defined in 3-7.",
-    "配置配線する回路は、3-8で合成した積和です。": "The dot-product netlist is synthesized in 3-8.",
+    "配置配線する回路は、3-8で合成した内積です。": "The dot-product netlist is synthesized in 3-8.",
     "表示するGDSは、4-1で作ります。": "The GDS to display is generated in 4-1.",
     "検証するGDSは、4-1で作ります。": "The GDS to verify is generated in 4-1.",
     "抽出は、5-1でLVSが一致したGDSから行います。": "Extraction uses the LVS-matched GDS from 5-1.",
@@ -445,7 +445,7 @@ ENGLISH = {
     "HDL：+ で書いた全加算器": "HDL: full adder using +",
     "HDL：* で書いた1トリットの積": "HDL: one-trit product using *",
     "HDL：同じ選択を2通りに書く": "HDL: two descriptions of selection",
-    "HDL：三値重みの4項の積和": "HDL: four-term dot product with ternary weights",
+    "HDL：三値重みの4項の内積": "HDL: four-term dot product with ternary weights",
     "論理合成して比べる": "Synthesize and compare",
     "論理合成": "Logic synthesis",
     "論理合成する": "Logic synthesis",

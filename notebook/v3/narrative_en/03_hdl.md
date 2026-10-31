@@ -74,7 +74,7 @@ Every synthesis run checks that the synthesized netlist implements the same func
 
 ### 3.7 Dot Product with Ternary Weights
 
-The matrix products in [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764), introduced at the start, consist of repeated dot products of ternary weights w<sub>i</sub> and inputs x<sub>i</sub>, y = Σ<sub>i</sub> w<sub>i</sub>x<sub>i</sub>. BitNet b1.58 uses 8-bit inputs; here, the inputs are restricted to one trit. The taped-out one-trit multiply-accumulate circuit underlying TritFlow's cells (X + A × B + C<sub>in</sub> = S + 3C<sub>out</sub>) corresponds to one term of this dot product. Here, the `*` and `+` operations from section 3.4 describe a four-term dot product, dot4. Each product ranges from −1 to +1, and the four-term sum ranges from −4 to +4, so two trits suffice for output y.
+The matrix products in [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764), introduced at the start, consist of repeated dot products of ternary weights w<sub>i</sub> and inputs x<sub>i</sub>, y = Σ<sub>i</sub> w<sub>i</sub>x<sub>i</sub>. BitNet b1.58 uses 8-bit inputs; here, the inputs are restricted to one trit. The taped-out one-trit multiply-accumulate circuit underlying TritFlow's cells (X + A × B + C<sub>in</sub> = S + 3C<sub>out</sub>) corresponds to one term of this dot product. Here, the `*` and `+` operations from section 3.4 describe a four-term dot-product circuit (module name dot4). Each product ranges from −1 to +1, and the four-term sum ranges from −4 to +4, so two trits suffice for output y.
 
 <!-- code: dot4_source -->
 
