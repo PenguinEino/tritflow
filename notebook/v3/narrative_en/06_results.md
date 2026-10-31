@@ -20,6 +20,8 @@ Static power is computed with SPICE from the DC operating points of the states i
 
 <!-- code: power6 -->
 
+With every input at 0, the static power reaches 1.2 W for 16 terms, about 3.4 to 3.8 mW per cell at every size. As long as 0 V comes from a resistive divider, current that grows with the number of cells flows even when no input changes, so this static power is a major limitation of the current cells. The next step is cells that output 0 V without a divider, as NANY's clamp to VMID already does in some states.
+
 ### 6.3 STA and SPICE
 
 For each size, with the weights fixed, an input sequence that creates and clears positive and negative carries is applied, and the delay predicted by ternary STA is compared with the transient delay from SPICE. The four-term sequence differs from the one in chapter 5. STA and SPICE get the same input transitions, input slew, output load and wire capacitance. The delay compared is each output's maximum settling time over the sequence.
@@ -59,5 +61,7 @@ This notebook demonstrated TritFlow, an automated design flow for ternary integr
 - **A pipeline from a dedicated ternary HDL to GDS**: from a TritVerilog description, the flow runs logic synthesis with simplification by ternary identities, two-metal place and route, GDS output, DRC/LVS with the PDK's official decks, wire-capacitance estimation and post-layout simulation in one pass.
 - **A ternary timing model and STA**: delay is defined from the six state transitions and the settling time, and a ternary static timing analysis that estimates delay without SPICE was built and compared with post-layout SPICE.
 - **Validation by measurement**: the standard cells keep the circuits and device sizes of the taped-out design, so they can be compared directly with measurements of the chips arriving in January 2027. Because the flow also generates a full-chip layout for the MPW shuttle automatically, a circuit designed with TritFlow can go to a shuttle as is, be fabricated and be checked by measurement.
+
+The current cells, however, make 0 V with a resistive divider, so static current flows even while the inputs do not change; the 16-term dot product draws 1.2 W with every input at 0. The next step is cells that output 0 V without a divider, aiming to reduce this static power.
 
 TritFlow is a first step toward learning balanced-ternary logic circuits, which may find use in ternary computation such as BitNet. All source code, the cell library and the design flow are released under Apache-2.0, giving researchers and students interested in ternary circuits a starting point for their own designs. We hope that this work, which closes the loop from design to fabrication and measurement on TR-1um and the OpenSUSI shuttles, Japan's open-source semiconductor infrastructure, will help open-source chip design grow in Japan.

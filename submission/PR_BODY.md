@@ -18,18 +18,18 @@ TritFlow is a design flow that takes ternary HDL to GDS, using CMOS cells that w
 - **Every step interactive on Colab**: schematics, layouts and waveforms appear at each step, and the HDL can be edited and rerun.
 - **A flow on Japan's first commercial open-source PDK**: built on OpenSUSI TR-1um, TritFlow pushes forward the democratization of chip design in Japan.
 
-![TritFlow on a ternary full adder: TritVerilog, synthesis, standard cell, place and route, post-layout SPICE and the MPW top](https://raw.githubusercontent.com/PenguinEino/tritflow/38aa212035f2c0be7a28c38073808f7c84019c83/figures/out/fig_flow_v2.png)
+![TritFlow on a ternary full adder: TritVerilog, synthesis, standard cell, place and route, post-layout SPICE and the MPW top](https://raw.githubusercontent.com/PenguinEino/tritflow/d24da2a154ec322bc54cf9cbce11e6ab57da9c90/figures/out/fig_flow_v2.png)
 
 ## Notebooks
 
 | Notebook | Language | Open in Colab |
 |---|---|---|
-| [tritflow_en.ipynb](https://github.com/PenguinEino/sscs-ose-code-a-chip.github.io/blob/isscc27-tritflow/ISSCC27/submitted_notebooks/TritFlow/tritflow_en.ipynb) | English | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/38aa212035f2c0be7a28c38073808f7c84019c83/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_en.ipynb) |
-| [tritflow_ja.ipynb](https://github.com/PenguinEino/sscs-ose-code-a-chip.github.io/blob/isscc27-tritflow/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) | Japanese | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/38aa212035f2c0be7a28c38073808f7c84019c83/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) |
+| [tritflow_en.ipynb](https://github.com/PenguinEino/sscs-ose-code-a-chip.github.io/blob/isscc27-tritflow/ISSCC27/submitted_notebooks/TritFlow/tritflow_en.ipynb) | English | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/d24da2a154ec322bc54cf9cbce11e6ab57da9c90/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_en.ipynb) |
+| [tritflow_ja.ipynb](https://github.com/PenguinEino/sscs-ose-code-a-chip.github.io/blob/isscc27-tritflow/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) | Japanese | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/d24da2a154ec322bc54cf9cbce11e6ab57da9c90/submission/ISSCC27/submitted_notebooks/TritFlow/tritflow_ja.ipynb) |
 
 Both notebooks are saved with their outputs.
 
-**Source code:** [github.com/PenguinEino/tritflow](https://github.com/PenguinEino/tritflow) (cell library, synthesis, place and route, verification and the notebook generator; the notebooks fetch commit [`ffedf1f`](https://github.com/PenguinEino/tritflow/tree/ffedf1f53f656aab3ef13e00d6fcb07927d7c80d), tag `isscc27-tritflow-2026-11-01b`).
+**Source code:** [github.com/PenguinEino/tritflow](https://github.com/PenguinEino/tritflow) (cell library, synthesis, place and route, verification and the notebook generator; the notebooks fetch commit [`658ddf8`](https://github.com/PenguinEino/tritflow/tree/658ddf89e0f7e4ae116519425e09b801e51144f2), tag `isscc27-tritflow-2026-11-01c`).
 
 ## Running and tool versions
 
