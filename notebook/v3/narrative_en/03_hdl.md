@@ -14,7 +14,7 @@ Balanced ternary has advantages that binary representations such as two's comple
 
 - **No sign bit**: because the digits are symmetric around 0, positive numbers, zero and negative numbers share one format, with no dedicated sign bit.
 - **Negation is immediate**: negating a number (−a) only flips the sign of every digit (T ↔ 1). Unlike two's complement, which inverts every bit and then adds 1 to the least significant bit, it involves no carry propagation.
-- **Truncation rounds to the nearest value**: because every digit is −1, 0 or +1, dropping lower digits leaves an error within half the weight of the dropped digits, symmetric about zero. TritVerilog's `a >> 1` (divide by 3 and round to the nearest integer) gets this rounding simply by dropping the least significant digit.
+- **Truncation rounds to the nearest value**: because every digit is −1, 0 or +1, dropping lower digits leaves an error smaller than half the weight of the lowest digit kept, symmetric about zero. TritVerilog's `a >> 1` (divide by 3 and round to the nearest integer) gets this rounding simply by dropping the least significant digit.
 
 ### 3.2 Syntax
 
@@ -85,7 +85,7 @@ The second description, which needs MUX3, uses more cells than the first. Whenev
 
 To make logic synthesis trustworthy, TritFlow automatically checks after every synthesis run that the synthesized gate netlist means the same as the original HDL. It evaluates the HDL behavior (integer and truth-value evaluation) and the gate netlist (logic simulation from each cell's truth table) along two independent paths and compares every output.
 
-Inputs of up to 12 trits are checked exhaustively (at most 3<sup>12</sup> = 531,441 combinations). Circuits with more than 12 input trits are checked with 100,000 pseudorandom test vectors from a fixed seed. The "equivalent over all … inputs" in the synthesis results so far comes from this check.
+Inputs of up to 12 trits are checked exhaustively (at most 3<sup>12</sup> = 531,441 combinations). Circuits with more than 12 input trits are checked with 100,000 pseudorandom test vectors from a fixed seed. The "all … input vectors equivalent" in the synthesis results so far comes from this check.
 
 ### 3.7 Application: Dot Product with Ternary Weights
 
