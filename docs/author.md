@@ -2,9 +2,8 @@
 
 Use exactly this in submission READMEs and the notebook title block.
 
-- Name: Einosuke Okazaki (岡崎 英之介)
-- Affiliation: Information and Communication Engineering Course, Department of Monozukuri
-  Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
+- Name: Einosuke Okazaki
+- Affiliation: Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
 - Status: Fifth-year student (final year of the five-year KOSEN engineering programme, which
   combines upper-secondary and the first two years of tertiary education)
 - Email: einosukeokazaki@gmail.com
