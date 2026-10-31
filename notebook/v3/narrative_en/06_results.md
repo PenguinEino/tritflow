@@ -1,46 +1,54 @@
 ## 6. Evaluation and Reuse
 
-Chapter 5 verified the four-term dot-product circuit with post-layout simulation and compared it with ternary STA. This chapter evaluates area, delay and static power as the term count changes, then reruns the flow after an HDL change and generates a shuttle top-level layout.
+Chapter 5 verified the four-term dot-product circuit with post-layout simulation and ternary STA. This chapter first evaluates area, delay and static power as the number of terms N changes. It then reruns the same flow after changing the HDL, and finally generates a top-level layout with the MPW frame and I/O pads.
 
 ### 6.1 Dot-Product Size and Area
 
-The evaluated circuit is a dot product of one-trit weights and inputs, y = w<sub>0</sub>x<sub>0</sub> + … + w<sub>N−1</sub>x<sub>N−1</sub>. The term counts are N = 2, 4, 8 and 16. The output uses the minimum number of trits needed to represent −N through +N (2 trits for N = 2 and 4, 3 for N = 8, 4 for N = 16). Weights remain HDL inputs but are fixed in simulation to repetitions of (+1, −1, +1, +1). Addition uses the same HDL form as section 3.7, without structural changes for different term counts.
+The evaluated circuit is the dot product of ternary weights and inputs, y = w<sub>0</sub>x<sub>0</sub> + … + w<sub>N−1</sub>x<sub>N−1</sub>, with the term count N = 2, 4, 8 and 16.
 
-The tables present recorded place and route and verification results. Area is measured from the routed die outline.
+The output y uses the minimum number of digits that represents −N through +N (2 trits for N = 2 and 4, 3 trits for N = 8, 4 trits for N = 16). The weights remain HDL inputs but are fixed in simulation to repetitions of (+1, −1, +1, +1). Addition is synthesized from the same HDL form as section 3.7, without structural changes for different term counts.
+
+The cell below shows the recorded place-and-route and verification results for each size. Area is computed from the outline of the routed die.
 
 <!-- code: scale6 -->
 
 ### 6.2 Static and Time-Average Power
 
-States that hold 0 V by resistive division draw static current even without input transitions. NANY also has zero-output states in which VMID clamps conduct while the VDD and VSS transistor stacks are cut off. Static power is calculated from DC operating points for states in the recorded input sequence.
+Ternary CMOS logic gates draw static current, even without input transitions, in states where a resistive divider holds 0 V. NANY cells also have states in which the series MOS paths to VDD and VSS are cut off and a clamp to VMID outputs 0 V.
 
-Time-average supply power excludes the power from the input voltage sources.
+Static power is obtained with SPICE from the DC operating points of the states in the recorded input sequence. The time-average supply power excludes the power from the input voltage sources.
 
 <!-- code: power6 -->
 
 ### 6.3 STA and SPICE
 
-Each circuit uses an input sequence that generates and clears positive and negative carries. The four-term sequence differs from chapter 5. STA uses the same fixed weights. STA and SPICE use identical input transitions, output load, input slew and wire capacitance. The reported delay is each output's maximum settling time over that sequence.
+For each circuit size, an input sequence that generates and clears positive and negative carries is applied, and with the weights fixed, the delay predicted by ternary STA is compared with the transient delay from SPICE. The four-term sequence differs from chapter 5. STA and SPICE receive the same input transitions, input slew, output load and wire capacitance. The compared delay is each output's maximum settling time over the sequence.
 
-The effect of wire capacitance is evaluated by removing only the estimated wire capacitance from the same extracted circuit. STA compares both cases at every size; SPICE compares them for four terms. Both cases retain intrinsic device capacitance and the 100 fF output load.
+The effect of wire capacitance on delay is also compared. Device parasitics and the 100 fF output load are kept in both cases, and only the estimated wire capacitance is removed. STA is compared at every size and SPICE at four terms.
 
-At N=16, some NANY loads exceed the 2 pF characterization limit, reaching 2.862 pF, so STA linearly extrapolates the delay along the load axis.
+In the 16-term circuit, some NANY loads exceed the characterization table's upper limit (2 pF), reaching up to 2.862 pF, so STA linearly extrapolates the delay along the load axis.
 
 <!-- code: timing6 -->
 
 ### 6.4 Editing HDL and Rerunning the Flow
 
-Making inference weights HDL constants allows logic synthesis to simplify the corresponding multiplier circuits. The following circuit fixes the weights of the dot-product circuit from section 3.7 to (+1, −1, +1, +1). After changes to the expression and port declarations, the same execution cell runs logic synthesis through post-layout simulation.
+Writing the inference weights as constants in the HDL lets logic synthesis simplify the multipliers according to the weights. The cell below rewrites the TritVerilog of the dot-product circuit from section 3.7 with its weights fixed to (+1, −1, +1, +1). Even with the expression and the input and output declarations changed, the same cell runs logic synthesis, place and route, DRC/LVS, wire-capacitance estimation and post-layout simulation in sequence.
 
 <!-- code: reuse_source -->
 
-SPICE covers all states when the total is at most 27. Otherwise, it selects 11 states from the zero input, all −1 and all +1 inputs, alternating signs, and single-input ±1 excursions. Expected outputs come from evaluating the HDL, independently of the synthesized netlist.
+The SPICE transient analysis checks every combination when there are at most 27 states, and otherwise 11 representative states, such as the zero input, all inputs at −1 or +1, alternating signs and single-input ±1 excursions. Expected outputs come from evaluating the HDL, not from the synthesized netlist.
 
 <!-- code: reuse6 -->
 
 ### 6.5 Shuttle Top-Level Layout
 
-The top-level layout adds pads, power routing and the PDK's stock MPW frame to the dot-product circuit routed in chapter 4; it is generated here and verified with DRC, LVS and the organizer's precheck. The frame's electrostatic discharge (ESD) supply shares VSS with the circuit's VSS (−5 V) and takes VDD at +5 V from a separate terminal. The −5 to +5 V ternary signals then stay within the ESD supply range, so the stock pads are used as they are. The taped-out chip uses the same connection.
+To manufacture the designed ternary core in a real fab, I/O pads must be placed around the chip, and the design must be combined with the MPW (Multi-Project Wafer) stock frame, which has electrostatic discharge (ESD) protection devices.
+
+This section generates a top-level layout that connects the dot-product circuit routed in chapter 4 to the OpenSUSI TR-1um stock MPW frame, and verifies it with DRC, LVS and the organizer's precheck.
+
+What matters here is matching the ESD protection to the ternary supply voltages. The ESD protection devices of the stock pads conduct when a pad's voltage leaves the range of the ESD supplies (VDD and VSS). Ternary signals, on the other hand, span −5 V to +5 V, a total of 10 V.
+
+TritFlow therefore connects the frame's ESD VSS to the circuit's VSS (−5 V) and supplies the ESD VDD with +5 V from a separate terminal. The −5 V to +5 V ternary signals then stay within the range of the ESD supplies, and the stock pads can be used as they are. This connection is the same as on the chip taped out in 2026, OpenSUSI-TR10.
 
 <!-- code: shuttle6 -->
 

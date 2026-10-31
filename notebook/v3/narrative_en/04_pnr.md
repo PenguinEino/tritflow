@@ -1,41 +1,43 @@
 ## 4. Place and Route
 
-This chapter places and routes the cell netlist from chapter 3 on TR-1um to produce GDS. The circuit is the four-term dot-product circuit from section 3.7.
+From the cell connectivity (netlist) synthesized in chapter 3, the cells are placed following the geometric rules of the TR-1um PDK and connected with two metal layers to generate GDS. This chapter looks at TritFlow's place-and-route tool, using the four-term dot-product circuit synthesized in section 3.7.
 
 ### 4.1 Why a Custom Place and Route Tool
 
-Place and route does not depend on whether signals are binary or ternary, so in principle binary EDA such as OpenROAD can be used. A port of TR-1um to LibreLane is also being attempted ([luyanaa/TR-1um](https://github.com/luyanaa/TR-1um), experimental). Applying binary EDA to ternary cells as they are, however, meets three obstacles.
+Place and route is a geometric connection problem that does not depend on signal values, so in principle binary EDA tools (such as OpenROAD) could be reused. For TR-1um, a port to LibreLane is in fact being attempted ([luyanaa/TR-1um](https://github.com/luyanaa/TR-1um)).
 
-1. **Two metal layers**: TR-1um has only two routing metals, M1 and M2, so power and signals compete for the same two layers.
-2. **Three power rails and Liberty**: every ternary cell must carry three power rails, VDD (+5 V), VMID (0 V) and VSS (−5 V). Liberty, the standard format for cell characteristics, cannot represent ternary logic and transitions.
-3. **Static current**: ternary cells draw static current through their resistive dividers while outputting 0. If high-current cells gather on one rail, the rail's allowed current is exceeded.
+Applying existing binary EDA tools to ternary design as they are, however, faces three technical obstacles.
 
-TritFlow therefore has its own small place-and-route tool that leaves routing channels between cell rows and routes on two layers.
+1. **Routing layers (two metals)**: TR-1um is a 1 µm process, and only two metal layers, the first (M1) and second (M2), are available for routing. With two layers, power distribution and signal routing compete for the same layers.
+2. **Three power rails and the limits of Liberty**: every ternary cell must carry three power rails, VDD (+5 V), VMID (0 V) and VSS (−5 V), continuously without gaps. Liberty, the standard format for describing cell characteristics, cannot describe ternary logic or transition characteristics.
+3. **Static current specific to ternary cells**: ternary cells draw static current through their resistive dividers while outputting 0 V. If high-current cells gather on one rail, the allowed current of the power wiring is exceeded.
+
+To solve these problems, TritFlow comes with its own lightweight place-and-route tool that leaves dedicated routing channels between cell rows and routes on two layers.
 
 ### 4.2 Placement: Simulated Annealing
 
-Cells are placed in horizontal rows, with routing channels left between rows.
+Placement uses rows, in which cells line up horizontally, alternating with channels, the routing passages.
 
-1. **Initial placement**: following signal flow from the cells nearest the inputs, each cell is packed into the currently shortest row.
-2. **Simulated annealing**: 600 annealing steps improve the initial placement. Each trial performs one of the following moves. A move that lowers the cost is accepted, and one that raises it is accepted with a temperature-dependent probability; the temperature decreases as the steps proceed.
-   - swap two cells (60%)
-   - move one cell to another position or row (30%)
-   - mirror one cell left to right (10%)
-3. **Cost and current constraint**: the cost is the sum of the half-perimeters of each net's terminal bounding box (HPWL, a wire-length estimate) plus a small weight times the longest row width. Because ternary cells draw current while outputting 0, a placement that exceeds the allowed current on any power rail gets infinite cost and is never chosen.
+1. **Initial placement**: from the circuit's inputs toward its outputs, following signal flow, each cell is packed into the currently shortest row.
+2. **Improvement by simulated annealing**: starting from the initial placement, 600 annealing steps improve the placement gradually. Each step randomly performs one of the following three moves. A move that lowers the cost is accepted, and one that raises it is accepted with a temperature-dependent probability; the temperature decreases as the steps proceed.
+   - **Swap (60%)**: exchange the positions of two cells.
+   - **Move (30%)**: move one cell to another row or position.
+   - **Mirror (10%)**: switch a cell between its normal orientation (R0) and its left-right mirror (MY), bringing its pins closer to nearby wiring.
+3. **Cost function and current constraint**: the cost is the sum of the half-perimeters of the bounding boxes around each net's terminals (HPWL: half-perimeter wire length) plus a small weight times the longest row width. In addition, the static current of the cells is summed per row, and any placement candidate that exceeds the allowed current of a power rail gets infinite cost and is rejected.
 
 ### 4.3 Routing: Maze Search
 
-Routing runs on the routing grid (6 µm pitch) on two layers: M1 running horizontally in the channels and M2 running vertically over the cells.
+Once placement is complete, the signal nets are routed on the routing grid (6 µm pitch). The basic strategy is orthogonal two-layer routing, with M1 running horizontally (inside the channels) and M2 vertically (allowed to pass over cells).
 
-1. **A\* search**: nets with many terminals and a large spread are routed first, each connecting its terminals by A\* search. M1 and M2 connect through vias (V1).
-2. **Rip-up and retry**: if a net cannot be routed, all routes are removed and routing restarts with that net first and the remaining order permuted, up to 8 attempts including the first.
-3. **Channel expansion**: if 8 attempts fail, the routing channels are widened and routing starts again (up to 5 times).
-4. **Power**: vertical M2 trunks feed the rails of each row.
+1. **A\* search**: starting with nets that have many terminals and spread widely over the circuit, each net is connected along a shortest path through vias (V1) by the A\* algorithm.
+2. **Rip-up and retry**: if a later net is blocked by existing wiring and cannot be connected, all wiring is removed, and routing restarts from the beginning with the failed net first and the remaining order permuted. This retry is performed up to 8 times, including the first attempt.
+3. **Channel expansion**: if routing is still incomplete after 8 attempts, the number of tracks in the routing channels is increased to widen the routing space, and routing is tried again (up to 5 times).
+4. **Power trunks**: vertical M2 power trunks are placed, feeding the M1 rails of each row.
 
-The cell below runs place and route. The figure shows placement and routing while they run; afterwards it is replaced by a figure whose sliders step through the recorded placement history and net routing order.
+Running the code cell below performs place and route. While it runs, the placement and routing are drawn; afterwards, the figure is replaced by one whose sliders step through the placement improvement and the order in which nets were routed.
 
 <!-- code: pnr2 -->
 
-The resulting GDS is shown below.
+The GDS layout of the finished dot-product circuit is shown below.
 
 <!-- code: gds2 -->
