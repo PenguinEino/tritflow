@@ -41,7 +41,7 @@ DESTINATION = HERE/"ISSCC27/submitted_notebooks/TritFlow"
 COMMON_FILES = {"README.md", "LICENSE", "NOTICE", "ABSTRACT.md", "PITCH.md", "CHECKLIST.md", "build-info.json"}
 NOTEBOOK_FILES = {"tritflow_en.ipynb", "tritflow_ja.ipynb"}
 FILES = COMMON_FILES | NOTEBOOK_FILES
-LIMIT_BYTES = 12*1024*1024  # own packaging budget for two languages, not an official limit
+LIMIT_BYTES = 16*1024*1024  # own packaging budget for two languages, not an official limit
 
 
 def digest(path):
