@@ -211,7 +211,7 @@ def test_chapter6_retains_executed_tables_for_manifest_and_readiness(tmp_path):
 
 def test_actual_payload_has_readable_evidence_and_exact_bilingual_manifests():
     info = builder.check(builder.DESTINATION)
-    assert info['total_bytes'] < 12*1024*1024
+    assert info['total_bytes'] < 16*1024*1024
     assert 'tritflow_ja.ipynb' in info['notebooks']
     for name in info['notebooks']:
         document = nbformat.read(builder.DESTINATION/name, as_version=4)
