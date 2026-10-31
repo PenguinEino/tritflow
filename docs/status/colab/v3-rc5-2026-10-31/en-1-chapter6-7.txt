@@ -1,0 +1,151 @@
+c50:
+| Terms N | Output trits | INV | NAND | NANY | NOR | Input vectors checked | Equivalence
+| 2 | 2 | 4 | 4 | 5 | 2 | Exhaustive 81 | Equivalent
+| 4 | 2 | 13 | 8 | 21 | 4 | Exhaustive 6,561 | Equivalent
+| 8 | 3 | 35 | 16 | 63 | 8 | Random 100,000 | Equivalent
+| 16 | 4 | 92 | 32 | 175 | 16 | Random 100,000 | Equivalent
+Weights and inputs are one trit each. Random equivalence checks use seed 0. Output width is the minimum needed for −N through +N.
+
+c50:
+| Terms N | Cells | Die sizemm × mm | Die areamm² | Rows | HPWLmm | Routed lengthmm | Signal vias | Place and routes | DRC / LVS
+| 2 | 15 | 0.61 × 0.87 | 0.53 | 5 | 3.95 | 8.27 | 107 | 1.73 | 0 / Matched
+| 4 | 46 | 1.69 × 1.21 | 2.04 | 6 | 24.30 | 40.44 | 329 | 2.98 | 0 / Matched
+| 8 | 122 | 2.16 × 3.05 | 6.60 | 13 | 167.86 | 236.37 | 1146 | 35.99 | 0 / Matched
+| 16 | 315 | 5.51 × 3.89 | 21.45 | 13 | 832.90 | 1,230.38 | 3320 | 48.55 | 0 / Matched
+Seed 0. HPWL estimates wire length between placed cell terminals. Routed length and vias cover signal routing only. Place and route time includes PDK DRC and excludes LVS. DRC reports violation counts.
+
+c50:
+Optional attempt N=32 is incomplete at place and route; excluded from the comparisons below.
+
+c50:
+N=16 place and route overrides: inter-row channel tracks 24, permitted current per 1 µm of M1 width 0.1335 mA.
+
+c50:
+Recorded conditions: ngspice-42, PDK 5d963db, 27 °C, supplies +5 / 0 / −5 V. Output load 100 fF, input slew 1 ns, maximum time step 2 ns. Hold time per state: N=2: 1 µs, N=4: 1 µs, N=8: 1 µs, N=16: 1.25 µs.
+
+c58:
+✓ Parse HDL and synthesize 31 cells · equivalent over 81 input vectors 0.0s
+
+c58:
+✓ Place and route 6 rows · 35 routed nets 9.5s
+
+c58:
+✓ DRC Violations: 0 7.4s
+
+c58:
+✓ LVS Matched 3.2s
+
+c58:
+✓ Extraction and wire capacitance Lumped wire capacitance on 38 nets 0.4s
+
+c58:
+| Net | Wire capacitance (fF)
+| _n1 | 198.2
+| _n20 | 193.3
+| x0 | 192.3
+| x3 | 191.5
+| x2 | 175.9
+| _n4 | 160.2
+| y[0] | 156.4
+| _n18 | 134.1
+| Total over 35 nets | 3047
+
+c58:
+✓ Post-layout simulation PASS · Max. error 0.042 V 75.6s
+
+c58:
+Zero, rail corners, alternating signs, single-input excursions until the budget, then unique pseudorandom states. Not exhaustive state/transition coverage.
+
+c58:
+| Item | Result
+| Circuit | dot4_fixed
+| Cells | 31
+| Macro size (µm) | 1284 × 1038
+| DRC violations | 0
+| LVS | Matched
+| SPICE input states | 11 / 81 (sampled states)
+| Output level and settling | PASS
+| Max. output error (V) | 0.0418
+| y[1] max. settling time (ns) | 167.9
+| y[0] max. settling time (ns) | 218.1
+| Cell reduction from constant weights | 46 → 31 (−15, 32.6%)
+
+c58:
+Simulation conditions: ngspice transient analysis, TR-1um IP62 nominal SPICE models, 27 °C, supplies +5 V / 0 V / −5 V. Ideal input voltage sources hold each value for 1 µs with linear 1 ns transitions. Output load: 100 fF; internal wire capacitance from extraction. Time step: 5 ns.
+
+c60:
+✓ Place in the MPW frame and verify 2500 × 2500 µm · 16 pads · all checks pass 343.3s
+
+c60:
+| Check | Result
+| Drawing DRC violations | 0
+| Drawing LVS | Matched
+| Mask DRC violations | 0
+| MPW precheck | PASS
+| Pad | Signal / supply | Direction | X (µm) | Y (µm)
+| P01 | VDD | power | -200.0 | 1040.0
+| P02 | VDD | power | -600.0 | 1040.0
+| P03 | x1 | input | -1040.0 | 600.0
+| P04 | x0 | input | -1040.0 | 200.0
+| P05 | w3 | input | -1040.0 | -200.0
+| P06 | w2 | input | -1040.0 | -600.0
+| P07 | w0 | input | -600.0 | -1040.0
+| P08 | VSS | power | -200.0 | -1040.0
+| P09 | x3 | input | 200.0 | -1040.0
+| P10 | w1 | input | 600.0 | -1040.0
+| P11 | y[1] | output | 1040.0 | -600.0
+| P12 | y[0] | output | 1040.0 | -200.0
+| P13 | VMID | power | 1040.0 | 200.0
+| P14 | x2 | input | 1040.0 | 600.0
+| P15 | VDD | power | 600.0 | 1040.0
+| P16 | ESD_VDD | power | 200.0 | 1040.0
+
+c63:
+✓ Parse HDL and synthesize 23 cells · equivalent over 81 input vectors 0.0s
+
+c63:
+✓ Place and route 6 rows · 27 routed nets 8.3s
+
+c63:
+✓ DRC Violations: 0 7.1s
+
+c63:
+✓ LVS Matched 3.5s
+
+c63:
+✓ Extraction and wire capacitance Lumped wire capacitance on 30 nets 0.4s
+
+c63:
+| Net | Wire capacitance (fF)
+| _n3 | 264.9
+| _n14 | 213.0
+| _n1 | 196.0
+| a[0] | 156.5
+| s[1] | 153.3
+| _n11 | 147.1
+| _n12 | 122.2
+| _n0 | 118.5
+| Total over 27 nets | 2232
+
+c63:
+✓ Post-layout simulation PASS · Max. error 0.043 V 52.7s
+
+c63:
+Zero, rail corners, alternating signs, single-input excursions until the budget, then unique pseudorandom states. Not exhaustive state/transition coverage.
+
+c63:
+| Item | Result
+| Circuit | add2
+| Cells | 23
+| Macro size (µm) | 876 × 1038
+| DRC violations | 0
+| LVS | Matched
+| SPICE input states | 11 / 81 (sampled states)
+| Output level and settling | PASS
+| Max. output error (V) | 0.0433
+| s[2] max. settling time (ns) | 119.5
+| s[1] max. settling time (ns) | 153.2
+| s[0] max. settling time (ns) | 78.1
+
+c63:
+Simulation conditions: ngspice transient analysis, TR-1um IP62 nominal SPICE models, 27 °C, supplies +5 V / 0 V / −5 V. Ideal input voltage sources hold each value for 1 µs with linear 1 ns transitions. Output load: 100 fF; internal wire capacitance from extraction. Time step: 5 ns.
