@@ -16,6 +16,14 @@ Information and Communication Engineering Course, Department of Monozukuri Engin
 
 TritFlow is a design flow from ternary HDL to GDS on OpenSUSI TR-1um, built on CMOS cells that handle three voltage levels directly. This notebook runs ternary HDL through logic synthesis, two-metal place and route, GDS output, DRC/LVS, post-layout simulation and ternary timing analysis in order.
 
+**Highlights**
+
+- **To our knowledge, the first ternary physical design flow**: CMOS cells handle the three levels −5 V, 0 V and +5 V directly, without binary encoding, and the flow takes HDL to GDS automatically.
+- **HDL to signoff in one pipeline**: TritVerilog → logic synthesis → two-metal place and route → GDS → DRC/LVS (official PDK decks) → post-layout SPICE → ternary timing analysis.
+- **Manufacturable GDS**: on OpenSUSI TR-1um, Japan's first commercial open-source PDK, the flow generates a full-chip GDS with the MPW shuttle's frame and pads.
+- **Cells from a taped-out design**: the cells keep the circuits and device sizes of ternary circuits the author taped out on OpenSUSI-TR10. The chips are scheduled for delivery in January 2027, so simulation results can be compared directly with measurements.
+- **Runs entirely on Colab, open source**: about 13 to 15 minutes for Run all; Apache-2.0.
+
 <!-- figure: fig_flow_v2 -->
 
 TritFlow uses **balanced ternary**. Each digit (trit) takes one of three values, −1, 0 and +1, and the digit weights are powers of 3 (1, 3, 9, …). In the circuit, these values correspond to −5 V, 0 V and +5 V. Balanced ternary is a long-established representation that was also adopted by [Setun](https://doi.org/10.1007/978-3-642-22816-2_10), an early ternary computer built at Moscow State University in 1958. It has recently drawn renewed attention through the large language model [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764), whose weights are restricted to these three values (−1, 0, +1). In its linear layers, the product of a weight and an 8-bit input is the input itself, its negation or zero, so the matrix product (GEMM) can be computed with additions and subtractions alone, without multipliers. Dedicated hardware that processes ternary data directly as ternary voltages, without an intermediate binary conversion, has the potential to achieve high efficiency.
