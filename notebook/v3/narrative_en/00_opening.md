@@ -6,7 +6,7 @@ Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
 **Runtime**
 
 - Run time: about 13 to 15 minutes for Run all on a fresh Colab runtime, including setup
-- Python: 3.12
+- Python: 3.13 on Colab (also checked locally with 3.12)
 - PDK: OpenSUSI TR-1um (commit 5d963db)
 - KLayout: 0.30.6
 - ngspice: 42

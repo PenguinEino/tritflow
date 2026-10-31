@@ -6,7 +6,7 @@ Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
 **実行環境**
 
 - 所要時間：新しいColabのランタイムでRun all、セットアップを含めて約13〜15分
-- Python：3.12
+- Python：Colabでは3.13（ローカルでは3.12でも確認）
 - PDK：OpenSUSI TR-1um（commit 5d963db）
 - KLayout：0.30.6
 - ngspice：42
