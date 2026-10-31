@@ -1,0 +1,31 @@
+---------------------------------------------------------------------------
+PhysicalVerificationError                 Traceback (most recent call last)
+/tmp/ipykernel_2810/3526603807.py in <cell line: 0>()
+     11                     "b3dab389ddaac1056c93bf5704230c6d2f52d5b2"], check=True)
+     12 with step("Place in the MPW frame and verify") as s:
+---> 13     dot4_chip = dot4_layout.result.to_chip(frame="OSS_FRAME", pdk_root=dot4_layout.settings.pdk,
+     14                                            klayout_binary=dot4_layout.settings.klayout,
+     15                                            output_dir=BUILD/"dot4_chip", mpw_template=mpw_template,
+
+/content/tritflow/tritflow/pnr/flow.py in to_chip(self, **options)
+     44         """Build and qualify a separate OpenSUSI full-chip TEG wrapper."""
+     45         from .chip import chip
+---> 46         return chip(self, **options)
+     47 
+     48 
+
+/content/tritflow/tritflow/pnr/chip.py in chip(result, output_dir, top, library, pdk_root, klayout_binary, mpw_template, current_margin, timeout, force_signoff, frame)
+     89         from .chip_frame import stock_chip
+     90 
+---> 91         return stock_chip(
+     92             result,
+     93             output_dir=output_dir,
+
+/content/tritflow/tritflow/pnr/chip_frame.py in stock_chip(result, output_dir, top, library, pdk_root, klayout_binary, mpw_template, current_margin, timeout, force_signoff)
+    503         )
+    504         if not report["clean"]:
+--> 505             raise PhysicalVerificationError(
+    506                 f"Stock-frame qualification failed; inspect {report['summary_path']}"
+    507             )
+
+PhysicalVerificationError: Stock-frame qualification failed; inspect /content/build/dot4_chip/signoff/signoff.summary.json

@@ -1,0 +1,73 @@
+[colab] Cell 1/32 c1: #@title Setup { display-mode: "form" }
+✓ Fetch source from GitHub 1.7s
+✓ Commit 50f982b · fetch 1.2s
+✓ Check out files 11.4s
+✓ pip 0.5s
+✓ KLayout and ngspice 129.4s
+✓ Fonts for circuit labels 6.4s
+✓ TR-1um PDK at commit 5d963db 7.3s
+✓ Pinned Python packages 44.7s
+✓ KLayout smoke test 5.1s
+✓ Check tools KLayout 0.30.6 · ngspice-42 0.6s
+[colab] Cell 2/32 c3: # 1-1 HDL
+[colab] Cell 3/32 c5: # 1-2 Logic synthesis
+✓ Parse HDL and synthesize INV×2 · NAND×1 · equivalent for all inputs 0.0s
+[colab] Cell 4/32 c7: # 1-3 Place and route
+✓ Place and route 3 cells · 348 × 366 µm · Routed nets: 4 5.3s
+[colab] Cell 5/32 c9: # 1-4 DRC and LVS
+✓ DRC Violations: 0 4.5s
+✓ LVS Matched 4.6s
+[colab] Cell 6/32 c11: # 1-5 Post-layout simulation
+✓ Extraction and wire capacitance Wire capacitance added to 4 signal nets 0.1s
+✓ ngspice within the ±0.5 V band in every interval 3.4s
+[colab] Cell 7/32 c14: # 2-1 INV DC analysis and sizing
+✓ INV DC analysis Input 0 V: Y = -0.040 V · 0.407 mA 0.2s
+✓ Check recorded sizing data 90 candidates · schematic, models and analysis code match 0.1s
+[colab] Cell 8/32 c16: # 2-2 Unary functions from NANY and the +1 constant
+[colab] Cell 9/32 c18: # 2-3 Cell truth tables
+[colab] Cell 10/32 c20: # 2-4 Standard cells
+[colab] Cell 11/32 c22: # 3-1 HDL: full adder using +
+[colab] Cell 12/32 c23: # 3-2 Logic synthesis
+✓ Logic synthesis INV×5 · NANY×11 · all 27 input vectors equivalent 0.0s
+[colab] Cell 13/32 c25: # 3-3 HDL: one-trit product using *
+[colab] Cell 14/32 c26: # 3-4 Logic synthesis
+✓ Logic synthesis INV×1 · NAND×2 · NOR×1 · all 9 input vectors equivalent 0.0s
+[colab] Cell 15/32 c28: # 3-5 HDL: two descriptions of selection
+[colab] Cell 16/32 c30: # 3-6 Synthesize and compare
+✓ Logic synthesis (op == 1't1) ? a : b 11 cells · op ? a : b 32 cells 0.0s
+[colab] Cell 17/32 c32: # 3-7 HDL: four-term dot product with ternary weights
+[colab] Cell 18/32 c33: # 3-8 Logic synthesis
+✓ Logic synthesis INV×13 · NAND×8 · NANY×21 · NOR×4 · all 6561 input vectors equivalent 0.0s
+[colab] Cell 19/32 c36: # 4-1 Place and route
+✓ Place and route 46 cells · 6 rows · 1692 × 1206 µm · Estimated wire length 40.1 → 24.3 mm · Vias: 329 12.5s
+[colab] Cell 20/32 c38: # 4-2 GDS
+[colab] Cell 21/32 c40: # 5-1 DRC and LVS
+✓ DRC Violations: 0 8.4s
+✓ LVS Matched 4.2s
+[colab] Cell 22/32 c42: # 5-2 Extraction and wire capacitance
+✓ Extraction and wire capacitance Device netlist · Wire capacitance added to 54 signal nets 0.6s
+[colab] Cell 23/32 c44: # 5-3 Post-layout simulation
+✓ ngspice within the ±0.5 V band in every interval 120.1s
+[colab] Cell 24/32 c46: # 5-4 INV delay table
+[colab] Cell 25/32 c48: # 5-5 Ternary STA and SPICE comparison
+✓ Ternary STA 2 outputs 0.2s
+[colab] Cell 26/32 c50: # 6-1 Dot-product size and area
+[colab] Cell 27/32 c52: # 6-2 Static current and power
+[colab] Cell 28/32 c54: # 6-3 STA and SPICE
+[colab] Cell 29/32 c56: # 6-4 Edit HDL
+[colab] Cell 30/32 c58: # 6-5 Run the full flow on the edited HDL
+✓ Parse HDL and synthesize 31 cells · equivalent over 81 input vectors 0.0s
+✓ Place and route 6 rows · 35 routed nets 10.5s
+✓ DRC Violations: 0 8.1s
+✓ LVS Matched 3.6s
+✓ Extraction and wire capacitance Lumped wire capacitance on 38 nets 0.5s
+✓ Post-layout simulation PASS · Max. error 0.042 V 87.2s
+[colab] Cell 31/32 c60: # 6-6 Dot-product circuit with MPW frame and pads
+✗ Place in the MPW frame and verify PhysicalVerificationError: Stock-frame qualification failed; inspect /content/build/dot4_chip/signoff/signoff.summary.json 361.3s
+[colab] Cell 32/32 c63: # 7-1 Playground
+✓ Parse HDL and synthesize 23 cells · equivalent over 81 input vectors 0.0s
+✓ Place and route 6 rows · 27 routed nets 9.0s
+✓ DRC Violations: 0 7.3s
+✓ LVS Matched 3.7s
+✓ Extraction and wire capacitance Lumped wire capacitance on 30 nets 0.4s
+✓ Post-layout simulation PASS · Max. error 0.043 V 53.2s
