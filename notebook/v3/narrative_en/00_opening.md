@@ -1,7 +1,7 @@
 # TritFlow: Balanced-Ternary HDL to GDS on Japan's First Commercial Open-Source PDK
 
-Einosuke Okazaki (岡崎 英之介)<br>
-Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
+Einosuke Okazaki<br>
+Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/notebook-v3/notebook/v3/tritflow_en.ipynb)
 
