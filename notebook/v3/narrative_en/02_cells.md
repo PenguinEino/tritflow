@@ -54,7 +54,7 @@ For condition 1, starting only from the input variable a and the constant +1, th
 
 <!-- code: closure -->
 
-NANY alone is not complete. Since NANY(0, 0) = 0, any network of NANY cells produces 0 when all inputs are 0. It cannot construct a function that produces a nonzero output at a = 0, or a +1 or −1 constant. Adding one nonzero constant removes this restriction. The remaining constants follow from NANY(+1, +1) = −1 and NANY(+1, −1) = 0, so only one constant-cell type is required. TritFlow uses this property to map arbitrary truth tables to cells.
+Why is NANY alone not complete, so that a constant cell is needed? Since NANY(0, 0) = −sat(0 + 0) = 0, when every input is 0 (0 V) any network of NANY cells keeps outputting 0 and cannot produce a value other than 0. One nonzero constant removes this limit. With +1 from TIEP, for example, the other constants follow as NANY(+1, +1) = −1 and NANY(+1, −1) = 0, so a single constant cell suffices.
 
 ### 2.3 Standard-Cell Library
 
