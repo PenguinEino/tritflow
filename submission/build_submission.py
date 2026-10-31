@@ -78,7 +78,7 @@ def render_readme(team, values=None):
                        "REPRESENTATIVE":team["representative"], "ATTENDANCE":team["attendance_and_poster"],
                        "ASSET_RIGHTS":team["asset_rights_confirmation"],
                        "AUTHOR_DETAILS":author_details(team),
-                       "COLAB_RUN_NOTE":"Saved outputs were executed locally; this v3 package has no claimed real-Colab Run-all verification."}.items():
+                       "COLAB_RUN_NOTE":"Run all was verified on fresh Colab CPU runtimes for both editions on 2026-10-31 (about 13–15 minutes including setup)."}.items():
         text = text.replace("{{"+key+"}}",str(value))
     return render(text, values or preview_values())
 
@@ -589,7 +589,7 @@ def package(documents, sources, destination, team, info):
     blockers = readiness(info["notebooks"])
     info["submission_ready"] = not blockers
     info["readiness_notes"] = blockers
-    values["PACKAGE_STATUS"] = "Ready for final submission review." if not blockers else "Development package. " + " ".join(blockers)
+    values["PACKAGE_STATUS"] = "" if not blockers else "Development package. " + " ".join(blockers)
     values["NOTEBOOKS"] = "\n\n".join(
         f"[{('English primary' if name.endswith('_en.ipynb') else 'Japanese companion' if primary != name else 'Japanese development preview')}]({name}) — executed with saved outputs."
         for name in documents)

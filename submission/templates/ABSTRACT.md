@@ -15,4 +15,4 @@ quantify how area, delay and wire load grow, how closely ternary STA tracks SPIC
 static power the divider-based zero level costs. Readers can edit the HDL and rerun the
 whole flow in Colab, and the dot product is also delivered as an MPW-framed top. Wire
 capacitance is estimated, not calibrated, and silicon measurement of the taped-out cells
-is the next step; no advantage over binary implementation is claimed.
+is the next step.

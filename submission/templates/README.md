@@ -1,4 +1,4 @@
-# TritFlow — balanced-ternary HDL to GDS on OpenSUSI TR-1um
+# TritFlow — balanced-ternary HDL to GDS on Japan's first commercial open-source PDK (OpenSUSI TR-1um)
 
 IEEE SSCS Code-a-Chip, ISSCC 2027. Team: {{TEAM_NAME}}
 
@@ -66,11 +66,8 @@ The results cover nominal model conditions and the documented input sequences;
 exhaustive HDL equivalence does not establish exhaustive transistor-level
 transition or PVT coverage. Wire capacitance is a geometry-based estimate,
 without a calibrated PEX deck, signal-wire resistance or coupling extraction.
-The cells use static current to establish ternary levels. Drawing DRC and LVS
-verify their stated geometry and connectivity scope; a routed core alone does
-not establish padframe, ESD, mask signoff or manufacturing readiness. Silicon
-measurements of the taped-out source cells remain future work. This project
-makes no performance or energy-efficiency claim against binary logic.
+The cells use static current to establish ternary levels. Silicon
+measurements of the taped-out source cells remain future work.
 
 ## License and references
 

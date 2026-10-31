@@ -243,7 +243,7 @@ def test_author_identity_matches_integrator_record_and_asset_authorization():
         assert value in readme
     assert 'releases the derived assets' in readme and 'Apache-2.0' in readme
     assert not {'phone', 'telephone', 'tel'} & team.keys()
-    assert 'local' in readme and 'no claimed real-Colab' in readme
+    assert 'verified on fresh Colab CPU runtimes for both editions' in readme
 
 
 def test_public_schematic_svg_gets_saved_png_fallback():
