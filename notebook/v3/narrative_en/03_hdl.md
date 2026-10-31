@@ -87,7 +87,7 @@ To make logic synthesis trustworthy, TritFlow automatically verifies after every
 
 Inputs of up to 12 trits are checked exhaustively (at most 3<sup>12</sup> = 531,441 combinations). Circuits with more than 12 input trits are verified with 100,000 pseudorandom test vectors from a fixed seed. The "equivalent over all … inputs" shown in the synthesis results so far comes from this check.
 
-### 3.7 Dot Product with Ternary Weights
+### 3.7 Application: Dot Product with Ternary Weights
 
 The central operation of ternary-weight neural networks such as [BitNet b1.58](https://doi.org/10.48550/arXiv.2402.17764), introduced at the start, is the dot product y = Σ<sub>i</sub> w<sub>i</sub>x<sub>i</sub> of ternary weights w<sub>i</sub> ∈ {−1, 0, +1} and inputs x<sub>i</sub>. BitNet b1.58 uses 8-bit inputs; here, the inputs are also restricted to one trit. The circuit the author taped out on OpenSUSI-TR10 is a one-trit multiply-accumulate circuit (X + A × B + C<sub>in</sub> = S + 3C<sub>out</sub>) that corresponds to one term of this dot product.
 
