@@ -7,7 +7,7 @@ Information and Communication Engineering Course, Department of Monozukuri Engin
 
 **Runtime**
 
-- Run time: 6 to 8 minutes for Run all on a fresh Colab runtime, including setup
+- Run time: about 13 to 15 minutes for Run all on a fresh Colab runtime, including setup
 - Python: 3.12
 - PDK: OpenSUSI TR-1um (commit 5d963db)
 - KLayout: 0.30.6

@@ -5,7 +5,7 @@ Information and Communication Engineering Course, Department of Monozukuri Engin
 
 **実行環境**
 
-- 所要時間：新しいColabのランタイムでRun all、セットアップを含めて6〜8分
+- 所要時間：新しいColabのランタイムでRun all、セットアップを含めて約13〜15分
 - Python：3.12
 - PDK：OpenSUSI TR-1um（commit 5d963db）
 - KLayout：0.30.6
