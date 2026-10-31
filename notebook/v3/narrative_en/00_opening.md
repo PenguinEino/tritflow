@@ -3,8 +3,6 @@
 Einosuke Okazaki<br>
 Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/notebook-v3/notebook/v3/tritflow_en.ipynb)
-
 **Runtime**
 
 - Run time: about 13 to 15 minutes for Run all on a fresh Colab runtime, including setup
