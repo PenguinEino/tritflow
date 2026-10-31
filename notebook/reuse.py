@@ -299,16 +299,10 @@ def run(source=None, *, output_dir=None, top=None, params=None, cells=None, pdk=
     return ReuseResult(circuit, net, layout, drc, lvs, extracted, post, summary)
 
 
-def shuttle_view(directory=None):
-    """Open the recorded dot4 GDS and its actual pad/pin map; never rerun P&R."""
-    from hashlib import sha256
+def _show_chip(report, gds):
+    """GDS viewer, then the signoff checks beside the pad map."""
     from tritflow.viz.layout import gds_viewer
 
-    folder = Path(directory or Path(__file__).parent / "assets/chip/dot4")
-    report = json.loads((folder / "signoff.json").read_text())
-    gds = folder / "tr_1um_dot4.gds"
-    if sha256(gds.read_bytes()).hexdigest() != report["gds_sha256"]:
-        raise ValueError("Recorded dot4 GDS hash does not match its signoff record")
     display(gds_viewer(gds, top=report["top"]))
     checks = _table([["検査", "結果"],
                      [_label("Drawing DRC 違反"), report["drawing_drc"]["violations"]],
@@ -323,6 +317,26 @@ def shuttle_view(directory=None):
     # The checks and the pad map side by side; they wrap below each other on a narrow screen.
     display(HTML('<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">'
                  f'{checks.data}{pads.data}</div>'))
+
+
+def chip_view(chip, net):
+    """Show a full chip built in this session from its own signoff report."""
+    report = dict(chip.report, top=chip.data["top"], pad_map=chip.data["pad_map"],
+                  port_directions={p.name: p.dir for p in net.ports})
+    _show_chip(report, chip.gds_path)
+    return report
+
+
+def shuttle_view(directory=None):
+    """Open the recorded dot4 GDS and its actual pad/pin map; never rerun P&R."""
+    from hashlib import sha256
+
+    folder = Path(directory or Path(__file__).parent / "assets/chip/dot4")
+    report = json.loads((folder / "signoff.json").read_text())
+    gds = folder / "tr_1um_dot4.gds"
+    if sha256(gds.read_bytes()).hexdigest() != report["gds_sha256"]:
+        raise ValueError("Recorded dot4 GDS hash does not match its signoff record")
+    _show_chip(report, gds)
     return report
 
 

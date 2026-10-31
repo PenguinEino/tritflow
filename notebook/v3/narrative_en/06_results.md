@@ -1,6 +1,6 @@
 ## 6. Evaluation and Reuse
 
-Chapter 5 verified the four-term dot product dot4 with post-layout simulation and compared it with ternary STA. This chapter evaluates area, delay and static power as the term count changes, then reruns the flow after an HDL change and presents a shuttle top-level layout.
+Chapter 5 verified the four-term dot product dot4 with post-layout simulation and compared it with ternary STA. This chapter evaluates area, delay and static power as the term count changes, then reruns the flow after an HDL change and generates a shuttle top-level layout.
 
 ### 6.1 Dot-Product Size and Area
 
@@ -40,7 +40,7 @@ SPICE covers all states when the total is at most 27. Otherwise, it selects 11 s
 
 ### 6.5 Shuttle Top-Level Layout
 
-The top-level layout adds pads, power routing and the PDK's stock MPW frame to dot4. The frame's electrostatic discharge (ESD) supply shares VSS with the circuit's VSS (−5 V) and takes VDD at +5 V from a separate terminal. The −5 to +5 V ternary signals then stay within the ESD supply range, so the stock pads are used as they are. The taped-out chip uses the same connection.
+The top-level layout adds pads, power routing and the PDK's stock MPW frame to the dot4 routed in chapter 4; it is generated here and verified with DRC, LVS and the organizer's precheck. The frame's electrostatic discharge (ESD) supply shares VSS with the circuit's VSS (−5 V) and takes VDD at +5 V from a separate terminal. The −5 to +5 V ternary signals then stay within the ESD supply range, so the stock pads are used as they are. The taped-out chip uses the same connection.
 
 <!-- code: shuttle6 -->
 

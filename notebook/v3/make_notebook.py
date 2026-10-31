@@ -329,8 +329,24 @@ reuse_result = run(reuse_source, output_dir=BUILD/"reuse", step_s=5e-9,
                    exhaustive_limit=27, sample_size=11)''',
 
 "shuttle6": '''# 6-6 MPWフレームとパッドを付けたdot4
-from reuse import shuttle_view
-dot4_chip = shuttle_view(ROOT/"notebook/assets/chip/dot4")''',
+need("dot4_layout", why="フレームに載せるdot4は、4-1で配置配線します。")
+import subprocess
+from reuse import chip_view
+# The organizer's MPW precheck template, pinned to one commit.
+mpw_template = BUILD/"TR-1um_MPW_Sanken"
+if not (mpw_template/"scripts/pre_check.py").is_file():
+    subprocess.run(["git", "clone", "-q", "https://github.com/munetomo-maruyama/TR-1um_MPW_Sanken.git",
+                    str(mpw_template)], check=True)
+    subprocess.run(["git", "-C", str(mpw_template), "checkout", "-q",
+                    "b3dab389ddaac1056c93bf5704230c6d2f52d5b2"], check=True)
+with step("MPWフレームに載せて検証") as s:
+    dot4_chip = dot4_layout.result.to_chip(frame="OSS_FRAME", pdk_root=dot4_layout.settings.pdk,
+                                           klayout_binary=dot4_layout.settings.klayout,
+                                           output_dir=BUILD/"dot4_chip", mpw_template=mpw_template,
+                                           force_signoff=True)
+    s.done(f"2500 × 2500 µm · パッド{len(dot4_chip.data['pad_map'])}個 · "
+           + ("全検査に合格" if dot4_chip.report["clean"] else "不合格の検査がある"))
+dot4_chip_report = chip_view(dot4_chip, dot4)''',
 
 "playground": '''# 7-1 Playground
 playground_source = """
@@ -356,6 +372,12 @@ ENGLISH = {
     "HDLを変更する": "Edit HDL",
     "変更したHDLから全工程を実行する": "Run the full flow on the edited HDL",
     "MPWフレームとパッドを付けたdot4": "dot4 with MPW frame and pads",
+    "フレームに載せるdot4は、4-1で配置配線します。": "The dot4 placed in the frame is routed in 4-1.",
+    "MPWフレームに載せて検証": "Place in the MPW frame and verify",
+    "µm · パッド": "µm · ",
+    "個 · ": " pads · ",
+    "全検査に合格": "all checks pass",
+    "不合格の検査がある": "some checks fail",
     
     "表示する記録は、6-1で読み込みます。": "The recorded data is loaded in 6-1.",
     "比較する記録は、6-1で読み込みます。": "The recorded data for comparison is loaded in 6-1.",

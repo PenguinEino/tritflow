@@ -196,8 +196,8 @@ def test_reuse_translation_preserves_the_recorded_producer():
 
     class WithoutLabels(ast.NodeTransformer):
         def visit_FunctionDef(self, node):
-            # shuttle_view only displays the recorded snapshot; it does not produce it.
-            return None if node.name in ("_label", "shuttle_view") else self.generic_visit(node)
+            # The chip views only display a chip; they do not produce the reuse record.
+            return None if node.name in ("_label", "shuttle_view", "chip_view", "_show_chip") else self.generic_visit(node)
 
         def visit_Assign(self, node):
             if any(isinstance(target, ast.Name) and target.id == "LABELS_EN" for target in node.targets):
