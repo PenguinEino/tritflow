@@ -1,12 +1,18 @@
 # Abstract
 
-TritFlow connects balanced-ternary circuit design to physical implementation
-on OpenSUSI TR-1um. A Verilog-like language describes signed arithmetic using
-ternary gates. Synthesis maps those descriptions to a library adapted from
-the author's taped-out cells, followed by placement, routing, drawing DRC,
-LVS and extracted ngspice simulation. Interactive figures connect schematics,
-transfer curves, layouts and waveforms. Hand estimates explain how resistor
-and transistor sizing establish the middle voltage, consume static power
-and shape ripple-carry delay. Readers can edit a circuit and repeat the flow
-in Colab. Reported results distinguish logic coverage, connectivity and
-nominal analog behavior; silicon measurements remain future work for validation.
+Ternary-weight neural networks such as BitNet b1.58 turn the products of their linear
+layers into additions, subtractions and skips, but the open ternary design tools we found
+implement ternary values by binary encoding. TritFlow is an open, notebook-driven flow from balanced-ternary
+HDL to GDS in which every signal stays a single three-level wire (−5, 0, +5 V). Its standard
+cells are adapted from the author's taped-out 1-trit multiply-add circuit on the open
+OpenSUSI TR-1um PDK; the notebook derives their functional completeness (Słupecki's
+criterion) and checks the resistive-divider zero level against SPICE. A dot product with one-trit
+weights and activations then carries the reader through equivalence-checked synthesis, a two-metal placer
+and router written for three power rails, PDK drawing DRC and LVS, extraction with estimated
+wire capacitance, post-layout ngspice, and a ternary static timing analysis that
+distinguishes six level transitions. {{RESULTS_SENTENCE}} Recorded runs up to 16 terms
+quantify how area, delay and wire load grow, how closely ternary STA tracks SPICE, and the
+static power the divider-based zero level costs. Readers can edit the HDL and rerun the
+whole flow in Colab, and the dot product is also delivered as an MPW-framed top. Wire
+capacitance is estimated, not calibrated, and silicon measurement of the taped-out cells
+is the next step.

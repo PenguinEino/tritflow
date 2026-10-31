@@ -11,7 +11,7 @@ import numpy as np
 from PIL import Image
 import pytest
 
-from tritflow.viz._gds_viewer import _GdsRenderer, _SESSIONS
+from tritflow.viz._gds_viewer import _GdsRenderer, _SESSIONS, _encode_image
 from tritflow.viz.layout import _pdk_layer_properties, gds_viewer
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -116,11 +116,80 @@ def test_busy_kernel_retries_without_permanent_static_transition(gds, monkeypatc
     assert 'live = false' not in script
     assert 'Promise.race' not in script  # A slow queued request must not be abandoned.
     assert 'live: waiting for kernel…' in script
-    assert 'if (!root.isConnected || !live || pending || drag) return;' in script
-    assert 'failures++;' in script and 'failures = 0; paint();' in script
+    # Renders also run while dragging; one request at a time keeps the queue short.
+    assert 'if (!root.isConnected || !live || pending) return;' in script
+    # Quick requests use only the viewport; idle high-DPI refinement is conditional.
+    assert 'lastRequest + 32' in script and '120 - (performance.now() - changedAt)' in script
+    assert 'sharp.width > quick.width || sharp.height > quick.height' in script
+    assert 'failures++;' in script and 'failures = 0; retryAt = 0;' in script
     assert 'Math.min(10000, 500 * 2 ** Math.min(failed - 1, 5))' in script
-    assert 'schedule(retryDelay(failures))' in script
+    assert 'retryAt = performance.now() + retryDelay(failures)' in script
     assert 'requested !== revision || failures' in script  # Retry newest view after recovery.
+
+
+def test_viewer_inherits_notebook_drawing_language_and_allows_override(gds, monkeypatch):
+    from tritflow.schematic import get_language, set_language
+    monkeypatch.setitem(sys.modules, 'google.colab', None)
+    original = get_language()
+    try:
+        set_language('ja')
+        html = gds_viewer(gds, width=500, height=300).data
+        assert '全体表示' in html and '座標の単位：µm' in html and 'TR-1umの層の凡例' in html
+        assert 'Static overview' not in html and 'Coordinates in' not in html
+        english = gds_viewer(gds, width=500, height=300, language='en').data
+        assert 'Static overview' in english and 'Coordinates in µm' in english
+        assert get_language() == 'ja'
+        with pytest.raises(ValueError, match='unknown language'):
+            gds_viewer(gds, language='de')
+    finally:
+        set_language(original)
+
+
+def test_live_webp_is_lossless_and_cache_separates_encodings(gds):
+    renderer = _GdsRenderer(gds)
+    try:
+        png = renderer.render([0, 0, 100, 100], 500, 500)
+        webp = renderer.render([0, 0, 100, 100], 500, 500, 'webp')
+        assert np.array_equal(pixels(png), pixels(webp))
+        assert len(webp['image']) <= len(png['image'])
+        assert renderer.render_count == 2
+        assert renderer.render([0, 0, 100, 100], 500, 500, 'webp')['cached']
+        with pytest.raises(ValueError, match='encoding'):
+            renderer.render([0, 0, 100, 100], 500, 500, 'jpeg')
+    finally:
+        renderer.close()
+
+
+def test_webp_encoder_falls_back_to_original_png(monkeypatch):
+    from PIL import features
+    stream = io.BytesIO()
+    Image.new('RGB', (10, 10), 'black').save(stream, format='PNG')
+    png = stream.getvalue()
+    monkeypatch.setattr(features, 'check', lambda name: False)
+    assert _encode_image(png, 'webp') == ('image/png', png)
+    monkeypatch.setattr(features, 'check', lambda name: True)
+    def unavailable(*args, **kwargs):
+        raise OSError('encoder unavailable')
+    monkeypatch.setattr(Image.Image, 'save', unavailable)
+    assert _encode_image(png, 'webp') == ('image/png', png)
+
+
+def test_kernel_cache_enforces_byte_limit_and_true_lru(gds, monkeypatch):
+    from tritflow.viz import _gds_viewer
+    renderer = _GdsRenderer(gds)
+    try:
+        first = renderer.render([0, 0, 100, 100], 100, 100)
+        second = renderer.render([1, 0, 101, 100], 100, 100)
+        monkeypatch.setattr(_gds_viewer, '_CACHE_BYTES',
+                            len(first['image']) + len(second['image']) + 50)
+        assert renderer.render([0, 0, 100, 100], 100, 100)['cached']
+        renderer.render([2, 0, 102, 100], 100, 100)
+        assert len(renderer.cache) == 2
+        assert renderer.cache_bytes <= _gds_viewer._CACHE_BYTES
+        assert renderer.render([0, 0, 100, 100], 100, 100)['cached']
+        assert not renderer.render([1, 0, 101, 100], 100, 100)['cached']
+    finally:
+        renderer.close()
 
 
 def test_labels_hide_at_overview_and_return_with_detail_and_static_export(tmp_path):
@@ -137,6 +206,10 @@ def test_labels_hide_at_overview_and_return_with_detail_and_static_export(tmp_pa
     try:
         overview = renderer.render([0, 0, 3000, 3000], 600, 600)
         assert overview['labels'] is False
+        # The notebook's first circuit is only 554 µm wide, but its rail names
+        # are still too dense for overview labels.
+        assert renderer.render([0, 0, 554, 388], 1000, 700)['labels'] is False
+        overview = renderer.render([0, 0, 3000, 3000], 600, 600)
         renderer.view.set_config('text-visible', 'true')
         with_labels = np.array(Image.open(io.BytesIO(bytes(
             renderer.view.get_pixels_with_options(600, 600, 0, 0, 0, db.DBox(*overview['box'])).to_png_data()))).convert('RGB'))
@@ -182,13 +255,42 @@ def test_registered_callback_json_and_independent_sessions(gds, monkeypatch):
         _SESSIONS.clear(); _SESSIONS.update(previous)
 
 
-def test_method_cells_use_viewer_keep_download_and_validate():
+def test_v3_layout_cells_use_viewer_and_validate():
     import importlib.util
     spec = importlib.util.spec_from_file_location('viewer_validation', ROOT/'notebook/validate_notebook.py')
     module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
-    document = module.validate(ROOT/'notebook/tritflow_tr1um.ipynb')
-    for cell in document['cells']:
-        if cell['id'] in ('method-pnr', 'method-custom_layout', 'method-shuttle'):
-            assert 'gds_viewer(' in cell['source'] and 'gds_download(' in cell['source']
-            assert 'render_gds(' not in cell['source']
-            assert len(cell['source'].strip().splitlines()) <= 14
+    document = module.validate(ROOT/'notebook/v3/tritflow_en.ipynb')
+    views = [cell['source'] for cell in document['cells']
+             if cell['cell_type'] == 'code' and 'gds_viewer(' in cell['source']]
+    assert len(views) == 2
+    assert any('gds_viewer(lay.gds_path)' in source for source in views)
+    assert any('gds_viewer(dot4_layout.gds_path)' in source for source in views)
+    assert all('render_gds(' not in source for source in views)
+
+
+def test_expired_sessions_unregister_callbacks_and_release_rasters(gds, monkeypatch):
+    from tritflow.viz._gds_viewer import _register
+    callbacks = {}
+    module = types.ModuleType('google.colab')
+    module.output = types.SimpleNamespace(
+        register_callback=lambda name, fn: callbacks.update({name: fn}),
+        unregister_callback=lambda name: callbacks.pop(name))
+    monkeypatch.setitem(sys.modules, 'google.colab', module)
+    previous = dict(_SESSIONS)
+    _SESSIONS.clear()
+    first = _GdsRenderer(gds)
+    try:
+        expired = _register(first)
+        first.render([0, 0, 100, 100], 300, 300, 'webp')
+        for _ in range(8):
+            _register(_GdsRenderer(gds))
+        assert expired not in callbacks and len(callbacks) == 8
+        assert first.view is None and not first.cache and first.cache_bytes == 0
+        # A fourth argument opts into live compression; old three-argument callers work.
+        active = next(iter(callbacks.values()))
+        assert active([0, 0, 100, 100], 300, 300, 'webp').data['image'].startswith('data:image/')
+        assert active([0, 0, 100, 100], 300, 300).data['image'].startswith('data:image/png;')
+    finally:
+        for renderer in _SESSIONS.values():
+            renderer.close()
+        _SESSIONS.clear(); _SESSIONS.update(previous)

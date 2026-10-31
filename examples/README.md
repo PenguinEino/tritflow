@@ -100,18 +100,153 @@ left-to-right/MSB order. For arithmetic, `a[i]` has weight 3ⁱ. Parameterized
 adders require `N >= 1`. The tests exhaust all inputs for N=1 through N=5;
 N=6 additionally uses 100,000 independent arithmetic reference vectors.
 
-Supported signal operators are `~a` (−a), `a & b` (min), `a | b` (max), and
-`nany(a,b)` (negative saturated sum), applied elementwise to equally sized
-vectors. `4'tT01T` is a four-trit constant (T=−1). Assignments require equal
-widths, with no implicit extension or truncation. Gate primitives are scalar,
-with output first. Parameters, indices and generate loops support integer
-`+ - * / %` and comparisons; division truncates toward zero. Trit arithmetic,
-`always`, `reg`, sequential logic and `x/z` are rejected with file:line:column
-diagnostics. Global net names `VDD`, `VMID`, and `VSS` are reserved.
+Signal operators include `~a` and `-a` (negate each trit), `a & b` (min),
+`a | b` (max), `nany(a,b)` (negative saturated sum), integer `+ - *`, and
+`== != < <= > >=` (one trit, +1 true / -1 false). `!`, `&&`, `||` operate on
+single trits with Kleene logic. `4'tT01T` is a four-trit constant (T=−1);
+decimal integer constants and parameters are also accepted in signal expressions.
+
+Assignment targets provide the arithmetic context width, including carry/sum
+concatenations. Operators evaluate at max(context, operand widths); operands
+extend with zero trits and assignments discard high trits that do not fit.
+Concatenation members and comparison operands determine their own widths.
+A plain reference assignment also extends/truncates. Gate primitive and module
+connections retain strict widths; primitives have scalar inputs and output first.
+Verilog operator precedence applies; `*` binds before `+`, comparison before
+bitwise logic, and `&&` before `||`.
+
+`a << k` shifts balanced digits toward the MSB and inserts zeros at the LSB,
+so it multiplies by 3**k before context-width truncation. `a >> k` drops the
+lowest k digits and inserts zeros at the MSB. Numerically this divides by
+3**k rounded to the nearest integer: +2 >> 1 = +1 and -2 >> 1 = -1.
+Exact halves cannot occur because the divisor is odd. A negative amount
+reverses direction; `a << -1` equals `a >> 1`. `<<<` and `>>>` are aliases.
+An amount whose magnitude reaches the evaluated data width produces zero.
+
+Shifts determine their natural width from the left operand only; the assignment
+context can widen that operand before shifting. The amount is self determined
+and reads a trit vector as a signed balanced integer. Constant integer amount
+expressions evaluate exactly (`a << (1+1)` shifts by two). Signal amount
+expressions follow the ordinary self-sized arithmetic rules. Shifts associate
+left to right, bind less tightly than addition and more tightly than comparisons:
+`a+b << 1` means `(a+b) << 1`. Constant shifts are wiring; TIE/BUF cells may
+still provide zeros and distinct physical output drivers. Variable shifts use
+three-way selectors over the complete signed amount, with overshifts pruned.
+They do not cascade opposite-direction shifts, which could discard useful digits.
+
+`c ? x : y` selects x at +1 and y at −1. At c=0, each result trit is the
+agreed input value where x and y match, and zero otherwise. `always @(*)` /
+`always @*` accept blocking assignments, begin/end, if/else and exact case
+statements with multiple labels and default. Procedural if takes its then arm
+only at +1; at 0 it takes else. `reg trit` is a combinational wire synonym.
+Every written bit must be assigned on every path, with reads following a
+blocking assignment, so incomplete blocks cannot infer latches.
+
+Parameters, indices and generate loops support integer `+ - * / %`, ternary shifts and
+comparisons; integer division truncates toward zero. Signal `/ %`, sequential
+logic, nonblocking assignments and `x/z` produce file:line:column diagnostics.
+Global net names `VDD`, `VMID`, and `VSS` are reserved.
+
+The RTL examples demonstrate the new constructs:
+
+| File / top | Meaning |
+|---|---|
+| `full_add_rtl.tv` | `assign {cout, sum} = a + b + cin;` maps to 11 NANY + 5 INV |
+| `adder4_rtl.tv` | Four-trit addition with an explicit carry, 55 cells |
+| `case_table.tv` | Multiplication truth table with multiple case labels |
+| `comparator_rtl.tv` | Signed two-trit less/equal/greater predicates |
+| `mux_rtl.tv` | Conditional selection with Kleene consensus |
+| `alu.tv` / `alu` | Shuttle showcase: two-trit operands, one-trit opcode, three-trit result |
+| `alu9.tv` / `alu9` | Large nine-operation variant; two-trit operands/opcode, four-trit result |
+
+The shuttle showcase `alu.tv` accepts a,b in -4..+4. One opcode trit
+selects three instructions; three result trits preserve all sums/differences:
+
+| op | Result |
+|---|---|
+| `1'tT` (-1) | a-b |
+| `1't0` (0) | a >> 1, nearest-integer division by 3 |
+| `1't1` (+1) | a+b |
+
+The two add/subtract labels share `r = a + op*b` inside `always @* case`.
+The opcode is a signed arithmetic digit as well as an instruction selector.
+This explicitly shares the adder; two separate `r=a+b` / `r=a-b` branches
+would build two arithmetic networks. The zero opcode demonstrates balanced
+rounding: -2/3 rounds to -1, and -1/3 rounds to 0. There is no saturation or
+arithmetic overflow for any valid operand. An independent integer oracle in
+`examples/alu_reference.py` checks all **243** input states against source and
+cells; `examples/alu9_reference.py` retains the large variant's **729** checks.
+
+The small ALU uses **64 cells**, routes to **1692 × 1590 µm**, and fits inside
+a **2500 × 2500 µm** OpenSUSI frame with actual power and signal pads.
+`PnrResult.to_chip()` plus `signoff()` passed drawing DRC, strict LVS, MDP,
+mask DRC, connectivity, the current reserve and the local organizer pre-check.
+The wrapper uses 17 passive TEG pads and needs a custom probe/bond allocation;
+its report correctly keeps `submission_ready=False`. The 2.5 mm frame check
+establishes physical fit; package/ESD approval remains the shuttle owner's work.
+
+The local run took about **34 seconds**, including full-chip qualification and
+post-layout SPICE. Four representative vectors cover all instructions and
+-1/0/+1 on every output; all 12 level/settling checks passed at 10 fF/output,
+1 µs holds and a 2 ns maximum step. Maximum level error was 0.039 V and the
+longest measured settling time was 221 ns. These selected transitions do not
+establish exhaustive analog delay. The brief's rough 3–5× Colab factor would
+make this about 1.7–2.8 minutes; that is an estimate, not a Colab measurement.
+
+`alu9.tv` retains the original nine instructions, with its module renamed
+`alu9`. It remains a large teaching variant. Shared one-hot selection reduces
+it from **423 to 262 cells**, with no claim of minimum area:
+
+| op | Integer code | Result |
+|---|---:|---|
+| `2'tTT` | -4 | a+b |
+| `2'tT0` | -3 | a-b |
+| `2'tT1` | -2 | -a |
+| `2't0T` | -1 | a & b, digit minimum |
+| `2't00` | 0 | a \| b, digit maximum |
+| `2't01` | +1 | a << 1, multiplication by 3 |
+| `2't1T` | +2 | a >> 1, nearest-integer division by 3 |
+| `2't10` | +3 | sign(a-b), -1/0/+1 |
+| `2't11` | +4 | a*b |
+
+Digit min/max differ from integer min/max: for -2 (`T1`) and +2 (`1T`),
+digit min is -4 (`TT`) and digit max is +4 (`11`). Four output trits retain
+all products, including ±16. The large variant is excluded from the default
+physical run and does not carry a new shuttle-fit or timing claim.
+
+`python3 -m examples.rtl_check` synthesizes the six default examples and runs
+real-PDK P&R, drawing DRC and strict device LVS. The small ALU additionally
+gets the full-chip checks and post-layout device SPICE with estimated GDS wire
+capacitance and the independent integer oracle. Reports and separate stage
+wall times go to `build/hdl_verilog_round3/summary.json`:
+
+```sh
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.rtl_check --names alu
+# Reproduce the four instruction/area candidates, including frame-fit trials:
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.alu_candidates
+# Optional, much larger nine-operation physical/SPICE run:
+TR1UM_PDK=~/pdk/TR-1um-pinned python3 -m examples.rtl_check --names alu9
+```
+
+Use `--output-root <directory>` for an isolated run and `--mpw-template <path>`
+for the organizer checkout's exact pre-check. By default the runner uses
+`~/TR-1um_MPW_Sanken` when present. The small ALU uses ordinary default P&R
+settings, seed 0 and 600 placement steps; all power limits retain their default
+20% reserve. Only the optional large variant retains Round 2's conservative
+32-row / 24-track routing envelope. The supported language, candidate table,
+mapping decisions and complete qualification results are in
+[the HDL_VERILOG status](../docs/status/HDL_VERILOG.md).
 
 Synthesis folds constants, removes double negation and dead logic, shares
 expressions and applies De Morgan transformations when they remove single-use
 inversions. It never treats `a & ~a` or `a | ~a` as Boolean constants.
+For a condition proved to return only ±1, selection uses min/max AND–OR.
+Case label equalities form a shared one-hot decoder only after proving common
+selectors, disjoint labels and coverage from the source IR. Missing labels get
+one shared default mask. Identical arms and constants fold before selection.
+Selectors that can be 0 retain general MUX3 and the Kleene consensus rule.
+Inferred RTL uses compact BUF trees that keep direct loads where possible;
+the pre-existing structural examples retain their exact saved netlists.
 Independent cell simulation checks every input vector up to 12 input trits;
 larger designs use 100,000 reproducible random vectors. `truth_table()` limits
 materialized tables to 12 inputs by default; synthesis streams batches.

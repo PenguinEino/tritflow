@@ -1,90 +1,15 @@
-"""Small HTML/Plotly display helpers; native measurements keep full precision."""
+"""Progress-label adapter used by the source-checked notebook cache.
 
-from html import escape
-import json
-import os
+The v3 displays live in views.py and the specialized view modules. This small
+adapter preserves cache.py's recorded import without retaining the old figure,
+gallery and narrative display layer.
+"""
 
-import numpy as np
-from IPython.display import HTML, display
-
-
-def title_controls(figure):
-    """Reserve separate title, controls and subplot-label bands in notebook views.
-
-    Keep native traces, frames, slider steps and button actions unchanged.
-    This copy only changes paper-coordinate UI placement; PNR owns the figure
-    functions themselves.
-    """
-    if not figure.layout.updatemenus:
-        return figure
-    import plotly.graph_objects as go
-    result = go.Figure(figure)
-    for menu in result.layout.updatemenus:
-        menu.update(y=1.06,yanchor="bottom",pad={"t":0,"b":0})
-    result.update_layout(title={"y":.99,"yanchor":"top"},
-                         margin={"t":max(140,result.layout.margin.t or 0)})
-    return result
+from live import _text
 
 
-def gds_download(path, *, url=None):
-    """Offer a GDSII file as a one-click browser download.
-
-    Generated layouts are embedded as a data link, so the button also works in a
-    saved or exported notebook. ``url`` links to a published copy instead of
-    embedding it (used for the 1.4 MB shuttle chip).
-    """
-    import base64, hashlib
-    from pathlib import Path
-    path = Path(path)
-    data = path.read_bytes()
-    href = escape(url, quote=True) if url else "data:application/octet-stream;base64,"+base64.b64encode(data).decode()
-    display(HTML(
-        f'<a download="{escape(path.name, quote=True)}" href="{href}" target="_blank" '
-        'style="display:inline-block;margin:6px 0;padding:9px 18px;border-radius:6px;background:#1a5fb4;'
-        'color:#fff;font:600 15px sans-serif;text-decoration:none">'
-        f'⬇ Download {escape(path.name)}</a>'
-        f'<span style="margin-left:12px;color:#555;font:13px sans-serif">GDSII, {len(data)/1024:.0f} KB · '
-        f'open in KLayout · SHA-256 {hashlib.sha256(data).hexdigest()[:16]}…</span>'))
-
-
-def show(figure):
-    figure = title_controls(figure)
-    if os.environ.get("TRITFLOW_NOTEBOOK_HEADLESS") == "1":
-        figure.to_json()
-    else:
-        display(figure)
-
-
-def display_value(value):
-    """Four significant digits for tables, never a change to recorded values."""
-    if isinstance(value,(float,np.floating)):
-        return f"{value:.4g}"
-    if isinstance(value,dict):
-        return "; ".join(f"{key}: {display_value(item)}" for key,item in value.items())
-    if isinstance(value,(list,tuple)):
-        return "["+", ".join(display_value(item) for item in value)+"]"
-    return str(value)
-
-
-def table(rows, *, details=None):
-    content = "<div style='display:block;width:100%;min-width:0;max-width:100%;overflow-x:auto;contain:inline-size;box-sizing:border-box'><table width='100%' style='width:100%;min-width:0;max-width:100%;table-layout:fixed'>"+"".join("<tr>"+"".join(
-        "<td style='padding:.3em .8em;white-space:normal;overflow-wrap:anywhere;vertical-align:top'>"+escape(display_value(v))+"</td>" for v in row)+"</tr>"
-        for row in rows)+"</table></div>"
-    if details:
-        content = "<details style='min-width:0;max-width:100%;overflow-x:auto'><summary>"+escape(details)+"</summary>"+content+"</details>"
-    display(HTML(content))
-
-
-def evidence(title, value):
-    text=value if isinstance(value,str) else json.dumps(value,indent=2,default=str)
-    display(HTML("<details><summary>"+escape(title)+"</summary><pre style='white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%'>"+escape(text)+"</pre></details>"))
-
-
-def details_html(title, content):
-    """Collapse an existing HTML report without discarding any of its rows."""
-    display(HTML('<details><summary>'+escape(title)+'</summary>'+content+'</details>'))
-
-
-def details_svg(title, svg):
-    """Keep an optional native schematic available outside the main figure path."""
-    details_html(title,svg)
+def label(value):
+    """Translate cache progress prefixes; leave circuit and artifact names intact."""
+    japanese = {"Computing: ": "計算中: ",
+                "Reusing the result computed earlier in this runtime: ": "この実行で求めた結果を再利用: "}
+    return _text(japanese.get(value, value), value)

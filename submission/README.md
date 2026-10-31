@@ -1,64 +1,74 @@
-# Build the reviewer package
+# Build the v3 Code-a-Chip reviewer package
 
-Run from the TritFlow source checkout with its existing Python/EDA/PDK tools.
-The source notebook remains output-free; the builder executes it in a Jupyter
-kernel against `$TR1UM_PDK` (the pinned public PDK), captures real tables and Plotly figures, and publishes an executed copy.
+The builder executes `notebook/v3/tritflow_en.ipynb` as the primary notebook
+and `notebook/v3/tritflow_ja.ipynb` as its Japanese companion. Until English
+exists, the Japanese notebook builds once as an explicitly labelled development
+preview. It is never renamed to look like an English notebook.
 
 ```sh
 python3 -m pip install --user --break-system-packages -r submission/requirements-build.txt
-python3 submission/build_submission.py
-python3 submission/build_submission.py --check
-python3 -m pytest submission/tests -q
+PYTHONDONTWRITEBYTECODE=1 python3 submission/build_submission.py
+PYTHONDONTWRITEBYTECODE=1 python3 submission/build_submission.py --check
+PYTHONDONTWRITEBYTECODE=1 python3 -m pytest submission/tests -q
 ```
 
-Static figure export also needs installed Chrome/Chromium and Cairo. The local
-Chrome was already available; nothing installs a browser or system package.
-Build-time dependencies stay in this repository, outside the reviewer payload.
-The first compatible combination tested is Kaleido 1.5.0 / Choreographer 1.4.0;
-Kaleido 1.1.0 was incompatible with Choreographer 1.4.0 and is not the build pin.
+Use the existing Python/EDA installation and pinned `$TR1UM_PDK`. Static export
+needs installed Chrome/Chromium and Cairo. No browser or system package is
+installed by the builder. All disposable kernel, sizing, EDA and export files
+stay in `submission/.build/`, including failed raw notebooks and diagnostics.
+The source notebooks, bootstrap, PDK and other streams' paths are not edited.
 
-`team.json` follows the integrator-owned `docs/author.md` exactly. Name,
-affiliation, student status, email and GitHub are included; no telephone field
-is rendered. The user has explicitly released their derived historical
-schematic assets under Apache-2.0. The author has confirmed in-person
-attendance and poster presentation if selected; the exact statement from
-`docs/author.md` is in `team.json` and the reviewer README.
+Only `submission/ISSCC27/submitted_notebooks/TritFlow/` belongs in the eventual
+official-repository PR. The bilingual payload has nine files: both notebooks,
+README, ABSTRACT, PITCH, CHECKLIST, LICENSE, NOTICE and build-info.json. A Japanese
+preview has eight. The complete payload must fit the self-imposed 12 MiB budget (two languages).
 
-Default payload: `submission/ISSCC27/submitted_notebooks/TritFlow/`.
-**Only that folder** belongs in the eventual official-repository PR. It contains
-the notebook, README, Apache license and NOTICE, abstract, pitch, checklist
-and build information; no EDA sources, PDK, large cell tree or raw simulation results.
-Current rules and inspected accepted-folder examples are linked in the checklist.
-The payload budget is 8 MiB, a self-imposed guard rather than an official limit.
+The first cell of each packaged notebook contains the exact team identity from
+`team.json`, which follows `docs/author.md`, recommended runtime versions and
+license information. References and execution provenance are added as appendix
+cells. Original source cells stay in order and keep their code. Pinned images
+in Markdown become embedded PNGs. Native KLayout overviews and real Chromium
+captures of the controls' initial states make the saved output readable without
+JavaScript. Re-execution restores the original controls.
 
-Saved figures are static native Plotly PNGs. Repeated SVG gallery HTML becomes
-selected embedded SVG/PNG image bundles, so readers need no JavaScript or local
-assets. PNG optimization is lossless. Numerical outputs are unchanged; known
-machine paths are replaced with `$TRITFLOW_ROOT`, `$TR1UM_PDK`, `$OUTPUTDIR`.
-The original notebook cells and bootstrap stay identical. Interactive figures
-return on normal re-execution; animation stills show the initial recorded frame.
+An extra, self-contained evidence cell reads the actual kernel's synthesized
+cell counts, equivalence coverage, layout dimensions, DRC/LVS outcomes, SPICE
+measurements and STA estimates. README and abstract results come from that
+cell's JSON output, never the storyboard. Future chapter 6 tables are discovered
+by their chapter heading and copied from executed HTML outputs without a
+cell-ID dependency; missing results produce an explicit scope statement rather
+than guessed measurements. Raw capture hashes and per-notebook source/runtime
+pins are retained in build-info.json. Runtime tools are recorded during
+execution, separately from packaging-tool versions.
 
-The repeated four-design campaign is committed in the source repository as
-`notebook/assets/four_designs.zip`, never copied into the eight-file payload.
-Its reader checks source/PDK/abstract/manifest/publication identity, experiment
-options and all native evidence bytes before displaying recorded outcomes.
-It does not turn the producer's tool version into a local cache key. A fresh
-session still executes the opening adder and selected editable circuit;
-`TRITFLOW_FORCE_RUN=1` recomputes the four-design campaign too.
-
-The raw executed notebook and flow outputs stay under
-`build/submission_capture/`. An error leaves diagnostics there and aborts
-publication. A successful payload is validated in a staging directory before
-replacing the previous payload. For packaging-only edits, reuse a successful
-raw capture with the identical source-notebook hash:
+For packaging-only edits, reuse successful captures with identical source bytes:
 
 ```sh
-python3 submission/build_submission.py --from-executed build/submission_capture/executed.raw.ipynb
+python3 submission/build_submission.py \
+  --from-executed submission/.build/submission_capture/tritflow_en/executed.raw.ipynb \
+  --from-executed-ja submission/.build/submission_capture/tritflow_ja/executed.raw.ipynb
 ```
 
-That command repackages a recorded execution; it does not claim a new EDA run
-or refresh its source/model context. Omit it to execute the current flow afresh.
-Use `--workdir`, `--output` or `--team` for isolated drafts. Saved outputs were
-generated locally. The Colab note names round 4's completed second Run all;
-its timing excludes the initial setup-only attempt. This builder
-never performs git-writing commands, opens a PR or submits personal information.
+For a Japanese preview, supply its capture to `--from-executed` or
+`--from-executed-ja`. A stale, incomplete or failed capture is rejected. Reuse
+does not claim a new EDA run. `--source`, `--japanese-source`, `--output` and
+`--workdir` support drafts; output and work directories must remain inside
+`submission/`. Publication is staged and validated before replacing the old
+payload. An oversized or failed build leaves the previous payload intact.
+
+```sh
+python3 submission/build_submission.py --check --require-final
+```
+
+The final gate requires English, an executed chapter 6 evaluation and source
+pins compatible with the final notebooks; a preview cannot silently become a
+final submission. Local execution does not claim a real-Colab v3 Run all, and
+historical v1 Colab evidence is not promoted to v3. The integrator owns source
+publication, final Colab qualification and filing the PR. This builder performs
+no git-writing commands, commits, pushes or submissions.
+
+The current official rules were re-fetched on 2026-10-23 using the official
+repository's immutable default-branch head. `official_snapshot.json` retains
+the fetched Markdown; `official_sources.json` records URLs, hashes and the
+precedence of the current README over legacy event dates. The generated
+checklist cites those sources and the IEEE award page.

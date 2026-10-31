@@ -8,6 +8,33 @@ from .vector import INK, SECONDARY, TRIT_COLOR, Vector
 from .model import natural
 
 
+# Legend words; the notebook switches them with set_language().
+LABELS = {
+    'en': {'cells': '{n} cells', 'branch': 'Branch', 'crossing': 'Crossing: no connection',
+           'values': 'Port values', 'wire_c': 'Port wire C', 'and_wire_c': ' / wire C'},
+    'ja': {'cells': '{n}セル', 'branch': '分岐', 'crossing': '交差（接続なし）',
+           'values': '端子の値', 'wire_c': '端子の配線容量', 'and_wire_c': '・配線容量'},
+}
+_language = 'en'
+
+
+def set_language(code):
+    """Draw schematic legends and GDS viewer controls in ``code`` ('en' or 'ja')."""
+    global _language
+    if code not in LABELS:
+        raise ValueError(f'unknown language: {code}')
+    _language = code
+
+
+def get_language():
+    """Return the drawing language selected by the notebook's existing setup."""
+    return _language
+
+
+def _label(key):
+    return LABELS[_language][key]
+
+
 def _rect(v,x,y,w,h,**style):
     v.path([('M',x,y),('L',x+w,y),('L',x+w,y+h),('L',x,y+h),('Z',)],**style)
 
@@ -87,13 +114,19 @@ def _symbol(v,node):
         v.line((cx,cy-12),(cx,cy));v.line((cx,cy),(x1,cy))
         v.text(cx,cy-18,value,size=11,anchor='middle');return
     left,right=gate(v,node.kind,cx,cy)
+    input_y={p:cy+off for p,off in zip(node.inputs,[0] if len(node.inputs)==1 else [-16,16])}
     for pin,(px,py) in node.pins.items():
         if pin in node.outputs:
             end=(right,cy)
         else:
             offset=left
             if node.kind=='NOR':offset=cx-35+9*(1-(16/24)**2)
-            end=(offset,py)
+            end=(offset,input_y[pin])
+            if py!=end[1]:
+                v.line((px,py),(left-16,py))
+                v.line((left-16,py),(left-16,end[1]))
+                v.line((left-16,end[1]),end)
+                continue
         v.line((px,py),end)
 
 
@@ -115,29 +148,35 @@ def _wire_styles(scene,values,caps):
     return styles
 
 
-def render(scene,values=None,caps=None,net_names=False,title=None):
-    """Paint an existing scene; geometry does not depend on any overlay."""
+def render(scene,values=None,caps=None,net_names=False,title=None,legend=True):
+    """Paint an existing scene; geometry does not depend on any overlay.
+
+    ``legend=False`` leaves out the cell count, the branch/crossing key and the port legend,
+    for views that show the values elsewhere.
+    """
     caps = caps or {}
     title = scene.top if title is None else title
     ports={c.net for c in scene.connections if c.endpoint.startswith('port:')}
     visible=sorted(ports&{s.net for s in scene.segments},key=natural)
     visible=[n for n in visible if values is not None or n in caps]
-    annotated=bool(visible)
+    annotated=bool(visible) and legend
     # Native 11 pt text prevents small notebook figures from inheriting the
     # tiny legend font used by the old, wide publication canvases.
     small=sum(n.kind not in {'input','output'} for n in scene.symbols)<=10
-    font=max(44/3,(44/3 if small else 12)*scene.width/1000)
+    font=20 if scene.detailed else max(44/3,(44/3 if small else 12)*scene.width/1000)
     row_pitch=max(18,math.ceil(font*1.5))
     beside=annotated and scene.width+208<=1000
     columns=1 if beside else max(1,min(len(visible),int(scene.width/max(192,font*15))))
     rows=math.ceil(len(visible)/columns) if annotated else 0
     extra=row_pitch*(2+rows+(1 if caps else 0)) if annotated and not beside else 0
-    v = Vector(scene.width+(208 if beside else 0),scene.height+extra,font_min=font,stroke_min=.8*scene.width/1000)
+    v = Vector(scene.width+(208 if beside else 0),scene.height+extra,font_min=font,
+               stroke_min=.8 if scene.detailed else .8*scene.width/1000,
+               display_width_limit=scene.width*.8 if scene.detailed else 1000)
     v.net_labels={signal:_wire_name(n,p,signal,ports)
                   for n in scene.symbols for p,signal in n.outputs.items()}
     v.text(24,max(20,v.font_min+4),title,size=12,weight='bold')
     gates=sum(len(n.members) for n in scene.symbols)
-    v.text(v.width-24,max(20,v.font_min+4),f'{gates} cells',size=9,color=SECONDARY,anchor='end')
+    if legend:v.text(v.width-24,max(20,v.font_min+4),_label('cells').format(n=gates),size=9,color=SECONDARY,anchor='end')
     for frame in scene.frames:
         x0,y0,x1,y1=frame.box
         _rect(v,x0,y0,x1-x0,y1-y0,stroke='#c3c2b7',fill='#fafaf8',width=.8)
@@ -172,24 +211,24 @@ def render(scene,values=None,caps=None,net_names=False,title=None):
     for node in scene.symbols:
         _symbol(v,node)
     footer=scene.height-16
-    if scene.junctions:
+    if legend and scene.junctions:
         v.line((24,footer-3),(48,footer-3),width=1.2)
         v.line((36,footer-11),(36,footer-3),width=1.2)
         v.circle(36,footer-3,2.4,fill=INK,stroke=INK,width=0)
-        v.text(56,footer,'Branch',size=9,color=SECONDARY)
-    if any(h.net!=s.net and h.a[1]==h.b[1] and s.a[0]==s.b[0]
+        v.text(56,footer,_label('branch'),size=9,color=SECONDARY)
+    if legend and any(h.net!=s.net and h.a[1]==h.b[1] and s.a[0]==s.b[0]
            and h.a[0]<s.a[0]<h.b[0] and s.a[1]<h.a[1]<s.b[1]
            for h in horizontal for s in vertical):
         offset=max(132,56+4*v.font_min)
         v.line((offset+12,footer-11),(offset+12,footer+5),width=1.2)
         v.line((offset,footer-3),(offset+24,footer-3),stroke='white',width=5)
         v.line((offset,footer-3),(offset+24,footer-3),width=1.2)
-        v.text(offset+32,footer,'Crossing: no connection',size=9,color=SECONDARY)
+        v.text(offset+32,footer,_label('crossing'),size=9,color=SECONDARY)
     if annotated:
         baseline=64 if beside else scene.height+row_pitch
         legend_x=scene.width+8 if beside else 24
-        heading='Port values' if values is not None else 'Port wire C'
-        if values is not None and caps:heading+=' / wire C'
+        heading=_label('values') if values is not None else _label('wire_c')
+        if values is not None and caps:heading+=_label('and_wire_c')
         v.text(legend_x,baseline,heading,size=10,weight='bold')
         cell_width=(scene.width-48)/columns
         for k,signal in enumerate(visible):

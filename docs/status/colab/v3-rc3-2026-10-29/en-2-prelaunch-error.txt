@@ -1,0 +1,21 @@
+
+[colab] A new version of Colab CLI is available: 0.7.5 (current: 0.7.4)
+[colab] Run 'colab update' to update.
+[colab] To silence this check, set "enable_update_check": false in ~/.config/colab-cli/settings.json
+
+[colab] Parsing notebook '/home/ishi-kai/code-a-chip-v3/docs/status/colab/v3-rc3-2026-10-29/.work/en-2.ipynb'...
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /home/ishi-kai/.local/share/uv/tools/google-colab-cli/lib/python3.15/site-pa │
+│ ckages/colab_cli/commands/execution.py:176 in exec_command                   │
+│                                                                              │
+│   173 │   if file:                                                           │
+│   174 │   │   if file.endswith(".ipynb"):                                    │
+│   175 │   │   │   typer.echo(f"[colab] Parsing notebook '{file}'...")        │
+│ ❱ 176 │   │   │   with open(file, "r", encoding="utf-8") as f:               │
+│   177 │   │   │   │   nb = nbformat.read(f, as_version=4)                    │
+│   178 │   │   │   │   for cell in nb.cells:                                  │
+│   179 │   │   │   │   │   # nbformat v4.5+ requires 'id' at the top level    │
+╰──────────────────────────────────────────────────────────────────────────────╯
+FileNotFoundError: [Errno 2] No such file or directory: 
+'/home/ishi-kai/code-a-chip-v3/docs/status/colab/v3-rc3-2026-10-29/.work/en-2.ip
+ynb'

@@ -1,0 +1,40 @@
+Code cell 26/31; notebook index 52; id c52
+---------------------------------------------------------------------------
+RuntimeError                              Traceback (most recent call last)
+/tmp/ipykernel_2402/1664453488.py in <cell line: 0>()
+      3 # The full campaign takes a long time (N=16 analysis and the N=32 routing attempt).
+      4 RECOMPUTE_SCALING = False #@param {type:"boolean"}
+----> 5 dot_scaling = load_scaling(recompute=RECOMPUTE_SCALING)
+      6 display(synthesis_table(dot_scaling), scaling_table(dot_scaling))
+      7 for attempt in dot_scaling.get("optional_attempts", []):
+
+/content/tritflow/notebook/scale_views.py in load_scaling(path, recompute, sizes)
+     78     if data.get("schema_version") != 1 or not data.get("complete") or data.get("stale"):
+     79         raise ValueError(_label("積和の記録が未完了、または計算条件が変更されている。"))
+---> 80     return verify_record(data)
+     81 
+     82 
+
+/content/tritflow/examples/dot_scaling.py in verify_record(data, root, pdk, artifacts)
+    211         changed += [name for name in review if review[name] != current_review[name]]
+    212     if changed:
+--> 213         raise RuntimeError("Recorded dot scaling is stale: " + ", ".join(changed[:8]))
+    214     if artifacts:
+    215         for name, digest in data.get("evidence_sha256", {}).items():
+
+RuntimeError: Recorded dot scaling is stale: source/tritflow/pnr/chip_power.py, source/tritflow/pnr/chip_power.py
+RuntimeError: Recorded dot scaling is stale: source/tritflow/pnr/chip_power.py, source/tritflow/pnr/chip_power.py
+
+Code cell 27/31; notebook index 54; id c54
+An exception has occurred, use %tb to see the full traceback.
+
+NotReady: Run "6-1 Dot-product size and area" first. The recorded data is loaded in 6-1.
+
+NotReady: Run "6-1 Dot-product size and area" first. The recorded data is loaded in 6-1.
+
+Code cell 28/31; notebook index 56; id c56
+An exception has occurred, use %tb to see the full traceback.
+
+NotReady: Run "6-1 Dot-product size and area" first. The recorded data for comparison is loaded in 6-1.
+
+NotReady: Run "6-1 Dot-product size and area" first. The recorded data for comparison is loaded in 6-1.

@@ -25,11 +25,12 @@ class Vector:
     net_labels: dict[str,str] = field(default_factory=dict)
     font_min: float = 0
     stroke_min: float = 0
+    display_width_limit: float = 1000
 
     @property
     def display_size(self):
-        """Natural export size fits Colab; the routing grid stays in viewBox units."""
-        width=min(1000,self.width)
+        """Compact exports fit Colab; detailed views preserve native type size."""
+        width=min(self.display_width_limit,self.width)
         return width,round(self.height*width/self.width,3)
 
     def path(self, commands, *, stroke=INK, fill='none', width=0.8, net=None):

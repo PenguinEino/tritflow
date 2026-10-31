@@ -15,12 +15,20 @@ module: "module" NAME parameter_header? "(" ports? ")" ";" item* "endmodule"
 parameter_header: "#" "(" parameter_entry ("," parameter_entry)* ")"
 parameter_entry: "parameter" "integer"? NAME "=" expr
 ports: port ("," port)*
-port: DIRECTION "trit" range? NAME -> typed_port
+port: DIRECTION "reg"? "trit" range? NAME -> typed_port
     | NAME                         -> continued_port
 range: "[" expr ":" expr "]"
 ?item: wire_decl | parameter_decl | localparam_decl | genvar_decl | assign
-     | primitive | instance | generate | for_generate
-wire_decl: "wire" "trit" range? NAME ("," NAME)* ";"
+     | primitive | instance | generate | for_generate | always_comb
+wire_decl: ("wire" | "reg") "trit" range? NAME ("," NAME)* ";"
+always_comb: "always" "@" ("(" "*" ")" | "*") statement
+?statement: "begin" statement* "end" -> block
+          | "if" "(" expr ")" statement ("else" statement)? -> if_stmt
+          | "case" "(" expr ")" case_item* "endcase" -> case_stmt
+          | expr "=" expr ";" -> blocking
+          | ";" -> empty_stmt
+case_item: expr ("," expr)* ":" statement -> labeled_case
+         | "default" ":"? statement -> default_case
 parameter_decl: "parameter" "integer"? bindings ";"
 localparam_decl: "localparam" "integer"? bindings ";"
 bindings: binding ("," binding)*
@@ -37,12 +45,24 @@ for_generate: "for" "(" "genvar"? NAME "=" expr ";" expr ";" step ")" "begin" ":
 step: NAME "=" expr -> step_assign
     | NAME "++"     -> step_inc
     | NAME "--"     -> step_dec
-?expr: comparison
-?comparison: bit_or (CMP bit_or)*
+?expr: conditional
+?conditional: logical_or "?" expr ":" conditional -> conditional
+            | logical_or
+?logical_or: logical_or "||" logical_and -> logical_or
+           | logical_and
+?logical_and: logical_and "&&" bit_or -> logical_and
+            | bit_or
 ?bit_or: bit_or "|" bit_and -> max_op
        | bit_and
-?bit_and: bit_and "&" sum -> min_op
-        | sum
+?bit_and: bit_and "&" equality -> min_op
+        | equality
+?equality: equality EQ relation -> comparison
+         | relation
+?relation: relation REL shift -> comparison
+         | shift
+?shift: shift LSHIFT sum -> shift_left
+      | shift RSHIFT sum -> shift_right
+      | sum
 ?sum: sum "+" product -> add
     | sum "-" product -> sub
     | product
@@ -51,6 +71,7 @@ step: NAME "=" expr -> step_assign
         | product "%" unary -> mod
         | unary
 ?unary: "~" unary -> neg
+      | "!" unary -> logical_not
       | "-" unary -> minus
       | "+" unary -> plus
       | atom
@@ -64,7 +85,10 @@ select: "[" expr "]" -> bit_select
       | "[" expr ":" expr "]" -> part_select
 DIRECTION.2: /(?:input|output)\b/
 PRIMITIVE.2: /(?:inv|nand|nor|nany|buf)\b/
-CMP: "<=" | ">=" | "==" | "!=" | "<" | ">"
+EQ: "==" | "!="
+REL: "<=" | ">=" | "<" | ">"
+LSHIFT.2: "<<<" | "<<"
+RSHIFT.2: ">>>" | ">>"
 TRIT: /[0-9]+'[tT][A-Za-z0-9_]+/
 INT: /[0-9]+/
 NAME: /[a-zA-Z_][a-zA-Z_0-9$]*/ | /\\[^\s]+/
@@ -120,7 +144,7 @@ def parse(text: str, filename: str = "<string>") -> AST:
         context = exc.get_context(text).strip()
         raise HDLError(
             f"{filename}:{exc.line}:{exc.column}: invalid TritVerilog syntax "
-            f"(combinational trit declarations and assignments only)\n{context}"
+            f"(combinational trit logic; use always @* and blocking = assignments)\n{context}"
         ) from None
     modules = {}
     for node in tree.children:

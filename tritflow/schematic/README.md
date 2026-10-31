@@ -43,7 +43,7 @@ Colours, serif font preferences and nominal line weights follow
 `figures/paperstyle.py`: −1 blue `#2a78d6`, 0 grey `#6f6e69`, +1 red `#e34948`;
 Nimbus Roman / Liberation Serif / DejaVu Serif. Notebook circuits (up to ten
 visible gates/blocks) use at least 11 pt at both their natural size and 1000 px
-wide. Larger expanded circuits retain the 9 pt minimum at 1000 px; symbol strokes are at least
+wide. Larger reviewed arithmetic circuits retain the 9 pt minimum at 1000 px; symbol strokes are at least
 0.8 display pixels. Gate name strips and port flags reserve room for this type. The package copies these
 small constants instead of depending on repository figure scripts.
 
@@ -120,6 +120,17 @@ between corners. The final scene has 24-pixel side margins and a header/footer s
 the displayed font. Compact generic circuits stay feedforward where possible;
 compare2 no longer returns its last stages to the left edge.
 
+Dense flat RTL cones can exhaust that compact workspace. The renderer then
+unfolds dependency levels into separate columns, widens busy fanout channels,
+and retries on a common 32-pixel pin lattice. Two-input gates keep their original
+outlines and use internal orthogonal adapters to the wider pin approaches.
+Driver-to-rail feeds are reserved before load routing. If bounded maze searches
+still fail, interval-coloured horizontal tracks above the logic and dedicated
+vertical lanes connect every net without sharing foreign wire segments.
+`scene.notes` records the fallback. These detailed views keep 12 pt native type
+and allow horizontal scrolling/zooming; they do not claim to fit 1000 pixels.
+Already-routable reviewed arithmetic views retain their exact SVG and sizing.
+
 ## Reuse after P&R
 
 ```python
@@ -175,7 +186,7 @@ accepts `.svg`, `.pdf` or `.png`; `png(scale=2)` returns a larger preview.
 SVG uses the standard library; PDF/PNG lazily use existing Matplotlib. No
 Graphviz, Cairo, Xschem, browser, TeX, extra pip or system package is required.
 PDF timestamps are disabled for byte-identical exports.
-Natural exports are at most 1000 px wide, with the routing grid preserved in
+Compact natural exports are at most 1000 px wide, with the routing grid preserved in
 the SVG viewBox. The flat half-adder with values is 1000×460 px; both two-trit
 adder overlays are 848×424 px, including their right-hand keys. All four
 notebook views fit within 1000×700 px. This bound is checked on the SVG's

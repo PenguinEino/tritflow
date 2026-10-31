@@ -22,6 +22,9 @@ def file_hash(path):
     return sha256(Path(path).read_bytes()).hexdigest()
 
 
+COMPUTING_MODULES = ("cache.py", "campaign.py", "experiments.py", "routing_identity.py")
+
+
 def source_manifest(root, pdk, *, names=None):
     """Content hashes of cached physical/electrical experiment inputs.
 
@@ -44,9 +47,13 @@ def source_manifest(root, pdk, *, names=None):
             return not (package == "sim" and name in {
                 "diagnose.py","publication.py","corners.py","sizing.py","scaling.py","load_sweep.py"})
         files = [p for p in root.glob("tritflow/**/*.py") if consumed(p)]
+        # Only notebook modules that compute or restore cached results are inputs.
+        # Prose, presentation and the generated notebooks never change a result,
+        # so editing them keeps recorded experiments valid.
         files += [root/"cells/template.json", *root.glob("cells/out/*.json"),root/"cells/out/all.spice",
-                  root/"notebook/setup_pins.json",root/"notebook/tritflow_tr1um.ipynb",
-                  *root.glob("notebook/*.py"),*root.glob("examples/*.tv"),*root.glob("examples/curated.py")]
+                  root/"notebook/setup_pins.json",
+                  *(p for name in COMPUTING_MODULES if (p:=root/"notebook"/name).is_file()),
+                  *root.glob("examples/*.tv"),*root.glob("examples/curated.py")]
         library=json.loads((root/"cells/out/library.json").read_text())
         entries=library.get("cells",library) if isinstance(library,dict) else library
         cells=list(entries) if isinstance(entries,dict) else [e if isinstance(e,str) else e["name"] for e in entries]
@@ -81,6 +88,12 @@ def notebook_hash(path):
     text = re.sub(r'SOURCE_REF = os\.environ\.get\(\\"TRITFLOW_REF\\", \\"[^"\\]*\\"\)',
                   'SOURCE_REF = <pinned>', Path(path).read_text())
     return sha256(text.encode()).hexdigest()
+
+
+def _progress(prefix, name):
+    from runtime_support import step
+    from presentation import label
+    step(label(prefix)+name)
 
 
 def source_fingerprint(root, pdk, *, names=None):
@@ -152,9 +165,9 @@ class Cache:
                                            for p, h in saved["artifacts"].items()):
                 self.events.append((name, "hit"))
                 self.timings.append({"stage":name, "state":"hit", "elapsed_s":time.perf_counter()-started})
-                print(f"Cache hit: {name}")
+                _progress("Reusing the result computed earlier in this runtime: ", name)
                 return restore_result(saved["result"])
-        print(f"Running: {name}")
+        _progress("Computing: ", name)
         result = producer()
         paths = artifacts(result) if callable(artifacts) else artifacts
         hashes = {str(Path(p).resolve()): file_hash(p) for p in paths}

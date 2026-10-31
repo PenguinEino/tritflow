@@ -1,0 +1,144 @@
+{
+  "source_commit": "7a33860d7a95393cfe88143a73e6365a8270088b",
+  "source_dirty": "?? notebook/runtime.json",
+  "mpw_template_commit": "b3dab389ddaac1056c93bf5704230c6d2f52d5b2",
+  "pdk_directory": "/content/tritflow-runtime/TR-1um-5d963db9d44e192d37a0489c208bfccf2e2f690c",
+  "scaling_n": [
+    2,
+    4,
+    8,
+    16
+  ],
+  "first": {
+    "drc_violations": 0,
+    "lvs_matched": true,
+    "spice_passed": true
+  },
+  "dot4": {
+    "drc_violations": 0,
+    "lvs_matched": true,
+    "spice_passed": true
+  },
+  "edited_hdl": {
+    "top": "dot4_fixed",
+    "passed": true,
+    "cells": 31,
+    "equivalence": {
+      "passed": true,
+      "mode": "exhaustive",
+      "vectors": 81,
+      "seed": null
+    },
+    "drc_violations": 0,
+    "lvs_matched": true,
+    "post_passed": true,
+    "max_error_v": 0.04183445959353754,
+    "conditions": {
+      "load_f": 1e-13,
+      "hold_s": 1e-06,
+      "step_s": 5e-09,
+      "edge_s": 1e-09,
+      "temperature_c": 27,
+      "band_v": 0.5
+    },
+    "transient_states": 11,
+    "total_states": 81,
+    "transient_mode": "sampled states"
+  },
+  "playground": {
+    "top": "add2",
+    "passed": true,
+    "cells": 23,
+    "equivalence": {
+      "passed": true,
+      "mode": "exhaustive",
+      "vectors": 81,
+      "seed": null
+    },
+    "drc_violations": 0,
+    "lvs_matched": true,
+    "post_passed": true,
+    "max_error_v": 0.04333979666307174,
+    "conditions": {
+      "load_f": 1e-13,
+      "hold_s": 1e-06,
+      "step_s": 5e-09,
+      "edge_s": 1e-09,
+      "temperature_c": 27,
+      "band_v": 0.5
+    },
+    "transient_states": 11,
+    "total_states": 81,
+    "transient_mode": "sampled states"
+  },
+  "pya_visibility": {
+    "kernel_origin": "/content/tritflow-runtime/python-313-23d401dd51969032/pya/__init__.py",
+    "PYTHONPATH": "/content/tritflow-runtime/python-313-23d401dd51969032:/env/python",
+    "child_rc": 0,
+    "child_stdout": "/content/tritflow-runtime/python-313-23d401dd51969032/pya/__init__.py\n",
+    "child_stderr": ""
+  },
+  "mpw": {
+    "frame": "OSS_FRAME",
+    "frame_children": {
+      "OSS_ESD_5V_VSS": 1,
+      "OSS_ESD_5V_VDD": 1,
+      "OSS_LOGO_TR": 1,
+      "OSS_EDGE_SEAL": 1,
+      "OSS_ESD_5V_ANA": 14,
+      "OSS_FRAME_CNR": 3,
+      "OSS_FRAME_CNR0": 1
+    },
+    "pad_count": 16,
+    "pads": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06",
+      "P07",
+      "P08",
+      "P09",
+      "P10",
+      "P11",
+      "P12",
+      "P13",
+      "P14",
+      "P15",
+      "P16"
+    ],
+    "clean": true,
+    "physical_checks_passed": true,
+    "cache_hit": false,
+    "runtime_s": 191.34581004199993,
+    "drawing_drc_violations": 0,
+    "drawing_lvs_matched": true,
+    "mask_drc_violations": 0,
+    "mpw_precheck_clean": true,
+    "mpw_precheck_exit_code": 0,
+    "mpw_precheck_command": [
+      "/usr/bin/python3",
+      "/content/build/dot4_chip/signoff/runs/7245da42cb0937a8/mpw_template/scripts/pre_check.py",
+      "--top",
+      "tr_1um_dot4",
+      "/content/build/dot4_chip/signoff/runs/7245da42cb0937a8/mpw_template/src/tr_1um_dot4.gds"
+    ],
+    "stock_frame": {
+      "clean": true,
+      "xor_area_um2": {},
+      "text_differences": [],
+      "method": "Every layer and transformed text of the complete stock OSS_FRAME hierarchy"
+    },
+    "connectivity_clean": true,
+    "stock_frame_policy_clean": true,
+    "metal_preservation_clean": true,
+    "dc_reserved_margin_met": true,
+    "gds_sha256": "6d2453708f58a442dbf151d4afe6bb77d4c9f3e1b813807a781c6068a592f6dd",
+    "submission_ready": false,
+    "reason": "Organizer allocation of a full 2500 um slot, final bond diagram and final CI remain",
+    "mpw_precheck_log_file": "en-1-mpw-precheck.txt",
+    "actual_pad_instances": 16
+  },
+  "generated_source_status_note": "Only untracked notebook/runtime.json, written by notebook setup; no tracked source modifications."
+}

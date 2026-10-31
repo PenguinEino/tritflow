@@ -1,55 +1,46 @@
 # Official requirements and submission checklist
 
-Checked **2026-10-18**, official repository revision
-`a502a6ba01260d3492df9137dddae0bb5fabeb3c`.
-Primary sources: [current root rules](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/a502a6ba01260d3492df9137dddae0bb5fabeb3c/README.md),
-[IEEE award page](https://sscs.ieee.org/membership/awards/ieee-sscs-code-a-chip-travel-grant-awards/),
-[ISSCC27 folder](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/tree/a502a6ba01260d3492df9137dddae0bb5fabeb3c/ISSCC27).
+Rechecked **2026-10-29**, official default-branch head
+`611b9d712ced9dd67b8aa0855ede44717579adbf`. Sources: [root README](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/README.md),
+[FAQ](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/FAQ.md),
+[How to Apply](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/howtoapply.md),
+[ISSCC27 instructions](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/ISSCC27/README.md),
+[submission-folder instructions](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/blob/611b9d712ced9dd67b8aa0855ede44717579adbf/ISSCC27/submitted_notebooks/README.md),
+and the independently checked [IEEE award page](https://sscs.ieee.org/membership/awards/ieee-sscs-code-a-chip-travel-grant-awards/).
+The builder repository retains the fetched Markdown and content hashes in
+`submission/official_snapshot.json` and `submission/official_sources.json`.
 
-| Requirement / rule | Evidence or submitter action | State |
-|---|---|---|
-| Open Jupyter project about circuit design or education | Executed `tritflow_tr1um.ipynb`, chapters 0–9; linked public source | Included |
-| Explain ideas, decisions, method, evidence and reproduction | Chapters 0/1, 4–6, 7/8; first setup cell and README | Included |
-| Use open tools; open PDK where applicable | Lark/NumPy, KLayout, ngspice, Plotly; OpenSUSI TR-1um; versions in build information | Included |
-| Reproducible source release | Local capture/source hashes in build-info.json; named real-Colab run and recovery scope in README | Real-Colab completion after one Run-all retry; first-attempt reliability unestablished |
-| Suitable open-source license | Apache-2.0 `LICENSE`, verbatim attribution `NOTICE` and author-authorized derived schematic assets; README license statement | Included |
-| One project folder under the current event's submitted notebooks | This directory maps to `ISSCC27/submitted_notebooks/TritFlow/` | Prepared |
-| Keep proposed changes within that project folder | Copy only these small payload files; builder/tests remain in TritFlow | Prepared |
-| Fork and submit a GitHub PR | Submitter/integrator action; no PR opened here | Pending |
-| Deadline: 2026-10-31 at 11:59 AM Pacific | Submitter schedules and files PR before that time | Pending |
-| Monitor review questions | Submitter watches the eventual PR | Pending |
-| Teams name one award/travel representative | README and top notebook fields use docs/author.md; sole author named representative | Included |
-| Attend ISSCC 2027 and present a poster if selected | Author-confirmed in-person attendance/poster commitment from docs/author.md, reproduced in README | Commitment confirmed; selection pending |
-| Follow travel policy; keep eligible-expense receipts | Representative's post-award responsibility; reimbursement is after attendance/document review | Pending selection |
-| Membership is encouraged, not an eligibility restriction | No membership assertion or invented applicant category | Informational |
-| Final layout is encouraged, optional | Saved real GDS raster, generated DRC/LVS evidence, chapters 0/3/6/7 | Included (optional) |
-| Technical jury decides awards | No claim of acceptance or award; applicant category/amount not assumed | Informational |
 
-Conservative presentation guidance retained from the older application guide:
 
-| Guidance | Location | State |
-|---|---|---|
-| Identify team members at notebook top | Title-cell Author block + README use docs/author.md exactly | Included |
-| Cite reused work/notebooks | Notebook references + README provenance; no prior submission cells reused | Included |
-| State recommended/used tool versions | Bootstrap pins and generated notebook/build information | Included |
+| Requirement or guidance | Evidence / remaining submitter action |
+|---|---|
+| Openly licensed circuit-design or educational Jupyter project | Executed v3 notebooks, public source, Apache-2.0 LICENSE and verbatim NOTICE |
+| Explain concept, decisions, method, results and reproducibility | Notebook chapters, executed outputs and README |
+| Open tools and, where applicable, an open PDK | KLayout, ngspice, Python libraries and OpenSUSI TR-1um |
+| Spell out all team members at notebook top | First cell of every packaged notebook and README use docs/author.md |
+| Add references, including reused notebooks | Notebook bibliography and submission references; README provenance; no previous submission code/cells reused |
+| Add recommended tool versions | Generated notebook front matter, bootstrap pins and build-info.json; observed execution/export versions are separate |
+| Designate one attending representative | Confirmed representative named in README and each notebook |
+| Attend ISSCC 2027 and present a poster if selected | Author-confirmed commitment reproduced in README; selection pending |
+| Project folder: ISSCC27/submitted_notebooks/TritFlow/ | Copy only this payload folder into the official fork |
+| Keep official-repository changes inside the project folder | Exclude TritFlow builder, tests, source checkout and raw captures |
+| Submit through a GitHub pull request | Submitter/integrator action; no PR opened by this task |
+| Deadline: 2026-10-31 at 11:59 AM Pacific | File the final PR before the current root-README deadline |
+| Monitor organizer questions and revisions | Submitter follows the eventual PR |
+| Follow IEEE travel policy and retain receipts | Representative's responsibility if selected; reimbursement follows attendance and document approval |
+| Final circuit layout is encouraged, not required | Saved real routed-core GDS views and PDK drawing-DRC/LVS evidence are included |
+| Membership is encouraged, not required | No membership or applicant grant-category assumption |
 
-`howtoapply.md` at the checked revision still specifies **ISSCC26** and
-**November 27, 2025**. Those event/deadline instructions are superseded here by
-the current root README and IEEE page. ISSCC27's directory README delegates to
-the root and the submitted-notebooks README requests a separate project folder.
-The FAQ's Python-3.7 installation recipe is an example, not a current tool mandate.
-Neither current source states a numerical file/size limit, mandates an abstract
-or pitch, requires final GDS, or imposes our local ten-minute runtime target.
-Saved static outputs and a small payload are additional reviewer conveniences.
+The checked `howtoapply.md` states no deadline and still names the **ISSCC26**
+folder. That folder instruction is superseded by the current root README and
+IEEE page. Its author, reference and tool-version guidance remains
+applicable. The FAQ's Python-3.7 installation example is historical, not a tool
+version mandate. The rules do not impose a numerical payload-size limit,
+require an abstract or pitch, require final GDS, or set a ten-minute runtime
+limit; our static outputs and 16 MiB budget are reviewer conveniences.
 
-Accepted structure examples inspected (not templates copied):
-
-- [ISSCC26 current-mode logic](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/tree/a502a6ba01260d3492df9137dddae0bb5fabeb3c/ISSCC26/submitted_notebooks/current_mode_logic_optimization): notebook, README, license and a few images; listed in ISSCC26's accepted table.
-- [ISSCC26 CircuitsDNA](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/tree/a502a6ba01260d3492df9137dddae0bb5fabeb3c/ISSCC26/submitted_notebooks/CircuitsDNA): notebook with supporting code; listed in the accepted table.
-- [VLSI26 IMC side-channel](https://github.com/sscs-ose/sscs-ose-code-a-chip.github.io/tree/a502a6ba01260d3492df9137dddae0bb5fabeb3c/VLSI26/accepted_notebooks/IMC_Side_Channel_Analysis): compact notebook/README folder; listed among VLSI26 winners.
-
-Before filing: check travel/poster logistics, the release
-tag and external links, inspect saved outputs, and re-check live official rules.
-The current saved outputs have local execution evidence. The README names the
-completed Colab run and its retry; its timing excludes the initial setup attempt
-and is not an installation-inclusive first-attempt benchmark.
+Before filing, rebuild the completed English primary and Japanese companion,
+inspect their saved figures, run the builder's `--check --require-final`, and
+re-check the live rules. Build-info.json distinguishes a development preview
+from a final package and records the exact source pins. Historical v1 Colab
+runs do not verify v3, and local saved execution is labelled accordingly.

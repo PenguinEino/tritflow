@@ -9,6 +9,7 @@ from collections import defaultdict
 
 import numpy as np
 
+from tritflow import progress
 from .placement import pin_location
 from .constraints import m2_obstacles
 from .gds import wire_box
@@ -274,6 +275,18 @@ class Maze:
             del remaining[start_node]
         self.paths[net] = paths
 
+    def segments(self, net):
+        """One routed net for live views: wires as (layer, x0, y0, x1, y1) and V1 cuts as (x, y), in µm."""
+        wires, vias = [], {(t["x"], t["y"]) for t in self.terminals[net] if "inst" in t}
+        for path in self.paths[net]:
+            for a, b in zip(path, path[1:]):
+                if a[0] == b[0]:
+                    wires.append(("M1" if a[0] == 0 else "M2", self.xs[a[1]], self.ys[a[2]],
+                                  self.xs[b[1]], self.ys[b[2]]))
+                else:
+                    vias.add((self.xs[a[1]], self.ys[a[2]]))
+        return {"wires": wires, "vias": sorted(vias)}
+
     def export(self):
         wires, vias = [], set()
         for net, paths in self.paths.items():
@@ -324,8 +337,11 @@ def route(data, terminals, library, seed=0, ripup_passes=3):
     for attempt in range(ripup_passes):
         maze.reset()
         try:
-            for net in order:
+            for done, net in enumerate(order, 1):
                 maze.route_net(net)
+                if progress.active():
+                    progress.report(kind="route", done=done, total=len(order), net=net,
+                                    attempt=attempt, segments=maze.segments(net))
             data["wires"], data["vias"] = maze.export()
             data["routing_order"] = list(maze.paths)
             data["routing_progress"] = [{"step": i, "net": net, "routed_nets": i,

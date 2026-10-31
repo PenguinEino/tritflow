@@ -1,0 +1,12 @@
+// Three operations on signed two-trit integers a,b (-4..+4).
+// op=-1: subtract; op=0: nearest a/3; op=+1: add.
+// One signed opcode trit multiplies b by -1 or +1, sharing the adder.
+// Three result trits retain the full -8..+8 add/subtract range.
+module alu(input trit [1:0] a, b, input trit op, output reg trit [2:0] r);
+  always @* begin
+    case (op)
+      1'tT, 1't1: r = a + op*b;
+      1't0:      r = a >> 1;
+    endcase
+  end
+endmodule

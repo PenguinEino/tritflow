@@ -28,6 +28,7 @@ LAYERS = (
 )
 METAL_COLORS = {"M1": "#2869ae", "M2": "#b43d8a", "V1": "#da9a22"}
 CELL_COLORS = {"INV": "#d2e5f1", "NANY": "#d8d2eb", "NAND": "#d5e8d2", "NOR": "#f2dec1"}
+_TEXT_LABEL_SPAN_UM = 150.0
 
 
 def _pdk_layer_properties():
@@ -44,8 +45,8 @@ def _data(pnr):
 
 
 def _gds_text_visibility(view, box):
-    """Hide dense pad/net names at overview; restore labels below a 1 mm span."""
-    visible = box.width() <= 1000.0 and _pdk_layer_properties() is not None
+    """Show fixed-size net labels only within a 150 µm detail viewport."""
+    visible = box.width() <= _TEXT_LABEL_SPAN_UM and _pdk_layer_properties() is not None
     view.set_config("text-visible", "true" if visible else "false")
     return visible
 
@@ -97,8 +98,11 @@ def _open_gds_view(gds_path, top=None):
             background, ink, muted, rule = "#ffffff", "#223044", "#667085", "#d8dee8"
         view.max_hier_levels = 100
         view.min_hier_levels = 0
+        # Labels in KLayout's bitmap font, ignoring each text's own size: they keep one screen
+        # size at every zoom, large enough to read.
         for key, value in (("background-color", background), ("grid-visible", "false"),
-                           ("text-visible", "false"),
+                           ("text-visible", "false"), ("text-font", "0"), ("apply-text-trans", "false"),
+                           ("default-font-size", "4"),
                            ("cell-box-visible", "false")):
             view.set_config(key, value)
         return view, cell, active, (background, ink, muted, rule)
@@ -166,16 +170,17 @@ def render_gds(gds_path, output_path=None, *, top=None, width=1800, height=1250)
     return output
 
 
-def gds_viewer(gds_path, *, top=None, width=1000, height=700):
+def gds_viewer(gds_path, *, top=None, width=1000, height=700, language=None):
     """Interactive KLayout GDS: live Colab detail, embedded overview elsewhere.
 
     Wheel zooms about the cursor, dragging pans, and double-click/Fit restores
     the overview. No server, CDN or notebook extension is required. A connected
     Colab kernel rerenders the visible box; exported/local notebooks retain
     client-side pan/zoom of the embedded PNG. Coordinates and scale are in µm.
+    ``language`` defaults to the schematic language selected by the notebook.
     """
     from ._gds_viewer import viewer_html
-    return viewer_html(gds_path, top=top, width=width, height=height)
+    return viewer_html(gds_path, top=top, width=width, height=height, language=language)
 
 
 def _cell_traces(data, placements=None, highlight=None):

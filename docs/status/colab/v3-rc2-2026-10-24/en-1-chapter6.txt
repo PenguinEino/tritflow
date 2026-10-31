@@ -1,0 +1,76 @@
+Cell c52, notebook index 52: # 6-1 Dot-product size and area (recorded)
+| Terms N | Output trits | INV | NAND | NANY | NOR | Input vectors checked | Equivalence
+| 2 | 2 | 4 | 4 | 5 | 2 | Exhaustive 81 | Equivalent
+| 4 | 2 | 13 | 8 | 21 | 4 | Exhaustive 6,561 | Equivalent
+| 8 | 3 | 35 | 16 | 63 | 8 | Random 100,000 | Equivalent
+| 16 | 4 | 92 | 32 | 175 | 16 | Random 100,000 | Equivalent
+Weights and inputs are one trit each. Random equivalence checks use seed 0. Output width is the minimum needed for −N through +N.
+| Terms N | Cells | Die sizemm × mm | Die areamm² | Rows | HPWLmm | Routed lengthmm | Signal vias | Place and routes | DRC / LVS
+| 2 | 15 | 0.61 × 0.87 | 0.53 | 5 | 3.95 | 8.27 | 107 | 1.73 | 0 / Matched
+| 4 | 46 | 1.69 × 1.21 | 2.04 | 6 | 24.30 | 40.44 | 329 | 2.98 | 0 / Matched
+| 8 | 122 | 2.16 × 3.05 | 6.60 | 13 | 167.86 | 236.37 | 1146 | 35.99 | 0 / Matched
+| 16 | 315 | 5.51 × 3.89 | 21.45 | 13 | 832.90 | 1,230.38 | 3320 | 48.55 | 0 / Matched
+Seed 0. HPWL estimates wire length between placed cell terminals. Routed length and vias cover signal routing only. Place and route time includes PDK DRC and excludes LVS. DRC reports violation counts.
+Optional attempt N=32 is incomplete at place and route; excluded from the comparisons below.
+N=16 place and route overrides: inter-row channel tracks 24, permitted current per 1 µm of M1 width 0.1335 mA.
+Recorded conditions: ngspice-42, PDK 5d963db, 27 °C, supplies +5 / 0 / −5 V. Output load 100 fF, input slew 1 ns, maximum time step 2 ns. Hold time per state: N=2: 1 µs, N=4: 1 µs, N=8: 1 µs, N=16: 1.25 µs.
+
+Cell c54, notebook index 54: # 6-2 Static current and power (recorded)
+| Terms N | Cells | |I(VDD)|mA · x=0 | |I(VSS)|mA · x=0 | Static powermW · x=0 | Time averagemW | Static/cellmW · x=0 | Average/cellmW | DC rangemW | Hold timeµs/interval
+| 2 | 15 | 5.04 | 5.04 | 50.41 | 21.72 | 3.361 | 1.448 | 4.07–50.41 | 1.00
+| 4 | 46 | 16.35 | 16.35 | 163.48 | 85.80 | 3.554 | 1.865 | 29.51–163.48 | 1.00
+| 8 | 122 | 45.21 | 45.21 | 452.08 | 229.51 | 3.706 | 1.881 | 86.92–452.08 | 1.00
+| 16 | 315 | 120.02 | 120.02 | 1,200.19 | 638.63 | 3.810 | 2.027 | 336.76–1,200.19 | 1.25
+P = −Σ(Vrail × Irail), with +5 / 0 / −5 V supplies and Irail positive into each SPICE voltage source. Static power and the DC range use separate operating-point analyses. Time-average power integrates supply power over 11 intervals. Input-source power is excluded; switching-only energy is not separated.
+
+
+Cell c56, notebook index 56: # 6-3 STA and SPICE (recorded)
+
+| N | Output | STA, no wire Cns | STA, with wire Cns | Increase% | SPICE, no wire Cns | SPICE, with wire Cns | Increase% | STA error%
+| 2 | y[1] | 56.2 | 62.9 | 11.9 | — | 80.0 | — | -21.3
+| 2 | y[0] | 68.1 | 75.6 | 11.0 | — | 79.7 | — | -5.0
+| 4 | y[1] | 106.1 | 122.5 | 15.4 | 113.1 | 128.6 | 13.7 | -4.8
+| 4 | y[0] | 191.5 | 221.3 | 15.5 | 199.7 | 227.2 | 13.8 | -2.6
+| 8 | y[2] | 363.3 | 462.2 | 27.2 | — | 432.3 | — | 6.9
+| 8 | y[1] | 333.9 | 422.3 | 26.5 | — | 397.0 | — | 6.4
+| 8 | y[0] | 348.3 | 437.0 | 25.5 | — | 440.2 | — | -0.7
+| 16 | y[3] | 626.3 | 919.7 | 46.9 | — | 902.2 | — | 1.9
+| 16 | y[2] | 596.9 | 880.5 | 47.5 | — | 868.6 | — | 1.4
+| 16 | y[1] | 567.9 | 835.0 | 47.0 | — | 828.9 | — | 0.7
+| 16 | y[0] | 576.2 | 839.3 | 45.7 | — | 828.6 | — | 1.3
+Each output's maximum settling time uses the same input transitions. STA error = (STA / SPICE − 1) × 100, with wire C in both. Both cases include intrinsic device capacitance and the 100 fF output load. The SPICE comparison without wire C is available only for N=4. Wire capacitance is estimated from geometry.
+
+Cell c62, notebook index 62: # 6-6 dot4 with MPW frame and pads (recorded)
+tr_1um_dot4 · KLayout / TR-1um
+Fit
++
+−
+Overview · wheel to zoom, drag to pan
+⬇ GDS
+Coordinates in µm
+TR-1um layer legend
+WN 140/0AP 3/1AN 3/2AR 3/3GC 8/1CO 11/0M1 13/0V1 19/0M2 20/0PO 14/0MASK 63/0PTECT 63/1ESD 63/2SCRB 80/0TXM1 48/0TXM2 49/0M1PIN 48/1prBoundary 235/0NW 36/0NF 25/0L 3/0HPBE 144/0HNBE 145/0PBE 146/0NBE 147/0PM 35/0NM 7/0NSD 28/0PSD 9/0CL 143/0HPM 33/0TC23 121/0M3 122/0RHP 148/0
+| Check (recorded) | Result
+| Drawing DRC violations | 0
+| Drawing LVS | Matched
+| Mask DRC violations | 0
+| MPW precheck | PASS
+| Submission ready | False
+| Pad | Signal / supply | Direction | X (µm) | Y (µm)
+| P01 | VDD | power | -200.0 | 1040.0
+| P02 | VDD | power | -600.0 | 1040.0
+| P03 | x1 | input | -1040.0 | 600.0
+| P04 | x0 | input | -1040.0 | 200.0
+| P05 | w3 | input | -1040.0 | -200.0
+| P06 | w2 | input | -1040.0 | -600.0
+| P07 | w0 | input | -600.0 | -1040.0
+| P08 | VSS | power | -200.0 | -1040.0
+| P09 | x3 | input | 200.0 | -1040.0
+| P10 | w1 | input | 600.0 | -1040.0
+| P11 | y[1] | output | 1040.0 | -600.0
+| P12 | y[0] | output | 1040.0 | -200.0
+| P13 | VMID | power | 1040.0 | 200.0
+| P14 | x2 | input | 1040.0 | 600.0
+| P15 | VDD | power | 600.0 | 1040.0
+| P16 | ESD_VDD | power | 200.0 | 1040.0
+Organizer allocation of a full 2500 um slot, final bond diagram and final CI remain

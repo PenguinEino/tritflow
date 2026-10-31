@@ -1,9 +1,9 @@
-"""Optional 2.5 mm OpenSUSI TEG wrapper with real passive probe terminals.
+"""Optional 2.5 mm OpenSUSI chip wrappers with native qualification.
 
-The pinned PDK's seal ring is copied unchanged. Its 16-pad TEG bank is replaced
-in the *copy* by peripheral instances of the same OSS_PAD_TEG primitive: the
-adder needs 17 independent terminals. This is a custom probe/bond map, not the
-stock 16-pin package, and does not claim ESD qualification for a 10 V rail span.
+The legacy TEG allocation supports the existing full-adder callers and recorded
+snapshots. ``frame="OSS_FRAME"`` selects the unchanged 16-pad ESD frame for the
+eight-input/two-output dot4 allocation. Only the organizer's unmodified stock
+frame waivers and independently reproduced frame-only MDP delta are accepted.
 """
 
 from __future__ import annotations
@@ -73,6 +73,7 @@ def chip(
     current_margin=0.2,
     timeout=180,
     force_signoff=False,
+    frame="OSS_FRAME_TEG",
 ):
     """Wrap a verified macro in a custom, passive OpenSUSI TEG allocation.
 
@@ -81,7 +82,26 @@ def chip(
     primitive. The peripheral probe/bond map needs organizer/package approval;
     this API performs physical signoff, not submission or ESD qualification.
     A failed connectivity/DRC/LVS/mask check never publishes a canonical GDS.
+    Use ``frame="OSS_FRAME"`` for the stock ESD frame's dot4 allocation; its
+    ESD VDD is separate from core VDD and its ESD VSS is the common substrate.
     """
+    if frame == "OSS_FRAME":
+        from .chip_frame import stock_chip
+
+        return stock_chip(
+            result,
+            output_dir=output_dir,
+            top=top,
+            library=library,
+            pdk_root=pdk_root,
+            klayout_binary=klayout_binary,
+            mpw_template=mpw_template,
+            current_margin=current_margin,
+            timeout=timeout,
+            force_signoff=force_signoff,
+        )
+    if frame != "OSS_FRAME_TEG":
+        raise ValueError("frame must be OSS_FRAME or OSS_FRAME_TEG")
     started = time.perf_counter()
     if not 0 <= current_margin < 1:
         raise ValueError("current_margin must be in [0, 1)")
@@ -472,7 +492,10 @@ def chip_signoff(
     out.mkdir(exist_ok=True)
     pdk = Path(pdk_root).expanduser().resolve()
     binary = Path(
-        klayout_binary or os.environ.get("KLAYOUT_BINARY") or shutil.which("klayout") or Path.home() / "bin/klayout/klayout"
+        klayout_binary
+        or os.environ.get("KLAYOUT_BINARY")
+        or shutil.which("klayout")
+        or Path.home() / "bin/klayout/klayout"
     ).resolve()
     files = [
         source.parent / (top + ".cir"),
@@ -484,6 +507,16 @@ def chip_signoff(
         Path(__file__).with_name(name)
         for name in ("chip_power.py", "signoff.py", "power.py", "verify.py")
     ]
+    stock = result.data["frame"]["cell"] == "OSS_FRAME"
+    if stock:
+        files += [
+            Path(__file__).with_name(name)
+            for name in ("chip_frame.py", "chip_frame_power.py", "chip_frame_audit.py")
+        ]
+        files += [Path(result.data["frame"]["source"])]
+        files += list((pdk / "libs.tech/xschem/TR-1um_frame").glob("*.sch"))
+        files += list((pdk / "libs.tech/spice/models").glob("*"))
+        files += list((source.parent / "esd_dc").glob("*"))
     files += [
         p
         for group in ("drc", "lvs")
@@ -573,10 +606,59 @@ def chip_signoff(
     )
     mask_drc = _drc(binary, deck / "run_IP62.drc", mask, top, out, "mask_drc", timeout)
     audit = _layout_audit(drawing, top)
+    stock_policy = None
+    if stock:
+        from .chip_frame_audit import stock_frame_policy
+
+        # Run the same pinned MDP on the stock hierarchy alone. A matching
+        # frame delta is recorded; any extra change or any owned waiver fails.
+        original_frame = db.Layout()
+        original_frame.read(result.data["frame"]["source"])
+        isolated = db.Layout()
+        isolated.dbu = original_frame.dbu
+        isolated.create_cell("OSS_FRAME").copy_tree(original_frame.cell("OSS_FRAME"))
+        frame_drawing, frame_mask = (
+            out / "stock_frame.gds",
+            out / "stock_frame.ip62.gds",
+        )
+        isolated.write(str(frame_drawing))
+        frame_run = _run(
+            [
+                binary,
+                "-b",
+                "-r",
+                deck / "run_mdp.drc",
+                "-rd",
+                f"input={frame_drawing}",
+                "-rd",
+                "cellname=OSS_FRAME",
+                "-rd",
+                f"output={frame_mask}",
+            ],
+            out,
+            "stock_frame_mdp",
+            timeout,
+        )
+        if frame_run["exit_code"] or not frame_mask.exists():
+            raise RuntimeError(
+                f"Stock frame MDP failed; inspect {frame_run['log_path']}"
+            )
+        stock_policy = stock_frame_policy(drawing, mask, top, frame_drawing, frame_mask)
+        mdp["full_die_metal_preservation"] = mdp["metal_preservation"]
+        mdp["metal_preservation"] = stock_policy["metal_preservation"]
+        mdp["stock_frame_mdp"] = frame_run
+        audit["stock_waivers"] = stock_policy["stock_waivers"]
     library = Library.load(result.data["library"]["source"])
     netlist = GateNetlist.from_dict(result.data["macro"]["netlist"])
     own = {"connectivity": connectivity(drawing, result.data, netlist, library)}
-    dc = dc_current_check(result.data, library)
+    if stock:
+        from .chip_frame import frame_integrity
+        from .chip_frame_power import check_stock_currents
+
+        own["stock_frame"] = frame_integrity(drawing, result.data["frame"]["source"])
+        dc = check_stock_currents(result.data, library, drawing)
+    else:
+        dc = dc_current_check(result.data, library)
     precheck = {
         "clean": audit["bbox_um"] == [-1250.0, -1250.0, 1250.0, 1250.0]
         and audit["top_cells"] == [top]
@@ -585,22 +667,44 @@ def chip_signoff(
         "method": "MPW fixed 2.5 mm centered die, DBU and frame checks",
     }
     if mpw_template:
-        copied = out / "pre_check.py"
-        shutil.copy2(Path(mpw_template) / "scripts/pre_check.py", copied)
+        directory = out
+        if stock:
+            directory = out / "mpw_template"
+            shutil.copytree(
+                Path(mpw_template).expanduser(),
+                directory,
+                ignore=shutil.ignore_patterns(".git", "__pycache__"),
+                dirs_exist_ok=True,
+            )
+            copied = directory / "scripts/pre_check.py"
+            local_drawing = directory / "src" / (top + ".gds")
+            shutil.copy2(drawing, local_drawing)
+        else:
+            copied = out / "pre_check.py"
+            shutil.copy2(Path(mpw_template) / "scripts/pre_check.py", copied)
+            local_drawing = drawing
         precheck = _run(
-            [sys.executable, copied, "--top", top, drawing],
-            out,
+            [sys.executable, copied, "--top", top, local_drawing],
+            directory,
             "mpw_precheck",
             timeout,
         )
         precheck["clean"] = precheck["exit_code"] == 0
+        if stock:
+            precheck["template_copy"] = str(directory)
+            precheck["drawing_sha256"] = _hash(local_drawing)
     physical = (
         drc["clean"]
         and lvs["matched"]
         and mask_drc["clean"]
         and precheck["clean"]
         and own["connectivity"]["clean"]
-        and not audit["waiver_polygon_count"]
+        and own.get("stock_frame", {"clean": True})["clean"]
+        and (
+            stock_policy["stock_waivers"]["clean"]
+            if stock
+            else not audit["waiver_polygon_count"]
+        )
         and mdp["metal_preservation"]["clean"]
     )
     clean = physical and dc.get("reserved_margin_met", False)
@@ -615,13 +719,18 @@ def chip_signoff(
         "fingerprint": fingerprint,
         "inputs": inputs,
         "submission_ready": False,
-        "reason": "Custom TEG pad/bond allocation and ESD/power/package approval still required",
+        "reason": (
+            "Organizer allocation of a full 2500 um slot, final bond diagram and final CI remain"
+            if stock
+            else "Custom TEG pad/bond allocation and ESD/power/package approval still required"
+        ),
         "top": top,
         "gds_path": str(source),
         "drawing_drc": drc,
         "drawing_lvs": lvs,
         "mdp": mdp,
         "mask_drc": mask_drc,
+        "stock_frame_policy": stock_policy,
         "drawing_audit": audit,
         "mpw_precheck": precheck,
         "self_checks": own,
@@ -646,6 +755,10 @@ def chip_signoff(
         "runtime_s": time.perf_counter() - started,
         "summary_path": str(summary),
     }
+    if stock and not physical:
+        report["reason"] = (
+            "Stock-frame qualification failed; inspect native reports, frame integrity, owned-waiver and owned-metal audits"
+        )
     if any(_hash(p) != h for p, h in inputs.items()):
         raise RuntimeError(
             "Chip signoff inputs changed during qualification; rerun after publication settles"

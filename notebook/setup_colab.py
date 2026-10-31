@@ -57,7 +57,14 @@ def download(url, destination, checksum=None):
     for attempt in range(4):
         try:
             with urlopen(url, timeout=120) as response, destination.open("wb") as stream:
-                shutil.copyfileobj(response, stream)
+                total, done, shown = int(response.headers.get("Content-Length") or 0), 0, 0.
+                for chunk in iter(lambda: response.read(1 << 18), b""):
+                    stream.write(chunk)
+                    done += len(chunk)
+                    if time.monotonic()-shown > .25:
+                        progress(done, total, Path(url).name)
+                        shown = time.monotonic()
+                progress(done, total or done, Path(url).name)
             if checksum and sha256(destination.read_bytes()).hexdigest() != checksum:
                 raise RuntimeError(f"SHA-256 mismatch: {url}")
             return
@@ -92,6 +99,20 @@ def bootstrap_pip(prefix):
     with zipfile.ZipFile(archive) as wheel:
         wheel.extractall(directory)
     return directory/"pip"
+
+
+def say(english, japanese):
+    """Start a setup stage, named in the notebook's language.
+
+    ``@stage``, ``@files`` and ``@progress`` lines are read by the notebook's progress view
+    (notebook/live.py); in a terminal they are plain, readable log lines.
+    """
+    japanese_notebook = os.environ.get("TRITFLOW_NOTEBOOK_LANGUAGE") == "ja"
+    print(f"@stage {japanese if japanese_notebook else english}", flush=True)
+
+
+def progress(done, total, label):
+    print(f"@progress {done} {total} {label}", flush=True)
 
 
 def main(argv=None):
@@ -138,8 +159,13 @@ def main(argv=None):
     prefix.mkdir(parents=True, exist_ok=True)
     environment = {**os.environ, "DEBIAN_FRONTEND": "noninteractive", "QT_QPA_PLATFORM": "offscreen",
                    "PIP_CACHE_DIR": str(prefix/"pip-cache"), "XDG_CACHE_HOME": str(prefix/"cache")}
+    say("pip", "pipを準備")
     bootstrap_pip(prefix)
+    say("KLayout and ngspice", "KLayoutとngspice")
+    lock = json.loads((HERE/PINS["ubuntu_dependency_lock"][version]).read_text())
+    print(f"@files {len(lock['packages']) + (1 if package else 0)}", flush=True)
     native, wrappers = install_native(package, HERE/PINS["ubuntu_dependency_lock"][version], prefix, download)
+    say("Fonts for circuit labels", "回路図ラベル用のフォント")
     fonts = install_fonts(prefix, download)
     binary, ngspice = wrappers["klayout"], wrappers["ngspice"]
     payload = native/"usr/bin/ngspice"
@@ -149,6 +175,7 @@ def main(argv=None):
         with tempfile.TemporaryDirectory(dir=prefix) as staging:
             staging = Path(staging)
             archive = staging/"pdk.tar.gz"
+            say(f"TR-1um PDK at commit {revision[:7]}", f"TR-1um PDK（コミット {revision[:7]}）")
             download(url, archive, PINS["pdk_archive_sha256"])
             unpack_archive(archive, staging)
             extracted = staging/f"TR-1um-{revision}"
@@ -160,7 +187,9 @@ def main(argv=None):
             (pdk/".tritflow-commit").write_text(revision+"\n")
     if (pdk/".tritflow-commit").read_text().strip() != revision:
         raise RuntimeError("PDK commit marker mismatch")
+    say("Pinned Python packages", "Pythonパッケージ")
     subprocess.run(commands[0], check=True, env=environment)
+    say("KLayout smoke test", "KLayoutの動作確認")
     subprocess.run(commands[1], check=True, env=environment)
     # All callers use KLAYOUT_BINARY from runtime.json. Keep installation
     # confined to prefix; a simulation-server run must not alter ~/bin.
@@ -179,7 +208,6 @@ def main(argv=None):
     temporary = HERE/"runtime.json.tmp"
     temporary.write_text(json.dumps(config, indent=2)+"\n")
     temporary.replace(HERE/"runtime.json")
-    print(json.dumps(config, indent=2))
     return 0
 
 
