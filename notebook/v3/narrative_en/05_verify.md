@@ -35,7 +35,7 @@ TritFlow therefore defines delay as **settling time**.
 
 > **Ternary delay**: the time from when the input starts to change until the output enters the acceptance band (±0.5 V) of its final target voltage (−5 V, 0 V or +5 V) and never leaves it again.
 
-The cell below fixes the dot-product circuit's weights to w = (+1, −1, +1, +1) and runs post-layout simulation while input x changes through a sequence that generates carries. This is the same use as inference with trained weights fixed. On the waveforms, arrows mark the settling time of the slowest transition of each output.
+The cell below fixes the dot-product circuit's weights to w = (+1, −1, +1, +1) and runs post-layout simulation while input x changes through a sequence that generates carries. This mirrors inference, in which trained weights are fixed. On the waveforms, arrows mark the settling time of the slowest transition of each output.
 
 <!-- code: spice5 -->
 
@@ -43,7 +43,7 @@ The cell below fixes the dot-product circuit's weights to w = (+1, −1, +1, +1)
 
 Binary STA considers only two transitions, rising and falling. Ternary logic has three logic states, so there are six state transitions in total (−1 → 0, −1 → +1, 0 → −1, 0 → +1, +1 → −1 and +1 → 0), and cell propagation delay differs for each.
 
-TritFlow's ternary STA looks up, for each cell, characterization tables of propagation delay and output slew measured with SPICE against "input transition type", "input slew" and "output load capacitance".
+TritFlow's ternary STA looks up, for each cell, characterization tables of propagation delay and output slew measured with SPICE and indexed by input transition type, input slew and output load capacitance.
 
 - **Stage propagation delay**: the time between the input midpoint crossing (halfway between the voltages before and after the transition) and the output midpoint crossing, summed stage by stage.
 - **Settling at the output**: at the final output stage, the time from the midpoint crossing to entering the ±0.5 V acceptance band is added, matching the settling time defined in section 5.3.

@@ -13,7 +13,7 @@ A vector of trits (for example `trit [1:0] a;`) represents an integer in **balan
 Balanced ternary has advantages that binary representations (such as two's complement) lack.
 
 - **No sign bit**: because −1 is included symmetrically, positive numbers, zero and negative numbers share one symmetric format without a dedicated sign bit.
-- **Negation completes at once**: negating a number (−a) only flips the sign of every digit (T ↔ 1). There is no carry propagation, unlike two's complement, which inverts every bit and then adds 1 to the least significant bit.
+- **Negation is immediate**: negating a number (−a) only flips the sign of every digit (T ↔ 1). There is no carry propagation, unlike two's complement, which inverts every bit and then adds 1 to the least significant bit.
 - **Truncation rounds to the nearest value**: because every digit is −1, 0 or +1, dropping lower digits leaves an error within half the weight of the dropped digits, symmetric between positive and negative. TritVerilog's `a >> 1` (divide by 3 and round to the nearest integer) achieves this rounding by simply dropping the least significant digit.
 
 ### 3.2 Syntax
@@ -30,7 +30,7 @@ TritFlow's logic synthesis engine is a deterministic compiler implemented in Pyt
 
 1. **Parsing and elaboration**: the TritVerilog source is parsed into an abstract syntax tree (AST), and the module hierarchy, parameters (`parameter`) and generate statements (`generate`) are elaborated into a logic intermediate representation. Procedural assignments inside `always @*` blocks are normalized to static single assignment (SSA) form, which tracks each signal's value at every assignment, and conditional branches such as `if` and `case` are expanded into selectors.
 2. **Technology mapping**: each operator is replaced with a dedicated cell structure. Addition and subtraction map to carry chains of full and half adders with the same structure as the taped-out circuits, comparisons to circuits that saturate per-digit differences and decide the sign from the most significant digit, and equality (`==`) and `case` labels to per-digit equality detectors. Selectors are described in section 3.5.
-3. **Logic optimization**: constants are folded, common subexpressions shared and unused gates removed. Expressions are then simplified with the following identities, which hold in ternary logic, unlike binary Boolean algebra.
+3. **Logic optimization**: constants are folded, common subexpressions shared and unused gates removed. Expressions are then simplified with the following identities, which still hold in ternary logic even though it is not a Boolean algebra.
    - Double negation: −(−x) = x
    - Idempotence: min(x, x) = x, max(x, x) = x
    - min and max with constants: min(x, +1) = x, min(x, −1) = −1, max(x, +1) = +1, max(x, −1) = x
