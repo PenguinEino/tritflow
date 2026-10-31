@@ -21,7 +21,7 @@ TritFlow is a design flow from ternary HDL to GDS on OpenSUSI TR-1um, built on C
 - **To our knowledge, the first ternary physical design flow from HDL to GDS**: one automated pipeline runs a dedicated ternary HDL (TritVerilog) → logic synthesis → two-metal place and route → GDS → DRC/LVS → post-layout SPICE → ternary timing analysis.
 - **Physical balanced ternary**: without binary encoding, CMOS cells carry −1, 0 and +1 as the three voltages −5 V, 0 V and +5 V.
 - **Manufacturable GDS**: the layouts pass the PDK's official DRC/LVS decks, and the flow generates a full-chip GDS with the MPW shuttle's frame and pads.
-- **Standard cells from a taped-out design**: the cells keep the circuits and device sizes of ternary circuits the author taped out on OpenSUSI-TR10. The chips are scheduled for delivery in January 2027, so simulation results can be compared directly with measurements.
+- **Standard cells from a taped-out design**: the cells are based on balanced-ternary logic circuits the author taped out on OpenSUSI-TR10 in 2026. The chips are scheduled for delivery in January 2027, so simulation results can be compared directly with measurements.
 - **Every step interactive on Colab**: about 13 to 15 minutes for Run all. Schematics, layouts and waveforms of each step appear in place, and the HDL can be edited and rerun. Apache-2.0.
 - **A flow on Japan's first commercial open-source PDK**: built on OpenSUSI TR-1um, it pushes forward the democratization of chip design in Japan.
 
