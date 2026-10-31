@@ -187,6 +187,21 @@ def test_japanese_status_survives_static_live_and_waiting_updates():
     assert browser.run(status) == _LABELS["ja"]["live"].format(count=1)
 
 
+def test_unanswered_kernel_falls_back_to_the_static_label_until_a_reply():
+    # Saved outputs reopened in Colab: no kernel registered this viewer's callback.
+    status = 'elements[\'[data-role="status"]\'].textContent'
+    browser = Browser(language="ja")
+    browser.run("event('wheel', {deltaY:-1000});")
+    browser.advance(3999)
+    assert browser.run(status) == _LABELS["ja"]["waiting"]
+    browser.advance(1)
+    assert browser.run(status) == _LABELS["ja"]["static"]
+    assert browser.run('fakeRoot.dataset.stalled') == '1'
+    browser.reply()
+    assert browser.run(status) == _LABELS["ja"]["live"].format(count=1)
+    assert browser.run('fakeRoot.dataset.stalled') == '0'
+
+
 def test_browser_without_webp_decode_recovers_with_png():
     browser = Browser()
     browser.run('Image.prototype.decode = function() { '

@@ -255,7 +255,10 @@ const ctx = canvas.getContext('2d');
 let box = config.box.slice(), imageBox = box.slice(), tile = overview;
 let timer = null, timerAt = Infinity, pending = false, revision = 0, served = 0;
 let drag = null, failures = 0, liveRenders = 0, retryAt = 0, lastRequest = -Infinity;
-let changedAt = performance.now(), cacheBytes = 0;
+let changedAt = performance.now(), cacheBytes = 0, waitingSince = null;
+// Saved outputs reopened in Colab have no kernel holding this viewer's callback:
+// a request then never returns, so a long wait falls back to the static label.
+const stallMs = 4000;
 let encoding = 'webp';
 const crops = new Map(), cacheLimit = 16 * 1024 * 1024;
 // Kernel availability can change during Run all. Only a non-Colab output is static.
@@ -349,11 +352,15 @@ function paint() {
   root.dataset.imageBox = JSON.stringify(imageBox);
 }
 function state() {
-  const waiting = live && (pending || served !== revision);
-  status.textContent = live ? (waiting ? labels.waiting : labels.live.replace('{count}', liveRenders))
-    : labels.static;
+  const now = performance.now(), waiting = live && (pending || served !== revision);
+  if (!waiting) waitingSince = null;
+  else if (waitingSince === null) { waitingSince = now; setTimeout(state, stallMs); }
+  const stalled = waiting && now - waitingSince >= stallMs;
+  status.textContent = !live || stalled ? labels.static
+    : waiting ? labels.waiting : labels.live.replace('{count}', liveRenders);
   root.dataset.mode = live ? 'live' : 'static';
   root.dataset.waiting = waiting ? '1' : '0';
+  root.dataset.stalled = stalled ? '1' : '0';
   root.dataset.retryCount = failures;
   root.dataset.retryDelay = failures ? retryDelay(failures) : 0;
 }
