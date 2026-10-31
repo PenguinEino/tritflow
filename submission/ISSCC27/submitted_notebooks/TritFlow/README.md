@@ -4,12 +4,12 @@ IEEE SSCS Code-a-Chip, ISSCC 2027. Team: TritFlow
 
 | Author | Affiliation | Email |
 |---|---|---|
-| Einosuke Okazaki (岡崎 英之介) | Information and Communication Engineering Course, Department of Monozukuri Engineering, Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan | einosukeokazaki@gmail.com |
+| Einosuke Okazaki | Tokyo Metropolitan College of Industrial Technology (KOSEN), Tokyo, Japan | einosukeokazaki@gmail.com |
 
 Fifth-year student (final year of the five-year KOSEN engineering programme, which combines upper-secondary and the first two years of tertiary education)
 GitHub: [PenguinEino](https://github.com/PenguinEino).
 
-Designated representative: **Einosuke Okazaki (岡崎 英之介)**.
+Designated representative: **Einosuke Okazaki**.
 Attendance/poster confirmation: **Einosuke Okazaki will attend ISSCC 2027 in person and present the poster if selected (confirmed by the author, 2026-10-18).**
 The author of the historical balanced-ternary-logic project releases the derived schematic assets in this repository under Apache-2.0.
 
@@ -60,7 +60,7 @@ power, timing, HDL-edit and framed-chip results with their conditions.
 
 ## Run in Colab
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/9048276bcbd4c84dd27d7df9f3cf44493283f2fe/notebook/v3/tritflow_en.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/599bad2b9dd52c5082a79361c9aba95e07abf5bb/notebook/v3/tritflow_en.ipynb)
 
 Open the primary notebook, connect a Python CPU runtime and choose **Runtime →
 Run all**. Its setup cell obtains the full immutable `SOURCE_REF` from GitHub,
@@ -88,7 +88,7 @@ measurements of the taped-out source cells remain future work.
 
 Notebook, code and derived schematic assets are **Apache-2.0**. [LICENSE](LICENSE)
 is the complete license and [NOTICE](NOTICE) preserves attribution. Einosuke
-Okazaki (岡崎 英之介), author of the historical schematics, releases the derived assets
+Okazaki, author of the historical schematics, releases the derived assets
 under Apache-2.0. External tools and the PDK retain their own licenses; their
 distributions are not included or relicensed here.
 

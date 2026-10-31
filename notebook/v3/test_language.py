@@ -78,9 +78,10 @@ def test_both_editions_have_the_same_cell_structure_and_local_assets():
     assert 'TRITFLOW_NOTEBOOK_LANGUAGE"] = "en"' in setup
 
 
-def test_colab_entry_point_and_original_bibliography_are_preserved():
+def test_run_time_and_original_bibliography_are_preserved():
     opening = (HERE/"narrative_en/00_opening.md").read_text()
-    assert "blob/notebook-v3/notebook/v3/tritflow_en.ipynb" in opening
+    # The notebook runs inside Colab; its Open-in-Colab badge lives in the submission README.
+    assert "colab-badge" not in opening
     assert "- Run time: about 13 to 15 minutes for Run all on a fresh Colab runtime, including setup" in opening
     japanese = (HERE/"narrative/07_playground.md").read_text().split("## 参考文献\n\n", 1)[1]
     english = (HERE/"narrative_en/07_playground.md").read_text().split("## References\n\n", 1)[1]

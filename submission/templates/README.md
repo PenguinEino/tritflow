@@ -73,7 +73,7 @@ measurements of the taped-out source cells remain future work.
 
 Notebook, code and derived schematic assets are **Apache-2.0**. [LICENSE](LICENSE)
 is the complete license and [NOTICE](NOTICE) preserves attribution. Einosuke
-Okazaki (岡崎 英之介), author of the historical schematics, releases the derived assets
+Okazaki, author of the historical schematics, releases the derived assets
 under Apache-2.0. External tools and the PDK retain their own licenses; their
 distributions are not included or relicensed here.
 
