@@ -8,13 +8,13 @@ A signal value, or trit, is −1, 0 or +1, corresponding to −5 V, 0 V or +5 V.
 
 A vector of trits (for example `trit [1:0] a;`) represents an integer in **balanced ternary**. Counting from the least significant digit, digit i has weight 3<sup>i</sup>. In numeric literals, the value −1 is written `T` (or lowercase `t`); for example, `2'tT1` represents −1·3 + 1 = −2. In general, n trits represent exactly the 3<sup>n</sup> integers from −(3<sup>n</sup> − 1)/2 to +(3<sup>n</sup> − 1)/2; two trits give the nine integers from −4 to +4.
 
+<!-- tables: numbers -->
+
 Balanced ternary has advantages that binary representations (such as two's complement) lack.
 
 - **No sign bit**: because −1 is included symmetrically, positive numbers, zero and negative numbers share one symmetric format without a dedicated sign bit.
 - **Negation completes at once**: negating a number (−a) only flips the sign of every digit (T ↔ 1). There is no carry propagation, unlike two's complement, which inverts every bit and then adds 1 to the least significant bit.
 - **Truncation rounds to the nearest value**: because every digit is −1, 0 or +1, dropping lower digits leaves an error within half the weight of the dropped digits, symmetric between positive and negative. TritVerilog's `a >> 1` (divide by 3 and round to the nearest integer) achieves this rounding by simply dropping the least significant digit.
-
-<!-- tables: numbers -->
 
 ### 3.2 Syntax
 
