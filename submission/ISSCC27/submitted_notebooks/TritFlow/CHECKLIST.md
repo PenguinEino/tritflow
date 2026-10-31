@@ -10,7 +10,7 @@ and the independently checked [IEEE award page](https://sscs.ieee.org/membership
 The builder repository retains the fetched Markdown and content hashes in
 `submission/official_snapshot.json` and `submission/official_sources.json`.
 
-Ready for final submission review.
+
 
 | Requirement or guidance | Evidence / remaining submitter action |
 |---|---|

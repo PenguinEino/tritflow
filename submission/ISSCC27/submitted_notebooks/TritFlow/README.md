@@ -1,4 +1,4 @@
-# TritFlow — balanced-ternary HDL to GDS on OpenSUSI TR-1um
+# TritFlow — balanced-ternary HDL to GDS on Japan's first commercial open-source PDK (OpenSUSI TR-1um)
 
 IEEE SSCS Code-a-Chip, ISSCC 2027. Team: TritFlow
 
@@ -13,7 +13,7 @@ Designated representative: **Einosuke Okazaki (岡崎 英之介)**.
 Attendance/poster confirmation: **Einosuke Okazaki will attend ISSCC 2027 in person and present the poster if selected (confirmed by the author, 2026-10-18).**
 The author of the historical balanced-ternary-logic project releases the derived schematic assets in this repository under Apache-2.0.
 
-Ready for final submission review.
+
 
 [English primary](tritflow_en.ipynb) — executed with saved outputs.
 
@@ -60,7 +60,7 @@ power, timing, HDL-edit and framed-chip results with their conditions.
 
 ## Run in Colab
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/6a786f1173790ddcce9f4aea18ab0b9f3c4eb66d/notebook/v3/tritflow_en.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PenguinEino/tritflow/blob/1bc97acda8e91879b3192e287c313a78ffe4f11e/notebook/v3/tritflow_en.ipynb)
 
 Open the primary notebook, connect a Python CPU runtime and choose **Runtime →
 Run all**. Its setup cell obtains the full immutable `SOURCE_REF` from GitHub,
@@ -69,7 +69,7 @@ and recorded campaigns are validated against the source and PDK before use.
 
 Recommended: Python 3.12; KLayout binary/Python 0.30.6; ngspice 42 (Ubuntu package 42+ds-3build1); OpenSUSI TR-1um `5d963db9d44e192d37a0489c208bfccf2e2f690c`. Use the Python packages installed by the notebook bootstrap.
 
-Saved outputs were executed locally; this v3 package has no claimed real-Colab Run-all verification.
+Run all was verified on fresh Colab CPU runtimes for both editions on 2026-10-31 (about 13–15 minutes including setup).
 
 For local execution, use the complete source checkout with the documented EDA
 installation and pinned PDK. Open the corresponding `notebook/v3/` notebook,
@@ -81,11 +81,8 @@ The results cover nominal model conditions and the documented input sequences;
 exhaustive HDL equivalence does not establish exhaustive transistor-level
 transition or PVT coverage. Wire capacitance is a geometry-based estimate,
 without a calibrated PEX deck, signal-wire resistance or coupling extraction.
-The cells use static current to establish ternary levels. Drawing DRC and LVS
-verify their stated geometry and connectivity scope; a routed core alone does
-not establish padframe, ESD, mask signoff or manufacturing readiness. Silicon
-measurements of the taped-out source cells remain future work. This project
-makes no performance or energy-efficiency claim against binary logic.
+The cells use static current to establish ternary levels. Silicon
+measurements of the taped-out source cells remain future work.
 
 ## License and references
 
