@@ -37,7 +37,7 @@ The difference from SPICE's −0.040 V and 0.407 mA follows from omitting RR vol
 
 Logic synthesis replaces HDL logic with combinations of library cells. To implement arbitrary logic, the cell basis must be **functionally complete**: connecting those cells must be sufficient to construct every logic function. In binary logic, NAND alone is complete.
 
-In ternary logic, NANY and the constant cell TIEP, defined below, form a complete basis.
+In ternary logic, the NANY cell below and the constant cell TIEP form a complete basis.
 
 - **NANY**: a two-input cell defined in TritFlow. It clips the sum of its inputs to the range −1 to +1, then negates it. NANY(a, b) = −sat(a + b)
 - **sat**: the function that clips to the range −1 to +1. sat(x) = max(−1, min(+1, x))
@@ -45,10 +45,12 @@ In ternary logic, NANY and the constant cell TIEP, defined below, form a complet
 
 Słupecki's criterion (1939) establishes completeness for a ternary function basis satisfying both conditions below.
 
-1. It can construct every unary function. Input a has three values, −1, 0 and +1, and each can map to any of three outputs, giving 3 × 3 × 3 = 27 unary functions.
-2. It can construct a binary function f(a, b) that depends on both inputs (changing either input alone can change the output) and takes all three output values, −1, 0 and +1.
+1. Every one-input (unary) function can be constructed: each of the three input values of a (−1, 0, +1) can map to any output independently, so there are 3 × 3 × 3 = 27 unary functions. All 27 must be generated.
+2. At least one essential two-input function can be constructed: a two-input function exists that depends on both inputs a and b (with either input fixed, changing the other can change the output) and takes all three output values −1, 0 and +1.
 
-NANY itself satisfies condition 2. Since NANY(a, 0) = −a, changing a can change the output, and the same holds for b. Its output also takes all three values. Condition 1 is checked constructively: starting with input a and the +1 constant, repeatedly connect available functions to NANY inputs until no new function appears. The table lists functions constructed in the first few rounds. Depth counts NANY stages from a and the constant.
+NANY itself satisfies condition 2 immediately. Since NANY(a, 0) = −a, a change in a appears directly at the output, and the same holds symmetrically for b. Its output also takes all of −1, 0 and +1.
+
+For condition 1, starting only from the input variable a and the constant +1, the outputs of known functions are fed recursively into NANY inputs, and the closure is checked exhaustively until all 27 unary functions appear. The table below shows how the generated functions grow with NANY logic depth.
 
 <!-- code: closure -->
 
