@@ -1,4 +1,4 @@
-## 6. Evaluation and Reuse
+## 6. Evaluation and Applications
 
 Chapter 5 verified the four-term dot-product circuit with post-layout simulation and ternary STA. This chapter first evaluates area, delay and static power as the number of terms N changes. It then reruns the same flow after changing the HDL, and finally generates a top-level layout with the MPW frame and I/O pads.
 

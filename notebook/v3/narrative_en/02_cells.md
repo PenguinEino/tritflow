@@ -15,7 +15,7 @@ At an input of ±5 V, only one MOS transistor conducts, pulling Y to its rail. A
 
 #### SPICE Simulation
 
-The DC analysis uses ngspice and the PDK models for 90 sets of dimensions, including the taped-out dimensions.
+The DC analysis uses ngspice and the PDK models for 90 device sizings, including the taped-out sizing.
 
 The taped-out dimensions trade off middle-level accuracy, delay, area and static current. TritFlow's cells keep these dimensions unchanged so that they can be compared with measurements. The grid in the figure also contains dimensions with both smaller error and smaller static current.
 
@@ -33,11 +33,11 @@ The difference from SPICE's −0.040 V and 0.407 mA follows from omitting RR vol
 
 <!-- code: inv -->
 
-### 2.2 Functional Completeness
+### 2.2 Completeness: Which Cells Build Any Ternary Logic
 
 Logic synthesis replaces HDL logic with combinations of library cells. To implement arbitrary logic, the cell basis must be **functionally complete**: connecting those cells must be sufficient to construct every logic function. In binary logic, NAND alone is complete.
 
-In ternary logic, the NANY cell below and the constant cell TIEP form a complete basis.
+In ternary logic, the NANY cell below and the constant cell TIEP alone form a complete basis.
 
 - **NANY**: a two-input cell defined in TritFlow. It clips the sum of its inputs to the range −1 to +1, then negates it. NANY(a, b) = −sat(a + b)
 - **sat**: the function that clips to the range −1 to +1. sat(x) = max(−1, min(+1, x))

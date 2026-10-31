@@ -12,7 +12,7 @@ Applying existing binary EDA tools to ternary design as they are, however, faces
 2. **Three power rails and the limits of Liberty**: every ternary cell must carry three power rails, VDD (+5 V), VMID (0 V) and VSS (−5 V), continuously without gaps. Liberty, the standard format for describing cell characteristics, cannot describe ternary logic or transition characteristics.
 3. **Static current specific to ternary cells**: ternary cells draw static current through their resistive dividers while outputting 0 V. If high-current cells gather on one rail, the allowed current of the power wiring is exceeded.
 
-To solve these problems, TritFlow comes with its own lightweight place-and-route tool that leaves dedicated routing channels between cell rows and routes on two layers.
+To solve these problems, TritFlow implements its own lightweight place-and-route tool that leaves dedicated routing channels between cell rows and routes on two layers.
 
 ### 4.2 Placement: Simulated Annealing
 

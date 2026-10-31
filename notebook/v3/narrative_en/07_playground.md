@@ -4,12 +4,12 @@ This chapter is a playground in which readers design their own ternary circuits 
 
 Just edit the TritVerilog source code in the code cell below and run it: logic synthesis, place and route, GDS generation, DRC/LVS, wire-capacitance estimation and post-layout simulation all run automatically, and the schematic, layout and waveforms are shown.
 
-The cell starts with a two-trit adder with carries (`add2`). Write circuits like the following freely and try designing ternary circuits.
+The cell starts with a two-trit adder with carries (`add2`). Try writing circuits such as the following.
 
-- **Selectors**: selectors using `op == 1't1 ? a : b` or `case` statements
+- **Selectors**: `op == 1't1 ? a : b` or `case` statements
 - **A ternary ALU**: circuits combining addition `+`, subtraction `-`, AND `&`, OR `|` and negation `~`
-- **Your own ternary circuits**: circuits that place cells such as NANY directly
-- **Dot-product circuits**: dot-product circuits with other term counts or widths
+- **Your own ternary circuits**: cells such as NANY placed directly
+- **Dot products**: other term counts or widths
 
 <!-- code: playground -->
 
